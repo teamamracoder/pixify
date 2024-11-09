@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}Post Details{% endblock %}
+
+{% block content %}
+
+<h1>Post Details</h1>
+<p>Title: {{ post.title }}</p>
+<p>Description: {{ post.description }}</p>
+
+<a href="{% url 'post_update' post.id %}">Edit</a> |
+<a href="{% url 'post_delete' post.id %}">Delete</a> |
+<a href="{% url 'post_list' %}">Back to Post List</a>
+
+{% endblock %}

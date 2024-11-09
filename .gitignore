@@ -1,0 +1,9 @@
+.venv
+venv
+.env
+env
+node_modules
+.idea
+__pycache__
+db.sqlite3
+migrations
