@@ -3,7 +3,7 @@
 ## Requirements
 
 1. [Python](https://www.python.org/downloads/)
-2. [PostgreSQL](https://www.postgresql.org/download/)
+2. [PostgreSQL](https://www.postgresql.org/download/), just set username(deafult) = postgres ,password = 2023 ,in all places during installation
 3. [Postman](https://www.postman.com/downloads/)
 
 ## Step 1: Clone Repository and Switch to new Branch
@@ -31,7 +31,21 @@
 
     > pip install -r requirements.txt
 
-## Step 6: Migrate
+## Step 6: Database Setup
+
+    - Open pgAdmin4
+    - create database 'pixify'
+    - make sure you have set password = 2023 ,for default user 'postgres' while installing and setting up postgresSQL database
+        - if not then open query tool on the database 'pixify' and run below commands
+            - if username is correct and password is wrong 
+                > ALTER USER postgres WITH PASSWORD '2023';
+            - if username is no correct
+                > CREATE USER postgres WITH PASSWORD '2023';
+                > GRANT ALL PRIVILEGES ON DATABASE pixify TO postgres;
+                > ALTER DATABASE pixify OWNER TO postgres;
+                > REVOKE ALL PRIVILEGES ON DATABASE pixify FROM postgres;
+
+## Step 7: Migrate
 
     > cd pixify
     > python manage.py makemigrations social_network
@@ -45,6 +59,6 @@
 
     > python manage.py migrate
 
-## Step 7: Run the server
+## Step 8: Run the server
 
     > python manage.py runserver
