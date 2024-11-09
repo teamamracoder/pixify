@@ -34,6 +34,7 @@
         -step 2: install psycopg-binanry
             > pip install "psycopg[binary]"
         -step 3: run the migration command again
+            > python manage.py makemigrations social_network
 
     > python manage.py migrate
 
