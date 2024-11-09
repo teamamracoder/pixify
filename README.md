@@ -1,44 +1,50 @@
 # Pixify
 
-## Clone Repo
+## Requirements
 
-    'https://token@github.com/teamamracoder/pixify.git
+1. [Python](https://www.python.org/downloads/)
+2. [PostgreSQL](https://www.postgresql.org/download/)
+3. [Postman](https://www.postman.com/downloads/)
 
-## Navigate to Directory
+## Step 1: Clone Repository and Switch to new Branch
+
+    > git clone https://token@github.com/teamamracoder/pixify.git
+    > git checkout -b writeYourNewBanchName
+
+## Step 2: Navigate to Directory
 
     > cd pixify
 
-## Create virtual env
+## Step 3: Create virtual env
 
     > python -m venv venv
 
-## Activate Virtual env
+## Step 4: Activate Virtual env
 
     > .\venv\Scripts\activate
     -if Execution Policy Error
         -open windows powershell as Admin and run this command
             > Set-ExecutionPolicy Unrestricted -Force
-        - then try the activate command again
+        - retry Step 4
 
-## Install packages
+## Step 5: Install packages
 
     > pip install -r requirements.txt
 
-## Migrate
+## Step 6: Migrate
 
     > cd pixify
     > python manage.py makemigrations social_network
-    - if error in psycopg,
-        -step 1: uninstall psycopg
+    - if error reagarding psycopg,
+        -step 6.1: uninstall psycopg
             > pip uninstall psycopg
-        -step 2: install psycopg-binanry
+        -step 6.2: install psycopg-binanry
             > pip install "psycopg[binary]"
-        -step 3: run the migration command again
+        -step 6.3: run the migration command again
             > python manage.py makemigrations social_network
 
     > python manage.py migrate
 
-- Run the server
-    > python manage.py runserver
+## Step 7: Run the server
 
-## Make Sure to make separate branch and navigate to that branch before commiting any changes
+    > python manage.py runserver
