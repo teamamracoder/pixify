@@ -9,17 +9,15 @@
 ## Step 1: Clone Repository and Switch to new Branch
 
     > git clone https://token@github.com/teamamracoder/pixify.git
-    > git checkout -b writeYourNewBanchName
-
-## Step 2: Navigate to Directory
-
     > cd pixify
+    > git checkout -b writeYourNewBanchName
+    > code .
 
-## Step 3: Create virtual env
+## Step 2: Create virtual env
 
     > python -m venv venv
 
-## Step 4: Activate Virtual env
+## Step 3: Activate Virtual env
 
     > .\venv\Scripts\activate
     -if Execution Policy Error
@@ -27,11 +25,11 @@
             > Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
         - retry Step 4
 
-## Step 5: Install packages
+## Step 4: Install packages
 
     > pip install -r requirements.txt
 
-## Step 6: Database Setup
+## Step 5: Database Setup
 
     - Open pgAdmin4
     - create database 'pixify'
@@ -45,7 +43,7 @@
                 > ALTER DATABASE pixify OWNER TO postgres;
                 > REVOKE ALL PRIVILEGES ON DATABASE pixify FROM postgres;
 
-## Step 7: Migrate
+## Step 6: Migrate
 
     > cd pixify
     > python manage.py makemigrations social_network
@@ -59,6 +57,6 @@
 
     > python manage.py migrate
 
-## Step 8: Run the server
+## Step 7: Run the server
 
     > python manage.py runserver
