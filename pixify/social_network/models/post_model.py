@@ -23,7 +23,7 @@ class Post(models.Model):
         default = AccessLevel.PUBLIC.value
     )
     members = models.ManyToManyField(
-        'User', through='PostSpecificUser', related_name='fk_members_chats_users'
+        'User', through='PostSpecificUser', through_fields=('post_id', 'specific_user_id'), related_name='fk_members_post_users'
     )
     treat_as = models.IntegerField(
         choices=[(type.value, type.name) for type in SpecificUserTreatment],
