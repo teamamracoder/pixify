@@ -3,11 +3,13 @@ from ..constants import ChatType
 
 class Chat(models.Model):
     title = models.CharField(null = True, blank = True)
-    # member_id = ArrayField(models.ForeignKey('User', on_delete=models.CASCADE, blank=False, related_name='fk_member_chats_users_id'))
     type = models.IntegerField(
         choices=[(type.value, type.name) for type in ChatType],
         blank=False,
         default=ChatType.PERSONAL.value
+    )
+    members = models.ManyToManyField(
+        'User', through='ChatMember', related_name='fk_members_chats_users'
     )
     
     is_active = models.BooleanField(default= True)
