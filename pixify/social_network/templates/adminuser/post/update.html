@@ -1,0 +1,19 @@
+{% extends "../base.html" %}
+
+{% block title %}Post List{% endblock %}
+
+{% block content %}
+
+<h1>Update Post</h1>
+<form method="post">
+    {% csrf_token %}
+    <label>Title:</label>
+    <input type="text" name="title" value="{{ post.title }}" required>
+    <label>Description:</label>
+    <input type="text" name="description" value="{{ post.description }}" required>
+    <button type="submit">Update</button>
+</form>
+<a href="{% url 'post_detail' post.id %}">Cancel</a>
+
+
+{% endblock %}
