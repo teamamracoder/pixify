@@ -5,11 +5,11 @@ from .. import services
 class UserListView(View):
     def get(self, request):
         users = services.user_service.list_users()
-        return render(request, 'user/list.html', {'users': users})
+        return render(request, 'adminuser/user/list.html', {'users': users})
 
 class UserCreateView(View):
     def get(self, request):
-        return render(request, 'user/create.html')
+        return render(request, 'adminuser/user/create.html')
 
     def post(self, request):
         first_name = request.POST['first_name']
@@ -21,12 +21,12 @@ class UserCreateView(View):
 class UserDetailView(View):
     def get(self, request, user_id):
         user = services.user_service.get_user(user_id)
-        return render(request, 'user/detail.html', {'user': user})
+        return render(request, 'adminuser/user/detail.html', {'user': user})
 
 class UserUpdateView(View):
     def get(self, request, user_id):
         user = services.user_service.get_user(user_id)
-        return render(request, 'user/update.html', {'user': user})
+        return render(request, 'adminuser/user/update.html', {'user': user})
 
     def post(self, request, user_id):
         user = services.user_service.get_user(user_id)
@@ -39,7 +39,7 @@ class UserUpdateView(View):
 class UserDeleteView(View):
     def get(self, request, user_id):
         user = services.user_service.get_user(user_id)
-        return render(request, 'user/delete.html', {'user': user})
+        return render(request, 'adminuser/user/delete.html', {'user': user})
 
     def post(self, request, user_id):
         user = services.user_service.get_user(user_id)
