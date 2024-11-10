@@ -10,3 +10,5 @@ migrations
 *.log
 .vscode/
 .idea/
+TeamSchedules.txt
+TeamANotes.txt

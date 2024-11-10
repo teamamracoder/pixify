@@ -22,7 +22,9 @@ class Post(models.Model):
         blank= False,
         default = AccessLevel.PUBLIC.value
     )
-    # specific_users = ArrayField(models.ForeignKey('User', on_delete=models.CASCADE, blank=True, default=None))
+    members = models.ManyToManyField(
+        'User', through='PostSpecificUser', related_name='fk_members_chats_users'
+    )
     treat_as = models.IntegerField(
         choices=[(type.value, type.name) for type in SpecificUserTreatment],
         blank=False,
