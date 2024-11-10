@@ -24,7 +24,7 @@
     > .\venv\Scripts\activate
     -if Execution Policy Error
         -open windows powershell as Admin and run this command
-            > Set-ExecutionPolicy Unrestricted -Force
+            > Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
         - retry Step 4
 
 ## Step 5: Install packages
