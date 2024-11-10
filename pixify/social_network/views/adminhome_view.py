@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.views import View
 
-class HomeView(View):
+class AdminHomeView(View):
     def get(self, request):
-        return render(request, 'enduser/home/index.html')
+        return render(request, 'adminuser/home/index.html')

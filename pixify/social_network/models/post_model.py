@@ -1,7 +1,5 @@
 from django.db import models
 from ..constants import PostType, AccessLevel, PostContentType, SpecificUserTreatment
-from django.contrib.postgres.fields import ArrayField
-from django.utils import timezone
 
 class Post(models.Model):
     posted_by = models.ForeignKey('User', on_delete=models.CASCADE, blank=False, default=None, related_name='fk_post_posts_users_id')

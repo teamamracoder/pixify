@@ -1,7 +1,0 @@
-		
-message	|
-chat	|----subhankar,subham
-
-message_reasd_status	sourik
-notification	rik
-follwers	partha
