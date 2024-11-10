@@ -23,7 +23,7 @@
     -if Execution Policy Error
         -open windows powershell as Admin and run this command
             > Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
-        - retry Step 4
+        - retry Step 3
 
 ## Step 4: Install packages
 
@@ -32,6 +32,7 @@
 ## Step 5: Database Setup
 
     - Open pgAdmin4
+    - if you have a database named 'pixify', then delete
     - create database 'pixify'
     - make sure you have set password = 2023 ,for default user 'postgres' while installing and setting up postgresSQL database
         - if not then open query tool on the database 'pixify' and run below commands
