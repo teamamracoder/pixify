@@ -5,11 +5,11 @@ from .. import services
 class PostListView(View):
     def get(self, request):
         posts = services.post_service.list_posts()
-        return render(request, 'post/list.html', {'posts': posts})
+        return render(request, 'adminuser/post/list.html', {'posts': posts})
 
 class PostCreateView(View):
     def get(self, request):
-        return render(request, 'post/create.html')
+        return render(request, 'adminuser/post/create.html')
 
     def post(self, request):
         title = request.POST['title']
@@ -20,12 +20,12 @@ class PostCreateView(View):
 class PostDetailView(View):
     def get(self, request, post_id):
         post = services.post_service.get_post(post_id)
-        return render(request, 'post/detail.html', {'post': post})
+        return render(request, 'adminuser/post/detail.html', {'post': post})
 
 class PostUpdateView(View):
     def get(self, request, post_id):
         post = services.post_service.get_post(post_id)
-        return render(request, 'post/update.html', {'post': post})
+        return render(request, 'adminuser/post/update.html', {'post': post})
 
     def post(self, request, post_id):
         post = services.post_service.get_post(post_id)
@@ -37,7 +37,7 @@ class PostUpdateView(View):
 class PostDeleteView(View):
     def get(self, request, post_id):
         post = services.post_service.get_post(post_id)
-        return render(request, 'post/delete.html', {'post': post})
+        return render(request, 'adminuser/post/delete.html', {'post': post})
 
     def post(self, request, post_id):
         post = services.post_service.get_post(post_id)
