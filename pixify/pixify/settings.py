@@ -79,7 +79,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'pixify',
         'USER': 'postgres',
-        'PASSWORD': '2023',
+        'PASSWORD': '2024',
         'HOST': 'localhost',
         'PORT': '5432',
     }
