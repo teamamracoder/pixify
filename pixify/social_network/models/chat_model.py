@@ -9,7 +9,7 @@ class Chat(models.Model):
         default=ChatType.PERSONAL.value
     )
     members = models.ManyToManyField(
-        'User', through='ChatMember', related_name='fk_members_chats_users'
+        'User', through='ChatMember', through_fields=('chat_id','member_id'), related_name='fk_members_chats_users'
     )
     
     is_active = models.BooleanField(default= True)
