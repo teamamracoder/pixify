@@ -25,7 +25,8 @@ urlpatterns = [
 
 
     # message
-    path('message/', views.messageView.as_view(), name='message'),
+    # path('message/', views.messageView.as_view(), name='message'),
+    path('chat/', views.ChatView.as_view(), name='chat'),
 
     # notification
     path('notification/', views.notificationView.as_view(), name='notification'),

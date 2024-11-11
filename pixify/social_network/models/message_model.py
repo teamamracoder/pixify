@@ -9,7 +9,7 @@ class Message(models.Model):
     send_at=models.DateTimeField(auto_now_add=True)
     reply_for_everyone = models.BooleanField(default=True)
     mentions = models.ManyToManyField(
-        'User', through='MessageMention', related_name='fk_mentions_messages_users'
+        'User', through='MessageMention', through_fields=('message','user'), related_name='fk_mentions_messages_users'
     )
     
     is_active = models.BooleanField(default= True)
