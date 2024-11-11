@@ -1,9 +1,14 @@
 .venv
-venv
+venv/
 .env
-env
+env/
 node_modules
 .idea
 __pycache__
 db.sqlite3
 migrations
+*.log
+.vscode/
+.idea/
+TeamSchedules.txt
+TeamANotes.txt

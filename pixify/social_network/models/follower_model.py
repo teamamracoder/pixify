@@ -1,19 +1,9 @@
 from django.db import models
-from django.core.exceptions import ValidationError
 
 class Follower(models.Model):
-    # virtual field
     follower = models.ForeignKey('User', on_delete=models.CASCADE, related_name='fk_follower_followers_users_id')
     following = models.ForeignKey('User', on_delete=models.CASCADE, related_name='fk_following_followers_users_id')
 
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(fields=['follower', 'following'], name='follow_pair')
-        ]
-    def clean(self):
-        if self.follower == self.following:
-            raise ValidationError("A user cannot follow themselves.")
-        
     is_active  = models.BooleanField(default= True)
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)        
@@ -21,7 +11,11 @@ class Follower(models.Model):
     updated_by = models.ForeignKey('User', on_delete=models.CASCADE, blank=True, default=None, related_name='fk_update_followers_users_id')
     
     class Meta:
-         db_table = 'followers'
+        db_table = 'followers'
+        constraints = [
+            models.UniqueConstraint(fields=['follower', 'following'], name='follow_pair'),
+            models.CheckConstraint(check=~models.Q(follower=models.F('following')), name='follower_not_equal_to_following')
+        ]
 
     def __str__(self):
          return f"ID: {self.id}, Created at: {self.created_at}, Active: {self.is_active}"
