@@ -11,7 +11,7 @@ class Chat(models.Model):
     members = models.ManyToManyField(
         'User', through='ChatMember', through_fields=('chat_id','member_id'), related_name='fk_members_chats_users'
     )
-    chat_cover = models.URLField(max_length=200, blank=True)
+    chat_cover = models.URLField(max_length=400, blank=True)
     is_active = models.BooleanField(default= True)
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)

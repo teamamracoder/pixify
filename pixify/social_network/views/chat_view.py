@@ -1,52 +1,36 @@
-from django.shortcuts import render, redirect
 from django.views import View
+from ..services import chat_service, message_service
+from django.shortcuts import render
 
-# everyone insert data manually
-# user (5)
-# chats (4)--> perasonal chat(2)
-#           --> group chat(2)
-# messages (each chats, 3 message)-->use different sender_id
-# message read status (as required, initially blank)
-class ChatView(View):
+class ChatListView(View):
     def get(self, request):
+        chats = chat_service.list_chats()
+        return render(request, 'enduser/chat/chats.html',{'chats':chats})
 
-    #    get all chats for the logged in user
-    #      loop over the chats
-    #           
-        #     # chat type
-        #     # if chattype personal
-        #         # chat->member(who is not the loggedinuser)->fullname 
-        #         # chat->member(who is not the loggedinuser)->photo
-        #     #if group
-        #         #chat->title
-        #         #chat->coverphoto
-        #     # message->findby_chat_id->all->id(desc)->first
-        #     #                                       ->created_at
-        #     #                                        ->msg
-    
-    #   users = [all follower/following without self]  but follwer/following of the logged user
-    #     data = {
-    #         'title'=>'fetch',
-    #         'photo'=>'fetch',
-    #         'last_message'=>'fetch',
-    #         'last_message_time'=>'fetch',
-    #         'unread_count'=>'fetch',
-    #          'users'=>users
-    #     }
-        return render(request, 'enduser/message/index.html')
-    
-    def createChat():
+class ChatCreateView(View):
+    def get():
+        # database data asbe
         return
-        # loggin = 3
-        
-        # memebers (2,4,3)
-        # dinal members =set(2,4,3,3)
-        
-        # as memebers=single,  then, type=pesonal
-        # chats(memeber), 2,1 and type=pesonal   
-        # if chat available do not create new chat, redirect to that chatbox
-        # else create new chat, redirect to their chatbox
-        
-        # mmebers 1,3
-        # as memebers=multiple, then type=group
-        # create new group 
+    
+    def post():
+        # database data jabe
+        return
+    
+class ChatDetailsView(View):
+    def get(self, request, chat_id):
+        chat = chat_service.chat_details(chat_id)
+        messages = message_service.list_messages_by_chat_id(chat_id)
+        return render(request, 'enduser/chat/messages.html',{'chat':chat,'messages':messages})
+    
+class ChatUpdatesView(View):
+    def get():
+        # database data asbe
+        return
+    
+    def post():
+        # database data jabe
+        return
+    
+class ChatDeleteView(View):
+    def get():
+        return
