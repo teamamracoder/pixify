@@ -11,3 +11,4 @@ from .notification_model import *
 from .post_reaction_model import *
 from .chat_member_model import *
 from .message_mention_model import *
+from .post_specific_user_model import *
