@@ -15,7 +15,7 @@ class Post(models.Model):
     )
     media_url = models.URLField(max_length=200, blank=True) 
     title = models.CharField(max_length=50)
-    description = models.TextField
+    description = models.TextField()
     
     accessability = models.IntegerField(
         choices=[(level.value, level.name) for level in AccessLevel],

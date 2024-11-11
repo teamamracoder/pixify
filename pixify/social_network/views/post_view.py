@@ -1,6 +1,8 @@
 from django.shortcuts import render, redirect
 from django.views import View
 from .. import services
+from ..constants import PostType,Gender,PostContentType,AccessLevel,SpecificUserTreatment
+
 
 class PostListView(View):
     def get(self, request):
@@ -9,9 +11,16 @@ class PostListView(View):
 
 class PostCreateView(View):
     def get(self, request):
-        return render(request, 'adminuser/post/create.html')
+        choices_file = [{posttype.value: posttype.name} for posttype in PostType]
+        #choices_relationship_status = [{status.name: status.value} for status in RelationShipStatus]
+        # return render(request,'adminuser/post/create.html',{"choices_file":choices_file})
+        return render(request,'adminuser/post/create.html',{"choices_file":choices_file,"PostType":PostType})
+
 
     def post(self, request):
+        print(request.POST)
+        print(request.POST["description"])
+        print(type(request.POST["description"]))
         title = request.POST['title']
         description = request.POST['description']
         services.post_service.create_post(title, description)

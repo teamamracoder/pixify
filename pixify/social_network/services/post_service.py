@@ -1,7 +1,7 @@
 from .. import models
 from django.shortcuts import get_object_or_404
 
-def list_posts():
+def list_posts(): 
     return models.Post.objects.all()
 
 def create_post(title, description):

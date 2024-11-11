@@ -26,22 +26,10 @@
         <!-- Post Type -->
         <label for="type">Post Type:</label>
         <select id="type" name="type">
-            {% for type in post_type_choices %}
+            {% for type in PostType %}
                 <option value="{{ type.value }}">{{ type.name }}</option>
             {% endfor %}
         </select><br><br>
-
-        <div class="col-md-4">
-            <label for="type" class="form-label">Gender</label>
-            <select id="type" name="gender" class="form-select">
-                {% for gender in choices_gender %}
-                    {% for name, value in gender.items %}
-                        <option value="{{ name }}">{{ value }}</option>
-                    {% endfor %}
-                {% endfor %}
-            </select>
-        </div>
-
 
         <!-- Content Type -->
         <label for="content_type">Content Type:</label>
