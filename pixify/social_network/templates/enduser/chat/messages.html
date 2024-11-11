@@ -1,0 +1,123 @@
+{% extends "enduser/base.html" %}
+{% block title %}Pixify-Message{% endblock %}
+{% block content %}
+{% load static %}
+    <div class="chat-container">
+        <div class="chat-header">
+            pixify chat
+        </div>
+        <div class="chat-body">
+            {% for message in messages %}
+            <div class="message sent text-dark">
+                {{message.text}}
+                <span class="time">{{message.created_at}}</span>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="chat-footer">
+            <form method="POST" action="/send_message">
+                <input type="text" name="message" placeholder="Type your message here..." required>
+                <button type="submit">Send</button>
+            </form>
+        </div>
+    </div>
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+    }
+    
+    .chat-container {
+        width: 400px;
+        height: 600px;
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+    
+    .chat-header {
+        background-color: #6a4c9c;
+        color: white;
+        padding: 10px;
+        text-align: center;
+        font-size: 18px;
+        font-weight: bold;
+    }
+    
+    .chat-body {
+        flex: 1;
+        padding: 20px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .message {
+        max-width: 80%;
+        margin-bottom: 10px;
+        padding: 10px;
+        border-radius: 10px;
+        position: relative;
+        font-size: 14px;
+    }
+    
+    .message.sent {
+        align-self: flex-end;
+        background-color: #e1ffc7;
+    }
+    
+    .message.received {
+        align-self: flex-start;
+        background-color: #f0f0f0;
+    }
+    
+    .message .time {
+        font-size: 10px;
+        position: absolute;
+        bottom: -15px;
+        right: 10px;
+        color: #555;
+    }
+    
+    .chat-footer {
+        padding: 10px;
+        background-color: #f9f9f9;
+        border-top: 1px solid #ddd;
+        display: flex;
+    }
+    
+    .chat-footer input[type="text"] {
+        flex: 1;
+        padding: 10px;
+        font-size: 14px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        outline: none;
+    }
+    
+    .chat-footer button {
+        padding: 10px 20px;
+        background-color: #6a4c9c;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        margin-left: 10px;
+        cursor: pointer;
+        font-size: 14px;
+    }
+    
+    .chat-footer button:hover {
+        background-color: #533b79;
+    }
+    
+</style>
+{% endblock %}

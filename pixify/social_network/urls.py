@@ -25,8 +25,11 @@ urlpatterns = [
 
 
     # message
-    # path('message/', views.messageView.as_view(), name='message'),
-    path('chat/', views.ChatView.as_view(), name='chat'),
+    path('chat/', views.ChatListView.as_view(), name='chat_list'),
+    path('chat/create', views.ChatCreateView.as_view(), name='chat_list'),
+    path('chat/<int:chat_id>', views.ChatDetailsView.as_view(), name='chat_details'),
+    path('chat/<int:chat_id>/update', views.ChatUpdatesView.as_view(), name='chat_update'),
+    path('chat/<int:chat_id>/delete', views.ChatDeleteView.as_view(), name='chat_delete'),
 
     # notification
     path('notification/', views.notificationView.as_view(), name='notification'),
