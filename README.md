@@ -15,7 +15,7 @@
 
 ## Step 2: Create virtual env
 
-    > python -m venv venv
+    > python -m venv venv           ()
 
 ## Step 3: Activate Virtual env
 
