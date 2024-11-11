@@ -6,8 +6,13 @@
 
 <h1>User Details</h1>
 <p>First Name: {{ user.first_name }}</p>
+<p>Middle Name: {{ user.middle_name }}</p>
 <p>Last Name: {{ user.last_name }}</p>
 <p>Email: {{ user.email }}</p>
+<p>Gender: {{ user.gender }}</p>
+<p>Date-of-Birth: {{ user.dob }}</p>
+<p>Hobbies: {{ user.hobbies }}</p>
+<p>Relationship_Status: {{ user.relationship_status }}</p>
 
 <a href="{% url 'user_update' user.id %}">Edit</a> |
 <a href="{% url 'user_delete' user.id %}">Delete</a> |
