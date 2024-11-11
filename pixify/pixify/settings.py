@@ -77,9 +77,9 @@ WSGI_APPLICATION = 'pixify.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'pixify',
+        'NAME': 'pixify_main',
         'USER': 'postgres',
-        'PASSWORD': '8086',
+        'PASSWORD': '12345',
         'HOST': 'localhost',
         'PORT': '5432',
     }
