@@ -28,6 +28,6 @@ class NotificationDeleteView(View):
 
     
     def post(self, request):
-        notification = services.notification_service.get_user()
-        services.user_service.delete_notifications(notification)
+        notification = services.notification_service.get_notification()
+        services.delete_notification_service.delete_notifications(notification)
         return redirect('notification_list')

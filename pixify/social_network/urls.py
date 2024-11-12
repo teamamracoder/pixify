@@ -21,7 +21,6 @@ urlpatterns = [
     path('admin/notifications/create/', views.NotificationCreateView.as_view(), name='notification_create'),
     path('admin/notifications/<int:delete_id>/delete/', views.NotificationDeleteView.as_view(), name='notification_delete'),
 
-
     # post
     path('admin/posts/', views.PostListView.as_view(), name='post_list'),
     path('admin/posts/create/', views.PostCreateView.as_view(), name='post_create'),
