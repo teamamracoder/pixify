@@ -47,58 +47,6 @@
     </div>
 </div>
 
-<div class="px-3 py-3 mt-3 users"
-    style="background-color: #1f0447e3;box-shadow: 0 4px 8px rgba(151, 95, 236, 0.5);font-family: serif;border-radius: 7px;">
-    <div class="pt-1 pb-3 px-2 mb-2 fw-semibold" style="border: 1px solid black;border-radius: 3px;">
-      <div class="container mt-4">
-        <div class="d-flex align-items-center">
-          <img src="{% static 'images/green.png'%}" alt="Profile" class="rounded-circle me-3" style="width: 40px; height: 40px; object-fit: cover;">
-            <input class="form-control" type="search" placeholder="" style="border-radius: 25px;">
-          </div>
-          <div class="row justify-content-around text-center py-2">
 
-            <div class="col-4 d-flex align-items-center justify-content-center">
-                <i class="bi bi-camera-video-fill text-danger me-2 fs-5"></i>
-                <span>Live video</span>
-            </div>
-
-            <div class="col-4 d-flex align-items-center justify-content-center"  data-bs-toggle="modal" data-bs-target="#addPhotosVideosModal" >
-                <i class="bi bi-image-fill text-success me-2 fs-5"></i>
-                <span>Photo/video</span>
-            </div>
-
-            <div class="col-4 d-flex align-items-center justify-content-center">
-                <i class="bi bi-emoji-smile-fill text-warning me-2 fs-5"></i>
-                <span>Feeling/activity</span>
-            </div>
-        </div>
-
-       </div>
-    </div>
-</div>
-{% comment %} <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addPhotosVideosModal" style="width: 100%;">
-  <i class="bi bi-plus-circle"></i> Add Photos/Videos
-</button> {% endcomment %}
-<div class="modal fade" id="addPhotosVideosModal" tabindex="-1" aria-labelledby="addPhotosVideosModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-      <div class="modal-content">
-          <div class="modal-header">
-              <h5 class="modal-title" id="addPhotosVideosModalLabel">Add photos/videos</h5>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body">
-              <div class="mb-3">
-                  <label for="fileInput" class="form-label">Or drag and drop</label>
-                  <input type="file" class="form-control" id="fileInput">
-              </div>
-              <button type="button" class="btn btn-primary">Add photos and videos from your mobile device</button>
-          </div>
-          <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Add to your post</button>
-              <button type="button" class="btn btn-primary">Post</button>
-          </div>
-         </div>
-  </div>
-</div>
 
 {% endblock %}
