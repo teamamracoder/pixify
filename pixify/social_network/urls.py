@@ -16,6 +16,12 @@ urlpatterns = [
     path('admin/users/<int:user_id>/update/', views.UserUpdateView.as_view(), name='user_update'),
     path('admin/users/<int:user_id>/delete/', views.UserDeleteView.as_view(), name='user_delete'),
 
+    #admin_notification
+    path('admin/notifications/', views.NotificationListView.as_view(), name='notification_list'),
+    path('admin/notifications/create/', views.NotificationCreateView.as_view(), name='notification_create'),
+    path('admin/notifications/<int:delete_id>/delete/', views.NotificationDeleteView.as_view(), name='notification_delete'),
+
+
     # post
     path('admin/posts/', views.PostListView.as_view(), name='post_list'),
     path('admin/posts/create/', views.PostCreateView.as_view(), name='post_create'),
