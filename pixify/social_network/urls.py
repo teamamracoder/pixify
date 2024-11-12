@@ -41,6 +41,7 @@ urlpatterns = [
      # contact
     path('contactus/', views.ContactUsView.as_view(), name='contact'),
 
+     path('comments/', views.CommentsView.as_view(), name='comments'),
 
 
 ]
