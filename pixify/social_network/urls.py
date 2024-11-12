@@ -34,6 +34,9 @@ urlpatterns = [
     # notification
     path('notification/', views.notificationView.as_view(), name='notification'),
 
-
-
+    #message reaction 
+    path('message_reaction/create/', views.MessageReactionCreateView.as_view(), name='message_reaction_create'),
+    path('message_reaction/<int:Message_reaction_id>/update/', views.MessageReactionUpdateView.as_view(), name='Message_reaction_update'),
+    path('message_reaction/<int:Message_reaction_id>/delete/', views.MessageReactionDeleteView.as_view(), name='Message_reaction_delete'),
 ]
+
