@@ -25,10 +25,19 @@ urlpatterns = [
 
 
     # message
-    path('message/', views.messageView.as_view(), name='message'),
+    path('message/', views.MessageView.as_view(), name='message'),
 
     # notification
-    path('notification/', views.notificationView.as_view(), name='notification'),
+    path('notification/', views.NotificationView.as_view(), name='notification'),
+
+     # profile
+    path('profile/', views.EnduserprofileView.as_view(), name='userprofile'),
+
+     # aboutus
+    path('aboutus/', views.AboutUsView.as_view(), name='aboutus'),
+
+     # contact
+    path('contactus/', views.ContactUsView.as_view(), name='contact'),
 
 
 
