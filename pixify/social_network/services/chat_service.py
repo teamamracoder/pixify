@@ -1,34 +1,43 @@
-from ..models import Chat
+from .. import models
+from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 
 def list_chats():
-    return Chat.objects.all()
+    return models.Chat.objects.all()
 
-def chat_details(chat_id):
-    return get_object_or_404(Chat, id=chat_id)
+def chats_create(request):
+    title = request.data.get('title')
+    chat_type = request.data.get('type')
+    members = request.data.get('members')
+    chat_cover = request.data.get('chat_cover')
+    is_active = request.data.get('is_active', True)
+    created_by = request.user.id  
+    updated_by = request.user.id  
+    chat = chats_create(title, chat_type, members, chat_cover, is_active, created_by, updated_by)
+    return models.Chat.objects.create(title=title,type=type,members=members,chat_cover=chat_cover,is_active=is_active ,created_by=created_by,updated_by=updated_by)
+
+# chat_service.py
+
+def get_user_data(user_id):    
+    followers = User.objects.filter(followers__followed_user=user_id).exclude(id=user_id)
+    followings = User.objects.filter(followings__user=user_id).exclude(id=user_id)
+    photo = User.profile_photo_url(User, 'profile') 
+    
+    return {
+        'user':user_id,
+        'followers': followers,
+        'followings': followings,
+        'photo': photo,
+    }
 
 
+    
 
+def delete_chat(chat_id):
+    return get_object_or_404(models.Chat, id=chat_id)
 
+def details_chats():
+    return models.Chat.objects.all()
 
-
-# from .. import models
-# from django.shortcuts import get_object_or_404
-
-# def list_chat():
-#     return models.Chat.objects.all()
-
-# def create_chat(reciver,sender):
-#     return models.Chat.objects.create(reciver=reciver,sender=sender)
-
-# def get_chat_(chat_id):
-#     return get_object_or_404(models.Chat, id=chat_id)
-
-# def get_chat_messages(chat_room):
-#     return models.Message.objects.filter(chat_room=chat_room).order_by('timestamp')
-
-# def create_message(chat_room, user, content):
-#     return models.objects.create(room=chat_room, user=user, content=content)
-
-# def delete_chat(chat_room):
-#     chat_room.delete()
+def get_chat (chat_id):
+    return get_object_or_404(models.Chat, id=chat_id)
