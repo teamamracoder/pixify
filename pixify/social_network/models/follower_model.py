@@ -1,9 +1,9 @@
 from django.db import models
 
 class Follower(models.Model):
-    follower = models.ForeignKey('User', on_delete=models.CASCADE, related_name='fk_follower_followers_users_id')
-    following = models.ForeignKey('User', on_delete=models.CASCADE, related_name='fk_following_followers_users_id')
-
+    follower = models.ForeignKey('User', on_delete=models.CASCADE, related_name='fk_follower_followers_users_id',null=True, blank=1)
+    following = models.ForeignKey('User', on_delete=models.CASCADE, related_name='fk_following_followers_users_id', null=True, blank=1)
+    user_id = models.ForeignKey('User', on_delete=models.CASCADE, related_name='fk_user_followers_users_id', null=True)
     is_active  = models.BooleanField(default= True)
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)        
