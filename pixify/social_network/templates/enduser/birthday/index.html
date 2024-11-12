@@ -1,0 +1,91 @@
+{% extends "enduser/base.html" %}
+
+{% block title %}Pixify-Notification{% endblock %}
+
+{% block content %}
+
+
+
+<div class="px-3 py-3 mt-3 users"style="background-color: #1f0447e3;box-shadow: 0 4px 8px rgba(151, 95, 236, 0.5);font-family: serif;border-radius: 7px;">
+    <div class="pt-1 pb-3 px-2 mb-2 fw-semibold">
+        <div class="p-2 card-header">
+            <div class="input-group">
+               <h3>Today's birthdays</h3>
+            </div>
+        </div>
+        <div class="card-body contacts_body " >
+            <ul class="request">
+            
+                <li>
+                <div class="d-flex bd-highlight flex-wrap">
+                    <div class="img_cont me-3">
+                        <img src="https://static.turbosquid.com/Preview/001292/481/WV/_D.jpg"
+                             class="rounded-circle user_img"
+                             style="height:50px;width: 50px;">
+                    </div>
+                    <div class="user_info flex-grow-1">
+                        <div class="d-flex justify-content-between flex-wrap pt-1">
+                            <span>Priya</span>
+                            <span style="font-size:15px;">22 years old</span>
+                        </div>
+                        <div id="send-btn" class="w-100 mt-2">
+                            <div class="p-2 card-header">
+                                <div class="input-group">
+                                    <input type="text" placeholder="Happy Birthday" class="form-control search-inp" style="height:40px;">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text search_btn">
+                                            <i class="bi bi-emoji-smile" style="font-size:19px;"></i>
+                                        </span>
+                                    </div>
+                                    <i class="bi bi-symmetry-horizontal text-info ms-2" style="font-size:27px;"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+        </li>
+                <hr>
+                
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            </ul>
+       </div> 
+   </div>
+</div>
+
+<style>
+   .input-group::placeholder {
+        color: white;
+        opacity: 1; 
+      }
+      
+    
+      
+</style>
+
+
+
+
+
+    {% endblock %}
+
+
+ 
+
+
+
+
+
+
