@@ -6,10 +6,12 @@
 {% load static %}
 
 <div class="px-3 py-3 mt-3 users"
-    style="background-color: #1f0447e3;box-shadow: 0 4px 8px rgba(151, 95, 236, 0.5);font-family: serif;border-radius: 7px;height: 620px;">
+    style="background-color: #1f0447e3;box-shadow: 0 4px 8px rgba(151, 95, 236, 0.5);font-family: serif;border-radius: 7px;">
+    
+    <!-- heading -->
         <div  class="m-2" >  
             <div class="p-3 fnd-pic" style="justify-content: space-between;display: flex;" >
-                <h2>Chats</h2>
+                <h2 class="mobile-hide">Chats</h2>
                 <div class="input-wrapper">
                   <button class="icon"> 
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" height="25px" width="25px">
@@ -19,86 +21,180 @@
                   </button>
                   <input placeholder="search.." class="input" name="text" type="text">
                 </div>
-                <!-- <i class="bi bi-search"></i> -->
             </div>
         </div>
 
-        {% for chat in chats %}
-        <div style="border: 1px solid black;border-radius: 3px;" class="m-2" >  
-            <div class="p-3 fnd-pic">
-                <a href="#" style="text-decoration: none; display:flex; align-items:center; gap:20px ;justify-content: space-between;">
-                    <img src="{{chat.chat_cover}}" class="img-fluid" alt="" style="height:40px; border-radius:50%;">
-                    <p>{{chat.title}}<i class="bi bi-patch-check prof-check" ></i></p>
-                    <div style="display: flex;flex-direction: column; padding-right: 20px;">
-                    <p><span  class="position-absolute  translate-middle badge rounded-pill bg-danger">2+</span></p>
-                    <p><span  class="position-absolute  translate-middle badge rounded-pill " style="padding-right: 88px;">Today 10:00am</span></p>
-                    </div>
-                </a>
-            </div>
-        </div>
-        {% endfor %}
-        <div style="border: 1px solid black;border-radius: 3px;" class="m-2" >  
-            <div class="p-3 fnd-pic">
-                <a href="#" style="text-decoration: none; display:flex; align-items:center; gap:20px ;justify-content: space-between;">
-                    <img src="{% static 'images/avatar.jpg' %}" class="img-fluid" alt="" style="height:40px; border-radius:50%;">
-                    <p>Reciver/Group<i class="bi bi-patch-check prof-check" ></i></p>
-                    <div style="display: flex;flex-direction: column;padding-right: 20px;">
-                    <p><span  class="position-absolute  translate-middle badge rounded-pill bg-danger">2+</span></p>
-                    <p><span  class="position-absolute  translate-middle badge rounded-pill " style="padding-right: 88px;">Today 10:00am</span></p>
-                    </div>
-                </a>
-            </div>
-        </div>
-        <div style="border: 1px solid black;border-radius: 3px;" class="m-2" >  
-            <div class="p-3 fnd-pic">
-                <a href="#" style="text-decoration: none; display:flex; align-items:center; gap:20px ;justify-content: space-between;">
-                    <img src="{% static 'images/avatar.jpg' %}" class="img-fluid" alt="" style="height:40px; border-radius:50%;">
-                    <p>Reciver/Group<i class="bi bi-patch-check prof-check" ></i></p>
-                    <div style="display: flex;flex-direction: column;padding-right: 20px;">
-                    <p><span  class="position-absolute  translate-middle badge rounded-pill bg-danger">2+</span></p>
-                    <p><span  class="position-absolute  translate-middle badge rounded-pill " style="padding-right: 88px;">Today 10:00am</span></p>
-                    </div>
-                </a>
-            </div>
-        </div>
-        <div style="border: 1px solid black;border-radius: 3px;" class="m-2" >  
-            <div class="p-3 fnd-pic">
-                <a href="#" style="text-decoration: none; display:flex; align-items:center; gap:20px ;justify-content: space-between;">
-                    <img src="{% static 'images/avatar.jpg' %}" class="img-fluid" alt="" style="height:40px; border-radius:50%;">
-                    <p>Reciver/Group<i class="bi bi-patch-check prof-check" ></i></p>
-                    <div style="display: flex;flex-direction: column;padding-right: 20px;">
-                    <p><span  class="position-absolute  translate-middle badge rounded-pill bg-danger">2+</span></p>
-                    <p><span  class="position-absolute  translate-middle badge rounded-pill " style="padding-right: 88px;">Today 10:00am</span></p>
-                    </div>
-                </a>
-            </div>
-        </div>
-        <div style="border: 1px solid black;border-radius: 3px;" class="m-2" >  
-            <div class="p-3 fnd-pic">
-                <a href="#" style="text-decoration: none; display:flex; align-items:center; gap:20px ;justify-content: space-between;">
-                    <img src="{% static 'images/avatar.jpg' %}" class="img-fluid" alt="" style="height:40px; border-radius:50%;">
-                    <p>Reciver/Group<i class="bi bi-patch-check prof-check" ></i></p>
-                    <div style="display: flex;flex-direction: column;padding-right: 20px;">
-                    <p><span  class="position-absolute  translate-middle badge rounded-pill bg-danger">2+</span></p>
-                    <p><span  class="position-absolute  translate-middle badge rounded-pill " style="padding-right: 88px;">Today 10:00am</span></p>
-                    </div>
-                </a>
-            </div>
-        </div>
- 
 
-        <div class="m-2" >  
-            <div class="p-3 fnd-pic" style="display: flex;justify-content: space-between;">
+        <!-- Peoples -->
+        
+        <div style="border: 1px solid black; border-radius: 3px;" class="m-2">  
+            <div class="p-3 fnd-pic">
+                <a href="#" style="text-decoration: none; display: flex; align-items: center; gap: 20px; justify-content: space-between;">
+                    <!-- Profile image -->
+                    <img src="{% static 'images/avatar.jpg' %}" class="img-fluid" alt="" style="height: 40px; border-radius: 50%;">
+        
+                    <!-- Text next to the image -->
+                    <div style="display: flex; flex-direction: column; flex-grow: 1;">
+                        <p style="margin: 0;">Receiver/Group <i class="bi bi-patch-check prof-check"></i></p>
+                        <p style="margin: 0; color: gray; font-size: 0.9em;">This is a dummy chat message...</p>
+                    </div>
+
+                    
+        
+                    <!-- Right-aligned section with badge and timestamp -->
+                    <div style="display: flex; flex-direction: column; align-items: flex-end; padding-right: 20px;">
+                        <p style="margin-top: 0;padding-right: 10px;"><span class="position-absolute translate-middle badge rounded-pill bg-danger">2+</span></p>
+                        <p style="margin-top: 10px; margin-bottom: 0; padding-right: 20px;"><span class="position-absolute translate-middle badge rounded-pill">Today 10:00am</span></p>
+                    </div>
+                </a>
+            </div>
+        </div>
+           
+        <div style="border: 1px solid black; border-radius: 3px;" class="m-2">  
+            <div class="p-3 fnd-pic">
+                <a href="#" style="text-decoration: none; display: flex; align-items: center; gap: 20px; justify-content: space-between;">
+                    <!-- Profile image -->
+                    <img src="{% static 'images/avatar.jpg' %}" class="img-fluid" alt="" style="height: 40px; border-radius: 50%;">
+        
+                    <!-- Text next to the image -->
+                    <div style="display: flex; flex-direction: column; flex-grow: 1;">
+                        <p style="margin: 0;">Receiver/Group <i class="bi bi-patch-check prof-check"></i></p>
+                        <p style="margin: 0; color: gray; font-size: 0.9em;">This is a dummy chat message...</p>
+                    </div>
+
+                    
+        
+                    <!-- Right-aligned section with badge and timestamp -->
+                    <div style="display: flex; flex-direction: column; align-items: flex-end; padding-right: 20px;">
+                        <p style="margin-top: 0;padding-right: 10px;"><span class="position-absolute translate-middle badge rounded-pill bg-danger">2+</span></p>
+                        <p style="margin-top: 10px; margin-bottom: 0; padding-right: 20px;"><span class="position-absolute translate-middle badge rounded-pill">Today 10:00am</span></p>
+                    </div>
+                </a>
+            </div>
+        </div>
+           
+        <div style="border: 1px solid black; border-radius: 3px;" class="m-2">  
+            <div class="p-3 fnd-pic">
+                <a href="#" style="text-decoration: none; display: flex; align-items: center; gap: 20px; justify-content: space-between;">
+                    <!-- Profile image -->
+                    <img src="{% static 'images/avatar.jpg' %}" class="img-fluid" alt="" style="height: 40px; border-radius: 50%;">
+        
+                    <!-- Text next to the image -->
+                    <div style="display: flex; flex-direction: column; flex-grow: 1;">
+                        <p style="margin: 0;">Receiver/Group <i class="bi bi-patch-check prof-check"></i></p>
+                        <p style="margin: 0; color: gray; font-size: 0.9em;">This is a dummy chat message...</p>
+                    </div>
+
+                    
+        
+                    <!-- Right-aligned section with badge and timestamp -->
+                    <div style="display: flex; flex-direction: column; align-items: flex-end; padding-right: 20px;">
+                        <p style="margin-top: 0;padding-right: 10px;"><span class="position-absolute translate-middle badge rounded-pill bg-danger">2+</span></p>
+                        <p style="margin-top: 10px; margin-bottom: 0; padding-right: 20px;"><span class="position-absolute translate-middle badge rounded-pill">Today 10:00am</span></p>
+                    </div>
+                </a>
+            </div>
+        </div>
+           
+        <div style="border: 1px solid black; border-radius: 3px;" class="m-2">  
+            <div class="p-3 fnd-pic">
+                <a href="#" style="text-decoration: none; display: flex; align-items: center; gap: 20px; justify-content: space-between;">
+                    <!-- Profile image -->
+                    <img src="{% static 'images/avatar.jpg' %}" class="img-fluid" alt="" style="height: 40px; border-radius: 50%;">
+        
+                    <!-- Text next to the image -->
+                    <div style="display: flex; flex-direction: column; flex-grow: 1;">
+                        <p style="margin: 0;">Receiver/Group <i class="bi bi-patch-check prof-check"></i></p>
+                        <p style="margin: 0; color: gray; font-size: 0.9em;">This is a dummy chat message...</p>
+                    </div>
+
+                    
+        
+                    <!-- Right-aligned section with badge and timestamp -->
+                    <div style="display: flex; flex-direction: column; align-items: flex-end; padding-right: 20px;">
+                        <p style="margin-top: 0;padding-right: 10px;"><span class="position-absolute translate-middle badge rounded-pill bg-danger">2+</span></p>
+                        <p style="margin-top: 10px; margin-bottom: 0; padding-right: 20px;"><span class="position-absolute translate-middle badge rounded-pill">Today 10:00am</span></p>
+                    </div>
+                </a>
+            </div>
+        </div>
+        <div style="border: 1px solid black; border-radius: 3px;" class="m-2">  
+            <div class="p-3 fnd-pic">
+                <a href="#" style="text-decoration: none; display: flex; align-items: center; gap: 20px; justify-content: space-between;">
+                    <!-- Profile image -->
+                    <img src="{% static 'images/avatar.jpg' %}" class="img-fluid" alt="" style="height: 40px; border-radius: 50%;">
+        
+                    <!-- Text next to the image -->
+                    <div style="display: flex; flex-direction: column; flex-grow: 1;">
+                        <p style="margin: 0;">Receiver/Group <i class="bi bi-patch-check prof-check"></i></p>
+                        <p style="margin: 0; color: gray; font-size: 0.9em;">This is a dummy chat message...</p>
+                    </div>
+
+                    
+        
+                    <!-- Right-aligned section with badge and timestamp -->
+                    <div style="display: flex; flex-direction: column; align-items: flex-end; padding-right: 20px;">
+                        <p style="margin-top: 0;padding-right: 10px;"><span class="position-absolute translate-middle badge rounded-pill bg-danger">2+</span></p>
+                        <p style="margin-top: 10px; margin-bottom: 0; padding-right: 20px;"><span class="position-absolute translate-middle badge rounded-pill">Today 10:00am</span></p>
+                    </div>
+                </a>
+            </div>
+        </div>
+        <div style="border: 1px solid black; border-radius: 3px;" class="m-2">  
+            <div class="p-3 fnd-pic">
+                <a href="#" style="text-decoration: none; display: flex; align-items: center; gap: 20px; justify-content: space-between;">
+                    <!-- Profile image -->
+                    <img src="{% static 'images/avatar.jpg' %}" class="img-fluid" alt="" style="height: 40px; border-radius: 50%;">
+        
+                    <!-- Text next to the image -->
+                    <div style="display: flex; flex-direction: column; flex-grow: 1;">
+                        <p style="margin: 0;">Receiver/Group <i class="bi bi-patch-check prof-check"></i></p>
+                        <p style="margin: 0; color: gray; font-size: 0.9em;">This is a dummy chat message...</p>
+                    </div>
+
+                    
+        
+                    <!-- Right-aligned section with badge and timestamp -->
+                    <div style="display: flex; flex-direction: column; align-items: flex-end; padding-right: 20px;">
+                        <p style="margin-top: 0;padding-right: 10px;"><span class="position-absolute translate-middle badge rounded-pill bg-danger">2+</span></p>
+                        <p style="margin-top: 10px; margin-bottom: 0; padding-right: 20px;"><span class="position-absolute translate-middle badge rounded-pill">Today 10:00am</span></p>
+                    </div>
+                </a>
+            </div>
+        </div>
+        <div style="border: 1px solid black; border-radius: 3px;" class="m-2">  
+            <div class="p-3 fnd-pic">
+                <a href="#" style="text-decoration: none; display: flex; align-items: center; gap: 20px; justify-content: space-between;">
+                    <!-- Profile image -->
+                    <img src="{% static 'images/avatar.jpg' %}" class="img-fluid" alt="" style="height: 40px; border-radius: 50%;">
+        
+                    <!-- Text next to the image -->
+                    <div style="display: flex; flex-direction: column; flex-grow: 1;">
+                        <p style="margin: 0;">Receiver/Group <i class="bi bi-patch-check prof-check"></i></p>
+                        <p style="margin: 0; color: gray; font-size: 0.9em;">This is a dummy chat message...</p>
+                    </div>
+
+                    
+        
+                    <!-- Right-aligned section with badge and timestamp -->
+                    <div style="display: flex; flex-direction: column; align-items: flex-end; padding-right: 20px;">
+                        <p style="margin-top: 0;padding-right: 10px;"><span class="position-absolute translate-middle badge rounded-pill bg-danger">2+</span></p>
+                        <p style="margin-top: 10px; margin-bottom: 0; padding-right: 20px;"><span class="position-absolute translate-middle badge rounded-pill">Today 10:00am</span></p>
+                    </div>
+                </a>
+            </div>
+        </div>
+       
+
+        <div class="m-2">  
+            <div class="p-3 fnd-pic" style="display: flex; justify-content: space-between;">
                 <div></div>
-                <div><i class="bi bi-plus-circle" style="font-size: 45px;"type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModalCenter"></i></div>
+                <div>
+                    <i class="text-light  bi bi-plus-circle sticky-icon" style="font-size: 45px;background-color: #1F0647; border-radius: 50%;" type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModalCenter"></i>
+                </div>
             </div>
         </div>
-
-
-
-
-
-
+        
         <!-- Modal -->
 <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
@@ -106,76 +202,125 @@
         <div class="modal-header">
         <div class="input-group mb-3">
                 <button class="btn btn-outline-secondary" type="button" id="button-addon1" id="searchbtn"><i
-                        class="bi bi-search"></i></button>
-                <input type="text" id="searchin" class="form-control" placeholder=""
+                        class="bi bi-search"></i>
+                </button>
+                <input type="text" id="searchin" class="form-control" placeholder="Search Name"
                     aria-label="Example text with button addon" aria-describedby="button-addon1">
-            </div> 
-          </button>
+             
+          </div>
+
         </div>
         
+
+
+
         <div class="modal-body">
-            <div style="border: 1px solid black;border-radius: 3px;" class="m-2"  >  
-                <div class="p-3 fnd-pic" >
-                    <a href="#" style="text-decoration: none; display:flex; align-items:center; gap:20px ;justify-content: center">
-                        <img src="{% static 'images/avatar.jpg' %}" class="img-fluid" alt="" style="height:40px; border-radius:50%;">
-                        <p>Reciver/Group<i class="bi bi-patch-check prof-check" ></i></p>
-                    </a>
-                </div>
+            <div  class="item" onclick="toggleSelect(this ,'item')" style="border: 1px solid black; border-radius: 3px;" class="m-2">  
+                <div class="p-3 fnd-pic">
+                    <a href="#" style="text-decoration: none; display: flex; align-items: center; gap: 20px; justify-content: space-between;">
+                        <!-- Profile image -->
+                        <img src="{% static 'images/avatar.jpg' %}" class="img-fluid" alt="" style="height: 40px; border-radius: 50%;">
+            
+                        <!-- Text next to the image -->
+                        <div style="display: flex; flex-direction: column; flex-grow: 1;">
+                            <p style="margin: 0;">Receiver/Group <i class="bi bi-patch-check prof-check"></i></p>
+                            <p style="margin: 0; color: gray; font-size: 0.9em;">Hey there! I am using Pixify </p>
+                        </div>
+                        </a>
+                    </div>
             </div>
-            <div style="border: 1px solid black;border-radius: 3px;" class="m-2" >  
-                <div class="p-3 fnd-pic" >
-                    <a href="#" style="text-decoration: none; display:flex; align-items:center; gap:20px ;justify-content: center">
-                        <img src="{% static 'images/avatar.jpg' %}" class="img-fluid" alt="" style="height:40px; border-radius:50%;">
-
-                        <p>Reciver/Group<i class="bi bi-patch-check prof-check" ></i></p>
-                    </a>
-                </div>
+            <div  class="item" onclick="toggleSelect(this ,'item')" style="border: 1px solid black; border-radius: 3px;" class="m-2">  
+                <div class="p-3 fnd-pic">
+                    <a href="#" style="text-decoration: none; display: flex; align-items: center; gap: 20px; justify-content: space-between;">
+                        <!-- Profile image -->
+                        <img src="{% static 'images/avatar.jpg' %}" class="img-fluid" alt="" style="height: 40px; border-radius: 50%;">
+            
+                        <!-- Text next to the image -->
+                        <div style="display: flex; flex-direction: column; flex-grow: 1;">
+                            <p style="margin: 0;">Receiver/Group <i class="bi bi-patch-check prof-check"></i></p>
+                            <p style="margin: 0; color: gray; font-size: 0.9em;">Hey there! I am using Pixify </p>
+                        </div>
+                        </a>
+                    </div>
             </div>
-            <div style="border: 1px solid black;border-radius: 3px;" class="m-2" >  
-                <div class="p-3 fnd-pic" >
-                    <a href="#" style="text-decoration: none; display:flex; align-items:center; gap:20px ;justify-content: center">
-                        <img src="{% static 'images/avatar.jpg' %}" class="img-fluid" alt="" style="height:40px; border-radius:50%;">
-
-                        <p>Reciver/Group<i class="bi bi-patch-check prof-check" ></i></p>
-                    </a>
-                </div>
+            <div  class="item" onclick="toggleSelect(this ,'item')" style="border: 1px solid black; border-radius: 3px;" class="m-2">  
+                <div class="p-3 fnd-pic">
+                    <a href="#" style="text-decoration: none; display: flex; align-items: center; gap: 20px; justify-content: space-between;">
+                        <!-- Profile image -->
+                        <img src="{% static 'images/avatar.jpg' %}" class="img-fluid" alt="" style="height: 40px; border-radius: 50%;">
+            
+                        <!-- Text next to the image -->
+                        <div style="display: flex; flex-direction: column; flex-grow: 1;">
+                            <p style="margin: 0;">Receiver/Group <i class="bi bi-patch-check prof-check"></i></p>
+                            <p style="margin: 0; color: gray; font-size: 0.9em;">Hey there! I am using Pixify </p>
+                        </div>
+                        </a>
+                    </div>
             </div>
-            <div style="border: 1px solid black;border-radius: 3px;" class="m-2" >  
-                <div class="p-3 fnd-pic" >
-                    <a href="#" style="text-decoration: none; display:flex; align-items:center; gap:20px ;justify-content: center">
-                        <img src="{% static 'images/avatar.jpg' %}" class="img-fluid" alt="" style="height:40px; border-radius:50%;">
-
-                        <p>Reciver/Group<i class="bi bi-patch-check prof-check" ></i></p>
-                    </a>
-                </div>
+            <div  class="item" onclick="toggleSelect(this ,'item')" style="border: 1px solid black; border-radius: 3px;" class="m-2">  
+                <div class="p-3 fnd-pic">
+                    <a href="#" style="text-decoration: none; display: flex; align-items: center; gap: 20px; justify-content: space-between;">
+                        <!-- Profile image -->
+                        <img src="{% static 'images/avatar.jpg' %}" class="img-fluid" alt="" style="height: 40px; border-radius: 50%;">
+            
+                        <!-- Text next to the image -->
+                        <div style="display: flex; flex-direction: column; flex-grow: 1;">
+                            <p style="margin: 0;">Receiver/Group <i class="bi bi-patch-check prof-check"></i></p>
+                            <p style="margin: 0; color: gray; font-size: 0.9em;">Hey there! I am using Pixify </p>
+                        </div>
+                        </a>
+                    </div>
             </div>
-            <div style="border: 1px solid black;border-radius: 3px;" class="m-2" >  
-                <div class="p-3 fnd-pic" >
-                    <a href="#" style="text-decoration: none; display:flex; align-items:center; gap:20px ;justify-content: center">
-                        <img src="{% static 'images/avatar.jpg' %}" class="img-fluid" alt="" style="height:40px; border-radius:50%;">
-
-                        <p>Reciver/Group<i class="bi bi-patch-check prof-check" ></i></p>
-                    </a>
-                </div>
+            <div  class="item" onclick="toggleSelect(this ,'item')" style="border: 1px solid black; border-radius: 3px;" class="m-2">  
+                <div class="p-3 fnd-pic">
+                    <a href="#" style="text-decoration: none; display: flex; align-items: center; gap: 20px; justify-content: space-between;">
+                        <!-- Profile image -->
+                        <img src="{% static 'images/avatar.jpg' %}" class="img-fluid" alt="" style="height: 40px; border-radius: 50%;">
+            
+                        <!-- Text next to the image -->
+                        <div style="display: flex; flex-direction: column; flex-grow: 1;">
+                            <p style="margin: 0;">Receiver/Group <i class="bi bi-patch-check prof-check"></i></p>
+                            <p style="margin: 0; color: gray; font-size: 0.9em;">Hey there! I am using Pixify </p>
+                        </div>
+                        </a>
+                    </div>
             </div>
-
-
-
-
-
 
         </div>
         
       </div>
     </div>
   </div>
-
-
-        
-    
 </div>
 
 
+
+  <script>
+    const allItems = document.querySelectorAll('.item'); 
+    // Array to store selected items
+    const selectedItems = [];
+
+    function toggleSelect(element, item) {
+      // Toggle the selection state
+      if (selectedItems.includes(item)) {
+        // If item is already selected, remove it from the array and update styling
+        const index = selectedItems.indexOf(item);
+        selectedItems.splice(index, 1);
+        element.classList.remove("selected");
+      } else {
+        // If item is not selected, add it to the array and update styling
+        selectedItems.push(item);
+        element.classList.add("selected");
+      }
+      // Display selected items
+      document.getElementById("selectedItems").innerText = selectedItems.join(", ");
+    }
+
+
+    
+  </script>
+
+  
 <style>
     #p-pic img{
 padding: 15px 20px ;
@@ -189,7 +334,7 @@ padding: 15px 20px ;
 
 
 
-/ From Uiverse.io by boryanakrasteva / 
+
 .input-wrapper {
   display: flex;
   align-items: center;
@@ -249,6 +394,106 @@ padding: 15px 20px ;
   transition: all 500ms cubic-bezier(0, 0.110, 0.35, 2);
 }
 
+
+.sticky-icon {
+    position: fixed;
+    bottom: 60px;
+    right: 460px;
+    z-index: 1055;
+}
+
+
+
+    .selected {
+      background-color: #4CAF50;
+      color: white;
+    }
+
+/* Base styles are already set; adding media queries for responsiveness */
+
+@media (max-width: 1200px) {
+    .sticky-icon {
+        right: 390px;
+        bottom: 100px;
+    }
+}
+
+@media (max-width: 992px) {
+    .users {
+        padding: 20px;
+        box-shadow: 0 4px 8px rgba(151, 95, 236, 0.5);
+    }
+    .sticky-icon {
+    right: 320px;
+    bottom: 85px;
+}
+}
+/* Hide the element on screens smaller than 768px (or your desired breakpoint) */
+@media only screen and (max-width: 768px) {
+  .mobile-hide {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+    .users {
+        padding: 15px;
+        margin-top: 20px;
+    }
+    .input-wrapper {
+        flex-direction: column;
+        gap: 10px;
+    }
+    .input {
+        width: 100%;
+        padding: 5px;
+        border-radius: 5px;
+    }
+    .sticky-icon {
+    right: 108px;
+    bottom: 55px;
+}
+}
+
+@media (max-width: 576px) {
+    .users {
+        padding: 10px;
+    }
+    .fnd-pic {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .input-wrapper {
+        width: 100%;
+    }
+    .icon, .input {
+        width: 100%;
+        padding: 10px;
+    }
+    .sticky-icon {
+    right: 92px;
+    bottom: 50px;
+}
+}
+
+@media (max-width: 480px) {
+    .sticky-icon {
+    right: 108px;
+    bottom: 50px;
+}
+    .input-wrapper {
+        width: 100%;
+        gap: 5px;
+    }
+    .input {
+        width: calc(100% - 20px);
+        padding: 8px;
+        font-size: 14px;
+    }
+    .users {
+        font-size: 0.9rem;
+    }
+}
 
 
 
