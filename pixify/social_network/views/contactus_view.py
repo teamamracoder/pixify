@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.views import View
 
-class MessageView(View):
+class ContactUsView(View):
     def get(self, request):
-        return render(request, 'enduser/message/index.html')
+        return render(request, 'enduser/contactus/index.html')
