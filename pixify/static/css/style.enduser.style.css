@@ -479,7 +479,32 @@ background-color: rgba(107, 99, 99, 0.3);
 
 
 /* Start CSS for Message by Badhan Sarkar*/
+/* -------------------Write by Badhan---------------------- */
 
+.notification-list { 
+    width: 600px;
+    margin: auto;
+    padding-top: 2px;
+    margin:0 px ;
+    padding:1px 0px;
+}
+.notification-item {
+    padding: 15px;
+    background-color: #680cf1e3;
+    border: 1px solid #5b0fdd;
+    border-radius: 10px;
+    margin-bottom: 10px;
+}
+.notification-text {
+    color: #fffeff;
+}
+.time-text {
+    font-size: 0.9rem;
+    color: #ffffff;
+}
+
+
+/* --------------End by Badhan-------------------------- */
 
 
 /* End CSS for Message by Badhan Sarkar */
@@ -657,3 +682,4 @@ textarea::placeholder {
 }
 
 /*End Subhasis*/
+
