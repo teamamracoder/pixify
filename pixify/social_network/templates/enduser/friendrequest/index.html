@@ -1,0 +1,69 @@
+
+
+{% extends "enduser/base.html" %} 
+
+{% block title %}Pixify-Message{% endblock %}
+
+{% block content %}
+
+{% load static %}
+<div class="px-3 py-3 mt-3" style="background-color: #1f0447e3; box-shadow: 0 4px 8px rgba(151, 95, 236, 0.5);font-family: serif;border-radius: 7px;" >
+
+ 
+
+    
+    <div class="card mb-sm-3 mb-md-0 contacts_card" style="background-color: #1f0447e3; height:560px;">
+
+
+
+    <div class="p-2 card-header">
+            <div class="input-group">
+                <input type="text" placeholder="Search..." name="" class="form-control search-inp" >
+                <div class="input-group-prepend">
+                    <span class="input-group-text search_btn"><i class="fas fa-search"></i></span>
+                </div>
+            </div>
+        </div>
+       
+        <div class="card-body contacts_body " > 
+
+            <ul class="request">
+                <li>
+                    <div class="d-flex bd-highlight">
+                        <div class="img_cont">
+                            <img src="{% static 'images/logo1.jpg' %}" class="rounded-circle user_img" >
+                            <span class="online_icon"></span>
+                        </div>
+                        <div class="user_info">
+                            <span>Priya</span>
+                            <p>Priya is online</p>
+                            <div id="req-btn">
+                            <button type="button" class="btn bg-info">Confirm</button>
+                            <button type="button" class="btn btn-secondary">Delete</button>
+                           </div>
+                        </div>
+                    </div>
+                </li>
+
+               
+
+
+
+            </ul>
+
+       </div> 
+
+
+</div>
+   
+
+</div>
+
+
+
+
+{% endblock %}
+
+
+
+   

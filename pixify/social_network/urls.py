@@ -41,7 +41,11 @@ urlpatterns = [
      # contact
     path('contactus/', views.ContactUsView.as_view(), name='contact'),
 
-     path('comments/', views.CommentsView.as_view(), name='comments'),
 
+    path('comments/', views.CommentsView.as_view(), name='comments'),
+
+    path('friendrequest/', views.FriendRequestView.as_view(), name='friendrequest'),
+
+    path('birthday/', views.BirthdayView.as_view(), name='birthday')
 
 ]
