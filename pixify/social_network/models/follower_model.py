@@ -17,8 +17,5 @@ class Follower(models.Model):
             models.CheckConstraint(check=~models.Q(follower=models.F('following')), name='follower_not_equal_to_following')
         ]
 
-    class Meta:
-         db_table = 'followers'
-
     def __str__(self):
          return f"ID: {self.id}, Created at: {self.created_at}, Active: {self.is_active}"
