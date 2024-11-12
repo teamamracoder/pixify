@@ -565,6 +565,139 @@ textarea::placeholder {
     color: white;
 }
 
+.modal-dialog{
+    padding-top: 57px; 
+
+}
+.modal-content {
+    background-color: #4e0b8d;
+    color: white;
+}
+
+.modal-header {
+    border-bottom: none;
+}
+
+.form-control {
+    background-color: #130322;
+
+}
+
+.modal-body {
+    overflow-y: scroll;
+    scroll-behavior: auto;
+    height: 440px;
+    margin-top: -20px;
+
+}
+
+.comment-section {
+    background-color: #130421;
+    border-radius: 5px;
+}
+
+
+.comment-section .p {
+    font-size: px;
+}
+
+.comment-box {
+    background-color: #130421;
+    scroll-behavior: auto; 
+
+}
+
+.modal-body::-webkit-scrollbar {
+    display: none;
+}
+
+.modal-body {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.btn-primary {
+    background-color: #4e0b8d;
+    border-radius: 5px;
+    padding: 5px;
+    box-shadow: blue;
+}
+
+.comment-text {
+    color: darkcyan;
+    font-size: 15px;
+    font-style: inherit;
+    margin-top: 5px;
+
+}
+
+.paragraph {
+    color: aliceblue;
+    font-size: 12px;
+    margin-left: 10px;
+    margin-top: -15px;
+}
+
+.commentContainer {
+    margin-top: -10px;
+    position: relative;
+
+}
+
+.comentWriteBox {
+    text-align:right;
+    padding: 7px;
+}
+
+.fileInputStyle {
+    width: 93%;
+    background-color: #130421;
+    font-size: 12px;
+    color: white;
+    font-weight: bold;
+    padding:5px;
+}
+.send-button {
+    position: absolute;
+    right: 20px;
+    bottom:70px;
+    /* cursor: pointer; */
+    background-color: darkcyan;
+}
+
+.send-button img {
+     height:16px;
+     width:17px;
+}
+.icons {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    display: flex;
+    gap: 10px;
+  }
+  
+  .icon {
+    font-size: 18px;
+    cursor: pointer;
+  }
+  .icon-container {
+    display: flex;
+    gap: 5px;
+    position: absolute;
+    bottom: 10px;
+    left:40px;
+    top: 50px;
+}
+
+.icon {
+    cursor: pointer;
+    font-size: 15px;
+}
+
+/* end  css for comment page  */
+
+
 
 /* End CSS for Home Page by Rima Das */
 
@@ -966,3 +1099,4 @@ textarea::placeholder {
 }
 
 /*End Subhasis*/
+
