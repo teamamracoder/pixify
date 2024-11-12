@@ -1,0 +1,27 @@
+{% extends "../base.html" %}
+
+{% block title %}Create Notification{% endblock %}
+
+{% block content %}
+
+<h1>Create Notification</h1>
+<form method="post">
+    {% csrf_token %}
+    <label>text:</label>
+    <input type="text" name="text" required>
+    
+    <div class="form-group">
+    <label for="media_url" class="form-label">Media URL</label>
+    <input type="url" id="media_url" name="media_url" class="form-control" placeholder="Enter media URL" value="{{ media_url }}">
+    </div> </br>
+    <label>receiver_id:</label>
+    <input type="text" name="receiver_id" required></br></br>
+    <label>is_read:</label>
+    <input type="text" name="is_read" required>
+
+    <button type="submit">Create</button>
+</form>
+<a href="{% url 'notification_list' %}">Back to Notification List</a>
+
+
+{% endblock %}
