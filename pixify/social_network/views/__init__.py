@@ -5,3 +5,6 @@ from .adminhome_view import *
 from .chat_view import *
 from .message_view import *
 from .notification_view import *
+from .contactus_view import *
+from .aboutus_view import *
+from .enduserprofile_view import *
