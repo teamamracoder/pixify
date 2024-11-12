@@ -8,8 +8,8 @@ class MessageReaction(models.Model):
     is_active=models.BooleanField(default= True)
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)
-    created_by=models.ForeignKey('User', on_delete=models.CASCADE,blank=True, default=None,related_name='fk_created_messagereactions_users_id')
-    updated_by = models.ForeignKey('User', on_delete=models.CASCADE, blank=True,default=None, related_name='fk_updated_messagereactions_users_id')
+    created_by=models.ForeignKey('User', on_delete=models.CASCADE,blank=True, default=None,related_name='fk_created_messagereactions_users_id',null=True)
+    updated_by = models.ForeignKey('User', on_delete=models.CASCADE, blank=True,default=None, related_name='fk_updated_messagereactions_users_id',null=True)
     
     class Meta:
         db_table = 'message_reactions'
