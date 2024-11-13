@@ -13,7 +13,7 @@ class UserCreateView(View):
     def get(self, request):
         choices_gender = [{gender.value: gender.name} for gender in Gender]
         choices_relationship_status = [{status.name: status.value} for status in RelationShipStatus]
-        return render(request, 'user/create.html',{"choices_gender":choices_gender,"choices_relationship_status":choices_relationship_status})
+        return render(request, 'adminuser/user/create.html',{"choices_gender":choices_gender,"choices_relationship_status":choices_relationship_status})
 
     def post(self, request):
         print(request)
