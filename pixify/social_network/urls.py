@@ -25,7 +25,7 @@ urlpatterns = [
 
     #chat
     path('chat/', views.ChatListView.as_view(), name='chat_list'),
-    path('chat/create', views.ChatCreateView.as_view(), name='chat_list'),
+    path('chat/create', views.ChatCreateView.as_view(), name='chat_create'),
     path('chat/<int:chat_id>', views.ChatDetailsView.as_view(), name='chat_details'),
     path('chat/<int:chat_id>/update', views.ChatUpdatesView.as_view(), name='chat_update'),
     path('chat/<int:chat_id>/delete', views.ChatDeleteView.as_view(), name='chat_delete'),
@@ -40,5 +40,5 @@ urlpatterns = [
     path('notification/', views.notificationView.as_view(), name='notification'),
 
 
-
+    path('users/api', views.userListViewApi.as_view(), name='users_api')
 ]

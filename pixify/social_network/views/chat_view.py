@@ -131,3 +131,4 @@ class ChatDeleteView(View):
         chat = chat_service.get_chat(chat_id)
         chat_service.delete_chat(chat)
         return redirect('chat_list')
+    
