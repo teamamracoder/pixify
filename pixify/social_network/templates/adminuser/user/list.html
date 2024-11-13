@@ -3,18 +3,64 @@
 {% block title %}User List{% endblock %}
 
 {% block content %}
+<style>
+        .hover-bg:hover {
+        background-color: rgba(240, 242, 245, 0.1);
+        color:aqua; 
+    }
+</style>
 
-<h1>User List</h1>
-<a href="{% url 'user_create' %}">Create User</a>
-<ul>
-    {% for user in users %}
-    <li>
-        <a href="{% url 'user_detail' user.id %}">{{ user.first_name }} {{ user.last_name }}</a>
-        (<a href="{% url 'user_update' user.id %}">Edit</a>)
-        (<a href="{% url 'user_delete' user.id %}">Delete</a>)
-    </li>
-    {% endfor %}
-</ul>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col">
+            <h2 class="text-center mb-4">Users</h2>
+
+            <div class="d-flex justify-content-between mb-3">
+                <div class="input-group" style="max-width: 300px;">
+                    <button class="btn btn-outline-secondary">Name</button>
+                    <button class="btn btn-outline-secondary">A-Z</button>
+                    <input type="text" class="form-control border-secondary" placeholder="Search" aria-label="Search">
+                    <span class="input-group-text border-secondary bg-info text-dark"><i class="bi bi-search"></i></span> 
+                </div>
+                <button class="btn btn-primary btn-sm"><a href="{% url 'user_create' %}" class="text-white text-decoration-none">Add User</a></button>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-info text-white"> 
+                        <tr>
+                            <th>Full Name</th>
+                            <th>Email</th>
+                            <th>Gender</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                        <tr>
+                            <td>
+                                <a class="text-decoration-none text-primary hover-bg" href="{% url 'user_detail' user.id %}">
+                                    {{ user.first_name }} {{ user.middle_name }} {{ user.last_name }}
+                                </a>
+                            </td>
+                            <td>{{ user.email }}</td>
+                            <td>{{ user.gender }}</td>
+                            <td>
+                                <div class="d-flex gap-2">
+                                    <button class="btn btn-sm shadow-none"><a href="{% url 'user_update' user.id %}"><i class="bi bi-pencil-square"></i></a></button>
+                                    <button class="btn btn-sm shadow-none"><a href="{% url 'user_delete' user.id %}"><i class="bi bi-trash text-danger"></i></a></button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 
 
 {% endblock %}
