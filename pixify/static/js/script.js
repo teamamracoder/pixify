@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded", function () {
     navItems.forEach(function (item) {
         const link = item.querySelector('a');
         if (link && link.getAttribute('href') === currentPath) {
-            item.classList.add('active');
+            // item.classList.add('active');
         }
     });
 
