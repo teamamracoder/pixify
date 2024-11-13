@@ -64,7 +64,7 @@
       >
         <!-- Profile image -->
         <img
-          src="{{chat_data.chat_cover}}"
+          src="{{chat.photo}}"
           class="img-fluid"
           alt=""
           style="height: 40px; border-radius: 50%"
@@ -73,10 +73,12 @@
         <!-- Text next to the image -->
         <div style="display: flex; flex-direction: column; flex-grow: 1">
           <p style="margin: 0">
-            {{chat_data.title}} <i class="bi bi-patch-check prof-check"></i>
+            <a href="{% url 'chat_details' chat.id %}">
+              {{chat.title}} <i class="bi bi-patch-check prof-check"></i>
+            </a>
           </p>
           <p style="margin: 0; color: gray; font-size: 0.9em">
-            
+            {{chat.last_message}} 
           </p>
         </div>
 
@@ -92,12 +94,12 @@
           <p style="margin-top: 0; padding-right: 10px">
             <span
               class="position-absolute translate-middle badge rounded-pill bg-danger"
-              >{{chat_data.un_read_msg}}</span
+              >{{chat.unread_count}}</span
             >
           </p>
           <p style="margin-top: 10px; margin-bottom: 0; padding-right: 20px">
             <span class="position-absolute translate-middle badge rounded-pill"
-              >{{chat_data.last_msg_time}}</span
+              >{{chat.last_message_time}}</span
             >
           </p>
         </div>
@@ -141,201 +143,7 @@
               aria-label="Example text with button addon"
               aria-describedby="button-addon1"
             />
-          </div>
-        </div>
-
-        <div class="modal-body">
-          <div
-            class="item"
-            onclick="toggleSelect(this ,'item')"
-            style="border: 1px solid black; border-radius: 3px"
-            class="m-2"
-          >
-            <div class="p-3 fnd-pic">
-              <a
-                href="#"
-                style="
-                  text-decoration: none;
-                  display: flex;
-                  align-items: center;
-                  gap: 20px;
-                  justify-content: space-between;
-                "
-              >
-                <!-- Profile image -->
-                <img
-                  src="{% static 'images/avatar.jpg' %}"
-                  class="img-fluid"
-                  alt=""
-                  style="height: 40px; border-radius: 50%"
-                />
-
-                <!-- Text next to the image -->
-                <div
-                  style="display: flex; flex-direction: column; flex-grow: 1"
-                >
-                  <p style="margin: 0">
-                    Receiver/Group <i class="bi bi-patch-check prof-check"></i>
-                  </p>
-                  <p style="margin: 0; color: gray; font-size: 0.9em">
-                    Hey there! I am using Pixify
-                  </p>
-                </div>
-              </a>
-            </div>
-          </div>
-          <div
-            class="item"
-            onclick="toggleSelect(this ,'item')"
-            style="border: 1px solid black; border-radius: 3px"
-            class="m-2"
-          >
-            <div class="p-3 fnd-pic">
-              <a
-                href="#"
-                style="
-                  text-decoration: none;
-                  display: flex;
-                  align-items: center;
-                  gap: 20px;
-                  justify-content: space-between;
-                "
-              >
-                <!-- Profile image -->
-                <img
-                  src="{% static 'images/avatar.jpg' %}"
-                  class="img-fluid"
-                  alt=""
-                  style="height: 40px; border-radius: 50%"
-                />
-
-                <!-- Text next to the image -->
-                <div
-                  style="display: flex; flex-direction: column; flex-grow: 1"
-                >
-                  <p style="margin: 0">
-                    Receiver/Group <i class="bi bi-patch-check prof-check"></i>
-                  </p>
-                  <p style="margin: 0; color: gray; font-size: 0.9em">
-                    Hey there! I am using Pixify
-                  </p>
-                </div>
-              </a>
-            </div>
-          </div>
-          <div
-            class="item"
-            onclick="toggleSelect(this ,'item')"
-            style="border: 1px solid black; border-radius: 3px"
-            class="m-2"
-          >
-            <div class="p-3 fnd-pic">
-              <a
-                href="#"
-                style="
-                  text-decoration: none;
-                  display: flex;
-                  align-items: center;
-                  gap: 20px;
-                  justify-content: space-between;
-                "
-              >
-                <!-- Profile image -->
-                <img
-                  src="{% static 'images/avatar.jpg' %}"
-                  class="img-fluid"
-                  alt=""
-                  style="height: 40px; border-radius: 50%"
-                />
-
-                <!-- Text next to the image -->
-                <div
-                  style="display: flex; flex-direction: column; flex-grow: 1"
-                >
-                  <p style="margin: 0">
-                    Receiver/Group <i class="bi bi-patch-check prof-check"></i>
-                  </p>
-                  <p style="margin: 0; color: gray; font-size: 0.9em">
-                    Hey there! I am using Pixify
-                  </p>
-                </div>
-              </a>
-            </div>
-          </div>
-          <div
-            class="item"
-            onclick="toggleSelect(this ,'item')"
-            style="border: 1px solid black; border-radius: 3px"
-            class="m-2"
-          >
-            <div class="p-3 fnd-pic">
-              <a
-                href="#"
-                style="
-                  text-decoration: none;
-                  display: flex;
-                  align-items: center;
-                  gap: 20px;
-                  justify-content: space-between;
-                "
-              >
-                <!-- Profile image -->
-                <img
-                  src="{% static 'images/avatar.jpg' %}"
-                  class="img-fluid"
-                  alt=""
-                  style="height: 40px; border-radius: 50%"
-                />
-
-                <!-- Text next to the image -->
-                <div
-                  style="display: flex; flex-direction: column; flex-grow: 1"
-                >
-                  <p style="margin: 0">
-                    Receiver/Group <i class="bi bi-patch-check prof-check"></i>
-                  </p>
-                  <p style="margin: 0; color: gray; font-size: 0.9em">
-                    Hey there! I am using Pixify
-                  </p>
-                </div>
-              </a>
-            </div>
-          </div>
-          <div
-            class="item"
-            onclick="toggleSelect(this ,'item')"
-            style="border: 1px solid black; border-radius: 3px"
-            class="m-2"
-          >
-            <div class="p-3 fnd-pic">
-              <a
-                href="#"
-                style="
-                  text-decoration: none;
-                  display: flex;
-                  align-items: center;
-                  gap: 20px;
-                  justify-content: space-between;
-                "
-              >
-                <!-- Profile image -->
-                <img
-                  src="{% static 'images/avatar.jpg' %}"
-                  class="img-fluid"
-                  alt=""
-                  style="height: 40px; border-radius: 50%"
-                />
-
-                <!-- Text next to the image -->
-                <div
-                  style="display: flex; flex-direction: column; flex-grow: 1"
-                >
-                  <p style="margin: 0">
-                    Receiver/Group <i class="bi bi-patch-check prof-check"></i>
-                  </p>
-                  <p style="margin: 0; color: gray; font-size: 0.9em">
-                    Hey there! I am using Pixify
-                  </p>
+                  </div>
                 </div>
               </a>
             </div>
