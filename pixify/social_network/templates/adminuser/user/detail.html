@@ -4,18 +4,86 @@
 
 {% block content %}
 
-<h1>User Details</h1>
-<p>First Name: {{ user.first_name }}</p>
-<p>Middle Name: {{ user.middle_name }}</p>
-<p>Last Name: {{ user.last_name }}</p>
-<p>Email: {{ user.email }}</p>
-<p>Gender: {{ user.gender }}</p>
-<p>Date-of-Birth: {{ user.dob }}</p>
-<p>Hobbies: {{ user.hobbies }}</p>
-<p>Relationship_Status: {{ user.relationship_status }}</p>
+<div class="container-fluid my-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-12 col-lg-12">
+            <div class="card border-primary">
+                <div class="card-header text-center">
+                    <h2 class="text-info">Create User</h2>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="form-group col-md-4 col-lg-4 col-sm-12 mb-3">
+                                <label for="firstName">First Name</label>
+                                <input type="text" class="form-control" id="firstName" name="first_name" placeholder="Enter your first name" required>
+                            </div>
+                            <div class="form-group col-md-4 col-lg-4 col-sm-12 mb-3">
+                                <label for="middleName">Middle Name</label>
+                                <input type="text" class="form-control" id="middleName" name="middle_name" placeholder="Enter your middle name">
+                            </div>
+                            <div class="form-group col-md-4 col-lg-4 col-sm-12 mb-3">
+                                <label for="lastName">Last Name</label>
+                                <input type="text" class="form-control" id="lastName" name="last_name" placeholder="Enter your last name" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-md-6 col-lg-6 col-sm-12 mb-3">
+                                <label for="email">Email</label>
+                                <input type="email" class="form-control" id="email" name="email" placeholder="abc123@gmail.com" required>
+                            </div>
+                            <div class="form-group col-md-6 col-lg-6 col-sm-12 mb-3">
+                                <label for="hobbies">Hobbies</label>
+                                <input type="text" class="form-control" id="hobbies" name="hobbies" placeholder="Enter hobbies (comma-separated)">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-md-6 col-lg-6 col-sm-12 mb-3">
+                                <label for="gender">Gender</label>
+                                <select id="gender" name="gender" class="form-control" required>
+                                    <option value="MALE" selected>Male</option>
+                                    <option value="FEMALE">Female</option>
+                                    <option value="OTHER">Other</option>
+                                </select>
+                            </div>
+                            <div class="form-group col-md-6 col-lg-6 col-sm-12 mb-3">
+                                <label for="relationshipStatus">Relationship Status</label>
+                                <select id="relationshipStatus" name="relationship_status" class="form-control" required>
+                                    <option value="SINGLE" selected>Single</option>
+                                    <option value="MARRIED">Married</option>
+                                    <option value="DIVORCED">Divorced</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-md-6 col-lg-6 col-sm-12 mb-3">
+                                <label for="dob">Date of Birth</label>
+                                <input type="date" class="form-control" id="dob" name="dob" required>
+                            </div>
+                            <div class="form-group col-md-6 col-lg-6 col-sm-12 mb-3">
+                                <label for="address">Address</label>
+                                <textarea class="form-control" id="address" name="address" placeholder="Enter Address" required></textarea>
+                            </div>
+                        </div>
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary">Save</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="my-3">
+            <a href="{% url 'user_list' %}">Back to User List</a>
+        </div>
+    </div>
+</div>
 
-<a href="{% url 'user_update' user.id %}">Edit</a> |
-<a href="{% url 'user_delete' user.id %}">Delete</a> |
-<a href="{% url 'user_list' %}">Back to User List</a>
+
+
+
+
+
+
 
 {% endblock %}
