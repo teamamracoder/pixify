@@ -64,3 +64,4 @@ class UserDeleteView(View):
         user = services.user_service.get_user(user_id)
         services.user_service.delete_user(user)
         return redirect('user_list')
+
