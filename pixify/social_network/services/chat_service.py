@@ -36,8 +36,5 @@ def get_user_data(user_id):
 def delete_chat(chat_id):
     return get_object_or_404(models.Chat, id=chat_id)
 
-def details_chats():
-    return models.Chat.objects.all()
-
 def get_chat (chat_id):
     return get_object_or_404(models.Chat, id=chat_id)
