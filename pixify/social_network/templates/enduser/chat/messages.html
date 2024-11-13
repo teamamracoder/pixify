@@ -6,11 +6,11 @@
         <div class="chat-header">
             <div class="user-info">
                 {% if ChatMember.chat_id > 2 %}
-                    <img src="{{ chat.chat_cover }}" alt="Group Chat" class="profile-pic">
-                    <span class="username">{{chat.user.first_name }}</span>
+                    <img src="{{ chat.photo}}" alt="Group Chat" class="profile-pic">
+                    <span class="username">{{chat.title}}</span>
                 {% else %}
-                    <img src="{{chat.chat_cover }}" alt="Profile Picture" class="profile-pic">
-                    <span class="username">username</span>
+                    <img src="{{chat.photo}}" alt="Profile Picture" class="profile-pic">
+                    <span class="username">{{chat.title}}</span>
                 {% endif %}
             </div>
         </div>
@@ -20,8 +20,8 @@
                 {% if message.sender == request.user %}
                     <div class="message sent">
                         <div class="message-info">
-                            <img src="{{ message.sender.profile_pic.url }}" alt="{{ message.sender.username }}'s Profile Picture" class="profile-pic">
-                            <span class="username">username</span>
+                            <img src="{{ chat.photo }}" alt="{{ message.sender.username }}'s Profile Picture" class="profile-pic">
+                            <span class="username">{{chat.title}}</span>
                         </div>
                         <div class="message-content">
                             <strong>You:</strong> {{ message.text }}
