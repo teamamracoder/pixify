@@ -12,9 +12,9 @@ def get_message_reaction(message_reaction_id):
     return get_object_or_404(MessageReaction, id=message_reaction_id)
 
 def update_message_reaction(reacted_by,message_reaction,reaction_type):
-    message_reaction.reacted_by= reacted_by,
-    message_reaction.message_reaction = message_reaction,
-    message_reaction.reaction_type = reaction_type
+    reacted_by= reacted_by,
+    message_reaction = message_reaction,
+    reaction_type = reaction_type
     message_reaction.save()
     return message_reaction
 

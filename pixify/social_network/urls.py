@@ -38,5 +38,8 @@ urlpatterns = [
     path('message_reaction/create/', views.MessageReactionCreateView.as_view(), name='message_reaction_create'),
     path('message_reaction/<int:Message_reaction_id>/update/', views.MessageReactionUpdateView.as_view(), name='Message_reaction_update'),
     path('message_reaction/<int:Message_reaction_id>/delete/', views.MessageReactionDeleteView.as_view(), name='Message_reaction_delete'),
-]
 
+    #message reply
+    path('reply/<int:message_id>/', views.send_reply, name='send_reply')
+    
+]    
