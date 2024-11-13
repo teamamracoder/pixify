@@ -8,7 +8,6 @@ from ..constants import ChatType
 from django.shortcuts import render,redirect
 
 
-
 class ChatListView(View):
     def get(self, request):
         chats = chat_service.list_chats()  
