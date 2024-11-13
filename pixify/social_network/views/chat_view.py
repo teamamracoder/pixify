@@ -5,12 +5,10 @@ from django.utils.timezone import localtime
 from ..models import Message, ChatMember, Follower
 from ..services import chat_service, user_service,message_service
 from ..constants import ChatType
-
-
 class ChatListView(View):
     def get(self, request):
-        chats = chat_service.list_chats()  
         user = user_service.get_user(1)  
+        chats = chat_service.list_chats(user.id)  
         chat_data = []  
         for chat in chats:
             chat_info = {}
@@ -63,9 +61,7 @@ class ChatListView(View):
                 'title': f"{following.following.first_name} {following.following.last_name}",
                 'photo': following.following.profile_photo_url,
             })
-            
-        print(follow_data)
-        return render(request, 'enduser/chat/chats.html', {
+        return render(request, 'enduser/chat/new.html', {
             'chats': chat_data,
             'follow_data': follow_data  
         })
@@ -84,9 +80,6 @@ class ChatListView(View):
             return f"Yesterday {timestamp.strftime('%H:%M')}"   
         else: 
             return timestamp.strftime('%Y-%m-%d %H:%M')
-
-
-
 class ChatCreateView(View):
     def post(self, request, user_id):
         data = chat_service.get_user_data(user_id)
@@ -98,9 +91,6 @@ class ChatCreateView(View):
             'followers': data['followers'],
             'followings': data['followings'],
         })
-
-
-
 class ChatDetailsView(View):
     def get(self, request, chat_id):
         chat = chat_service.details_chats(chat_id)
