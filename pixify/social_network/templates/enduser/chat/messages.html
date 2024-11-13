@@ -7,9 +7,9 @@
             <div class="user-info">
                 {% if ChatMember.chat_id > 2 %}
                     <img src="{{ chat.chat_cover }}" alt="Group Chat" class="profile-pic">
-                    <span class="username">{{ chat.name }}</span>
+                    <span class="username">{{chat.user.first_name }}</span>
                 {% else %}
-                    <img src="{{ receiver.profile_pic.url }}" alt="Profile Picture" class="profile-pic">
+                    <img src="{{chat.chat_cover }}" alt="Profile Picture" class="profile-pic">
                     <span class="username">username</span>
                 {% endif %}
             </div>
@@ -21,7 +21,7 @@
                     <div class="message sent">
                         <div class="message-info">
                             <img src="{{ message.sender.profile_pic.url }}" alt="{{ message.sender.username }}'s Profile Picture" class="profile-pic">
-                            <span class="username">{{ message.sender.username }}</span>
+                            <span class="username">username</span>
                         </div>
                         <div class="message-content">
                             <strong>You:</strong> {{ message.text }}
@@ -34,9 +34,9 @@
                             <img src="{{ message.sender.profile_pic.url }}" alt="{{ message.sender.username }}'s Profile Picture" class="profile-pic">
                             <span class="username">{{ message.sender.username }}</span>
                         </div>
-                        <div class="message-content">
-                            <strong>{{ message.sender.username }}:</strong> {{ message.text }}
-                            <span class="time">{{ message.created_at|date:"h:i A, F j, Y" }}</span>
+                        <div class="message-content">username<br>
+                             {{ message.text }}
+                            <span class="time">{{ message.created_at|date:"h:i " }}</span>
                         </div>
                     </div>
                 {% endif %}
@@ -53,141 +53,152 @@
     </div>
 
     <style>
-        .chat-container {
-            height: 600px;
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            max-width: 500px;
-            margin: 0 auto;
-        }
+        /* Chat Container */
+.chat-container {
+    height: 600px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    max-width: 500px;
+    margin: 0 auto;
+}
 
-        .chat-header {
-            background-color: #6a4c9c;
-            color: white;
-            padding: 10px;
-            display: flex;
-            justify-content: flex-start;
-            align-items: center;
-        }
+/* Header */
+.chat-header {
+    background-color: #6a4c9c;
+    color: white;
+    padding: 10px;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+}
 
-        .user-info {
-            display: flex;
-            align-items: center;
-        }
+.user-info {
+    display: flex;
+    align-items: center;
+}
 
-        .profile-pic {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            margin-right: 10px;
-            object-fit: cover;
-        }
+.profile-pic {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 10px;
+    object-fit: cover;
+}
 
-        .username {
-            font-size: 18px;
-            font-weight: bold;
-            color: white;
-        }
+.username {
+    font-size: 18px;
+    font-weight: bold;
+    color: white;
+}
 
-        .chat-body {
-            flex: 1;
-            padding: 20px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-        }
+/* Chat Body */
+.chat-body {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
 
-        .message {
-            max-width: 80%;
-            margin-bottom: 10px;
-            padding: 10px;
-            border-radius: 10px;
-            position: relative;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-        }
+.message {
+    max-width: 80%;
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 10px;
+    position: relative;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+}
 
-        .message.sent {
-            align-self: flex-end;
-            background-color: #e1ffc7;
-        }
+.message.sent {
+    align-self: flex-end;
+    background-color: #6a4c9c; /* Light green for sent messages */
+}
 
-        .message.received {
-            align-self: flex-start;
-            background-color: #f0f0f0;
-        }
+.message.received {
+    align-self: flex-start;
+    background-color: #d3d3d3; /* Light gray for received messages */
+    color: #333333; /* Dark text color for readability */
+}
 
-        .message-info {
-            display: flex;
-            align-items: center;
-        }
+/* Message Info */
+.message-info {
+    display: flex;
+    align-items: center;
+}
 
-        .message-info .profile-pic {
-            width: 30px;
-            height: 30px;
-            margin-right: 8px;
-        }
+.message-info .profile-pic {
+    width: 30px;
+    height: 30px;
+    margin-right: 8px;
+}
 
-        .message-info .username {
-            font-size: 14px;
-            font-weight: bold;
-            color: #333;
-        }
+.message-info .username {
+    font-size: 14px;
+    font-weight: bold;
+    color: #ffffff;
+}
 
-        .message-content {
-            display: flex;
-            flex-direction: column;
-            max-width: 80%;
-        }
+/* Message Content */
+.message-content {
+    display: flex;
+    flex-direction: column;
+    max-width: 80%;
+}
 
-        .message-content .time {
-            font-size: 10px;
-            color: #555;
-            margin-top: 5px;
-        }
+.message-content .time {
+    font-size: 10px;
+    color: #000000; /* Black color for time */
+    margin-top: 5px;
+    
+}
 
-        .chat-footer {
-            padding: 10px;
-            background-color: #888686;
-            border-top: 1px solid #ddd;
-            display: flex;
-            justify-content: space-between;
-        }
+/* Footer */
+.chat-footer {
+    padding: 10px;
+    background-color: #888686;
+    border-top: 1px solid #ddd;
+    display: flex;
+    justify-content: space-between;
+}
 
-        .chat-footer form {
-            display: flex;
-            flex: 1;
-        }
+.chat-footer form {
+    display: flex;
+    flex: 1;
+}
 
-        .chat-footer input[type="text"] {
-            flex: 1;
-            padding: 10px;
-            font-size: 14px;
-            border: 1px solid #c7c5c5;
-            color: black;
-            border-radius: 5px 0 0 5px;
-            outline: none;
-            width: 100%;
-            box-sizing: border-box;
-        }
+.chat-footer input[type="text"] {
+    flex: 1;
+    padding: 10px;
+    font-size: 14px;
+    border: 1px solid #c7c5c5;
+    color: white; /* White text in input box */
+    background-color: #333333; /* Darker background for input box */
+    border-radius: 5px 0 0 5px;
+    outline: none;
+    width: 100%;
+    box-sizing: border-box;
+}
 
-        .chat-footer button {
-            padding: 10px 20px;
-            background-color: #6a4c9c;
-            color: white;
-            border: none;
-            border-radius: 0 5px 5px 0;
-            cursor: pointer;
-            font-size: 14px;
-        }
+.chat-footer button {
+    padding: 10px 20px;
+    background-color: #6a4c9c;
+    color: white;
+    border: none;
+    border-radius: 0 5px 5px 0;
+    cursor: pointer;
+    font-size: 14px;
+}
 
-        .chat-footer button:hover {
-            background-color: #533b79;
-        }
+.chat-footer button:hover {
+    background-color: #533b79;
+}
+
     </style>
+    
 {% endblock %}
