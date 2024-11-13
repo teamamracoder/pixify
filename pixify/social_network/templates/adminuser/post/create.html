@@ -8,7 +8,7 @@
     <form method="POST" novalidate>
         {% csrf_token %}
         <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
-        
+        <h3 class="text-center">Create Post</h3>
         <div class="form-group">
             <label for="posted_by">Posted By</label>
             <select name="posted_by" class="form-control" id="posted_by" required>
