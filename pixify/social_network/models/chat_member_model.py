@@ -2,15 +2,15 @@ from django.db import models
 from django.utils import timezone
 
 class ChatMember(models.Model):
-    chat_id = models.ForeignKey('Chat', on_delete=models.CASCADE, default=None)
-    member_id = models.ForeignKey('User', on_delete=models.CASCADE, default=None)
-    joined_at = models.DateTimeField(default=timezone.now)
+    chat_id = models.ForeignKey('Chat', on_delete=models.CASCADE, db_default=None)
+    member_id = models.ForeignKey('User', on_delete=models.CASCADE, db_default=None)
+    joined_at = models.DateTimeField(db_default=timezone.now)
     
-    is_active = models.BooleanField(default= True)
+    is_active = models.BooleanField(db_default= True)
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)
-    created_by = models.ForeignKey('User', on_delete=models.CASCADE, blank=True, null=True, default=None, related_name='fk_create_chatmembers_users_id' )
-    updated_by = models.ForeignKey('User', on_delete=models.CASCADE, blank=True, null=True, default=None, related_name='fk_update_chatmembers_users_id')
+    created_by = models.ForeignKey('User', on_delete=models.CASCADE, blank=True, null=True, db_default=None, related_name='fk_create_chatmembers_users_id' )
+    updated_by = models.ForeignKey('User', on_delete=models.CASCADE, blank=True, null=True, db_default=None, related_name='fk_update_chatmembers_users_id')
     
     class Meta:
         db_table = 'chat_members'

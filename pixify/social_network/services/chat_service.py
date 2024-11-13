@@ -7,13 +7,13 @@ def list_chats():
 def chat_details(chat_id):
     return get_object_or_404(Chat, id=chat_id)
 
-def create_chat(title, members, chat_cover, user,type):
+def create_chat(user, members, type, is_active):
             
-    chat = Chat.objects.create(title=title, members=members, chat_cover=chat_cover, created_by=user,type=type)        
+    chat = Chat.objects.create(members=members, created_by=user,type=type, is_active=is_active)        
 
-    for member_id in members:
-        member = User.objects.get(id=member_id)
-        ChatMember.objects.create(chat_id=chat, member_id=member, created_by=user)
+    # for member_id in members:
+    #     member = User.objects.get(id=member_id)
+    #     ChatMember.objects.create(chat_id=chat, member_id=member, created_by=user)
     return chat
 
 def update_chat(chat, title, members, chat_cover):    
@@ -50,3 +50,13 @@ def details_chats(chat_id):
 
 def get_chat (chat_id):
     return get_object_or_404(Chat, id=chat_id)
+
+
+
+# chat service
+# all chats jar title that starts with search param 
+# +
+# all recepeints jar firstname starts with search param
+
+# considtion
+# chats er member er mdhdhe loggeduser thakte lgbe
