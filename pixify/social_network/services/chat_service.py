@@ -2,8 +2,8 @@ from .. import models
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 
-def list_chats():
-    return models.Chat.objects.all()
+def list_chats(user):
+    return models.Chat.objects.filter(members=user).exclude(members=user)
 
 def chats_create(request):
     title = request.data.get('title')
@@ -22,7 +22,6 @@ def get_user_data(user_id):
     followers = User.objects.filter(followers__followed_user=user_id).exclude(id=user_id)
     followings = User.objects.filter(followings__user=user_id).exclude(id=user_id)
     photo = User.profile_photo_url(User, 'profile') 
-    
     return {
         'user':user_id,
         'followers': followers,
