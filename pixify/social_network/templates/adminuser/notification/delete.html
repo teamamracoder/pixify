@@ -1,0 +1,17 @@
+{% extends "../base.html" %}
+
+{% block title %}Delete User{% endblock %}
+
+{% block content %}
+
+<h1>Delete Notification</h1>
+<p>Are you sure you want to delete {{ notification.text }} {{ notification.media_url }} {{ notification.receiver_id }} {{ notification.is_read }} ?</p>
+<form method="post">
+    {% csrf_token %}
+    <button type="submit">Yes, delete</button>
+</form>
+
+<a href="{% url 'notification_detail' delete_id %}">Cancel</a>
+
+
+{% endblock %}
