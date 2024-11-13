@@ -4,6 +4,7 @@ from django.shortcuts import get_object_or_404
 def list_messages_by_chat_id(chat_id):
     return Message.objects.filter(chat_id=chat_id)
 
+
 def create_message(text, media_url, sender_id, chat_id):
     return Message.objects.create(
         text=text,
