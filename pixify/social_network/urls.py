@@ -33,8 +33,8 @@ urlpatterns = [
     # message
     path('message/', views.messageView.as_view(), name='message'),
     path('message/create', views.messageCreateView.as_view(), name='message_create'),
-    path('message/<int:message_id>/update/', views.messageUpdateView.as_view(), name='message_update'),
-    path('message/<int:message_id>/delete/', views.messageDeleteView.as_view(), name='message_delete'),
+    path('message/<int:message_id>/update', views.messageUpdateView.as_view(), name='message_update'),
+    path('message/<int:message_id>/delete', views.messageDeleteView.as_view(), name='message_delete'),
 
     # notification
     path('notification/', views.notificationView.as_view(), name='notification'),

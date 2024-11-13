@@ -1,4 +1,4 @@
-from ..models import Chat,User,ChatMember
+from ..models import Chat, User, ChatMember
 from django.shortcuts import get_object_or_404
 
 def list_chats():
@@ -8,22 +8,24 @@ def chat_details(chat_id):
     return get_object_or_404(Chat, id=chat_id)
 
 
-def create_chat(title, members, chat_cover,):
-    chat = Chat.objects.create(title=title, 
-            chat_cover=chat_cover,
-            )    
-    member_objs = User.objects.filter(id__in=members)
-    for member in member_objs: 
-        ChatMember.objects.create(chat_id=chat, member_id=member)
+def create_chat(title, members, chat_cover, user,type):
+            
+    chat = Chat.objects.create(title=title, members=members, chat_cover=chat_cover, created_by=user,type=type)        
+
+    for member_id in members:
+        member = User.objects.get(id=member_id)
+        ChatMember.objects.create(chat_id=chat, member_id=member, created_by=user)
     return chat
 
-def update_chat(chat, title, members, chat_cover):
-    chat.title = title
-    chat.members = members
-    chat.chat_cover = chat_cover
-    return chat
-
-# services/chat_service.py
+def update_chat(chat, title, members, chat_cover):    
+        chat.title = title  
+        chat.chat_cover = chat_cover                
+        chat.members.clear()                
+        for member_id in members:
+            member = User.objects.get(id=member_id)
+            ChatMember.objects.create(chat_id=chat, member_id=member)                
+        chat.save()
+        return chat    
 
 def delete_chat(chat_id):
     chat = get_object_or_404(Chat, id=chat_id)
