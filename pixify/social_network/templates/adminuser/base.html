@@ -40,25 +40,39 @@
         </div>
     </nav> -->
 
-    <nav class="navbar navbar-expand-lg bg-info" data-bs-theme="dark">
+    <nav class="navbar navbar-expand-lg navbar-light" style="background-color: #e3f2fd;">
         <div class="container-fluid">
-            <button class="navbar-toggler d-lg-inline-block d-none me-2" type="button" id="sidebar-toggler">
+            <!-- Menu Button -->
+            <button class="btn btn-light me-3" id="menu-toggle">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            <a class="navbar-brand" href="#">Pixify</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav">
-                    <div class="list-group mt-3 rounded-0 d-lg-none" id="navLinks">
-                        <!-- links -->
-                    </div>
+            <!-- Brand Name -->
+            <a class="navbar-brand" href="#">Admin Dashboard</a>
+            <div class="collapse navbar-collapse">
+                <!-- Search Bar in Navbar -->
+                <form class="d-flex ms-auto" role="search">
+                    <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+                    <button class="btn btn-outline-primary" type="submit">
+                        <i class="bi bi-search"></i>
+                    </button>
+                </form>
+                <!-- Navbar Links -->
+                <ul class="navbar-nav ms-3">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#"><i class="bi bi-bell"></i> Notifications</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#"><i class="bi bi-gear"></i> Settings</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#"><i class="bi bi-box-arrow-right"></i> Logout</a>
+                    </li>
                 </ul>
             </div>
         </div>
     </nav>
+
+
 
     <div class="container-fluid">
         <div class="row">
@@ -118,7 +132,7 @@
                                                 class="list-group-item list-group-item-action ui-bg-grey border-0 ps-4">
                                                 <i class="bi bi-pc-display me-2 fs-6"></i>
                                                 List</a>
-                                            <a href="#"
+                                            <a href="{% url 'user_create' %}"
                                                 class="list-group-item list-group-item-action ui-bg-grey border-0 ps-4">
                                                 <i class="bi bi-diagram-3 fs-6 me-2"></i>
                                                 Create</a>

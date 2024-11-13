@@ -5,7 +5,6 @@
 {% block content %}
 
 <div class="container mt-5">
-    <h2>Create Post</h2>
     <form method="POST" novalidate>
         {% csrf_token %}
         <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
@@ -15,7 +14,7 @@
             <select name="posted_by" class="form-control" id="posted_by" required>
                 <!-- Replace with dynamic user options -->
                 <option value="">Select User</option>
-                <option value="1">User 1</option>
+                <option value="22">User 1</option>
                 <option value="2">User 2</option>
             </select>
         </div>
