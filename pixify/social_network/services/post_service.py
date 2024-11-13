@@ -4,8 +4,20 @@ from django.shortcuts import get_object_or_404
 def list_posts():
     return models.Post.objects.all()
 
-def create_post(title, description):
-    return models.Post.objects.create(title=title, description=description)
+def create_post(**kwargs):
+    post = models.Post.objects.create(
+            posted_by=kwargs['posted_by'],
+            type=kwargs['type'],
+            content_type=kwargs['content_type'],
+            media_url=kwargs.get('media_url'),
+            title=kwargs['title'],
+            # description=kwargs['description'],
+            accessability=kwargs['accessability'],
+            is_active=kwargs.get('is_active', True) 
+        )
+    return post
+
+
 
 def get_post(post_id):
     return get_object_or_404(models.Post, id=post_id)
