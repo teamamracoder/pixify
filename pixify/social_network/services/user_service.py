@@ -5,6 +5,7 @@ def list_users():
     return models.User.objects.all()
 
 def create_user(first_name, last_name, email):
+    print("These are valurs" + first_name,last_name,email)
     return models.User.objects.create(first_name=first_name, last_name=last_name, email=email)
 
 def get_user(user_id):

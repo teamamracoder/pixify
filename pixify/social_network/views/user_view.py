@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from django.views import View
 from .. import services
+from ..constants import *
 
 class UserListView(View):
     def get(self, request):
@@ -9,13 +10,22 @@ class UserListView(View):
 
 class UserCreateView(View):
     def get(self, request):
-        return render(request, 'adminuser/user/create.html')
+        choices_gender = [{gender.value: gender.name} for gender in Gender]
+        choices_relationship_status = [{status.name: status.value} for status in RelationShipStatus]
+        return render(request, 'user/create.html',{"choices_gender":choices_gender,"choices_relationship_status":choices_relationship_status})
 
     def post(self, request):
+        print(request)
         first_name = request.POST['first_name']
+        middle_name = request.POST['middle_name']
         last_name = request.POST['last_name']
         email = request.POST['email']
-        services.user_service.create_user(first_name, last_name, email)
+        address=request.POST['address']
+        dob=request.POST['dob']
+        gender=request.POST['gender']
+        relationship_status=request.POST['relationship_status']
+        hobbies=request.POST['hobbies']
+        services.user_service.create_user(first_name,middle_name, last_name, email,address,dob,gender,relationship_status,hobbies)
         return redirect('user_list')
 
 class UserDetailView(View):
