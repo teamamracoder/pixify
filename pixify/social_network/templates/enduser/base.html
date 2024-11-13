@@ -52,7 +52,7 @@
             }
           }
           @media (min-width: 1400px) {
-            .body-container{
+            #body-container{
                 padding-left: 7rem !important;
                 padding-right: 7rem !important;
             }
@@ -200,7 +200,7 @@
                             <a class="nav-link" href="/notification/">
                                 <span
                                     class="position-absolute top-0 start-30 translate-middle badge rounded-pill bg-danger"
-                                    style="margin-left:27px; margin-top:7px;">1+</span>
+                                    style="margin-left:27px; margin-top:7px;">2+</span>
                                 <i class="fa-solid fa-bell"></i>
                             </a>
                         </li>
@@ -274,87 +274,8 @@
             </div>
         </nav>
 
-
-        {% comment %} <main class="container-fluid mt-2 " style="min-height: 600px; margin-top: 60px !important;display:none;" id="phoneScreenContent">
-            <div class="row body-container">
-                <div class="col-sm-2 col-md-3 col-lg-3 col-xl-3 left-sidebar">
-                    <div class="px-1 py-3 mt-3"
-                        style="background-color: #1f0447e3;box-shadow: 0 4px 8px rgba(151, 95, 236, 0.5);font-family: serif;border-radius: 7px;">
-                        <div class="left-sideber">
-                            <div class="left-siteber-opt">
-                                <ul class="left-siteber-opt-ul" style="display: flex;flex-direction: column;align-items: center;padding-left: 0;">
-                                    <li class="pb-3"><a href="/profile"><i class="fa-solid fa-user me-2"></i></a></li>
-                                    <li class="pb-3"><a href="#"><i class="fa-solid fa-user-group me-2"></i></a></li>
-                                    <li class="pb-3"><a href="#"><i class="fa-solid fa-clock me-2"></i></a></li>
-                                    <li class="pb-3"><a href="#"><i class="fa-solid fa-bookmark me-2"></i></a></li>
-                                    <li class="pb-3"><a href="#"><i class="fa-solid fa-people-group me-2"></i></a></li>
-                                    <li class="pb-3"><a href="#"><i class="fa-solid fa-signs-post me-2"></i></a></li>
-                                </ul>
-                            </div>
-                            <hr>
-
-
-                            <div class="">
-                                <ul class="d-flex flex-wrap flex-sm-row flex-column justify-content-center list-unstyled mb-0 align-items-center">
-                                    <li class="pb-3"><a href="#" class="text-decoration-none">Privacy</a></li>
-                                    <li class="pb-3"><a href="#" class="text-decoration-none">choice</a></li>
-                                    <li class="pb-3"><a href="#" class="text-decoration-none">Terms</a></li>
-                                    <li class="pb-3"><a href="#" style="text-decoration: none;">Cookies</a></li>
-                                    <li class="pb-3"><a href="/admin" style="text-decoration: none;">Admin</a></li>
-                                    <li class="pb-3"><a href="#" style="text-decoration: none;">more..</a></li>
-                                </ul>
-                            </div>
-
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-sm-10 col-md-6 col-lg-6 col-xl-6 pe-3 center-bodycontent">
-                    {% block content %}
-
-                    {% endblock %}
-
-                    <div class="px-3 py-3 mt-5"
-                        style="background-color: #1f0447e3;box-shadow: 0 4px 8px rgba(151, 95, 236, 0.5);    font-family: serif;border-radius: 7px;">
-                        <div class="pb-1 pt-1" style=" border-bottom: 1.5px solid #975fec;">
-                            <div class="d-flex">
-                                <h5 class="text-center text-white">Friend request</h5>
-                                <span class="text-center text-align-center ms-auto fw-semibold"
-                                    style="color: rgb(0, 255, 242);cursor: pointer;    font-size: 14px;">See
-                                    All</span>
-                            </div>
-                            <p class="ps-2" style="color: #975fec;margin-bottom: 10px;">No request</p>
-                        </div>
-                        <div class="pb-1 pt-2 mt-3" style=" border-bottom: 1.5px solid #975fec;">
-                            <div class="d-flex">
-                                <h5 class="text-center text-white">Birthdays</h5>
-                                <span class="text-center text-align-center ms-auto fw-semibold"
-                                    style="color: rgb(0, 255, 242);cursor: pointer;    font-size: 14px;">See
-                                    All</span>
-                            </div>
-                            <p class="ps-2" style="color: #975fec;margin-bottom: 10px;">No Birthday</p>
-                        </div>
-                        <div class="pb-1 pt-2 mt-3" style=" border-bottom: 1.5px solid #975fec;">
-                            <div class="d-flex">
-                                <h5 class="text-center text-white">Contacts</h5>
-                                <span class="text-center text-align-center ms-auto fw-semibold"
-                                    style="color: rgb(0, 255, 242);cursor: pointer;    font-size: 14px;">See
-                                    All</span>
-                            </div>
-                            <p class="ps-2" style="color: #975fec;margin-bottom: 10px;">No contacts</p>
-                        </div>
-                    </div>
-                </div>
-
-
-            </div>
-
-        </main> {% endcomment %}
-
-
-
     <main class="container-fluid mt-2 " style="min-height: 600px; margin-top: 60px !important;">
-        <div class="row px-5 body-container">
+        <div class="row px-5 body-container" id="body-container">
             <div class="col-12 col-sm-12 col-md-3 col-lg-3 col-xl-3 ps-5 pe-3 left-sidebar" id="leftSidebar">
                 <div class="px-3 py-3 mt-3"
                     style="background-color: #1f0447e3;box-shadow: 0 4px 8px rgba(151, 95, 236, 0.5);font-family: serif;border-radius: 7px;">
@@ -403,27 +324,27 @@
                     <div class="pb-1 pt-1" style=" border-bottom: 1.5px solid #975fec;">
                         <div class="d-flex">
                             <h5 class="text-center text-white">Friend request</h5>
-                            <span class="text-center text-align-center ms-auto fw-semibold"
-                                style="color: rgb(0, 255, 242);cursor: pointer;    font-size: 14px;">See
-                                All</span>
+                            <a href="/friendrequest" class="text-center text-align-center ms-auto fw-semibold"
+                                style="color: rgb(0, 255, 242);cursor: pointer; font-size: 14px;text-decoration:none;">See
+                                All</a>
                         </div>
                         <p class="ps-2" style="color: #975fec;margin-bottom: 10px;">No request</p>
                     </div>
                     <div class="pb-1 pt-2 mt-3" style=" border-bottom: 1.5px solid #975fec;">
                         <div class="d-flex">
                             <h5 class="text-center text-white">Birthdays</h5>
-                            <span class="text-center text-align-center ms-auto fw-semibold"
-                                style="color: rgb(0, 255, 242);cursor: pointer;    font-size: 14px;">See
-                                All</span>
+                            <a href="/birthday" class="text-center text-align-center ms-auto fw-semibold"
+                                style="color: rgb(0, 255, 242);cursor: pointer;font-size: 14px;text-decoration:none;">See
+                                All</a>
                         </div>
                         <p class="ps-2" style="color: #975fec;margin-bottom: 10px;">No Birthday</p>
                     </div>
                     <div class="pb-1 pt-2 mt-3" style=" border-bottom: 1.5px solid #975fec;">
                         <div class="d-flex">
                             <h5 class="text-center text-white">Contacts</h5>
-                            <span class="text-center text-align-center ms-auto fw-semibold"
-                                style="color: rgb(0, 255, 242);cursor: pointer;    font-size: 14px;">See
-                                All</span>
+                            <a href="#" class="text-center text-align-center ms-auto fw-semibold"
+                                style="color: rgb(0, 255, 242);cursor: pointer;font-size: 14px;text-decoration:none;">See
+                                All</a>
                         </div>
                         <p class="ps-2" style="color: #975fec;margin-bottom: 10px;">No contacts</p>
                     </div>
