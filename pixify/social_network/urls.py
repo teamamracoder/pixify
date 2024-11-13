@@ -34,6 +34,8 @@ urlpatterns = [
     # notification
     path('notification/', views.notificationView.as_view(), name='notification'),
 
-
+    # message_edit and deleat
+    # path('message/<int:message_id>/edit', views.MessageEditView.as_view(), name='message_edit'),
+    # path('message/<int:message_id>/delete', views.MessageDeleteView.as_view(), name='message_delete'),
 
 ]
