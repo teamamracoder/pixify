@@ -19,7 +19,9 @@ urlpatterns = [
     #admin_notification
     path('admin/notifications/', views.NotificationListView.as_view(), name='notification_list'),
     path('admin/notifications/create/', views.NotificationCreateView.as_view(), name='notification_create'),
-    path('admin/notifications/<int:delete_id>/delete/', views.NotificationDeleteView.as_view(), name='notification_delete'),
+    path('admin/notifications/<int:notification_id>/detail/', views.NotificationDetailView.as_view(), name='notification_detail'),
+    # path('admin/notifications/<int:notification_id>/update/', views.NotificationUpdateView.as_view(), name='notification_update'),
+    # path('admin/notifications/<int:delete_id>/delete/', views.NotificationDeleteView.as_view(), name='notification_delete'),
 
     # post
     path('admin/posts/', views.PostListView.as_view(), name='post_list'),
