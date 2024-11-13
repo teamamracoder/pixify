@@ -68,4 +68,30 @@
         </form>
     </div>
 </div> -->
+<input type="text" class="text-dark" id="search_chats">
+<div id="fill">
+    <a href="">name</a>
+</div>
+<script>
+
+
+$(document).ready(function() {
+    $("#search_chats").on('input',function(){
+        $.ajax({
+            url: 'users/api?search='+$(this).val(),
+            type: 'GET',
+            success: function(res) {
+                console.log(res)
+                {% comment %} jotogula data res asbe sob loop er vetore 
+                $("#fill").html(`
+                    <a href="chat/id">res.first_name</a>
+                `); {% endcomment %} 
+            },
+            error: function(xhr, status, error) {
+                console.log(xhr)
+            },
+        });
+    })
+});
+</script>
 {% endblock %}
