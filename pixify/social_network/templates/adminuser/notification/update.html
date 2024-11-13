@@ -1,7 +1,7 @@
 
 {% extends "../base.html" %}
 
-{% block title %}Create Notification{% endblock %}
+{% block title %}Update Notification{% endblock %}
 
 {% block content %}
 
@@ -10,7 +10,7 @@
         <div class="col-12 col-md-12 col-lg-12">
             <div class="card shadow-sm">
                 <div class="card-header text-center">
-                    <h2 class="text-info">Create Notification</h2>
+                    <h2 class="text-info">Update Notification</h2>
                 </div>
                 <div class="card-body">
                     <form method="post">
@@ -36,13 +36,12 @@
                                 <label for="isread">IS_Read</label>
                                 <input type="text" class="form-control" id="is_read" name="is_read">
                             </div>
-                            
                         </div>            
                        
 
                             <div class="container my-2">
                                 <button class="btn btn-primary btn-sm">
-                                    <a class="text-decoration-none text-white" href="{% url 'notification_create' %}"> Create</a>                                 
+                                    <a  class="text-decoration-none text-white"  href="{% url 'notification_create' %}">Edit</a>                                 
                                 </button>                                     
                                   
                                   <button class="btn btn-primary btn-sm">
