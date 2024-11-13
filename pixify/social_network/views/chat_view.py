@@ -103,9 +103,9 @@ class ChatCreateView(View):
 
 class ChatDetailsView(View):
     def get(self, request, chat_id):
-        chat = chat_service.details_chats(chat_id)
+        chat = chat_service.get_chat(chat_id)
         messages = message_service.list_messages_by_chat_id(chat_id)
-        return 
+        return render(request, 'enduser/chat/messages.html',{'chat':chat,'messages':messages})
 
     def post(self, request, chat_id):
         chat = chat_service.get_chat(chat_id)
