@@ -90,9 +90,13 @@
     <div class="container mt-4">
       <div class="d-flex align-items-center">
         <img src="{% static 'images/green.png'%}" alt="Profile" class="rounded-circle me-3" style="width: 40px; height: 40px; object-fit: cover;">
-        <div  data-bs-toggle="modal" data-bs-target="#addPhotosVideosModal" style="display: inline-block; cursor: pointer;width: 90%;">
+        {% comment %} <div  data-bs-toggle="modal" data-bs-target="#addPhotosVideosModal" style="display: inline-block; cursor: pointer;width: 90%;">
             <input class="form-control" type="search" placeholder="" style="background-color: rgb(61, 61, 107); cursor: pointer; box-shadow:0 4px 8px rgba(151, 95, 236, 0.5);border: 1px solid #975fec;">
+        </div> {% endcomment %}
+        <div class="pb-1" data-bs-toggle="modal" data-bs-target="#addPhotosVideosModal" style="display: inline-block; cursor: pointer; width: 90%;">
+            <textarea class="form-control" placeholder="" style="background-color: rgb(61, 61, 107); cursor: pointer; box-shadow: 0 4px 8px rgba(151, 95, 236, 0.5); border: 1px solid #975fec; height: 48px;"></textarea>
         </div>
+
           {% comment %} <input class="form-control" disabled type="search" data-bs-toggle="modal" data-bs-target="#addPhotosVideosModal" placeholder="" style="border-radius: 25px;background-color: rgb(61, 61, 107);cursor: pointer;"> {% endcomment %}
         </div>
         <div class="row justify-content-around text-center py-2">
@@ -116,27 +120,41 @@
      </div>
   </div>
 
-  <div class="modal fade" id="addPhotosVideosModal" tabindex="-1" aria-labelledby="addPhotosVideosModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="addPhotosVideosModalLabel">Add photos/videos</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="mb-3">
-                    <label for="fileInput" class="form-label">Or drag and drop</label>
-                    <input type="file" class="form-control" id="fileInput">
-                </div>
-                <button type="button" class="btn btn-primary">Add photos and videos from your mobile device</button>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Add to your post</button>
-                <button type="button" class="btn btn-primary">Post</button>
-            </div>
-           </div>
-    </div>
+  <div class="modal fade" id="addPhotosVideosModal" tabindex="-1" aria-labelledby="addPhotosVideosModalLabel"
+  aria-hidden="true">
+  <div class="modal-dialog">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h5 class="modal-title" id="addPhotosVideosModalLabel">Create a Post</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+              <div class="d-flex align-items-center mb-3">
+                  <img src="https://cdn-icons-png.flaticon.com/128/1144/1144760.png" alt="User Avatar"
+                      class="user-avatar me-2">
+                  <span class="fw-bold">Your Name</span>
+              </div>
+              <div class="mb-3">
+                  <textarea class="form-control" placeholder="What do you want to talk about?" rows="4"
+                      style="resize: none;"></textarea>
+              </div>
+              <div class="mb-3">
+                  <label for="fileInput" class="file-upload-label" style="width: 100%;">
+                      <input type="file" class="form-control d-none" id="fileInput" multiple>
+                      <p>Drag and drop photos or videos, or click to browse</p>
+                  </label>
+              </div>
+              <button type="button" class="btn btn-outline-primary w-100 mb-3">
+                  Add photos and videos from your mobile device
+              </button>
+          </div>
+          <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Add to your post</button>
+              <button type="button" class="btn btn-primary">Post</button>
+          </div>
+      </div>
   </div>
+</div>
 </div>
 
 

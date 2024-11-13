@@ -366,7 +366,7 @@ i {
 .user_info {
     margin-top: auto;
     margin-bottom: auto;
-    margin-left: 15px;
+    /* margin-left: 15px; */
 }
 
 .search_btn i {
@@ -1206,6 +1206,47 @@ textarea::placeholder {
 #searchbarInput span {
     background-color: rgb(61, 61, 107);
     box-shadow: 0 4px 8px rgba(151, 95, 236, 0.5);
+}
+
+/* For Modal */
+.modal-content {
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    color: black;
+}
+
+.modal-body span {
+    color: black;
+}
+
+.modal-header {
+    border-bottom: 1px solid #ddd;
+    color: black;
+}
+
+.modal-footer {
+    border-top: 1px solid #ddd;
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+}
+
+.file-upload-label {
+    border: 2px dashed #aaa;
+    padding: 20px;
+    text-align: center;
+    border-radius: 5px;
+    cursor: pointer;
+    color: #555;
+    font-size: 0.9rem;
+    background-color: #f9f9f9;
+}
+
+.file-upload-label:hover {
+    background-color: #f1f1f1;
 }
 
 /*End Subhasis*/
