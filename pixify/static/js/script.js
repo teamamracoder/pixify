@@ -9,10 +9,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
     navItems.forEach(function (item) {
         const link = item.querySelector('a');
-        console.log(link && link.getAttribute('href'), '+', currentPath);
         if (link && link.getAttribute('href') === currentPath) {
-            console.log(currentPath, "yes");
-            item.classList.add('active');
+            // item.classList.add('active');
         }
     });
 
@@ -71,5 +69,7 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
     }
+
+
 });
 
