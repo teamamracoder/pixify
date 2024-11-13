@@ -5,6 +5,7 @@ from django.utils.timezone import localtime
 from ..models import Message, ChatMember, Follower
 from ..services import chat_service, user_service,message_service
 from ..constants import ChatType
+from django.shortcuts import render,redirect
 
 
 class ChatListView(View):
@@ -88,49 +89,44 @@ class ChatListView(View):
 
 
 class ChatCreateView(View):
-    def post(self, request, user_id):
-        data = chat_service.get_user_data(user_id)
-        if 'followers' not in data or 'followings' not in data:
-            return redirect('error_page') 
-        return render(request, 'enduser/chat/user_profile.html', {
-            'title': 'User Followers and Following',
-            'photo': data['photo'],
-            'followers': data['followers'],
-            'followings': data['followings'],
-        })
+  
 
+    def get(self, request):    
+        # user = request.user        
+        user = user_service.get_user(2)
+        title = "AbC"
+        type = "2"
+        members = [1, 2, 3]  # Example member IDs
+        chat_cover = "exampleurl.com"
+        chat_service.create_chat(title, members, chat_cover,user,type)                            
+        return redirect('chat/')
 
-
+    def post():
+        # database data jabe
+        return
+    
 class ChatDetailsView(View):
     def get(self, request, chat_id):
         chat = chat_service.get_chat(chat_id)
         messages = message_service.list_messages_by_chat_id(chat_id)
         return render(request, 'enduser/chat/messages.html',{'chat':chat,'messages':messages})
-
+    
     def post(self, request, chat_id):
         chat = chat_service.get_chat(chat_id)
         chat_service.delete_chat(chat)
         return redirect('chat_list')
-
-
+    
 class ChatUpdatesView(View):
+   
     def get(self, request, chat_id):
-        chat = chat_service.details_chats(chat_id)
-        messages = message_service.list_messages_by_chat_id(chat_id)
-        return 
-
-    def post(self, request, chat_id):
-        chat = chat_service.get_chat(chat_id)
-        chat_service.delete_chat(chat)
-        return redirect('chat_list')
-
-
+        chat  = chat_service.chat_details(chat_id)
+        title = "XYZ"
+        members = [2, 4]
+        chat_cover = "example.com"
+        chat_service.update_chat(chat, title, members, chat_cover)        
+        return redirect('chat/')
+    
 class ChatDeleteView(View):
-    def get(self, request, chat_id):
-        chat = chat_service.details_chats(chat_id)
-        messages = message_service.list_messages_by_chat_id(chat_id)
-        return
-
     def post(self, request, chat_id):
         chat = chat_service.get_chat(chat_id)
         chat_service.delete_chat(chat)
