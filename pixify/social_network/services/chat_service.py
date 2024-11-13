@@ -1,22 +1,37 @@
-from .. import models
-from django.contrib.auth.models import User
+from ..models import Chat, User, ChatMember
 from django.shortcuts import get_object_or_404
 
 def list_chats(user):
     return models.Chat.objects.filter(members=user).exclude(members=user)
 
-def chats_create(request):
-    title = request.data.get('title')
-    chat_type = request.data.get('type')
-    members = request.data.get('members')
-    chat_cover = request.data.get('chat_cover')
-    is_active = request.data.get('is_active', True)
-    created_by = request.user.id  
-    updated_by = request.user.id  
-    chat = chats_create(title, chat_type, members, chat_cover, is_active, created_by, updated_by)
-    return models.Chat.objects.create(title=title,type=type,members=members,chat_cover=chat_cover,is_active=is_active ,created_by=created_by,updated_by=updated_by)
+def chat_details(chat_id):
+    return get_object_or_404(Chat, id=chat_id)
 
-# chat_service.py
+def create_chat(user, members, type, is_active):
+            
+    chat = Chat.objects.create(members=members, created_by=user,type=type, is_active=is_active)        
+
+    # for member_id in members:
+    #     member = User.objects.get(id=member_id)
+    #     ChatMember.objects.create(chat_id=chat, member_id=member, created_by=user)
+    return chat
+
+def update_chat(chat, title, members, chat_cover):    
+        chat.title = title  
+        chat.chat_cover = chat_cover                
+        chat.members.clear()                
+        for member_id in members:
+            member = User.objects.get(id=member_id)
+            ChatMember.objects.create(chat_id=chat, member_id=member)                
+        chat.save()
+        return chat    
+
+def delete_chat(chat_id):
+    chat = get_object_or_404(Chat, id=chat_id)
+    chat.is_active = False
+    chat.save()
+    return chat
+
 
 def get_user_data(user_id):    
     followers = User.objects.filter(followers__followed_user=user_id).exclude(id=user_id)
@@ -29,14 +44,18 @@ def get_user_data(user_id):
         'photo': photo,
     }
 
-
-    
-
-def delete_chat(chat_id):
-    return get_object_or_404(models.Chat, id=chat_id)
-
-def details_chats():
-    return models.Chat.objects.all()
+def details_chats(chat_id):
+    return Chat.objects(chat_id)
 
 def get_chat (chat_id):
-    return get_object_or_404(models.Chat, id=chat_id)
+    return get_object_or_404(Chat, id=chat_id)
+
+
+
+# chat service
+# all chats jar title that starts with search param 
+# +
+# all recepeints jar firstname starts with search param
+
+# considtion
+# chats er member er mdhdhe loggeduser thakte lgbe

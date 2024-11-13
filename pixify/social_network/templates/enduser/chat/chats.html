@@ -73,7 +73,9 @@
         <!-- Text next to the image -->
         <div style="display: flex; flex-direction: column; flex-grow: 1">
           <p style="margin: 0">
-            {{chat.title}} <i class="bi bi-patch-check prof-check"></i>
+            <a href="{% url 'chat_details' chat.id %}">
+              {{chat.title}} <i class="bi bi-patch-check prof-check"></i>
+            </a>
           </p>
           <p style="margin: 0; color: gray; font-size: 0.9em">
             {{chat.last_message}} 
