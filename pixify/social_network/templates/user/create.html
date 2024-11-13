@@ -1,19 +1,122 @@
-{% extends "base.html" %}
+{% extends "../base.html" %}
 
 {% block title %}Create User{% endblock %}
 
 {% block content %}
-
-<h1>Create User</h1>
+<!-- 
+<h1>Create User</h1> -->
 <form method="post">
     {% csrf_token %}
-    <label>First Name:</label>
+    <style>
+    
+        .layout {
+            margin: auto;
+            width: 500px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+    
+        
+        .form-box {
+            border: 1px solid aqua;
+            padding: 20px;
+            width: 60vw;
+            margin: 2px; 
+            border-radius: 8px;
+        }
+    
+        
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+    </style>
+
+    <div class="layout">
+        <div class="header">
+            <h1>Create User</h1>
+        </div> 
+
+        <div class="row form-box">
+            <form class="" method="post">
+                <div class="col-md-6">
+                    <label for="firstname" class="form-label">FirstName</label>
+                    <input type="text" class="form-control" name="first_name" id="first_name" placeholder="enter your first name">
+                </div>
+    
+                <div class="col-md-6">
+                    <label for="middlename" class="form-label">MiddleName</label>
+                    <input type="text" class="form-control" name="middle_name" id="middle_name" placeholder="enter your middle name">
+                </div>
+    
+                <div class="col-12">
+                    <label for="lastname" class="form-label">LastName</label>
+                    <input type="text" class="form-control" name="last_name" id="last_name" placeholder="enter your last name">
+                </div>
+    
+                <div class="col-12">
+                    <label for="email" class="form-label">email</label>
+                    <input type="text" class="form-control" name="email" id="email" placeholder="abc123@gmail.com">
+                </div>
+
+                <div class="col-12">
+                    <label for="address" class="form-label">address</label>
+                    <input type="text" class="form-control" name="address" id="address" placeholder="address">
+                </div>
+
+                <div class="col-12">
+                    <label for="hobbies" class="form-label">Hobbies</label>
+                    <input type="text" class="form-control" name="hobbies" id="hobbies" placeholder="Enter hobbies (comma-separated)">
+                </div>
+    
+                <div class="col-md-4">
+                    <label for="gender" class="form-label">Gender</label>
+                    <select id="gender" name="gender" class="form-select">
+                        <!-- <option value="1">Male</option>
+                        <option value="2">Female</option>
+                        <option value="3">Others</option> -->
+                        {% for gender in choices_gender %}
+                            {% for name, value in gender.items %}
+                                <option value="{{ name }}">{{ value }}</option>
+                            {% endfor %}
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-md-4">
+                    <label for="relationship_status" class="form-label">Relationship Status</label>
+                    <select id="relationship_status" name="relationship_status" class="form-select">
+                        <!-- <option value="1">Male</option>
+                        <option value="2">Female</option>
+                        <option value="3">Others</option> -->
+                        {% for status in choices_relationship_status %}
+                            {% for name, value in status.items %}
+                                <option value="{{ value }}">{{ name }}</option>
+                            {% endfor %}
+                        {% endfor %}
+                    </select>
+                </div>
+    
+                <div class="col-md-2">
+                    <label for="D.O.B" class="form-label">D.O.B</label>
+                    <input type="date" name="dob" class="form-control" id="dob" value="{{ dob_default|default:'1950-01-01' }}">
+                </div>
+    
+                <div class="col-12">
+                    <button type="submit" class="btn btn-primary my-3">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- <label>First Name:</label>
     <input type="text" name="first_name" required>
     <label>Last Name:</label>
     <input type="text" name="last_name" required>
     <label>Email:</label>
     <input type="email" name="email" required>
-    <button type="submit">Create</button>
+    <button type="submit">Create</button> -->
 </form>
 <a href="{% url 'user_list' %}">Back to User List</a>
 
