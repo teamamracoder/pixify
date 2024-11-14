@@ -75,7 +75,24 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 
-// select post photo and videos
+// Badhan
+// Function to update time stamps
+
+function updateTimeStamps() {
+    document.getElementById('time1').innerText = '11h';
+    document.getElementById('time2').innerText = '1m';
+    document.getElementById('time3').innerText = '20m';
+    document.getElementById('time4').innerText = '5m';
+    document.getElementById('time5').innerText = '2h';
+    document.getElementById('time6').innerText = '9h';
+}
+
+// Call the function to update time stamps
+updateTimeStamps();
+updateTimeStamps();
+//End Badhan
+
+// select post photo and videos--Priya
 let files = [],
     button = document.querySelector(".top button"),
     form = document.querySelector("#form"),
@@ -116,3 +133,4 @@ const delImage = index => {
     files.splice(index, 1)
     showImages()
 }
+// select post photo and videos--Priya End
