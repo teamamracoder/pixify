@@ -2,7 +2,7 @@ from django.db import models
 from ..constants import PostType, AccessLevel, PostContentType, SpecificUserTreatment
 
 class Post(models.Model):
-    posted_by = models.ForeignKey('User', on_delete=models.CASCADE, related_name='fk_post_posts_users_id', blank=True)
+    posted_by = models.ForeignKey('User', on_delete=models.CASCADE, related_name='fk_post_posts_users_id')
     type = models.IntegerField(
         choices=[(type.value, type.name) for type in PostType],
         blank=True,
@@ -31,11 +31,11 @@ class Post(models.Model):
         db_default= SpecificUserTreatment.INCLUDE.value
     )
 
-    is_active = models.BooleanField(db_default=True)
+    is_active = models.BooleanField(db_default=True,blank=True)
     created_at = models.DateTimeField(auto_now_add=True, blank=True)
     updated_at = models.DateTimeField(auto_now=True, blank=True)
     created_by = models.ForeignKey('User', on_delete=models.CASCADE, blank=True, related_name='fk_create_posts_users_id')
-    updated_by = models.ForeignKey('User', on_delete=models.CASCADE, blank=True, related_name='fk_update_posts_users_id')
+    updated_by = models.ForeignKey('User', on_delete=models.CASCADE, blank=True, null=True, related_name='fk_update_posts_users_id')
     
     class Meta:
         db_table = 'posts'

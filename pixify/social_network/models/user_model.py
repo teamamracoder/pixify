@@ -1,36 +1,61 @@
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
-import datetime
-from ..constants import Gender, RelationShipStatus
 
-class User(models.Model):
-    first_name = models.CharField(max_length=50, db_default=None)
-    middle_name = models.CharField(max_length=50, db_default=None)
-    last_name = models.CharField(max_length=50, db_default=None)
+from social_network.constants.default_values import Role
+from ..constants import Gender, RelationShipStatus
+from django.contrib.auth.models import AbstractUser
+
+class User(AbstractUser):
+    first_name = models.CharField(max_length=50)
+    middle_name = models.CharField(max_length=50, blank=True, null=True)
+    last_name = models.CharField(max_length=50)
     email = models.EmailField(unique=True)
+    # set role while creating user, default value is not working
+    roles = ArrayField(
+        models.IntegerField(
+            choices=[(type.value, type.name) for type in Role], 
+            db_default=Role.END_USER.value,
+            blank=True
+        ),
+        blank=True
+    )
     address = models.CharField(blank=True, null=True, max_length=100)
-    hobbies = ArrayField(models.CharField(max_length=50,blank=True, db_default=None), db_default=list)
-    bio = models.CharField(max_length=100, null=True)
-    profile_photo_url = models.URLField(max_length=200, null=True)
-    cover_photo_url = models.URLField(max_length=200, null=True)
-    dob = models.DateField(blank=False,db_default=datetime.date(1950, 1, 1))
+    hobbies = ArrayField(models.CharField(max_length=50,blank=True, null=True), null=True, blank=True)
+    bio = models.CharField(max_length=100, null=True, blank=True)
+    profile_photo_url = models.URLField(max_length=200, null=True, blank=True)
+    cover_photo_url = models.URLField(max_length=200, null=True, blank=True)
+    dob = models.DateField(blank=True, null=True)
     gender = models.IntegerField(
         choices=[(gender.value, gender.name) for gender in Gender],
         blank=True,
-        db_default=None
+        null=True
     )
     relationship_status = models.IntegerField(
         choices=[(status.value, status.name) for status in RelationShipStatus],
         blank=True,
-        db_default=None
+        null=True
     )
-
-    is_active = models.BooleanField(db_default= True)
-    created_at = models.DateTimeField(auto_now_add=True, null=True)
-    updated_at = models.DateTimeField(auto_now=True, null=True)
-    # created_by = models.ForeignKey('User', on_delete=models.CASCADE, blank=True, null=True, db_default=None, related_name='fk_create_users_users_id')
-    # updated_by = models.ForeignKey('User', on_delete=models.CASCADE, blank=True, null=True, db_default=None, related_name='fk_update_users_users_id')
+    country = models.CharField(max_length=40, blank=True, db_default='INDIA')
+    # timezone = 
+    is_active = models.BooleanField(db_default=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True, blank=True)
+    updated_at = models.DateTimeField(auto_now=True, blank=True)
+    created_by = models.ForeignKey('User', on_delete=models.CASCADE, blank=True, null=True, related_name='fk_create_users_users_id')
+    updated_by = models.ForeignKey('User', on_delete=models.CASCADE, blank=True, null=True, related_name='fk_update_users_users_id')
     
+    # fields required for abstract user
+    groups = None
+    user_permissions = None
+    username = models.CharField(max_length=128, blank=True, null=True)
+    password = models.CharField(max_length=128, blank=True, null=True)
+    last_login = models.DateTimeField(null=True, blank=True)
+    date_joined = models.DateTimeField(auto_now_add=True, blank=True)
+    is_staff = models.BooleanField(db_default=False, blank=True)  # To allow admin access
+    is_superuser = models.BooleanField(db_default=False, blank=True)  # Superuser status
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = []
+
     class Meta:
         db_table = 'users'
     

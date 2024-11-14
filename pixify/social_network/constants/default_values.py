@@ -37,3 +37,19 @@ class RelationShipStatus(Enum):
     MARRIED = 2
     DIVORCED = 3
     COMMITTED = 4
+    
+class MASTERTYPE(Enum):
+    REACTION = 1
+    
+    
+# static values, insert these in master_lists table
+class Reactions:
+    LOVE = '<i class="bi bi-suit-heart-fill text-danger"></i>'
+    LIKE = '<i class="bi bi-hand-thumbs-up-fill text-success"></i>'
+    ANGRY = '<i class="bi bi-emoji-angry-fill text-warning"></i>'
+    SAD = '<i class="bi bi-emoji-frown-fill text-secondary"></i>'
+    SMILE = '<i class="bi bi-emoji-grin-fill text-success"></i>'
+    CARE = '<i class="bi bi-hearts text-danger"></i>'
+    WOW = '<i class="bi bi-emoji-surprise-fill text-info"></i>'
+    KISS = '<i class="bi bi-emoji-kiss-fill text-danger"></i>'
+    HEARTBROKE = '<i class="bi bi-heartbreak-fill text-dark"></i>'
