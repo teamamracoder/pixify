@@ -558,8 +558,8 @@ i {
 }
 
 .notification-item {
-    padding: 15px;
-    background-color: #680cf1e3;
+    padding: 10px;
+    background-color: #995cf6e3;
     border: 1px solid #5b0fdd;
     border-radius: 10px;
     margin-bottom: 10px;
@@ -567,6 +567,8 @@ i {
 
 .notification-text {
     color: #fffeff;
+    padding-left: 6px;
+    font-size: small;
 }
 
 .time-text {
@@ -574,6 +576,39 @@ i {
     color: #ffffff;
 }
 
+
+
+.profile-pic {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.chat-details {
+    flex-grow: 1;
+    overflow: hidden;
+}
+
+.chat-name {
+    font: weight 0;;
+    font-size: 1rem;
+}
+
+.chat-message {
+    color: #26e80d;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.time-stamp {
+    color: #fff9f9;
+    font-size: 0.8rem;
+    white-space: nowrap;
+}
 
 /* --------------End by Badhan-------------------------- */
 
