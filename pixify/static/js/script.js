@@ -73,3 +73,19 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 });
 
+
+// 
+// Function to update time stamps
+
+function updateTimeStamps() {
+    document.getElementById('time1').innerText = '11h';
+    document.getElementById('time2').innerText = '1m';
+    document.getElementById('time3').innerText = '20m';
+    document.getElementById('time4').innerText = '5m';
+    document.getElementById('time5').innerText = '2h';
+    document.getElementById('time6').innerText = '9h';
+}
+
+// Call the function to update time stamps
+updateTimeStamps();
+updateTimeStamps();
