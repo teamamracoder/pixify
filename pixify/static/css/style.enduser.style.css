@@ -131,7 +131,7 @@ i {
 .modal-content {
     width: 400px;
 
-    background-color: rgb(33, 16, 49);
+    background-color: #211031;
 }
 
 .sec {
@@ -489,16 +489,59 @@ i {
 
 }
 
+.con{
+    width: 100%;
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    position: relative;
+    height: auto;
+    flex-wrap: wrap;
+    margin-top: 20px;
+    overflow-y: auto;
+    max-height: 300px;
+}
+.con .images{
+    height: 95px;
+    width: 95px;
+    border-radius: 5px;
+    box-shadow: 0 0 5px rgba(107, 99, 99, 0.3);
+    overflow: hidden;
+    position: relative;
+    margin-bottom: 7px;
+    margin-right: 7px;
+}
+.con .images img{
+    height: 100%;
+    width: 100%;
+}
+.con .images span{
+    position: absolute;
+    top: -4px;
+    right: 5px;
+    cursor: pointer;
+    font-size: 25px;
+    color: fff;
+}
+.con .images span:hover{
+    opacity: 0.5;
+}
 
+.editpic{
+    height:200px;
+    width: 200pxpx;
+    border-radius: 5px;
+    box-shadow: 0 0 5px rgba(107, 99, 99, 0.3);
+    overflow: hidden;
+    position: relative;
+    margin-bottom: 7px;
+    margin-right: 7px;
+}
 
-
-
-
-
-
-
-
-
+.editpic img{
+    height: 100%;
+    width: 100%;
+}
 
 /* End CSS for Nav Bar by Priya Mitra */
 
@@ -550,16 +593,16 @@ textarea::placeholder {
 }
 
 .textAreaStyle {
-    /* width: 870px; */
+
     padding: 10px;
     border-radius: 10px;
 }
 
 .post-section {
-    /* width: 900px; */
+   
     margin-top: 20px;
     padding: 15px;
-    background-color: rgb(16, 3, 26);
+    background-color: #10031a;
 
     margin-right: 5px;
 }
@@ -640,8 +683,8 @@ textarea::placeholder {
 .modal-body {
     overflow-y: scroll;
     scroll-behavior: auto;
-    height: 440px;
-    margin-top: -20px;
+/*   
+    margin-top: -20px; */
 
 }
 
