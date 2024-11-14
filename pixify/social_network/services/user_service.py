@@ -19,7 +19,7 @@ def update_user(user, first_name, last_name, email):
 
 def delete_user(user):
     user.delete()
-    
+  
 def list_users_api(request):
     search_query = request.GET['search']
     if search_query:
@@ -28,3 +28,6 @@ def list_users_api(request):
     else:
         users = User.objects.all().values()
     return users
+
+  def get_user_by_email(email):
+    return models.User.objects.filter(email=email).first()
