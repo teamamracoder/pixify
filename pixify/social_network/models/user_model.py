@@ -1,6 +1,5 @@
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
-
 from social_network.constants.default_values import Role
 from ..constants import Gender, RelationShipStatus
 from django.contrib.auth.models import AbstractUser
@@ -18,7 +17,7 @@ class User(AbstractUser):
             blank=True
         ),
         blank=True
-    )
+
     address = models.CharField(blank=True, null=True, max_length=100)
     hobbies = ArrayField(models.CharField(max_length=50,blank=True, null=True), null=True, blank=True)
     bio = models.CharField(max_length=100, null=True, blank=True)
@@ -52,6 +51,7 @@ class User(AbstractUser):
     date_joined = models.DateTimeField(auto_now_add=True, blank=True)
     is_staff = models.BooleanField(db_default=False, blank=True)  # To allow admin access
     is_superuser = models.BooleanField(db_default=False, blank=True)  # Superuser status
+
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
