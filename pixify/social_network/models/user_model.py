@@ -1,13 +1,21 @@
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
 import datetime
-from ..constants import Gender, RelationShipStatus
 
-class User(models.Model):
+from social_network.constants.default_values import Role
+from ..constants import Gender, RelationShipStatus
+from django.contrib.auth.models import AbstractUser
+from django.utils import timezone
+
+class User(AbstractUser):
     first_name = models.CharField(max_length=50, default=None)
     middle_name = models.CharField(max_length=50, default=None)
     last_name = models.CharField(max_length=50, default=None)
     email = models.EmailField(unique=True)
+    roles = ArrayField(
+        models.IntegerField(choices=[(type.value, type.name) for type in Role], default=Role.END_USER),
+        default=list
+    )
     address = models.CharField(blank=True, null=True, max_length=100)
     hobbies = ArrayField(models.CharField(max_length=50,blank=True, default=None), default=list)
     bio = models.CharField(max_length=100, null=True)
@@ -31,6 +39,19 @@ class User(models.Model):
     created_by = models.ForeignKey('User', on_delete=models.CASCADE, blank=True, null=True, default=None, related_name='fk_create_users_users_id')
     updated_by = models.ForeignKey('User', on_delete=models.CASCADE, blank=True, null=True, default=None, related_name='fk_update_users_users_id')
     
+    # fields required for abstract user
+    groups = None
+    user_permissions = None
+    username = models.CharField(max_length=128, blank=True, null=True)
+    password = models.CharField(max_length=128, blank=True, null=True)
+    last_login = models.DateTimeField(null=True, blank=True)
+    date_joined = models.DateTimeField(default=timezone.now)
+    is_staff = models.BooleanField(default=False)  # To allow admin access
+    is_superuser = models.BooleanField(default=False)  # Superuser status
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = []
+
     class Meta:
         db_table = 'users'
     
