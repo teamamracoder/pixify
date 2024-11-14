@@ -4,50 +4,7 @@
 
 {% block content %}
 
-{% comment %} <div class="px-3 py-3 mt-3 users"
-    style="background-color: #1f0447e3;box-shadow: 0 4px 8px rgba(151, 95, 236, 0.5);font-family: serif;border-radius: 7px;">
-    <div class="pt-1 pb-3 px-2 mb-2 fw-semibold" style="border: 1px solid black;border-radius: 3px;">
-        <div class="p-2">
-            <a href="#" style="text-decoration: none;">
-                <i class="bi bi-person-fill" style="color:#f8c471;"></i>
-                <span class="fw-semiboldS username" style="color:#f8c471;">Notification For</span>
-            </a>
-        </div>
-        <div class="message-content">
-            <a href="#" style="text-decoration: none;">
-                <span class="ps-3 message">Details</span>
-            </a>
-        </div>
-    </div>
-    <div class="pt-1 pb-3 px-2 mb-2 fw-semibold" style="border: 1px solid black;border-radius: 3px;">
-        <div class="p-2">
-            <a href="#" style="text-decoration: none;">
-                <i class="bi bi-person-fill" style="color:#f8c471;"></i>
-                <span class="fw-semiboldS username" style="color:#f8c471;">Notification For</span>
-            </a>
-        </div>
-        <div class="message-content">
-            <a href="#" style="text-decoration: none;">
-                <span class="ps-3 message">Details</span>
-            </a>
-        </div>
-    </div>
-    <div class="pt-1 pb-3 px-2 mb-2 fw-semibold" style="border: 1px solid black;border-radius: 3px;">
-        <div class="p-2">
-            <a href="#" style="text-decoration: none;">
-                <i class="bi bi-person-fill" style="color:#f8c471;"></i>
-                <span class="fw-semiboldS username" style="color:#f8c471;">Notification For</span>
-            </a>
-        </div>
-        <div class="message-content">
-            <a href="#" style="text-decoration: none;">
-                <span class="ps-3 message">Details</span>
-            </a>
-        </div>
-    </div>
-
-</div> {% endcomment %}
-
+{%load static %}
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.css" rel="stylesheet">
@@ -57,7 +14,7 @@
     <div class="pt-1 pb-0 px-2 mb-0 fw-semibold">
         <div class="container notification-list">
             <div class="notification-item d-flex align-items-start mb-3">
-                <i class="bi bi-person-circle me-3 fs-3"></i>
+                <img src="{% static 'images/logo.png'%}" alt="Profile Picture" class="profile-pic">
                 <div>
                     <p class="notification-text mb-1">
                         <strong>App Dev:</strong> Why was data hiding? Because it was encapsulated and didn't want to be public.
@@ -67,7 +24,7 @@
             </div>
 
             <div class="notification-item d-flex align-items-start mb-3">
-                <i class="bi bi-person-circle me-3 fs-3"></i>
+                <img src="{% static 'images/logo.png'%}" alt="Profile Picture" class="profile-pic">
                 <div>
                     <p class="notification-text mb-1">
                         <strong>Vfx:</strong> What is the similarity between Error and Cloud?
@@ -77,7 +34,7 @@
             </div>
 
             <div class="notification-item d-flex align-items-start mb-3">
-                <i class="bi bi-person-circle me-3 fs-3"></i>
+                <img src="{% static 'images/logo.png'%}" alt="Profile Picture" class="profile-pic">
                 <div>
                     <p class="notification-text mb-1">
                         <strong>Devlop:</strong> If you stay with them longer, you will get sick but if they disappear, you will feel relief.
@@ -86,7 +43,7 @@
                 </div>
             </div>
             <div class="notification-item d-flex align-items-start mb-3">
-                <i class="bi bi-person-circle me-3 fs-3"></i>
+                <img src="{% static 'images/logo.png'%}" alt="Profile Picture" class="profile-pic">
                 <div>
                     <p class="notification-text mb-1">
                         <strong>Softdev:</strong> Why did the frontend developer go down and the backend developer get promoted?
@@ -96,7 +53,7 @@
             </div>
 
             <div class="notification-item d-flex align-items-start mb-3">
-                <i class="bi bi-person-circle me-3 fs-3"></i>
+                <img src="{% static 'images/logo.png'%}" alt="Profile Picture" class="profile-pic">
                 <div>
                     <p class="notification-text mb-1">
                         <strong>Oops:</strong> Because the frontend developer kept spending their money on margin and padding but the backend developer knows how to handle load in every situation.
