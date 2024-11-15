@@ -20,7 +20,7 @@ urlpatterns = [
     path('admin/notifications/', views.NotificationListView.as_view(), name='notification_list'),
     path('admin/notifications/create/', views.NotificationCreateView.as_view(), name='notification_create'),
     path('admin/notifications/<int:notification_id>/detail/', views.NotificationDetailView.as_view(), name='notification_detail'),
-    # path('admin/notifications/<int:notification_id>/update/', views.NotificationUpdateView.as_view(), name='notification_update'),
+    path('admin/notifications/<int:notification_id>/update/', views.NotificationUpdateView.as_view(), name='notification_update'),
     # path('admin/notifications/<int:delete_id>/delete/', views.NotificationDeleteView.as_view(), name='notification_delete'),
 
     # post
@@ -36,8 +36,5 @@ urlpatterns = [
     path('chat/', views.ChatView.as_view(), name='chat'),
 
     # notification
-    path('notification/', views.notificationView.as_view(), name='notification'),
-
-
-
-]
+    path('notification/', views.notificationView.as_view(), name='notification')
+]  
