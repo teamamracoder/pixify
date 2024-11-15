@@ -49,6 +49,9 @@ urlpatterns = [
 
     path('birthday/', views.BirthdayView.as_view(), name='birthday'),
 
-    path('friends/', views.FriendsView.as_view(), name='friends')
+    path('friends/', views.FriendsView.as_view(), name='friends'),
+    path('birthday/', views.BirthdayView.as_view(), name='birthday'),
+
+    path('userprofile/', views.UserprofileView.as_view(), name='userprofile'),
 
 ]
