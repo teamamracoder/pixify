@@ -38,7 +38,7 @@ class RelationShipStatus(Enum):
     DIVORCED = 3
     COMMITTED = 4
     
-class MASTERTYPE(Enum):
+class MasterType(Enum):
     REACTION = 1
     
     
