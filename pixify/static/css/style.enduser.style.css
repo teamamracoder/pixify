@@ -489,7 +489,7 @@ i {
 
 }
 
-.con{
+.con {
     width: 100%;
     display: flex;
     justify-content: flex-start;
@@ -501,7 +501,8 @@ i {
     overflow-y: auto;
     max-height: 300px;
 }
-.con .images{
+
+.con .images {
     height: 95px;
     width: 95px;
     border-radius: 5px;
@@ -511,11 +512,13 @@ i {
     margin-bottom: 7px;
     margin-right: 7px;
 }
-.con .images img{
+
+.con .images img {
     height: 100%;
     width: 100%;
 }
-.con .images span{
+
+.con .images span {
     position: absolute;
     top: -4px;
     right: 5px;
@@ -523,12 +526,13 @@ i {
     font-size: 25px;
     color: fff;
 }
-.con .images span:hover{
+
+.con .images span:hover {
     opacity: 0.5;
 }
 
-.editpic{
-    height:200px;
+.editpic {
+    height: 200px;
     width: 200pxpx;
     border-radius: 5px;
     box-shadow: 0 0 5px rgba(107, 99, 99, 0.3);
@@ -538,36 +542,10 @@ i {
     margin-right: 7px;
 }
 
-.editpic img{
+.editpic img {
     height: 100%;
     width: 100%;
 }
-
-
-
-
-.service-item {
-    height: 300px;
-    width: 200px;
-    border-radius: 5px;
-    box-shadow: 0 0 5px rgba(107, 99, 99, 0.3);
-    background-color:  #fdfbff;
-   
-}
-
-.service-item img{ 
-    height:100%;
-    width: 100%;
-    object-fit: cover;
-
-
-}
-/* side bar */
-
-  
-
-
-
 
 /* End CSS for Nav Bar by Priya Mitra */
 
@@ -618,7 +596,8 @@ i {
 }
 
 .chat-name {
-    font: weight 0;;
+    font: weight 0;
+    ;
     font-size: 1rem;
 }
 
@@ -637,6 +616,7 @@ i {
 }
 
 /* --------------End by Badhan-------------------------- */
+
 
 /* End CSS for Message by Badhan Sarkar */
 
@@ -659,7 +639,7 @@ textarea::placeholder {
 }
 
 .post-section {
-   
+
     margin-top: 20px;
     padding: 15px;
     background-color: #10031a;
@@ -729,7 +709,6 @@ textarea::placeholder {
 .modal-content {
     background-color: #4e0b8d;
     color: white;
-    
 }
 
 .modal-header {
@@ -744,7 +723,7 @@ textarea::placeholder {
 .modal-body {
     overflow-y: scroll;
     scroll-behavior: auto;
-/*   
+    /*
     margin-top: -20px; */
 
 }
@@ -1011,18 +990,19 @@ textarea::placeholder {
     font-size: 13px;
 }
 
-/* story */
-
-
-.stories-container{
-    max-width: 600px;
-    margin: 25px auto;
-    position: relative;
-
-/* .stories-container {
-    max-width: 100%;
-  
+/* stories  */
+/* .story:hover{
+    opacity: 0.8;
 } */
+
+
+
+/* story */
+.stories-container {
+    max-width: 100%;
+    /* margin: 25px auto;
+    position: relative; */
+}
 
 .stories-container .previous-btn,
 .stories-container .next-btn,
@@ -1041,33 +1021,19 @@ textarea::placeholder {
     cursor: pointer;
 }
 
-/* .stories-full-view .next-btn {
+.stories-full-view .next-btn {
     margin-right: 24%;
 }
 
 .stories-full-view .previous-btn {
     margin-left: 24%;
-} */
+}
 
 .stories-container .previous-btn,
 .stories-full-view .previous-btn {
     left: 8px;
 
 }
-
-/* .stories-container .previous-btn,
-.stories-container .next-btn{
-    opacity: 0;
-    pointer-events: none;
-    transition: all 400ms ease;
-}
-.stories-container .previous-btn .active1,
-.stories-container .next-btn .active1{
-    opacity: 1;
-    pointer-events: auto;
-
-} */
-
 
 .stories-container .next-btn,
 .stories-full-view .next-btn {
@@ -1096,19 +1062,13 @@ textarea::placeholder {
     gap: 8px;
 }
 
-
-
-.stories-container .content{
-    scrollbar-width: none;
-    overflow-x: scroll; 
-    scroll-behavior: smooth;
-
-
+.stories-container .content {
+    overflow-x: scroll;
 }
 
 .stories-container .content::-webkit-scrollbar {
     display: none;
-
+    scrollbar-width: none;
 }
 
 .stories-container .author {
@@ -1124,42 +1084,34 @@ textarea::placeholder {
     background: linear-gradient(transparent, #222 130%);
 }
 
+.plus-btn {
+    margin-top: -50px;
+}
 
 .stories-full-view {
     position: fixed;
-    margin-top: 58px;
     inset: 0;
     z-index: 5;
-
-    background:rgb(0,0,0,0.9) ;
-    place-items: center; 
-
-/*     background: rgb(0, 0, 0, 0.9); */
+    background: rgb(0, 0, 0, 0.9);
     display: none;
-
-.stories-full-view.actived{
-     display:block !important;
+    place-items: center;
 }
 
-.stories-full-view .close-btn{
-    position: absolute; 
-    left: 95%;
-    width: 45px;
-
+.stories-full-view.active {
+    display: grid;
+}
 
 .stories-full-view .close-btn {
-/*     position: absolute;
+    position: absolute;
     top: 32px;
     left: 24%;
-    width: 30px; */
-
+    width: 30px;
     background-color: #444;
     color: #fff;
     border-radius: 50%;
     padding: 10px;
     display: flex;
     cursor: pointer;
-    font-size: 18px;
 }
 
 .stories-full-view .story {
@@ -1167,31 +1119,10 @@ textarea::placeholder {
     text-align: center;
 }
 
-.stories-full-view .story .user-profile{
-    position: relative;
-    bottom:240px ;
-    margin-left: 10px;
-
-
-}
-.stories-full-view .story .user-profile img{
-    width: 38px;
-    height: 38px;
-    border-radius: 50%; 
-    border: 4px solid #45abff;
-
-}
-.stories-full-view .content{
-    height: 85vh;
-
-
 .stories-full-view .content {
     height: 90vh;
     width: 100%;
-    max-width: 700px; 
-    position: relative;
-    padding-top: 38px;
-    scroll-behavior: smooth;
+    max-width: 700px;
 }
 
 .stories-full-view .story img {
@@ -1200,15 +1131,6 @@ textarea::placeholder {
     object-fit: cover;
     border-radius: 16px;
 }
-
-.stories-full-view .author{
-    position:absolute; 
-    top: 43px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-family: "Roboto" sans-serif ;
-    font-size: 18px; 
-
 
 .stories-full-view .author {
     position: absolute;
@@ -1224,17 +1146,11 @@ textarea::placeholder {
     border: 1px solid #e0e0e0;
     border-radius: 30px;
     padding: 10px 15px;
-
 }
- .profile{ 
-    position: relative;
-    margin-top: -170px;
-    margin-left: 8px;
-    border: 3px solid #d3ccd1;
-    height: 40px;
-    cursor: pointer;
-    width: 40px;    
 
+.profile-img {
+    width: 40px;
+    height: 40px;
 }
 
 .emoji-btn, .image-btn {
@@ -1297,18 +1213,8 @@ textarea::placeholder {
     align-items: center;
     justify-content: center;
     border-radius: 50%;
-    overflow: hidden; 
-    position: relative; 
+    transition: background-color 0.3s;
 }
-
-
-.profile img{
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center;
-   
-} */
 
 .icon.whatsapp {
     background-color: #25D366;
@@ -1337,7 +1243,6 @@ textarea::placeholder {
 .icon:hover {
     background-color: #5a27d5;
 }
-
 
 /* End CSS for  Left Side Bar by Shribash*/
 
