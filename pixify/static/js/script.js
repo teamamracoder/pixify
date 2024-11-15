@@ -9,9 +9,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     navItems.forEach(function (item) {
         const link = item.querySelector('a');
-        console.log(link && link.getAttribute('href'), '+', currentPath);
         if (link && link.getAttribute('href') === currentPath) {
-            console.log(currentPath, "yes");
             item.classList.add('active');
         }
     });
@@ -71,10 +69,13 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
     }
+
+
 });
 
 
-// 
+
+// Badhan
 // Function to update time stamps
 
 function updateTimeStamps() {
@@ -89,20 +90,47 @@ function updateTimeStamps() {
 // Call the function to update time stamps
 updateTimeStamps();
 updateTimeStamps();
+//End Badhan
+
+// select post photo and videos--Priya
+let files = [],
+    button = document.querySelector(".top button"),
+    form = document.querySelector("#form"),
+    container = document.querySelector(".con"),
+    text = document.querySelector(".inner"),
+    browse = document.querySelector(".select"),
+    input = document.querySelector("#fileInput");
+
+
+browse.addEventListener('click', () => input.click());
 
 
 
-// Work by Badhan
+input.addEventListener('change', () => {
+    let file = input.files;
+    for (let i = 0; i < file.length; i++) {
+        if (files.every(e => e.name != file[i].name)) files.push(file[i])
 
-document.addEventListener("DOMContentLoaded", () => {
-    const confirmButton = document.querySelector('.btn-primary');
-    const deleteButton = document.querySelector('.btn-secondary');
 
-    confirmButton.addEventListener('click', () => {
-        alert('Friend request confirmed!');
-    });
+    }
 
-    deleteButton.addEventListener('click', () => {
-        alert('Friend request deleted!');
-    });
-});
+    form.reset();
+    showImages();
+
+})
+
+const showImages = () => {
+    let images = '';
+    files.forEach((e, i) => {
+        images += `<div class="images">
+        <img src="${URL.createObjectURL(e)}">
+        <span onclick="delImage(${i})">&times</span>
+     </div>`
+    })
+    container.innerHTML = images;
+}
+const delImage = index => {
+    files.splice(index, 1)
+    showImages()
+}
+// select post photo and videos--Priya End
