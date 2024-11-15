@@ -22,18 +22,17 @@
                     <input type="text" class="form-control border-secondary" placeholder="Search" aria-label="Search">
                     <span class="input-group-text border-secondary bg-info text-dark"><i class="bi bi-search"></i></span> 
                 </div>
-                <button class="btn btn-primary btn-sm"><a href="{% url 'notification_create' %}" class="text-white text-decoration-none">Add Notification</a></button>
+                <button class="btn btn-primary btn-sm"><a href="{% url 'notification_create' %}" class="text-white text-decoration-none">Add User</a></button>
             </div>
 
             <div class="table-responsive">
                 <table class="table table-hover">
                     <thead class="table-info text-white"> 
                         <tr>
-                            <th>Text</th>
-                            <th>Media URL</th>
-                            <th>Receiver_ID</th>
+                            <th>Text</th>                            
+                            <th>Media URL</th>                            
                             <th>IS_Read</th>
-                            <th>Action</th>
+                            <th>Status</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -41,17 +40,16 @@
                         <tr>
                             <td>
                                 <a class="text-decoration-none text-primary hover-bg" href="{% url 'notification_detail' notification.id %}">
-                                    {{ notification.text }} {{ notification.media_url }} {{ notification.receiver_id }} {{ notification.is_read }}
+                                    {{notification.text }}
                                 </a>
-                            </td>
-                            <td>{{ notification.text }}</td>
+                            </td>                      
+                                                    
                             <td>{{ notification.media_url }}</td>
-                            <td>{{ notification.receiver_id }}</td>
+
                             <td>{{ notification.is_read }}</td>
                             <td>
                                 <div class="d-flex gap-2">
-                                    <button class="btn btn-sm shadow-none"><a href="#"><i class="bi bi-pencil-square"></i></a></button>
-                                    <button class="btn btn-sm shadow-none"><a href="#"><i class="bi bi-trash text-danger"></i></a></button>
+                                    <button class="btn btn-sm shadow-none"><a href=""><i class="bi bi-eye"></i></a></button>
                                 </div>
                             </td>
                         </tr>
