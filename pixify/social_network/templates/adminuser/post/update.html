@@ -6,7 +6,7 @@
 <div class="container-fluid my-5">
     <div class="row justify-content-center">
         <div class="col-12 col-md-12 col-lg-12">
-            <div class="card border-primary">
+            <div class="card shadow">
                 <div class="card-header text-center">
                     <h2 class="text-info">Update Post</h2>
                 </div>
@@ -86,11 +86,9 @@
                             <label class="form-check-label" for="is_active">Is Active</label>
                         </div>
 
-                        <div class="container my-2">
-                            <button class="btn btn-primary btn-sm" type="submit">
-                                Update
-                            </button>
-                            <a class="btn btn-secondary btn-sm text-white" href="{% url 'post_detail' post.id %}">Back</a>
+                        <div class="text-start">
+                            <a href="{% url 'post_list' %}" class="btn btn-sm btn-outline-secondary">Back</a>
+                            <button type="submit" class="btn btn-sm btn-primary">Save</button>
                         </div>
                     </form>
                 </div>
