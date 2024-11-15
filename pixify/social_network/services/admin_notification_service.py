@@ -1,9 +1,12 @@
 from .. import models
 from django.shortcuts import get_object_or_404
+from django.db.models import Q 
 
-def list_notifications():
-    return models.Notification.objects.all()
+# def list_notifications():
+#     return models.Notification.objects.all()
 
+def list_notifications(sort_by='text'):
+    return models.Notification.objects.all().order_by(sort_by)
 
 def create_notifications(**kwargs):
     notification = models.Notification.objects.create(
@@ -12,7 +15,7 @@ def create_notifications(**kwargs):
             media_url=kwargs.get('media_url'),
             is_read=kwargs['is_read'],  
             is_active=kwargs.get('is_active', True) 
-            
+
         )
     return notification
 
@@ -31,16 +34,18 @@ def update_notifications(**kwargs):
         )
     return notification
 
-# def update_notifications(notification, text,media_url,receiver_id, is_read):
-#     notification.text = text
-#     notification.media_url = media_url
-#     notification.receiver_id = receiver_id
-#     notification.is_read = is_read
-#    
-#     return notification
 
-# def create_notifications(text, media_url, receiver_id,is_read ):
-#     return models.Notification.objects.create(text=text, media_url=media_url, receiver_id=receiver_id,is_read=is_read)
 
 # def delete_notifications(notification):
 #     notification.delete()
+
+
+def list_notifications_filtered(search_query, sort_by='text'):
+    if search_query:
+        # Use Q objects to filter by first_name, last_name, or email
+        return models.Notification.objects.filter(
+            Q(text__icontains=search_query) | 
+            Q(media_url__icontains=search_query) |
+            Q(is_read__icontains=search_query)
+        ).order_by(sort_by)
+    return models.Notification.objects.all().order_by(sort_by)
