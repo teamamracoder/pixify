@@ -704,14 +704,8 @@ textarea::placeholder {
     font-size: 13px;
 }
 
-/* stories  */
-/* .story:hover{
-    opacity: 0.8;
-} */
-
-
-
 /* story */
+
 .stories-container{
     max-width: 600px;
     margin: 25px auto;
@@ -732,18 +726,26 @@ textarea::placeholder {
     padding: 10px;
     display: flex;
     cursor: pointer;
-}
-.stories-full-view .next-btn{
-    margin-right: 24%;
-}
-.stories-full-view .previous-btn{
-    margin-left: 24%;
+    
 }
 .stories-container .previous-btn,
 .stories-full-view .previous-btn{
     left: 8px;
 
 }
+/* .stories-container .previous-btn,
+.stories-container .next-btn{
+    opacity: 0;
+    pointer-events: none;
+    transition: all 400ms ease;
+}
+.stories-container .previous-btn .active1,
+.stories-container .next-btn .active1{
+    opacity: 1;
+    pointer-events: auto;
+
+} */
+
 .stories-container .next-btn,
 .stories-full-view .next-btn{
     right: 8px;
@@ -768,12 +770,16 @@ textarea::placeholder {
     display: flex;
     gap: 8px;
 }
+
+
 .stories-container .content{
+    scrollbar-width: none;
     overflow-x: scroll; 
+    scroll-behavior: smooth;
 }
 .stories-container .content::-webkit-scrollbar{
     display: none;
-    scrollbar-width: none;
+
 }
 .stories-container .author{
     position: absolute;
@@ -787,41 +793,60 @@ textarea::placeholder {
     color: black;
     background: linear-gradient(transparent ,#222 130%);
 }
+
 .plus-btn{
     margin-top: -50px;
 }
 .stories-full-view{
     position: fixed;
+    margin-top: 58px;
     inset: 0;
     z-index: 5;
-    background:rgb(0,0,0,0.9);
+    background:rgb(0,0,0,0.9) ;
+    place-items: center; 
     display: none;
-    place-items: center;
 }
-.stories-full-view.active{
-     display: grid;
+.stories-full-view.actived{
+     display:block !important;
 }
 
 .stories-full-view .close-btn{
-    position: absolute;
-    top: 32px;
-    left: 24%;
-    width: 30px;
+    position: absolute; 
+    left: 95%;
+    width: 45px;
     background-color: #444;
     color: #fff;
     border-radius: 50%; 
     padding: 10px;
     display: flex; 
     cursor: pointer;
+    font-size: 18px;
 }
 .stories-full-view .story{
     height: 100%;
     text-align: center;
 }
+.stories-full-view .story .user-profile{
+    position: relative;
+    bottom:240px ;
+    margin-left: 10px;
+
+
+}
+.stories-full-view .story .user-profile img{
+    width: 38px;
+    height: 38px;
+    border-radius: 50%; 
+    border: 4px solid #45abff;
+
+}
 .stories-full-view .content{
-    height: 90vh;
+    height: 85vh;
     width: 100%;
-    max-width: 700px;
+    max-width: 700px; 
+    position: relative;
+    padding-top: 38px;
+    scroll-behavior: smooth;
 }
 .stories-full-view .story img{
     height: 100%;
@@ -830,93 +855,33 @@ textarea::placeholder {
     border-radius: 16px;
 }
 .stories-full-view .author{
-    position:absolute;
-    top: 8px;
+    position:absolute; 
+    top: 43px;
     left: 50%;
     transform: translateX(-50%);
     font-family: "Roboto" sans-serif ;
-    font-size: 18px;
+    font-size: 18px; 
 }
-/* .comment-box {
-    background-color: #f8f9fa;
-    border: 1px solid #e0e0e0;
-    border-radius: 30px;
-    padding: 10px 15px;
-}
-
-.profile-img {
-    width: 40px;
+/* .profile{ 
+    position: relative;
+    margin-top: -170px;
+    margin-left: 8px;
+    border: 3px solid #d3ccd1;
     height: 40px;
-}
-
-.emoji-btn, .image-btn {
-    border: none;
-    background: none;
-    color: #6c757d;
-}
-
-.emoji-btn:hover, .image-btn:hover {
-    color: #343a40;
-} */
-
-.com-opt-bar{
-    display: flex;
-}
-.emoji-img .smile{ 
-    padding-left: 55px;
-    align-items: center;
-}
-.emoji-img .img-1{ 
-   padding-top: 20px;
-   padding-left: 20px;
-}
-.com-opt-bar .comment-btn{ 
-    height: 30px;
-    width: 100px;
-    margin-left: 350px;
-    background-color:#16e253;
-    text-align: center;
-} 
-.bg-dark {
-    background-color: #222 !important;
-}
-
-.bg-purple {
-    background-color: #7b4bf9 !important; 
-}
-
-.post-image {
-    max-width: 100%;
-    border-radius: 8px;
-}
- 
-
-.black-box i{
-    padding: 10px;
-}
-.icon {
-    font-size: 30px;
-    color: white;
-    width: 50px;
-    height: 50px;
-    padding: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    cursor: pointer;
+    width: 40px;    
     border-radius: 50%;
-    transition: background-color 0.3s;
+    overflow: hidden; 
+    position: relative; 
 }
 
-.icon.whatsapp { background-color: #25D366; }
-.icon.facebook { background-color: #3b5998; }
-.icon.twitter { background-color: #1DA1F2; }
-.icon.linkedin { background-color: #0077b5; }
-.icon.instagram { background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%); }
-.icon.link { background-color: #6c757d; }
-
-.icon:hover {
-    background-color:#5a27d5;
-}
+.profile img{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+   
+} */
 /* End CSS for  Left Side Bar by Shribash*/
 
 /*Subhasis*/

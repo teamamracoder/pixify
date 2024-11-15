@@ -1,40 +1,24 @@
 {% extends "enduser/base.html" %}
 
 {% block title %}Pixify-Home{% endblock %}
-
+{% load static %}
 {% block content %} 
-  
-  <!-- story -->
-  <div class="d-flex justify-content-between position-relative mt-5">
-    <!-- story-1 -->
-<!-- <div class="mx-1 bg- rounded story" type="button" style="width: 6em; height: 180px;background-color: #1f0447e3 " >
-<img src="static\images\10.jpg" alt="story post" class="card-img-top" style="min-height: 105px; object-fit: cover;">
-   <div class="d-flex align-items-center justify-content-center position-relative" style="min-height: 65px; ">
-<p class="mb-0 text-center fs-7 fw-bold" style="color: white;  ">Create story</p>
-<div class="position-absolute top-0 start-50 translate-middle">
-<i class="fas fa-plus-circle fs-3 text-primary bg-white p-1 rounded-circle">
-    <img src="" alt="story post" class="card-img-top" style=" object-fit: cover;"> 
-</i>
-</div>
-</div>
-</div> -->
-    <!-- stories 2 -->
-<div class="stories-container">
-    
-    <div class="content">
 
-        
-        <div class="previous-btn">
+
+
+
+ <!-- story short view -->
+<div class="stories-container ">  
+    <div class="content">  
+        <div class="previous-btn active1">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
               </svg> 
-        </div>
-     
+        </div>  
         <div class="stories">
 
-
             <div class="mx-1 bg- rounded story" type="button" style="width: 6em; height: 180px;background-color: #1f0447e3 " >
-                <img src="static\images\10.jpg" alt="story post" class="card-img-top" style="min-height: 105px; object-fit: cover;">
+                <img src="static\images\p4.jpg" alt="story post" class="card-img-top" style="min-height: 105px; object-fit: cover;">
                    <div class="d-flex align-items-center justify-content-center position-relative" style="min-height: 65px; ">
                 <p class="mb-0 text-center fs-7 fw-bold" style="color: white;  ">Create story</p>
                 <div class="position-absolute top-0 start-50 translate-middle plus-btn">
@@ -43,274 +27,58 @@
                 </i>
                 </div>
                 </div>
-                </div> 
-
+                </div>
+            <!-- <div class="user-pro">
             <div class="story">
-                <img src="static\images\7.jpg" alt="">
+                <img src="static\images\p4.jpg" alt="">
                 <div class="author">Author</div>
+                
             </div>
+            <div class="position-relative me-2" style="width: 50px;height: 50px;border-radius: 50px;border: 2px solid #e211f5; padding: 2px; overflow: hidden; background: transparent;top:-75%;left:5%;">
+                <img src="static\images\priya.jpg" class="img-fluid rounded-circle" style="height: 45px; width: 45px;object-fit: cover;"> 
+            </div>
+        </div> -->
 
-            <div class="story">
-                <img src="static\images\8.jpg" alt="">
-                <div class="author">Author</div>
-            </div>
 
-            <div class="story">
-                <img src="static\images\9.jpg" alt="">
-                <div class="author">Author</div>
-            </div>
-
-            <div class="story">
-                <img src="static\images\10.jpg" alt="">
-                <div class="author">Author</div>
-            </div>
-
-            <div class="story">
-                <img src="static\images\6.jpg" alt="">
-                <div class="author">Author</div>
-            </div>
-
-            <div class="story">
-                <img src="static\images\8.jpg" alt="">
-                <div class="author">Author</div>
-            </div>
-
-            <div class="story">
-                <img src="static\images\7.jpg" alt="">
-                <div class="author">Author</div>
-            </div>
         </div>
       
         <div class="next-btn">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
-              </svg> 
+                <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+            </svg>
         </div>
     </div>
-</div>
-</div>
-
-
-    
-
-
-<div class="container post-center">
-    <div class="post-box">
-    <div class="post-top">
-        <a href="">
-            <img src="static\images\7.jpg" alt="avatar" class="rounded-circle me-1 " style="width: 28px; object-fit: cover; height: 28px; " > 
-           </a><h6 class="u-name"> Sribash Sarkar</h6> 
-    </div> 
-    <div class="post-des-img"> 
-         <from class="post-text">
-            <div class="text-in">
-               <input type="text" placeholder="This is simple post"> 
-            </div>
-         </from>
-
-        <img src="static\images\a6.jpg" class="img-fluid" alt="Responsive image">
-    </div>
-    <div class="post-react-det">
-        <div class="post-react">
-            <i class="fa-regular fa-heart"></i>
-            <i class="fa-regular fa-comment"></i>
-            <i class="fa-solid fa-bookmark me-2"></i>
-            <i class="fa-solid fa-share-nodes"></i>
-            <i class="fa-solid fa-pen post-pe-icon"></i>
-            <i class="fa-solid fa-trash post-pe-icon"></i> 
-        </div>
-        <div class="post-date-time">
-            <p>10November2024 20:05pm </p>
-            <p></p>
-        </div> 
-       </div>
-    </div> 
 </div> 
- <!-- comment section -->
- <div class="bg-white p-3 mt-3 rounded border shadow" style="margin-left: 14px;width: 100%;">
-    <!-- avater -->
-     <div class="d-flex" type="button" >
-        <div class="p-1">
-            <img src="static\images\9.jpg" alt="avatar" class="rounded-circle me-2" style="width: 38px; height: 38px; object-fit: cover;">
-        </div>
-        <div class="bg-white border" style="width: 100%; height: 88px; border-radius: 10px;">
-        <div class="com-post-et">
-            <div class="coment">
-            <input type="text" class="from-control rounded-pill border-0 bg-gray" style="width: 100%;height: 35px;color: black; border: none; text-decoration: none; padding: 20px;" placeholder="comment">
-            </div>
-            <i class="far fa-smile" style="padding: 20px; color: black;"></i>
-            <i class="far fa-image" style="color: black;"></i>
-            <button type="button" class="btn btn-primary" style="margin-left: 320px; ">Comment</button>
-        </div>
-        </div>
-     </div>
- </div>
+<!-- stories-full-view -->
 
-<div class="container post-center">
-    <div class="post-box">
-    <div class="post-top">
-        <a href="">
-            <img src="static\images\7.jpg" alt="avatar" class="rounded-circle me-1 " style="width: 28px; object-fit: cover; height: 28px; " > 
-           </a><h6 class="u-name"> Sribash Sarkar</h6> 
-    </div> 
-    <div class="post-des-img"> 
-         <from class="post-text">
-            <div class="text-in">
-               <input type="text" placeholder="This is simple post"> 
-            </div>
-         </from>
-
-        <img src="static\images\a6.jpg" class="img-fluid" alt="Responsive image">
+<div class="stories-full-view ">
+    <div class="close-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+          </svg>
+                  
     </div>
-    <div class="post-react-det">
-        <div class="post-react">
-            <i class="fa-regular fa-heart"></i>
-            <i class="fa-regular fa-comment"></i>
-            <i class="fa-solid fa-bookmark me-2"></i> 
-            <i class="fa-solid fa-share-nodes btn btn-primary" data-bs-toggle="modal" data-bs-target="#shareModal"></i> 
-            
-        </div>
-
-        <div class="modal fade" id="shareModal" tabindex="-1" aria-labelledby="shareModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content bg-purple text-light">
-                    <div class="modal-header border-0">
-                        <h5 class="modal-title" id="shareModalLabel" style="padding: 20px;">Share</h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body d-flex  black-box">
-                        <a href="#" class="icon whatsapp"><i class="fab fa-whatsapp"></i></a>
-                        <a href="#" class="icon facebook"><i class="fab fa-facebook-f"></i></a>
-                        <a href="#" class="icon twitter"><i class="fab fa-twitter"></i></a>
-                        <a href="#" class="icon linkedin"><i class="fab fa-linkedin-in"></i></a>
-                        <a href="#" class="icon instagram"><i class="fab fa-instagram"></i></a>
-                        <a href="#" class="icon link"><i class="fas fa-link"></i></a>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="post-date-time">
-            <p>10November2024 20:05pm </p>
-            <p></p>
+    <div class="content">
+        <div class="previous-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+              </svg> 
         </div> 
-       </div>
-    </div> 
+        <div class="story">
+            <img src="static\images\p1.jpg" alt="">
+            <div class="author">Author</div>
+        </div>
+        <div class="next-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+            </svg>
+        </div>
+    </div>
 </div>
-<!-- <div class="modal fade" id="shareModal" tabindex="-1" aria-labelledby="shareModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content bg-purple text-light">
-            <div class="modal-header border-0">
-                <h5 class="modal-title" id="shareModalLabel" style="padding: 20px;">Share</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body d-flex  black-box">
-                <a href="#" class="icon whatsapp"><i class="fab fa-whatsapp"></i></a>
-                <a href="#" class="icon facebook"><i class="fab fa-facebook-f"></i></a>
-                <a href="#" class="icon twitter"><i class="fab fa-twitter"></i></a>
-                <a href="#" class="icon linkedin"><i class="fab fa-linkedin-in"></i></a>
-                <a href="#" class="icon instagram"><i class="fab fa-instagram"></i></a>
-                <a href="#" class="icon link"><i class="fas fa-link"></i></a>
-            </div>
-        </div>
-    </div>
-</div> -->
-
- <!-- comment section -->
- <div class="bg-white p-3 mt-3 rounded border shadow" style="margin-left: 14px;width: 100%;">
-    <!-- avater -->
-     <div class="d-flex" type="button" >
-        <div class="p-1">
-            <img src="static\images\9.jpg" alt="avatar" class="rounded-circle me-2" style="width: 38px; height: 38px; object-fit: cover;">
-        </div>
-        <div class="bg-white border" style="width: 100%; height: 88px; border-radius: 10px;">
-        <div class="com-post-et">
-            <div class="coment">
-            <input type="text" class="from-control rounded-pill border-0 bg-gray" style="width: 100%;height: 35px;color: black; border: none; text-decoration: none; padding: 20px;" placeholder="comment">
-            </div>
-            <i class="far fa-smile" style="padding: 20px; color: black;"></i>
-            <i class="far fa-image" style="color: black;"></i>
-            <button type="button" class="btn btn-primary" style="margin-left: 320px; ">Comment</button>
-        </div>
-        </div>
-     </div>
- </div>
- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 
 
 
 
-<!-- <div class="px-3 py-3 mt-3"
-style="background-color: #1f0447e3;box-shadow: 0 4px 8px rgba(151, 95, 236, 0.5);font-family: serif;border-radius: 7px;">
-    <div>
-        <div class="">
-
-            <div id="carouselExampleIndicators" class="carousel slide">
-                <div class="carousel-indicators">
-                  <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
-                  <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="1" aria-label="Slide 2"></button>
-                  <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="2" aria-label="Slide 3"></button>
-                </div>
-                <div class="carousel-inner">
-                    <div class="carousel-item">
-                        <img src=https://img.freepik.com/free-photo/close-up-guitar-strings-with-shallow-depth-field-soft-focus_169016-60792.jpg?semt=ais_hybrid
-                            class="d-block"  height="350" width="100%">
-                    </div>
-                    <div class="carousel-item active">
-                        <img src=https://img.freepik.com/free-photo/close-up-guitar-strings-with-shallow-depth-field-soft-focus_169016-60792.jpg?semt=ais_hybrid
-                            class="d-block"  height="350" width="100%">
-                    </div>
-                    <div class="carousel-item">
-                        <img src=https://img.freepik.com/free-photo/close-up-guitar-strings-with-shallow-depth-field-soft-focus_169016-60792.jpg?semt=ais_hybrid
-                            class="d-block"  height="350" width="100%">
-                    </div>
-                </div>
-            <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
-                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                <span class="visually-hidden">Previous</span>
-              </button>
-              <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
-                <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                <span class="visually-hidden">Next</span>
-              </button>
-              </div>
-        </div>
-    </div>
-
-        <div class="post-section">
-            <form>
-               {% comment %} <div class="form-group">
-                    <label style="font-size: 25px; color: white; font-weight: bold;" for="photoUpload">Select
-                        Photo</label>
-                    <div class="fileInputStyle">
-                        <div class="browseStyle">
-                            <label for="file-upload" class="custom-file-upload">
-                                Browse..
-                            </label>
-                        </div>
-                        <input type="file" class="form-control-file" id="photoUpload" accept="image/*"
-                            style="display: none;">
-                        <span id="file-name">No file selected.</span>
-                    </div>
-                </div> {% endcomment %}
-                 <label style="font-size: 20px; color: white; font-weight: bold;" for="fileUpload">Select
-                    Photo</label>
-                <div class="mb-3 " >
-                    <input type="file" class="form-control fileInputStyle" id="fileUpload">
-                    {% comment %} <label class="input-group-text " for="inputGroupFile02">Upload</label> {% endcomment %}
-                </div>
-
-                <div class="form-group" style="margin-top: 15px;">
-                     <textarea class="form-control textAreaStyle" id="postText" rows="3"
-                        style=" background-color: rgb(35, 10, 59); border:2px solid rgb(16, 3, 26); font-size: 20px; color:white;"
-                        placeholder="What's on your mind  ?"></textarea>
-                </div>
-                <button type="submit" class="btn btn-primary post-button"
-                    style="color: white; font-weight: bold; background-color:#975fec;">
-                    POST
-                </button>
-            </form>
-    </div>
- </div> -->
+<script type="text/javascript" src="{% static 'js/sribash.js' %}"></script>
 {% endblock %}
