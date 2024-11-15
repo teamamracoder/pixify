@@ -5,10 +5,6 @@ def list_posts():
     return models.Post.objects.all()
 
 def create_post(**kwargs):
-    print(kwargs['posted_by'])
-    print(kwargs['type'])
-    print(kwargs['content_type'])
-    print(kwargs['media_url'])
     post = models.Post.objects.create(
             posted_by=kwargs['posted_by'],
             type=kwargs['type'],
@@ -21,7 +17,6 @@ def create_post(**kwargs):
             treat_as = kwargs['treat_as'],
             is_active=kwargs.get('is_active', True) 
         )
-    post.save()
     return post
 
 

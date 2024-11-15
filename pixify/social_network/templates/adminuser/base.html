@@ -48,29 +48,31 @@
             </button>
             <!-- Brand Name -->
             <a class="navbar-brand" href="#">Admin Dashboard</a>
+            
+            <!-- Navbar Collapse -->
             <div class="collapse navbar-collapse">
-                <!-- Search Bar in Navbar -->
-                <form class="d-flex ms-auto" role="search">
-                    <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-                    <button class="btn btn-outline-primary" type="submit">
-                        <i class="bi bi-search"></i>
-                    </button>
-                </form>
-                <!-- Navbar Links -->
-                <ul class="navbar-nav ms-3">
-                    <li class="nav-item">
-                        <a class="nav-link" href="#"><i class="bi bi-bell"></i> Notifications</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#"><i class="bi bi-gear"></i> Settings</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#"><i class="bi bi-box-arrow-right"></i> Logout</a>
+                <!-- Push this ul to the right side -->
+                <ul class="navbar-nav ms-auto">
+                    <!-- Notification Button -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link position-relative me-2" href="#" id="notificationDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-bell fs-4"></i> <!-- Notification bell icon -->
+                            <span class="badge bg-danger position-absolute top-1 start-90 translate-middle rounded-pill ">5</span>
+ <!-- Notification count badge -->
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end p-3" aria-labelledby="notificationDropdown" style="min-width: 250px;">
+                            <li><a class="dropdown-item" href="#">Notification 1</a></li>
+                            <li><a class="dropdown-item" href="#">Notification 2</a></li>
+                            <li><a class="dropdown-item" href="#">Notification 3</a></li>
+                            <li><a class="dropdown-item" href="#">Notification 4</a></li>
+                            <li><a class="dropdown-item" href="#">Notification 5</a></li>
+                        </ul>
                     </li>
                 </ul>
             </div>
         </div>
     </nav>
+    
 
 
 
@@ -158,11 +160,10 @@
                                                 class="list-group-item list-group-item-action ui-bg-grey border-0 ps-4">
                                                 <i class="bi bi-tools fs-6 me-2"></i>
                                                 List</a>
-                                                <a href="{% url 'post_create' %}"
+                                            <a href="#"
                                                 class="list-group-item list-group-item-action ui-bg-grey border-0 ps-4">
                                                 <i class="bi bi-diagram-3 fs-6 me-2"></i>
-                                                Create</a>
-                                            
+                                                Create</a>                                          
                                         </div>
                                     </div>
                                 </div>
@@ -180,11 +181,11 @@
                                     data-bs-parent="#accordionContainer">
                                     <div class="accordion-body p-0">
                                         <div class="list-group rounded-0">
-                                            <a href="{% url 'chat_list' %}"
+                                            <a href=""
                                                 class="list-group-item list-group-item-action ui-bg-grey border-0 ps-4">
                                                 <i class="bi bi-chat-dots fs-6 me-2"></i>
                                                 List</a>
-                                            <a href="{% url 'chat_create' %}"
+                                            <a href="#"
                                                 class="list-group-item list-group-item-action ui-bg-grey border-0 ps-4">
                                                 <i class="bi bi-telephone-inbound me-2 fs-6"></i>
                                                Create</a>
@@ -204,19 +205,19 @@
                                 <div id="user" class="accordion-collapse collapse" data-bs-parent="#accordionContainer">
                                     <div class="accordion-body p-0">
                                         <div class="list-group rounded-0">
-                                             <a href="{% url 'notification_list' %}"
+                                            <a href="#"
                                                 class="list-group-item list-group-item-action ui-bg-grey border-0 ps-4">
                                                 <i class="bi bi-person me-2 fs-5"></i>
                                                 List</a>
-                                          
-                                             <a href="{% url 'notification_create' %}"
+                                            <a href="#"
                                                 class="list-group-item list-group-item-action ui-bg-grey border-0 ps-4">
                                                 <i class="bi bi-person-gear me-2 fs-5"></i>
                                                 Create</a>
                                         </div>
                                     </div>
                                 </div>
-                            </div>                     
+                            </div>
+                      
 
                         </div>
                     </a>
