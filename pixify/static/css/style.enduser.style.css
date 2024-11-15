@@ -543,6 +543,32 @@ i {
     width: 100%;
 }
 
+
+
+
+.service-item {
+    height: 300px;
+    width: 200px;
+    border-radius: 5px;
+    box-shadow: 0 0 5px rgba(107, 99, 99, 0.3);
+    background-color:  #fdfbff;
+   
+}
+
+.service-item img{ 
+    height:100%;
+    width: 100%;
+    object-fit: cover;
+
+
+}
+/* side bar */
+
+  
+
+
+
+
 /* End CSS for Nav Bar by Priya Mitra */
 
 
@@ -704,6 +730,7 @@ textarea::placeholder {
 .modal-content {
     background-color: #4e0b8d;
     color: white;
+    
 }
 
 .modal-header {
