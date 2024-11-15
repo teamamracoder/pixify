@@ -7,7 +7,7 @@
 <div class="container-fluid my-5">
     <div class="row justify-content-center">
         <div class="col-12 col-md-12 col-lg-12">
-            <div class="card border-primary">
+            <div class="card shadow">
                 <div class="card-header text-center">
                     <h2 class="text-info">Create User</h2>
                 </div>
@@ -17,72 +17,73 @@
                         <div class="row">
                             <div class="form-group col-md-4 col-lg-4 col-sm-12 mb-3">
                                 <label for="firstName">FirstName</label>
-                                <input type="text" class="form-control" id="firstName" placeholder="Enter your first name">
+                                <input type="text" class="form-control" name="first_name" id="first_name" placeholder="Enter your first name">
                             </div>
                             <div class="form-group col-md-4 col-lg-4 col-sm-12 mb-3">
                                 <label for="middleName">MiddleName</label>
-                                <input type="text" class="form-control" id="middleName" placeholder="Enter your middle name">
+                                <input type="text" class="form-control" name="middle_name" id="middle_name" placeholder="Enter your middle name">
                             </div>
                             <div class="form-group col-md-4 col-lg-4 col-sm-12 mb-3">
                                 <label for="lastName">LastName</label>
-                                <input type="text" class="form-control" id="lastName" placeholder="Enter your last name">
+                                <input type="text" class="form-control" name="last_name" id="last_name" placeholder="Enter your last name">
                             </div>
                         </div>
+
                         <div class="row">
                             <div class="form-group col-md-6 col-lg-6 col-sm-12 mb-3">
                                 <label for="email">Email</label>
-                                <input type="email" class="form-control" id="email" placeholder="abc123@gmail.com">
+                                <input type="email" class="form-control" name="email" id="email" placeholder="abc123@gmail.com">
                             </div>
                             <div class="form-group col-md-6 col-lg-6 col-sm-12 mb-3">
                                 <label for="hobbies">Hobbies</label>
-                                <input type="text" class="form-control" id="hobbies" placeholder="Enter hobbies (comma-separated)">
+                                <input type="text" class="form-control" id="hobbies" name="hobbies" placeholder="Enter hobbies (comma-separated)">
                             </div>
                         </div>
 
-                        
                         <div class="row">
-                            <div class="form-group col-md-6 col-lg-6 col-sm-12 mb-3">
-                                <label for="gender">Gender</label>
-                                <select id="gender" class="form-control">
-                                    <option selected>MALE</option>
-                                    <option>FEMALE</option>
-                                    <option>OTHER</option>
+                            <div class="col-md-4">
+                                <label for="gender" class="form-label">Gender</label>
+                                <select id="gender" name="gender" class="form-select">
+                                    {% for gender in choices_gender %}
+                                        {% for name, value in gender.items %}
+                                            <option value="{{ name }}">{{ value }}</option>
+                                        {% endfor %}
+                                    {% endfor %}
                                 </select>
                             </div>
-                            <div class="form-group col-md-6 col-lg-6 col-sm-12 mb-3">
-                                <label for="relationshipStatus">Relationship Status</label>
-                                <select id="relationshipStatus" class="form-control">
-                                    <option selected>SINGLE</option>
-                                    <option>MARRIED</option>
-                                    <option>DIVORCED</option>
+            
+                            <div class="col-md-4">
+                                <label for="gender" class="form-label">Relationship Status</label>
+                                <select id="relationship_status" name="relationship_status" class="form-select">
+                                    {% for choices_relationship in choices_relationship_status %}
+                                        {% for name, value in choices_relationship.items %}
+                                            <option value="{{ value }}">{{ name }}</option>
+                                        {% endfor %}
+                                    {% endfor %}
                                 </select>
                             </div>
+            
+                            
                         </div>
                         <div class="row">
-
                             <div class="form-group col-md-6 col-lg-6 col-sm-12 mb-3">
                                 <label for="dob">D.O.B</label>
-                                <input type="date" class="form-control" id="dob">
+                                <input type="date" name="dob" class="form-control" id="dob">
                             </div>
                             <div class="form-group col-md-6 col-lg-6 col-sm-12 mb-3">
                                 <label for="address">Address</label>
-                                <textarea type="text" class="form-control" id="address" placeholder="Enter Address"></textarea>
+                                <textarea type="text" name="address" class="form-control" id="address" placeholder="Enter Address"></textarea>
                             </div>
                         </div>
-                        <div class="text-center">
-                            <button type="submit" class="btn btn-primary">Save</button>
+                        <div class="text-start">
+                            <a href="{% url 'user_list' %}" class="btn btn-sm btn-outline-secondary">Back</a>
+                            <button type="submit" class="btn btn-sm btn-primary">Save</button>
                         </div>
                     </form>
                 </div>
             </div>
         </div>
-        <div class="my-3">
-            <a href="{% url 'user_list' %}">Back to User List</a>
-        </div>
-    
     </div>
 </div>
-
-
 
 {% endblock %}

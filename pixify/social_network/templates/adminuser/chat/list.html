@@ -1,5 +1,3 @@
-
-
 {% extends "../base.html" %}
 
 {% block title %}Chat List{% endblock %}
@@ -9,8 +7,6 @@
         .hover-bg:hover {
         background-color: rgba(240, 242, 245, 0.1);
         color:aqua; 
-
-
     }
 </style>
 
@@ -21,34 +17,41 @@
                 <div class="card-header text-center">
                     <h2 class="">Chat List</h2>
                 </div>
-                <div class="card-body">
-                    <div class="d-flex justify-content-between mb-3">
+                <div class="d-flex justify-content-between mb-3">
+                    <button class="btn btn-primary btn-sm"><a href="{% url 'chat_create' %}" class="text-white text-decoration-none">Add Chat</a></button>
+                   
+                    <form method="get" action="{% url 'chat_list' %}">
                         <div class="input-group" style="max-width: 300px;">
-                            <button class="btn btn-outline-secondary">Name</button>
-                            <button class="btn btn-outline-secondary">A-Z</button>
-                            <input type="text" class="form-control border-secondary" placeholder="Search" aria-label="Search">
-                            <span class="input-group-text border-secondary bg-info text-dark"><i class="bi bi-search"></i></span> 
+                            <input type="text" class="form-control border-secondary" placeholder="Search" aria-label="Search" name="search" value="{{ search_query }}">
+                            <button class="btn btn-outline-secondary">Search</button>
                         </div>
-                        <button class="btn btn-primary btn-sm"><a href="{% url 'chat_create' %}" class="text-white text-decoration-none">Add Chat</a></button>
-                    </div>
+                    </form>
+                </div>
                             
                     <div class="table-responsive">
                         <table class="table table-hover">
                             <thead class="table-info text-white"> 
                                 <tr>
-                                    <th>Title</th>
-                                    <th>Type</th>                                 
-                                    <th>Chat_Cover</th>
+                                    <th>
+                                        <a href="?sort_by=title&sort_order={% if sort_order == 'asc' %}desc{% else %}asc{% endif %}">Title</a>
+                                    </th>
+                                    <th>
+                                        <a href="?sort_by=type&sort_order={% if sort_order == 'asc' %}desc{% else %}asc{% endif %}">Type
+
+                                        </th>                                 
+                                    <th>
+                                        <a href="?sort_by=chat_cover&sort_order={% if sort_order == 'asc' %}desc{% else %}asc{% endif %}">Chat_Cover</a>
+                                    </th>
                                     <th>Status</th>                            
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for chat in chats %}
                                 <tr>
-                                    <td>
-                                        
-                                        <a href="#" class="hover-bg">{{ chat.title }}</a>
-                                        
+                                    <td>                                       
+                                        <a class="text-decoration-none text-primary hover-bg" href="{% url 'chat_detail' chat.id %}">
+                                            {{ chat.title }} 
+                                        </a>                                       
                                     </td>
                                     <td>
                                         {% for type in choices_type %}
@@ -69,6 +72,25 @@
                                 {% endfor %}
                             </tbody>
                         </table>
+
+                        <div class="pagination">
+                            <span class="step-links">
+                                {% if chats.has_previous %}
+                                    <a href="?page=1&search={{ search_query }}&sort_by={{ sort_by }}&sort_order={{ sort_order }}">First</a>
+                                    <a href="?page={{ chats.previous_page_number }}&search={{ search_query }}&sort_by={{ sort_by }}&sort_order={{ sort_order }}">Previous</a>
+                                {% endif %}
+                        
+                                <span class="current">
+                                    Page {{ chats.number }} of {{ chats.paginator.num_pages }}.
+                                </span>
+                        
+                                {% if chats.has_next %}
+                                    <a href="?page={{ chats.next_page_number }}&search={{ search_query }}&sort_by={{ sort_by }}&sort_order={{ sort_order }}">Next</a>
+                                    <a href="?page={{ chats.paginator.num_pages }}&search={{ search_query }}&sort_by={{ sort_by }}&sort_order={{ sort_order }}">Last</a>
+                                {% endif %}
+                            </span>
+                        </div>
+
                     </div>
                         </div>
                     

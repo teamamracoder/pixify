@@ -1,7 +1,7 @@
 from .. import models
 from django.shortcuts import get_object_or_404
 
-def list_posts():
+def list_posts(): 
     return models.Post.objects.all()
 
 def create_post(**kwargs):
@@ -11,12 +11,13 @@ def create_post(**kwargs):
             content_type=kwargs['content_type'],
             media_url=kwargs.get('media_url'),
             title=kwargs['title'],
-            # description=kwargs['description'],
+            description=kwargs['description'],
             accessability=kwargs['accessability'],
+            members  = kwargs['members'],
+            treat_as = kwargs['treat_as'],
             is_active=kwargs.get('is_active', True) 
         )
     return post
-
 
 
 def get_post(post_id):
