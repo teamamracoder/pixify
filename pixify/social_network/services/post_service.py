@@ -1,8 +1,10 @@
 from .. import models
 from django.shortcuts import get_object_or_404
+from django.db.models import Q     # added by sujit 
 
-def list_posts(): 
-    return models.Post.objects.all()
+
+def list_posts(sort_by = 'title'): 
+    return models.Post.objects.all().order_by(sort_by)
 
 def create_post(**kwargs):
     post = models.Post.objects.create(
@@ -30,3 +32,15 @@ def update_post(post, title, description):
 
 def delete_post(post):
     post.delete()
+
+
+# new added by sujit
+def list_posts_filtered(search_query, sort_by='posted_by'):
+    if search_query:
+        # Use Q objects to filter by first_name, last_name, or email
+        return models.User.objects.filter(
+            Q(posted_by__icontains=search_query) | 
+            Q(title__icontains=search_query) |
+            Q(description__icontains=search_query)
+        ).order_by(sort_by)
+    return models.Post.objects.all().order_by(sort_by)    

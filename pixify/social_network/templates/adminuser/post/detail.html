@@ -112,20 +112,13 @@
     </tbody>
 </table>
 
-
-
-
-
-
-
-
-
-
 <!-- <p>Title: {{ post.title }}</p>
 <p>Description: {{ post.description }}</p> -->
+<div class="text-start">
+    <a href="{% url 'post_list' %}" class="btn btn-sm btn-outline-secondary">Back</a>
+    <a href="{% url 'post_update' post.id %}" class="btn btn-sm btn-primary">Edit</a>
+</div>
 
-
-<a href="{% url 'post_update' post.id %}" class="btn btn-primary btn-sm">Edit</a> |
-<a href="{% url 'post_delete' post.id %}" class="btn btn-primary btn-sm">Delete</a> |
-<a href="{% url 'post_list' %}" class="btn btn-primary btn-sm">Back to Post List</a>
 {% endblock %}
+
+

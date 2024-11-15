@@ -7,7 +7,7 @@
 <div class="container-fluid my-5">
     <div class="row justify-content-center ">
         <div class="col-12 col-md-12 col-lg-12 ">
-            <div class="card border-primary ">
+            <div class="card shadow ">
                 <div class="card-header text-center">
                     <h2 class="text-info">Create Post</h2>
                 </div>
@@ -89,15 +89,10 @@
                                     <label class="form-check-label" for="is_active">Is Active</label>
                                 </div>
                             </div>
-                            <div class="container my-2">
-                                <button class="btn btn-primary btn-sm" type="submit">
-                                    Create                                 
-                                </button>                                     
-                                  
-                                  <button class="btn btn-primary btn-sm" type="submit">
-                                     <a class="text-decoration-none text-white" href="{% url 'post_list' %}">Back</a>
-                                  </button>   
-                        </div>
+                            <div class="text-start">
+                                <a href="{% url 'post_list' %}" class="btn btn-sm btn-outline-secondary">Back</a>
+                                <button type="submit" class="btn btn-sm btn-primary">Save</button>
+                            </div>
                         </form>
                         <!-- <a href="{% url 'post_list' %}" class="back-link">Back to Post List</a> -->
                 </div>
