@@ -43,6 +43,7 @@ urlpatterns = [
     path('request-otp/', views.RequestOTPView.as_view(), name='request_otp'),
     path('verify-otp/', views.VerifyOTPView.as_view(), name='verify_otp'),
     path('logout/', views.LogoutView.as_view(), name='logout'),
+    path('register/', views.UserRegistrationView.as_view(), name='register'),
 
     path('users/api', views.userListViewApi.as_view(), name='users_api')
 ]

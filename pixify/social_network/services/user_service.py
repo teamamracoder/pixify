@@ -29,5 +29,5 @@ def list_users_api(request):
         users = User.objects.all().values()
     return users
 
-  def get_user_by_email(email):
-    return models.User.objects.filter(email=email).first()
+def get_user_by_email(email):
+    return User.objects.filter(email=email).first()
