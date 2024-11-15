@@ -1,0 +1,94 @@
+{% extends "enduser/base.html" %}
+
+{% block title %}Pixify-AboutUs{% endblock %}
+
+{% block content %}
+
+{%load static %}
+
+<div class="px-3 py-3 mt-3"
+    style="background-color: #1f0447e3;box-shadow: 0 4px 8px rgba(151, 95, 236, 0.5);font-family: serif;border-radius: 7px;">
+        <div class=" d-flex align-items-center">
+            <img src="https://cdn-icons-png.flaticon.com/128/1144/1144760.png" alt="Logo" class="rounded-circle me-2" style="width:20px; height:20px; background-color:white;">
+            <h5 class="modal-title mb-1">Rima Das</h5>
+        </div>
+        <div class="post-center pb-3 mb-3" style="margin-left: 0px;">
+            <p class="px-3 pt-2" style="font-size:15px; margin: 0; margin-bottom: 5px;" >Wow, this is good</p>
+
+            <div class="post-box pb-2">
+
+
+            <div class="post-des-img">
+                <img src="{% static 'images/green.png' %}" class="img-fluid" alt="Responsive image">
+            </div>
+            <div class="post-react-det">
+                <div class="post-react">
+                    <i class="fa-regular fa-heart"></i>
+                    <a href="/comments"><i class="fa-regular fa-comment"></i></a>
+                    <i class="fa-solid fa-bookmark me-2"></i>
+                    <i class="fa-solid fa-share-nodes" data-bs-toggle="modal" data-bs-target="#shareModal"></i>
+                    <i class="fa-solid fa-pen post-pe-icon"></i>
+                    <i class="fa-solid fa-trash post-pe-icon"></i>
+                </div>
+                <div class="post-date-time">
+                    <p>10November2024 20:05pm </p>
+                    <p></p>
+                </div>
+               </div>
+            </div>
+
+        </div>
+        <div class="comment-section pb-3">
+                <div class="comment-box p-1">
+                    <div class="border border-dark m-1 p-2 mb-2" style="height: auto;">
+                        <div class="d-flex py-1 align-items-center">
+                            <img src="{% static 'images/green.png'%}" alt="User" class="" style="width:20px; height:20px; background-color:darkcyan;">
+                            <div class="comment-text mb-0 ps-3">
+                                <span class="d-block">Rima Das</span>
+                                <span class="fw-light" style="font-size:11px">Wow ! What a picture '</span>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="border border-dark m-1 p-2 mb-2" style="height: auto;">
+                        <div class="d-flex py-1 align-items-center">
+                            <img src="{% static 'images/green.png'%}" alt="User" class="" style="width:20px; height:20px; background-color:darkcyan;">
+                            <div class="comment-text mb-0 ps-3">
+                                <span class="d-block">Subhasis Barman</span>
+                                <span class="fw-light" style="font-size:11px">Wow ! What a picture '</span>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="">
+                    <div class="d-flex align-items-start mb-2 mt-3">
+                        <img src="{% static 'images/avatar.jpg'%}" alt="User" class="rounded-circle" style="width:25px; height:25px; background-color:white;margin:0px auto;">
+                        <textarea class="ms-2 px-2 form-control fileInputStyle"  style="background-color: #f8f9fa" rows="2" placeholder="Comment..."></textarea>
+                    </div>
+                    {% comment %} <div class="d-flex justify-content-between align-items-center">
+                        <div class="icon-container">
+                            <span class="icon like-icon">👩</span>
+                            <span class="icon emoji-icon">👍</span>
+                            <span class="icon camera-icon">🤗</span>
+                            <span class="icon gif-icon">🎥</span>
+                            <span class="icon sticker-icon">🌟</span>
+                        </div>
+                        <button class="btn btn-primary ms-3" style="font-size: 10px; font-weight: bold; border-radius: 0;">
+                            COMMENT
+                        </button>
+                    </div> {% endcomment %}
+                </div>
+        </div>
+
+
+
+
+    </div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+
+
+{% endblock %}
