@@ -1,6 +1,7 @@
 {% extends "enduser/base.html" %}
 
 {% block title %}Pixify-Home{% endblock %}
+
 {% load static %}
 {% block content %} 
 
@@ -80,5 +81,45 @@
 
 
 
+    <div class="container post-center pb-3">
+        <div class="post-box pb-2">
+        <div class="post-top">
+            <a href="">
+                <img src="{% static 'images/IMG_20240915_213320.jpg' %}" alt="avatar" class="rounded-circle me-1 " style="width: 28px; object-fit: cover; height: 28px; " >
+               </a><h6 class="u-name"> Sribash Sarkar</h6>
+        </div>
+        <div class="post-des-img">
+            <p class="px-3 pt-2" style="font-size:15px; margin: 0; margin-bottom: 5px;padding-bottom:13px;" >Wow, this is good</p>
+            <img src="{% static 'images/green.png' %}" class="img-fluid" alt="Responsive image">
+        </div>
+        <div class="post-react-det">
+            <div class="post-react">
+                <i class="fa-regular fa-heart"></i>
+                <i class="fa-regular fa-comment"></i>
+                <i class="fa-solid fa-bookmark me-2"></i>
+                <i class="fa-solid fa-share-nodes" data-bs-toggle="modal" data-bs-target="#shareModal"></i>
+            </div>
+            <div class="post-date-time">
+                <p>10November2024 20:05pm </p>
+                <p></p>
+            </div>
+           </div>
+        </div>
+        {% comment %} <div class="p-3 rounded shadow pb-5" style="width: 100%;border:1.5px solid #975fec">
+             <div class="d-flex" type="button" >
+                <div class="p-1">
+                    <img src="{% static 'images/avatar.jpg' %}" alt="avatar" class="rounded-circle me-2" style="width: 38px; height: 38px; object-fit: cover;">
+                </div>
+                <div class="border" style="width: 100%; height: 88px; border-radius: 10px;background-color: rgb(61, 61, 107);border:none !important;">
+                <div class="com-post-et">
+                    <div class="coment">
+                    <input type="text" class="from-control rounded-pill border-0 bg-gray" style="width: 100%;height: 35px;color: black; border: none; text-decoration: none; padding: 20px;background-color: rgb(61, 61, 107);" placeholder="comment">
+                    </div>
+                    <i class="far fa-smile" style="padding: 20px; color: black;"></i>
+                    <i class="far fa-image" style="color: black;"></i>
+
+
 <script type="text/javascript" src="{% static 'js/sribash.js' %}"></script>
 {% endblock %}
+
+
