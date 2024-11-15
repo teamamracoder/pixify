@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from django.views import View
 from .. import services
 
+
 class PostListView(View):
     def get(self, request):
         posts = services.post_service.list_posts()
@@ -11,11 +12,18 @@ class PostCreateView(View):
     def get(self, request):
         return render(request, 'adminuser/post/create.html')
 
+
     def post(self, request):
         title = request.POST['title']
         description = request.POST['description']
-        services.post_service.create_post(title, description)
+        services.post_service.create_post(title,description)
         return redirect('post_list')
+
+   
+
+
+
+
 
 class PostDetailView(View):
     def get(self, request, post_id):
@@ -43,3 +51,5 @@ class PostDeleteView(View):
         post = services.post_service.get_post(post_id)
         services.post_service.delete_post(post)
         return redirect('post_list')
+
+

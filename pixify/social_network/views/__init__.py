@@ -11,5 +11,5 @@ from .enduserprofile_view import *
 from .comments_view import *
 from .friendrequest_view import *
 from .birthday_view import *
-from .
+from .friends_view import *
 
