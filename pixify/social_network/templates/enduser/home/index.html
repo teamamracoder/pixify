@@ -134,20 +134,22 @@
                       class="user-avatar me-2">
                   <span class="fw-bold text-light">Priya Mitra</span>
               </div>
+              <form action="enduser/home/index/" method="POST" class="button" id="form" enctype="multipart/form-data">
+                {% csrf_token %}
               <div class="mb-3  ">
                   <textarea class="form-control " placeholder="What do you want to talk about?" rows="2"
-                      style="resize: none;"></textarea>
+                      style="resize: none;" name="title"></textarea>
               </div>
              
               <div class="mb-3" >
-                <form action="/upload" method="POST" class="button" id="form">
+                {% comment %} <form action="/upload" method="POST" class="button" id="form"> {% endcomment %}
                     <label for="fileInput " class="file-upload-label bg-secondary" style="width: 100%; outline:none;border:none">
-                        <input type="file" class="form-control d-none bg-secondary" id="fileInput" multiple>
+                        <input type="file" class="form-control d-none bg-secondary" id="fileInput" multiple name="media_url">
                         <p style="color:black;" class="select">Drag and drop photos or videos, or click to
                             browse</p>
                         <i class="bi bi-image" style="color:black; font-size:22px;" class="inner"></i>
                     </label>
-                </form>
+                {% comment %}</form>  {% endcomment %}
                 <div class="con">
                 </div>
             </div>
@@ -166,8 +168,9 @@
             </div>
           </div>
           <div class="justify-content-center mx-auto mb-3">
-              <button type="button" class="btn btn-light mx-auto b_btn px-5" disabled>Post</button>
+              <button type="submit" class="btn btn-light mx-auto b_btn px-5" >Post</button>
           </div> 
+        </form> 
       </div>
   </div>
 </div>
