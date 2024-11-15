@@ -1,8 +1,12 @@
 from .. import models
 from django.shortcuts import get_object_or_404
+from django.db.models import Q
 
-def list_chats():
-  return models.Chat.objects.all()
+
+# def list_chats():
+#   return models.Chat.objects.all()
+def list_chats(sort_by='title'):
+    return models.Chat.objects.all().order_by(sort_by)
 
 
 def create_chats(**kwargs):
@@ -23,7 +27,7 @@ def update_chats(chat,title,type,is_active,chat_cover,created_by, updated_by):
    chat.title=title
    chat.type=type
    chat.is_active=is_active
-   chat.created_by=created_by
+#    chat.created_by=created_by
    chat.chat_cover=chat_cover
    chat.updated_by=updated_by
    
@@ -32,3 +36,13 @@ def update_chats(chat,title,type,is_active,chat_cover,created_by, updated_by):
 
 def delete_chats(chat):
     chat.delete()
+
+def list_chats_filtered(search_query, sort_by='title'):
+    if search_query:
+        
+        return models.Chat.objects.filter(
+            Q(title__icontains=search_query) | 
+            Q(type__icontains=search_query) |
+            Q(chat_cover__icontains=search_query)
+        ).order_by(sort_by)
+    return models.Chat.objects.all().order_by(sort_by)

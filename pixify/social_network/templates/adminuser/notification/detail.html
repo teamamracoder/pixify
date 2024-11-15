@@ -1,0 +1,55 @@
+
+{% extends "../base.html" %}
+
+{% block title %}Notification Details{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid my-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-12 col-lg-12">
+            <div class="card shadow-sm">
+                <div class="card-header text-center">
+                    <h2 class="text-info">Notification Details</h2>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="form-group col-md-4 col-lg-5 col-sm-12 mb-3">
+                                <label for="text">Text: </label>
+                                <input type="text" value="{{notification.text}}" class="form-control" id="text" name="text">
+                            </div>
+                            <div class="form-group col-md-4 col-lg-5 col-sm-12 mb-3">
+                                <label for="mediaurl">Media URL: </label>
+                                <input type="text" value="{{notification.media_url}}" class="form-control" id="media_url" name="media_url">
+                            </div>
+                           
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-md-4 col-lg-5 col-sm-12 mb-3">
+                                <label for="receiverid">Receiver_ID</label>
+                                <input type="text" value="{{notification.receiver_id}}" class="form-control" id="receiver_id" name="receiver_id">
+                            </div>
+
+                            <div class="form-group col-md-4 col-lg-5 col-sm-12 mb-3">
+                                <label for="isread">IS_Read</label>
+                                <input type="text" value="{{notification.is_read}}"  class="form-control" id="is_read" name="is_read">
+                            </div>
+                        </div>            
+                       
+
+                            <div class="container my-2">                                                         
+                                <button class="btn btn-primary btn-sm">
+                                    <a  class="text-decoration-none text-white"  href="{% url 'notification_create' %}">Edit</a>
+                                  </button>                              
+                                  <button class="btn btn-primary btn-sm">
+                                     <a  class="text-decoration-none text-white"  href="{% url 'notification_list' %}">Back</a>
+                                  </button>   
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>       
+</div>
+{% endblock %}
