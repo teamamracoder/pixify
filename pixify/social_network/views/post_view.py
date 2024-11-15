@@ -26,7 +26,8 @@ class PostCreateView(View):
                     'is_active': request.POST.get('is_active', 'on') == 'on'
                 }
         services.post_service.create_post(**post_data) 
-        return redirect(request,'adminuser/post/list.html') 
+        return redirect(request,'adminuser/post/create.html') 
+        # return redirect(request,'adminuser/post/list.html')
                 
 
 class PostDetailView(View):
