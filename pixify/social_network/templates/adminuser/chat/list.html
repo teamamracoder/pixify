@@ -1,3 +1,5 @@
+
+
 {% extends "../base.html" %}
 
 {% block title %}Chat List{% endblock %}
@@ -7,59 +9,73 @@
         .hover-bg:hover {
         background-color: rgba(240, 242, 245, 0.1);
         color:aqua; 
+
+
     }
 </style>
 
-<div class="container mt-5">
+<div class="container-fluid my-5">
     <div class="row justify-content-center">
-        <div class="col">
-            <h2 class="text-center mb-4">Chat List</h2>
-            
-            <div class="d-flex justify-content-between mb-3">
-                <div class="input-group" style="max-width: 300px;">
-                    <button class="btn btn-outline-secondary">Name</button>
-                    <button class="btn btn-outline-secondary">A-Z</button>
-                    <input type="text" class="form-control border-secondary" placeholder="Search" aria-label="Search">
-                    <span class="input-group-text border-secondary bg-info text-dark"><i class="bi bi-search"></i></span> 
+        <div class="col-12 col-md-12 col-lg-12">
+            <div class="">
+                <div class="card-header text-center">
+                    <h2 class="">Chat List</h2>
                 </div>
-                <button class="btn btn-primary btn-sm"><a href="{% url 'chat_create' %}" class="text-white text-decoration-none">Create Chats</a></button>
-            </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-3">
+                        <div class="input-group" style="max-width: 300px;">
+                            <button class="btn btn-outline-secondary">Name</button>
+                            <button class="btn btn-outline-secondary">A-Z</button>
+                            <input type="text" class="form-control border-secondary" placeholder="Search" aria-label="Search">
+                            <span class="input-group-text border-secondary bg-info text-dark"><i class="bi bi-search"></i></span> 
+                        </div>
+                        <button class="btn btn-primary btn-sm"><a href="{% url 'chat_create' %}" class="text-white text-decoration-none">Add Chat</a></button>
+                    </div>
+                            
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-info text-white"> 
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Type</th>                                 
+                                    <th>Chat_Cover</th>
+                                    <th>Status</th>                            
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for chat in chats %}
+                                <tr>
+                                    <td>
+                                        
+                                        <a href="#" class="hover-bg">{{ chat.title }}</a>
+                                        
+                                    </td>
+                                    <td>
+                                        {% for type in choices_type %}
+                                        {% for name, value in type.items %}
+                                            <!-- Check if the gender matches user.gender and display it -->
+                                            {% if name == chat.type %}
+                                                {{ value }}
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% endfor %}
 
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead class="table-info text-white"> 
-                        <tr>
-                            <th>Title</th>
-                            <th>Type</th>
-                            <th>Members</th>
-                            <th>Action</th>                            
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for chat in chats %}
-                        <tr>
-                            <td>
-                                
-                                  <a href="{% url 'chat_detail' chat.id %}">{{ chat.title }}</a>
-                                
-                            </td>
-                            <td>{{ chat.type }}</td>
-                            <td>{{ chat.member }}</td>
-                            <td>
-                               <div class="d-flex gap-2">
-                                    <button class="btn btn-sm shadow-none"><a href="{% url 'chat_update' %}"><i class="bi bi-pencil-square"></i></a></button>
-                                    <button class="btn btn-sm shadow-none"><a href="{% url 'chat_delete' %}"><i class="bi bi-trash text-danger"></i></a></button>
-                                </div>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                                    </td>
+                                    
+                                    <td>{{ chat.chat_cover }}</td>
+                                    <td><i class="bi bi-eye text-primary"></i><td>
+                                    
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                        </div>
+                    
+                </div>
             </div>
-        </div>
-    </div>
+        </div>       
 </div>
-
 
 
 

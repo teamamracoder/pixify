@@ -1,6 +1,10 @@
 from django.shortcuts import render, redirect
 from django.views import View
 from .. import services
+from ..models import User
+from ..models import Chat
+from ..constants import ChatType
+
 
 # everyone insert data manually
 # user (5)
@@ -54,31 +58,33 @@ class ChatView(View):
 
 class ChatAdminListView(View):
     def get(self, request):
+        choices_type = [{type.value: type.name} for type in ChatType]
         chats = services.chat_service.list_chats()
-        return render(request, 'adminuser/chat/list.html',{'chats':chats})
+        return render(request, 'adminuser/chat/list.html',{'chats':chats,'choices_type':choices_type })
 
 
 class ChatAdminCreateView(View):
     def get(self, request):       
-        return render(request, 'adminuser/chat/create.html')
+        choices_type = [{type.value: type.name} for type in ChatType]
+        return render(request, 'adminuser/chat/create.html',{'choices_type':choices_type})
 
     def post(self, request):
-        title=request.POST['title']
-        # member=request.POST['member']
-        type=request.POST['type']
-        is_active=request.POST.get('is_active' 'True')=='True'
-        created_at=request.POST.getlist('created_at')
-        updated_at=request.POST.getlist('updated_at')
-        created_by_id=request.POST.getlist('created_by_id')
-        updated_by_id=request.POST.getlist('updated_by_id')
-        chat_cover=request.POST.getlist('chat_cover')
-        services.chat_service.create_chats(title,type,is_active,created_at,updated_at,created_by_id,updated_by_id,chat_cover)
-        return redirect ('chat_list')
+        chat_data={
+        'title': request.POST['title'],      
+        'type': request.POST['type'],       
+        'chat_cover': request.POST.get('chat_cover', ''), 
+        #'created_by_id': Chat.objects.get(id=request.POST['created_by_id']),
+        'is_active': request.POST.get('is_active', 'on') == 'on',
+        'created_by':User.objects.get(id=request.POST['created_by']),
+        'updated_by':User.objects.get(id=request.POST['updated_by'])
+        }
+        services.chat_service.create_chats(**chat_data)
+        return redirect (request,'adminuser/chat/list.html')
     
 class ChatAdminDetailView(View):
-    def get(self, request, chat_id):
-        chat = services.chat_service.get_chat(chat_id)
-        return render(request, 'adminuser/chat/detail.html', {'chat': chat}) 
+    def get(self, request):
+        #chat = services.chat_service.get_chat(chat_id)
+        return render(request, 'adminuser/chat/detail.html') 
         
 
 class ChatAdminUpdateView(View):
@@ -90,8 +96,9 @@ class ChatAdminUpdateView(View):
         chat = services.chat_service.get_chat(chat_id)
         title = request.POST['title']
         type = request.POST['type']
+        chat_cover = request.POST['chat_cover']
         
-        services.chat_service.update_chats(chat, title,type)
+        services.chat_service.update_chats(chat, title,type,chat_cover)
         return redirect('chat_detail', chat_id=chat.id)
     
 
@@ -104,3 +111,5 @@ class ChatAdminDeleteView(View):
         chat= services.chat_service.get_chat(chat_id)
         services.chat_service.delete_chats(chat)
         return redirect('chat_list')
+
+

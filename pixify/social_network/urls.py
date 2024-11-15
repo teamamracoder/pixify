@@ -26,7 +26,7 @@ urlpatterns = [
     #chat
     path('admin/chat/', views.ChatAdminListView.as_view(), name='chat_list'),
     path('admin/chat/create/', views.ChatAdminCreateView.as_view(), name='chat_create'),
-    path('admin/chat/<int:chat_id>/', views.ChatAdminDetailView.as_view(), name='chat_detail'),
+    path('admin/chat/detail/', views.ChatAdminDetailView.as_view(), name='chat_detail'),
     path('admin/chat/<int:chat_id>/update/', views.ChatAdminUpdateView.as_view(), name='chat_update'),
     path('admin/chat/<int:chat_id>/delete/', views.ChatAdminDeleteView.as_view(), name='chat_delete'),
     
