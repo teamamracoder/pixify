@@ -89,3 +89,20 @@ function updateTimeStamps() {
 // Call the function to update time stamps
 updateTimeStamps();
 updateTimeStamps();
+
+
+
+// Work by Badhan
+
+document.addEventListener("DOMContentLoaded", () => {
+    const confirmButton = document.querySelector('.btn-primary');
+    const deleteButton = document.querySelector('.btn-secondary');
+
+    confirmButton.addEventListener('click', () => {
+        alert('Friend request confirmed!');
+    });
+
+    deleteButton.addEventListener('click', () => {
+        alert('Friend request deleted!');
+    });
+});

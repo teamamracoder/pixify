@@ -43,6 +43,8 @@ urlpatterns = [
 
     path('friendrequest/', views.FriendRequestView.as_view(), name='friendrequest'),
 
-     path('birthday/', views.BirthdayView.as_view(), name='birthday')
+    path('birthday/', views.BirthdayView.as_view(), name='birthday'),
+
+    path('userprofile/', views.UserprofileView.as_view(), name='userprofile'),
 
 ]
