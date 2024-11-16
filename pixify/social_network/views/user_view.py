@@ -1,10 +1,12 @@
 import datetime
 from django.http import HttpResponseBadRequest
-from django.shortcuts import render, redirect
+from django.shortcuts import get_object_or_404, render, redirect
 from django.views import View
+
 from .. import services
 from ..constants import Gender, RelationShipStatus, Role
 from django.core.paginator import Paginator    #  added by sujit
+from django.http import JsonResponse
 
 # new added by sujit-----------
 class UserListView(View):
@@ -138,4 +140,21 @@ class UserDeleteView(View):
         user = services.user_service.get_user(user_id)
         services.user_service.delete_user(user)
         return redirect('user_list')
+
+
+class ToggleUserActiveView(View):
+    def post(self, request, user_id):
+        user = services.user_service.get_user(user_id)
+        user.is_active = not user.is_active  # Toggle active status
+        user.save()
+        return JsonResponse({'is_active': user.is_active})
+
+
+
+class UserProfileView(View):
+    def get(self, request):
+        # user = services.user_service.get_user()
+        return render(request, 'adminuser/user/user_profile.html')
+    
+
 
