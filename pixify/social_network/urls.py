@@ -20,7 +20,7 @@ urlpatterns = [
     path('admin/notifications/', views.NotificationListView.as_view(), name='notification_list'),
     path('admin/notifications/create/', views.NotificationCreateView.as_view(), name='notification_create'),
     path('admin/notifications/<int:notification_id>/detail/', views.NotificationDetailView.as_view(), name='notification_detail'),
-    # path('admin/notifications/<int:notification_id>/update/', views.NotificationUpdateView.as_view(), name='notification_update'),
+    path('admin/notifications/<int:notification_id>/update/', views.NotificationUpdateView.as_view(), name='notification_update'),
     # path('admin/notifications/<int:delete_id>/delete/', views.NotificationDeleteView.as_view(), name='notification_delete'),
 
     # post
@@ -30,22 +30,11 @@ urlpatterns = [
     path('admin/posts/<int:post_id>/update/', views.PostUpdateView.as_view(), name='post_update'),
     path('admin/posts/<int:post_id>/delete/', views.PostDeleteView.as_view(), name='post_delete'),
 
-    #chat
-    path('admin/chat/', views.ChatAdminListView.as_view(), name='chat_list'),
-    path('admin/chat/create/', views.ChatAdminCreateView.as_view(), name='chat_create'),
-    path('admin/chat/<int:chat_id>/', views.ChatAdminDetailView.as_view(), name='chat_detail'),
-    path('admin/chat/<int:chat_id>/update/', views.ChatAdminUpdateView.as_view(), name='chat_update'),
-    path('admin/chat/<int:chat_id>/delete/', views.ChatAdminDeleteView.as_view(), name='chat_delete'),
-    
-
 
     # message
     # path('message/', views.messageView.as_view(), name='message'),
     path('chat/', views.ChatView.as_view(), name='chat'),
 
     # notification
-    path('notification/', views.notificationView.as_view(), name='notification'),
-
-
-
-]
+    path('notification/', views.notificationView.as_view(), name='notification')
+]  
