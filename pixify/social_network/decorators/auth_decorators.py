@@ -1,7 +1,7 @@
 from django.http import HttpResponseForbidden
 from django.contrib.auth.decorators import login_required
 from functools import wraps
-from django.shortcuts import redirect
+from django.shortcuts import redirect, render
 from django.utils.decorators import method_decorator
 
 
@@ -24,7 +24,7 @@ def role_required(*roles):
             if len(set(request.user.roles) & set(roles)) > 0:
                 return view_func(self, request, *args, **kwargs)
             else:
-                return redirect('/')
+                return render(request, "error/403.html")
 
         # If this is a method in a class-based view, apply as a method_decorator
         return (
