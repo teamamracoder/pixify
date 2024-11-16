@@ -45,4 +45,8 @@ urlpatterns = [
     path('logout/', views.LogoutView.as_view(), name='logout'),
 
     path('users/api', views.userListViewApi.as_view(), name='users_api')
+    # message_edit and deleat
+    # path('message/<int:message_id>/edit', views.MessageEditView.as_view(), name='message_edit'),
+    # path('message/<int:message_id>/delete', views.MessageDeleteView.as_view(), name='message_delete'),
+
 ]
