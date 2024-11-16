@@ -18,7 +18,7 @@
                         <div class="row">
                             <div class="form-group col-md-4 col-lg-5 col-sm-12 mb-3">
                                 <label for="text">Text: </label>
-                                <input type="text" value="{{notification.text}}" class="form-control" id="text" name="text">
+                                <input type="text" value="{{notification.text}}"  class="form-control" id="text" name="text">
                             </div>
                             <div class="form-group col-md-4 col-lg-5 col-sm-12 mb-3">
                                 <label for="mediaurl">Media URL: </label>
@@ -34,22 +34,15 @@
 
                             <div class="form-group col-md-4 col-lg-5 col-sm-12 mb-3">
                                 <label for="isread">IS_Read</label>
-                                <input type="text" value="{{notification.is_read}}"  class="form-control" id="is_read" name="is_read">
+                                <input type="text" value="{{notification.is_read}}" class="form-control" id="is_read" name="is_read">
                             </div>
-                        </div>            
-                       
-
-                            <div class="container my-2">                                                         
-                                <button class="btn btn-primary btn-sm">
-                                    <a  class="text-decoration-none text-white"  href="{% url 'notification_create' %}">Edit</a>
-                                  </button>                              
-                                  <button class="btn btn-primary btn-sm">
-                                     <a  class="text-decoration-none text-white"  href="{% url 'notification_list' %}">Back</a>
-                                  </button>   
-                        </div>
-                    </form>
+                            <div class="text-start">
+                                <a href="{% url 'notification_list' %}" class="btn btn-sm btn-outline-secondary">Back</a>
+                                <a href="{% url 'notification_update' notification.id %}" class="btn btn-sm btn-primary">Edit</a>
+                            </div>
+                        </div>    
+                    </div>
                 </div>
-            </div>
-        </div>       
-</div>
-{% endblock %}
+            </div>       
+        </div>
+</div>{% endblock %}
