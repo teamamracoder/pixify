@@ -40,6 +40,14 @@ class RelationShipStatus(Enum):
     
 class MasterType(Enum):
     REACTION = 1
+
+
+class ResponseMessageType(Enum):
+    SUCCESS='success'
+    ERROR='error'
+    WARNING='warning'
+    INFO='info'
+    NONE='null'
     
     
 # static values, insert these in master_lists table
