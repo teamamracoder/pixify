@@ -165,3 +165,11 @@ class ChatAdminDeleteView(View):
         return redirect('chat_list')
 
 
+class ToggleUserActiveView(View):
+    def post(self, request, chat_id):
+        chat = services.chat_service.get_chat(chat_id)
+        chat.is_active = not chat.is_active  # Toggle active status
+        chat.save()
+        return redirect({'is_active': chat.is_active})
+
+
