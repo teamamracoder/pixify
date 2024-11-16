@@ -16,48 +16,79 @@
             <h2 class="text-center mb-4">Notifications</h2>
 
             <div class="d-flex justify-content-between mb-3">
-                <div class="input-group" style="max-width: 300px;">
-                    <button class="btn btn-outline-secondary">Name</button>
-                    <button class="btn btn-outline-secondary">A-Z</button>
-                    <input type="text" class="form-control border-secondary" placeholder="Search" aria-label="Search">
-                    <span class="input-group-text border-secondary bg-info text-dark"><i class="bi bi-search"></i></span> 
-                </div>
-                <button class="btn btn-primary btn-sm"><a href="{% url 'notification_create' %}" class="text-white text-decoration-none">Add Notification</a></button>
+                <button class="btn btn-primary btn-sm"><a href="{% url 'notification_create' %}" class="text-white text-decoration-none">Add Notifications</a></button>
+               
+                <form method="get" action="{% url 'notification_list' %}">
+                    <div class="input-group" style="max-width: 300px;">
+                        <input type="text" class="form-control border-secondary" placeholder="Search" aria-label="Search" name="search" value="{{ search_query }}">
+                        <button class="btn btn-outline-secondary">Search</button>
+                    </div>
+                </form>
             </div>
 
             <div class="table-responsive">
                 <table class="table table-hover">
                     <thead class="table-info text-white"> 
                         <tr>
-                            <th>Text</th>
-                            <th>Media URL</th>
-                            <th>Receiver_ID</th>
-                            <th>IS_Read</th>
-                            <th>Action</th>
+                            <th>
+                                <a href="?sort_by=text&sort_order={% if sort_order == 'asc' %}desc{% else %}asc{% endif %}">Text</a>
+                            </th>
+                            <th>
+                                <a href="?sort_by=media_url&sort_order={% if sort_order == 'asc' %}desc{% else %}asc{% endif %}">Media URL</a>
+                            </th>
+                            <th>
+                                <a href="?sort_by=is_read&sort_order={% if sort_order == 'asc' %}desc{% else %}asc{% endif %}">IS_Read</a>
+                            </th>
+                            <th>
+                                Status
+                            </th>
                         </tr>
                     </thead>
+
+
                     <tbody>
                         {% for notification in notifications %}
                         <tr>
                             <td>
                                 <a class="text-decoration-none text-primary hover-bg" href="{% url 'notification_detail' notification.id %}">
-                                    {{ notification.text }} {{ notification.media_url }} {{ notification.receiver_id }} {{ notification.is_read }}
+                                    {{notification.text }}
                                 </a>
-                            </td>
-                            <td>{{ notification.text }}</td>
+                            </td>                      
+                                                    
                             <td>{{ notification.media_url }}</td>
-                            <td>{{ notification.receiver_id }}</td>
+
                             <td>{{ notification.is_read }}</td>
                             <td>
                                 <div class="d-flex gap-2">
-                                    <button class="btn btn-sm shadow-none"><a href="#"><i class="bi bi-pencil-square"></i></a></button>
-                                    <button class="btn btn-sm shadow-none"><a href="#"><i class="bi bi-trash text-danger"></i></a></button>
+                                    <button class="btn btn-sm shadow-none"><a href=""><i class="bi bi-eye"></i></a></button>
                                 </div>
                             </td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
+
+
+                <div class="pagination">
+                    <span class="step-links">
+                        {% if notifications.has_previous %}
+                            <a href="?page=1&search={{ search_query }}&sort_by={{ sort_by }}&sort_order={{ sort_order }}">First</a>
+                            <a href="?page={{ notifications.previous_page_number }}&search={{ search_query }}&sort_by={{ sort_by }}&sort_order={{ sort_order }}">Previous</a>
+                        {% endif %}
+                
+                        <span class="current">
+                            Page {{ notifications.number }} of {{ notifications.paginator.num_pages }}.
+                        </span>
+                
+                        {% if notifications.has_next %}
+                            <a href="?page={{ notifications.next_page_number }}&search={{ search_query }}&sort_by={{ sort_by }}&sort_order={{ sort_order }}">Next</a>
+                            <a href="?page={{ notifications.paginator.num_pages }}&search={{ search_query }}&sort_by={{ sort_by }}&sort_order={{ sort_order }}">Last</a>
+                        {% endif %}
+                    </span>
+                </div>
+
+
+
             </div>
         </div>
     </div>

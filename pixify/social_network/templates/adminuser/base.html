@@ -160,7 +160,7 @@
                                                 class="list-group-item list-group-item-action ui-bg-grey border-0 ps-4">
                                                 <i class="bi bi-tools fs-6 me-2"></i>
                                                 List</a>
-                                            <a href="#"
+                                            <a href="{% url 'post_create' %}"
                                                 class="list-group-item list-group-item-action ui-bg-grey border-0 ps-4">
                                                 <i class="bi bi-diagram-3 fs-6 me-2"></i>
                                                 Create</a>                                          
@@ -181,11 +181,11 @@
                                     data-bs-parent="#accordionContainer">
                                     <div class="accordion-body p-0">
                                         <div class="list-group rounded-0">
-                                            <a href="{% url 'chat_list' %}"
-                                                class="list-group-item list-group-item-action ui-bg-grey border-0 ps-4">
+                                            <a href=""                                              
+                                              class="list-group-item list-group-item-action ui-bg-grey border-0 ps-4">
                                                 <i class="bi bi-chat-dots fs-6 me-2"></i>
                                                 List</a>
-                                            <a href="{% url 'chat_create' %}"
+                                                <a href="#"
                                                 class="list-group-item list-group-item-action ui-bg-grey border-0 ps-4">
                                                 <i class="bi bi-telephone-inbound me-2 fs-6"></i>
                                                Create</a>
@@ -205,11 +205,11 @@
                                 <div id="user" class="accordion-collapse collapse" data-bs-parent="#accordionContainer">
                                     <div class="accordion-body p-0">
                                         <div class="list-group rounded-0">
-                                            <a href="#"
+                                            <a href="{% url 'notification_list' %}"
                                                 class="list-group-item list-group-item-action ui-bg-grey border-0 ps-4">
                                                 <i class="bi bi-person me-2 fs-5"></i>
                                                 List</a>
-                                            <a href="#"
+                                            <a href="{% url 'notification_create' %}"
                                                 class="list-group-item list-group-item-action ui-bg-grey border-0 ps-4">
                                                 <i class="bi bi-person-gear me-2 fs-5"></i>
                                                 Create</a>
