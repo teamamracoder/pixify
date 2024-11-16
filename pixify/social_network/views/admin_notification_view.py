@@ -1,13 +1,46 @@
-
 from django.shortcuts import render, redirect
 from django.views import View
 from .. import services
-from ..models import Notification
+from ..models import User
+from django.core.paginator import Paginator    
 
 class NotificationListView(View):
     def get(self, request):
-        notifications = services.admin_notification_service.list_notifications()
-        return render(request, 'adminuser/notification/list.html',{'notifications':notifications})
+        # Fetch the search query from the URL parameters
+        search_query = request.GET.get('search', '') 
+        sort_by = request.GET.get('sort_by', 'text')
+        sort_order = request.GET.get('sort_order', 'asc')
+        page_number = request.GET.get('page', 1)
+
+
+        # Adjust sort order for descending order
+        if sort_order == 'desc':
+            sort_by = '-' + sort_by
+
+        print(f"Search Query: {search_query}")
+        # Get filtered and sorted users based on search
+        notifications = services.admin_notification_service.list_notifications_filtered(search_query, sort_by)
+
+        # Paginate the users
+        paginator = Paginator(notifications, 10)  # Show 10 users per page
+        page_obj = paginator.get_page(page_number)
+
+        # choices_gender = [{gender.value: gender.name} for gender in Gender]
+
+        return render(request, 'adminuser/notification/list.html', {
+            'notifications': page_obj,
+            # 'choices_gender': choices_gender,
+            'sort_by': sort_by,
+            'sort_order': sort_order,
+            'search_query': search_query,  # Ensure this is being passed to the template
+            'page_obj': page_obj,
+        })
+
+
+# class NotificationListView(View):
+#     def get(self, request):
+#         notifications = services.admin_notification_service.list_notifications()
+#         return render(request, 'adminuser/notification/list.html',{'notifications':notifications})
     
 
 class NotificationCreateView(View):
@@ -15,52 +48,50 @@ class NotificationCreateView(View):
         return render(request, 'adminuser/notification/create.html')
   
     
-    def notification(self, request):
+    def post(self, request):
         notification_data = {
-            'receiver_id': Notification.objects.get(id=request.POST['receiver_id']),
+            'receiver_id': User.objects.get(id=request.POST['receiver_id']),
             'text': request.POST['text'],           
             'media_url': request.POST.get('media_url', ''), 
-            'is_read': request.POST['is_read'],            
-            # 'is_active': request.POST.get('is_active', 'on') == 'on'
+            'is_read': request.POST['is_read']     
+            
         }
         services.admin_notification_service.create_notifications(**notification_data) 
-        return redirect(request,'adminuser/notification/create.html') 
-         
-
-
+        # return redirect(request,'adminuser/notification/list.html') 
+        return redirect('notification_list')         
 
 class NotificationDetailView(View):
     def get(self, request, notification_id):
         notification = services.admin_notification_service.get_notification(notification_id)
         return render(request, 'adminuser/notification/detail.html',{'notification': notification})
 
-# class NotificationUpdateView(View):
-#     def get(self, request):
-#         # services.admin_notification_service.get_notification()
-#         return render(request, 'adminuser/notification/update.html')
 
-#     def post(self, request, post_id):
-#         notification = services.admin_notification_service.get_notification()
-#         text = request.POST['text']
-#         media_url = request.POST['media_url']
-#         receiver_id = request.POST['receiver_id']
-#         is_read = request.POST['is_read']
-#         notification = services.admin_notification_service.update_notification(notification, text, media_url, receiver_id, is_read,)
-#         return redirect('notification_detail')
-
+class NotificationUpdateView(View):
+    def get(self, request, notification_id):
+        notification = services.admin_notification_service.get_notification(notification_id)
+        return render(request, 'adminuser/notification/update.html',{'notification': notification})
     
+    def post(self, request, notification_id):
+        notification = services.admin_notification_service.get_notification(notification_id)
+
+        notification_data = {
+            'id' : notification.id,           
+            'receiver_id': User.objects.get(id=request.POST['receiver_id']),
+            'text': request.POST['text'],           
+            'media_url': request.POST.get('media_url', ''), 
+            'is_read': request.POST['is_read']     
+        }
+        services.admin_notification_service.update_notifications(**notification_data) 
+        return redirect(request,'adminuser/notification/list.html')
+
 
 
 # class NotificationDeleteView(View):
-#     def get(self, request):
-#         return render(request, 'adminuser/notification/delete.html')   
+#     def get(self, request, notification_id):
+#         notification = services.admin_notification_service.get_user(notification_id)
+#         return render(request, 'adminuser/notification/delete.html', {'notification': notification})
 
-    
-    # def post(self, request):
-    #     notification = services.notification_service.get_notification()
-    #     notification = services.delete_notification_service.delete_notifications(notification)
-    #     return redirect('notification_list')
-    
-
-
-
+#     def post(self, request, notification_id):
+#         notification = services.admin_notification_service.get_notification(notification_id)
+#         services.admin_notification_service.delete_notification(notification)
+#         return redirect(request,'notification_list')
