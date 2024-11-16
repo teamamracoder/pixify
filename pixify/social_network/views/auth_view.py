@@ -1,3 +1,4 @@
+from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, logout
 from django.views import View
@@ -13,21 +14,35 @@ from .. import services
 class RequestOTPView(View):
     @catch_error
     def get(self, request):
-        return render(request, "auth/request_otp.html")
+        message = request.session.pop("message", SuccessMessage.S000006.value)
+        message_type = request.session.pop(
+            "message_type", ResponseMessageType.INFO.value
+        )
+
+        return render(
+            request,
+            "auth/request_otp.html",
+            success_response(message=message, message_type=message_type),
+        )
 
     @catch_error
     def post(self, request):
         email = request.POST.get("email")
 
         # send otp to the email
-        services.auth_service.send_otp(email)
+        is_send = services.auth_service.send_otp(email)
 
-        # take the user to verify otp page
-        return render(
-            request,
-            f"auth/verify_otp.html",
-            success_response(SuccessMessage.S000002.value, {"email": email}),
-        )
+        if is_send:
+            # take the user to verify otp page
+            return render(
+                request,
+                f"auth/verify_otp.html",
+                success_response(SuccessMessage.S000002.value, {"email": email}),
+            )
+        else:
+            request.session["message"] = ErrorMessage.E000003.value
+            request.session["message_type"] = ResponseMessageType.WARNING.value
+            return redirect("request_otp")
 
 
 class VerifyOTPView(View):
@@ -51,9 +66,8 @@ class VerifyOTPView(View):
                 request.session.save()
 
                 # set message to session variable
-                request.session["message"] = "Welcome to pixify"
+                request.session["message"] = SuccessMessage.S000001.value
                 request.session["message_type"] = ResponseMessageType.SUCCESS.value
-                # request.session.pop('temp_data', None)
 
                 # redirect to next page
                 return redirect("home")
@@ -109,8 +123,26 @@ class UserRegistrationView(View):
         request.session.save()
 
         # set message to session variable
-        request.session["message"] = "Welcome to pixify"
+        request.session["message"] = SuccessMessage.S000005.value
         request.session["message_type"] = ResponseMessageType.SUCCESS.value
 
         # redirect to next page
         return redirect("home")
+
+
+class ResendOTPView(View):
+    @catch_error
+    def post(self, request):
+        email = request.POST.get("email")
+
+        # send otp to the email
+        is_send = services.auth_service.send_otp(email)
+
+        if is_send:
+            # send success response
+            return JsonResponse(
+                success_response(SuccessMessage.S000002.value), status=200
+            )
+        else:
+            # send error response
+            return JsonResponse(error_response(ErrorMessage.E000003.value), status=503)
