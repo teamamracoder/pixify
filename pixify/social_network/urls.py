@@ -11,6 +11,8 @@ urlpatterns = [
 
     # user
     path('admin/users/', views.UserListView.as_view(), name='user_list'),
+    # path('users/', UserListView.as_view(), name='user_list'),
+    path('users/toggle-active/<int:user_id>/', views.ToggleUserActiveView.as_view(), name='toggle_user_active'),
     path('admin/users/create/', views.UserCreateView.as_view(), name='user_create'),
     path('admin/users/<int:user_id>/', views.UserDetailView.as_view(), name='user_detail'),
     path('admin/users/<int:user_id>/update/', views.UserUpdateView.as_view(), name='user_update'),
