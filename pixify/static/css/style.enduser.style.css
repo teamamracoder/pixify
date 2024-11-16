@@ -407,9 +407,9 @@ i {
     width: 70px;
 }
 
-.active {
+/* .active {
     background-color: rgba(107, 99, 99, 0.3);
-}
+} */
 
 .request {
     list-style: none;
@@ -589,9 +589,15 @@ i {
 }
 
 .notification-item {
-    padding: 10px;
-    background-color: #995cf6e3;
-    border: 1px solid #5b0fdd;
+    padding: 10px 10px 5px 10px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #2f066de3;
+}
+
+.notification-item-active {
+    padding: 10px 10px 5px 10px;
+    background-color: #2f066de3;
     border-radius: 10px;
     margin-bottom: 10px;
 }
