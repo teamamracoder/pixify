@@ -208,7 +208,7 @@ i {
 
 }
 
-.profile {
+.loginuserprofile {
     display: flex;
     justify-content: space-around;
 }
@@ -547,6 +547,33 @@ i {
     width: 100%;
 }
 
+
+
+
+.service-item {
+    height: 300px;
+    width: 200px;
+    border-radius: 5px;
+    box-shadow: 0 0 5px rgba(107, 99, 99, 0.3);
+    background-color: #fdfbff;
+
+}
+
+.service-item img {
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+
+
+}
+
+/* side bar */
+
+
+
+
+
+
 /* End CSS for Nav Bar by Priya Mitra */
 
 
@@ -597,7 +624,6 @@ i {
 
 .chat-name {
     font: weight 0;
-    ;
     font-size: 1rem;
 }
 
@@ -723,8 +749,7 @@ textarea::placeholder {
 .modal-body {
     overflow-y: scroll;
     scroll-behavior: auto;
-    /*
-    margin-top: -20px; */
+    /*   margin-top: -20px; */
 
 }
 
@@ -998,10 +1023,13 @@ textarea::placeholder {
 
 
 /* story */
+
+
 .stories-container {
+    /* max-width: 510px; */
     max-width: 100%;
-    /* margin: 25px auto;
-    position: relative; */
+    /* margin: 24px auto; */
+    position: relative;
 }
 
 .stories-container .previous-btn,
@@ -1021,17 +1049,30 @@ textarea::placeholder {
     cursor: pointer;
 }
 
-.stories-full-view .next-btn {
+/* .stories-full-view .next-btn{
     margin-right: 24%;
 }
 
 .stories-full-view .previous-btn {
     margin-left: 24%;
-}
-
+} */
 .stories-container .previous-btn,
 .stories-full-view .previous-btn {
     left: 8px;
+
+}
+
+.stories-container .previous-btn.actived,
+.stories-container .next-btn {
+    opacity: 0;
+    pointer-events: none;
+    transition: all 400ms ease;
+}
+
+.stories-container .previous-btn .actived,
+.stories-container .next-btn .actived {
+    opacity: 1;
+    pointer-events: auto;
 
 }
 
@@ -1042,7 +1083,7 @@ textarea::placeholder {
 
 .stories-container .story {
     height: 180px;
-    /* width: 120px; */
+    width: 120px;
     flex-shrink: 0;
     border-radius: 7px;
     overflow: hidden;
@@ -1064,6 +1105,8 @@ textarea::placeholder {
 
 .stories-container .content {
     overflow-x: scroll;
+    scrollbar-width: none;
+    scroll-behavior: smooth;
 }
 
 .stories-container .content::-webkit-scrollbar {
@@ -1090,28 +1133,30 @@ textarea::placeholder {
 
 .stories-full-view {
     position: fixed;
+    margin-top: 58px;
     inset: 0;
     z-index: 5;
     background: rgb(0, 0, 0, 0.9);
+    place-items: center;
     display: none;
     place-items: center;
 }
 
-.stories-full-view.active {
-    display: grid;
+.stories-full-view.actived {
+    display: block !important;
 }
 
 .stories-full-view .close-btn {
     position: absolute;
-    top: 32px;
-    left: 24%;
-    width: 30px;
+    left: 95%;
+    width: 45px;
     background-color: #444;
     color: #fff;
     border-radius: 50%;
     padding: 10px;
     display: flex;
     cursor: pointer;
+    font-size: 18px;
 }
 
 .stories-full-view .story {
@@ -1119,10 +1164,29 @@ textarea::placeholder {
     text-align: center;
 }
 
+.stories-full-view .story .user-profile {
+    position: relative;
+    bottom: 240px;
+    margin-left: 10px;
+
+
+}
+
+.stories-full-view .story .user-profile img {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: 4px solid #45abff;
+
+}
+
 .stories-full-view .content {
-    height: 90vh;
+    height: 85vh;
     width: 100%;
     max-width: 700px;
+    position: relative;
+    padding-top: 38px;
+    scroll-behavior: smooth;
 }
 
 .stories-full-view .story img {
@@ -1134,11 +1198,32 @@ textarea::placeholder {
 
 .stories-full-view .author {
     position: absolute;
-    top: 8px;
+    top: 43px;
     left: 50%;
     transform: translateX(-50%);
     font-family: "Roboto" sans-serif;
     font-size: 18px;
+}
+
+.profile {
+    position: relative;
+    margin-top: -170px;
+    margin-left: 8px;
+    border: 3px solid #ff2bbf;
+    height: 40px;
+    width: 40px;
+    border-radius: 50%;
+    overflow: hidden;
+    display: inline-block;
+    background: relative;
+}
+
+.profile img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+
 }
 
 /* .comment-box {
@@ -1147,10 +1232,15 @@ textarea::placeholder {
     border-radius: 30px;
     padding: 10px 15px;
 }
-
-.profile-img {
-    width: 40px;
+ .profile{
+    position: relative;
+    margin-top: -170px;
+    margin-left: 8px;
+    border: 3px solid #d3ccd1;
     height: 40px;
+    cursor: pointer;
+    width: 40px;
+
 }
 
 .emoji-btn, .image-btn {
@@ -1213,10 +1303,20 @@ textarea::placeholder {
     align-items: center;
     justify-content: center;
     border-radius: 50%;
-    transition: background-color 0.3s;
+    overflow: hidden;
+    position: relative;
 }
 
-.icon.whatsapp {
+
+.profile img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+
+}
+
+*/ .icon.whatsapp {
     background-color: #25D366;
 }
 

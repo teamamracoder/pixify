@@ -78,59 +78,96 @@ document.addEventListener("DOMContentLoaded", function () {
 // Badhan
 // Function to update time stamps
 
-function updateTimeStamps() {
-    document.getElementById('time1').innerText = '11h';
-    document.getElementById('time2').innerText = '1m';
-    document.getElementById('time3').innerText = '20m';
-    document.getElementById('time4').innerText = '5m';
-    document.getElementById('time5').innerText = '2h';
-    document.getElementById('time6').innerText = '9h';
-}
+// function updateTimeStamps() {
+//     document.getElementById('time1').innerText = '11h';
+//     document.getElementById('time2').innerText = '1m';
+//     document.getElementById('time3').innerText = '20m';
+//     document.getElementById('time4').innerText = '5m';
+//     document.getElementById('time5').innerText = '2h';
+//     document.getElementById('time6').innerText = '9h';
+// }
 
-// Call the function to update time stamps
-updateTimeStamps();
-updateTimeStamps();
+// updateTimeStamps();
+// updateTimeStamps();
 //End Badhan
 
 // select post photo and videos--Priya
+// let files = [],
+//     button = document.querySelector(".top button"),
+//     form = document.querySelector("#form"),
+//     container = document.querySelector(".con"),
+//     text = document.querySelector(".inner"),
+//     browse = document.querySelector(".select"),
+//     input = document.querySelector("#fileInput");
+
+
+// browse.addEventListener('click', () => input.click());
+
+
+
+// input.addEventListener('change', () => {
+//     let file = input.files;
+//     for (let i = 0; i < file.length; i++) {
+//         if (files.every(e => e.name != file[i].name)) files.push(file[i])
+
+
+//     }
+
+//     form.reset();
+//     showImages();
+
+// })
+
+// const showImages = () => {
+//     let images = '';
+//     files.forEach((e, i) => {
+//         images += `<div class="images">
+//         <img src="${URL.createObjectURL(e)}">
+//         <span onclick="delImage(${i})">&times</span>
+//      </div>`
+//     })
+//     container.innerHTML = images;
+// }
+// const delImage = index => {
+//     files.splice(index, 1)
+//     showImages()
+// }
+
+
 let files = [],
-    button = document.querySelector(".top button"),
-    form = document.querySelector("#form"),
     container = document.querySelector(".con"),
-    text = document.querySelector(".inner"),
     browse = document.querySelector(".select"),
     input = document.querySelector("#fileInput");
+if (browse && input) {
+    browse.addEventListener('click', () => input.click());
 
+    input.addEventListener('change', () => {
+        let file = input.files;
+        for (let i = 0; i < file.length; i++) {
+            if (files.every(e => e.name !== file[i].name)) files.push(file[i]);
+        }
 
-browse.addEventListener('click', () => input.click());
+        //input.value = "";
+        showImages();
+    });
+}
 
-
-
-input.addEventListener('change', () => {
-    let file = input.files;
-    for (let i = 0; i < file.length; i++) {
-        if (files.every(e => e.name != file[i].name)) files.push(file[i])
-
-
-    }
-
-    form.reset();
-    showImages();
-
-})
 
 const showImages = () => {
     let images = '';
     files.forEach((e, i) => {
         images += `<div class="images">
-        <img src="${URL.createObjectURL(e)}">
-        <span onclick="delImage(${i})">&times</span>
-     </div>`
-    })
+            <img src="${URL.createObjectURL(e)}" alt="Uploaded Image Preview">
+            <span onclick="delImage(${i})" style="cursor: pointer;">&times;</span>
+        </div>`;
+    });
     container.innerHTML = images;
-}
+};
+
 const delImage = index => {
-    files.splice(index, 1)
-    showImages()
-}
+    files.splice(index, 1);
+    showImages();
+};
+
+
 // select post photo and videos--Priya End
