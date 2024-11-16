@@ -38,8 +38,16 @@ class RelationShipStatus(Enum):
     DIVORCED = 3
     COMMITTED = 4
     
-class MASTERTYPE(Enum):
+class MasterType(Enum):
     REACTION = 1
+
+
+class ResponseMessageType(Enum):
+    SUCCESS='success'
+    ERROR='error'
+    WARNING='warning'
+    INFO='info'
+    NONE='null'
     
     
 # static values, insert these in master_lists table
