@@ -12,73 +12,81 @@
 <div class="px-3 py-3 mt-3" style="background-color: #1f0447e3;box-shadow: 0 4px 8px rgba(151, 95, 236, 0.5);font-family: serif;border-radius: 7px;">
 
 
-  <!-- story -->
-  <div class="d-flex justify-content-between position-relative">
+ 
 
-    <div class="stories-container">
+<body>
+    
+    <!-- story short view -->
+   <div class="stories-container ">  
+       <div class="content">  
+           <div class="previous-btn active1">
+               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                   <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+                 </svg> 
+           </div>  
+           <div class="stories">
+   
+               <div class="mx-1 bg- rounded story" type="button" style="width: 6rem; height: 180px;background-color: #bf16e0e3 " >
 
-        <div class="content">
+                <img src="static\images\p1.jpg" alt="story post" class="card-img-top" style="min-height: 105px; object-fit: cover;">
+                      <div class="d-flex align-items-center justify-content-center position-relative" style="min-height: 65px; background: relative;">
+                   <p class="mb-0 text-center fs-7 fw-bold" style="color: white; position: relative;">Create story</p>
+                   <div class="position-absolute top-0 start-50 translate-middle plus-btn">
+                   <i class="fas fa-plus-circle fs-3 text-primary bg-white p-1 rounded-circle">
+                      <!-- <img src="static\images\p4.jpg" alt="story post" class="card-img-top" style=" object-fit: cover;"> -->
+                   </i>
+                   </div>
+                   </div>
+                   </div>
+   
+                   
+                    <!-- <div class="story">
+                        <img src="static\images\p1.jpg" alt="">
+                        <div class="author"></div>
+                        <div id="dp">
+                            <img src="static\images\p1.jpg" alt="">
+                        </div> 
+                   </div> -->
+           </div>
+         
+           <div class="next-btn ">
+               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                   <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+               </svg>
+           </div>
+       </div>
+   </div> 
+   <!-- stories-full-view -->
+   
+   <div class="stories-full-view ">
+       <div class="close-btn">
+           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+               <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+             </svg>
+                     
+       </div>
+       <div class="content">
+           <div class="previous-btn">
+               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                   <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+                 </svg> 
+           </div> 
+           <div class="story">
+            <img src="static\images\p1.jpg" alt="">
+            <div class="author">Sribash Sarkar</div>
+            <div id="dp">
+                <img src="static\images\p1.jpg" alt="">
+            </div> 
+           <div class="time-line"></div>
 
-
-            <div class="previous-btn">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
-                  </svg>
-            </div>
-
-            <div class="stories" style="overflow: hidden;">
-
-
-                <div class="mx-1 bg- rounded story" type="button" style="width: 6em; height: 180px;background-color: #1f0447e3 " >
-                    <img src="{% static 'images/IMG_20240915_213320.jpg' %}" alt="story post" class="card-img-top" style="min-height: 105px; object-fit: cover;">
-                       <div class="d-flex align-items-center justify-content-center position-relative" style="min-height: 65px; ">
-                    <p class="mb-0 text-center fs-7 fw-bold" style="color: white;  ">Create story</p>
-                    <div class="position-absolute top-0 start-50 translate-middle plus-btn">
-                    <i class="fas fa-plus-circle fs-3 text-primary bg-white p-1 rounded-circle">
-                       <!-- <img src="" alt="story post" class="card-img-top" style=" object-fit: cover;"> -->
-                    </i>
-                    </div>
-                    </div>
-                    </div>
-
-
-            </div>
-
-            <div class="next-btn">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
-                  </svg>
-            </div>
-        </div>
-    </div>
- </div>
-
-<!-- stories-full-view -->
-
-<div class="stories-full-view ">
-    <div class="close-btn">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
-          </svg>
-
-    </div>
-    <div class="content">
-        <div class="previous-btn">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
-              </svg>
-        </div>
-        <div class="story">
-            <img src="" alt="">
-            <div class="author">Author</div>
-        </div>
-        <div class="next-btn">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
-            </svg>
-        </div>
-    </div>
-</div>
+       </div>
+           <div class="next-btn">
+               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                   <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+               </svg>
+           </div>
+       </div>
+   </div>  
 
 
 

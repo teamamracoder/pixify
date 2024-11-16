@@ -3,181 +3,52 @@ const  allStories =[
     {
         id:0, 
         author:"sribash sarkar",
-        profile:"static/images/p3.jpg",
+        dp:"static/images/p3.jpg",
         imageUrl:"static/images/p3.jpg",
     },
     {
         id:1,
         author:"PRIYA MITRA",
+        dp:"static/images/priya.jpg",
         imageUrl:"static/images/priya.jpg",
     },
     {
         id:2,
+        dp:"static/images/p3.jpg",
         author:"Rima das",
-        imageUrl:"static/images/p2.jpg",
+        imageUrl:"static/images/p3.jpg",
     },
     {
         id:3,
+        dp:"static/images/p1.jpg",
         author:"sribash sarkar",
         imageUrl:"static/images/p1.jpg",
     },
     {
         id:4,
+        dp:"static/images/p2.jpg",
         author:"sribash sarkar",
         imageUrl:"static/images/p2.jpg",
     },
     {
         id:5,
+        dp:"static/images/p3.jpg",
         author:"sribash sarkar",
         imageUrl:"static/images/p3.jpg",
     },
     {
         id:6,
+        dp:"static/images/p4.jpg",
         author:"sribash sarkar",
         imageUrl:"static/images/p4.jpg",
     },
-    {
-        id:7,
-        author:"sribash sarkar",
-        imageUrl:"static/images/p5.jpg",
-    },
-    {
-        id:0,
-        author:"sribash sarkar",
-        imageUrl:"static/images/p1.jpg",
-    },
-    {
-        id:1,
-        author:"sribash sarkar",
-        imageUrl:"static/images/priya.jpg",
-    },
-    {
-        id:2,
-        author:"sribash sarkar",
-        imageUrl:"static/images/p3.jpg",
-    },
-    {
-        id:3,
-        author:"sribash sarkar",
-        imageUrl:"static/images/priya.jpg",
-    },
-    {
-        id:4,
-        author:"sribash sarkar",
-        imageUrl:"static/images/p3.jpg",
-    },
-    {
-        id:5,
-        author:"sribash sarkar",
-        imageUrl:"static/images/p3.jpg",
-    },
-    {
-        id:6,
-        author:"sribash sarkar",
-        imageUrl:"static/images/p4.jpg",
-    },
-    {
-        id:7,
-        author:"sribash sarkar",
-        imageUrl:"static/images/p3.jpg",
-    }, 
-    {
-        id:0,
-        author:"sribash sarkar",
-        imageUrl:"static/images/p3.jpg",
-    },
-    {
-        id:1,
-        author:"sribash sarkar",
-        imageUrl:"static/images/p3.jpg",
-    },
-    {
-        id:2,
-        author:"sribash sarkar",
-        imageUrl:"static/images/p3.jpg",
-    },
-    {
-        id:3,
-        author:"sribash sarkar",
-        imageUrl:"static/images/p3.jpg",
-    },
-    {
-        id:4,
-        author:"sribash sarkar",
-        imageUrl:"static/images/p3.jpg",
-    },
-    {
-        id:5,
-        author:"sribash sarkar",
-        imageUrl:"static/images/p3.jpg",
-    },
-    {
-        id:6,
-        author:"sribash sarkar",
-        imageUrl:"static/images/p4.jpg",
-    },
-    {
-        id:7,
-        author:"sribash sarkar",
-        imageUrl:"static/images/p3.jpg",
-    },
-    {
-        id:0,
-        author:"sribash sarkar",
-        imageUrl:"static/images/p3.jpg",
-    },
-    {
-        id:1,
-        author:"sribash sarkar",
-        imageUrl:"static/images/p3.jpg",
-    },
-    {
-        id:2,
-        author:"sribash sarkar",
-        imageUrl:"static/images/p3.jpg",
-    },
-    {
-        id:3,
-        author:"sribash sarkar",
-        imageUrl:"static/images/p3.jpg",
-    },
-    {
-        id:4,
-        author:"sribash sarkar",
-        imageUrl:"static/images/p3.jpg",
-    },
-    {
-        id:5,
-        author:"sribash sarkar",
-        imageUrl:"static/images/p3.jpg",
-    },
-    {
-        id:6,
-        author:"sribash sarkar",
-        imageUrl:"static/images/p4.jpg",
-    },
-    {
-        id:7,
-        author:"sribash sarkar",
-        imageUrl:"static/images/p3.jpg",
-    },
-];
- 
-
-// const dpimg=[
-//         {
-//             id:0, 
-//             author:"sribash sarkar",
-//             imageUrl:"static/images/p3.jpg",
-//         },
-// ]
-
-
+]; 
+const storyImgsort =document.querySelector(".story #dp img");
 const stories =document.querySelector(".stories");
 const storiesFullView =document.querySelector(".stories-full-view");
 const closeBtn =document.querySelector(".close-btn");
 const storyImgFull =document.querySelector(".stories-full-view .story img");
-const profileImgFull =document.querySelector(".stories-full-view .profile img");
+const profileImgFull =document.querySelector(".stories-full-view #dp img");
 const storyAuthorFull =document.querySelector(".stories-full-view .story .author");
 const nextBtn = document.querySelector(".stories-container .next-btn");
 const storiesContent = document.querySelector(".stories-container .content");
@@ -202,9 +73,18 @@ const createStories = () => {
         author.classList.add("author");
         author.innerHTML = s.author;
 
+        const dp = document.createElement("div");
+        dp.classList.add("dp");
+        const dpimg = document.createElement("img");
+        dpimg.src = s.dp;
+
         story.appendChild(img);
+        story.appendChild(dp);
+        dp.appendChild(dpimg);
         story.appendChild(author);
         stories.appendChild(story); 
+        // stories.appendChild(dp); 
+
         story.addEventListener("click",() =>{
             showFullView(i);
         })
@@ -241,6 +121,7 @@ const createStories = () => {
 
  const updateFullview = () =>{
     storyImgFull.src = allStories[currentActive].imageUrl;
+    profileImgFull.src = allStories[currentActive].dp;
     storyAuthorFull.innerHTML = allStories[currentActive].author;
     // profileImgFull.src = allStories[currentActive].imageUrl;
 
