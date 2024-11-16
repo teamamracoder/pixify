@@ -333,8 +333,7 @@ i {
 
 .search_btn {
     border-radius: 0 15px 10px 0 !important;
-    background-color: rgba(176, 175, 179, 0.3) !important;
-
+    background-color: rgb(61, 61, 107) !important;
     border: 0 !important;
     color: white !important;
     cursor: pointer;
@@ -358,7 +357,7 @@ i {
 
 .search-inp {
     border-radius: 15px 0 0 15px !important;
-    background-color: rgba(176, 175, 179, 0.3) !important;
+    background-color: rgb(61, 61, 107) !important;
     border: 0 !important;
     color: white !important;
 }
@@ -420,16 +419,16 @@ i {
     width: 100% !important;
     padding: 5px 10px;
     margin-bottom: 15px !important;
+    border-radius: 10px;
 }
 
 .request li:hover {
-    background-color: rgba(107, 99, 99, 0.3);
+    background-color: #2f066de3 !important;
 }
 
 .search_btn {
     border-radius: 0 15px 10px 0 !important;
     background-color: rgba(176, 175, 179, 0.3) !important;
-
     border: 0 !important;
     color: white !important;
     cursor: pointer;
