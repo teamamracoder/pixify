@@ -14,6 +14,12 @@ class HomeView(View):
     @auth_required
     @role_required(Role.ADMIN.value, Role.END_USER.value)
     def get(self, request):
-        session_message = request.session.pop('message','')
-        session_message_type = request.session.pop('message_type','') 
-        return render(request, 'enduser/home/index.html',success_response(message=session_message, message_type=session_message_type))
+        message = request.session.pop("message", "")
+        message_type = request.session.pop("message_type", "")
+        return render(
+            request,
+            "enduser/home/index.html",
+            success_response(
+                message=message, message_type=message_type
+            ),
+        )
