@@ -4,7 +4,8 @@ from django.shortcuts import render, redirect
 from django.views import View
 from .. import services
 from ..models import User
-from django.core.paginator import Paginator    #  added by sujit
+from django.core.paginator import Paginator    
+from django.http import JsonResponse
 
 class PostListView(View):
     def get(self, request):
@@ -86,4 +87,13 @@ class PostDeleteView(View):
         post = services.post_service.get_post(post_id)
         services.post_service.delete_post(post)
         return redirect('post_list')
+    
+
+class TogglePostActiveView(View):
+    def post(self, request, post_id):
+        post = services.post_service.get_post(post_id)
+        post.is_active = not post.is_active  # Toggle active status
+        post.save()
+        return JsonResponse({'is_active': post.is_active})
+
 
