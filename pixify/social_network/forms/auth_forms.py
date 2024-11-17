@@ -21,6 +21,8 @@ class VerifyOtpForm(forms.Form):
     )
     otp = forms.CharField(
         label="Please enter OTP",
+        min_length=6,
+        max_length=6,
         validators=[
             MinLengthValidator(6, message="OTP must be minimum 6 characters long."),
             MaxLengthValidator(6, message="OTP must be maximum 6 characters long."),

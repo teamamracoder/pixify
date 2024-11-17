@@ -17,8 +17,25 @@
 </div>
 
 <script>
-    $("#verify_otp_form").validate();
-    
+    $(document).ready(function () {
+        $("#verify_otp_form").validate({
+            rules: {
+                otp: {
+                    required: true,
+                    minlength: 6,
+                    maxlength: 6
+                },
+            },
+            messages: {
+                otp: {
+                    required: "Please enter OTP.",
+                    minlength: "OTP must be at least 6 characters.",
+                    maxlength: "OTP cannot exceed 6 characters."
+                },
+            }
+        });
+    });
+
     const resendBtn = $("#resendOTP");
     resendBtn.click(
         () => {

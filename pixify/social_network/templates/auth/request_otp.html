@@ -16,7 +16,24 @@
 </div>
 
 <script>
-    $("#req_otp_form").validate();
+    $(document).ready(function () {
+        $("#req_otp_form").validate({
+            rules: {
+                email: {
+                    required: true,
+                    minlength: 7,
+                    maxlength: 30
+                }
+            },
+            messages: {
+                email: {
+                    required: "Please enter your email id.",
+                    minlength: "Email must be at least 7 characters.",
+                    maxlength: "Email cannot exceed 30 characters."
+                }
+            }
+        });
+    });
 </script>
 
 {% endblock %}
