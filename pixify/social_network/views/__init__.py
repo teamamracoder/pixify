@@ -16,4 +16,5 @@ from .comments_view import *
 from .friendrequest_view import *
 from .birthday_view import *
 from .friends_view import *
-
+from .manage_chat_view import *
+from .manage_notification_view import *
