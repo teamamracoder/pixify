@@ -13,8 +13,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    
+    'channels',
+    'daphne',
+    'socketio',
     'social_network'
 ]
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -45,6 +50,8 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'pixify.wsgi.application'
+# ASGI_APPLICATION = 'pixify.asgi.application'
+
 
 DATABASES = {
     'default': {
