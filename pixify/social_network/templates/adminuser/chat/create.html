@@ -1,0 +1,69 @@
+
+{% extends "../base.html" %}
+
+{% block title %}Chat Create{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid my-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-12 col-lg-12">
+            <div class="card shadow-sm">
+                <div class="card-header text-center">
+                    <h2 class="text-info">Chat Create</h2>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="mb-3">
+                                <label for="title" class="form-label">Title</label>
+                                <input type="text" class="form-control" id="title" name="title" placeholder="title" required>
+                            </div>
+
+                                <div class="mb-3">
+                                    <label for="type" class="form-label">Type</label>
+                                    <select id="type" name="type" class="form-select">
+                                        {% for type in choices_type %}
+                                            {% for name, value in type.items %}
+                                                <option value="{{ name }}">{{ value }}</option>
+                                            {% endfor %}
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                
+                                
+                                
+                                
+                                
+                                
+                                <div class="mb-3">
+                                    <label for="chat_cover" class="form-label">Chat_Cover</label>
+                                    <input type="chat_cover" class="form-control" id="chat_cover" name="chat_cover" placeholder="URL" required> 
+                                </div>
+
+                                <input type="hidden" id="created_by" name="created_by" value="10">
+                                <input type="hidden" id="updated_by" name="updated_by" value="10">
+    
+                                <div class="form-group form-check">
+                                    <input type="checkbox" name="is_active" class="form-check-input" id="is_active" checked>
+                                    <label class="form-check-label" for="is_active">Is Active</label>
+                                </div>
+                           
+                        </div>
+                             
+                       
+
+                        <div class="text-start">
+                            <a href="{% url 'chat_list' %}" class="btn btn-sm btn-outline-secondary">Back</a>
+                            <button type="submit" class="btn btn-sm btn-primary">Save</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>       
+</div>
+
+
+
+{% endblock %}

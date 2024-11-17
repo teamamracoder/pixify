@@ -1,0 +1,16 @@
+{% extends "../base.html" %}
+
+{% block title %}Delete Chat{% endblock %}
+
+{% block content %}
+
+<h1>Delete Chat</h1>
+<p>Are you sure you want to delete {{ chat.title }}?</p>
+<form method="post">
+    {% csrf_token %}
+    <button type="submit">Yes, delete</button>
+</form>
+<a href="{% url 'chat_list' chat.id %}">Cancel</a>
+
+
+{% endblock %}
