@@ -120,4 +120,28 @@
     }
     
 </style>
+<script>
+    const socket = io("http://localhost:8000");  // Use your server’s URL and port
+
+socket.on("connect", () => {
+    console.log("Connected to server");
+});
+
+socket.on("disconnect", () => {
+    console.log("Disconnected from server");
+});
+
+socket.on("response", (data) => {
+    const messages = document.getElementById("messages");
+    const messageItem = document.createElement("div");
+    messageItem.textContent = data.message;
+    messages.appendChild(messageItem);
+});
+
+function sendMessage() {
+    const message = document.getElementById("message").value;
+    socket.emit("message", message);
+}
+
+</script>
 {% endblock %}
