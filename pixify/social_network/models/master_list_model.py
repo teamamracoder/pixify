@@ -1,11 +1,11 @@
 from django.db import models
-from ..constants import MASTERTYPE
+from ..constants import MasterType
 
 class MasterList(models.Model):
     name = models.CharField(max_length=50, blank=True, null=True)
     value = models.CharField(max_length=100)
     type = models.IntegerField(
-        choices=[(type.value, type.name) for type in MASTERTYPE]
+        choices=[(type.value, type.name) for type in MasterType]
     )
     
     is_active = models.BooleanField(db_default=True, blank=True)
