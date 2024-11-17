@@ -22,12 +22,12 @@ urlpatterns = [
 
 
     #admin_notification
-    path('admin/notifications/', views.AdminNotificationListView.as_view(), name='notification_list'),
-    path('admin/notifications/toggle-active/<int:notification_id>/', views.AdminToggleNotificationActiveView.as_view(), name='toggle_Notification_active'),
-    path('admin/notifications/create/', views.AdminNotificationCreateView.as_view(), name='notification_create'),
-    path('admin/notifications/<int:notification_id>/detail/', views.AdminNotificationDetailView.as_view(), name='notification_detail'),
-    path('admin/notifications/<int:notification_id>/update/', views.AdminNotificationUpdateView.as_view(), name='notification_update'),
-    # path('admin/notifications/<int:delete_id>/delete/', views.AdminNotificationDeleteView.as_view(), name='notification_delete'),
+    path('admin/notifications/', views.ManageNotificationListView.as_view(), name='manage_notification_list'),
+    path('admin/notifications/toggle-active/<int:notification_id>/', views.ManageToggleNotificationActiveView.as_view(), name='manage_toggle_Notification_active'),
+    path('admin/notifications/create/', views.ManageNotificationCreateView.as_view(), name='manage_notification_create'),
+    path('admin/notifications/<int:notification_id>/detail/', views.ManageNotificationDetailView.as_view(), name='manage_notification_detail'),
+    path('admin/notifications/<int:notification_id>/update/', views.ManageNotificationUpdateView.as_view(), name='manage_notification_update'),
+    # path('admin/notifications/<int:delete_id>/delete/', views.ManageNotificationDeleteView.as_view(), name='manage_notification_delete'),
 
     # post
     path('admin/posts/', views.AdminPostListView.as_view(), name='post_list'),

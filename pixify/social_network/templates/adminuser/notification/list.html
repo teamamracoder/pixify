@@ -16,9 +16,9 @@
             <h2 class="text-center mb-4">Notifications</h2>
 
             <div class="d-flex justify-content-between mb-3">
-                <button class="btn btn-primary btn-sm"><a href="{% url 'notification_create' %}" class="text-white text-decoration-none">Add Notifications</a></button>
+                <button class="btn btn-primary btn-sm"><a href="{% url 'manage_notification_create' %}" class="text-white text-decoration-none">Add Notifications</a></button>
                
-                <form method="get" action="{% url 'notification_list' %}">
+                <form method="get" action="{% url 'manage_notification_list' %}">
                     <div class="input-group" style="max-width: 300px;">
                         <input type="text" class="form-control border-secondary" placeholder="Search" aria-label="Search" name="search" value="{{ search_query }}">
                         <button class="btn btn-outline-secondary">Search</button>
@@ -50,7 +50,7 @@
                         {% for notification in notifications %}
                         <tr>
                             <td>
-                                <a class="text-decoration-none text-primary hover-bg" href="{% url 'notification_detail' notification.id %}">
+                                <a class="text-decoration-none text-primary hover-bg" href="{% url 'manage_notification_detail' notification.id %}">
                                     {{notification.text }}
                                 </a>
                             </td>                      
