@@ -120,7 +120,7 @@
             const button = $(this);
 
             $.ajax({
-                url: '/users/toggle-active/' + userId + '/',
+                url: '/admin/users/toggle-active/' + userId + '/',
                 type: 'POST',
                 headers: {
                     'X-CSRFToken': '{{ csrf_token }}'  // Include CSRF token for security

@@ -78,7 +78,6 @@ class AdminUserUpdateView(View):
         return render(request, 'adminuser/user/update.html', {'user': user,"choices_gender":choices_gender,"choices_relationship_status":choices_relationship_status})
     
     def post(self, request, user_id):
-
         user = services.user_service.get_user(user_id)
 
         # Gather all form data into a dictionary

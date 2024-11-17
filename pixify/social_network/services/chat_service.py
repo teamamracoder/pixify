@@ -14,9 +14,9 @@ def create_chats(**kwargs):
      title=kwargs['title'],
      type=kwargs['type'],
      chat_cover=kwargs.get('chat_cover'),
-     created_by=kwargs['created_by'],
-     updated_by=kwargs['updated_by'],
-     is_active=kwargs.get('is_active', True) 
+     is_active=kwargs.get('is_active', True),
+     created_by=kwargs['created_by']
+
   )
   return chat
 
