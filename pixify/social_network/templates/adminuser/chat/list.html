@@ -67,8 +67,8 @@
                                     
                                     <td>{{ chat.chat_cover }}</td>
                                     <td>
-                                        <button class="btn btn-sm toggle-status" data-user-id="{{ user.id }}">
-                                            {% if user.is_active %}
+                                        <button class="btn btn-sm toggle-status" data-chat-id="{{ chat.id }}">
+                                            {% if chat.is_active %}
                                                 <i class="bi bi-toggle-on text-success"></i> Active
                                             {% else %}
                                                 <i class="bi bi-toggle-off text-danger"></i> Inactive
@@ -108,15 +108,15 @@
         </div>       
 </div>
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 <script>
     $(document).ready(function() {
         $('.toggle-status').click(function() {
-            const userId = $(this).data('user-id');
+            const chatId = $(this).data('chat-id');
             const button = $(this);
 
             $.ajax({
-                url: '/users/toggle-active/' + userId + '/',
+                url: '/admin/chat/toggle-active/' + chatId + '/',
                 type: 'POST',
                 headers: {
                     'X-CSRFToken': '{{ csrf_token }}'  // Include CSRF token for security

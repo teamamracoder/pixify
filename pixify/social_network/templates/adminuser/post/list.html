@@ -14,38 +14,25 @@
     <div class="row justify-content-center">
         <div class="col">
             <h2 class="text-center mb-4">Posts</h2>
-
             <div class="d-flex justify-content-between mb-3">
-                <!-- <div class="input-group" style="max-width: 300px;">
-                    <button class="btn btn-outline-secondary">Name</button>
-                    <button class="btn btn-outline-secondary">A-Z</button>
-                    <input type="text" class="form-control border-secondary" placeholder="Search" aria-label="Search">
-                    <span class="input-group-text border-secondary bg-info text-dark"><i
-                            class="bi bi-search"></i></span>
-                </div> -->
-                <div class=""><button class="btn btn-primary btn-sm"><a href="{% url 'post_create' %}"
-                            class="text-white text-decoration-none">Add Post</a></button></div>
-
-
-
+                <div>
+                    <button class="btn btn-primary btn-sm"><a href="{% url 'post_create' %}" class="text-white text-decoration-none"></a>Add Post</button>
+                </div>
                 <form method="get" action="{% url 'post_list' %}">
                     <div class="input-group" style="max-width: 300px;">
                         <input type="text" class="form-control border-secondary" placeholder="Search"
-                            aria-label="Search" name="search" value="{{ search_query }}">
+                               aria-label="Search" name="search" value="{{ search_query }}">
                         <button class="btn btn-outline-secondary">Search</button>
                     </div>
                 </form>
             </div>
-
-
-
-
+            
             <div class="table-responsive">
                 <table class="table table-hover">
                     <thead class="table-info text-white"> 
                         <tr>
                             <th>
-                                <a href="?sort_by=posted_by&sort_order={% if sort_order == 'asc' %}desc{% else %}asc{% endif %}">Posted_by</a>
+                                <a href="?sort_by=posted_by&sort_order={% if sort_order == 'asc' %}desc{% else %}asc{% endif %}">Posted by</a>
                             </th>
                             <th>
                                 <a href="?sort_by=title&sort_order={% if sort_order == 'asc' %}desc{% else %}asc{% endif %}">Title</a>
@@ -53,57 +40,48 @@
                             <th>
                                 <a href="?sort_by=description&sort_order={% if sort_order == 'asc' %}desc{% else %}asc{% endif %}">Description</a>
                             </th>
-                            <th>
-                                Status
-                            </th>
+                            <th>Status</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for post in posts %}
                         <tr>
                             <td>
-                                <a class="text-decoration-none text-primary hover-bg px-3 py-2"
-                                    href="{% url 'post_detail' post.id %}">
-                                    {{ post.posted_by_id }}
+                                <a class="text-decoration-none text-primary hover-bg" href="{% url 'post_detail' post.id %}">
+                                    {{ post.posted_by }} 
                                 </a>
                             </td>
-                            </td>
+                            <td>{{ post.title }}</td>
                             <td>
-                                {{ post.title }}
-                            </td>
-                            <td>
-
-                                {{ post.description }}
-
+                                {{ post.media_url }}
                             </td>
                             <td>
                                 <i class="bi bi-eye text-primary"></i>
+                                
                             </td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
-
-                <!-- new added by sujit -->
+            
                 <div class="pagination">
                     <span class="step-links">
                         {% if posts.has_previous %}
                             <a href="?page=1&search={{ search_query }}&sort_by={{ sort_by }}&sort_order={{ sort_order }}">First</a>
-                            <a href="?page={{ users.previous_page_number }}&search={{ search_query }}&sort_by={{ sort_by }}&sort_order={{ sort_order }}">Previous</a>
+                            <a href="?page={{ posts.previous_page_number }}&search={{ search_query }}&sort_by={{ sort_by }}&sort_order={{ sort_order }}">Previous</a>
                         {% endif %}
-                
                         <span class="current">
                             Page {{ posts.number }} of {{ posts.paginator.num_pages }}.
                         </span>
-                
                         {% if posts.has_next %}
                             <a href="?page={{ posts.next_page_number }}&search={{ search_query }}&sort_by={{ sort_by }}&sort_order={{ sort_order }}">Next</a>
                             <a href="?page={{ posts.paginator.num_pages }}&search={{ search_query }}&sort_by={{ sort_by }}&sort_order={{ sort_order }}">Last</a>
                         {% endif %}
                     </span>
                 </div>
-
             </div>
+            
+
         </div>
     </div>
 </div>

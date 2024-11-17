@@ -11,6 +11,8 @@ urlpatterns = [
 
     # user
     path('admin/users/', views.UserListView.as_view(), name='user_list'),
+    path('admin/users/profile', views.UserProfileView.as_view(), name='user_profile'),
+    path('users/toggle-active/<int:user_id>/', views.ToggleUserActiveView.as_view(), name='toggle_user_active'),
     path('admin/users/create/', views.UserCreateView.as_view(), name='user_create'),
     path('admin/users/<int:user_id>/', views.UserDetailView.as_view(), name='user_detail'),
     path('admin/users/<int:user_id>/update/', views.UserUpdateView.as_view(), name='user_update'),
@@ -35,7 +37,8 @@ urlpatterns = [
     path('admin/chat/<int:chat_id>/', views.ChatAdminDetailView.as_view(), name='chat_detail'),
     path('admin/chat/<int:chat_id>/update/', views.ChatAdminUpdateView.as_view(), name='chat_update'),
     path('admin/chat/<int:chat_id>/delete/', views.ChatAdminDeleteView.as_view(), name='chat_delete'),
-    
+    path('admin/chat/toggle-active/<int:chat_id>/', views.ToggleChatActiveView.as_view(), name='toggle_chat_active'),
+
 
 
     # message
