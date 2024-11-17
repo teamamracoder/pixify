@@ -46,9 +46,8 @@ urlpatterns = [
     path('register/', views.UserRegistrationView.as_view(), name='register'),
     path('resend-otp/', views.ResendOTPView.as_view(), name='resend_otp'),
 
-    path('users/api', views.userListViewApi.as_view(), name='users_api')
-    # message_edit and deleat
-    # path('message/<int:message_id>/edit', views.MessageEditView.as_view(), name='message_edit'),
-    # path('message/<int:message_id>/delete', views.MessageDeleteView.as_view(), name='message_delete'),
 
+    path('users/api', views.userListViewApi.as_view(), name='users_api'),
+    path('chat/chats/api', views.chatListViewApi.as_view(), name='chats_api'),
+    path('chat/followers/api', views.followerViewApi.as_view(), name='followers_api')
 ]
