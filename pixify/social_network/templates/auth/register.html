@@ -15,6 +15,33 @@
     </div>
 </div>
 <script>
-    $("#register_form").validate();
+    $(document).ready(function () {
+        $("#register_form").validate({
+            rules: {
+                first_name: {
+                    required: true,
+                    minlength: 3,
+                    maxlength: 15
+                },
+                last_name: {
+                    required: true,
+                    minlength: 3,
+                    maxlength: 15
+                },
+            },
+            messages: {
+                first_name: {
+                    required: "Please enter your first name.",
+                    minlength: "First name must be at least 3 characters.",
+                    maxlength: "First name cannot exceed 15 characters."
+                },
+                last_name: {
+                    required: "Please enter your last name.",
+                    minlength: "Last name must be at least 3 characters.",
+                    maxlength: "Last name cannot exceed 15 characters."
+                },
+            }
+        });
+    });
 </script>
 {% endblock %}
