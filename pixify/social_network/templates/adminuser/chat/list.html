@@ -18,9 +18,9 @@
                     <h2 class="">Chat List</h2>
                 </div>
                 <div class="d-flex justify-content-between mb-3">
-                    <button class="btn btn-primary btn-sm"><a href="{% url 'chat_create' %}" class="text-white text-decoration-none">Add Chat</a></button>
+                    <button class="btn btn-primary btn-sm"><a href="{% url 'manage_chat_create' %}" class="text-white text-decoration-none">Add Chat</a></button>
                    
-                    <form method="get" action="{% url 'chat_list' %}">
+                    <form method="get" action="{% url 'manage_chat_list' %}">
                         <div class="input-group" style="max-width: 300px;">
                             <input type="text" class="form-control border-secondary" placeholder="Search" aria-label="Search" name="search" value="{{ search_query }}">
                             <button class="btn btn-outline-secondary">Search</button>
@@ -49,7 +49,7 @@
                                 {% for chat in chats %}
                                 <tr>
                                     <td>                                       
-                                        <a class="text-decoration-none text-primary hover-bg" href="{% url 'chat_detail' chat.id %}">
+                                        <a class="text-decoration-none text-primary hover-bg" href="{% url 'manage_chat_detail' chat.id %}">
                                             {{ chat.title }} 
                                         </a>                                       
                                     </td>

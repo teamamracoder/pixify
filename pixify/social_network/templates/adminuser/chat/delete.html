@@ -10,7 +10,7 @@
     {% csrf_token %}
     <button type="submit">Yes, delete</button>
 </form>
-<a href="{% url 'chat_list' chat.id %}">Cancel</a>
+<a href="{% url 'manage_chat_list' chat.id %}">Cancel</a>
 
 
 {% endblock %}
