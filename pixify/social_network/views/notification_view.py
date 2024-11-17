@@ -1,3 +1,4 @@
+from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.views import View
 
@@ -82,11 +83,13 @@ class AdminNotificationUpdateView(View):
         notification_data = {
             'id' : notification.id,           
             'receiver_id': User.objects.get(id=request.POST['receiver_id']),
+            'created_by': User.objects.get(id=request.POST['created_by']),
             'text': request.POST['text'],           
             'media_url': request.POST.get('media_url', ''), 
             'is_read': request.POST['is_read']     
+        
         }
-        services.admin_notification_service.update_notifications(**notification_data) 
+        services.admin_notification_service.admin_update_notification(**notification_data) 
         return redirect(request,'adminuser/notification/list.html')
 
 
@@ -100,3 +103,11 @@ class AdminNotificationUpdateView(View):
 #         notification = services.admin_notification_service.get_notification(notification_id)
 #         services.admin_notification_service.delete_notification(notification)
 #         return redirect(request,'notification_list')
+
+
+class AdminToggleNotificationActiveView(View):
+    def post(self, request, notification_id):
+        notification = services.admin_notification_service.get_notification(notification_id)
+        notification.is_active = not notification.is_active  
+        notification.save()
+        return JsonResponse({'is_active': notification.is_active})

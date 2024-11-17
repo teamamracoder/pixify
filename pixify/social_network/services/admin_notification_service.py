@@ -22,14 +22,14 @@ def admin_create_notification(**kwargs):
         )
     return notification
 
-def admin_update_notifications(**kwargs):
+def admin_update_notification(**kwargs):
     notification = models.Notification.objects.create(
             id= kwargs['id'],
             receiver_id=kwargs['receiver_id'],
             text=kwargs['text'],           
             media_url=kwargs.get('media_url'),
-            is_read=kwargs['is_read']
-            
+            is_read=kwargs['is_read'],
+            created_by=kwargs['created_by'] 
         )
     return notification
 

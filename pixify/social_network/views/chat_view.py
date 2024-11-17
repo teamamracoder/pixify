@@ -12,7 +12,7 @@ from ..models import User
 from ..models import Chat
 from ..constants import ChatType
 from django.core.paginator import Paginator 
-from django.http import HttpResponseBadRequest 
+from django.http import HttpResponseBadRequest, JsonResponse 
 
 
 
@@ -147,7 +147,7 @@ class ChatDeleteView(View):
         return redirect('chat_list')
 
 
-
+# Admin Section
 #=============================================================================
 class ChatAdminListView(View):
     def get(self, request):
@@ -194,10 +194,9 @@ class ChatAdminCreateView(View):
         'title': request.POST['title'],      
         'type': request.POST['type'],       
         'chat_cover': request.POST.get('chat_cover', ''), 
-        #'created_by_id': Chat.objects.get(id=request.POST['created_by_id']),
         'is_active': request.POST.get('is_active', 'on') == 'on',
-        'created_by':User.objects.get(id=request.POST['created_by']),
-        'updated_by':User.objects.get(id=request.POST['updated_by'])
+        'created_by': User.objects.get(id=request.POST['created_by'])
+        # 'updated_by':User.objects.get(id=request.POST['updated_by'])
         }
         services.chat_service.create_chats(**chat_data)
         return redirect ('chat_list')
@@ -247,3 +246,11 @@ class ChatAdminDeleteView(View):
         chat= chat_service.get_chat(chat_id)
         chat_service.delete_chats(chat)
         return redirect('chat_list')
+
+
+class AdminToggleChatActiveView(View):
+    def post(self, request, chat_id):
+        chat = services.chat_service.get_chat(chat_id)
+        chat.is_active = not chat.is_active  
+        chat.save()
+        return JsonResponse({'is_active': chat.is_active})
