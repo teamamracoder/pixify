@@ -26,6 +26,7 @@ urlpatterns = [
 
     # post
     path('admin/posts/', views.PostListView.as_view(), name='post_list'),
+    path('admin/posts/toggle-active/<int:post_id>/', views.TogglePostActiveView.as_view(), name='toggle_post_active'),
     path('admin/posts/create/', views.PostCreateView.as_view(), name='post_create'),
     path('admin/posts/<int:post_id>/', views.PostDetailView.as_view(), name='post_detail'),
     path('admin/posts/<int:post_id>/update/', views.PostUpdateView.as_view(), name='post_update'),
