@@ -8,13 +8,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}My Django App{% endblock %}</title>
     <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
-    <!-- <link rel="stylesheet" href="{% static 'css/bootstrap.enduser.css' %}"> -->
+    <link rel="stylesheet" href="{% static 'css/bootstrap.enduser.css' %}">
     <link rel="stylesheet" href="{% static 'css/style.enduser.style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/toastr.min.css' %}">
     <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
-
+    <script src="{% static 'js/script.js' %}"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
+    <script src="{% static 'js/jquery-3.7.1.min.js' %}"></script>
+    <script src="{% static 'js/toastr.min.js' %}"></script>
+    <script src="{% static 'js/script.js' %}"></script>
+
 
 
     <style>
@@ -179,22 +184,15 @@
                             <a class="nav-link" href="/"><i class="fa-solid fa-house"></i></a>
                         </li>
 
-                        <li class="nav-item" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Chat">
-                            <a class="nav-link" href="/message/">
-                                <span
-                                    class="position-absolute top-0 start-30 translate-middle badge rounded-pill bg-danger"
-                                    style="margin-left:27px; margin-top:7px;">2+</span>
-                                <i class="bi bi-messenger"></i>
-                            </a>
-                        </li>
-                        <li class="nav-item" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Notification">
-                            <a class="nav-link" href="/notification/">
-                                <span
-                                    class="position-absolute top-0 start-30 translate-middle badge rounded-pill bg-danger"
-                                    style="margin-left:27px; margin-top:7px;">2+</span>
-                                    <i class="bi bi-bell-fill"></i>
-                            </a>
-                        </li>
+                    <li class="nav-item" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Chat">
+                        <a class="nav-link active" aria-current="page" href="/message"><i
+                                class="bi bi-messenger"></i></a>
+                    </li>
+
+                    <li class="nav-item" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Notification">
+                        <a class="nav-link active" aria-current="page" href="/notification"><i
+                                class="fa-solid fa-bell"></i></a>
+                    </li>
 
                         <li class="nav-item" data-bs-toggle="tooltip" data-bs-placement="bottom" title="About">
                             <a class="nav-link" href="/aboutus/"><i class="bi bi-info-circle-fill"></i></a>
@@ -334,19 +332,38 @@
 
     </main>
 
-
-
-
-    {% comment %} <footer class="px-5" style="position: absolute; bottom: 0; width: 100%;">
+    <!-- <footer class="px-5" style="position: absolute; bottom: 0; width: 100%;">
         <p class="text-center pt-3 mx-5" style="border-top: 1.5px solid #975fec;">&copy; 2024 Pixify App</p>
-    </footer> {% endcomment %}
-    {% comment %} <footer class="px-5 mt-5" style="position: sticky;width: 100%; background-color:  rgba(33, 16, 49, 0.815);">
-        <p class="text-center pt-3 pb-3 mb-0">&copy; 2024 Pixify App</p>
-    </footer> {% endcomment %}
-    <script src="{% static 'js/script.js' %}"></script>
-    <script src="{% static 'js/sribash.js' %}"></script>
+    </footer> -->
 </body>
-<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script type="text/javascript">
+    const show_toastr = (message, type) => {
+        // check if message is null or empty string
+        if (!message) return;
+
+        // show toast message based on type
+        switch (type) {
+            case 'info':
+                toastr.info(message);
+                break;
+            case 'warning':
+                toastr.warning(message);
+                break;
+            case 'success':
+                toastr.success(message);
+                break;
+            case 'error':
+                toastr.error(message);
+                break;
+            default:
+                break;
+        }
+    }
+
+    // call show toast message
+    show_toastr("{{ message|escapejs }}", "{{ message_type|escapejs }}");
+
+</script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
 
 </html>

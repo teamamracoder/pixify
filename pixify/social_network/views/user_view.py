@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from django.views import View
 from .. import services
+from django.http import JsonResponse
 
 class UserListView(View):
     def get(self, request):
