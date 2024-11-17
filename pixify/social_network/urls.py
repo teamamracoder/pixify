@@ -35,11 +35,11 @@ urlpatterns = [
     path('message/create', views.messageCreateView.as_view(), name='message_create'),
     path('message/<int:message_id>/update', views.messageUpdateView.as_view(), name='message_update'),
     path('message/<int:message_id>/delete', views.messageDeleteView.as_view(), name='message_delete'),
+    path('message/<int:message_id>/mention', views.messageMentionView.as_view(), name='message_mention'),
+    path('message/<int:message_id>/reply', views.messageReplyView.as_view(), name='message_reply'),
 
     # notification
     path('notification/', views.notificationView.as_view(), name='notification'),
-
-    # auth
     path('request-otp/', views.RequestOTPView.as_view(), name='request_otp'),
     path('verify-otp/', views.VerifyOTPView.as_view(), name='verify_otp'),
     path('logout/', views.LogoutView.as_view(), name='logout'),
@@ -47,7 +47,14 @@ urlpatterns = [
     path('resend-otp/', views.ResendOTPView.as_view(), name='resend_otp'),
 
 
+
+    #api 
     path('users/api', views.userListViewApi.as_view(), name='users_api'),
     path('chat/chats/api', views.chatListViewApi.as_view(), name='chats_api'),
-    path('chat/followers/api', views.followerViewApi.as_view(), name='followers_api')
+    path('chat/followers/api', views.followerViewApi.as_view(), name='followers_api'),
+    path('message_reaction/create/', views.MessageReactionCreateView.as_view(), name='message_reaction_create'),
+    path('message_reaction/<int:Message_reaction_id>/update/', views.MessageReactionUpdateView.as_view(), name='Message_reaction_update'),
+    path('message_reaction/<int:Message_reaction_id>/delete/', views.MessageReactionDeleteView.as_view(), name='Message_reaction_delete'),
+
 ]
+

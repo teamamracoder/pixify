@@ -3,8 +3,8 @@ from django.views import View
 from ..services import chat_service, user_service,message_service
 from django.http import JsonResponse
 from ..constants import ChatType
+from ..models import User
 from django.utils import timezone
-from django.shortcuts import render
 
 class ChatListView(View):
     def get(self, request):
@@ -67,27 +67,30 @@ class ChatListView(View):
             return timestamp.strftime('%d/%m/%Y')
 
 
-
 class ChatCreateView(View):
-    def post(self, request, user_id):
-        data = chat_service.get_user_data(user_id)
-        if 'followers' not in data or 'followings' not in data:
-            return redirect('error_page') 
-        return render(request, 'enduser/chat/user_profile.html', {
-            'title': 'User Followers and Following',
-            'photo': data['photo'],
-            'followers': data['followers'],
-            'followings': data['followings'],
-        })
-    def get(self, request):    
-        # user = request.user        
-        user = user_service.get_user(2)
-        title = "AbC"
-        type = "2"
-        members = [1, 2, 3]  # Example member IDs
-        chat_cover = "exampleurl.com"
-        chat_service.create_chat(title, members, chat_cover,user,type)                            
-        return redirect('chat/')
+    def post(self, request):
+        user = user_service.get_user(request)
+        return render(request, 'enduser/chat/chats.html',{'user':user})         
+
+    def get(self,request):                
+        user=request.POST['user']
+        title = request.POST['titel','']
+        type = request.POST['type']
+        members = request.POST.getlist('membes')        
+
+        if type == ChatType.PERSONAL.value:    
+            other_user = User.objects.get(id=members)
+            title = other_user.first_name 
+            chat_cover = other_user.profile_photo_url            
+
+        elif type == ChatType.GROUP.value:                        
+            chat_cover = request.POST.get('chat_cover', '')
+    
+        chat=chat_service.create_chat(user,title, chat_cover,type)            
+        for member in members:   
+            chat_service.add_member_to_chat(chat,member)
+        return redirect('chat/')         
+
 
 class ChatDetailsView(View):
     def get(self, request, chat_id):
@@ -100,30 +103,44 @@ class ChatDetailsView(View):
         chat_service.delete_chat(chat)
         return redirect('chat_list')
     
-class ChatUpdatesView(View):
-   
-    def get(self, request, chat_id):
+class ChatUpdatesView(View):   
+    def post(self, request,chat_id):        
+        return render(request, 'enduser/chat/chats.html',{'chat':chat_id})   
+     
+    def get(self,request,chat_id):
         chat  = chat_service.chat_details(chat_id)
-        title = "XYZ"
-        members = [2, 4]
-        chat_cover = "example.com"
-        chat_service.update_chat(chat, title, members, chat_cover)        
+        title = request.POST['titel','']
+        members = request.POST.getlist('membes')
+        chat_cover = request.POST.get('chat_cover', '')
+        chat_service.update_chat(chat, title, chat_cover)    
+        for member in members:   
+            chat_service.remove_member_from_chat(chat_id,member)
         return redirect('chat/')
-    
+
+
 class ChatDeleteView(View):
-    def post(self, request, chat_id):
+    def post(self, request,chat_id):
+        chat=chat_service.get_chat(chat_id)
+        return render(request, 'enduser/chat/chats.html',{'chat':chat})   
+     
+    def get(self, request, chat_id):
         chat = chat_service.get_chat(chat_id)
         chat_service.delete_chat(chat)
         return redirect('chat_list')
+
 class chatListViewApi(View):
-    def get(self, request):
-        user = user_service.get_user(2)
-        chats =chat_service.list_chats_api(request,user)
+   def get(self, request):
+        user = user_service.get_user(4)
+        print(user)
+        chats = chat_service.list_chats_api(request, user)
         return JsonResponse(list(chats), safe=False)
+
 class followerViewApi(View):
     def get(self, request):
-        user = user_service.get_user(2)
-        followers =chat_service.list_followers_api(request,user)
-        return JsonResponse(list(followers), safe=False)
-
+        user = user_service.get_user(2) 
+        print(user)
+        follower_data = chat_service.list_followers_api(request, user)
+        print(follower_data)
+        return JsonResponse(follower_data, safe=False)
     
+
