@@ -35,10 +35,14 @@ urlpatterns = [
     path('message/create', views.messageCreateView.as_view(), name='message_create'),
     path('message/<int:message_id>/update', views.messageUpdateView.as_view(), name='message_update'),
     path('message/<int:message_id>/delete', views.messageDeleteView.as_view(), name='message_delete'),
+    path('message/<int:message_id>/mention', views.messageMentionView.as_view(), name='message_mention'),
+    path('message/<int:message_id>/reply', views.messageReplyView.as_view(), name='message_reply'),
 
     # notification
     path('notification/', views.notificationView.as_view(), name='notification'),
 
-
-    path('users/api', views.userListViewApi.as_view(), name='users_api')
+    #api
+    path('users/api', views.userListViewApi.as_view(), name='users_api'),
+    path('chat/chats/api', views.chatListViewApi.as_view(), name='chats_api'),
+    path('chat/followers/api', views.followerViewApi.as_view(), name='followers_api')
 ]
