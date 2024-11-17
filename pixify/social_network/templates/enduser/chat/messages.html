@@ -1,204 +1,323 @@
 {% extends "enduser/base.html" %}
+
 {% block title %}Chat{% endblock %}
+
 {% block content %}
 {% load static %}
-    <div class="chat-container">
-        <div class="chat-header">
-            <div class="user-info">
-                {% if ChatMember.chat_id > 2 %}
-                    <img src="{{ chat.chat_cover }}" alt="Group Chat" class="profile-pic">
-                    <span class="username">{{chat.user.first_name }}</span>
-                {% else %}
-                    <img src="{{chat.chat_cover }}" alt="Profile Picture" class="profile-pic">
-                    <span class="username">username</span>
-                {% endif %}
-            </div>
-        </div>
-
-        <div class="chat-body">
-            {% for message in messages %}
-                {% if message.sender == request.user %}
-                    <div class="message sent">
-                        <div class="message-info">
-                            <img src="{{ message.sender.profile_pic.url }}" alt="{{ message.sender.username }}'s Profile Picture" class="profile-pic">
-                            <span class="username">username</span>
-                        </div>
-                        <div class="message-content">
-                            <strong>You:</strong> {{ message.text }}
-                            <span class="time">{{ message.created_at|date:"h:i A, F j, Y" }}</span>
-                        </div>
-                    </div>
-                {% else %}
-                    <div class="message received">
-                        <div class="message-info">
-                            <img src="{{ message.sender.profile_pic.url }}" alt="{{ message.sender.username }}'s Profile Picture" class="profile-pic">
-                            <span class="username">{{ message.sender.username }}</span>
-                        </div>
-                        <div class="message-content">username<br>
-                             {{ message.text }}
-                            <span class="time">{{ message.created_at|date:"h:i " }}</span>
-                        </div>
-                    </div>
-                {% endif %}
-            {% endfor %}
-        </div>
-
-        <div class="chat-footer">
-            <form method="POST" action="/send_message">
-                {% csrf_token %}
-                <input type="text" name="message" placeholder="Type your message here..." required>
-                <button type="submit">➤</button>
-            </form>
+<div class="chat-container">
+    <div class="chat-header">
+        <div class="user-info">
+            {% if ChatMember.chat_id > 2 %}
+                <img src="{{ chat.photo }}" alt="Group Chat" class="profile-pic">
+                <span class="username">{{ chat.title }}</span>
+            {% else %}
+                <img src="{{ chat.photo }}" alt="Profile Picture" class="profile-pic">
+                <span class="username">{{ chat.title }}</span>
+            {% endif %}
         </div>
     </div>
 
-    <style>
-        /* Chat Container */
-.chat-container {
-    height: 600px;
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    max-width: 500px;
-    margin: 0 auto;
-}
+    <div class="chat-body">
+        {% for message in messages %}
+            {% if message.sender == request.user %}
+                <div class="message sent">
+                    <div class="message-content">
+                        <div class="message-header">
+                            <img src="{{ chat.photo }}" alt="Sender Profile Pic" class="message-profile-pic">
+                            <span class="message-username">{{ message.sender.username }}</span>
+                        </div>
+                        <span>{{ message.text }}</span>
+                    </div>
+                    <div class="message-footer">
+                        <i class="bi bi-three-dots-vertical" onclick="toggleOptions({{ message.id }})"></i>
+                        <span class="time">{{ message.created_at|date:"h:i" }}</span>
+                    </div>
+                    <div class="options-popup" id="options-{{ message.id }}" style="display: none;">
+                        <a href="#" onclick="editMessage('{{ message.id }}', '{{ message.text|escapejs }}')">Edit</a>
+                        <form method="POST" action="">
+                            {% csrf_token %}
+                            <button type="submit" class="delete-btn">Delete</button>
+                        </form>
+                        <a href="#" onclick="replyToMessage('{{ message.id }}', '{{ message.sender.username }}', '{{ message.text|escapejs }}')">Reply</a>
+                    </div>
+                </div>
+            {% else %}
+                <div class="message received">
+                    <div class="message-content">
+                        <div class="message-header">
+                            <img src="{{ message.sender.profile_pic.url }}" alt="{{ message.sender.username }}'s Profile Picture" class="message-profile-pic">
+                            <span class="message-username">{{ message.sender.username }}</span>
+                        </div>
+                        <span>{{ message.text }}</span>
+                    </div>
+                    <div class="message-footer">
+                        <i class="bi bi-three-dots-vertical" onclick="toggleOptions({{ message.id }})"></i>
+                        <span class="time">{{ message.created_at|date:"h:i" }}</span>
+                    </div>
+                    <div class="options-popup" id="options-{{ message.id }}" style="display: none;">
+                        <a href="#" onclick="editMessage('{{ message.id }}', '{{ message.text|escapejs }}')">Edit</a>
+                        <form method="POST" action="">
+                            {% csrf_token %}
+                            <button type="submit" class="delete-btn">Delete</button>
+                        </form>
+                        <a href="#" onclick="replyToMessage('{{ message.id }}', '{{ message.sender.username }}', '{{ message.text|escapejs }}')">Reply</a>
+                    </div>
+                </div>
+            {% endif %}
+        {% endfor %}
+    </div>
 
-/* Header */
-.chat-header {
-    background-color: #6a4c9c;
-    color: white;
-    padding: 10px;
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-}
+    <div class="chat-footer">
+        <div id="reply-preview" style="display: none;">
+            <div class="reply-message">
+                <span class="close-reply" onclick="cancelReply()">✖</span>
+                <span class="reply-username"></span>: <span class="reply-text"></span>
+            </div>
+        </div>
 
-.user-info {
-    display: flex;
-    align-items: center;
-}
+        <form method="POST" action="/send_message">
+            {% csrf_token %}
+            <input type="text" name="message" placeholder="Type your message here..." required>
+            <button type="submit">➤</button>
+        </form>
+    </div>
+</div>
 
-.profile-pic {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    margin-right: 10px;
-    object-fit: cover;
-}
+<script>
+    function toggleOptions(messageId) {
+        const popup = document.getElementById('options-' + messageId);
+        popup.style.display = popup.style.display === 'none' ? 'block' : 'none';
+    }
 
-.username {
-    font-size: 18px;
-    font-weight: bold;
-    color: white;
-}
+    function editMessage(messageId, content) {
+        const messageInput = document.querySelector('input[name="message"]');
+        messageInput.value = content;
+        messageInput.focus();
+        document.querySelector('form').action = `/message/${messageId}/edit/`;
+    }
 
-/* Chat Body */
-.chat-body {
-    flex: 1;
-    padding: 20px;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-}
+    function replyToMessage(messageId, username, content) {
+        const messageInput = document.querySelector('input[name="message"]');
+        document.getElementById('reply-preview').style.display = 'block';
+        document.querySelector('.reply-username').textContent = username;
+        document.querySelector('.reply-text').textContent = content;
 
-.message {
-    max-width: 80%;
-    margin-bottom: 10px;
-    padding: 10px;
-    border-radius: 10px;
-    position: relative;
-    font-size: 14px;
-    display: flex;
-    align-items: center;
-}
+        messageInput.focus();
+    }
 
-.message.sent {
-    align-self: flex-end;
-    background-color: #6a4c9c; /* Light green for sent messages */
-}
+    function cancelReply() {
+        document.getElementById('reply-preview').style.display = 'none';
+    }
 
-.message.received {
-    align-self: flex-start;
-    background-color: #d3d3d3; /* Light gray for received messages */
-    color: #333333; /* Dark text color for readability */
-}
+    document.addEventListener('click', function (event) {
+        if (!event.target.closest('.options-popup') && !event.target.closest('.bi-three-dots-vertical')) {
+            document.querySelectorAll('.options-popup').forEach(popup => popup.style.display = 'none');
+        }
+    });
+</script>
 
-/* Message Info */
-.message-info {
-    display: flex;
-    align-items: center;
-}
+<style>
+    /* Overall Chat Container */
+    .chat-container {
+        height: 650px;
+        background-color: #f2f2f2;
+        border-radius: 10px;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        max-width: 600px;
+        margin: 0 auto;
+        font-family: 'Arial', sans-serif;
+        color: black;  /* Set default text color to black */
+    }
 
-.message-info .profile-pic {
-    width: 30px;
-    height: 30px;
-    margin-right: 8px;
-}
+    /* Header */
+    .chat-header {
+        background-color: #533b79;
+        color: white;
+        padding: 15px;
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        border-radius: 10px 10px 0 0;
+    }
 
-.message-info .username {
-    font-size: 14px;
-    font-weight: bold;
-    color: #ffffff;
-}
+    .user-info {
+        display: flex;
+        align-items: center;
+    }
 
-/* Message Content */
-.message-content {
-    display: flex;
-    flex-direction: column;
-    max-width: 80%;
-}
+    .profile-pic {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        margin-right: 20px;
+        object-fit: cover;
+    }
 
-.message-content .time {
-    font-size: 10px;
-    color: #000000; /* Black color for time */
-    margin-top: 5px;
-    
-}
+    .username {
+        font-size: 22px;
+        font-weight: bold;
+        color: white;
+    }
 
-/* Footer */
-.chat-footer {
-    padding: 10px;
-    background-color: #888686;
-    border-top: 1px solid #ddd;
-    display: flex;
-    justify-content: space-between;
-}
+    /* Chat Body */
+    .chat-body {
+        flex: 1;
+        padding: 20px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+    }
 
-.chat-footer form {
-    display: flex;
-    flex: 1;
-}
+    .message {
+        max-width: 80%;
+        margin-bottom: 12px;
+        padding: 12px 15px;
+        border-radius: 20px;
+        position: relative;
+        font-size: 15px;
+        display: flex;
+        flex-direction: column;
+        transition: all 0.3s ease;
+        background-color: #ffffff;
+        box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.1);
+    }
 
-.chat-footer input[type="text"] {
-    flex: 1;
-    padding: 10px;
-    font-size: 14px;
-    border: 1px solid #c7c5c5;
-    color: white; /* White text in input box */
-    background-color: #333333; /* Darker background for input box */
-    border-radius: 5px 0 0 5px;
-    outline: none;
-    width: 100%;
-    box-sizing: border-box;
-}
+    .message.sent {
+        align-self: flex-end;
+        background-color: #533b79;
+        color: white;
+    }
 
-.chat-footer button {
-    padding: 10px 20px;
-    background-color: #6a4c9c;
-    color: white;
-    border: none;
-    border-radius: 0 5px 5px 0;
-    cursor: pointer;
-    font-size: 14px;
-}
+    .message.received {
+        align-self: flex-start;
+        background-color: #d1c6d3;
+        color: #333333;
+    }
 
-.chat-footer button:hover {
-    background-color: #533b79;
-}
+    .message-content {
+        margin-bottom: 25px;
+        position: relative;
+    }
 
-    </style>
-    
+    /* Profile Picture inside Message */
+    .message-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 8px;
+    }
+
+    .message-profile-pic {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-right: 10px;
+    }
+
+    .message-username {
+        font-weight: bold;
+        color: #533b79;
+        font-size: 14px;
+    }
+
+    .message-footer {
+        position: absolute;
+        bottom: 5px;
+        right: 5px;
+        font-size: 12px;
+        color: #888;
+        display: flex;
+        align-items: center;
+    }
+
+    .message-footer .time {
+        margin-right: 10px;
+    }
+
+    .message-footer .bi-three-dots-vertical {
+        cursor: pointer;
+        font-size: 12px; /* Smaller icon */
+        margin-left: 5px;
+    }
+
+    .options-popup {
+        display: none;
+        position: absolute;
+        top: 25px;
+        left: 100%; /* Align the options to the right of the message */
+        margin-left: 10px;
+        background-color: #fff;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        width: 160px;
+        font-size: 14px;
+        z-index: 10;
+    }
+
+    .options-popup a {
+        display: block;
+        padding: 10px;
+        color: #333;
+        text-decoration: none;
+        border-bottom: 1px solid #ccc;
+    }
+
+    .options-popup a:hover,
+    .options-popup .delete-btn:hover {
+        background-color: #f2f2f2;
+    }
+
+    .delete-btn {
+        background: none;
+        color: red;
+        border: none;
+        cursor: pointer;
+    }
+
+    /* Footer */
+    .chat-footer {
+        padding: 12px;
+        background-color: #e6e6e6;
+        border-top: 1px solid #ddd;
+        display: flex;
+        justify-content: space-between;
+        flex-direction: column;
+    }
+
+    .chat-footer form {
+        display: flex;
+        flex: 1;
+        align-items: center;
+    }
+
+    .chat-footer input[type="text"] {
+        flex: 1;
+        padding: 12px;
+        font-size: 14px;
+        border-radius: 25px;
+        border: 1px solid #c7c5c5;
+        outline: none;
+        background-color: #333333;
+        color: white;
+        margin-right: 10px;
+    }
+
+    .chat-footer button {
+        padding: 12px 20px;
+        background-color: #533b79;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        cursor: pointer;
+        font-size: 16px;
+    }
+
+    .chat-footer button:hover {
+        background-color: #3e2b5c;
+    }
+</style>
 {% endblock %}
