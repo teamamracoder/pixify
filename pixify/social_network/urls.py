@@ -25,12 +25,33 @@ urlpatterns = [
 
 
     # message
-    # path('message/', views.messageView.as_view(), name='message'),
-    path('chat/', views.ChatView.as_view(), name='chat'),
+
+    path('message/', views.MessageView.as_view(), name='message'),
+    # path('chat/', views.ChatView.as_view(), name='chat'),
+   
 
     # notification
-    path('notification/', views.notificationView.as_view(), name='notification'),
+    path('notification/', views.NotificationView.as_view(), name='notification'),
+
+     # profile
+    path('profile/', views.EnduserprofileView.as_view(), name='userprofile'),
+
+     # aboutus
+    path('aboutus/', views.AboutUsView.as_view(), name='aboutus'),
+
+     # contact
+    path('contactus/', views.ContactUsView.as_view(), name='contact'),
 
 
+    path('comments/', views.CommentsView.as_view(), name='comments'),
+
+    path('friendrequest/', views.FriendRequestView.as_view(), name='friendrequest'),
+
+    path('birthday/', views.BirthdayView.as_view(), name='birthday'),
+
+    path('friends/', views.FriendsView.as_view(), name='friends'),
+    path('birthday/', views.BirthdayView.as_view(), name='birthday'),
+
+    path('userprofile/', views.UserprofileView.as_view(), name='userprofile'),
 
 ]
