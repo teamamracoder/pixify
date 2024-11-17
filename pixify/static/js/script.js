@@ -211,3 +211,12 @@ function toggleShareButton() {
     shareButtonContainer.style.display = isAnyChecked ? "flex" : "none";
 }
 //End Share Modal
+
+//For Tooltip--Priya
+document.addEventListener('DOMContentLoaded', function () {
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+    })
+});
+//For Tooltip--Priya End
