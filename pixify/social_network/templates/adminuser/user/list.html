@@ -8,6 +8,10 @@
         background-color: rgba(240, 242, 245, 0.1);
         color:aqua; 
     }
+        .current {
+        font-weight: bold; 
+    }
+
 </style>
 
 <div class="container mt-5">
@@ -81,23 +85,26 @@
 
 
                 <!-- new added by sujit -->
-                <div class="pagination">
-                    <span class="step-links">
-                        {% if users.has_previous %}
-                            <a href="?page=1&search={{ search_query }}&sort_by={{ sort_by }}&sort_order={{ sort_order }}">First</a>
-                            <a href="?page={{ users.previous_page_number }}&search={{ search_query }}&sort_by={{ sort_by }}&sort_order={{ sort_order }}">Previous</a>
-                        {% endif %}
-                
-                        <span class="current">
+                <div class="container">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="step-links">
+                            {% if users.has_previous %}
+                                <a  href="?page=1&search={{ search_query }}&sort_by={{ sort_by }}&sort_order={{ sort_order }}" class="btn btn-link">First</a>
+                        <a href="?page={{ users.previous_page_number }}&search={{ search_query }}&sort_by={{ sort_by }}&sort_order={{ sort_order }}" class="btn btn-link">Previous</a>
+                            {% endif %}
+                            
+                            {% if users.has_next %}
+                        <a href="?page={{ users.next_page_number }}&search={{ search_query }}&sort_by={{ sort_by }}&sort_order={{ sort_order }}" class="btn btn-link">Next</a>
+                        <a href="?page={{ users.paginator.num_pages }}&search={{ search_query }}&sort_by={{ sort_by }}&sort_order={{ sort_order }}" class="btn btn-link">Last</a>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="current ml-auto">
                             Page {{ users.number }} of {{ users.paginator.num_pages }}.
-                        </span>
-                
-                        {% if users.has_next %}
-                            <a href="?page={{ users.next_page_number }}&search={{ search_query }}&sort_by={{ sort_by }}&sort_order={{ sort_order }}">Next</a>
-                            <a href="?page={{ users.paginator.num_pages }}&search={{ search_query }}&sort_by={{ sort_by }}&sort_order={{ sort_order }}">Last</a>
-                        {% endif %}
-                    </span>
+                        </div>
+                    </div>
                 </div>
+                
                 
             </div>
         </div>

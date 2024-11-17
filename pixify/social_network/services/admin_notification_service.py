@@ -4,26 +4,25 @@ from django.db.models import Q
 
 # def list_notifications():
 #     return models.Notification.objects.all()
+def get_notification(notification_id):
+    return get_object_or_404(models.Notification, id=notification_id)
 
-def list_notifications(sort_by='text'):
+
+def admin_list_notifications(sort_by='text'):
     return models.Notification.objects.all().order_by(sort_by)
 
-def create_notifications(**kwargs):
+def admin_create_notification(**kwargs):
     notification = models.Notification.objects.create(
             receiver_id=kwargs['receiver_id'],
             text=kwargs['text'],           
             media_url=kwargs.get('media_url'),
             is_read=kwargs['is_read'],  
-            is_active=kwargs.get('is_active', True) 
-
+            is_active=kwargs.get('is_active', True), 
+            created_by=kwargs['created_by'] 
         )
     return notification
 
-def get_notification(notification_id):
-    return get_object_or_404(models.Notification, id=notification_id)
-
-
-def update_notifications(**kwargs):
+def admin_update_notifications(**kwargs):
     notification = models.Notification.objects.create(
             id= kwargs['id'],
             receiver_id=kwargs['receiver_id'],
@@ -40,7 +39,7 @@ def update_notifications(**kwargs):
 #     notification.delete()
 
 
-def list_notifications_filtered(search_query, sort_by='text'):
+def admin_list_notifications_filtered(search_query, sort_by='text'):
     if search_query:
         # Use Q objects to filter by first_name, last_name, or email
         return models.Notification.objects.filter(
