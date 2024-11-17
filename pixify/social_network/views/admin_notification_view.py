@@ -3,6 +3,7 @@ from django.views import View
 from .. import services
 from ..models import User
 from django.core.paginator import Paginator    
+from django.http import JsonResponse
 
 class NotificationListView(View):
     def get(self, request):
@@ -86,12 +87,20 @@ class NotificationUpdateView(View):
 
 
 
-# class NotificationDeleteView(View):
-#     def get(self, request, notification_id):
-#         notification = services.admin_notification_service.get_user(notification_id)
-#         return render(request, 'adminuser/notification/delete.html', {'notification': notification})
+class NotificationDeleteView(View):
+    def get(self, request, notification_id):
+        notification = services.admin_notification_service.get_user(notification_id)
+        return render(request, 'adminuser/notification/delete.html', {'notification': notification})
 
-#     def post(self, request, notification_id):
-#         notification = services.admin_notification_service.get_notification(notification_id)
-#         services.admin_notification_service.delete_notification(notification)
-#         return redirect(request,'notification_list')
+    def post(self, request, notification_id):
+        notification = services.admin_notification_service.get_notification(notification_id)
+        services.admin_notification_service.delete_notification(notification)
+        return redirect(request,'notification_list')
+    
+  
+class ToggleNotificationActiveView(View):
+    def post(self, request, notification_id):
+        notification = services.admin_notification_service.get_notification(notification_id)
+        notification.is_active = not notification.is_active  # Toggle active status
+        notification.save()
+        return JsonResponse({'is_active': notification.is_active})
