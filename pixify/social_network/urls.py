@@ -37,6 +37,7 @@ urlpatterns = [
     path('admin/posts/<int:post_id>/update/', views.AdminPostUpdateView.as_view(), name='post_update'),
     path('admin/posts/<int:post_id>/delete/', views.AdminPostDeleteView.as_view(), name='post_delete'),
 
+
     #chat
     path('admin/chat/', views.ChatAdminListView.as_view(), name='chat_list'),
     path('admin/chat/create/', views.ChatAdminCreateView.as_view(), name='chat_create'),

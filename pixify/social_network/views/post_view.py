@@ -4,6 +4,8 @@ from django.views import View
 from .. import services
 from ..models import User
 from django.core.paginator import Paginator    
+from django.http import JsonResponse
+
 
 class AdminPostListView(View):
     def get(self, request):
@@ -86,6 +88,7 @@ class AdminPostDeleteView(View):
         post = services.post_service.get_post(post_id)
         services.post_service.delete_post(post)
         return redirect('post_list')
+
 
 class AdminTogglePostActiveView(View):
     def post(self, request, post_id):
