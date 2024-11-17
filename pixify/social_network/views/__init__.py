@@ -6,5 +6,5 @@ from .chat_view import *
 from .message_view import *
 from .notification_view import *
 from .auth_view import *
-from .admin_notification_view import *
 from .manage_chat_view import *
+from .manage_notification_view import *
