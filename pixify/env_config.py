@@ -14,6 +14,10 @@ env = environ.Env(
     DATABASE_PASSWORD=(str, ''),
     DATABASE_HOST=(str, ''),
     DATABASE_PORT=(str, ''),
+
+    # EMAIL
+    EMAIL_ID=(str, ''),
+    EMAIL_PASSWORD=(str, ''),
 )
 
 env.read_env()

@@ -1,0 +1,15 @@
+{% extends "auth/base.html" %}
+
+{% block title %}Welcome to Pixify{% endblock %}
+
+{% block content %}
+
+<h2>Request OTP</h2>
+<form method="post">
+    {% csrf_token %}
+    <label for="email">Email:</label>
+    <input type="text" id="email" name="email" required>
+    <button type="submit">Send OTP</button>
+</form>
+
+{% endblock %}
