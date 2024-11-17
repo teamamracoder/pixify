@@ -48,7 +48,6 @@ urlpatterns = [
     path('register/', views.UserRegistrationView.as_view(), name='register'),
     path('resend-otp/', views.ResendOTPView.as_view(), name='resend_otp'),
 
-
 #api 
     path('users/api', views.userListViewApi.as_view(), name='users_api'),
     path('chat/chats/api', views.chatListViewApi.as_view(), name='chats_api'),
