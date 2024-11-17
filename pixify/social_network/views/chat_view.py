@@ -6,9 +6,23 @@ from ..models import Message, ChatMember, Follower
 from ..services import chat_service, message_service, user_service
 from ..constants import ChatType
 from django.shortcuts import render,redirect
+from .. import services
+
+from ..models import User
+from ..models import Chat
+from ..constants import ChatType
+from django.core.paginator import Paginator 
+from django.http import HttpResponseBadRequest 
 
 
-class ChatListView(View):
+
+# everyone insert data manually
+# user (5)
+# chats (4)--> perasonal chat(2)
+#           --> group chat(2)
+# messages (each chats, 3 message)-->use different sender_id
+# message read status (as required, initially blank)
+class ChatView(View):
     def get(self, request):
         chats = chat_service.list_chats()  
         user = user_service.get_user(1)  
@@ -137,44 +151,90 @@ class ChatDeleteView(View):
 #=============================================================================
 class ChatAdminListView(View):
     def get(self, request):
-        chats = chat_service.list_chats()
-        return render(request, 'adminuser/chat/list.html',{'chats':chats})
+        search_query = request.GET.get('search', '') 
+        sort_by = request.GET.get('sort_by', 'title')
+        sort_order = request.GET.get('sort_order', 'asc')
+        page_number = request.GET.get('page', 1)
+
+
+        # Adjust sort order for descending order
+        if sort_order == 'desc':
+            sort_by = '-' + sort_by
+
+        # print(f"Search Query: {search_query}")
+        # Get filtered and sorted users based on search
+        chat = services.chat_service.list_chats_filtered(search_query, sort_by)
+
+        # Paginate the users
+        paginator = Paginator(chat, 10)  # Show 10 users per page
+        page_obj = paginator.get_page(page_number)
+
+        
+        
+        choices_type = [{type.value: type.name} for type in ChatType]
+
+        return render(request, 'adminuser/chat/list.html', {
+            'chats': page_obj,
+            'choices_type': choices_type,
+            'sort_by': sort_by,
+            'sort_order': sort_order,
+            'search_query': search_query,  # Ensure this is being passed to the template
+            'page_obj': page_obj,
+        })
+
 
 
 class ChatAdminCreateView(View):
     def get(self, request):       
-        return render(request, 'adminuser/chat/create.html')
+        choices_type = [{type.value: type.name} for type in ChatType]
+        return render(request, 'adminuser/chat/create.html',{"choices_type":choices_type})
 
     def post(self, request):
-        title=request.POST['title']
-        # member=request.POST['member']
-        type=request.POST['type']
-        is_active=request.POST.get('is_active' 'True')=='True'
-        created_at=request.POST.getlist('created_at')
-        updated_at=request.POST.getlist('updated_at')
-        created_by_id=request.POST.getlist('created_by_id')
-        updated_by_id=request.POST.getlist('updated_by_id')
-        chat_cover=request.POST.getlist('chat_cover')
-        chat_service.create_chats(title,type,is_active,created_at,updated_at,created_by_id,updated_by_id,chat_cover)
+        chat_data={
+        'title': request.POST['title'],      
+        'type': request.POST['type'],       
+        'chat_cover': request.POST.get('chat_cover', ''), 
+        #'created_by_id': Chat.objects.get(id=request.POST['created_by_id']),
+        'is_active': request.POST.get('is_active', 'on') == 'on',
+        'created_by':User.objects.get(id=request.POST['created_by']),
+        'updated_by':User.objects.get(id=request.POST['updated_by'])
+        }
+        services.chat_service.create_chats(**chat_data)
         return redirect ('chat_list')
+        
     
 class ChatAdminDetailView(View):
-    def get(self, request, chat_id):
-        chat = chat_service.get_chat(chat_id)
-        return render(request, 'adminuser/chat/detail.html', {'chat': chat}) 
+    def get(self, request, chat_id):  
+        choices_type = [{type.value: type.name} for type in ChatType]     
+        chat = services.chat_service.get_chat(chat_id)
+        return render(request, 'adminuser/chat/detail.html',{'chat':chat, "choices_type":choices_type }) 
         
 
 class ChatAdminUpdateView(View):
     def get(self, request,chat_id):
-        chat = chat_service.get_chat(chat_id)
-        return render(request, 'adminuser/chat/update.html',{'chat': chat})
+        choices_type = [{type.value: type.name} for type in ChatType]
+        chat = services.chat_service.get_chat(chat_id)
+        return render(request, 'adminuser/chat/update.html',{'chat': chat, "choices_type":choices_type})
 
     def post(self, request, chat_id):
-        chat = chat_service.get_chat(chat_id)
-        title = request.POST['title']
-        type = request.POST['type']
+        chat = services.chat_service.get_chat(chat_id)
+        chat_data={
+            'updated_by': User.objects.get(id=request.POST['updated_by']),
+            'title':request.POST.get('title'),
+            'type':request.POST.get('type'),
+            'chat_cover':request.POST.get('chat_cover'),
+            'is_active':request.POST.get('is_active', 'on') == 'on',
+            # 'created_by':request.POST.get('created_by'),
+            # 'updated_by':request.POST.get('updated_by'),
+        }
+
+        required_fields = ['title', 'type', 'chat_cover']
+        for field in required_fields:
+            if not chat_data.get(field):
+                return HttpResponseBadRequest(f"Missing required field: {field}")
         
-        chat_service.update_chats(chat, title,type)
+        services.chat_service.update_chats(
+            chat, **chat_data)
         return redirect('chat_detail', chat_id=chat.id)
     
 
@@ -187,5 +247,3 @@ class ChatAdminDeleteView(View):
         chat= chat_service.get_chat(chat_id)
         chat_service.delete_chats(chat)
         return redirect('chat_list')
-
-    

@@ -1,5 +1,24 @@
 from ..models import Chat, User, ChatMember
 from django.shortcuts import get_object_or_404
+from django.db.models import Q
+
+
+# def list_chats():
+#   return models.Chat.objects.all()
+def list_chats(sort_by='title'):
+    return Chat.objects.all().order_by(sort_by)
+
+
+def create_chats(**kwargs):
+  chat= Chat.objects.create(
+     title=kwargs['title'],
+     type=kwargs['type'],
+     chat_cover=kwargs.get('chat_cover'),
+     created_by=kwargs['created_by'],
+     updated_by=kwargs['updated_by'],
+     is_active=kwargs.get('is_active', True) 
+  )
+  return chat
 
 def list_chats():
     return Chat.objects.all()
@@ -64,18 +83,26 @@ def admin_create_chats(title,type,is_active,created_at,updated_at,created_by_id,
 def admin_get_chat(chat_id):
     return get_object_or_404(Chat, id=chat_id)
 
-def admin_update_chats(chat,title,type,is_active,created_at,updated_at,created_by_id,updated_by_id,chat_cover):
+def update_chats(chat,title,type,is_active,chat_cover,created_by, updated_by):
    chat.title=title
    chat.type=type
    chat.is_active=is_active
-   chat.created_at=created_at
-   chat.updated_at=updated_at
-   chat.created_by_id=created_by_id
-   chat.updated_by_id=updated_by_id
+#    chat.created_by=created_by
    chat.chat_cover=chat_cover
+   chat.updated_by=updated_by
    
    chat.save()
    return chat
 
 def admin_delete_chats(chat):
     chat.delete()
+
+def list_chats_filtered(search_query, sort_by='title'):
+    if search_query:
+        
+        return Chat.objects.filter(
+            Q(title__icontains=search_query) | 
+            Q(type__icontains=search_query) |
+            Q(chat_cover__icontains=search_query)
+        ).order_by(sort_by)
+    return Chat.objects.all().order_by(sort_by)
