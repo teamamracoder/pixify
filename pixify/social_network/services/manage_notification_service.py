@@ -2,16 +2,12 @@ from .. import models
 from django.shortcuts import get_object_or_404
 from django.db.models import Q 
 
-# def list_notifications():
-#     return models.Notification.objects.all()
-def get_notification(notification_id):
+
+def manage_get_notification(notification_id):
     return get_object_or_404(models.Notification, id=notification_id)
 
 
-def admin_list_notifications(sort_by='text'):
-    return models.Notification.objects.all().order_by(sort_by)
-
-def admin_create_notification(**kwargs):
+def manage_create_notification(**kwargs):
     notification = models.Notification.objects.create(
             receiver_id=kwargs['receiver_id'],
             text=kwargs['text'],           
@@ -22,24 +18,16 @@ def admin_create_notification(**kwargs):
         )
     return notification
 
-def admin_update_notification(**kwargs):
-    notification = models.Notification.objects.create(
-            id= kwargs['id'],
-            receiver_id=kwargs['receiver_id'],
-            text=kwargs['text'],           
-            media_url=kwargs.get('media_url'),
-            is_read=kwargs['is_read'],
-            created_by=kwargs['created_by'] 
-        )
+def manage_update_notification(notification, text,receiver_id,media_url, is_read):
+    notification.text = text
+    notification.receiver_id = receiver_id
+    notification.media_url = media_url
+    notification.is_read = is_read     
+    notification.save()
     return notification
 
 
-
-# def delete_notifications(notification):
-#     notification.delete()
-
-
-def admin_list_notifications_filtered(search_query, sort_by='text'):
+def manage_list_notifications_filtered(search_query, sort_by='text'):
     if search_query:
         # Use Q objects to filter by first_name, last_name, or email
         return models.Notification.objects.filter(
