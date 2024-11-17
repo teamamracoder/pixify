@@ -72,37 +72,3 @@ def get_chat (chat_id):
 
 
 
-#=====================================================
-def admin_list_chats():
-  return Chat.objects.all()
-
-
-def admin_create_chats(title,type,is_active,created_at,updated_at,created_by_id,updated_by_id,chat_cover):
-  return Chat.objects.create(title=title,type=type,is_active=is_active,created_at=created_at,updated_at=updated_at,created_by_id=created_by_id,updated_by_id=updated_by_id,chat_cover=chat_cover)
-
-def admin_get_chat(chat_id):
-    return get_object_or_404(Chat, id=chat_id)
-
-def update_chats(chat,title,type,is_active,chat_cover,created_by, updated_by):
-   chat.title=title
-   chat.type=type
-   chat.is_active=is_active
-#    chat.created_by=created_by
-   chat.chat_cover=chat_cover
-   chat.updated_by=updated_by
-   
-   chat.save()
-   return chat
-
-def admin_delete_chats(chat):
-    chat.delete()
-
-def list_chats_filtered(search_query, sort_by='title'):
-    if search_query:
-        
-        return Chat.objects.filter(
-            Q(title__icontains=search_query) | 
-            Q(type__icontains=search_query) |
-            Q(chat_cover__icontains=search_query)
-        ).order_by(sort_by)
-    return Chat.objects.all().order_by(sort_by)
