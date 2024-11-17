@@ -46,8 +46,3 @@ class UserDeleteView(View):
         user = services.user_service.get_user(user_id)
         services.user_service.delete_user(user)
         return redirect('user_list')
-
-class userListViewApi(View):
-    def get(self, request):
-        users = services.user_service.list_users_api(request)
-        return JsonResponse(list(users), safe=False)
