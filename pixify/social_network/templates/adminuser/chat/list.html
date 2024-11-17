@@ -66,7 +66,16 @@
                                     </td>
                                     
                                     <td>{{ chat.chat_cover }}</td>
-                                    <td><i class="bi bi-eye text-primary"></i><td>
+                                    <td>
+                                        <button class="btn btn-sm toggle-status" data-chat-id="{{ chat.id }}">
+                                            {% if chat.is_active %}
+                                                <i class="bi bi-toggle-on text-success"></i> Active
+                                            {% else %}
+                                                <i class="bi bi-toggle-off text-danger"></i> Inactive
+                                            {% endif %}
+                                        </button>
+                                    </td>
+                                    
                                     
                                 </tr>
                                 {% endfor %}
@@ -99,6 +108,34 @@
         </div>       
 </div>
 
+
+<script>
+    $(document).ready(function() {
+        $('.toggle-status').click(function() {
+            const chatId = $(this).data('chat-id');
+            const button = $(this);
+
+            $.ajax({
+                url: '/admin/chat/toggle-active/' + chatId + '/',
+                type: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'  // Include CSRF token for security
+                },
+                success: function(response) {
+                    // Update the button's text and icon based on the new status
+                    if (response.is_active) {
+                        button.html('<i class="bi bi-toggle-on text-success"></i> Active');
+                    } else {
+                        button.html('<i class="bi bi-toggle-off text-danger"></i> Inactive');
+                    }
+                },
+                error: function(xhr) {
+                    alert('Error updating status: ' + xhr.responseText);
+                }
+            });
+        });
+    });
+</script>
 
 
 {% endblock %}

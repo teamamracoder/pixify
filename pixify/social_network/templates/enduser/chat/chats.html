@@ -1,0 +1,351 @@
+{% extends "enduser/base.html" %} {% block title %}Pixify-Message{% endblock %}
+{% block content %} {% load static %}
+
+<div
+  class="px-3 py-3 mt-3 users"
+  style="
+    background-color: #1f0447e3;
+    box-shadow: 0 4px 8px rgba(151, 95, 236, 0.5);
+    font-family: serif;
+    border-radius: 7px;
+    position:relative;
+    "
+>
+  <!-- heading -->
+  <div class="m-2">
+    <div
+      class="p-3 fnd-pic"
+      style="justify-content: space-between; display: flex"
+    >
+      <h2 class="mobile-hide">Chats</h2>
+      <div class="input-wrapper">
+        <button class="icon">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            height="25px"
+            width="25px"
+          >
+            <path
+              stroke-linejoin="round"
+              stroke-linecap="round"
+              stroke-width="1.5"
+              stroke="#fff"
+              d="M11.5 21C16.7467 21 21 16.7467 21 11.5C21 6.25329 16.7467 2 11.5 2C6.25329 2 2 6.25329 2 11.5C2 16.7467 6.25329 21 11.5 21Z"
+            ></path>
+            <path
+              stroke-linejoin="round"
+              stroke-linecap="round"
+              stroke-width="1.5"
+              stroke="#fff"
+              d="M22 22L20 20"
+            ></path>
+          </svg>
+        </button>
+        <input placeholder="search.." class="input" name="text" type="text" />
+      </div>
+    </div>
+  </div>
+
+  <!-- Peoples -->
+{%for chat in chats%}
+  <div style="border: 1px solid black; border-radius: 3px" class="m-2">
+    <div class="p-3 fnd-pic">
+      <a
+        href="#"
+        style="
+          text-decoration: none;
+          display: flex;
+          align-items: center;
+          gap: 20px;
+          justify-content: space-between;
+        "
+      >
+        <!-- Profile image -->
+        <img
+          src="{{chat.photo}}"
+          class="img-fluid"
+          alt=""
+          style="height: 40px; border-radius: 50%"
+        />
+
+        <!-- Text next to the image -->
+        <div style="display: flex; flex-direction: column; flex-grow: 1">
+          <p style="margin: 0">
+            <a href="{% url 'chat_details' chat.id %}">
+              {{chat.title}} <i class="bi bi-patch-check prof-check"></i>
+            </a>
+          </p>
+          <p style="margin: 0; color: gray; font-size: 0.9em">
+            {{chat.last_message}} 
+          </p>
+        </div>
+
+        <!-- Right-aligned section with badge and timestamp -->
+        <div
+          style="
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            padding-right: 20px;
+          "
+        >
+          <p style="margin-top: 0; padding-right: 10px">
+            <span
+              class="position-absolute translate-middle badge rounded-pill bg-danger"
+              >{{chat.unread_count}}</span
+            >
+          </p>
+          <p style="margin-top: 10px; margin-bottom: 0; padding-right: 20px">
+            <span class="position-absolute translate-middle badge rounded-pill"
+              >{{chat.last_message_time}}</span
+            >
+          </p>
+        </div>
+      </a>
+    </div>
+  </div>
+{% endfor %}
+
+
+  <div style="position:absolute; bottom:30px; right:20px;">
+    <button data-toggle="modal" data-target="#exampleModalCenter" class="border-0 bg-transparent">
+        <i class="text-light bi bi-plus-circle fs-1" style="background-color: #1f0647;"></i>
+    </button>
+  </div>
+
+  <!-- Modal -->
+  <div
+    class="modal fade"
+    id="exampleModalCenter"
+    tabindex="-1"
+    role="dialog"
+    aria-labelledby="exampleModalCenterTitle"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <div class="input-group mb-3">
+            <button
+              class="btn btn-outline-secondary"
+              type="button"
+              id="button-addon1"
+              id="searchbtn"
+            >
+              <i class="bi bi-search"></i>
+            </button>
+            <input
+              type="text"
+              id="searchin"
+              class="form-control"
+              placeholder="Search Name"
+              aria-label="Example text with button addon"
+              aria-describedby="button-addon1"
+            />
+                  </div>
+                </div>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    const allItems = document.querySelectorAll(".item");
+    // Array to store selected items
+    const selectedItems = [];
+  
+    function toggleSelect(element, item) {
+      // Toggle the selection state
+      if (selectedItems.includes(item)) {
+        // If item is already selected, remove it from the array and update styling
+        const index = selectedItems.indexOf(item);
+        selectedItems.splice(index, 1);
+        element.classList.remove("selected");
+      } else {
+        // If item is not selected, add it to the array and update styling
+        selectedItems.push(item);
+        element.classList.add("selected");
+      }
+      // Display selected items
+      document.getElementById("selectedItems").innerText =
+        selectedItems.join(", ");
+    }
+  </script>
+  
+  <style>
+    #p-pic img {
+      padding: 15px 20px;
+      height: 180px;
+      border-radius: 50%;
+    }
+    .profile {
+      display: flex;
+      justify-content: space-around;
+    }
+  
+    .input-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 15px;
+      position: relative;
+    }
+  
+    .input {
+      border-style: none;
+      height: 50px;
+      width: 50px;
+      padding: 10px;
+      outline: none;
+      border-radius: 50%;
+      transition: 0.5s ease-in-out;
+      background-color: #7e4fd4;
+      box-shadow: 0px 0px 3px #f3f3f3;
+      padding-right: 40px;
+      color: #fff;
+    }
+  
+    .input::placeholder,
+    .input {
+      font-family: "Trebuchet MS", "Lucida Sans Unicode", "Lucida Grande",
+        "Lucida Sans", Arial, sans-serif;
+      font-size: 17px;
+    }
+  
+    .input::placeholder {
+      color: #8f8f8f;
+    }
+  
+    .icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: absolute;
+      right: 0px;
+      cursor: pointer;
+      width: 50px;
+      height: 50px;
+      outline: none;
+      border-style: none;
+      border-radius: 50%;
+      pointer-events: painted;
+      background-color: transparent;
+      transition: 0.2s linear;
+    }
+  
+    .icon:focus ~ .input,
+    .input:focus {
+      box-shadow: none;
+      width: 250px;
+      border-radius: 0px;
+      background-color: transparent;
+      border-bottom: 3px solid #7e4fd4;
+      transition: all 500ms cubic-bezier(0, 0.11, 0.35, 2);
+    }
+  
+    .sticky-icon {
+      position: fixed;
+      bottom: 60px;
+      right: 460px;
+      z-index: 1055;
+    }
+  
+    .selected {
+      background-color: #4caf50;
+      color: white;
+    }
+  
+    /* Base styles are already set; adding media queries for responsiveness */
+  
+    @media (max-width: 1200px) {
+      .sticky-icon {
+        right: 390px;
+        bottom: 100px;
+      }
+    }
+  
+    @media (max-width: 992px) {
+      .users {
+        padding: 20px;
+        box-shadow: 0 4px 8px rgba(151, 95, 236, 0.5);
+      }
+      .sticky-icon {
+        right: 320px;
+        bottom: 85px;
+      }
+    }
+    /* Hide the element on screens smaller than 768px (or your desired breakpoint) */
+    @media only screen and (max-width: 768px) {
+      .mobile-hide {
+        display: none;
+      }
+    }
+  
+    @media (max-width: 768px) {
+      .users {
+        padding: 15px;
+        margin-top: 20px;
+      }
+      .input-wrapper {
+        flex-direction: column;
+        gap: 10px;
+      }
+      .input {
+        width: 100%;
+        padding: 5px;
+        border-radius: 5px;
+      }
+      .sticky-icon {
+        right: 108px;
+        bottom: 55px;
+      }
+    }
+  
+    @media (max-width: 576px) {
+      .users {
+        padding: 10px;
+      }
+      .fnd-pic {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .input-wrapper {
+        width: 100%;
+      }
+      .icon,
+      .input {
+        width: 100%;
+        padding: 10px;
+      }
+      .sticky-icon {
+        right: 92px;
+        bottom: 50px;
+      }
+    }
+  
+    @media (max-width: 480px) {
+      .sticky-icon {
+        right: 108px;
+        bottom: 50px;
+      }
+      .input-wrapper {
+        width: 100%;
+        gap: 5px;
+      }
+      .input {
+        width: calc(100% - 20px);
+        padding: 8px;
+        font-size: 14px;
+      }
+      .users {
+        font-size: 0.9rem;
+      }
+    }
+  </style>
+</div>
+
+
+{% endblock %}
