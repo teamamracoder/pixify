@@ -1,13 +1,12 @@
 from django.shortcuts import render,redirect
 from django.views import View
-
 from ..services import chat_service, user_service,message_service, chat_member_service
 from django.http import JsonResponse
 from ..constants import ChatType
 from ..models import User
 from django.utils import timezone
 
-class ChatListView(View):
+class ChatView(View):
     def get(self, request):
         user = request.user
         chats = chat_service.list_chats_by_user(user)
