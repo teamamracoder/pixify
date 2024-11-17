@@ -38,5 +38,21 @@ urlpatterns = [
     path('chat/', views.ChatView.as_view(), name='chat'),
 
     # notification
-    path('notification/', views.notificationView.as_view(), name='notification')
-]  
+    path('notification/', views.notificationView.as_view(), name='notification'),
+
+     # auth
+    path('request-otp/', views.RequestOTPView.as_view(), name='request_otp'),
+    path('verify-otp/', views.VerifyOTPView.as_view(), name='verify_otp'),
+    path('logout/', views.LogoutView.as_view(), name='logout'),
+    path('register/', views.UserRegistrationView.as_view(), name='register'),
+    path('resend-otp/', views.ResendOTPView.as_view(), name='resend_otp'),
+
+    path('users/api', views.userListViewApi.as_view(), name='users_api')
+    # message_edit and deleat
+    # path('message/<int:message_id>/edit', views.MessageEditView.as_view(), name='message_edit'),
+    # path('message/<int:message_id>/delete', views.MessageDeleteView.as_view(), name='message_delete'),
+
+]
+
+
+
