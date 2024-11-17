@@ -1046,7 +1046,7 @@ textarea::placeholder {
     cursor: pointer;
 }
 
-.stories-container .previous-btn,
+ .stories-container .previous-btn,
 .stories-full-view .previous-btn {
     left: 8px;
 
@@ -1057,7 +1057,7 @@ textarea::placeholder {
     opacity: 0;
     pointer-events: none;
     transition: all 400ms ease;
-}
+} 
 
 .stories-container .previous-btn.actived,
 .stories-container .next-btn.actived {
