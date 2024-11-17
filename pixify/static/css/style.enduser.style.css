@@ -746,10 +746,10 @@ textarea::placeholder {
     border-bottom: none;
 }
 
-.form-control {
+/* .form-control {
     background-color: #130322;
 
-}
+} */
 
 .modal-body {
     overflow-y: scroll;
@@ -785,9 +785,9 @@ textarea::placeholder {
 }
 
 .btn-primary {
-    background-color: #4e0b8d;
+    /* background-color: #4e0b8d; */
     border-radius: 5px;
-    padding: 5px;
+    padding: 5px 12px;
     box-shadow: blue;
 }
 
@@ -913,6 +913,118 @@ textarea::placeholder {
 }
 
 /* 12/11/2024 tuesday */
+/* sharee */
+
+.share-container {
+    /* position: fixed; */
+    max-width: 450px;
+    /* margin: 0px 50px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    */
+    padding: 2px 20px 10px 20px
+}
+
+
+.profile-item {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    /* border-bottom: 1px solid #ddd; */
+    position: relative;
+}
+
+/* .profile-item:hover {
+    background-color: rgb(214, 210, 210);
+} */
+
+.profile-pic {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+.profile-item {
+    font-size: 14.5px;
+
+}
+
+.share-button-container {
+    display: none;
+    justify-content: right;
+    padding-top: 2px;
+    padding-bottom: 5px;
+    /* margin-top: 20px; */
+}
+
+.custom-checkbox {
+    position: absolute;
+    right: 10px;
+}
+
+.custom-checkbox input[type="checkbox"] {
+    display: flex;
+}
+
+.custom-checkbox label {
+    font-size: 1.3rem;
+    color: #d1cccc;
+    cursor: pointer;
+}
+
+.custom-checkbox input[type="checkbox"]:checked+label {
+    color: #0d6efd;
+}
+
+.icon-container {
+    max-width: 600px;
+
+}
+
+.icon-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #555;
+}
+
+.icon-item i {
+    font-size: 22px;
+    color: #0d6efd;
+}
+
+.icon-label {
+    margin-top: 5px;
+    font-size: 0.9rem;
+    color: #555;
+}
+
+.icon-container {
+    max-width: 600px;
+    margin: auto;
+}
+
+.icon-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #555;
+}
+
+
+.icon-label {
+    margin-top: 5px;
+    font-size: 0.9rem;
+    color: #555;
+}
+
+.text-light {
+    font-size: 18px;
+}
+
+/* sharee  end */
+
 
 .post-center {
     width: 100%;
@@ -1291,7 +1403,7 @@ textarea::placeholder {
 }
 
 .bg-purple {
-    background-color: #7b4bf9 !important;
+    background-color: #2f066de3 !important;
 }
 
 .post-image {
@@ -1409,8 +1521,8 @@ textarea::placeholder {
 }
 
 .modal-header {
-    border-bottom: 1px solid #ddd;
-    color: black;
+    padding-top: 10px;
+    padding-bottom: 10px;
 }
 
 .modal-footer {
