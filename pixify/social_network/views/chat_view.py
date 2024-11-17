@@ -6,7 +6,7 @@ from ..constants import ChatType
 from ..models import User
 from django.utils import timezone
 
-class ChatView(View):
+class ChatListView(View):
     def get(self, request):
         user = request.user
         chats = chat_service.list_chats_by_user(user)
