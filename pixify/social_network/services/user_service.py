@@ -1,5 +1,7 @@
-from ..models import Chat, User
+from ..models import User
 from django.shortcuts import get_object_or_404
+from django.db.models import Q   
+
 
 def list_users():
     return User.objects.all()
