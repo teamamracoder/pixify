@@ -1,6 +1,7 @@
 from ..models import Message, MessageReadStatus,MessageMention
 from django.shortcuts import get_object_or_404
 
+
 def list_messages_by_chat_id(chat_id, unread_messages,user):
             for message in unread_messages:
                 MessageReadStatus.objects.create(
@@ -8,7 +9,6 @@ def list_messages_by_chat_id(chat_id, unread_messages,user):
                 read_by=user
             )
             return Message.objects.filter(chat_id=chat_id,is_active=True)
-
 
 def create_message(text, media_url, sender_id, chat_id):
     return Message.objects.create(

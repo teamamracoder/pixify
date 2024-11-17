@@ -1,6 +1,6 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
-from ..services import message_service, user_service, chat_service
+from ..services import message_service,user_service, chat_service,message_reaction_service
 
 class messageView(View):
     def get(self, request):
@@ -43,7 +43,6 @@ class messageDeleteView(View):
     def get(self, request, message_id):
         message_service.delete_message(message_id)
         return render(request, 'enduser/message/index.html')
-    
 class messageMentionView(View):
     def post(self,request,chat_id):
         chat=chat_service.chat_details(chat_id)
@@ -54,7 +53,6 @@ class messageMentionView(View):
         chat=chat_service.get_chat(chat_id)
         mention=chat_service.mention_chat(chat,user)
         return render(request, 'enduser/message/index.html',{'mention':mention})
-    
 class messageReplyView(View):
     def post(self,request,chat_id):
         chat=chat_service.chat_details(chat_id)
@@ -74,3 +72,23 @@ class messageReplyView(View):
         for user in mentions:
             message_service.add_message_mentions(message_id,user)
         return render(request, 'enduser/message/index.html')
+class MessageReactionCreateView(View):
+    def get(self, request):
+        reacted_by= user_service.get_user(1)
+        message_id= message_service.get_message(2)
+        reaction_type='abcd'
+        message_reaction_service.create_message_reaction(reacted_by,message_id,reaction_type)
+        
+class MessageReactionUpdateView(View):
+    def get(self, request, message_reaction_id):
+        message_reaction =message_reaction_service.get_message_reaction(message_reaction_id)
+        reacted_by = user_service.get_user(1)
+        message_id = message_service.get_message(2)
+        reaction_type ='avc' 
+        message_reaction_service.update_message_reaction(reacted_by, message_id, reaction_type)
+
+class  MessageReactionDeleteView(View): 
+    def get(self, request, message_reaction_id):
+        message_reaction = message_reaction_service.get_message_reaction(message_reaction_id)
+
+
