@@ -10,13 +10,13 @@ urlpatterns = [
 
 
     # user
-    path('admin/users/', views.AdminUserListView.as_view(), name='user_list'),
-    path('admin/users/profile', views.AdminUserProfileView.as_view(), name='user_profile'),
-    path('admin/users/toggle-active/<int:user_id>/', views.AdminToggleUserActiveView.as_view(), name='toggle_user_active'),
-    path('admin/users/create/', views.AdminUserCreateView.as_view(), name='user_create'),
-    path('admin/users/<int:user_id>/', views.AdminUserDetailView.as_view(), name='user_detail'),
-    path('admin/users/<int:user_id>/update/', views.AdminUserUpdateView.as_view(), name='user_update'),
-    path('admin/users/<int:user_id>/delete/', views.AdminUserDeleteView.as_view(), name='user_delete'),
+    path('admin/users/', views.ManageUserListView.as_view(), name='user_list'),
+    path('admin/users/profile', views.ManageUserProfileView.as_view(), name='user_profile'),
+    path('admin/users/toggle-active/<int:user_id>/', views.ManageToggleUserActiveView.as_view(), name='toggle_user_active'),
+    path('admin/users/create/', views.ManageUserCreateView.as_view(), name='user_create'),
+    path('admin/users/<int:user_id>/', views.ManageUserDetailView.as_view(), name='user_detail'),
+    path('admin/users/<int:user_id>/update/', views.ManageUserUpdateView.as_view(), name='user_update'),
+    path('admin/users/<int:user_id>/delete/', views.ManageUserDeleteView.as_view(), name='user_delete'),
 
 # ==============================
 
