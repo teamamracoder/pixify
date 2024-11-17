@@ -144,7 +144,17 @@ class UserDeleteView(View):
 
 class ToggleUserActiveView(View):
     def post(self, request, user_id):
-        user = services.user_service.get_object_or_404(id=user_id)
+        user = services.user_service.get_user(user_id)
         user.is_active = not user.is_active  # Toggle active status
         user.save()
         return JsonResponse({'is_active': user.is_active})
+
+
+
+class UserProfileView(View):
+    def get(self, request):
+        # user = services.user_service.get_user()
+        return render(request, 'adminuser/user/user_profile.html')
+    
+
+
