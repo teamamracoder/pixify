@@ -1,15 +1,15 @@
-import datetime
 from django.http import HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, render, redirect
 from django.views import View
 
 from .. import services
 from ..constants import Gender, RelationShipStatus, Role
-from django.core.paginator import Paginator    #  added by sujit
+from django.core.paginator import Paginator   
 from django.http import JsonResponse
 
-# new added by sujit-----------
-class UserListView(View):
+
+
+class AdminUserListView(View):
     def get(self, request):
         # Fetch the search query from the URL parameters
         search_query = request.GET.get('search', '') 
@@ -17,14 +17,13 @@ class UserListView(View):
         sort_order = request.GET.get('sort_order', 'asc')
         page_number = request.GET.get('page', 1)
 
-
         # Adjust sort order for descending order
         if sort_order == 'desc':
             sort_by = '-' + sort_by
 
         print(f"Search Query: {search_query}")
         # Get filtered and sorted users based on search
-        users = services.user_service.list_users_filtered(search_query, sort_by)
+        users = services.user_service.admin_list_users_filtered(search_query, sort_by)
 
         # Paginate the users
         paginator = Paginator(users, 10)  # Show 10 users per page
@@ -41,13 +40,9 @@ class UserListView(View):
             'page_obj': page_obj,
         })
 
-# class UserListView(View):
-#     def get(self, request):
-#         users = services.user_service.list_users()
-#         choices_gender = [{gender.value: gender.name} for gender in Gender]
-#         return render(request, 'adminuser/user/list.html', {'users': users,'choices_gender':choices_gender})
 
-class UserCreateView(View):
+
+class AdminUserCreateView(View):
     def get(self, request):
         choices_gender = [{gender.value: gender.name} for gender in Gender]
         choices_relationship_status = [{status.name: status.value} for status in RelationShipStatus]
@@ -63,18 +58,19 @@ class UserCreateView(View):
                     'dob' : request.POST['dob'],
                     'gender' : request.POST['gender'],
                     'relationship_status' : request.POST['relationship_status'],
-                    'hobbies' : request.POST.getlist('hobbies')
+                    'hobbies' : request.POST.getlist('hobbies'),
+                    'roles': [1]
                 }
-        services.user_service.create_user(**user_data)
+        services.user_service.admin_create_user(**user_data)
         return redirect('user_list')
 
 
-class UserDetailView(View):
+class AdminUserDetailView(View):
     def get(self, request, user_id):
         user = services.user_service.get_user(user_id)
         return render(request, 'adminuser/user/detail.html', {'user': user})
 
-class UserUpdateView(View):
+class AdminUserUpdateView(View):
     def get(self, request, user_id):
         choices_gender = [{gender.value: gender.name} for gender in Gender]
         choices_relationship_status = [{status.name: status.value} for status in RelationShipStatus]
@@ -82,7 +78,6 @@ class UserUpdateView(View):
         return render(request, 'adminuser/user/update.html', {'user': user,"choices_gender":choices_gender,"choices_relationship_status":choices_relationship_status})
     
     def post(self, request, user_id):
-
         user = services.user_service.get_user(user_id)
 
         # Gather all form data into a dictionary
@@ -131,7 +126,7 @@ class UserUpdateView(View):
     #     services.user_service.update_user(user, first_name,middle_name, last_name, email,hobbies,address,dob,gender,relationship_status)
     #     return redirect('user_detail', user_id=user.id)
 
-class UserDeleteView(View):
+class AdminUserDeleteView(View):
     def get(self, request, user_id):
         user = services.user_service.get_user(user_id)
         return render(request, 'adminuser/user/delete.html', {'user': user})
@@ -142,7 +137,7 @@ class UserDeleteView(View):
         return redirect('user_list')
 
 
-class ToggleUserActiveView(View):
+class AdminToggleUserActiveView(View):
     def post(self, request, user_id):
         user = services.user_service.get_user(user_id)
         user.is_active = not user.is_active  # Toggle active status
@@ -151,7 +146,7 @@ class ToggleUserActiveView(View):
 
 
 
-class UserProfileView(View):
+class AdminUserProfileView(View):
     def get(self, request):
         # user = services.user_service.get_user()
         return render(request, 'adminuser/user/user_profile.html')

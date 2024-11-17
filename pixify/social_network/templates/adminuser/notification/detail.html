@@ -16,23 +16,22 @@
                 <hr>
                 <div class="row">
                     <div class="col-md-6 mb-2">
-                        <strong>Text:</strong> vjkfjvifvkcmlmc
-                      
+                        <strong>Text:</strong> {{ notification.text }}
                     </div>
                     <div class="col-md-6 mb-2">
-                        <strong>Receiver_ID:</strong> 4
+                        <strong>Receiver_ID:</strong> {{ notification.receiver_id.first_name }} {{ notification.receiver_id.last_name }}
                     </div>
                     <div class="col-md-6 mb-2">
-                        <strong>IS_Read:</strong> True
+                        <strong>IS_Read:</strong> {{ notification.is_read }}
                     </div>
                     <div class="col-md-6 mb-2">
-                        <strong>IS_Active:</strong> True
+                        <strong>IS_Active:</strong> {{ notification.is_active }}
                     </div>
                     <div class="col-md-6 mb-2">
-                        <strong>Created_At:</strong> 2024-11-11
+                        <strong>Created_At:</strong> {{ notification.created_at }}
                     </div>
                     <div class="col-md-6 mb-2">
-                        <strong>Updated_At:</strong> 13:07:08.511475+00:00
+                        <strong>Updated_At:</strong> {{ notification.updated_at }}
                     </div>
                     
                     <div class="text-start">
