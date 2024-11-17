@@ -41,7 +41,7 @@
      {% comment %} Buttons -1{% endcomment %}
       <div class="accordion-item" style="background-color: #1f0447; color: #ffffff;" style="border:1px solid">
        <h2 class="accordion-header" id="headingOne">
-         <button class="accordion-button collapsed d-flex justify-content-between align-items-center" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne" style="background-color: #1f0447; color: #ffffff;">
+         <button class="accordion-button collapsed d-flex justify-content-between align-items-center" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne" style="background-color: #1f0447; color: #ffffff;padding-top: 1px;padding-bottom: 1px;">
            <span></span>
            <span class="icon">+</span>
          </button>
@@ -54,7 +54,7 @@
      </div>
      <div class="accordion-item" style="background-color: #1f0447; color: #ffffff;">
         <h2 class="accordion-header" id="headingTwo">
-          <button class="accordion-button collapsed d-flex justify-content-between align-items-center" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo" style="background-color: #1f0447; color: #ffffff;">
+          <button class="accordion-button collapsed d-flex justify-content-between align-items-center" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo" style="background-color: #1f0447; color: #ffffff;padding-top: 1px;padding-bottom: 1px;">
             <span></span>
             <span class="icon">+</span>
           </button>
@@ -79,7 +79,7 @@
             const icon = button.querySelector('.icon');
             const isCollapsed = button.classList.contains('collapsed');
             document.querySelectorAll('.accordion-button .icon').forEach(i => i.textContent = '+')
-            icon.textContent = isCollapsed ? '-' : '+';
+            icon.textContent = isCollapsed ? '+' : '-';
           });
         });
       </script>

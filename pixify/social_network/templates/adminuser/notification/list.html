@@ -1,0 +1,135 @@
+{% extends "../base.html" %}
+
+{% block title %}Notification List{% endblock %}
+
+{% block content %}
+<style>
+        .hover-bg:hover {
+        background-color: rgba(240, 242, 245, 0.1);
+        color:aqua; 
+    }
+</style>
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col">
+            <h2 class="text-center mb-4">Notifications</h2>
+
+            <div class="d-flex justify-content-between mb-3">
+                <button class="btn btn-primary btn-sm"><a href="{% url 'manage_notification_create' %}" class="text-white text-decoration-none">Add Notifications</a></button>
+               
+                <form method="get" action="{% url 'manage_notification_list' %}">
+                    <div class="input-group" style="max-width: 300px;">
+                        <input type="text" class="form-control border-secondary" placeholder="Search" aria-label="Search" name="search" value="{{ search_query }}">
+                        <button class="btn btn-outline-secondary">Search</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-info text-white"> 
+                        <tr>
+                            <th>
+                                <a href="?sort_by=text&sort_order={% if sort_order == 'asc' %}desc{% else %}asc{% endif %}">Text</a>
+                            </th>
+                            <th>
+                                <a href="?sort_by=media_url&sort_order={% if sort_order == 'asc' %}desc{% else %}asc{% endif %}">Media URL</a>
+                            </th>
+                            <th>
+                                <a href="?sort_by=is_read&sort_order={% if sort_order == 'asc' %}desc{% else %}asc{% endif %}">IS_Read</a>
+                            </th>
+                            <th>
+                                Status
+                            </th>
+                        </tr>
+                    </thead>
+
+
+                    <tbody>
+                        {% for notification in notifications %}
+                        <tr>
+                            <td>
+                                <a class="text-decoration-none text-primary hover-bg" href="{% url 'manage_notification_detail' notification.id %}">
+                                    {{notification.text }}
+                                </a>
+                            </td>                      
+                                                    
+                            <td>{{ notification.media_url }}</td>
+
+                            <td>{{ notification.is_read }}</td>
+
+
+
+                            <td>
+                                <button class="btn btn-sm toggle-status" data-notification-id="{{ notification.id }}">
+                                    {% if notification.is_active %}
+                                        <i class="bi bi-toggle-on text-success"></i> Active
+                                    {% else %}
+                                        <i class="bi bi-toggle-off text-danger"></i> Inactive
+                                    {% endif %}
+                                </button>
+                            </td>
+
+
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+
+                <div class="pagination">
+                    <span class="step-links">
+                        {% if notifications.has_previous %}
+                            <a href="?page=1&search={{ search_query }}&sort_by={{ sort_by }}&sort_order={{ sort_order }}">First</a>
+                            <a href="?page={{ notifications.previous_page_number }}&search={{ search_query }}&sort_by={{ sort_by }}&sort_order={{ sort_order }}">Previous</a>
+                        {% endif %}
+                
+                        <span class="current">
+                            Page {{ notifications.number }} of {{ notifications.paginator.num_pages }}.
+                        </span>
+                
+                        {% if notifications.has_next %}
+                            <a href="?page={{ notifications.next_page_number }}&search={{ search_query }}&sort_by={{ sort_by }}&sort_order={{ sort_order }}">Next</a>
+                            <a href="?page={{ notifications.paginator.num_pages }}&search={{ search_query }}&sort_by={{ sort_by }}&sort_order={{ sort_order }}">Last</a>
+                        {% endif %}
+                    </span>
+                </div>
+
+
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    $(document).ready(function() {
+        $('.toggle-status').click(function() {
+            const notificationId = $(this).data('notification-id');
+            const button = $(this);
+
+            $.ajax({
+                url: '/admin/notifications/toggle-active/' + notificationId + '/',
+                type: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'  // Include CSRF token for security
+                },
+                success: function(response) {
+                    // Update the button's text and icon based on the new status
+                    if (response.is_active) {
+                        button.html('<i class="bi bi-toggle-on text-success"></i> Active');
+                    } else {
+                        button.html('<i class="bi bi-toggle-off text-danger"></i> Inactive');
+                    }
+                },
+                error: function(xhr) {
+                    alert('Error updating status: ' + xhr.responseText);
+                }
+            });
+        });
+    });
+</script>
+
+{% endblock %}
