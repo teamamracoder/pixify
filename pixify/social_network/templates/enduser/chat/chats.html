@@ -47,6 +47,7 @@
         <div id="fill">
 
       </div>
+
       <script>
       
       $(document).ready(function() {
@@ -160,36 +161,37 @@
             </button>
             <input
               type="text"
-              id="searchin"
+              id="searchin"              
               class="form-control"
               placeholder="Search Name"
               aria-label="Example text with button addon"
               aria-describedby="button-addon1"
             />
-            <div id="filled">
+          <div id="fill">
+              <a href="">followers</a>
+          </div>
+          <script>
+          
+          $(document).ready(function() {
+              $("#searchin").on('input',function(){
+                  $.ajax({
+                      url: '/chat/followers/api?search='+$(this).val(),                      
+                      type: 'GET',
+                      success: function(res) {                        
+                          console.log(res)
+                          $("#fill").html(`
+                             <a href="chat/${follower.id}">${follower.first_name}</a><br/>
+                          `); 
+                      },
+                      error: function(xhr, status, error) {
+                          console.log(xhr)
+                      },
+                  });
+              })
+          });
+          </script>
+          </div>
 
-            </div>
-            <script>
-            
-            $(document).ready(function() {
-                $("#searchin").on('input',function(){
-                    $.ajax({
-                        url: '/chat/chats/api?search='+$(this).val(),
-                        type: 'GET',
-                        success: function(res) {
-                            console.log(res)
-                            $("#filled").html(`
-                          
-                            `); 
-                        },
-                        error: function(xhr, status, error) {
-                            console.log(xhr)
-                        },
-                    });
-                })
-            });
-            </script>
-                  </div>
                 </div>
               </a>
             </div>
