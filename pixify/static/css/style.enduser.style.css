@@ -913,6 +913,120 @@ textarea::placeholder {
 }
 
 /* 12/11/2024 tuesday */
+/* sharee */
+
+.share-container {
+    /* position: fixed; */
+    max-width: 450px;
+    margin: 0px 50px;
+    border: 2px solid #ddd;
+    padding: 20px;
+    border-radius: 8px;
+
+}
+
+
+.profile-item {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    position: relative;
+}
+
+.profile-item:hover {
+    background-color: rgb(214, 210, 210);
+}
+
+.profile-pic {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+.profile-item {
+    font-size: 14.5px;
+
+}
+
+.share-button-container {
+    display: none;
+    justify-content: right;
+    margin-top: 20px;
+}
+
+.custom-checkbox {
+    position: absolute;
+    right: 10px;
+}
+
+.custom-checkbox input[type="checkbox"] {
+    display: flex;
+}
+
+.custom-checkbox label {
+    font-size: 1.3rem;
+    color: #d1cccc;
+    cursor: pointer;
+}
+
+.custom-checkbox input[type="checkbox"]:checked+label {
+    color: #0d6efd;
+}
+
+.icon-container {
+    max-width: 600px;
+
+}
+
+.icon-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #555;
+}
+
+.icon-item i {
+    font-size: 2rem;
+    color: #0d6efd;
+}
+
+.icon-label {
+    margin-top: 5px;
+    font-size: 0.9rem;
+    color: #555;
+}
+
+.icon-container {
+    max-width: 600px;
+    margin: auto;
+}
+
+.icon-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #555;
+}
+
+.icon-item i {
+    font-size: 2rem;
+    color: #0d6efd;
+}
+
+.icon-label {
+    margin-top: 5px;
+    font-size: 0.9rem;
+    color: #555;
+}
+
+.text-light {
+    font-size: 10px;
+}
+
+/* sharee  end */
+
 
 .post-center {
     width: 100%;

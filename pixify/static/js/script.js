@@ -197,3 +197,17 @@ document.querySelectorAll(".view-comment").forEach((viewComment) => {
 
 
 //End Comment
+
+
+
+//Share Modal--Rima
+function toggleShareButton() {
+
+    const checkboxes = document.querySelectorAll(".custom-checkbox input[type='checkbox']");
+    const isAnyChecked = Array.from(checkboxes).some(checkbox => checkbox.checked);
+
+
+    const shareButtonContainer = document.getElementById("shareButtonContainer");
+    shareButtonContainer.style.display = isAnyChecked ? "flex" : "none";
+}
+//End Share Modal
