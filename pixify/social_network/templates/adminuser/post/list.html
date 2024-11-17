@@ -40,6 +40,7 @@
                             <th>
                                 <a href="?sort_by=description&sort_order={% if sort_order == 'asc' %}desc{% else %}asc{% endif %}">Description</a>
                             </th>
+
                             <th>Status</th>
                         </tr>
                     </thead>
@@ -48,17 +49,25 @@
                         <tr>
                             <td>
                                 <a class="text-decoration-none text-primary hover-bg" href="{% url 'post_detail' post.id %}">
-                                    {{ post.posted_by }} 
+                                    {{ post.posted_by.first_name }} {{ post.posted_by.last_name }} 
                                 </a>
                             </td>
                             <td>{{ post.title }}</td>
                             <td>
                                 {{ post.media_url }}
                             </td>
-                            <td>
-                                <i class="bi bi-eye text-primary"></i>
+                            
+                                <td>
+                                    <button class="btn btn-sm toggle-status" data-post-id="{{ post.id }}">
+                                        {% if post.is_active %}
+                                            <i class="bi bi-toggle-on text-success"></i> Active
+                                        {% else %}
+                                            <i class="bi bi-toggle-off text-danger"></i> Inactive
+                                        {% endif %}
+                                    </button>
+                                </td>
                                 
-                            </td>
+                            
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -80,9 +89,36 @@
                     </span>
                 </div>
             </div>
-            
-
         </div>
     </div>
 </div>
+
+<script>
+    $(document).ready(function() {
+        $('.toggle-status').click(function() {
+            const postId = $(this).data('post-id');
+            const button = $(this);
+
+            $.ajax({
+                url: '/admin/posts/toggle-active/' + postId + '/',
+                type: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'  // Include CSRF token for security
+                },
+                success: function(response) {
+                    // Update the button's text and icon based on the new status
+                    if (response.is_active) {
+                        button.html('<i class="bi bi-toggle-on text-success"></i> Active');
+                    } else {
+                        button.html('<i class="bi bi-toggle-off text-danger"></i> Inactive');
+                    }
+                },
+                error: function(xhr) {
+                    alert('Error updating status: ' + xhr.responseText);
+                }
+            });
+        });
+    });
+</script>
+
 {% endblock %}
