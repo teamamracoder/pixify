@@ -3,7 +3,7 @@ from django.views import View
 from django.utils import timezone
 from django.utils.timezone import localtime
 from ..models import Message, ChatMember, Follower
-from ..services import chat_service, user_service, message_service
+from ..services import chat_service, message_service, user_service
 from ..constants import ChatType
 from django.shortcuts import render,redirect
 
