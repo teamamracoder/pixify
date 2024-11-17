@@ -4,19 +4,17 @@
 
 {% block content %}
 
-<h2>Welcome to Pixify</h2>
-<h3>Please enter details to continue</h3>
-<h2>Verify OTP</h2>
-
-<form method="post" action="{% url 'verify_otp' %}">
-    {% csrf_token %}
-    <input type="hidden" name="email" value="{{ data.email }}">
-    <input type="hidden" name="next_url" value="{{ data.next_url }}">
-    <label for="otp_code">OTP Code:</label>
-    <input type="text" id="otp_code" name="otp_code" required>
-    <button type="submit">Verify OTP</button>
-</form>
-<button id="resendOTP" class="border-0 bg-transparent text-light text-decoration-underline">Resend OTP</button>
+<h2>Verify your email to continue</h2>
+<div class="row">
+    <div class="col-md-6">
+        <form method="post" action="{% url 'verify_otp' %}">
+            {% csrf_token %}
+            {{ data.verify_otp_form.as_p }}
+            <button type="submit" class="btn btn-sm btn-primary my-2">Verify</button>
+        </form>
+        <button id="resendOTP" class="border-0 bg-transparent text-light text-decoration-underline my-2">Resend OTP</button>
+    </div>
+</div>
 
 <script>
     const resendBtn = $("#resendOTP");
@@ -26,7 +24,7 @@
             $.ajax({
                 url: "{% url 'resend_otp' %}",
                 method: 'POST',
-                data: { email: "{{ data.email }}" },
+                data: { email: $('#id_email').val() },
                 headers: { "X-CSRFToken": "{{ csrf_token }}" },
                 complete: (res) => {
                     // get data from response
