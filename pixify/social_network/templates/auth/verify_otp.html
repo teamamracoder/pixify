@@ -1,0 +1,55 @@
+{% extends "auth/base.html" %}
+
+{% block title %}Welcome to Pixify{% endblock %}
+
+{% block content %}
+
+<h2>Welcome to Pixify</h2>
+<h3>Please enter details to continue</h3>
+<h2>Verify OTP</h2>
+
+<form method="post" action="{% url 'verify_otp' %}">
+    {% csrf_token %}
+    <input type="hidden" name="email" value="{{ data.email }}">
+    <input type="hidden" name="next_url" value="{{ data.next_url }}">
+    <label for="otp_code">OTP Code:</label>
+    <input type="text" id="otp_code" name="otp_code" required>
+    <button type="submit">Verify OTP</button>
+</form>
+<button id="resendOTP" class="border-0 bg-transparent text-light text-decoration-underline">Resend OTP</button>
+
+<script>
+    const resendBtn = $("#resendOTP");
+    resendBtn.click(
+        () => {
+            resendBtn.text("sending...").addClass('disabled');
+            $.ajax({
+                url: "{% url 'resend_otp' %}",
+                method: 'POST',
+                data: { email: "{{ data.email }}" },
+                headers: { "X-CSRFToken": "{{ csrf_token }}" },
+                complete: (res) => {
+                    // get data from response
+                    const data = res.responseJSON;
+                    // show toast message
+                    if (data.success) {
+                        toastr.success(data.message);
+                        // timer
+                        resendBtn.text("3:00");
+                        // reset button after 3 min
+                        const timeout = 20000; // currently it is 20 sec - (set 3 min - 1000*60*3)
+                        setTimeout(() => { resendBtn.text("Resend OTP").removeClass('disabled') }, timeout);
+                    } else {
+                        // show toast message
+                        toastr.warning(data.message);
+                        // reset resend button if failed
+                        resendBtn.text("Resend OTP").removeClass('disabled');
+                    }
+                }
+            })
+        }
+    )
+
+</script>
+
+{% endblock %}
