@@ -10,7 +10,7 @@
     {% csrf_token %}
     <button type="submit">Yes, delete</button>
 </form>
-<a href="{% url 'notification_list' notification_id %}">Cancel</a>
+<a href="{% url 'manage_notification_list' notification_id %}">Cancel</a>
 
 
 {% endblock %}
