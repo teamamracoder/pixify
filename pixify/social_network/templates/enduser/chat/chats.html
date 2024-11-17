@@ -40,28 +40,25 @@
               stroke-width="1.5"
               stroke="#fff"
               d="M22 22L20 20"
-            ></path>
+            ></path> 
           </svg>
         </button>
-        <input placeholder="search.." class="input" id="search_chats" name="text" type="text" />
-      
-      <div id="fill">
-          <a href="">chats</a>
+        <input placeholder="search.." class="input" name="text" type="text" id="search_chats" />
+        <div id="fill">
+
       </div>
-
-
 
       <script>
       
       $(document).ready(function() {
           $("#search_chats").on('input',function(){
               $.ajax({
-                  url: '/chat/chats/api?search=' + $(this).val(),
+                  url: '/chat/chats/api?search='+$(this).val(),
                   type: 'GET',
                   success: function(res) {
                       console.log(res)
                       $("#fill").html(`
-                          <a href="chat/id">res.first_name</a>
+                     <a href="chat/id">res.first_name></a>
                       `); 
                   },
                   error: function(xhr, status, error) {
@@ -71,9 +68,6 @@
           })
       });
       </script>
-      
-      
-      
       </div>
     </div>
   </div>
@@ -94,7 +88,7 @@
       >
         <!-- Profile image -->
         <img
-          src="{{chat.photo}}"
+          src="{{chat.chat_cover}}"
           class="img-fluid"
           alt=""
           style="height: 40px; border-radius: 50%"
@@ -103,12 +97,12 @@
         <!-- Text next to the image -->
         <div style="display: flex; flex-direction: column; flex-grow: 1">
           <p style="margin: 0">
-            <a href="{% url 'chat_details' chat.id %}">
+            <a href="{% url 'chat_details' chat_id=chat.id %}">
               {{chat.title}} <i class="bi bi-patch-check prof-check"></i>
             </a>
           </p>
           <p style="margin: 0; color: gray; font-size: 0.9em">
-            {{chat.last_message}} 
+            {{chat.latest_message}} 
           </p>
         </div>
 
@@ -124,12 +118,12 @@
           <p style="margin-top: 0; padding-right: 10px">
             <span
               class="position-absolute translate-middle badge rounded-pill bg-danger"
-              >{{chat.unread_count}}</span
+              >{{chat.unread_messages}}</span
             >
           </p>
           <p style="margin-top: 10px; margin-bottom: 0; padding-right: 20px">
             <span class="position-absolute translate-middle badge rounded-pill"
-              >{{chat.last_message_time}}</span
+              >{{chat.latest_message_timestamp}}</span
             >
           </p>
         </div>
@@ -173,9 +167,6 @@
               aria-label="Example text with button addon"
               aria-describedby="button-addon1"
             />
-                
-          
-          
           <div id="fill">
               <a href="">followers</a>
           </div>
@@ -199,15 +190,8 @@
               })
           });
           </script>
-          
-          
-          
-          
-          
-          
-          
-          
           </div>
+
                 </div>
               </a>
             </div>
