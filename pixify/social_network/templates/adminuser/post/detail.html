@@ -5,11 +5,85 @@
 {% block content %}
 
 <h1>Post Details</h1>
-<p>Title: {{ post.title }}</p>
-<p>Description: {{ post.description }}</p>
 
-<a href="{% url 'post_update' post.id %}">Edit</a> |
-<a href="{% url 'post_delete' post.id %}">Delete</a> |
-<a href="{% url 'post_list' %}">Back to Post List</a>
+
+
+
+<table class="table table-hover">
+    <thead class="table-info text-white">
+        <tr>
+            <th>Posted BY ID</th>
+            <th>ID</th>
+            <th>Media URL</th>
+            <th>Title</th>
+            <th>is Active</th> 
+            <th>Created At</th>
+            <th>Updated At</th>
+            <th>Descriptions</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+
+        <tr>
+
+            <td>
+                <a class="text-decoration-none text-primary hover-bg px-3 py-2"
+                    href="{% url 'post_detail' post.id %}">
+                    {{ post.id }}
+                </a>
+            </td>
+
+            <td>
+                <a class="text-decoration-none text-primary hover-bg px-3 py-2"
+                    href="{% url 'post_detail' post.id %}">{{ post.media_url }}</a>
+            </td>
+            
+            <td>
+                <a class="text-decoration-none text-primary hover-bg px-3 py-2"
+                    href="{% url 'post_detail' post.id %}">
+                    {{ post.title }}
+                </a>
+            </td>
+
+            <td>
+                <a class="text-decoration-none text-primary hover-bg px-3 py-2"
+                    href="{% url 'post_detail' post.id %}">
+                    {{ post.is_active }}
+                </a>
+            </td>
+
+            <td>
+                <a class="text-decoration-none text-primary hover-bg px-3 py-2"
+                    href="{% url 'post_detail' post.id %}">{{ post.created_at }}</a>
+            </td>
+            <td>
+                <a class="text-decoration-none text-primary hover-bg px-3 py-2"
+                    href="{% url 'post_detail' post.id %}">
+                    {{ post.updated_at }}
+                </a>
+            </td>
+            <td>
+                <a class="text-decoration-none text-primary hover-bg px-3 py-2"
+                    href="{% url 'post_detail' post.id %}">
+                    {{ post.description }}
+                </a>
+            </td>
+
+            <td>
+                <i class="fa-solid fa-eye"></i>
+            </td>
+            
+        </tr>
+        
+    </tbody>
+</table>
+
+<div class="text-start">
+    <a href="{% url 'post_list' %}" class="btn btn-sm btn-outline-secondary">Back</a>
+    <a href="{% url 'post_update' post.id %}" class="btn btn-sm btn-primary">Edit</a>
+</div>
 
 {% endblock %}
+
+
