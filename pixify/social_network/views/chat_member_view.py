@@ -3,14 +3,14 @@ from django.views import View
 from ..services import chat_member_service
 
 
-class MemberManageView(View):
+class ChatMemeberUpdateView(View):
     def post(self, request, chat_id):
         user_id = request.POST.get('user_id')
         action = request.POST.get('action')
 
         if action == 'add':
-            chat_member_service.add_member_to_chat(chat_id, user_id, request.user)
+            chat_member_service.create_chat_member(chat_id, user_id, request.user)
         else:
-             chat_member_service.remove_member_from_chat(chat_id, user_id)           
+            chat_member_service.delete_chat_member(chat_id, user_id, request.user)           
 
         return redirect('chat_detail', chat_id=chat_id)

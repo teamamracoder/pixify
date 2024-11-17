@@ -1,94 +1,64 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
-from ..services import message_service,user_service, chat_service,message_reaction_service
 
-class messageView(View):
+from ..services import message_service,user_service, chat_service, message_reaction_service, message_mention_service
+
+class MessageListView(View):
     def get(self, request):
         return render(request, 'enduser/message/index.html')  
 
-class messageCreateView(View):
-    def post(self,request,chat_id):
-        chat=chat_service.chat_details(chat_id)
+class MessageCreateView(View):
+    def get(self,request,chat_id):
+        chat=chat_service.get_chat_by_id(chat_id)
         return render(request, 'enduser/message/index.html',{'chat':chat})  
     
-    def get(self, request):        
+    def post(self, request):        
         text = request.POST['text']
         media_url = request.POST['media_url','']
         sender_id = request.POST['sender_id']
         chat_id = request.POST['chat_id']
         reply_for_message_id=request.POST['reply_for_messages_id']
         mentions= request.POST.getlist('mentions','')
-        message_service.create_message(text, media_url, sender_id, chat_id, reply_for_message_id)
+        message = message_service.create_message(text, media_url, sender_id, chat_id, reply_for_message_id)
         for user in mentions:
-            message_service.add_message_mentions(message_id,user)        
+            message_mention_service.create_message_mentions(message,user)        
         return render(request, 'enduser/message/index.html')
 
-class messageUpdateView(View):
-    def post(self,request,chat_id):
-        chat=chat_service.chat_details(chat_id)
+class MessageUpdateView(View):
+    def get(self,request,chat_id):
+        chat=chat_service.get_chat_by_id(chat_id)
         return render(request, 'enduser/message/index.html',{'chat':chat})
      
-    def get(self, request, message_id):
-        message = message_service.get_message(message_id)        
+    def post(self, request, message_id):
+        message = message_service.get_message_by_id(message_id)        
         text = request.POST['text']
         media_url = request.POST['media_url','']
         message_service.update_message(message, text, media_url)
         return render(request, 'enduser/message/index.html')
 
-class messageDeleteView(View):
-    def post(self,request,chat_id):
-        chat=chat_service.chat_details(chat_id)
-        return render(request, 'enduser/message/index.html',{'chat':chat})
-    
-    def get(self, request, message_id):
+class MessageDeleteView(View):  
+    def post(self, request, message_id):
         message_service.delete_message(message_id)
         return render(request, 'enduser/message/index.html')
-class messageMentionView(View):
-    def post(self,request,chat_id):
-        chat=chat_service.chat_details(chat_id)
+    
+class MessageReplyCreateView(View):
+    def get(self,request,chat_id):
+        chat=chat_service.get_chat_by_id(chat_id)
         return render(request, 'enduser/message/index.html',{'chat':chat})
     
-    def get(self, request,chat_id):
-        user=user_service.get_user(request)
-        chat=chat_service.get_chat(chat_id)
-        mention=chat_service.mention_chat(chat,user)
-        return render(request, 'enduser/message/index.html',{'mention':mention})
-class messageReplyView(View):
-    def post(self,request,chat_id):
-        chat=chat_service.chat_details(chat_id)
-        return render(request, 'enduser/message/index.html',{'chat':chat})
-    
-    def get(self, request, message_id,chat_id):        
+    def post(self, request, message_id,chat_id):        
         user=user_service.get_user(request)        
         text = request.POST['text']
         media_url = request.POST['media_url','']
         sender_id = user
-        chat_id = chat_service.chat_details(chat_id)
-        reply_for_message_id = message_service.get_message(message_id)         
+        chat_id = chat_service.get_chat_by_id(chat_id)
+        reply_for_message_id = message_service.get_message_by_id(message_id)         
         mentions=request.POST.getlist('mention','')
         created_by = user
         updated_by = user        
         message_service.reply_message(text,media_url,sender_id,chat_id,reply_for_message_id,created_by,updated_by,mentions)
         for user in mentions:
-            message_service.add_message_mentions(message_id,user)
+            message_mention_service.create_message_mentions(message_id,user)
         return render(request, 'enduser/message/index.html')
-class MessageReactionCreateView(View):
-    def get(self, request):
-        reacted_by= user_service.get_user(1)
-        message_id= message_service.get_message(2)
-        reaction_type='abcd'
-        message_reaction_service.create_message_reaction(reacted_by,message_id,reaction_type)
-        
-class MessageReactionUpdateView(View):
-    def get(self, request, message_reaction_id):
-        message_reaction =message_reaction_service.get_message_reaction(message_reaction_id)
-        reacted_by = user_service.get_user(1)
-        message_id = message_service.get_message(2)
-        reaction_type ='avc' 
-        message_reaction_service.update_message_reaction(reacted_by, message_id, reaction_type)
-
-class  MessageReactionDeleteView(View): 
-    def get(self, request, message_reaction_id):
-        message_reaction = message_reaction_service.get_message_reaction(message_reaction_id)
 
 
