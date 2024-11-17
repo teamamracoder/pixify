@@ -2,8 +2,8 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    # home
-    path('admin/', views.AdminHomeView.as_view(), name='home'),
+    # admin-home
+    path('admin/', views.AdminHomeView.as_view(), name='admin_home'),
 
     # home
     path('', views.HomeView.as_view(), name='home'),
@@ -41,8 +41,15 @@ urlpatterns = [
     # notification
     path('notification/', views.notificationView.as_view(), name='notification'),
 
-    #api
+    # auth
+    path('request-otp/', views.RequestOTPView.as_view(), name='request_otp'),
+    path('verify-otp/', views.VerifyOTPView.as_view(), name='verify_otp'),
+    path('logout/', views.LogoutView.as_view(), name='logout'),
+    path('register/', views.UserRegistrationView.as_view(), name='register'),
+    path('resend-otp/', views.ResendOTPView.as_view(), name='resend_otp'),
+
+#api
     path('users/api', views.userListViewApi.as_view(), name='users_api'),
     path('chat/chats/api', views.chatListViewApi.as_view(), name='chats_api'),
     path('chat/followers/api', views.followerViewApi.as_view(), name='followers_api')
-]
+]   
