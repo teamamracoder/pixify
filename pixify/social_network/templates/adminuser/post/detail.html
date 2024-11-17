@@ -14,12 +14,8 @@
         <tr>
             <th>Posted BY ID</th>
             <th>ID</th>
-            <!-- <th>type</th> -->
-            <!-- <th>content Type</th> -->
             <th>Media URL</th>
             <th>Title</th>
-            <!-- <th>Accessibility</th>
-            <th>Treated As</th>-->
             <th>is Active</th> 
             <th>Created At</th>
             <th>Updated At</th>
@@ -29,30 +25,15 @@
     </thead>
     <tbody>
 
-                <tr>
-            <td>
-                
-                    {{ post.posted_by_id }}
-                </a>
-            </td>
+        <tr>
+
             <td>
                 <a class="text-decoration-none text-primary hover-bg px-3 py-2"
                     href="{% url 'post_detail' post.id %}">
                     {{ post.id }}
                 </a>
             </td>
-            <!-- <td>
-                <a class="text-decoration-none text-primary hover-bg px-3 py-2"
-                    href="{% url 'post_detail' post.id %}">
-                    {{ post.type }}
-                </a>
-            </td>
-            <td>
-                <a class="text-decoration-none text-primary hover-bg px-3 py-2"
-                    href="{% url 'post_detail' post.id %}">
-                    {{ post.content_type }}
-                </a> -->
-            </td>
+
             <td>
                 <a class="text-decoration-none text-primary hover-bg px-3 py-2"
                     href="{% url 'post_detail' post.id %}">{{ post.media_url }}</a>
@@ -64,18 +45,6 @@
                     {{ post.title }}
                 </a>
             </td>
-            <!-- <td>
-                <a class="text-decoration-none text-primary hover-bg px-3 py-2"
-                    href="{% url 'post_detail' post.id %}">
-                    {{ post.accessability }}
-                </a>
-            </td>
-            <td>
-                <a class="text-decoration-none text-primary hover-bg px-3 py-2"
-                    href="{% url 'post_detail' post.id %}">
-                    {{ post.treat_as }}
-                </a>
-            </td> -->
 
             <td>
                 <a class="text-decoration-none text-primary hover-bg px-3 py-2"
@@ -101,8 +70,6 @@
                 </a>
             </td>
 
-            
-
             <td>
                 <i class="fa-solid fa-eye"></i>
             </td>
@@ -112,8 +79,6 @@
     </tbody>
 </table>
 
-<!-- <p>Title: {{ post.title }}</p>
-<p>Description: {{ post.description }}</p> -->
 <div class="text-start">
     <a href="{% url 'post_list' %}" class="btn btn-sm btn-outline-secondary">Back</a>
     <a href="{% url 'post_update' post.id %}" class="btn btn-sm btn-primary">Edit</a>
