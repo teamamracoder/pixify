@@ -4,12 +4,36 @@
 
 {% block content %}
 
-<h2>Request OTP</h2>
-<form method="post">
-    {% csrf_token %}
-    <label for="email">Email:</label>
-    <input type="text" id="email" name="email" required>
-    <button type="submit">Send OTP</button>
-</form>
+<h2>Login</h2>
+<div class="row">
+    <div class="col-md-6">
+        <form method="post" id="req_otp_form">
+            {% csrf_token %}
+            {{ data.req_otp_form.as_p }}
+            <button type="submit" class="btn btn-sm btn-primary my-2">Send OTP</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $("#req_otp_form").validate({
+            rules: {
+                email: {
+                    required: true,
+                    minlength: 7,
+                    maxlength: 30
+                }
+            },
+            messages: {
+                email: {
+                    required: "Please enter your email id.",
+                    minlength: "Email must be at least 7 characters.",
+                    maxlength: "Email cannot exceed 30 characters."
+                }
+            }
+        });
+    });
+</script>
 
 {% endblock %}

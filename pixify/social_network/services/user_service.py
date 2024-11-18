@@ -1,5 +1,7 @@
-from ..models import Chat, User
+from ..models import User
 from django.shortcuts import get_object_or_404
+from django.db.models import Q   
+
 
 def list_users():
     return User.objects.all()
@@ -19,15 +21,6 @@ def update_user(user, first_name, last_name, email):
 
 def delete_user(user):
     user.delete()
-  
-def list_users_api(request):
-    search_query = request.GET['search']
-    if search_query:
-        # recipient name/ group name should start with search param
-        users = User.objects.filter(first_name__icontains=search_query).values()
-    else:
-        users = User.objects.all().values()
-    return users
 
 def get_user_by_email(email):
     return User.objects.filter(email=email).first()
