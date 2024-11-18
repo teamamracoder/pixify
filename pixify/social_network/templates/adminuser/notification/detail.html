@@ -1,0 +1,44 @@
+{% extends "../base.html" %}
+
+{% block title %}Notification Details{% endblock %}
+
+{% block content %}
+
+
+<div class="container mt-5">
+    <div class="card shadow-sm">
+        <div class="card-header bg-info text-white">
+            <h4 class="mb-0">Notification Details</h4>
+        </div>
+        <div class="card-body">
+            <div class="mb-3">
+                <h5 class="fw-bold">Notification Details</h5>
+                <hr>
+                <div class="row">
+                    <div class="col-md-6 mb-2">
+                        <strong>Text:</strong> {{ notification.text }}
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <strong>Receiver_ID:</strong> {{ notification.receiver_id.first_name }} {{ notification.receiver_id.last_name }}
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <strong>IS_Read:</strong> {{ notification.is_read }}
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <strong>IS_Active:</strong> {{ notification.is_active }}
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <strong>Created_At:</strong> {{ notification.created_at }}
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <strong>Updated_At:</strong> {{ notification.updated_at }}
+                    </div>
+                    
+                    <div class="text-start">
+                        <a href="{% url 'manage_notification_list' %}" class="btn btn-sm btn-outline-secondary">Back</a>
+                        <a href="{% url 'manage_notification_update' notification.id %}" class="btn btn-sm btn-primary">Edit</a>
+                    </div>
+            </div>
+        </div>
+    </div>
+</div>{% endblock %}
