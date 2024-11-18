@@ -9,25 +9,29 @@ from django.utils import timezone
 
 class ChatListView(View):
     def get(self, request):
-        user = request.user
+        user = request.user 
         chats = chat_service.list_chats_by_user(user)
         followers, followings = chat_service.get_all_user_follow(user)
         chat_data = []
 
         for chat in chats:
             unread_messages = message_service.unread_count(chat, user)
-            unread_messages_display = '' if unread_messages == 0 else '4+' if unread_messages > 4 else str(unread_messages)
+            unread_messages_display = '' if unread_messages == 0 else '10+' if unread_messages > 10 else str(unread_messages)
 
             if not chat.latest_message:
                 chat.latest_message = ''
 
-            # if chat.type == ChatType.PERSONAL.value:
-            #     member = chat_service.get_recipient_for_personal(chat.id, user) # check this function again
-            #     title = f"{member.first_name} {member.last_name}"
-            #     chat_cover = member.profile_photo_url
-            # else:
-            title = chat.title             # if no title available thaen show all users as a simple list in the title position
-            chat_cover = chat.chat_cover  
+            if chat.type == ChatType.PERSONAL.value:
+                member = chat_service.get_recipient_for_personal(chat.id, user) # check this function again
+                title = f"{member.first_name} {member.last_name}"
+                chat_cover = member.profile_photo_url
+            else:
+                if chat.title:    
+                    title = chat.title 
+                else:
+                    title="unknown group"
+                          # if no title available thaen show all users as a simple list in the title position
+                chat_cover = chat.chat_cover  
                 
             latest_message_timestamp = self.format_timestamp(chat.latest_message_timestamp)
             
