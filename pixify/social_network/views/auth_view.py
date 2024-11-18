@@ -9,7 +9,7 @@ from social_network.constants.error_messages import ErrorMessage
 from social_network.constants.success_messages import SuccessMessage
 from social_network.decorators.exception_decorators import catch_error
 from social_network.utils.common_utils import print_log
-from .. import services 
+from .. import services
 
 
 class RequestOTPView(View):
