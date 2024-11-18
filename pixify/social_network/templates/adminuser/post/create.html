@@ -4,79 +4,100 @@
 
 {% block content %}
 
-<div class="container mt-5">
-    <form method="POST" novalidate>
-        {% csrf_token %}
-        <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
-        
-        <div class="form-group">
-            <label for="posted_by">Posted By</label>
-            <select name="posted_by" class="form-control" id="posted_by" required>
-                {% for id,name in user_select %}
-                    <option value="{{id}}">{{name}}</option>
-                {% endfor %}
-            </select>
+<div class="container-fluid my-5">
+    <div class="row justify-content-center ">
+        <div class="col-12 col-md-12 col-lg-12 ">
+            <div class="card shadow ">
+                <div class="card-header text-center">
+                    <h2 class="text-info">Create Post</h2>
+                </div>
+                <div class="spaci p-3 ">
+                    <classds="card-body">
+                        <form method="post">
+                            {% csrf_token %}
+                            <div class="row">
+                                <div class="form-group col-md-4 col-lg-4 col-sm-12 mb-3 ">
+                                    <label for="posted_by">Posted By</label>
+                                    <select name="posted_by" class="form-control" id="posted_by" required>
+                                        <option value="">Select User</option>
+                                        <option value="1">User 1</option>
+                                        <option value="2">User 2</option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-4 col-lg-4 col-sm-12 mb-3">
+                                    <label for="type">Type</label>
+                                    <select name="type" class="form-control" id="type" >
+                                        <option value="1">Normal</option>
+                                        <option value="2">Special</option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-4 col-lg-4 col-sm-12 mb-3">
+                                    <label for="content_type">Content Type</label>
+                                    <select name="content_type" class="form-control" id="content_type" >
+                                        <option value="1">Text</option>
+                                        <option value="2">Image</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6 col-lg-6 col-sm-12 mb-3">
+                                    <label for="media_url">Media URL</label>
+                                    <input type="url" name="media_url" class="form-control" id="media_url"
+                                        placeholder="Enter media URL">
+                                </div>
+                                <div class="form-group col-md-6 col-lg-6 col-sm-12 mb-3">
+                                    <label for="title">Title</label>
+                                    <input type="text" name="title" class="form-control" id="title" >
+                                </div>
+                            </div>
+
+
+                            <div class="row">
+                                <div class="form-group col-md-6 col-lg-6 col-sm-12 mb-3">
+                                    <label for="description">Description</label>
+                                    <textarea name="description" class="form-control" id="description" rows="4"
+                                        ></textarea>
+
+                                </div>
+                                <div class="form-group col-md-6 col-lg-6 col-sm-12 mb-3">
+                                    <label for="accessability">Accessibility</label>
+                                    <select name="accessability" class="form-control" id="accessability" >
+                                        <option value="1">Public</option>
+                                        <option value="2">Private</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row">
+
+                                <div class="form-group col-md-6 col-lg-6 col-sm-12 mb-3">
+                                    <label for="members">Members</label>
+                                    <select name="members" class="form-control" id="members" multiple>
+                                        <option value="1">Member 1</option>
+                                        <option value="2">Member 2</option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-6 col-lg-6 col-sm-12 mb-3">
+                                    <label for="treat_as">Treat As</label>
+                                    <select name="treat_as" class="form-control" id="treat_as" >
+                                        <option value="1">Include</option>
+                                        <option value="2">Exclude</option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-6 col-lg-6 col-sm-12 mb-3">
+                                    <input type="checkbox" name="is_active" class="form-check-input" id="is_active"
+                                        checked>
+                                    <label class="form-check-label" for="is_active">Is Active</label>
+                                </div>
+                            </div>
+                            <div class="text-start">
+                                <a href="{% url 'post_list' %}" class="btn btn-sm btn-outline-secondary">Back</a>
+                                <button type="submit" class="btn btn-sm btn-primary">Save</button>
+                            </div>
+                        </form>
+                        
+                </div>
+            </div>
         </div>
-        <div class="form-group">
-            <label for="type">Type</label>
-            <select name="type" class="form-control" id="type" required>
-                <option value="1">Normal</option>
-                <option value="2">Special</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label for="content_type">Content Type</label>
-            <select name="content_type" class="form-control" id="content_type" required>
-                <option value="1">Text</option>
-                <option value="2">Image</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label for="media_url">Media URL</label>
-            <input type="url" name="media_url" class="form-control" id="media_url" placeholder="Enter media URL">
-        </div>
-        <div class="form-group">
-            <label for="title">Title</label>
-            <input type="text" name="title" class="form-control" id="title" required>
-        </div>
-        <div class="form-group">
-            <label for="description">Description</label>
-            <textarea name="description" class="form-control" id="description" rows="4" required></textarea>
-        </div>
-        <div class="form-group">
-            <label for="accessability">Accessibility</label>
-            <select name="accessability" class="form-control" id="accessability" required>
-                {% for id,name in user_select %}
-                    <option value="{{id}}">{{name}}</option>
-                {% endfor %}
-            </select>
-        </div>
-        <div class="form-group">
-            <label for="members">Members</label>
-            <select name="members" class="form-control" id="members" multiple>
-                <option value="1">Member 1</option>
-                <option value="2">Member 2</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label for="treat_as">Treat As</label>
-            <select name="treat_as" class="form-control" id="treat_as" required>
-                <option value="1">Include</option>
-                <option value="2">Exclude</option>
-            </select>
-        </div>
-        <div class="form-group form-check">
-            <input type="checkbox" name="is_active" class="form-check-input" id="is_active" checked>
-            <label class="form-check-label" for="is_active">Is Active</label>
-        </div>
-        <button type="submit" class="btn btn-primary">Submit</button>
-    </form>
+    </div>
 </div>
-
-
-
-
-<a href="{% url 'user_list' %}">Back to Post List</a>
-
-
 {% endblock %}

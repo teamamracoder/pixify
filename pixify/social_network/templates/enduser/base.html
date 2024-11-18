@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="{% static 'css/style.enduser.style.css' %}">
     <link rel="stylesheet" href="{% static 'css/toastr.min.css' %}">
     <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'js/script.js' %}"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
@@ -20,53 +21,168 @@
     <script src="{% static 'js/script.js' %}"></script>
 
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-                return new bootstrap.Tooltip(tooltipTriggerEl)
-            })
-        });
-    </script>
+
+    <style>
+        @media (max-width: 575px) {
+            .left-sidebar,.right-sidebar,.center-bodycontent {
+                padding-left: 0rem !important;
+                padding-right: 0rem !important;
+                margin-bottom:1rem
+            }
+          }
+          @media (min-width: 576px) and (max-width: 768px) {
+            .left-sidebar,.right-sidebar,.center-bodycontent {
+                padding-left: 3rem !important;
+                padding-right: 3rem !important;
+                margin-bottom:1rem
+            }
+          }
+          @media (min-width: 768px) and (max-width: 991px) {
+            .left-sidebar{
+                padding-left: 0rem !important;
+            }
+            .right-sidebar{
+                padding-right: 0rem !important;
+            }
+            .body-container{
+                padding-left: 1.5rem !important;
+                padding-right: 1.5rem !important;
+            }
+          }
+          @media (min-width: 1400px) {
+            #body-container{
+                padding-left: 7rem !important;
+                padding-right: 7rem !important;
+            }
+          }
+          @media (min-width: 768px) and (max-width: 991px) {
+            #p-pic img{
+                height:auto;
+                padding:2px;
+                margin-top:7px;
+            }
+          }
+          @media (min-width: 991px) and (max-width: 1200px) {
+            #p-pic img{
+                height:auto;
+                padding: 16px;
+                margin-top: 0px;
+            }
+          }
+          @media (max-width: 768px){
+            #p-pic{
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+            #user-details{
+                display: flex;
+                flex-flow: column;
+                justify-content: center;
+                align-items: center;
+            }
+            #rightSidebar{
+                display:none;
+            }
+            #leftSidebar{
+                display:none;
+            }
+          }
+          @media (max-width: 1320px) {
+            #searchbarInput{
+                display:none;
+            }
+            #searchbarBtn{
+                display:block !important;
+            }
+          }
+          @media (max-width: 992px) {
+            #navbarNav ul{
+                gap:25px;
+            }
+          }
+          @media (max-width: 768px) {
+            #navContainer{
+                padding-left: 50px !important;
+            }
+            .center-bodycontent{
+                padding-left: 0px !important;
+                padding-right: 0px !important;
+            }
+
+          }
+          @media (max-width: 650px) {
+            #navContainer{
+                padding-left: 0px !important;
+            }
+            #navbar{
+                padding-left: 25px !important;
+                padding-right: 25px !important;
+            }
+            #navbarNav ul{
+                gap:15px;
+            }
+            #searchbarInputMiddle{
+                margin-right: 45px !important;
+                margin-left: 20px;
+            }
+          }
+          @media (max-width: 480px) {
+            #navContainer{
+                padding-left: 0px !important;
+            }
+            #navbar{
+                padding-left: 10px !important;
+                padding-right:10px !important
+            }
+            #navbarNav ul{
+                gap:6px;
+            }
+            #userImage{
+                margin-left: 0px !important;
+            }
+            #sidelogo{
+                margin-right: 0px !important;
+            }
+          }
+          @media (min-width: 768px) and (max-width: 992px) {
+            #searchbarInputMiddle{
+                margin-right: 0px !important;
+            }
+        }
+    </style>
 </head>
-
-<body style="background-color: #1a0933 !important;">
-    <nav class="navbar navbar-expand-lg " data-bs-theme="dark" style="background-color:#220b46;">
-        <div class="container-fluid">
-            <div class="navlogo">
-
-                <a class="navbar-brand" href="/">
-                    <h4>Pixify</h4>
-                </a>
-
-                <div class="topnav">
-                    <div id="search__container">
-                        {% comment %} <i class="bi bi-search"></i> {% endcomment %}
-                        <input class="search__input" type="text" placeholder="Search" />
-
-                    </div>
-                    {% comment %} <div class="input-group mb-3">
-                        <button class="btn btn-outline-secondary" type="button" id="button-addon1" id="searchbtn"><i
-                                class="bi bi-search"></i></button>
-                        <input type="text" id="searchin" class="form-control" placeholder=""
-                            aria-label="Example text with button addon" aria-describedby="button-addon1">
-                    </div> {% endcomment %}
-
+    <body style="background-color: #1a0933 !important;">
+        <nav class="navbar navbar-expand fixed-top px-5" data-bs-theme="dark"  style="background-color:#220b46;" id="navbar">
+            <div class="container-fluid" id="navContainer" style="height: 40px;padding-left: 100px;">
+                <!-- Left side: Logo -->
+                <div class="d-flex col-md-3">
+                    <a class="navbar-brand me-4" href="/" id="sidelogo">
+                        <img src="{% static 'images/logo1.jpg' %}" alt="Logo" class="d-inline-block align-top"
+                            style="width: 38px; height: 38px;">
+                    </a>
+                    <form action="" class="nav-item" id="searchbarInput" style="padding-top: 5px;">
+                        <div class="input-group">
+                            <span class="input-group-text border-0">
+                                <i class="fa fa-search"></i>
+                            </span>
+                            <input type="text" class="form-control" placeholder="Search" />
+                        </div>
+                    </form>
                 </div>
-
-
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-            </div>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav">
-
-                    <li class="nav-item" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Home">
-                        <a class="nav-link active" aria-current="page" href="/"><i class="fa-solid fa-house"></i></a>
-                    </li>
-
+                <!-- Right side: Profile Image -->
+                <div class="collapse navbar-collapse pe-auto col-md-5" id="navbarNav" style="height: 40px;justify-content: center;">
+                    <form action="" class="nav-item" id="searchbarInputMiddle" style="padding-top: 5px;margin-right: 85px;width: 100%;display:none;">
+                        <input class="form-control " type="text" placeholder="Search" />
+                    </form>
+                    <ul class="navbar-nav ms-auto" id="navbarNavMiddle">
+                        <li class="nav-item" id="searchbarBtn" style="display:none;" data-bs-toggle="tooltip"
+                            data-bs-placement="bottom" >
+                            <i class="bi bi-search"></i>
+                        </li>
+                        <li class="nav-item" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Home">
+                            <a class="nav-link" href="/"><i class="fa-solid fa-house"></i></a>
+                        </li>
 
                     <li class="nav-item" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Chat">
                         <a class="nav-link active" aria-current="page" href="/chat"><i
@@ -78,71 +194,72 @@
                                 class="fa-solid fa-bell"></i></a>
                     </li>
 
-                    <li class="nav-item" data-bs-toggle="tooltip" data-bs-placement="bottom" title="About">
-                        <a class="nav-link active" aria-current="page" href="/"><i
-                                class="fa-solid fa-circle-info"></i></a>
-                    </li>
+                        <li class="nav-item" data-bs-toggle="tooltip" data-bs-placement="bottom" title="About">
+                            <a class="nav-link" href="/aboutus/"><i class="bi bi-info-circle-fill"></i></a>
+                        </li>
 
+                        <li class="nav-item" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Call">
+                            <a class="nav-link" href="/contactus/"><i class="fa-solid fa-phone"></i></a>
+                        </li>
+                        <li class="nav-item ms-3" id="userImage" style="margin-right: auto;">
+                            <a class="nav-link" href="#" style="padding-top: 2px;padding-bottom: 2px;">
+                                <img src="{% static 'images/avatar.jpg' %}" alt="User" class="rounded-circle"
+                                    style="width: 38px; height: 38px;">
+                            </a>
+                            <!-- Dropdown content -->
+                            <div id="userDropdown" class="dropdown-menu" style="display: none; position: absolute; top: 100%; right: 0;width: 250px;background-color: #1f0447e3;box-shadow: 0 4px 8px rgba(151, 95, 236, 0.5);font-family: serif;border-radius: 7px;">
+                                <div class="pt-1 px-2 fw-semibold">
+                                    <div class="p-2" style="border-bottom: 1.5px solid #975fec;">
+                                        <a class="d-flex" href="#" style="padding-top: 2px;padding-bottom: 2px;text-decoration: none;corsor:pointer;">
+                                            <img src="{% static 'images/avatar.jpg' %}" alt="User" class="rounded-circle"
+                                                style="width: 38px; height: 38px;">
+                                                <div>
+                                                <span class="fw-semibold ps-2 username d-block" style="color:#f8c471;">Subhasis Barman</span>
+                                                <span class="ps-2 fw-normal d-block" style="color:white;font-size: 13px;">Cooch Behar</span>
+                                            </div>
+                                        </a>
+                                    </div>
 
-                    <li class="nav-item" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Call">
-                        <a class="nav-link active" aria-current="page" href="/"><i class="fa-solid fa-phone"></i></a>
-                    </li>
-                </ul>
-            </div>
+                                    <div class="message-content py-2" style="border-bottom: 1.5px solid #975fec;">
+                                        <div class="ps-2 py-2 message;" style="font-size: 16px;"><a href="/profile" style="color:white;text-decoration: none;corsor:pointer"><i class="fa-solid fa-user-group me-2"></i>Friends</a></div>
+                                        <div class="ps-2 py-2 message;" style="font-size: 16px;"><a href="/profile" style="color:white;text-decoration: none;corsor:pointer"><i class="fa-solid fa-clock me-2"></i>Memories</a></div>
+                                        <div class="ps-2 py-2 message;" style="font-size: 16px;"><a href="/profile" style="color:white;text-decoration: none;corsor:pointer"><i class="fa-solid fa-bookmark me-2"></i>Save</a></div>
+                                        <div class="ps-2 py-2 message;" style="font-size: 16px;"><a href="/profile" style="color:white;text-decoration: none;corsor:pointer"><i class="fa-solid fa-people-group me-2"></i>Group</a></div>
+                                        <div class="ps-2 py-2 message;" style="font-size: 16px;"><a href="/profile" style="color:white;text-decoration: none;corsor:pointer"><i class="fa-solid fa-signs-post me-2"></i>Post</a></a></div>
+                                    </div>
 
-            <div id="but">
-
-                <button type="button" class="btn btn1" data-bs-toggle="modal" data-bs-target="#exampleModal"
-                    data-bs-whatever="@mdo">Login</button>
-                <button type="button" class="btn btn2">Signup</button>
-            </div>
-
-            <!-- Modal -->
-            <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel"
-                aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        {% comment %} <div class="modal-header">
-                            <h1 class="modal-title fs-5 text-center" id="exampleModalLabel"
-                                style="justify-content:center;">User Login Page</h1>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div> {% endcomment %}
-                        <div class="modal-body">
-                            <form>
-                                <h1 class="modal-title fs-5 text-center">Login</h1>
-                                <div class="mb-3 ">
-                                    <label for="recipient-name" class="col-form-label">Username</label>
-                                    <input type="text" class="form-control" id="recipient-name" placeholder="username">
+                                    <div class="message-content py-2" style="border-bottom: 1.5px solid #975fec;">
+                                        <div class="ps-2 message" style="font-size: 16px;">Account</div>
+                                        <div>
+                                            <span class="ps-3 py-1 fw-normal d-block" style="color:white;font-size: 13px;">Settings</span>
+                                            <span class="ps-3 fw-normal d-block" style="color:white;font-size: 13px;">Privacy</span>
+                                        </div>
+                                    </div>
+                                    <div class="message-content py-2">
+                                        <a href="#" style="text-decoration: none;">
+                                            <span class="ps-2 message" style="font-size: 16px;">Sign Out</span>
+                                        </a>
+                                    </div>
                                 </div>
-                                <div class="mb-3">
-                                    <label for="recipient-name" class="col-form-label">Password</label>
-                                    <input type="Password" class="form-control" id="recipient-email"
-                                        placeholder="password">
-                                </div>
 
-                            </form>
-
-                        </div>
-                        <div class="sec" style="  padding: 20px;">
-                            <a href="#" id="forget" data-bs-dismiss="modal">Forget Password</a>
-                            <button type="button " id="login" class="btn btn-primary">Login</button>
-                        </div>
-                    </div>
+                            </div>
+                        </li>
+                    </ul>
                 </div>
+
+                <div class="col-md-3"></div>
             </div>
+        </nav>
 
-        </div>
-    </nav>
-
-    <main class="container-fluid mt-2" style="min-height: 600px;">
-        <div class="row px-5">
-            <div class="col-12 col-sm-4 col-md-3 ps-5 pe-3">
+    <main class="container-fluid mt-2 " style="min-height: 600px; margin-top: 60px !important;">
+        <div class="row px-5 body-container" id="body-container">
+            <div class="col-12 col-sm-12 col-md-3 col-lg-3 col-xl-3 ps-5 pe-3 left-sidebar" id="leftSidebar">
                 <div class="px-3 py-3 mt-3"
                     style="background-color: #1f0447e3;box-shadow: 0 4px 8px rgba(151, 95, 236, 0.5);font-family: serif;border-radius: 7px;">
                     <div class="left-sideber">
                         <div class="left-siteber-opt">
                             <ul class="left-siteber-opt-ul" style="padding-left: 0px;">
-                                <li class="pb-2"><a href="#"><i class="fa-solid fa-user me-2"></i>user</a></li>
+                                <li class="pb-2"><a href="/profile"><i class="fa-solid fa-user me-2"></i>Subhasis</a></li>
                                 <li class="pb-2"><a href="#"><i class="fa-solid fa-user-group me-2"></i>friends</a></li>
                                 <li class="pb-2"><a href="#"><i class="fa-solid fa-clock me-2"></i>memories</a></li>
                                 <li class="pb-2"><a href="#"><i class="fa-solid fa-bookmark me-2"></i>save</a></li>
@@ -156,56 +273,55 @@
                             <p>No Sortcurts</p>
                         </div>
                         <hr>
-                        <div class="d-flex py-2" style="list-style: none;">
-                            <li class="pe-2"><a href="#" style="text-decoration: none;">privacy</a></li>
-                            <li class="pe-2"><a href="#" style="text-decoration: none;">Add choice</a></li>
-                            <li class="pe-2"><a href="#" style="text-decoration: none;">Terms</a></li>
-                            <li class="pe-2"><a href="#" style="text-decoration: none;">Advertising</a>
-                            </li>
 
-                        </div>
-                        <div class="d-flex" style="list-style: none;">
-                            <li class="pe-2"><a href="#" style="text-decoration: none;">cookies</a></li>
-                            <li class="pe-2"><a href="/admin" style="text-decoration: none;">Admin</a></li>
-                            <li class="pe-2"><a href="#" style="text-decoration: none;">more</a></li>
+                        <div class="container py-2">
+                            <ul class="d-flex flex-wrap flex-sm-row flex-column justify-content-start list-unstyled mb-0">
+                                <li class="pe-2"><a href="#" class="text-decoration-none">Privacy</a></li>
+                                <li class="pe-2"><a href="#" class="text-decoration-none">Add choice</a></li>
+                                <li class="pe-2"><a href="#" class="text-decoration-none">Terms</a></li>
+                                <li class="pe-2"><a href="#" class="text-decoration-none">Advertising</a></li>
+                                <li class="pe-2"><a href="#" style="text-decoration: none;">Cookies</a></li>
+                                <li class="pe-2"><a href="/admin" style="text-decoration: none;">Admin</a></li>
+                                <li class="pe-2"><a href="#" style="text-decoration: none;">more..</a></li>
+                            </ul>
                         </div>
 
                     </div>
                 </div>
             </div>
 
-            <div class="col-12 col-sm-8 col-md-6">
+            <div class="col-12 col-sm-12 col-md-6 col-lg-6 col-xl-6 center-bodycontent">
                 {% block content %}
 
                 {% endblock %}
             </div>
-            <div class="col-12 col-sm-4 col-md-3 ps-5 pe-5">
+            <div class="col-12 col-sm-12 col-md-3 col-lg-3 col-xl-3 ps-3 pe-5 right-sidebar" id="rightSidebar">
                 <div class="px-3 py-3 mt-3"
                     style="background-color: #1f0447e3;box-shadow: 0 4px 8px rgba(151, 95, 236, 0.5);    font-family: serif;border-radius: 7px;">
                     <div class="pb-1 pt-1" style=" border-bottom: 1.5px solid #975fec;">
                         <div class="d-flex">
                             <h5 class="text-center text-white">Friend request</h5>
-                            <span class="text-center text-align-center ms-auto fw-semibold"
-                                style="color: rgb(0, 255, 242);cursor: pointer;    font-size: 14px;">See
-                                All</span>
+                            <a href="/friendrequest" class="text-center text-align-center ms-auto fw-semibold"
+                                style="color: rgb(0, 255, 242);cursor: pointer; font-size: 14px;text-decoration:none;">See
+                                All</a>
                         </div>
                         <p class="ps-2" style="color: #975fec;margin-bottom: 10px;">No request</p>
                     </div>
                     <div class="pb-1 pt-2 mt-3" style=" border-bottom: 1.5px solid #975fec;">
                         <div class="d-flex">
                             <h5 class="text-center text-white">Birthdays</h5>
-                            <span class="text-center text-align-center ms-auto fw-semibold"
-                                style="color: rgb(0, 255, 242);cursor: pointer;    font-size: 14px;">See
-                                All</span>
+                            <a href="/birthday" class="text-center text-align-center ms-auto fw-semibold"
+                                style="color: rgb(0, 255, 242);cursor: pointer;font-size: 14px;text-decoration:none;">See
+                                All</a>
                         </div>
                         <p class="ps-2" style="color: #975fec;margin-bottom: 10px;">No Birthday</p>
                     </div>
                     <div class="pb-1 pt-2 mt-3" style=" border-bottom: 1.5px solid #975fec;">
                         <div class="d-flex">
                             <h5 class="text-center text-white">Contacts</h5>
-                            <span class="text-center text-align-center ms-auto fw-semibold"
-                                style="color: rgb(0, 255, 242);cursor: pointer;    font-size: 14px;">See
-                                All</span>
+                            <a href="#" class="text-center text-align-center ms-auto fw-semibold"
+                                style="color: rgb(0, 255, 242);cursor: pointer;font-size: 14px;text-decoration:none;">See
+                                All</a>
                         </div>
                         <p class="ps-2" style="color: #975fec;margin-bottom: 10px;">No contacts</p>
                     </div>

@@ -1,6 +1,5 @@
 from django.shortcuts import render,redirect
 from django.views import View
-
 from ..services import chat_service, user_service,message_service, chat_member_service
 from django.http import JsonResponse
 from ..constants import ChatType
