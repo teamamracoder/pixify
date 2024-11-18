@@ -746,10 +746,10 @@ textarea::placeholder {
     border-bottom: none;
 }
 
-.form-control {
+/* .form-control {
     background-color: #130322;
 
-}
+} */
 
 .modal-body {
     overflow-y: scroll;
@@ -785,9 +785,9 @@ textarea::placeholder {
 }
 
 .btn-primary {
-    background-color: #4e0b8d;
+    /* background-color: #4e0b8d; */
     border-radius: 5px;
-    padding: 5px;
+    padding: 5px 12px;
     box-shadow: blue;
 }
 
@@ -918,11 +918,11 @@ textarea::placeholder {
 .share-container {
     /* position: fixed; */
     max-width: 450px;
-    margin: 0px 50px;
+    /* margin: 0px 50px;
     border: 2px solid #ddd;
-    padding: 20px;
     border-radius: 8px;
-
+    */
+    padding: 2px 20px 10px 20px
 }
 
 
@@ -930,13 +930,13 @@ textarea::placeholder {
     display: flex;
     align-items: center;
     padding: 10px;
-    border-bottom: 1px solid #ddd;
+    /* border-bottom: 1px solid #ddd; */
     position: relative;
 }
 
-.profile-item:hover {
+/* .profile-item:hover {
     background-color: rgb(214, 210, 210);
-}
+} */
 
 .profile-pic {
     width: 40px;
@@ -953,7 +953,9 @@ textarea::placeholder {
 .share-button-container {
     display: none;
     justify-content: right;
-    margin-top: 20px;
+    padding-top: 2px;
+    padding-bottom: 5px;
+    /* margin-top: 20px; */
 }
 
 .custom-checkbox {
@@ -988,7 +990,7 @@ textarea::placeholder {
 }
 
 .icon-item i {
-    font-size: 2rem;
+    font-size: 22px;
     color: #0d6efd;
 }
 
@@ -1010,10 +1012,6 @@ textarea::placeholder {
     color: #555;
 }
 
-.icon-item i {
-    font-size: 2rem;
-    color: #0d6efd;
-}
 
 .icon-label {
     margin-top: 5px;
@@ -1022,7 +1020,7 @@ textarea::placeholder {
 }
 
 .text-light {
-    font-size: 10px;
+    font-size: 18px;
 }
 
 /* sharee  end */
@@ -1405,7 +1403,7 @@ textarea::placeholder {
 }
 
 .bg-purple {
-    background-color: #7b4bf9 !important;
+    background-color: #2f066de3 !important;
 }
 
 .post-image {
@@ -1459,9 +1457,9 @@ textarea::placeholder {
     background-color: #6c757d;
 }
 
-.icon:hover {
+/* .icon:hover {
     background-color: #5a27d5;
-}
+} */
 
 /* End CSS for  Left Side Bar by Shribash*/
 
@@ -1523,8 +1521,8 @@ textarea::placeholder {
 }
 
 .modal-header {
-    border-bottom: 1px solid #ddd;
-    color: black;
+    padding-top: 10px;
+    padding-bottom: 10px;
 }
 
 .modal-footer {
