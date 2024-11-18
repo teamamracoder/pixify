@@ -746,10 +746,10 @@ textarea::placeholder {
     border-bottom: none;
 }
 
-.form-control {
+/* .form-control {
     background-color: #130322;
 
-}
+} */
 
 .modal-body {
     overflow-y: scroll;
@@ -769,7 +769,7 @@ textarea::placeholder {
 }
 
 .comment-box {
-    background-color: #3d195f;
+    /* background-color: #3d195f; */
     scroll-behavior: auto;
     border-radius: 5px;
 
@@ -785,9 +785,9 @@ textarea::placeholder {
 }
 
 .btn-primary {
-    background-color: #4e0b8d;
+    /* background-color: #4e0b8d; */
     border-radius: 5px;
-    padding: 5px;
+    padding: 5px 12px;
     box-shadow: blue;
 }
 
@@ -795,7 +795,7 @@ textarea::placeholder {
     color: darkcyan;
     font-size: 15px;
     font-style: inherit;
-    margin-top: 5px;
+    /* margin-top: 5px; */
 
 }
 
@@ -818,11 +818,11 @@ textarea::placeholder {
 }
 
 .fileInputStyle {
-    width: 93%;
+    width: 100%;
     background-color: #130421;
     font-size: 12px;
     color: white;
-    font-weight: bold;
+    /* font-weight: bold; */
     padding: 5px;
 }
 
@@ -913,6 +913,118 @@ textarea::placeholder {
 }
 
 /* 12/11/2024 tuesday */
+/* sharee */
+
+.share-container {
+    /* position: fixed; */
+    max-width: 450px;
+    /* margin: 0px 50px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    */
+    padding: 2px 20px 10px 20px
+}
+
+
+.profile-item {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    /* border-bottom: 1px solid #ddd; */
+    position: relative;
+}
+
+/* .profile-item:hover {
+    background-color: rgb(214, 210, 210);
+} */
+
+.profile-pic {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+.profile-item {
+    font-size: 14.5px;
+
+}
+
+.share-button-container {
+    display: none;
+    justify-content: right;
+    padding-top: 2px;
+    padding-bottom: 5px;
+    /* margin-top: 20px; */
+}
+
+.custom-checkbox {
+    position: absolute;
+    right: 10px;
+}
+
+.custom-checkbox input[type="checkbox"] {
+    display: flex;
+}
+
+.custom-checkbox label {
+    font-size: 1.3rem;
+    color: #d1cccc;
+    cursor: pointer;
+}
+
+.custom-checkbox input[type="checkbox"]:checked+label {
+    color: #0d6efd;
+}
+
+.icon-container {
+    max-width: 600px;
+
+}
+
+.icon-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #555;
+}
+
+.icon-item i {
+    font-size: 22px;
+    color: #0d6efd;
+}
+
+.icon-label {
+    margin-top: 5px;
+    font-size: 0.9rem;
+    color: #555;
+}
+
+.icon-container {
+    max-width: 600px;
+    margin: auto;
+}
+
+.icon-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #555;
+}
+
+
+.icon-label {
+    margin-top: 5px;
+    font-size: 0.9rem;
+    color: #555;
+}
+
+.text-light {
+    font-size: 18px;
+}
+
+/* sharee  end */
+
 
 .post-center {
     width: 100%;
@@ -1020,20 +1132,12 @@ textarea::placeholder {
     font-size: 13px;
 }
 
-/* stories  */
-/* .story:hover{
-    opacity: 0.8;
-} */
-
-
-
 /* story */
 
 
 .stories-container {
-    /* max-width: 510px; */
-    max-width: 100%;
-    /* margin: 24px auto; */
+    max-width: 600px;
+    margin: 25px auto;
     position: relative;
 }
 
@@ -1054,28 +1158,21 @@ textarea::placeholder {
     cursor: pointer;
 }
 
-/* .stories-full-view .next-btn{
-    margin-right: 24%;
-}
-
-.stories-full-view .previous-btn {
-    margin-left: 24%;
-} */
 .stories-container .previous-btn,
 .stories-full-view .previous-btn {
     left: 8px;
 
 }
 
-.stories-container .previous-btn.actived,
+.stories-container .previous-btn,
 .stories-container .next-btn {
     opacity: 0;
     pointer-events: none;
     transition: all 400ms ease;
 }
 
-.stories-container .previous-btn .actived,
-.stories-container .next-btn .actived {
+.stories-container .previous-btn.actived,
+.stories-container .next-btn.actived {
     opacity: 1;
     pointer-events: auto;
 
@@ -1110,8 +1207,6 @@ textarea::placeholder {
 
 .stories-container .content {
     overflow-x: scroll;
-    scrollbar-width: none;
-    scroll-behavior: smooth;
 }
 
 .stories-container .content::-webkit-scrollbar {
@@ -1124,8 +1219,8 @@ textarea::placeholder {
     bottom: 0;
     left: 0;
     right: 0;
-    padding: 8px 16px;
-    font-size: 15px;
+    padding: 3px;
+    font-size: 16px;
     font-family: "Roboto", sans-serif;
     font-weight: bold;
     color: black;
@@ -1141,10 +1236,9 @@ textarea::placeholder {
     margin-top: 58px;
     inset: 0;
     z-index: 5;
-    background: rgb(0, 0, 0, 0.9);
+    background: rgba(0, 0, 0, 0.9);
     place-items: center;
     display: none;
-    place-items: center;
 }
 
 .stories-full-view.actived {
@@ -1203,14 +1297,42 @@ textarea::placeholder {
 
 .stories-full-view .author {
     position: absolute;
-    top: 43px;
+    top: 58px;
     left: 50%;
+    color: #e90acb;
     transform: translateX(-50%);
     font-family: "Roboto" sans-serif;
     font-size: 18px;
 }
 
-.profile {
+.stories-full-view .story #dp {
+    margin-left: 35%;
+    top: -60%;
+}
+
+.stories-full-view .story .time-line {
+    height: 2px;
+    width: 40%;
+    top: 20%;
+    left: 30%;
+    background: rgb(255, 21, 204);
+    border-radius: 5px;
+    position: absolute;
+    animation: timeline 3s linear forwards;
+
+}
+
+@keyframes timeline {
+    0% {
+        width: 0;
+    }
+
+    100% {
+        width: 40%;
+    }
+}
+
+.story #dp {
     position: relative;
     margin-top: -170px;
     margin-left: 8px;
@@ -1219,11 +1341,10 @@ textarea::placeholder {
     width: 40px;
     border-radius: 50%;
     overflow: hidden;
-    display: inline-block;
     background: relative;
 }
 
-.profile img {
+.story #dp img {
     width: 100%;
     height: 100%;
     object-fit: cover;
@@ -1231,32 +1352,29 @@ textarea::placeholder {
 
 }
 
-/* .comment-box {
-    background-color: #f8f9fa;
-    border: 1px solid #e0e0e0;
-    border-radius: 30px;
-    padding: 10px 15px;
-}
- .profile{
+.story .dp {
     position: relative;
     margin-top: -170px;
     margin-left: 8px;
-    border: 3px solid #d3ccd1;
+    border: 3px solid #ff2bbf;
     height: 40px;
-    cursor: pointer;
     width: 40px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: relative;
+}
+
+.story .dp img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
 
 }
 
-.emoji-btn, .image-btn {
-    border: none;
-    background: none;
-    color: #6c757d;
-}
 
-.emoji-btn:hover, .image-btn:hover {
-    color: #343a40;
-} */
+/* story css end */
+
 
 .com-opt-bar {
     display: flex;
@@ -1285,7 +1403,7 @@ textarea::placeholder {
 }
 
 .bg-purple {
-    background-color: #7b4bf9 !important;
+    background-color: #2f066de3 !important;
 }
 
 .post-image {
@@ -1313,15 +1431,9 @@ textarea::placeholder {
 }
 
 
-.profile img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center;
 
-}
 
-*/ .icon.whatsapp {
+.icon.whatsapp {
     background-color: #25D366;
 }
 
@@ -1345,9 +1457,9 @@ textarea::placeholder {
     background-color: #6c757d;
 }
 
-.icon:hover {
+/* .icon:hover {
     background-color: #5a27d5;
-}
+} */
 
 /* End CSS for  Left Side Bar by Shribash*/
 
@@ -1409,8 +1521,8 @@ textarea::placeholder {
 }
 
 .modal-header {
-    border-bottom: 1px solid #ddd;
-    color: black;
+    padding-top: 10px;
+    padding-bottom: 10px;
 }
 
 .modal-footer {
@@ -1436,6 +1548,12 @@ textarea::placeholder {
 
 .file-upload-label:hover {
     background-color: #f1f1f1;
+}
+
+/*ForComment Section*/
+#CommentsectionTextarea textarea:focus {
+    outline: none;
+    border: none;
 }
 
 /*End Subhasis*/
