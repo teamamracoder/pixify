@@ -1,0 +1,72 @@
+{% extends "auth/base.html" %}
+
+{% block title %}Welcome to Pixify{% endblock %}
+
+{% block content %}
+
+<h2>Verify your email to continue</h2>
+<div class="row">
+    <div class="col-md-6">
+        <form method="post" action="{% url 'verify_otp' %}" id="verify_otp_form">
+            {% csrf_token %}
+            {{ data.verify_otp_form.as_p }}
+            <button type="submit" class="btn btn-sm btn-primary my-2">Verify</button>
+        </form>
+        <button id="resendOTP" class="border-0 bg-transparent text-light text-decoration-underline my-2">Resend OTP</button>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $("#verify_otp_form").validate({
+            rules: {
+                otp: {
+                    required: true,
+                    minlength: 6,
+                    maxlength: 6
+                },
+            },
+            messages: {
+                otp: {
+                    required: "Please enter OTP.",
+                    minlength: "OTP must be at least 6 characters.",
+                    maxlength: "OTP cannot exceed 6 characters."
+                },
+            }
+        });
+    });
+
+    const resendBtn = $("#resendOTP");
+    resendBtn.click(
+        () => {
+            resendBtn.text("sending...").addClass('disabled');
+            $.ajax({
+                url: "{% url 'resend_otp' %}",
+                method: 'POST',
+                data: { email: $('#id_email').val() },
+                headers: { "X-CSRFToken": "{{ csrf_token }}" },
+                complete: (res) => {
+                    // get data from response
+                    const data = res.responseJSON;
+                    // show toast message
+                    if (data.success) {
+                        toastr.success(data.message);
+                        // timer
+                        resendBtn.text("3:00");
+                        // reset button after 3 min
+                        const timeout = 20000; // currently it is 20 sec - (set 3 min - 1000*60*3)
+                        setTimeout(() => { resendBtn.text("Resend OTP").removeClass('disabled') }, timeout);
+                    } else {
+                        // show toast message
+                        toastr.warning(data.message);
+                        // reset resend button if failed
+                        resendBtn.text("Resend OTP").removeClass('disabled');
+                    }
+                }
+            })
+        }
+    )
+
+</script>
+
+{% endblock %}
