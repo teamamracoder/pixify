@@ -8,22 +8,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}My Django App{% endblock %}</title>
     <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
-    <!-- <link rel="stylesheet" href="{% static 'css/bootstrap.enduser.css' %}"> -->
-    <link rel="stylesheet" href="{% static 'css/style.enduser.style.css' %}">
+    {% comment %} <link rel="stylesheet" href="{% static 'css/bootstrap.enduser.css' %}"> {% endcomment %}
+    <link rel="stylesheet" href="{% static 'css/style.enduser.css' %}">
+    <link rel="stylesheet" href="{% static 'css/toastr.min.css' %}">
     <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
-
+    <script src="{% static 'js/script.js' %}"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
+    <script src="{% static 'js/jquery-3.7.1.min.js' %}"></script>
+    <script src="{% static 'js/toastr.min.js' %}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        })
+    });
+</script>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-                return new bootstrap.Tooltip(tooltipTriggerEl)
-            })
-        });
-    </script>
     <style>
         @media (max-width: 575px) {
             .left-sidebar,.right-sidebar,.center-bodycontent {
@@ -170,7 +173,6 @@
                             </span>
                             <input type="text" class="form-control" placeholder="Search" />
                         </div>
-                        {% comment %} <input class="form-control " type="text" placeholder="Search" /> {% endcomment %}
                     </form>
                 </div>
                 <!-- Right side: Profile Image -->
@@ -188,13 +190,14 @@
                         </li>
 
                         <li class="nav-item" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Chat">
-                            <a class="nav-link" href="/message/">
+                            <a class="nav-link" href="/chat/">
                                 <span
                                     class="position-absolute top-0 start-30 translate-middle badge rounded-pill bg-danger"
                                     style="margin-left:27px; margin-top:7px;">2+</span>
                                 <i class="bi bi-messenger"></i>
                             </a>
                         </li>
+
                         <li class="nav-item" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Notification">
                             <a class="nav-link" href="/notification/">
                                 <span
@@ -229,17 +232,7 @@
                                             </div>
                                         </a>
                                     </div>
-                                    {% comment %} <div class="message-content py-2" style="border-bottom: 1.5px solid #975fec;">
-                                        <div class="ps-2 message" style="font-size: 16px;">Account</div>
-                                        <ul class="" style="padding-left: 0px;">
-                                            <li class="pb-2"><a href="/profile"><i class="fa-solid fa-user me-2"></i>user</a></li>
-                                            <li class="pb-2"><a href="#"><i class="fa-solid fa-user-group me-2"></i>friends</a></li>
-                                            <li class="pb-2"><a href="#"><i class="fa-solid fa-clock me-2"></i>memories</a></li>
-                                            <li class="pb-2"><a href="#"><i class="fa-solid fa-bookmark me-2"></i>save</a></li>
-                                            <li class="pb-2"><a href="#"><i class="fa-solid fa-people-group me-2"></i>group</a></li>
-                                            <li class="pb-2"><a href="#"><i class="fa-solid fa-signs-post me-2"></i>post</a></li>
-                                        </ul>
-                                    </div> {% endcomment %}
+
                                     <div class="message-content py-2" style="border-bottom: 1.5px solid #975fec;">
                                         <div class="ps-2 py-2 message;" style="font-size: 16px;"><a href="/profile" style="color:white;text-decoration: none;corsor:pointer"><i class="fa-solid fa-user-group me-2"></i>Friends</a></div>
                                         <div class="ps-2 py-2 message;" style="font-size: 16px;"><a href="/profile" style="color:white;text-decoration: none;corsor:pointer"><i class="fa-solid fa-clock me-2"></i>Memories</a></div>
@@ -261,9 +254,7 @@
                                         </a>
                                     </div>
                                 </div>
-                                {% comment %} <a class="dropdown-item" href="/profile">Profile</a>
-                                <a class="dropdown-item" href="/settings">Settings</a>
-                                <a class="dropdown-item" href="/logout">Logout</a> {% endcomment %}
+
                             </div>
                         </li>
                     </ul>
@@ -354,18 +345,38 @@
 
     </main>
 
-
-
-
-    {% comment %} <footer class="px-5" style="position: absolute; bottom: 0; width: 100%;">
+    <!-- <footer class="px-5" style="position: absolute; bottom: 0; width: 100%;">
         <p class="text-center pt-3 mx-5" style="border-top: 1.5px solid #975fec;">&copy; 2024 Pixify App</p>
-    </footer> {% endcomment %}
-    {% comment %} <footer class="px-5 mt-5" style="position: sticky;width: 100%; background-color:  rgba(33, 16, 49, 0.815);">
-        <p class="text-center pt-3 pb-3 mb-0">&copy; 2024 Pixify App</p>
-    </footer> {% endcomment %}
-    <script src="{% static 'js/script.js' %}"></script>
+    </footer> -->
 </body>
-<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script type="text/javascript">
+    const show_toastr = (message, type) => {
+        // check if message is null or empty string
+        if (!message) return;
+
+        // show toast message based on type
+        switch (type) {
+            case 'info':
+                toastr.info(message);
+                break;
+            case 'warning':
+                toastr.warning(message);
+                break;
+            case 'success':
+                toastr.success(message);
+                break;
+            case 'error':
+                toastr.error(message);
+                break;
+            default:
+                break;
+        }
+    }
+
+    // call show toast message
+    show_toastr("{{ message|escapejs }}", "{{ message_type|escapejs }}");
+
+</script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
 
 </html>
