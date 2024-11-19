@@ -4,6 +4,8 @@
 {% load static %}
 {% block content %}
 
+
+
 <div class="px-3 py-3 mt-3  users"
         style="background-color: #1f0447e3;box-shadow: 0 4px 8px rgba(151, 95, 236, 0.5);font-family: serif;border-radius: 7px;">
         <div class="row loginuserprofile mx-2 pt-1 pb-3 px-2 mb-2 fw-semibold "
@@ -28,8 +30,82 @@
                 </ul>
 
                 <div class="col-auto col-sm-auto d-flex" style="gap:10px">
-                    <button type="button" class="prof-btn btn btn-primary" style="font-size:14px ;">EDIT</button>
-                    <button type="button" class="btn btn-primary prof-btn" style="font-size:14px;">CHANGE PASSWORD</button>
+
+                  {% comment %} Rework by Badhan {% endcomment %}
+
+                <button type="button" class="prof-btn btn btn-primary" data-bs-toggle="modal"  data-bs-target="#editModal" style="font-size:14px ;">EDIT</button>
+                   {% comment %} Push by Badhan Sarkar {% endcomment %}
+                   <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="backgroundcolour modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title text-white-custom" id="editModalLabel">Edit Information</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="editForm">
+                                    <div class="mb-3">
+                                        <label for="firstName" class="form-label text-white-custom">First Name:</label>
+                                        <input type="text" class="form-control" id="firstName" placeholder="Enter first name">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="lastName" class="form-label text-white-custom">Last Name:</label>
+                                        <input type="text" class="form-control" id="lastName" placeholder="Enter last name">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="age" class="form-label text-white-custom">Age:</label>
+                                        <input type="number" class="form-control" id="age" placeholder="Enter age">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="gender" class="form-label text-white-custom">Gender:</label>
+                                        <select class="form-select" id="gender">
+                                            <option value="Select Gender"style="background-color:blue;">Select Gender</option>
+                                            <option value="Male" style="background-color:#1f0447e3;">Male</option>
+                                            <option value="Female"style="background-color:#1f0447e3;">Female</option>
+                                            <option value="Other"style="background-color:#1f0447e3;">Other</option>
+                                        </select>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-primary" id="saveButton">Save</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                    {% comment %} Rework By Badhan {% endcomment %}
+                    <button type="button" class="btn btn-primary prof-btn"  data-bs-toggle="modal" data-bs-target="#changePasswordModal"   style="font-size:14px;">CHANGE PASSWORD</button>
+
+ <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content custom-modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="changePasswordModalLabel">Change Password</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form>
+          <div class="mb-3">
+            <label for="newPassword" class="form-label">New Password:</label>
+            <input type="password" class="form-control" id="newPassword">
+          </div>
+          <div class="mb-3">
+            <label for="confirmPassword" class="form-label">Confirm Password:</label>
+            <input type="password" class="form-control" id="confirmPassword">
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+                    {% comment %} ------------Badhan------------ {% endcomment %}
+
                 </div>
             </div>
         </div>
@@ -225,16 +301,61 @@
              </div>
 
           </div>
+</div>
 
-
-
-
-
-
-    </div>
 <style>
+
     .galary .col{
     padding-right:0;
     }
-</style>
+
+
+
+        {% comment %}Work by Badhan Sarkar  {% endcomment %}
+        .backgroundcolour {
+            background: #1f0447e3;
+        }
+
+        .text-white-custom {
+            color: white;
+        }
+
+       .custom-modal-content {
+          background-color: #1f0447e3;
+          color: white; 
+        } 
+      </style>
+
+{% comment %} Javascrpits {% endcomment %}
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+   
+    const editModal = document.getElementById('editModal');
+    const editForm = document.getElementById('editForm');
+    const saveButton = document.getElementById('saveButton');
+    editModal.addEventListener('shown.bs.modal', () => {
+        editForm.reset();
+    });
+    saveButton.addEventListener('click', () => {
+        const firstName = document.getElementById('firstName').value;
+        const lastName = document.getElementById('lastName').value;
+        const age = document.getElementById('age').value;
+        const gender = document.getElementById('gender').value;
+        console.log("First Name:", firstName);
+        console.log("Last Name:", lastName);
+        console.log("Age:", age);
+        console.log("Gender:", gender);
+        const modalInstance = bootstrap.Modal.getInstance(editModal);
+        modalInstance.hide();
+    });
+
+
+
+
+
+</script>
+{% comment %} By Badhan Sarkar {% endcomment %}
+
 {% endblock %}
