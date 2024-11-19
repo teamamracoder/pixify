@@ -29,7 +29,7 @@
                         <span>{{ message.text }}</span>
                     </div>
                     <div class="message-footer">
-                        <i class="bi bi-three-dots-vertical" onclick="toggleOptions({{ message.id }})"></i>
+                        <i class="bi bi-three-dots-vertical" onclick="toggleOptions({{ message.id}})"></i>
                         <span class="time">{{ message.created_at|date:"h:i" }}</span>
                     </div>
                     <div class="options-popup" id="options-{{ message.id }}" style="display: none;">
@@ -51,7 +51,7 @@
                         <span>{{ message.text }}</span>
                     </div>
                     <div class="message-footer">
-                        <i class="bi bi-three-dots-vertical" onclick="toggleOptions({{ message.id }})"></i>
+                        <i class="bi bi-three-dots-vertical" onclick="toggleOptions({{ message.id}})"></i>
                         <span class="time">{{ message.created_at|date:"h:i" }}</span>
                     </div>
                     <div class="options-popup" id="options-{{ message.id }}" style="display: none;">

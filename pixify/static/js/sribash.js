@@ -2,32 +2,32 @@
 const allStories = [
     {
         id: 0,
-        author: "sribash sarkar",
+        author: "Sribash Sarkar",
         dp: "static/images/p3.jpg",
         imageUrl: "static/images/p3.jpg",
     },
     {
         id: 1,
-        author: "PRIYA MITRA",
+        author: "Priya Mitra",
         dp: "static/images/priya.jpg",
         imageUrl: "static/images/priya.jpg",
     },
     {
         id: 2,
         dp: "static/images/p3.jpg",
-        author: "Rima das",
+        author: "Rima Das",
         imageUrl: "static/images/p3.jpg",
     },
     {
         id: 3,
         dp: "static/images/p1.jpg",
-        author: "sribash sarkar",
+        author: "Subhasis Barmar",
         imageUrl: "static/images/p1.jpg",
     },
     {
         id: 4,
         dp: "static/images/p2.jpg",
-        author: "sribash sarkar",
+        author: "Badhan Sarkar",
         imageUrl: "static/images/p2.jpg",
     },
     {

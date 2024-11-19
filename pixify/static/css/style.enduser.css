@@ -1131,6 +1131,10 @@ textarea::placeholder {
     padding-right: 5px;
     font-size: 13px;
 }
+/* left side bar styling */
+/* .left-list li a{
+    font-size: 18px;
+} */
 
 /* story */
 
@@ -1217,13 +1221,13 @@ textarea::placeholder {
 .stories-container .author {
     position: absolute;
     bottom: 0;
-    left: 0;
+    left:0;
+    text-align: center;
     right: 0;
     padding: 3px;
-    font-size: 16px;
-    font-family: "Roboto", sans-serif;
-    font-weight: bold;
-    color: black;
+    font-size: 14px;
+    font-family: "Roboto", sans-serif; 
+    color: #fff;
     background: linear-gradient(transparent, #222 130%);
 }
 
