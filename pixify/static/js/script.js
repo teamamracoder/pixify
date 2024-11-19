@@ -130,33 +130,81 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 // select post photo and videos--Priya
-let files = [],
-    container = document.querySelector(".con"),
-    browse = document.querySelector(".select"),
-    input = document.querySelector("#fileInput");
-browse.addEventListener('click', () => input.click());
-input.addEventListener('change', () => {
-    let file = input.files;
-    for (let i = 0; i < file.length; i++) {
-        if (files.every(e => e.name != file[i].name)) files.push(file[i])
+
+document.addEventListener("DOMContentLoaded", () => {
+    let files = [];
+    let container = document.querySelector(".con");
+    //let browse = document.querySelector(".select");
+    let input = document.querySelector("#fileInput");
+
+    if (input) {
+        input.addEventListener('change', () => {
+            let file = input.files;
+            for (let i = 0; i < file.length; i++) {
+                if (files.every(e => e.name !== file[i].name)) files.push(file[i]);
+            }
+
+            showImages();
+        });
     }
-    form.reset();
-    showImages();
-})
-const showImages = () => {
-    let images = '';
-    files.forEach((e, i) => {
-        images += `<div class="images">
-        <img src="${URL.createObjectURL(e)}">
-        <span onclick="delImage(${i})">&times</span>
-     </div>`
-    })
-    container.innerHTML = images;
-}
-const delImage = index => {
-    files.splice(index, 1)
-    showImages()
-}
+
+    const showImages = () => {
+        let images = '';
+        files.forEach((e, i) => {
+            images += `<div class="images">
+                <img src="${URL.createObjectURL(e)}" alt="Uploaded Image Preview">
+                <span onclick="window.delImage(${i})" style="cursor: pointer;">&times;</span>
+            </div>`;
+        });
+        container.innerHTML = images;
+    };
+
+    window.delImage = index => {
+        files.splice(index, 1);
+        showImages();
+    };
+    const dropZone = document.getElementById("dropZone");
+    const fileInput = document.getElementById("fileInput");
+
+    //let files = [];
+
+    // Highlight drop zone when dragging files over
+    dropZone.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        dropZone.style.borderColor = "blue"; // Highlight border color
+        dropZone.style.backgroundColor = "#f0f8ff";
+    });
+
+    // Remove highlight when dragging out
+    dropZone.addEventListener("dragleave", () => {
+        dropZone.style.borderColor = "#ccc"; // Reset border color
+        dropZone.style.backgroundColor = "transparent";
+    });
+
+    // Handle file drop
+    dropZone.addEventListener("drop", (e) => {
+        e.preventDefault();
+        dropZone.style.borderColor = "#ccc"; // Reset border color
+        dropZone.style.backgroundColor = "transparent";
+
+        const droppedFiles = Array.from(e.dataTransfer.files);
+        handleFiles(droppedFiles);
+    });
+
+    // Handle file processing
+    const handleFiles = (selectedFiles) => {
+        selectedFiles.forEach((file) => {
+            if (files.every((e) => e.name !== file.name)) {
+                files.push(file);
+            }
+        });
+        showImages();
+    };
+
+
+});
+
+
 
 // select post photo and videos--Priya End
 
@@ -170,25 +218,32 @@ const delImage = index => {
 
 //For Comment
 // comment reply section by priya mitra
-document.querySelectorAll(".view-comment").forEach((viewComment) => {
-    viewComment.addEventListener("click", () => {
-        document.querySelectorAll(".reply-open").forEach(reply => {
-            reply.style.display = "none";
-        });
-        document.querySelectorAll(".view-comment").forEach(comment => {
-            comment.innerHTML = comment.innerHTML.replace("Hide reply", "View reply");
-        });
+document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll(".view-comment").forEach((viewComment) => {
 
-        const replyOpen = viewComment.nextElementSibling;
-        if (replyOpen.style.display === "none" || replyOpen.style.display === "") {
-            replyOpen.style.display = "block";
-            viewComment.innerHTML = viewComment.innerHTML.replace("View reply", "Hide reply");
-        } else {
-            replyOpen.style.display = "none";
-            viewComment.innerHTML = viewComment.innerHTML.replace("Hide reply", "View reply");
-        }
+        viewComment.addEventListener("click", () => {
+            document.querySelectorAll(".reply-open").forEach(reply => {
+
+                reply.style.display = "none";
+            });
+            document.querySelectorAll(".view-comment").forEach(comment => {
+                comment.innerHTML = comment.innerHTML.replace("Hide reply", "View reply");
+            });
+
+            const replyOpen = viewComment.nextElementSibling;
+            if (replyOpen.style.display === "none" || replyOpen.style.display === "") {
+                replyOpen.style.display = "block";
+                viewComment.innerHTML = viewComment.innerHTML.replace("View reply", "Hide reply");
+            } else {
+                replyOpen.style.display = "none";
+                viewComment.innerHTML = viewComment.innerHTML.replace("Hide reply", "View reply");
+            }
+        });
     });
+
 });
+
+
 
 
 //End Comment
