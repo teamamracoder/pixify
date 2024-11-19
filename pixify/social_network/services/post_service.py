@@ -5,8 +5,8 @@ from django.db.models import Q
 def list_posts():
     return Post.objects.all()
 
-def create_post(title, description,media_url):
-    return Post.objects.create(title=title, description=description,media_url=media_url)
+# def create_post(title, description,media_url,posted_by):
+#     return Post.objects.create(title=title, description=description,media_url=media_url,posted_by = posted_by)
 
 def get_post(post_id):
     return get_object_or_404(Post, id=post_id)
@@ -29,12 +29,12 @@ def admin_list_posts(sort_by = 'title'):
 def admin_create_post(**kwargs):
     post = Post.objects.create(
             posted_by=kwargs['posted_by'],
-            created_by=kwargs['created_by']
+            created_by=kwargs['created_by'],
             # type=kwargs['type'],
             # content_type=kwargs['content_type'],
             # media_url=kwargs.get('media_url'),
-            # title=kwargs['title'],
-            # description=kwargs['description'],
+            title=kwargs['title'],
+            description=kwargs['description'],
             # accessability=kwargs['accessability'],
             # members  = kwargs['members'],
             # treat_as = kwargs['treat_as'],
@@ -42,7 +42,7 @@ def admin_create_post(**kwargs):
         )
     return post
 
-def admin_list_posts_filtered(search_query, sort_by='posted_by'):
+def admin_list_posts_filtered(search_query, sort_by='first_name'):
     if search_query:
         # Use Q objects to filter by first_name, last_name, or email
         return Post.objects.filter(
@@ -51,3 +51,5 @@ def admin_list_posts_filtered(search_query, sort_by='posted_by'):
             Q(description__icontains=search_query)
         ).order_by(sort_by)
     return Post.objects.all().order_by(sort_by)    
+
+
