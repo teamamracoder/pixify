@@ -4,6 +4,9 @@ from django.shortcuts import render, redirect
 from django.views import View
 from .. import services
 from ..models import User
+import os
+from pixify import settings
+
 from django.core.paginator import Paginator 
 
 
@@ -95,3 +98,31 @@ class AdminTogglePostActiveView(View):
         post.is_active = not post.is_active  # Toggle active status
         post.save()
         return JsonResponse({'is_active': post.is_active})
+
+
+
+
+
+
+# post create by priya
+class UserPostCreateView(View):
+   
+    
+    def post(self, request):
+        post_Title = request.POST['postTitle']
+        postFiles = request.FILES.getlist('postFiles')
+        postFile = []
+        for file in postFiles:
+            postFile.append(file.name)
+        media_urls=[]
+        for file in postFiles:
+            file_path=os.path.join(settings.MEDIA_ROOT,file.name)
+            with open(file_path,'wb+') as destination:
+                for chunk in file.chunks():
+                    destination.write(chunk)
+            media_urls.append(f"{settings.MEDIA_URL}{file.name}")            
+
+      
+        services.post_service.user_post(post_Title, media_urls)
+        return redirect('home')
+    

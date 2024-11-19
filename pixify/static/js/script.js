@@ -96,45 +96,79 @@ document.addEventListener("DOMContentLoaded", function () {
 //End Badhan
 
 // select post photo and videos--Priya
+// let files = [],
+//     container = document.querySelector(".con"),
+//     browse = document.querySelector(".select"),
+//     input = document.querySelector("#fileInput");
+// if (browse && input) {
+//     browse.addEventListener('click', () => input.click());
+
+//     input.addEventListener('change', () => {
+//         let file = input.files;
+//         for (let i = 0; i < file.length; i++) {
+//             if (files.every(e => e.name !== file[i].name)) files.push(file[i]);
+//         }
+
+//         //input.value = "";
+//         showImages();
+//     });
+// }
+// const showImages = () => {
+//     let images = '';
+//     files.forEach((e, i) => {
+//         images += `<div class="images">
+//             <img src="${URL.createObjectURL(e)}" alt="Uploaded Image Preview">
+//             <span onclick="delImage(${i})" style="cursor: pointer;">&times;</span>
+//         </div>`;
+//     });
+//     container.innerHTML = images;
+// };
+// const delImage = index => {
+//     files.splice(index, 1);
+//     showImages();
+// };
+
+
+// select post photo and videos--Priya
 let files = [],
     container = document.querySelector(".con"),
     browse = document.querySelector(".select"),
     input = document.querySelector("#fileInput");
-if (browse && input) {
-    browse.addEventListener('click', () => input.click());
-
-    input.addEventListener('change', () => {
-        let file = input.files;
-        for (let i = 0; i < file.length; i++) {
-            if (files.every(e => e.name !== file[i].name)) files.push(file[i]);
-        }
-
-        //input.value = "";
-        showImages();
-    });
-}
-
-
+browse.addEventListener('click', () => input.click());
+input.addEventListener('change', () => {
+    let file = input.files;
+    for (let i = 0; i < file.length; i++) {
+        if (files.every(e => e.name != file[i].name)) files.push(file[i])
+    }
+    form.reset();
+    showImages();
+})
 const showImages = () => {
     let images = '';
     files.forEach((e, i) => {
         images += `<div class="images">
-            <img src="${URL.createObjectURL(e)}" alt="Uploaded Image Preview">
-            <span onclick="delImage(${i})" style="cursor: pointer;">&times;</span>
-        </div>`;
-    });
+        <img src="${URL.createObjectURL(e)}">
+        <span onclick="delImage(${i})">&times</span>
+     </div>`
+    })
     container.innerHTML = images;
-};
-
+}
 const delImage = index => {
-    files.splice(index, 1);
-    showImages();
-};
-
+    files.splice(index, 1)
+    showImages()
+}
 
 // select post photo and videos--Priya End
-//For Comment
 
+
+
+
+
+
+
+
+
+//For Comment
 // comment reply section by priya mitra
 document.querySelectorAll(".view-comment").forEach((viewComment) => {
     viewComment.addEventListener("click", () => {
@@ -155,7 +189,6 @@ document.querySelectorAll(".view-comment").forEach((viewComment) => {
         }
     });
 });
-
 
 
 //End Comment
