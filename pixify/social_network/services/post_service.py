@@ -1,6 +1,7 @@
 from ..models import Post,User
 from django.shortcuts import get_object_or_404
 from django.db.models import Q   
+from .. import models
 
 def list_posts():
     return Post.objects.all()
@@ -51,3 +52,7 @@ def admin_list_posts_filtered(search_query, sort_by='posted_by'):
             Q(description__icontains=search_query)
         ).order_by(sort_by)
     return Post.objects.all().order_by(sort_by)    
+
+#create post
+def user_post(post_Title,post_Files):
+    return models.Post.objects.create(title=post_Title,media_url=post_Files,created_by_id=1,posted_by_id=1)

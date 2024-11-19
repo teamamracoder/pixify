@@ -1,12 +1,12 @@
-/* @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap'); */
-@import url('https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap');
+ @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap'); 
+
 /*Start CSS for Nav Bar by Priya Mitra */
 
 * {
     margin: 0;
     padding: 0;
     color: whitesmoke;
-    font-family: "Ubuntu", sans-serif;
+    font-family: "roboto", sans-serif;
 }
 
 .navlogo {
@@ -20,9 +20,9 @@ nav {
 }
 
 .topnav {
-    /* width: 220px; */
+
     height: 35px;
-    /* margin-top: 6px; */
+   
 
 }
 
@@ -129,7 +129,7 @@ i {
 }
 
 .modal-content {
-    width: 400px;
+  
 
     background-color: #211031;
 }
@@ -250,6 +250,7 @@ i {
     color: rgba(172, 57, 147, 0.973);
     margin-bottom: 8px;
     padding: 5px;
+    font-size: 13px;
 }
 
 .prof-btn {
@@ -1019,9 +1020,9 @@ textarea::placeholder {
     color: #555;
 }
 
-.text-light {
+/* .text-light {
     font-size: 18px;
-}
+} */
 
 /* sharee  end */
 
@@ -1029,10 +1030,10 @@ textarea::placeholder {
 .post-center {
     width: 100%;
     background-color: #03072ecc;
-    margin-left: 15px;
+    /* margin-left: 15px; */
     outline: none;
     background-color: #1f0447e3;
-    box-shadow: 0 4px 8px rgba(151, 95, 236, 0.5);
+  
     font-family: serif;
 }
 
@@ -1158,7 +1159,7 @@ textarea::placeholder {
     cursor: pointer;
 }
 
- .stories-container .previous-btn,
+.stories-container .previous-btn,
 .stories-full-view .previous-btn {
     left: 8px;
 
@@ -1169,7 +1170,7 @@ textarea::placeholder {
     opacity: 0;
     pointer-events: none;
     transition: all 400ms ease;
-} 
+}
 
 .stories-container .previous-btn.actived,
 .stories-container .next-btn.actived {
@@ -1203,6 +1204,7 @@ textarea::placeholder {
 .stories-container .stories {
     display: flex;
     gap: 8px;
+   
 }
 
 .stories-container .content {
@@ -1299,26 +1301,26 @@ textarea::placeholder {
     position: absolute;
     top: 58px;
     left: 50%;
-    color: #e90acb;
+    color:#2f066de3;
     transform: translateX(-50%);
     font-family: "Roboto" sans-serif;
     font-size: 18px;
 }
 
 .stories-full-view .story #dp {
-    margin-left: 35%;
-    top: -60%;
+    margin-left: 34%;
+    top: -63%;
 }
 
 .stories-full-view .story .time-line {
     height: 2px;
     width: 40%;
-    top: 20%;
-    left: 30%;
-    background: rgb(255, 21, 204);
-    border-radius: 5px;
+    top: 9%;
+    left: 27.5%;
+    background: #2f066de3;
+    border-radius: 50%;
     position: absolute;
-    animation: timeline 3s linear forwards;
+    animation: timeline 10s linear forwards;
 
 }
 
@@ -1328,7 +1330,7 @@ textarea::placeholder {
     }
 
     100% {
-        width: 40%;
+        width: 45%;
     }
 }
 
@@ -1336,7 +1338,7 @@ textarea::placeholder {
     position: relative;
     margin-top: -170px;
     margin-left: 8px;
-    border: 3px solid #ff2bbf;
+    border: 3px solid #4f0cb4e3;
     height: 40px;
     width: 40px;
     border-radius: 50%;
@@ -1554,6 +1556,14 @@ textarea::placeholder {
 #CommentsectionTextarea textarea:focus {
     outline: none;
     border: none;
+   
 }
 
-/*End Subhasis*/
+/*End Subhasis*Thank you for your business! We look forward to working with you again.*/
+
+.center-bodycontent::-webkit-scrollbar {
+  width: 1px;
+}
+html {
+    scroll-behavior: smooth;
+  }
