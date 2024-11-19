@@ -647,6 +647,15 @@ i {
 }
 
 /* --------------End by Badhan-------------------------- */
+/* ---------------Edit Button----------------- */
+
+.backgroundcolour {
+    background: #1f0447e3;
+}
+
+.text-white-custom {
+    color: white;
+}
 
 
 /* End CSS for Message by Badhan Sarkar */
