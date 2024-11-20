@@ -111,7 +111,7 @@ class ChatDetailsView(View):
         chat.title = chat.title             # if no title available thaen show all users as a simple list in the title position
         chat.chat_cover = chat.chat_cover  
                 
-        return render(request, 'enduser/chat/messages.html',{'chat':chat,'messages':messages})
+        return render(request, 'enduser/chat/messages.html',{'chat':chat,'messages':messages,'user':user})
     
 class ChatUpdateView(View):   
     def get(self, request,chat_id):        

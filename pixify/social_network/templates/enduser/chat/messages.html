@@ -19,7 +19,7 @@
 
     <div class="chat-body">
         {% for message in messages %}
-            {% if message.sender == request.user %}
+            {% if message.sender_id == user.id %}
                 <div class="message sent">
                     <div class="message-content">
                         <div class="message-header">
@@ -29,8 +29,9 @@
                         <span>{{ message.text }}</span>
                     </div>
                     <div class="message-footer">
-                        <i class="bi bi-three-dots-vertical" onclick="toggleOptions({{ message.id }})"></i>
                         <span class="time">{{ message.created_at|date:"h:i" }}</span>
+                        <i class="bi bi-three-dots-vertical" onclick="toggleOptions({{ message.id }})"></i>
+                        <i class="bi bi-emoji-smile" onclick="toggleReactionPopup({{ message.id }})"></i>
                     </div>
                     <div class="options-popup" id="options-{{ message.id }}" style="display: none;">
                         <a href="#" onclick="editMessage('{{ message.id }}', '{{ message.text|escapejs }}')">Edit</a>
@@ -40,6 +41,14 @@
                         </form>
                         <a href="#" onclick="replyToMessage('{{ message.id }}', '{{ message.sender.username }}', '{{ message.text|escapejs }}')">Reply</a>
                     </div>
+                    <div class="reaction-popup" id="reaction-popup-{{ message.id }}" style="display: none;">
+                        <span onclick="addReaction('{{ message.id }}', '👍')">👍</span>
+                        <span onclick="addReaction('{{ message.id }}', '❤️')">❤️</span>
+                        <span onclick="addReaction('{{ message.id }}', '😂')">😂</span>
+                        <span onclick="addReaction('{{ message.id }}', '😮')">😮</span>
+                        <span onclick="addReaction('{{ message.id }}', '😢')">😢</span>
+                    </div>
+                    <div class="reaction-display" id="reaction-display-{{ message.id }}"></div>
                 </div>
             {% else %}
                 <div class="message received">
@@ -51,8 +60,9 @@
                         <span>{{ message.text }}</span>
                     </div>
                     <div class="message-footer">
+                        <span class="time">{{ message.created_at|date:"h:i A" }}</span>
                         <i class="bi bi-three-dots-vertical" onclick="toggleOptions({{ message.id }})"></i>
-                        <span class="time">{{ message.created_at|date:"h:i" }}</span>
+                        <i class="bi bi-emoji-smile" onclick="toggleReactionPopup({{ message.id }})"></i>
                     </div>
                     <div class="options-popup" id="options-{{ message.id }}" style="display: none;">
                         <a href="#" onclick="editMessage('{{ message.id }}', '{{ message.text|escapejs }}')">Edit</a>
@@ -62,19 +72,20 @@
                         </form>
                         <a href="#" onclick="replyToMessage('{{ message.id }}', '{{ message.sender.username }}', '{{ message.text|escapejs }}')">Reply</a>
                     </div>
+                    <div class="reaction-popup" id="reaction-popup-{{ message.id }}" style="display: none;">
+                        <span onclick="addReaction('{{ message.id }}', '👍')">👍</span>
+                        <span onclick="addReaction('{{ message.id }}', '❤️')">❤️</span>
+                        <span onclick="addReaction('{{ message.id }}', '😂')">😂</span>
+                        <span onclick="addReaction('{{ message.id }}', '😮')">😮</span>
+                        <span onclick="addReaction('{{ message.id }}', '😢')">😢</span>
+                    </div>
+                    <div class="reaction-display" id="reaction-display-{{ message.id }}"></div>
                 </div>
             {% endif %}
         {% endfor %}
     </div>
 
     <div class="chat-footer">
-        <div id="reply-preview" style="display: none;">
-            <div class="reply-message">
-                <span class="close-reply" onclick="cancelReply()">✖</span>
-                <span class="reply-username"></span>: <span class="reply-text"></span>
-            </div>
-        </div>
-
         <form method="POST" action="/send_message">
             {% csrf_token %}
             <input type="text" name="message" placeholder="Type your message here..." required>
@@ -89,32 +100,25 @@
         popup.style.display = popup.style.display === 'none' ? 'block' : 'none';
     }
 
-    function editMessage(messageId, content) {
-        const messageInput = document.querySelector('input[name="message"]');
-        messageInput.value = content;
-        messageInput.focus();
-        document.querySelector('form').action = `/message/${messageId}/edit/`;
+    function toggleReactionPopup(messageId) {
+        const popup = document.getElementById('reaction-popup-' + messageId);
+        popup.style.display = popup.style.display === 'none' ? 'flex' : 'none';
     }
 
-    function replyToMessage(messageId, username, content) {
-        const messageInput = document.querySelector('input[name="message"]');
-        document.getElementById('reply-preview').style.display = 'block';
-        document.querySelector('.reply-username').textContent = username;
-        document.querySelector('.reply-text').textContent = content;
-
-        messageInput.focus();
-    }
-
-    function cancelReply() {
-        document.getElementById('reply-preview').style.display = 'none';
-    }
-
-    document.addEventListener('click', function (event) {
-        if (!event.target.closest('.options-popup') && !event.target.closest('.bi-three-dots-vertical')) {
-            document.querySelectorAll('.options-popup').forEach(popup => popup.style.display = 'none');
+    function addReaction(messageId, reaction) {
+        const display = document.getElementById('reaction-display-' + messageId);
+        const existingReaction = [...display.children].find(child => child.textContent.includes(reaction));
+        if (existingReaction) {
+            existingReaction.textContent = `${reaction} ${parseInt(existingReaction.textContent.split(' ')[1]) + 1}`;
+        } else {
+            const newReaction = document.createElement('span');
+            newReaction.textContent = `${reaction} 1`;
+            display.appendChild(newReaction);
         }
-    });
+        document.getElementById('reaction-popup-' + messageId).style.display = 'none';
+    }
 </script>
+
 
 <style>
     /* Overall Chat Container */
@@ -319,5 +323,92 @@
     .chat-footer button:hover {
         background-color: #3e2b5c;
     }
+
+    .dropdown {
+        position: absolute;
+        background-color: #fff;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+        max-height: 150px;
+        overflow-y: auto;
+        z-index: 10;
+    }
+
+    
+    .mention-item {
+        padding: 10px;
+        font-size: 14px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    .mention-item:hover {
+        background-color: #f0f0f0;
+    }
+
+    #mention-suggestions {
+        transform: translateY(-100%);
+        margin-bottom: 10px;
+    }
+    .message-footer {
+        position: relative;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 5px 10px;
+    }
+    
+    .bi-emoji-smile {
+        font-size: 20px;
+        cursor: pointer;
+        color: gray;
+    }
+    
+    .bi-emoji-smile:hover {
+        color: black;
+    }
+    
+    .reaction-popup {
+        display: flex;
+        position: absolute;
+        bottom: -40px;
+        right: 0;
+        background-color: #fff;
+        border: 1px solid #ccc;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        padding: 5px;
+        z-index: 10;
+    }
+    
+    .reaction-popup span {
+        margin: 5px;
+        cursor: pointer;
+        font-size: 18px;
+    }
+    
+    .reaction-popup span:hover {
+        transform: scale(1.2);
+        transition: 0.3s;
+    }
+    
+    .reaction-display {
+        margin-top: 5px;
+        display: flex;
+        gap: 5px;
+        font-size: 14px;
+    }
+    
+    .reaction-display span {
+        padding: 5px 8px;
+        background-color: #e0e0e0;
+        border-radius: 10px;
+        font-size: 12px;
+        display: inline-flex;
+        align-items: center;
+        font-weight: bold;
+    }
+    
 </style>
-{% endblock %}
+{% endblock %} add a action when i type "@" in the form 
