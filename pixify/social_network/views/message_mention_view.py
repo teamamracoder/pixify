@@ -1,14 +1,20 @@
-from django.shortcuts import render,redirect
 from django.views import View
-from ..services import chat_service, user_service
+from ..services import message_mention_service
+from django.http import JsonResponse
+from ..models import ChatMember
 
-class MessageMentionCreateView(View):
-    def get(self,request,chat_id):
-        chat=chat_service.get_chat_by_id(chat_id)
-        return render(request, 'enduser/message/index.html',{'chat':chat})
-    
-    def post(self, request,chat_id):
-        user=user_service.get_user(request)
-        chat=chat_service.get_chat_by_id(chat_id)
-        mention=chat_service.get_all_mentions_by_chat_id(chat,user)
-        return render(request, 'enduser/message/index.html',{'mention':mention})
+class MessageMentionListViewApi(View):
+    def get(self, request, chat_id):
+        user = request.user
+        search_query = request.GET.get('search', '')        
+        members_count = ChatMember.objects.filter(chat_id=chat_id).exclude(member_id=user).count()                        
+        if members_count > 1:
+            mention_list = message_mention_service.list_messages_mention_Api(chat_id, user, search_query)
+            print(f"Mention List: {mention_list}")  
+            return JsonResponse(mention_list, safe=False)
+        else:
+            print("Not enough members to show mention list")  
+            return JsonResponse([], safe=False)
+
+
+
