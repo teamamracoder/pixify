@@ -3,18 +3,122 @@
 {% block title %}Post List{% endblock %}
 
 {% block content %}
+<style>
+    .hover-bg:hover {
+        background-color: rgba(240, 242, 245, 0.1);
+        color: aqua;
+    }
+</style>
 
-<h1>Post List</h1>
-<a href="{% url 'post_create' %}">Create Post</a>
-<ul>
-    {% for post in posts %}
-    <li>
-        <a href="{% url 'post_detail' post.id %}">{{ post.title }}</a>
-        (<a href="{% url 'post_update' post.id %}">Edit</a>)
-        (<a href="{% url 'post_delete' post.id %}">Delete</a>)
-    </li>
-    {% endfor %}
-</ul>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col">
+            <h2 class="text-center mb-4">Posts</h2>
+            <div class="d-flex justify-content-between mb-3">
+                <div>
+                    <button class="btn btn-primary btn-sm"><a href="{% url 'post_create' %}" class="text-white text-decoration-none"></a>Add Post</button>
+                </div>
+                <form method="get" action="{% url 'post_list' %}">
+                    <div class="input-group" style="max-width: 300px;">
+                        <input type="text" class="form-control border-secondary" placeholder="Search"
+                               aria-label="Search" name="search" value="{{ search_query }}">
+                        <button class="btn btn-outline-secondary">Search</button>
+                    </div>
+                </form>
+            </div>
+            
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-info text-white"> 
+                        <tr>
+                            <th>
+                                <a href="?sort_by=posted_by&sort_order={% if sort_order == 'asc' %}desc{% else %}asc{% endif %}">Posted by</a>
+                            </th>
+                            <th>
+                                <a href="?sort_by=title&sort_order={% if sort_order == 'asc' %}desc{% else %}asc{% endif %}">Title</a>
+                            </th>
+                            <th>
+                                <a href="?sort_by=description&sort_order={% if sort_order == 'asc' %}desc{% else %}asc{% endif %}">Description</a>
+                            </th>
 
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for post in posts %}
+                        <tr>
+                            <td>
+                                <a class="text-decoration-none text-primary hover-bg" href="{% url 'post_detail' post.id %}">
+                                    {{ post.posted_by.first_name }} {{ post.posted_by.last_name }} 
+                                </a>
+                            </td>
+                            <td>{{ post.title }}</td>
+                            <td>
+                                {{ post.media_url }}
+                            </td>
+                            
+                                <td>
+                                    <button class="btn btn-sm toggle-status" data-post-id="{{ post.id }}">
+                                        {% if post.is_active %}
+                                            <i class="bi bi-toggle-on text-success"></i> Active
+                                        {% else %}
+                                            <i class="bi bi-toggle-off text-danger"></i> Inactive
+                                        {% endif %}
+                                    </button>
+                                </td>
+                                
+                            
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            
+                <div class="pagination">
+                    <span class="step-links">
+                        {% if posts.has_previous %}
+                            <a href="?page=1&search={{ search_query }}&sort_by={{ sort_by }}&sort_order={{ sort_order }}">First</a>
+                            <a href="?page={{ posts.previous_page_number }}&search={{ search_query }}&sort_by={{ sort_by }}&sort_order={{ sort_order }}">Previous</a>
+                        {% endif %}
+                        <span class="current">
+                            Page {{ posts.number }} of {{ posts.paginator.num_pages }}.
+                        </span>
+                        {% if posts.has_next %}
+                            <a href="?page={{ posts.next_page_number }}&search={{ search_query }}&sort_by={{ sort_by }}&sort_order={{ sort_order }}">Next</a>
+                            <a href="?page={{ posts.paginator.num_pages }}&search={{ search_query }}&sort_by={{ sort_by }}&sort_order={{ sort_order }}">Last</a>
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function() {
+        $('.toggle-status').click(function() {
+            const postId = $(this).data('post-id');
+            const button = $(this);
+
+            $.ajax({
+                url: '/admin/posts/toggle-active/' + postId + '/',
+                type: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'  // Include CSRF token for security
+                },
+                success: function(response) {
+                    // Update the button's text and icon based on the new status
+                    if (response.is_active) {
+                        button.html('<i class="bi bi-toggle-on text-success"></i> Active');
+                    } else {
+                        button.html('<i class="bi bi-toggle-off text-danger"></i> Inactive');
+                    }
+                },
+                error: function(xhr) {
+                    alert('Error updating status: ' + xhr.responseText);
+                }
+            });
+        });
+    });
+</script>
 
 {% endblock %}
