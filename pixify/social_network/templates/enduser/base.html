@@ -8,8 +8,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}My Django App{% endblock %}</title>
     <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
-    <link rel="stylesheet" href="{% static 'css/bootstrap.enduser.css' %}">
-    <link rel="stylesheet" href="{% static 'css/style.enduser.style.css' %}">
+    {% comment %} <link rel="stylesheet" href="{% static 'css/bootstrap.enduser.css' %}"> {% endcomment %}
+    <link rel="stylesheet" href="{% static 'css/style.enduser.css' %}">
     <link rel="stylesheet" href="{% static 'css/toastr.min.css' %}">
     <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
     <script src="{% static 'js/script.js' %}"></script>
@@ -18,9 +18,14 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
     <script src="{% static 'js/jquery-3.7.1.min.js' %}"></script>
     <script src="{% static 'js/toastr.min.js' %}"></script>
-    <script src="{% static 'js/script.js' %}"></script>
-
-
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        })
+    });
+</script>
 
     <style>
         @media (max-width: 575px) {
@@ -184,15 +189,23 @@
                             <a class="nav-link" href="/"><i class="fa-solid fa-house"></i></a>
                         </li>
 
-                    <li class="nav-item" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Chat">
-                        <a class="nav-link active" aria-current="page" href="/chat"><i
-                                class="bi bi-messenger"></i></a>
-                    </li>
+                        <li class="nav-item" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Chat">
+                            <a class="nav-link" href="/chat/">
+                                <span
+                                    class="position-absolute top-0 start-30 translate-middle badge rounded-pill bg-danger"
+                                    style="margin-left:27px; margin-top:7px;">2+</span>
+                                <i class="bi bi-messenger"></i>
+                            </a>
+                        </li>
 
-                    <li class="nav-item" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Notification">
-                        <a class="nav-link active" aria-current="page" href="/notification"><i
-                                class="fa-solid fa-bell"></i></a>
-                    </li>
+                        <li class="nav-item" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Notification">
+                            <a class="nav-link" href="/notification/">
+                                <span
+                                    class="position-absolute top-0 start-30 translate-middle badge rounded-pill bg-danger"
+                                    style="margin-left:27px; margin-top:7px;">2+</span>
+                                    <i class="bi bi-bell-fill"></i>
+                            </a>
+                        </li>
 
                         <li class="nav-item" data-bs-toggle="tooltip" data-bs-placement="bottom" title="About">
                             <a class="nav-link" href="/aboutus/"><i class="bi bi-info-circle-fill"></i></a>
