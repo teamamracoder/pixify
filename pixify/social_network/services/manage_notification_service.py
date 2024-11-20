@@ -1,6 +1,12 @@
+from ..models import Notification
+from ..packages.get_data import GetData
 from .. import models
 from django.shortcuts import get_object_or_404
 from django.db.models import Q 
+
+
+def manage_list_notifications():
+    return Notification.objects.all()
 
 
 def manage_get_notification(notification_id):
@@ -27,12 +33,14 @@ def manage_update_notification(notification, text,receiver_id,media_url, is_read
     return notification
 
 
-def manage_list_notifications_filtered(search_query, sort_by='text'):
-    if search_query:
-        # Use Q objects to filter by first_name, last_name, or email
-        return models.Notification.objects.filter(
-            Q(text__icontains=search_query) | 
-            Q(media_url__icontains=search_query) |
-            Q(is_read__icontains=search_query)
-        ).order_by(sort_by)
-    return models.Notification.objects.all().order_by(sort_by)
+def manage_list_notifications_filtered(search_query, sorting_order, sort_by, page_number):
+    # get data
+    data = (
+        GetData(Notification)
+        .search(search_query,"text","media_url", "is_read")
+        .sort(sort_by, sorting_order)
+        .paginate(limit=3, page=page_number)
+        .execute()
+    )
+    # return data
+    return data
