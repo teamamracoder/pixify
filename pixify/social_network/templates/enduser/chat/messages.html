@@ -96,7 +96,7 @@
 
 <form id="messageForm" method="POST" action="message/create">
     {% csrf_token %}
-    <input type="hidden" id="chat_id" name="chat_id" value="6"> 
+    <input type="hidden" id="chat_id" name="chat_id" value={{chat.id}}> 
     <div id="mentionModal" class="modal">
         <div class="modal-content" id="mention-suggestions">
             <!-- Mention suggestions will be displayed here -->
