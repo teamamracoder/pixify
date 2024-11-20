@@ -116,41 +116,100 @@
                 <div class="modal-header">
                     <div class="input-group mb-3">
 
-                        <button class="btn btn-secondary" type="button" id="button-addon1" id="searchbtn">
-                            <i class="bi bi-search"></i>
-                        </button>
 
-                        <input type="text" id="searchin" class="form-control" placeholder="Search Name"
-                            aria-label="Example text with button addon" aria-describedby="button-addon1" />
-                        <div id="filled">
-                            
-                        </div>
-                        {% comment %} <script>
-                            $(document).ready(function () {
-                                $("#searchin").on('input', function () {
-                                    $.ajax({
-                                        url: '/chat/followers/api?search=' + $(this).val(),
-                                        type: 'GET',
-                                        success: function (res) {
-                                            console.log(res)
-                                            $("#filled").html(`
-                               <a href="chat/${follower.id}">${follower.first_name}</a><br/>
-                            `);
-                                        },
-                                        error: function (xhr, status, error) {
-                                            console.log(xhr)
-                                        },
-                                    });
-                                })
-                            });
-                        </script> {% endcomment %}
-                    </div>
+                        
+                       
+
+    <div class="input-wrapper">
+        <input type="text" id="searchin" class="form-control" placeholder="Search Name" aria-label="Search Name">
+    </div>
+    <button class="btn btn-outline-secondary" type="button" id="button-addon1" id="searchbtn"style="border-top-right-radius : 10px;border-bottom-right-radius : 10px;">
+        <i class="bi bi-search"></i>
+    </button>
+    <div id="filled" style="padding-top: 10px;">
+    <!-- Combined follower and following data will be inserted here -->
+    </div>
+
+   <script>
+    $(document).ready(function () {
+        let selectedItems = []; // Array to store selected item IDs
+
+        function fetchFollowersAndFollowings(searchQuery = '') {
+            $.ajax({
+                url: '/chat/followers/api?search=' + searchQuery,
+                type: 'GET',
+                success: function (res) {
+                    console.log(res); // Print the returned JSON object to the console for debugging
+                    var combinedHtml = '';
+
+                        res.followers.forEach(function (follower) {
+                        combinedHtml += `
+                            <div class="user-item" id="user-${follower.user_id}" ondblclick="toggleSelection(${follower.user_id})">
+                                <div class="user-content">
+                                    <img src="${follower.user_id__profile_photo_url}" alt="${follower.user_id__first_name}'s profile photo" class="profile-photo">
+                                    <a href="/chat/${follower.user_id}">${follower.user_id__first_name} ${follower.user_id__last_name}</a>
+                                </div>
+                            </div>
+                        `;
+                    });
+
+                        res.followings.forEach(function (following) {
+                        combinedHtml += `
+                          <div class="user-item" id="user-${following.user_id}" ondblclick="toggleSelection(${following.user_id})">
+                                <div class="user-content">
+                                    <img src="${following.user_id__profile_photo_url}" alt="${following.user_id__first_name}'s profile photo" class="profile-photo">
+                                    <a href="/chat/${following.user_id}">${following.user_id__first_name} ${following.user_id__last_name}</a>
+                                </div>
+                            </div>
+                        `;
+                    });
+
+                    $("#filled").html(combinedHtml);
+
+                // Reapply selected class to previously selected items
+                    selectedItems.forEach(function (itemId) {
+                        $(`#user-${itemId}`).addClass('selected');
+                    });
+                },
+            error: function (xhr, status, error) {
+                console.log(xhr);
+            },
+        });
+    }
+
+    // Fetch all followers and followings on page load
+    fetchFollowersAndFollowings();
+
+    // Fetch followers and followings as the user types in the search bar
+        $("#searchin").on('input', function () {
+            fetchFollowersAndFollowings($(this).val());
+        });
+
+    // Function to handle user selection on double-tap
+        window.toggleSelection = function (userId) {
+            const element = $(`#user-${userId}`);
+            element.toggleClass('selected');
+
+            if (element.hasClass('selected')) {
+            // Add to selectedItems array if selected
+                if (!selectedItems.includes(userId)) {
+                    selectedItems.push(userId);
+                }
+            } else {
+            // Remove from selectedItems array if deselected
+                selectedItems = selectedItems.filter(id => id !== userId);
+            }
+        }
+    });
+    </script>
 
                 </div>
-                </a>
+
             </div>
+            </a>
         </div>
     </div>
+</div>
 
 <script>
     const allItems = document.querySelectorAll(".item");
@@ -388,6 +447,53 @@
             font-size: 0.9rem;
         }
     }
+
+/*Message mention */
+    
+.profile-photo {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+.user-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    padding: 5px; /* Increase padding for larger touch area */
+    cursor: pointer;
+    width: 100%; /* Ensure the item spans the full width of its container */
+    box-sizing: border-box; /* Ensure padding is included in the width */
+}
+
+.user-item .user-content {
+    display: flex;
+    align-items: center;
+    flex: 1;
+}
+
+.user-item.selected {
+    background-color: #11dbf940;
+    border: 3px solid #ccc;
+    border-radius: 30px;
+    width: 370px; /* Correct syntax to ensure the item spans the full width */
+}
+
+.user-item a {
+    text-decoration: none;
+    color: inherit; /* Ensure the link inherits the color for readability */
+}
+
+#searchin {
+    height:40px;
+    width: 320px; 
+    border-radius:15px;
+    background-color : rgb(86 185 200);
+    border-top-right-radius:0px;
+    border-bottom-right-radius:0px;
+}
+
 </style>
 </div>
 {% endblock %}
