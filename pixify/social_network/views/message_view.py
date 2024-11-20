@@ -17,12 +17,15 @@ class MessageCreateView(View):
         text = request.POST.get('message')
         media_url = request.POST.get('media_url','')
         sender_id = auth_user
-        chat_id = request.POST.get('chat_id')        
-        mentions= request.POST.getlist('mentions','[]')
-        message = message_service.create_message(text, media_url, sender_id, chat_id)       
-        for user in mentions:
-            message_mention_service.create_message_mentions(message,user,auth_user)        
-        return render(request, 'enduser/message/index.html')
+        chat = chat_service.get_chat_by_id(request.POST.get('chat_id'))
+        message = message_service.create_message(text, media_url, sender_id, chat)
+        # error in mention
+        # mentions= request.POST.getlist('mentions','[]')
+        # print(len(mentions))
+        # if len(mentions)>0:    
+        #     for user in mentions:
+        #         message_mention_service.create_message_mentions(message,user,auth_user)        
+        return redirect('chat_details', chat_id=chat.id)
          
 class MessageUpdateView(View):
     def get(self,request,chat_id):
