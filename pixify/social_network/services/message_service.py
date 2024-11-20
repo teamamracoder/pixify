@@ -9,8 +9,9 @@ def create_message(text, media_url, sender_id, chat_id):
     return Message.objects.create(
         text=text,
         media_url=media_url,
-        sender_id_id=sender_id,
-        chat_id_id=chat_id
+        sender_id=sender_id,
+        chat_id=chat_id,
+        created_by=sender_id
     )
 
 def get_message_by_id(message_id):
