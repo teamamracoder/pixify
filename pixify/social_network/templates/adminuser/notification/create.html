@@ -9,12 +9,15 @@
     <div class="row justify-content-center">
         <div class="col-12 col-md-12 col-lg-12">
             <div class="card shadow-sm">
+
                 <div class="card-header text-center">
                     <h2 class="text-info">Create Notification</h2>
                 </div>
+
                 <div class="card-body">
                     <form method="post">
                         {% csrf_token %}
+
                         <div class="row">
                             <div class="form-group col-md-4 col-lg-4 col-sm-12 mb-3">
                                 {{ form.text.label_tag }}
@@ -50,19 +53,18 @@
                                 {% endif %}
                             </div>                                                                           
                         </div>
+
                         <!-- Repeat for other fields -->
                         <div class="text-start">
                             <a href="{% url 'manage_notification_list' %}" class="btn btn-sm btn-outline-secondary">Back</a>
                             <button type="submit" class="btn btn-sm btn-primary">Save</button>
                         </div>
-                    </form>
-                    
+
+                    </form>                    
                 </div>
             </div>
         </div>       
     </div>
 </div>
-
-
 
 {% endblock %}
