@@ -3,6 +3,10 @@ from django.views import View
 
 from ..services import message_service,user_service, chat_service, message_reaction_service, message_mention_service
 
+class MessageListView(View):
+    def get(self, request):
+        return render(request, 'enduser/message/index.html')  
+
 class MessageCreateView(View):
     def get(self,request,chat_id):
         chat=chat_service.get_chat_by_id(chat_id)
