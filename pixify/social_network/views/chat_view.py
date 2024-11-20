@@ -76,22 +76,22 @@ class ChatCreateView(View):
         return render(request, 'enduser/chat/chats.html',{'user':user})         
 
     def post(self,request):                
-        user=request.POST['user']
-        title = request.POST['titel','']
+        user=request.POST['user']        
         type = request.POST['type']
-        members = request.POST.getlist('membes')        
+        members = request.POST.getlist('members')        
 
-        if type == ChatType.PERSONAL.value:    
-            other_user = User.objects.get(id=members)
-            title = other_user.first_name 
-            chat_cover = other_user.profile_photo_url            
+        if type == ChatType.PERSONAL.value:            
+            title = None
+            chat_cover = None
 
-        elif type == ChatType.GROUP.value:                        
+        elif type == ChatType.GROUP.value:    
+            title = request.POST['titel','']                    
             chat_cover = request.POST.get('chat_cover', '')
     
-        chat=chat_service.create_chat(user,title, chat_cover,type)            
+        chat=chat_service.create_chat(user,title, chat_cover,type)           
+        members.append(user.id) 
         for member in members:   
-            chat_member_service.create_chat_member(chat,member)
+            chat_member_service.create_chat_member(chat,member,user)
         return redirect('chat/')         
 
 
@@ -118,15 +118,12 @@ class ChatUpdateView(View):
         return render(request, 'enduser/chat/chats.html',{'chat':chat_id})   
      
     def post(self,request,chat_id):
+        user=request.user
         chat  = chat_service.get_chat_by_id(chat_id)
-        title = request.POST['titel','']
-        members = request.POST.getlist('membes')
-        chat_cover = request.POST.get('chat_cover', '')
-        chat_service.update_chat(chat, title, chat_cover)    
-        for member in members:   
-            chat_member_service.delete_chat_member(chat_id,member)
+        title = request.POST['titel','']        
+        chat_cover = request.POST.get('chat_cover', '')                
+        chat_service.update_chat(chat, title, chat_cover, user)                  
         return redirect('chat/')
-
 
 class ChatDeleteView(View):  
     def post(self, request, chat_id):
