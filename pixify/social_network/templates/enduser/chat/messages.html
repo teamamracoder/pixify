@@ -8,10 +8,10 @@
     <div class="chat-header">
         <div class="user-info">
             {% if ChatMember.chat_id > 2 %}
-                <img src="{{ chat.photo }}" alt="Group Chat" class="profile-pic">
+                <img src="{{chat.chat_cover }}" alt="Group Chat" class="profile-pic">
                 <span class="username">{{ chat.title }}</span>
             {% else %}
-                <img src="{{ chat.photo }}" alt="Profile Picture" class="profile-pic">
+                <img src="{{ chat.chat_cover }}" alt="Profile Picture" class="profile-pic">
                 <span class="username">{{ chat.title }}</span>
             {% endif %}
         </div>
@@ -19,18 +19,19 @@
 
     <div class="chat-body">
         {% for message in messages %}
-            {% if message.sender == request.user %}
+            {% if message.sender_id == user.id %}
                 <div class="message sent">
                     <div class="message-content">
                         <div class="message-header">
-                            <img src="{{ chat.photo }}" alt="Sender Profile Pic" class="message-profile-pic">
+                            <img src="{{ chat.chat_cover }}" alt="Sender Profile Pic" class="message-profile-pic">
                             <span class="message-username">{{ message.sender.username }}</span>
                         </div>
                         <span>{{ message.text }}</span>
                     </div>
                     <div class="message-footer">
-                        <i class="bi bi-three-dots-vertical" onclick="toggleOptions({{ message.id }})"></i>
                         <span class="time">{{ message.created_at|date:"h:i" }}</span>
+                        <i class="bi bi-three-dots-vertical" onclick="toggleOptions({{ message.id }})"></i>
+                        <i class="bi bi-emoji-smile" onclick="toggleReactionPopup({{ message.id }})"></i>
                     </div>
                     <div class="options-popup" id="options-{{ message.id }}" style="display: none;">
                         <a href="#" onclick="editMessage('{{ message.id }}', '{{ message.text|escapejs }}')">Edit</a>
@@ -40,19 +41,28 @@
                         </form>
                         <a href="#" onclick="replyToMessage('{{ message.id }}', '{{ message.sender.username }}', '{{ message.text|escapejs }}')">Reply</a>
                     </div>
+                    <div class="reaction-popup" id="reaction-popup-{{ message.id }}" style="display: none;">
+                        <span onclick="addReaction('{{ message.id }}', '👍')">👍</span>
+                        <span onclick="addReaction('{{ message.id }}', '❤️')">❤️</span>
+                        <span onclick="addReaction('{{ message.id }}', '😂')">😂</span>
+                        <span onclick="addReaction('{{ message.id }}', '😮')">😮</span>
+                        <span onclick="addReaction('{{ message.id }}', '😢')">😢</span>
+                    </div>
+                    <div class="reaction-display" id="reaction-display-{{ message.id }}"></div>
                 </div>
             {% else %}
                 <div class="message received">
                     <div class="message-content">
                         <div class="message-header">
-                            <img src="{{ message.sender.profile_pic.url }}" alt="{{ message.sender.username }}'s Profile Picture" class="message-profile-pic">
+                            <img src="{{ chat.chat_cover }}" alt="{{ message.sender.username }}'s Profile Picture" class="message-profile-pic">
                             <span class="message-username">{{ message.sender.username }}</span>
                         </div>
                         <span>{{ message.text }}</span>
                     </div>
                     <div class="message-footer">
+                        <span class="time">{{ message.created_at|date:"h:i A" }}</span>
                         <i class="bi bi-three-dots-vertical" onclick="toggleOptions({{ message.id }})"></i>
-                        <span class="time">{{ message.created_at|date:"h:i" }}</span>
+                        <i class="bi bi-emoji-smile" onclick="toggleReactionPopup({{ message.id }})"></i>
                     </div>
                     <div class="options-popup" id="options-{{ message.id }}" style="display: none;">
                         <a href="#" onclick="editMessage('{{ message.id }}', '{{ message.text|escapejs }}')">Edit</a>
@@ -62,12 +72,21 @@
                         </form>
                         <a href="#" onclick="replyToMessage('{{ message.id }}', '{{ message.sender.username }}', '{{ message.text|escapejs }}')">Reply</a>
                     </div>
+                    <div class="reaction-popup" id="reaction-popup-{{ message.id }}" style="display: none;">
+                        <span onclick="addReaction('{{ message.id }}', '👍')">👍</span>
+                        <span onclick="addReaction('{{ message.id }}', '❤️')">❤️</span>
+                        <span onclick="addReaction('{{ message.id }}', '😂')">😂</span>
+                        <span onclick="addReaction('{{ message.id }}', '😮')">😮</span>
+                        <span onclick="addReaction('{{ message.id }}', '😢')">😢</span>
+                    </div>
+                    <div class="reaction-display" id="reaction-display-{{ message.id }}"></div>
                 </div>
             {% endif %}
         {% endfor %}
     </div>
 
     <div class="chat-footer">
+
         <div id="reply-preview" style="display: none;">
             <div class="reply-message">
                 <span class="close-reply" onclick="cancelReply()">✖</span>
@@ -75,21 +94,121 @@
             </div>
         </div>
 
-        <form method="POST" action="/send_message">
-            {% csrf_token %}
-            <input type="text" name="message" placeholder="Type your message here..." required>
-            <button type="submit">➤</button>
-        </form>
+<form id="messageForm" method="POST" action="message/create">
+    {% csrf_token %}
+    <input type="hidden" id="chat_id" name="chat_id" value={{chat.id}}> 
+    <div id="mentionModal" class="modal">
+        <div class="modal-content" id="mention-suggestions">
+            <!-- Mention suggestions will be displayed here -->
+        </div>
+    </div>
+    <input type="text" name="message" id="message-input" placeholder="Type your message here..." required>
+    <button type="submit">➤</button>
+</form>
     </div>
 </div>
 
 <script>
+
+$(document).ready(function () {
+    $('#message-input').on('input', function () {
+        var messageText = $(this).val();
+        var chatId = $('#chat_id').val();         
+
+        if (messageText.includes('@') && chatId) {
+            var searchQuery = messageText.split('@').pop().trim(); 
+            console.log('Search Query:', searchQuery);
+
+            $.ajax({
+                url: `/message-mention/${chatId}?search=${searchQuery}`, 
+                type: 'GET',
+                success: function (res) {
+                    console.log('Response:', res);
+
+                    if (Array.isArray(res) && res.length > 0) {
+                        displayMentions(res);
+                    } else {
+                        console.log('No members found or invalid response format');
+                        $('#mentionModal').hide(); 
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error:', error);
+                }
+            });
+        } else {
+            $('#mentionModal').hide(); 
+        }
+    });
+
+    function displayMentions(mentions) {
+        var mentionSuggestions = $('#mention-suggestions');
+        mentionSuggestions.empty(); 
+
+        mentions.forEach(function (mention) {
+            var mentionItem;
+
+            if (mention.member_id === 'all') {
+                mentionItem = `
+                    <div class="mention-item" data-member-id="${mention.member_id}">
+                        <i class="fas fa-users" style="font-size:24px; color:black"></i>
+                        @${mention.member_id__first_name} ${mention.member_id__last_name}
+                    </div>
+                `;
+            } else {
+                mentionItem = `
+                    <div class="mention-item" data-member-id="${mention.member_id}">
+                        <img src="${mention.member_id__profile_photo_url}" alt="${mention.member_id__first_name}'s profile photo" class="profile-photo">
+                        @${mention.member_id__first_name} ${mention.member_id__last_name}
+                    </div>
+                `;
+            }
+            mentionSuggestions.append(mentionItem);
+        });
+
+        $('#mentionModal').show(); 
+    }
+
+    $('#mention-suggestions').on('click', '.mention-item', function () {
+        var mentionText = $(this).text().trim();
+        var messageInput = $('#message-input');
+        var messageText = messageInput.val().trim();
+        messageText = messageText.replace(/@\w*$/, mentionText + ' ').trim();
+        messageInput.val(messageText);
+        $('#mentionModal').hide();
+    });
+
+    $(window).on('click', function (event) {
+        if ($(event.target).is('#mentionModal')) {
+            $('#mentionModal').hide(); 
+        }
+    });
+});
+
+
     function toggleOptions(messageId) {
         const popup = document.getElementById('options-' + messageId);
         popup.style.display = popup.style.display === 'none' ? 'block' : 'none';
     }
 
-    function editMessage(messageId, content) {
+    function toggleReactionPopup(messageId) {
+        const popup = document.getElementById('reaction-popup-' + messageId);
+        popup.style.display = popup.style.display === 'none' ? 'flex' : 'none';
+    }
+
+    function addReaction(messageId, reaction) {
+        const display = document.getElementById('reaction-display-' + messageId);
+        const existingReaction = [...display.children].find(child => child.textContent.includes(reaction));
+        if (existingReaction) {
+            existingReaction.textContent = `${reaction} ${parseInt(existingReaction.textContent.split(' ')[1]) + 1}`;
+        } else {
+            const newReaction = document.createElement('span');
+            newReaction.textContent = `${reaction} 1`;
+            display.appendChild(newReaction);
+        }
+        document.getElementById('reaction-popup-' + messageId).style.display = 'none';
+    }
+      function editMessage(messageId, content) {
         const messageInput = document.querySelector('input[name="message"]');
         messageInput.value = content;
         messageInput.focus();
@@ -114,7 +233,9 @@
             document.querySelectorAll('.options-popup').forEach(popup => popup.style.display = 'none');
         }
     });
+  
 </script>
+
 
 <style>
     /* Overall Chat Container */
@@ -319,5 +440,133 @@
     .chat-footer button:hover {
         background-color: #3e2b5c;
     }
+
+
+/*start Partha*/
+/* Custom styles for mention modal */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1000; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: hidden; /* Prevent scroll */
+    background-color: rgba(0, 0, 0, 0.4); /* Black with opacity */
+}
+
+.modal-content {
+    background-color: #fefefe;
+    
+    margin-top: 21%;
+    margin-left: 33%;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 250px; /* Could be more or less, depending on screen size */
+    max-height: 40%; /* Ensure the modal is not too tall */
+    overflow-y: auto; /* Enable vertical scroll if content is too tall */
+}
+
+
+
+.mention-item:hover {
+    background-color: #ddd; /* Background color on hover */
+    color: #000; /* Text color on hover */
+}
+
+.profile-photo {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+/*end Partha*/
+
+/*start A*/
+    .dropdown {
+        position: absolute;
+        background-color: #fff;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+        max-height: 150px;
+        overflow-y: auto;
+        z-index: 10;
+    }
+
+    
+.mention-item {
+    padding: 10px;
+    cursor: pointer;
+    color: #333; /* Default text color */
+}
+    .mention-item:hover {
+        background-color: #f0f0f0;
+    }
+
+    #mention-suggestions {
+        transform: translateY(-100%);
+        margin-bottom: 10px;
+    }
+    .message-footer {
+        position: relative;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 5px 10px;
+    }
+    
+    .bi-emoji-smile {
+        font-size: 20px;
+        cursor: pointer;
+        color: gray;
+    }
+    
+    .bi-emoji-smile:hover {
+        color: black;
+    }
+    
+    .reaction-popup {
+        display: flex;
+        position: absolute;
+        bottom: -40px;
+        right: 0;
+        background-color: #fff;
+        border: 1px solid #ccc;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        padding: 5px;
+        z-index: 10;
+    }
+    
+    .reaction-popup span {
+        margin: 5px;
+        cursor: pointer;
+        font-size: 18px;
+    }
+    
+    .reaction-popup span:hover {
+        transform: scale(1.2);
+        transition: 0.3s;
+    }
+    
+    .reaction-display {
+        margin-top: 5px;
+        display: flex;
+        gap: 5px;
+        font-size: 14px;
+    }
+    
+    .reaction-display span {
+        padding: 5px 8px;
+        background-color: #e0e0e0;
+        border-radius: 10px;
+        font-size: 12px;
+        display: inline-flex;
+        align-items: center;
+        font-weight: bold;
+    }
+    /*end A*/
 </style>
-{% endblock %}
+{% endblock %} add a action when i type "@" in the form 
