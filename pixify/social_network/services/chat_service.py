@@ -34,9 +34,15 @@ def get_chat_by_id(chat_id):
   
 def get_recipient_for_personal(chat_id,user):
     # check this
-    chat_member = ChatMember.objects.exclude(member_id=user.id).get(chat_id=chat_id)
-    member = chat_member.member_id 
-    return member
+    try:
+        chat_member = ChatMember.objects.exclude(member_id=user.id).get(chat_id=chat_id)
+        if chat_member:
+            member = chat_member.member_id 
+            return member
+        return False
+    except Exception as e:
+        return False
+
 
 def get_recipients_for_group(chat_id,user):
         chat_members = ChatMember.objects.filter(chat_id=chat_id).exclude(member_id=user.id)

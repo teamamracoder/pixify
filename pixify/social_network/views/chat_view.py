@@ -24,8 +24,12 @@ class ChatListView(View):
 
             if chat.type == ChatType.PERSONAL.value:
                 member = chat_service.get_recipient_for_personal(chat.id, user) 
-                title = f"{member.first_name} {member.last_name}"
-                chat_cover = member.profile_photo_url
+                if member:
+                    title = f"{member.first_name} {member.last_name}"
+                    chat_cover = member.profile_photo_url
+                else:
+                    title = ''
+                    chat_cover=''
             elif chat.type == ChatType.GROUP.value:
                 title= chat_service.get_recipients_for_group(chat.id,user)
                 if chat.title:    
