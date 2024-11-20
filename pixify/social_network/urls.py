@@ -108,6 +108,9 @@ urlpatterns = [
     path('message-reply/<int:message_id>/', views.MessageReplyCreateView.as_view(), name='message_reply'),
 
     path('posts/create/', views.UserPostCreatView.as_view()),
+    # path('posts/list/', views.UserPostListView.as_view(), name='Userposts_list'),
+    path('', views.UserPostListView.as_view(), name='Userposts_list'),
+
 ]
 
 

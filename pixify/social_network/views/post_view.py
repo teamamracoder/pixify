@@ -99,7 +99,14 @@ class AdminTogglePostActiveView(View):
         post.save()
         return JsonResponse({'is_active': post.is_active})
 
+
+
+
+# create post for enduser 
 class UserPostCreatView(View):
+    def get(self, request):
+        return render(request, 'enduser/home/index.html')
+
     def post(self, request):
         user_id = 1;
         post_Title = request.POST['postTitle']
@@ -117,26 +124,22 @@ class UserPostCreatView(View):
 
 
         services.post_service.user_post(post_Title,media_urls,user_id)
-        return redirect('home')
-
-# class UserPostCreateView(View):
-#     def get(self, request):
-#         return render(request, 'enduser/home/index.html')
-
-#     def post(self, request):
-#         post_Title = request.POST['postTitle']
-#         postFiles = request.FILES.getlist('postFiles')
-#         postFile = []
-#         for file in postFiles:
-#             postFile.append(file.name)
-#         media_urls=[]
-#         for file in postFiles:
-#             file_path=os.path.join(settings.MEDIA_ROOT,file.name)
-#             with open(file_path,'wb+') as destination:
-#                 for chunk in file.chunks():
-#                     destination.write(chunk)
-#             media_urls.append(f"{settings.MEDIA_URL}{file.name}")
+        return redirect('Userposts_list')
+        
 
 
-#         services.post_service.user_post(post_Title, media_urls)
-#         return redirect('home')
+
+
+#display post for enduser create by priya
+class UserPostListView(View):
+    def get(self, request):
+        posts = services.post_service.Postlist_posts()
+        post_dict={
+                  'posts':posts,
+                  'name':'priya',
+                }
+        return render(request, 'enduser/home/index.html', {'post_dict': post_dict})
+    
+    
+
+       

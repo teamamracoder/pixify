@@ -124,8 +124,8 @@
                   <span class="fw-bold text-light">Priya Mitra</span>
               </div>
               <div class="mb-3  ">
-                  <textarea class="form-control " name="postTitle" placeholder="What do you want to talk about?" rows="2"
-                      style="resize: none;"></textarea>
+                  <textarea class="form-control  " name="postTitle" placeholder="What do you want to talk about?" rows="2"
+                      style="resize: none;background-color: #b9b5b5"></textarea>
               </div>
 
               <div class="mb-3" >
@@ -160,7 +160,7 @@
             </div>
           </div>
           <div class="justify-content-center mx-auto mb-3">
-              <button type="submit" class="btn btn-light mx-auto b_btn px-3 d-flex">Post</button>
+              <button type="submit" class="btn text-dark bg-light mx-auto b_btn px-3 d-flex">Post</button>
           </div>
         </form>
       </div>
@@ -168,7 +168,49 @@
 </div>
 </div>
 
+{% if post_dict.posts %}
+    {% for post in post_dict.posts %}
+ <div class="container post-center pb-3 mb-3">
+    
+    <div class="post-box">
 
+    <div class="post-top" style="height: 45px;">
+        <a href="">
+            <img src="{% static 'images/IMG_20240915_213320.jpg' %}" alt="avatar" class="rounded-circle me-1 " style="width: 35px; object-fit: cover; height: 35px; " >
+        </a>
+        <div class="d-flex "style="flex-direction: column;" >
+         <h6 class="u-name"> {{ post.posted_by.first_name }} {{ post.posted_by.last_name }} <span style="font-size:14px;color:#e9e6e6c7;">Upload his profile picture</span></h6>
+         <span style="font-size:11px;margin-left: 15px;position: relative;bottom: 10px;" class="py-1">{{post.created_at}} <i class="bi bi-globe-americas p-1" style="font-size:10px"></i></span>
+        </div>
+    </div>
+
+    <div class="post-des-img">
+        <p class="px-3 pt-2" style="font-size:15px; margin: 0; margin-bottom: 5px;padding-bottom:13px;" >{{ post.title }}</p>
+        {% for media in post.media_url %}
+        <img src="{% static media %}" class="img-fluid" alt="Responsive image">
+        {% endfor %}
+    </div>
+    
+    <div>
+        <div class="d-flex align-items-center px-2 ">
+            <i class="bi bi-hand-thumbs-up pe-1"style="font-size:12px"></i> <i class="bi bi-heart  "style="font-size:12px"></i>
+            <span style="font-size:14px;color:#e9e6e6c7;" class="px-2"> Rima Das, Sribash Sarkar and <span>9</span> others</span>
+            <span style="font-size:14px;color:#e9e6e6c7;" class="ms-auto pe-2">5 comments</span>
+        </div>
+        </div>
+    <div class="post-react-det">
+        <div class="post-react">
+            <i class="fa-regular fa-heart"></i>
+            <a href="/comments"><i class="fa-regular fa-comment"></i></a>
+            <i class="fa-regular fa-bookmark"></i>
+            <i class="fa-solid fa-share-nodes"  data-bs-toggle="modal" data-bs-target="#shareModal"></i>
+
+        </div>
+       </div>
+    </div>
+</div>   
+{% endfor %}
+{% endif %}  
 
 
 <div class="py-3 mt-2 mb-5" id="homePagePostsection">
@@ -225,11 +267,11 @@
                 <div class="d-flex align-items-center mb-3" style="margin-top:10px;">
                     <img src="{% static 'images/avatar.jpg' %}" alt="User Avatar"
                         class="user-avatar me-2">
-                    <span class="fw-bold text-light">Priya Mitra is with Rima Das, Sribash Sarkar, Badhan <br>and 16 others <button class="text-white px-2 rounded" style="outline:none;border:none;"><i class="bi bi-people-fill"></i>Friends(+)<i class="bi bi-caret-down-fill"></i></button> </span>
+                    <span class="fw-bold text-light">Priya Mitra is with Rima Das, Sribash Sarkar, Badhan <br>and 16 others <button class="text-white px-2 rounded " style="outline:none;border:none;background: transparent;"><i class="bi bi-people-fill px-1"></i>Friends(+)<i class="bi bi-caret-down-fill"></i></button> </span>
                 </div>
                 <div class="mb-3  ">
-                    <textarea class="form-control " placeholder="caption..." rows="2"
-                         style="outline:none;border:none;resize: none;"></textarea>
+                    <textarea class="form-control text-dark " placeholder="caption..." rows="2"
+                         style="outline:none;border:none;resize: none;background-color:white;"></textarea>
                 </div>
 
                 <div class="mb-3 ">
@@ -493,6 +535,59 @@
             </div>
         </div>
     </div>
+
+
+
+
+{% comment %} created by priya {% endcomment %}
+{% comment %} 
+{% if post_dict.posts %}
+    {% for post in post_dict.posts %}
+ <div class="container post-center pb-3 mb-3">
+    
+    <div class="post-box">
+
+    <div class="post-top" style="height: 45px;">
+        <a href="">
+            <img src="{% static 'images/IMG_20240915_213320.jpg' %}" alt="avatar" class="rounded-circle me-1 " style="width: 35px; object-fit: cover; height: 35px; " >
+        </a>
+        <div class="d-flex "style="flex-direction: column;" >
+         <h6 class="u-name"> {{ post.posted_by.first_name }} {{ post.posted_by.last_name }} <span style="font-size:14px;color:#e9e6e6c7;">Upload his profile picture</span></h6>
+         <span style="font-size:11px;margin-left: 15px;position: relative;bottom: 10px;" class="py-1">{{post.created_at}} <i class="bi bi-globe-americas p-1" style="font-size:10px"></i></span>
+        </div>
+    </div>
+
+    <div class="post-des-img">
+        <p class="px-3 pt-2" style="font-size:15px; margin: 0; margin-bottom: 5px;padding-bottom:13px;" >{{ post.title }}</p>
+        {% for media in post.media_url %}
+        <img src="{% static media %}" class="img-fluid" alt="Responsive image">
+        {% endfor %}
+    </div>
+    
+    <div>
+        <div class="d-flex align-items-center px-2 ">
+            <i class="bi bi-hand-thumbs-up pe-1"style="font-size:12px"></i> <i class="bi bi-heart  "style="font-size:12px"></i>
+            <span style="font-size:14px;color:#e9e6e6c7;" class="px-2"> Rima Das, Sribash Sarkar and others</span>
+            <span style="font-size:14px;color:#e9e6e6c7;" class="ms-auto pe-2">5 comments</span>
+        </div>
+        </div>
+    <div class="post-react-det">
+        <div class="post-react">
+            <i class="fa-regular fa-heart"></i>
+            <a href="/comments"><i class="fa-regular fa-comment"></i></a>
+            <i class="fa-solid fa-bookmark me-2"></i>
+            <i class="fa-solid fa-share-nodes"  data-bs-toggle="modal" data-bs-target="#shareModal"></i>
+
+        </div>
+       </div>
+    </div>
+</div>   
+{% endfor %}
+{% endif %}  
+ {% endcomment %}
+
+
+
 
  </div>
  <script src="{% static 'js/sribash.js' %}"></script>
