@@ -8,22 +8,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}My Django App{% endblock %}</title>
     <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
-    <!-- <link rel="stylesheet" href="{% static 'css/bootstrap.enduser.css' %}"> -->
-    <link rel="stylesheet" href="{% static 'css/style.enduser.style.css' %}">
+    {% comment %} <link rel="stylesheet" href="{% static 'css/bootstrap.enduser.css' %}"> {% endcomment %}
+    <link rel="stylesheet" href="{% static 'css/style.enduser.css' %}">
+    <link rel="stylesheet" href="{% static 'css/toastr.min.css' %}">
     <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
-
+    <script src="{% static 'js/script.js' %}"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
+    <script src="{% static 'js/jquery-3.7.1.min.js' %}"></script>
+    <script src="{% static 'js/toastr.min.js' %}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        })
+    });
+</script>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-                return new bootstrap.Tooltip(tooltipTriggerEl)
-            })
-        });
-    </script>
     <style>
         @media (max-width: 575px) {
             .left-sidebar,.right-sidebar,.center-bodycontent {
@@ -52,7 +55,7 @@
             }
           }
           @media (min-width: 1400px) {
-            .body-container{
+            #body-container{
                 padding-left: 7rem !important;
                 padding-right: 7rem !important;
             }
@@ -170,7 +173,6 @@
                             </span>
                             <input type="text" class="form-control" placeholder="Search" />
                         </div>
-                        {% comment %} <input class="form-control " type="text" placeholder="Search" /> {% endcomment %}
                     </form>
                 </div>
                 <!-- Right side: Profile Image -->
@@ -200,13 +202,13 @@
                             <a class="nav-link" href="/notification/">
                                 <span
                                     class="position-absolute top-0 start-30 translate-middle badge rounded-pill bg-danger"
-                                    style="margin-left:27px; margin-top:7px;">1+</span>
-                                <i class="fa-solid fa-bell"></i>
+                                    style="margin-left:27px; margin-top:7px;">2+</span>
+                                    <i class="bi bi-bell-fill"></i>
                             </a>
                         </li>
 
                         <li class="nav-item" data-bs-toggle="tooltip" data-bs-placement="bottom" title="About">
-                            <a class="nav-link" href="/aboutus/"><i class="fa-solid fa-circle-info"></i></a>
+                            <a class="nav-link" href="/aboutus/"><i class="bi bi-info-circle-fill"></i></a>
                         </li>
 
                         <li class="nav-item" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Call">
@@ -230,17 +232,7 @@
                                             </div>
                                         </a>
                                     </div>
-                                    {% comment %} <div class="message-content py-2" style="border-bottom: 1.5px solid #975fec;">
-                                        <div class="ps-2 message" style="font-size: 16px;">Account</div>
-                                        <ul class="" style="padding-left: 0px;">
-                                            <li class="pb-2"><a href="/profile"><i class="fa-solid fa-user me-2"></i>user</a></li>
-                                            <li class="pb-2"><a href="#"><i class="fa-solid fa-user-group me-2"></i>friends</a></li>
-                                            <li class="pb-2"><a href="#"><i class="fa-solid fa-clock me-2"></i>memories</a></li>
-                                            <li class="pb-2"><a href="#"><i class="fa-solid fa-bookmark me-2"></i>save</a></li>
-                                            <li class="pb-2"><a href="#"><i class="fa-solid fa-people-group me-2"></i>group</a></li>
-                                            <li class="pb-2"><a href="#"><i class="fa-solid fa-signs-post me-2"></i>post</a></li>
-                                        </ul>
-                                    </div> {% endcomment %}
+
                                     <div class="message-content py-2" style="border-bottom: 1.5px solid #975fec;">
                                         <div class="ps-2 py-2 message;" style="font-size: 16px;"><a href="/profile" style="color:white;text-decoration: none;corsor:pointer"><i class="fa-solid fa-user-group me-2"></i>Friends</a></div>
                                         <div class="ps-2 py-2 message;" style="font-size: 16px;"><a href="/profile" style="color:white;text-decoration: none;corsor:pointer"><i class="fa-solid fa-clock me-2"></i>Memories</a></div>
@@ -262,9 +254,7 @@
                                         </a>
                                     </div>
                                 </div>
-                                {% comment %} <a class="dropdown-item" href="/profile">Profile</a>
-                                <a class="dropdown-item" href="/settings">Settings</a>
-                                <a class="dropdown-item" href="/logout">Logout</a> {% endcomment %}
+
                             </div>
                         </li>
                     </ul>
@@ -274,94 +264,15 @@
             </div>
         </nav>
 
-
-        {% comment %} <main class="container-fluid mt-2 " style="min-height: 600px; margin-top: 60px !important;display:none;" id="phoneScreenContent">
-            <div class="row body-container">
-                <div class="col-sm-2 col-md-3 col-lg-3 col-xl-3 left-sidebar">
-                    <div class="px-1 py-3 mt-3"
-                        style="background-color: #1f0447e3;box-shadow: 0 4px 8px rgba(151, 95, 236, 0.5);font-family: serif;border-radius: 7px;">
-                        <div class="left-sideber">
-                            <div class="left-siteber-opt">
-                                <ul class="left-siteber-opt-ul" style="display: flex;flex-direction: column;align-items: center;padding-left: 0;">
-                                    <li class="pb-3"><a href="/profile"><i class="fa-solid fa-user me-2"></i></a></li>
-                                    <li class="pb-3"><a href="#"><i class="fa-solid fa-user-group me-2"></i></a></li>
-                                    <li class="pb-3"><a href="#"><i class="fa-solid fa-clock me-2"></i></a></li>
-                                    <li class="pb-3"><a href="#"><i class="fa-solid fa-bookmark me-2"></i></a></li>
-                                    <li class="pb-3"><a href="#"><i class="fa-solid fa-people-group me-2"></i></a></li>
-                                    <li class="pb-3"><a href="#"><i class="fa-solid fa-signs-post me-2"></i></a></li>
-                                </ul>
-                            </div>
-                            <hr>
-
-
-                            <div class="">
-                                <ul class="d-flex flex-wrap flex-sm-row flex-column justify-content-center list-unstyled mb-0 align-items-center">
-                                    <li class="pb-3"><a href="#" class="text-decoration-none">Privacy</a></li>
-                                    <li class="pb-3"><a href="#" class="text-decoration-none">choice</a></li>
-                                    <li class="pb-3"><a href="#" class="text-decoration-none">Terms</a></li>
-                                    <li class="pb-3"><a href="#" style="text-decoration: none;">Cookies</a></li>
-                                    <li class="pb-3"><a href="/admin" style="text-decoration: none;">Admin</a></li>
-                                    <li class="pb-3"><a href="#" style="text-decoration: none;">more..</a></li>
-                                </ul>
-                            </div>
-
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-sm-10 col-md-6 col-lg-6 col-xl-6 pe-3 center-bodycontent">
-                    {% block content %}
-
-                    {% endblock %}
-
-                    <div class="px-3 py-3 mt-5"
-                        style="background-color: #1f0447e3;box-shadow: 0 4px 8px rgba(151, 95, 236, 0.5);    font-family: serif;border-radius: 7px;">
-                        <div class="pb-1 pt-1" style=" border-bottom: 1.5px solid #975fec;">
-                            <div class="d-flex">
-                                <h5 class="text-center text-white">Friend request</h5>
-                                <span class="text-center text-align-center ms-auto fw-semibold"
-                                    style="color: rgb(0, 255, 242);cursor: pointer;    font-size: 14px;">See
-                                    All</span>
-                            </div>
-                            <p class="ps-2" style="color: #975fec;margin-bottom: 10px;">No request</p>
-                        </div>
-                        <div class="pb-1 pt-2 mt-3" style=" border-bottom: 1.5px solid #975fec;">
-                            <div class="d-flex">
-                                <h5 class="text-center text-white">Birthdays</h5>
-                                <span class="text-center text-align-center ms-auto fw-semibold"
-                                    style="color: rgb(0, 255, 242);cursor: pointer;    font-size: 14px;">See
-                                    All</span>
-                            </div>
-                            <p class="ps-2" style="color: #975fec;margin-bottom: 10px;">No Birthday</p>
-                        </div>
-                        <div class="pb-1 pt-2 mt-3" style=" border-bottom: 1.5px solid #975fec;">
-                            <div class="d-flex">
-                                <h5 class="text-center text-white">Contacts</h5>
-                                <span class="text-center text-align-center ms-auto fw-semibold"
-                                    style="color: rgb(0, 255, 242);cursor: pointer;    font-size: 14px;">See
-                                    All</span>
-                            </div>
-                            <p class="ps-2" style="color: #975fec;margin-bottom: 10px;">No contacts</p>
-                        </div>
-                    </div>
-                </div>
-
-
-            </div>
-
-        </main> {% endcomment %}
-
-
-
     <main class="container-fluid mt-2 " style="min-height: 600px; margin-top: 60px !important;">
-        <div class="row px-5 body-container">
+        <div class="row px-5 body-container" id="body-container">
             <div class="col-12 col-sm-12 col-md-3 col-lg-3 col-xl-3 ps-5 pe-3 left-sidebar" id="leftSidebar">
                 <div class="px-3 py-3 mt-3"
                     style="background-color: #1f0447e3;box-shadow: 0 4px 8px rgba(151, 95, 236, 0.5);font-family: serif;border-radius: 7px;">
                     <div class="left-sideber">
                         <div class="left-siteber-opt">
                             <ul class="left-siteber-opt-ul" style="padding-left: 0px;">
-                                <li class="pb-2"><a href="/profile"><i class="fa-solid fa-user me-2"></i>user</a></li>
+                                <li class="pb-2"><a href="/profile"><i class="fa-solid fa-user me-2"></i>Subhasis</a></li>
                                 <li class="pb-2"><a href="#"><i class="fa-solid fa-user-group me-2"></i>friends</a></li>
                                 <li class="pb-2"><a href="#"><i class="fa-solid fa-clock me-2"></i>memories</a></li>
                                 <li class="pb-2"><a href="#"><i class="fa-solid fa-bookmark me-2"></i>save</a></li>
@@ -403,27 +314,27 @@
                     <div class="pb-1 pt-1" style=" border-bottom: 1.5px solid #975fec;">
                         <div class="d-flex">
                             <h5 class="text-center text-white">Friend request</h5>
-                            <span class="text-center text-align-center ms-auto fw-semibold"
-                                style="color: rgb(0, 255, 242);cursor: pointer;    font-size: 14px;">See
-                                All</span>
+                            <a href="/friendrequest" class="text-center text-align-center ms-auto fw-semibold"
+                                style="color: rgb(0, 255, 242);cursor: pointer; font-size: 14px;text-decoration:none;">See
+                                All</a>
                         </div>
                         <p class="ps-2" style="color: #975fec;margin-bottom: 10px;">No request</p>
                     </div>
                     <div class="pb-1 pt-2 mt-3" style=" border-bottom: 1.5px solid #975fec;">
                         <div class="d-flex">
                             <h5 class="text-center text-white">Birthdays</h5>
-                            <span class="text-center text-align-center ms-auto fw-semibold"
-                                style="color: rgb(0, 255, 242);cursor: pointer;    font-size: 14px;">See
-                                All</span>
+                            <a href="/birthday" class="text-center text-align-center ms-auto fw-semibold"
+                                style="color: rgb(0, 255, 242);cursor: pointer;font-size: 14px;text-decoration:none;">See
+                                All</a>
                         </div>
                         <p class="ps-2" style="color: #975fec;margin-bottom: 10px;">No Birthday</p>
                     </div>
                     <div class="pb-1 pt-2 mt-3" style=" border-bottom: 1.5px solid #975fec;">
                         <div class="d-flex">
                             <h5 class="text-center text-white">Contacts</h5>
-                            <span class="text-center text-align-center ms-auto fw-semibold"
-                                style="color: rgb(0, 255, 242);cursor: pointer;    font-size: 14px;">See
-                                All</span>
+                            <a href="#" class="text-center text-align-center ms-auto fw-semibold"
+                                style="color: rgb(0, 255, 242);cursor: pointer;font-size: 14px;text-decoration:none;">See
+                                All</a>
                         </div>
                         <p class="ps-2" style="color: #975fec;margin-bottom: 10px;">No contacts</p>
                     </div>
@@ -434,18 +345,38 @@
 
     </main>
 
-
-
-
-    {% comment %} <footer class="px-5" style="position: absolute; bottom: 0; width: 100%;">
+    <!-- <footer class="px-5" style="position: absolute; bottom: 0; width: 100%;">
         <p class="text-center pt-3 mx-5" style="border-top: 1.5px solid #975fec;">&copy; 2024 Pixify App</p>
-    </footer> {% endcomment %}
-    {% comment %} <footer class="px-5 mt-5" style="position: sticky;width: 100%; background-color:  rgba(33, 16, 49, 0.815);">
-        <p class="text-center pt-3 pb-3 mb-0">&copy; 2024 Pixify App</p>
-    </footer> {% endcomment %}
-    <script src="{% static 'js/script.js' %}"></script>
+    </footer> -->
 </body>
-<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script type="text/javascript">
+    const show_toastr = (message, type) => {
+        // check if message is null or empty string
+        if (!message) return;
+
+        // show toast message based on type
+        switch (type) {
+            case 'info':
+                toastr.info(message);
+                break;
+            case 'warning':
+                toastr.warning(message);
+                break;
+            case 'success':
+                toastr.success(message);
+                break;
+            case 'error':
+                toastr.error(message);
+                break;
+            default:
+                break;
+        }
+    }
+
+    // call show toast message
+    show_toastr("{{ message|escapejs }}", "{{ message_type|escapejs }}");
+
+</script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
 
 </html>

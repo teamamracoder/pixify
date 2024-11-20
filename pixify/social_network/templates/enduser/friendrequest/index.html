@@ -1,6 +1,6 @@
 
 
-{% extends "enduser/base.html" %} 
+{% extends "enduser/base.html" %}
 
 {% block title %}Pixify-Message{% endblock %}
 
@@ -9,23 +9,23 @@
 {% load static %}
 <div class="px-3 py-3 mt-3" style="background-color: #1f0447e3; box-shadow: 0 4px 8px rgba(151, 95, 236, 0.5);font-family: serif;border-radius: 7px;" >
 
- 
-
-    
-    <div class="card mb-sm-3 mb-md-0 contacts_card" style="background-color: #1f0447e3; height:560px;">
 
 
 
-    <div class="p-2 card-header">
-            <div class="input-group">
+    <div class="card mb-sm-3 mb-md-0 contacts_card" style="background-color: #1f0447e3; ">
+
+
+
+        <div class="p-2 card-header">
+            <div class="input-group px-5">
                 <input type="text" placeholder="Search..." name="" class="form-control search-inp" >
                 <div class="input-group-prepend">
                     <span class="input-group-text search_btn"><i class="fas fa-search"></i></span>
                 </div>
             </div>
-        </div>
-       
-        <div class="card-body contacts_body " > 
+    </div>
+
+    <div class="card-body contacts_body " >
 
             <ul class="request">
                 <li>
@@ -35,27 +35,51 @@
                             <span class="online_icon"></span>
                         </div>
                         <div class="user_info">
-                            <span>Priya</span>
+                            <span>Priya Mitra</span>
                             <p>Priya is online</p>
                             <div id="req-btn">
-                            <button type="button" class="btn bg-info">Confirm</button>
-                            <button type="button" class="btn btn-secondary">Delete</button>
+                            {% comment %} <button type="button" class="btn bg-info">Confirm</button>
+                            <button type="button" class="btn btn-secondary">Delete</button> {% endcomment %}
+                            <div class="col-auto col-sm-auto d-flex" style="gap:10px">
+                                <button type="button" class="prof-btn btn btn-primary px-4" style="font-size:14px ;">Confirm</button>
+                                <button type="button" class="btn btn-primary prof-btn px-4" style="font-size:14px;">Delete</button>
+                            </div>
+                           </div>
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <div class="d-flex bd-highlight">
+                        <div class="img_cont">
+                            <img src="{% static 'images/logo1.jpg' %}" class="rounded-circle user_img" >
+                            <span class="online_icon"></span>
+                        </div>
+                        <div class="user_info">
+                            <span>Subhasis Barman</span>
+                            <p>Priya is online</p>
+                            <div id="req-btn">
+                            {% comment %} <button type="button" class="btn bg-info">Confirm</button>
+                            <button type="button" class="btn btn-secondary">Delete</button> {% endcomment %}
+                            <div class="col-auto col-sm-auto d-flex" style="gap:10px">
+                                <button type="button" class="prof-btn btn btn-primary px-4" style="font-size:14px ;">Confirm</button>
+                                <button type="button" class="btn btn-primary prof-btn px-4" style="font-size:14px;">Delete</button>
+                            </div>
                            </div>
                         </div>
                     </div>
                 </li>
 
-               
+
 
 
 
             </ul>
 
-       </div> 
+       </div>
 
 
-</div>
-   
+   </div>
+
 
 </div>
 
@@ -66,4 +90,4 @@
 
 
 
-   
+

@@ -4,12 +4,72 @@
 
 {% block content %}
 
-<h1>Post Details</h1>
-<p>Title: {{ post.title }}</p>
-<p>Description: {{ post.description }}</p>
+<h1 class="text-center">Post Details</h1>
 
-<a href="{% url 'post_update' post.id %}">Edit</a> |
-<a href="{% url 'post_delete' post.id %}">Delete</a> |
-<a href="{% url 'post_list' %}">Back to Post List</a>
+
+<div class="row">
+    <div class="col-md-4 ">
+        <div class="card shadow p-3 mb-5 bg-body-tertiary rounded-4">
+            <div class="card-body ">
+                <div class="position-relative">
+                    <img src="https://png.pngtree.com/png-clipart/20230927/original/pngtree-man-avatar-image-for-profile-png-image_13001877.png" class="rounded-circle img-fluid" style="width: 150px;" />
+                    <h3 class="mb-3">{{ user.first_name }} {{ user.middle_name }} {{ user.last_name }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+<div class="col-md-8">
+    <div class="card shadow p-3 mb-3 bg-body-tertiary rounded-4">
+        <h5>Activity Feed</h5>
+        <div class="row">
+            <!-- <a href="https://www.timeanddate.com/calendar/">14Nov2024</a> -->
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item">
+                    <div class="row">
+                        <div class="col-6">Post id</div>
+                        <div class="col-6">{{ post.id }}</div>
+                    </div>
+                </li>
+
+                <li class="list-group-item">
+                    <div class="row">
+                        <div class="col-6">Post title</div>
+                        <div class="col-6">{{post.title}}</div>
+                    </div>
+                </li>
+
+                <li class="list-group-item">
+                    <div class="row">
+                        <div class="col-6">post Description</div>
+                        <div class="col-6">{{post.description}}</div>
+                    </div>
+                </li>
+
+                <!-- <li class="list-group-item">
+                    <div class="row">
+                        <div class="col-6">item 1</div>
+                        <div class="col-6">value 1</div>
+                    </div>
+                </li>
+
+                <li class="list-group-item">A second item</li>
+                <li class="list-group-item">A third item</li>
+                <li class="list-group-item">A fourth item</li>
+                <li class="list-group-item">And a fifth one</li>
+            </ul> -->
+        </div>
+        <div class="text-start">
+            <a href="{% url 'post_list' %}" class="btn btn-sm btn-outline-secondary">Back</a>
+            <a href="{% url 'post_update' post.id %}" class="btn btn-sm btn-primary">Edit</a>
+        </div>
+    </div>
+</div>
+
+<!-- <div class="text-start">
+    <a href="{% url 'post_list' %}" class="btn btn-sm btn-outline-secondary">Back</a>
+    <a href="{% url 'post_update' post.id %}" class="btn btn-sm btn-primary">Edit</a>
+</div> -->
 
 {% endblock %}

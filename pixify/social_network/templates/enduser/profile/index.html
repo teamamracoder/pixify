@@ -6,7 +6,7 @@
 
 <div class="px-3 py-3 mt-3  users"
         style="background-color: #1f0447e3;box-shadow: 0 4px 8px rgba(151, 95, 236, 0.5);font-family: serif;border-radius: 7px;">
-        <div class="row profile mx-2 pt-1 pb-3 px-2 mb-2 fw-semibold "
+        <div class="row loginuserprofile mx-2 pt-1 pb-3 px-2 mb-2 fw-semibold "
             style="border: 1px solid black;border-radius: 3px;">
             <div id="p-pic" class="col-md-4 col-lg-5 col-xl-5 col-xxl-5" id="item-1">
                 <img class="img-fluid" src="{% static 'images/avatar.jpg' %}" alt="">
@@ -26,11 +26,7 @@
                     <li class="pb-2"><a href="#" class="text-white"><i class="bi bi-bell"></i> Notifications <span
                                 class="text-t fw-medium">(5)</span></a></li>
                 </ul>
-                {% comment %} <div class="row" style="display:flex; gap:10px">
-                    <button type="button" class="prof-btn btn btn-primary" style="font-size:14px ;">EDIT</button>
-                    <button type="button" class="btn btn-primary prof-btn"
-                        style="font-size:14px ;">CHANGE PASSWORD</button>
-                </div> {% endcomment %}
+
                 <div class="col-auto col-sm-auto d-flex" style="gap:10px">
                     <button type="button" class="prof-btn btn btn-primary" style="font-size:14px ;">EDIT</button>
                     <button type="button" class="btn btn-primary prof-btn" style="font-size:14px;">CHANGE PASSWORD</button>
@@ -48,8 +44,8 @@
                     <span class="text-center text-align-center ms-auto fw-semibold"
                     style="color: rgb(0, 255, 242);cursor: pointer;    font-size: 14px;">See
                     All</span>
-                   
-              
+
+
                 </div>
               </div>
             <div>
@@ -78,19 +74,19 @@
             <div style="width: 100%; display:flex;justify-content:center;">
             <span class="text-center justify-content-center p-2 " style="font-size:25px; border-bottom: 2px solid rgba(172, 57, 147, 0.973);">Memories</span>
             </div>
-        
+
             <div  class="m-2">
               <div class="p-3 fnd-pic d-flex  justify-content-around" >
                   <span>Saved</span>
                   <span class="text-center text-align-center ms-auto fw-semibold"
                   style="color: rgb(0, 255, 242);cursor: pointer;    font-size: 14px;">See
                   All</span>
-                 
-          
+
+
               </div>
           </div>
-            <div class="row profile mx-2   pt-1 pb-3 px-2 mb-2 fw-semibold" >
-        
+            <div class="row loginuserprofile mx-2   pt-1 pb-3 px-2 mb-2 fw-semibold" >
+
             <div class="container text-center p-2" class="memory" >
                 <div class="row">
                   <div class="col">
@@ -104,9 +100,9 @@
                   </div>
                 </div>
               </div>
-        
-        
-        
+
+
+
           <div class="container text-center p-2" class="memory">
             <div class="row">
               <div class="col">
@@ -122,27 +118,27 @@
           </div>
         </div>
         </div>
-          
-        
+
+
 
 
 
         <div class="galary justify-content-center "id="item-4" >
-            <div style="width: 100%; display:flex;justify-content:center;"> 
-              <span class="text-center p-2 " style="font-size:25px; border-bottom: 2px solid #ac3993f8;">Saved <i class="fa-solid fa-bookmark" style="font-size:18px;"></i> </span>
+            <div style="width: 100%; display:flex;justify-content:center;">
+              <span class="text-center p-2 " style="font-size:25px; border-bottom: 2px solid #ac3993f8;">Saved  </span>
             </div>
-          
+
             <div  class="m-2">
               <div class="p-3 fnd-pic d-flex  justify-content-around" >
                   <span >Saved</span>
                   <span class="text-center text-align-center ms-auto fw-semibold"
                   style="color: rgb(0, 255, 242);cursor: pointer;    font-size: 14px;">See
                   All</span>
-                 
-          
+
+
               </div>
           </div>
-            <div class="row profile mx-2   pt-1 pb-3 px-2 mb-2 fw-semibold" >
+            <div class="row loginuserprofile mx-2   pt-1 pb-3 px-2 mb-2 fw-semibold" >
               <div class="container text-center p-2" class="memory" >
                   <div class="row">
                     <div class="col">
@@ -156,9 +152,9 @@
                     </div>
                   </div>
                 </div>
-          
-          
-          
+
+
+
             <div class="container text-center p-2" class="memory">
               <div class="row">
                 <div class="col">
@@ -174,11 +170,11 @@
             </div>
           </div>
           </div>
-          
-          
-          
-          
-          
+
+
+
+
+
               <div>
                   <div style=" display:flex;justify-content:center;" id="item-5">
                       <span class="text-center p-2 " style="font-size:25px; border-bottom: 2px solid rgba(172, 57, 147, 0.973); ">Groups</span>
@@ -189,8 +185,8 @@
                         <span class="text-center text-align-center ms-auto fw-semibold"
                         style="color: rgb(0, 255, 242);cursor: pointer;    font-size: 14px;">See
                         All</span>
-                       
-                
+
+
                     </div>
                 </div>
                   <div >
@@ -202,7 +198,7 @@
                                   </a>
                               </div>
                       </div>
-                      <div style="border: 1px solid black;border-radius: 3px;" class="m-2" >  
+                      <div style="border: 1px solid black;border-radius: 3px;" class="m-2" >
                           <div class="p-3 fnd-pic" >
                               <a href="#" style="text-decoration: none; display:flex; align-items:center; gap:20px ">
                                   <img src="{% static 'images/avatar.jpg' %}" class="img-fluid" alt="" style="height:40px;   border-radius:50%;">
@@ -210,7 +206,7 @@
                               </a>
                           </div>
                       </div>
-                      <div style="border: 1px solid black;border-radius: 3px;" class="m-2" >  
+                      <div style="border: 1px solid black;border-radius: 3px;" class="m-2" >
                         <div class="p-3 fnd-pic" >
                             <a href="#" style="text-decoration: none; display:flex; align-items:center; gap:20px ">
                                 <img src="{% static 'images/avatar.jpg' %} " class="img-fluid" alt="" style="height:40px;   border-radius:50%;">
@@ -218,7 +214,7 @@
                             </a>
                         </div>
                     </div>
-                    <div style="border: 1px solid black;border-radius: 3px;" class="m-2" >  
+                    <div style="border: 1px solid black;border-radius: 3px;" class="m-2" >
                       <div class="p-3 fnd-pic" >
                           <a href="#" style="text-decoration: none; display:flex; align-items:center; gap:20px ">
                               <img src="{% static 'images/avatar.jpg' %} " class="img-fluid" alt="" style="height:40px;   border-radius:50%;">
@@ -227,10 +223,10 @@
                       </div>
                   </div>
              </div>
-          
+
           </div>
-          
-          
+
+
 
 
 
