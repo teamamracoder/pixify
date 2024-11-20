@@ -54,7 +54,7 @@ class GetData:
             for field in fields:
                 query |= Q(**{f"{field}__icontains": search_text})
             self.queryset = self.queryset.filter(query)
-            self.applied_options["search"] = {"text": search_text, "fields": fields}
+            self.applied_options["search"] = {"text": search_text, "fields": list(fields)}
         return self
 
     def sort(self, sort_by: Optional[str] = None, order: str = SortingOrder.ASC.value) -> "GetData":
@@ -109,6 +109,9 @@ class GetData:
             "total": paginator.count,
             "total_page": paginator.num_pages,
             "current_page": self.page_obj.number,
+            "prev_page": (
+                self.page_obj.previous_page_number() if self.page_obj.has_previous() else None
+            ),
             "next_page": (
                 self.page_obj.next_page_number() if self.page_obj.has_next() else None
             ),

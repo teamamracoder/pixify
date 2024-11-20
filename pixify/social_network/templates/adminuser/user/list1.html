@@ -21,10 +21,10 @@
 
             <div class="d-flex justify-content-between mb-3">
                 <button class="btn btn-primary btn-sm"><a href="{% url 'user_create' %}" class="text-white text-decoration-none">Add User</a></button>
-              
+               
                 <form method="get" action="{% url 'user_list' %}">
                     <div class="input-group" style="max-width: 300px;">
-                        <input type="text" class="form-control border-secondary" placeholder="Search" aria-label="Search" name="search" value="{{ data.applied_options.search.text }}">
+                        <input type="text" class="form-control border-secondary" placeholder="Search" aria-label="Search" name="search" value="{{ search_query }}">
                         <button class="btn btn-outline-secondary">Search</button>
                     </div>
                 </form>
@@ -36,13 +36,13 @@
                     <thead class="table-info text-white"> 
                         <tr>
                             <th>
-                                <a href="?sort_by=first_name&sort_order={% if data.applied_options.sort.order == 'asc' %}desc{% else %}asc{% endif %}">Full Name</a>
+                                <a href="?sort_by=first_name&sort_order={% if sort_order == 'asc' %}desc{% else %}asc{% endif %}">Full Name</a>
                             </th>
                             <th>
-                                <a href="?sort_by=email&sort_order={% if data.applied_options.sort.order == 'asc' %}desc{% else %}asc{% endif %}">Email</a>
+                                <a href="?sort_by=email&sort_order={% if sort_order == 'asc' %}desc{% else %}asc{% endif %}">Email</a>
                             </th>
                             <th>
-                                <a href="?sort_by=gender&sort_order={% if data.applied_options.sort.order == 'asc' %}desc{% else %}asc{% endif %}">Gender</a>
+                                <a href="?sort_by=gender&sort_order={% if sort_order == 'asc' %}desc{% else %}asc{% endif %}">Gender</a>
                             </th>
                             <th>
                                 Status
@@ -51,7 +51,7 @@
                     </thead>
                     
                     <tbody>
-                        {% for user in data.data %}
+                        {% for user in users %}
                         <tr>
                             <td>
                                 <a class="text-decoration-none text-primary hover-bg" href="{% url 'user_detail' user.id %}">
@@ -85,7 +85,7 @@
 
 
                 <!-- new added by sujit -->
-                <!-- <div class="container">
+                <div class="container">
                     <div class="d-flex justify-content-between align-items-center">
                         <div class="step-links">
                             {% if users.has_previous %}
@@ -103,7 +103,7 @@
                             Page {{ users.number }} of {{ users.paginator.num_pages }}.
                         </div>
                     </div>
-                </div> -->
+                </div>
                 
                 
             </div>
