@@ -36,6 +36,11 @@ def get_recipient_for_personal(chat_id,user):
     member = chat_member.member_id 
     return member
 
+def get_recipients_for_group(chat_id,user):
+        chat_members = ChatMember.objects.filter(chat_id=chat_id).exclude(member_id=user.id)
+        first_names = [chat_member.member_id.first_name for chat_member in chat_members]
+        return " , ".join(first_names)
+
 def get_all_user_follow(user):
     followers = Follower.objects.filter(follower=user, is_active=True).select_related('following')
     followings = Follower.objects.filter(following=user, is_active=True).select_related('follower')
@@ -44,13 +49,17 @@ def get_all_user_follow(user):
 def get_all_mentions_by_chat_id(chat,user):     
      return ChatMember.objects.fillter(chat_id=chat).exclude(member_id=user).selct_related('member')
 
-def list_chats_api(request, user):
-    search_query = request.GET.get('search', '')
+def list_chats_api(request,chat_data_list): 
+    search_query =request.GET.get('search', '')  
     if search_query:
-        chats = Chat.objects.filter(members=user, title__icontains=search_query).values()
+        filtered_chats = [
+            chat for chat in chat_data_list 
+            if search_query.lower() in chat['title'].lower()
+        ]
     else:
-        chats = Chat.objects.filter(members=user).values()
-    return chats
+        filtered_chats = chat_data_list
+    return filtered_chats
+
   
 def list_followers_api(request, user):
     search_query = request.GET.get('search', '')

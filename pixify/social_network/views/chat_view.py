@@ -12,7 +12,9 @@ class ChatListView(View):
         chats = chat_service.list_chats_by_user(user)
         followers, followings = chat_service.get_all_user_follow(user)
         chat_data = []
-
+        if not chats:
+            no_chat_message="No chats available"
+            return render(request, 'enduser/chat/chats.html',no_chat_message)
         for chat in chats:
             unread_messages = message_service.unread_count(chat, user)
             unread_messages_display = '' if unread_messages == 0 else '10+' if unread_messages > 10 else str(unread_messages)
@@ -21,15 +23,15 @@ class ChatListView(View):
                 chat.latest_message = ''
 
             if chat.type == ChatType.PERSONAL.value:
-                member = chat_service.get_recipient_for_personal(chat.id, user) # check this function again
+                member = chat_service.get_recipient_for_personal(chat.id, user) 
                 title = f"{member.first_name} {member.last_name}"
                 chat_cover = member.profile_photo_url
-            else:
+            elif chat.type == ChatType.GROUP.value:
+                title= chat_service.get_recipients_for_group(chat.id,user)
                 if chat.title:    
                     title = chat.title 
                 else:
-                    title="unknown group"
-                          # if no title available thaen show all users as a simple list in the title position
+                    title=title 
                 chat_cover = chat.chat_cover  
                 
             latest_message_timestamp = self.format_timestamp(chat.latest_message_timestamp)
@@ -65,7 +67,7 @@ class ChatListView(View):
         now = timezone.now()
         diff = now - timestamp
         if diff.days == 0:
-            return timestamp.strftime('%H:%M')
+            return timestamp.strftime('%I:%M %p')
         elif diff.days == 1:
             return 'Yesterday'
         elif diff.days < 7:
@@ -103,17 +105,18 @@ class ChatDetailsView(View):
     def get(self, request, chat_id):
         user = request.user 
         chat = chat_service.get_chat_by_id(chat_id)
-        
-        ## need to implement
         messages = message_service.list_messages_by_chat_id(chat_id)
-        # if chat.type == ChatType.PERSONAL.value:
-        #     member = chat_service.get_recipient_for_personal(chat.id, user)
-        #     chat.title = f"{member.first_name} {member.last_name}"
-        #     chat.chat_cover = member.profile_photo_url
-        # else:
-        
-        chat.title = chat.title             # if no title available thaen show all users as a simple list in the title position
-        chat.chat_cover = chat.chat_cover  
+        if chat.type == ChatType.PERSONAL.value:
+            member = chat_service.get_recipient_for_personal(chat.id, user)
+            chat.title = f"{member.first_name} {member.last_name}"
+            chat.chat_cover = member.profile_photo_url
+        elif chat.type == ChatType.GROUP.value:
+            title= chat_service.get_recipients_for_group(chat.id,user)
+            if chat.title:    
+                chat.title = chat.title 
+            else:
+                chat.title=title 
+            chat.chat_cover = chat.chat_cover   
                 
         return render(request, 'enduser/chat/messages.html',{'chat':chat,'messages':messages})
     
@@ -139,9 +142,38 @@ class ChatDeleteView(View):
         return redirect('chat_list')
 
 class ChatListViewApi(View):
-   def get(self, request):
+    def get(self, request):
         user = request.user
-        chats = chat_service.list_chats_api(request, user)
-        return JsonResponse(list(chats), safe=False)
+        chats = chat_service.list_chats_by_user(user)
+        chat_data_list = []  # Initialize the list to store chat information
+
+        for chat in chats:
+            if chat.type == ChatType.PERSONAL.value:
+                member = chat_service.get_recipient_for_personal(chat.id, user)
+                title = f"{member.first_name} {member.last_name}"
+                chat_cover = member.profile_photo_url
+                chat_info = {
+                    'id': chat.id,
+                    'title': title,
+                    'chat_cover': chat_cover,
+                }
+            elif chat.type == ChatType.GROUP.value:
+                title = chat.title or chat_service.get_recipients_for_group(chat.id, user)
+                chat_cover = chat.chat_cover
+                chat_info = {
+                    'id': chat.id,
+                    'title': title,
+                    'chat_cover': chat_cover,
+                }
+            else:
+                chat_info = {
+                    'id': chat.id,
+                    'title': "Unknown Chat",
+                    'chat_cover': None, 
+                }
+            chat_data_list.append(chat_info)
+        chats = chat_service.list_chats_api(request,chat_data_list)
+        return JsonResponse(chats, safe=False)
+
     
 

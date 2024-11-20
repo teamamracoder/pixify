@@ -8,10 +8,10 @@
     <div class="chat-header">
         <div class="user-info">
             {% if ChatMember.chat_id > 2 %}
-                <img src="{{ chat.photo }}" alt="Group Chat" class="profile-pic">
+                <img src="{{chat.chat_cover }}" alt="Group Chat" class="profile-pic">
                 <span class="username">{{ chat.title }}</span>
             {% else %}
-                <img src="{{ chat.photo }}" alt="Profile Picture" class="profile-pic">
+                <img src="{{ chat.chat_cover }}" alt="Profile Picture" class="profile-pic">
                 <span class="username">{{ chat.title }}</span>
             {% endif %}
         </div>
@@ -23,7 +23,7 @@
                 <div class="message sent">
                     <div class="message-content">
                         <div class="message-header">
-                            <img src="{{ chat.photo }}" alt="Sender Profile Pic" class="message-profile-pic">
+                            <img src="{{ chat.chat_cover }}" alt="Sender Profile Pic" class="message-profile-pic">
                             <span class="message-username">{{ message.sender.username }}</span>
                         </div>
                         <span>{{ message.text }}</span>
@@ -45,7 +45,7 @@
                 <div class="message received">
                     <div class="message-content">
                         <div class="message-header">
-                            <img src="{{ message.sender.profile_pic.url }}" alt="{{ message.sender.username }}'s Profile Picture" class="message-profile-pic">
+                            <img src="{{ chat.chat_cover }}" alt="{{ message.sender.username }}'s Profile Picture" class="message-profile-pic">
                             <span class="message-username">{{ message.sender.username }}</span>
                         </div>
                         <span>{{ message.text }}</span>
