@@ -22,32 +22,23 @@ class ManageUserListView(View):
         sort_order = request.GET.get('sort_order', SortingOrder.DESC.value)
         page_number = request.GET.get('page', 1)
 
+        # get data
         data = services.manage_user_service.manage_list_users_filtered(
             search_query=search_query,
             sort_by=sort_by,
             sorting_order=sort_order,
+            page_number=page_number
         )
 
+        # add more data
         data["choices_gender"] = [{gender.value: gender.name} for gender in Gender]
 
+        # return
         return render(
             request,
-            'adminuser/user/list2.html',
+            'adminuser/user/list.html',
             success_response("User data fetched successfully", data)
-        )
-    
-    """
-    {
-            'users': page_obj,
-            'choices_gender': choices_gender,
-            'sort_by': sort_by,
-            'sort_order': sort_order,
-            'search_query': search_query,  # Ensure this is being passed to the template
-            'page_obj': page_obj,
-        }
-    """
-    
-
+        ) 
 
 
 class ManageUserCreateView(View):

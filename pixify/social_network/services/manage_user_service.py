@@ -39,16 +39,16 @@ def manage_update_user(user, first_name,middle_name,last_name, email,dob,gender,
     user.save()
     return user
 
-def manage_list_users_filtered(search_query, sorting_order, sort_by):
+def manage_list_users_filtered(search_query, sorting_order, sort_by, page_number):
+    # get data
     data = (
         GetData(User)
         .search(search_query,"first_name","last_name", "email")
         .sort(sort_by, sorting_order)
-        # .filter(is_active=True)
-        .paginate(limit=10, page=1)
+        .paginate(limit=3, page=page_number)
         .execute()
     )
-    print(data)
+    # return data
     return data
 
 
