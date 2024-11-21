@@ -15,71 +15,70 @@
                     <form method="post">
                         {% csrf_token %}
                         <div class="row">
-                            <div class="form-group col-md-4 col-lg-4 col-sm-12 mb-3">
-                                <label for="firstName">FirstName</label>
-                                <input type="text" class="form-control" name="first_name" id="first_name" placeholder="Enter your first name">
+                            <div class="form-group col-md-4 mb-3">
+                                {{ form.first_name.label }}
+                                {{ form.first_name }}
+                                {% if form.first_name.errors %}
+                                    <div class="text-danger">{{ form.first_name.errors }}</div>
+                                {% endif %}
                             </div>
-                            <div class="form-group col-md-4 col-lg-4 col-sm-12 mb-3">
-                                <label for="middleName">MiddleName</label>
-                                <input type="text" class="form-control" name="middle_name" id="middle_name" placeholder="Enter your middle name">
+                            <div class="form-group col-md-4 mb-3">
+                                {{ form.middle_name.label }}
+                                {{ form.middle_name }}
+                                {% if form.middle_name.errors %}
+                                    <div class="text-danger">{{ form.middle_name.errors }}</div>
+                                {% endif %}
                             </div>
-                            <div class="form-group col-md-4 col-lg-4 col-sm-12 mb-3">
-                                <label for="lastName">LastName</label>
-                                <input type="text" class="form-control" name="last_name" id="last_name" placeholder="Enter your last name">
+                            <div class="form-group col-md-4 mb-3">
+                                {{ form.last_name.label }}
+                                {{ form.last_name }}
+                                {% if form.last_name.errors %}
+                                    <div class="text-danger">{{ form.last_name.errors }}</div>
+                                {% endif %}
                             </div>
                         </div>
-
+                    
                         <div class="row">
-                            <div class="form-group col-md-6 col-lg-6 col-sm-12 mb-3">
-                                <label for="email">Email</label>
-                                <input type="email" class="form-control" name="email" id="email" placeholder="abc123@gmail.com">
+                            <div class="form-group col-md-6 mb-3">
+                                {{ form.email.label }}
+                                {{ form.email }}
+                                {% if form.email.errors %}
+                                    <div class="text-danger">{{ form.email.errors }}</div>
+                                {% endif %}
                             </div>
-                            <div class="form-group col-md-6 col-lg-6 col-sm-12 mb-3">
-                                <label for="hobbies">Hobbies</label>
-                                <input type="text" class="form-control" id="hobbies" name="hobbies" placeholder="Enter hobbies (comma-separated)">
+                            <div class="form-group col-md-6 mb-3">
+                                {{ form.hobbies.label }}
+                                {{ form.hobbies }}
+                                {% if form.hobbies.errors %}
+                                    <div class="text-danger">{{ form.hobbies.errors }}</div>
+                                {% endif %}
                             </div>
                         </div>
-
+                    
                         <div class="row">
-                            <div class="col-md-4">
-                                <label for="gender" class="form-label">Gender</label>
-                                <select id="gender" name="gender" class="form-select">
-                                    {% for gender in choices_gender %}
-                                        {% for name, value in gender.items %}
-                                            <option value="{{ name }}">{{ value }}</option>
-                                        {% endfor %}
-                                    {% endfor %}
-                                </select>
+                            <div class="form-group col-md-4 mb-3">
+                                {{ form.dob.label }}
+                                {{ form.dob }}
+                                {% if form.dob.errors %}
+                                    <div class="text-danger">{{ form.dob.errors }}</div>
+                                {% endif %}
                             </div>
-            
-                            <div class="col-md-4">
-                                <label for="gender" class="form-label">Relationship Status</label>
-                                <select id="relationship_status" name="relationship_status" class="form-select">
-                                    {% for choices_relationship in choices_relationship_status %}
-                                        {% for name, value in choices_relationship.items %}
-                                            <option value="{{ value }}">{{ name }}</option>
-                                        {% endfor %}
-                                    {% endfor %}
-                                </select>
-                            </div>
-            
-                            
-                        </div>
-                        <div class="row">
-                            <div class="form-group col-md-6 col-lg-6 col-sm-12 mb-3">
-                                <label for="dob">D.O.B</label>
-                                <input type="date" name="dob" class="form-control" id="dob">
-                            </div>
-                            <div class="form-group col-md-6 col-lg-6 col-sm-12 mb-3">
-                                <label for="address">Address</label>
-                                <textarea type="text" name="address" class="form-control" id="address" placeholder="Enter Address"></textarea>
+                            <div class="form-group col-md-4 mb-3">
+                                {{ form.address.label }}
+                                {{ form.address }}
+                                {% if form.address.errors %}
+                                    <div class="text-danger">{{ form.address.errors }}</div>
+                                {% endif %}
                             </div>
                         </div>
+                    
                         <div class="text-start">
                             <a href="{% url 'user_list' %}" class="btn btn-sm btn-outline-secondary">Back</a>
                             <button type="submit" class="btn btn-sm btn-primary">Save</button>
                         </div>
                     </form>
+                    
+                    
                 </div>
             </div>
         </div>

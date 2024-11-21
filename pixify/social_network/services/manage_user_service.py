@@ -12,14 +12,14 @@ def manage_get_user(user_id):
 def manage_create_user(**kwargs):
     user = User.objects.create(
         first_name=kwargs['first_name'],
-        middle_name=kwargs['middle_name'],
+        # middle_name=kwargs['middle_name'],
         last_name=kwargs['last_name'],
-        dob=kwargs['dob'],
+        # dob=kwargs['dob'],
         email=kwargs['email'],
-        address=kwargs['address'],
-        gender=kwargs['gender'],
-        relationship_status=kwargs['relationship_status'],
-        hobbies=kwargs['hobbies'],
+        # address=kwargs['address'],
+        # gender=kwargs['gender'],
+        # relationship_status=kwargs['relationship_status'],
+        # hobbies=kwargs['hobbies'],
         roles=kwargs['roles']    
     )
     return user
