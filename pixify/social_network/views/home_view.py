@@ -17,22 +17,19 @@ class HomeView(View):
     def get(self, request):
         message = request.session.pop("message", "")
         message_type = request.session.pop("message_type", "")
+        # user post create by priya
         posts =services.post_service.Postlist_posts()
-        
+        count_commnet =services.comment_service.get_count_comment(15)
+        print(count_commnet)
         post_dict={
                   'posts':posts,
                   'name':'priya',
+                  
                 }
 
         context = success_response(message=message, message_type=message_type)
         context.update({'post_dict': post_dict})  # Merge with the posts data
 
         return render(request, "enduser/home/index.html", context)
-        # return render(
-        #     request,
-        #     "enduser/home/index.html",
-        #     success_response(
-        #         message=message, message_type=message_type
-        #     ),
-        # )
+      
     

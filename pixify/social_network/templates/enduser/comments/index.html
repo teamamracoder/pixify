@@ -175,8 +175,10 @@
             </div>
         </div>
     </div>
-
+  
 </div>
+<form action="" method="post">
+    {% csrf_token %}
      <div class="d-flex align-items-start mb-2 mt-3" id="CommentsectionTextarea">
             <img src="{% static 'images/avatar.jpg'%}" alt="User" class="rounded-circle"
                 style="width:25px; height:25px; background-color:white;margin:0px auto;">
@@ -184,15 +186,18 @@
                 style="background-color: #f8f9fa;width: 100%;background-color:rgb(61, 61, 107);">
                 <textarea class="fileInputStyle"
                     style="background-color: #f8f9fa;width: 100%;background-color:rgb(132 132 152);" rows="2"
-                    placeholder="Comment..."></textarea>
+                    placeholder="Comment..." name="comment_text"></textarea>
                 <div class="d-flex mx-2" style="gap:15px;border-top:1px solid #975fec;">
                     <i class="bi bi-person-vcard text-light fs-8"></i>
                     <i class="bi bi-emoji-smile text-light fs-8"></i>
                     <i class="bi bi-filetype-gif text-light fs-8"></i>
                     <i class="bi bi-stickies text-light fs-8"></i>
-                    <i class="bi bi-symmetry-horizontal ms-auto fs-7 text-info"></i>
+                   <button type="submit"> <i class="bi bi-symmetry-horizontal ms-auto fs-7 text-info "type="submit"></i></button>
                 </div>
             </div>
     </div>
+</form>
 </div>
+
+
 {% endblock %}
