@@ -1,8 +1,8 @@
-from ..models import ChatMember
+from ..models import ChatMember,MessageMention
 from django.db.models import Q
 
-def create_message_mentions(message,user):
-    MessageMention.objects.create(message=message,user=user)
+def create_message_mentions(message,user,auth_user):
+    MessageMention.objects.create(message=message,user=user,created_by=auth_user)
     
 def list_messages_mention_Api(chat, user, search_query):
     if search_query:

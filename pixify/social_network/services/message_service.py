@@ -5,12 +5,12 @@ from django.shortcuts import get_object_or_404
 def list_messages_by_chat_id(chat_id):   # make message_read_status service and views for read_status
     return Message.objects.filter(chat_id=chat_id,is_active=True)
 
-def create_message(text, media_url, sender_id, chat_id):
+def create_message(text, media_url, sender_id, chat):
     return Message.objects.create(
         text=text,
         media_url=media_url,
         sender_id=sender_id,
-        chat_id=chat_id,
+        chat_id=chat,
         created_by=sender_id
     )
 

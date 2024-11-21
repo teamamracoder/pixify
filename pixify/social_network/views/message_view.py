@@ -1,29 +1,39 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
-
+from ..models import User,ChatMember
 from ..services import message_service,user_service, chat_service, message_reaction_service, message_mention_service
+import re
 
 class MessageListView(View):
     def get(self, request):
         return render(request, 'enduser/message/index.html')  
 
 class MessageCreateView(View):
-    def get(self,request,chat_id):
-        chat=chat_service.get_chat_by_id(chat_id)
-        return render(request, 'enduser/message/index.html',{'chat':chat})  
+    def get(self, request, chat_id):
+        chat = chat_service.get_chat_by_id(chat_id)
+        return render(request, 'enduser/message/index.html', {'chat': chat})
     
-    def post(self, request):        
-        auth_user=request.user
+    def post(self, request):
+        auth_user = request.user
         text = request.POST.get('message')
-        media_url = request.POST.get('media_url','')
+        media_url = request.POST.get('media_url', '')
         sender_id = auth_user
-        chat_id = request.POST.get('chat_id')        
-        mentions= request.POST.getlist('mentions','[]')
-        message = message_service.create_message(text, media_url, sender_id, chat_id)       
-        for user in mentions:
-            message_mention_service.create_message_mentions(message,user,auth_user)        
-        return render(request, 'enduser/message/index.html')
-         
+        chat_id = request.POST.get('chat_id')
+        mentions = request.POST.get('mentions', '')
+        mention_ids = []
+        if mentions == "all":           
+            chat_members = ChatMember.objects.filter(chat_id=chat_id).exclude(member_id=auth_user)
+            mention_ids = [member.member_id.id for member in chat_members]
+        else:
+            mention_ids = [int(id) for id in re.split('[, ]+', mentions) if id]        
+        message = message_service.create_message(text, media_url, sender_id, chat_id)        
+        for user_id in mention_ids:
+            user = User.objects.get(id=user_id)
+            message_mention_service.create_message_mentions(message, user, auth_user)
+        
+        return redirect('message_list', chat_id=chat_id)
+ 
+
 class MessageUpdateView(View):
     def get(self,request,chat_id):
         chat=chat_service.get_chat_by_id(chat_id)
