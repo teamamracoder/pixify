@@ -17,15 +17,16 @@ def create_message(text, media_url, sender_id, chat):
 def get_message_by_id(message_id):
     return get_object_or_404(Message, id=message_id,is_active=True)
 
-def update_message(message, text, media_url):
+def update_message(message, text, media_url,user):
     message.text = text
     message.media_url = media_url
+    message.updated_by=user
     message.save()
     return message
 
-def delete_message(message_id):
-        message = get_object_or_404(message, id=message_id)
+def delete_message(message,user):
         message.is_active=False
+        message.updated_by=user
         message.save()
 
 def reply_message(user, text, media_url, sender_id, chat_id, reply_for_message_id):    

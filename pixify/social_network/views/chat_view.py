@@ -89,7 +89,6 @@ class ChatCreateView(View):
         user=request.POST['user']        
         type = request.POST['type']
         members = request.POST.getlist('members')        
-
         if type == ChatType.PERSONAL.value:            
             title = None
             chat_cover = None

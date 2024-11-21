@@ -64,14 +64,12 @@
                         <i class="bi bi-three-dots-vertical" onclick="toggleOptions({{ message.id }})"></i>
                         <i class="bi bi-emoji-smile" onclick="toggleReactionPopup({{ message.id }})"></i>
                     </div>
-                    <div class="options-popup" id="options-{{ message.id }}" style="display: none;">
-                        <a href="#" onclick="editMessage('{{ message.id }}', '{{ message.text|escapejs }}')">Edit</a>
-                        <form method="POST" action="">
-                            {% csrf_token %}
-                            <button type="submit" class="delete-btn">Delete</button>
-                        </form>
-                        <a href="#" onclick="replyToMessage('{{ message.id }}', '{{ message.sender.username }}', '{{ message.text|escapejs }}')">Reply</a>
-                    </div>
+                   <div class="options-popup" id="options-{{ message.id }}" style="display: none;">
+    <a href="#" onclick="editMessage('{{ message.id }}', '{{ message.text|escapejs }}')">Edit</a>
+    <a href="#" onclick="deleteMessage('{{ message.id }}')">Delete</a>
+    <a href="#" onclick="replyToMessage('{{ message.id }}', '{{ message.sender.username }}', '{{ message.text|escapejs }}')">Reply</a>
+</div>
+
                     <div class="reaction-popup" id="reaction-popup-{{ message.id }}" style="display: none;">
                         <span onclick="addReaction('{{ message.id }}', '👍')">👍</span>
                         <span onclick="addReaction('{{ message.id }}', '❤️')">❤️</span>
@@ -94,9 +92,16 @@
             </div>
         </div>
 
-<form id="messageForm" method="POST" action="message/create">
+
+
+        
+
+<form id="messageForm" method="POST" action="{% url 'message_create' %}">
     {% csrf_token %}
-    <input type="hidden" id="chat_id" name="chat_id" value={{chat.id}}> 
+    <input type="hidden" id="action" name="action" value="create"> <!-- Default to create -->
+    <input type="hidden" id="chat_id" name="chat_id" value="{{ chat.id }}"> 
+    <input type="hidden" id="message_id" name="message_id" value=""> <!-- Used for update/delete -->
+
     <div id="mentionModal" class="modal">
         <div class="modal-content" id="mention-suggestions">
             <!-- Mention suggestions will be displayed here -->
@@ -105,31 +110,46 @@
     <input type="text" name="message" id="message-input" placeholder="Type your message here..." required>
     <button type="submit">➤</button>
 </form>
-    </div>
+
+
+</div>
 </div>
 
 <script>
+    function setFormAction(action, messageId = '') {
+        document.getElementById('action').value = action;
+        document.getElementById('message_id').value = messageId;
+
+        let formAction = '';
+        if (action === 'update') {
+            formAction = `/chat/message/${messageId}/update/`;
+        } else if (action === 'delete') {
+            formAction = `/chat/message/${messageId}/delete/`;
+        } else {
+            formAction = `/chat/message/create/`;
+        }
+        document.getElementById('messageForm').action = formAction;
+    }
+
+
 
 $(document).ready(function () {
+    var mentionedUsers = []; // Array to store mentioned user IDs
+
     $('#message-input').on('input', function () {
         var messageText = $(this).val();
-        var chatId = $('#chat_id').val();         
+        var chatId = $('#chat_id').val();
 
         if (messageText.includes('@') && chatId) {
-            var searchQuery = messageText.split('@').pop().trim(); 
-            console.log('Search Query:', searchQuery);
-
+            var searchQuery = messageText.split('@').pop().trim();
             $.ajax({
-                url: `/message-mention/${chatId}?search=${searchQuery}`, 
+                url: `/message-mention/${chatId}?search=${searchQuery}`,
                 type: 'GET',
                 success: function (res) {
-                    console.log('Response:', res);
-
                     if (Array.isArray(res) && res.length > 0) {
                         displayMentions(res);
                     } else {
-                        console.log('No members found or invalid response format');
-                        $('#mentionModal').hide(); 
+                        $('#mentionModal').hide();
                     }
                 },
                 error: function (xhr, status, error) {
@@ -137,13 +157,13 @@ $(document).ready(function () {
                 }
             });
         } else {
-            $('#mentionModal').hide(); 
+            $('#mentionModal').hide();
         }
     });
 
     function displayMentions(mentions) {
         var mentionSuggestions = $('#mention-suggestions');
-        mentionSuggestions.empty(); 
+        mentionSuggestions.empty();
 
         mentions.forEach(function (mention) {
             var mentionItem;
@@ -166,7 +186,7 @@ $(document).ready(function () {
             mentionSuggestions.append(mentionItem);
         });
 
-        $('#mentionModal').show(); 
+        $('#mentionModal').show();
     }
 
     $('#mention-suggestions').on('click', '.mention-item', function () {
@@ -175,15 +195,36 @@ $(document).ready(function () {
         var messageText = messageInput.val().trim();
         messageText = messageText.replace(/@\w*$/, mentionText + ' ').trim();
         messageInput.val(messageText);
+
+        // Add the mentioned user's ID to the array
+        var userId = $(this).data('member-id');
+        if (!mentionedUsers.includes(userId)) {
+            mentionedUsers.push(userId);
+        }
+
         $('#mentionModal').hide();
+        
+        // Return focus to the input field
+        messageInput.focus();
+    });
+
+    $('#messageForm').on('submit', function () {
+        // Add mentioned user IDs to a hidden input before submitting the form
+        $('<input>').attr({
+            type: 'hidden',
+            name: 'mentions',
+            value: mentionedUsers.join(',')
+        }).appendTo('#messageForm');
     });
 
     $(window).on('click', function (event) {
         if ($(event.target).is('#mentionModal')) {
-            $('#mentionModal').hide(); 
+            $('#mentionModal').hide();
         }
     });
 });
+
+
 
 
     function toggleOptions(messageId) {
@@ -208,12 +249,18 @@ $(document).ready(function () {
         }
         document.getElementById('reaction-popup-' + messageId).style.display = 'none';
     }
-      function editMessage(messageId, content) {
+    function editMessage(messageId, content) {
         const messageInput = document.querySelector('input[name="message"]');
         messageInput.value = content;
         messageInput.focus();
-        document.querySelector('form').action = `/message/${messageId}/edit/`;
+        setFormAction('update', messageId);
     }
+
+    function deleteMessage(messageId) {
+    setFormAction('delete', messageId);  // Dynamically set the form action to delete the message
+    document.getElementById('messageForm').submit();  // Submit the form
+}
+
 
     function replyToMessage(messageId, username, content) {
         const messageInput = document.querySelector('input[name="message"]');
@@ -233,8 +280,8 @@ $(document).ready(function () {
             document.querySelectorAll('.options-popup').forEach(popup => popup.style.display = 'none');
         }
     });
-  
 </script>
+
 
 
 <style>
