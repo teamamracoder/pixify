@@ -10,10 +10,8 @@ class MessageMentionListViewApi(View):
         members_count = ChatMember.objects.filter(chat_id=chat_id).exclude(member_id=user).count()                        
         if members_count > 1:
             mention_list = message_mention_service.list_messages_mention_Api(chat_id, user, search_query)
-            print(f"Mention List: {mention_list}")  
             return JsonResponse(mention_list, safe=False)
         else:
-            print("Not enough members to show mention list")  
             return JsonResponse([], safe=False)
 
 
