@@ -57,4 +57,16 @@ class ManageChatUpdateForm(forms.Form):
     # Add fields for middle_name, dob, address, etc. as needed...
 
 
-
+# Manage_Member_Chat
+# ===========================================
+class ManageMemberChatCreateForm(forms.Form):
+   user_id = forms.CharField(
+        label="User_Id",
+        
+        widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "Enter User Id"})
+    )
+    
+chat_id = forms.IntegerField(
+    label="Chat_Id",
+    widget=forms.TextInput(attrs={"class": "form-control","placeholder": "Enter Chat Id"})
+    )
