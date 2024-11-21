@@ -33,7 +33,7 @@ from django.shortcuts import get_object_or_404, render, redirect
 from django.http import HttpResponseBadRequest
 from django.views import View
 from ..decorators.exception_decorators import catch_error
-from ..forms import ManageChatCreateForm, ManageChatUpdateForm
+from ..forms import ManageChatCreateForm, ManageChatUpdateForm,ManageMemberChatCreateForm
 from .. import services
 
 
@@ -208,4 +208,23 @@ class ManageToggleChatActiveView(View):
         return JsonResponse({'is_active': chat.is_active})
 
 
-
+# Manage_Chat_Member
+#======================================================================
+class ManageMemberChatCreateView(View):
+    @catch_error
+    def get(self, request):
+        form = ManageMemberChatCreateForm()
+        return render(request, 'adminuser/chat/membercreate.html', {"form": form })
+    
+    @catch_error
+    def post(self, request,chat_id,user_id):
+        form = ManageMemberChatCreateForm(request.POST)
+        if form.is_valid():
+            chat_member = {
+                user_id: form.cleaned_data['user_id'],
+                chat_id: form.cleaned_data['chat_id'],
+                
+            }
+            services.manage_chat_service.manage_create_chats(**chat_member)
+            return redirect('manage_chat_list')
+        return render(request, 'adminuser/chat/membercreate.html', {"form": form})
