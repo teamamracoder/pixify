@@ -45,8 +45,9 @@ def get_recipient_for_personal(chat_id,user):
 
 
 def get_recipients_for_group(chat_id,user):
-        chat_members = ChatMember.objects.filter(chat_id=chat_id).exclude(member_id=user.id)
+        chat_members = ChatMember.objects.filter(chat_id=chat_id).exclude(member_id=user.id)        # proper tarika implement
         first_names = [chat_member.member_id.first_name for chat_member in chat_members]
+        first_names.insert(0,'You')   # jugaru tarika
         return " , ".join(first_names)
 
 def get_all_user_follow(user):
