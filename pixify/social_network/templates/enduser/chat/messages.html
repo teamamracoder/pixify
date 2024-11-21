@@ -19,26 +19,26 @@
 
     <div class="chat-body">
         {% for message in messages %}
-            {% if message.sender_id == user.id %}
+            {% if message.sender_id.id == user.id %}
                 <div class="message sent">
                     <div class="message-content">
                         <div class="message-header">
                             <img src="{{ chat.chat_cover }}" alt="Sender Profile Pic" class="message-profile-pic">
                             <span class="message-username">{{ message.sender.username }}</span>
                         </div>
-                        <span>{{ message.text }}</span>
+                        <span class="text-dark">{{ message.text }}</span>
                     </div>
                     <div class="message-footer">
+                        
                         <span class="time">{{ message.created_at|date:"h:i" }}</span>
                         <i class="bi bi-three-dots-vertical" onclick="toggleOptions({{ message.id }})"></i>
                         <i class="bi bi-emoji-smile" onclick="toggleReactionPopup({{ message.id }})"></i>
                     </div>
                     <div class="options-popup" id="options-{{ message.id }}" style="display: none;">
+                        {% if message.sender_id.id == user.id%}
                         <a href="#" onclick="editMessage('{{ message.id }}', '{{ message.text|escapejs }}')">Edit</a>
-                        <form method="POST" action="">
-                            {% csrf_token %}
-                            <button type="submit" class="delete-btn">Delete</button>
-                        </form>
+                        {%endif%}
+                        <a href="#" onclick="deleteMessage('{{ message.id }}')">Delete</a>
                         <a href="#" onclick="replyToMessage('{{ message.id }}', '{{ message.sender.username }}', '{{ message.text|escapejs }}')">Reply</a>
                     </div>
                     <div class="reaction-popup" id="reaction-popup-{{ message.id }}" style="display: none;">
@@ -51,11 +51,11 @@
                     <div class="reaction-display" id="reaction-display-{{ message.id }}"></div>
                 </div>
             {% else %}
-                <div class="message received">
+                <div class="message received float-end">
                     <div class="message-content">
                         <div class="message-header">
-                            <img src="{{ chat.chat_cover }}" alt="{{ message.sender.username }}'s Profile Picture" class="message-profile-pic">
-                            <span class="message-username">{{ message.sender.username }}</span>
+                            <img src="{{ chat.chat_cover }}" alt="{{ message.sender_id.first_name }}'s Profile Picture" class="message-profile-pic">
+                            <span class="message-username">{{ message.sender_id.first_name }}</span>
                         </div>
                         <span>{{ message.text }}</span>
                     </div>
@@ -65,7 +65,10 @@
                         <i class="bi bi-emoji-smile" onclick="toggleReactionPopup({{ message.id }})"></i>
                     </div>
                    <div class="options-popup" id="options-{{ message.id }}" style="display: none;">
-    <a href="#" onclick="editMessage('{{ message.id }}', '{{ message.text|escapejs }}')">Edit</a>
+                    {% if message.sender_id.id == user.id%}
+                    <a href="#" onclick="editMessage('{{ message.id }}', '{{ message.text|escapejs }}')">Edit</a>
+                    {%endif%}
+
     <a href="#" onclick="deleteMessage('{{ message.id }}')">Delete</a>
     <a href="#" onclick="replyToMessage('{{ message.id }}', '{{ message.sender.username }}', '{{ message.text|escapejs }}')">Reply</a>
 </div>
@@ -136,16 +139,18 @@
 $(document).ready(function () {
     var mentionedUsers = []; // Array to store mentioned user IDs
 
-    $('#message-input').on('input', function () {
+    // jdi input hoy and oi specific input value ta @ hoy
+    $('#message-input').on('input', function (e) {
+        console.log(e)
         var messageText = $(this).val();
         var chatId = $('#chat_id').val();
-
         if (messageText.includes('@') && chatId) {
             var searchQuery = messageText.split('@').pop().trim();
             $.ajax({
-                url: `/message-mention/${chatId}?search=${searchQuery}`,
+                url: `/message-mention/${chatId}?search=${searchQuery}`,        // extra_param = single/multiple selected_memnber_id 
                 type: 'GET',
                 success: function (res) {
+                    console.log(res)
                     if (Array.isArray(res) && res.length > 0) {
                         displayMentions(res);
                     } else {
