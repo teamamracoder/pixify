@@ -6,7 +6,8 @@
     margin: 0;
     padding: 0;
     color: whitesmoke;
-    font-family: "Ubuntu", sans-serif;
+    /* font-family: "Ubuntu", sans-serif; */
+    font-family: serif;
 }
 
 .navlogo {
@@ -128,11 +129,6 @@ i {
     background-color: rgb(61, 61, 107);
 }
 
-.modal-content {
-    width: 400px;
-
-    background-color: #211031;
-}
 
 .sec {
     justify-content: center;
@@ -422,9 +418,9 @@ i {
     border-radius: 10px;
 }
 
-.request li:hover {
+/* .request li:hover {
     background-color: #2f066de3 !important;
-}
+} */
 
 .search_btn {
     border-radius: 0 15px 10px 0 !important;
@@ -580,7 +576,7 @@ i {
 /* -------------------Write by Badhan---------------------- */
 
 .notification-list {
-    width: 600px;
+    /* width: 600px; */
     margin: auto;
     padding-top: 2px;
     margin: 0 px;
@@ -737,10 +733,6 @@ textarea::placeholder {
 
 }
 
-.modal-content {
-    background-color: #4e0b8d;
-    color: white;
-}
 
 .modal-header {
     border-bottom: none;
@@ -892,6 +884,7 @@ textarea::placeholder {
 }
 
 .left-siteber-opt-ul li a i {
+    font-size: 17px;
     width: 30px;
     text-align: center;
 
@@ -917,7 +910,7 @@ textarea::placeholder {
 
 .share-container {
     /* position: fixed; */
-    max-width: 450px;
+    /* max-width: 450px; */
     /* margin: 0px 50px;
     border: 2px solid #ddd;
     border-radius: 8px;
@@ -1019,9 +1012,9 @@ textarea::placeholder {
     color: #555;
 }
 
-.text-light {
+/* .text-light {
     font-size: 18px;
-}
+} */
 
 /* sharee  end */
 
@@ -1032,7 +1025,7 @@ textarea::placeholder {
     /* margin-left: 15px; */
     outline: none;
     background-color: #1f0447e3;
-    box-shadow: 0 4px 8px rgba(151, 95, 236, 0.5);
+    /* box-shadow: 0 4px 8px rgba(151, 95, 236, 0.5); */
     font-family: serif;
 }
 
@@ -1042,6 +1035,7 @@ textarea::placeholder {
     margin-top: 5px;
     background-color: #1f0447fb;
     border: 2px solid #1a033bfb;
+    border-radius: 7px;
 }
 
 .post-center .post-box .post-top {
@@ -1464,12 +1458,239 @@ textarea::placeholder {
 /* End CSS for  Left Side Bar by Shribash*/
 
 /*Subhasis*/
+@media (max-width: 575px) {
+    .left-sidebar,.right-sidebar,.center-bodycontent {
+        padding-left: 0rem !important;
+        padding-right: 0rem !important;
+        margin-bottom:1rem
+    }
+  }
+  @media (min-width: 576px) and (max-width: 768px) {
+    .left-sidebar,.right-sidebar,.center-bodycontent {
+        padding-left: 3rem !important;
+        padding-right: 3rem !important;
+        margin-bottom:1rem
+    }
+  }
+  @media (min-width: 768px) and (max-width: 991px) {
+    .left-sidebar{
+        padding-left: 0rem !important;
+    }
+    .right-sidebar{
+        padding-right: 0rem !important;
+    }
+    .body-container{
+        padding-left: 1.5rem !important;
+        padding-right: 1.5rem !important;
+    }
+  }
+  @media (min-width: 1400px) {
+    #body-container{
+        padding-left: 7rem !important;
+        padding-right: 7rem !important;
+    }
+  }
+  @media (min-width: 768px) and (max-width: 991px) {
+    #p-pic img{
+        height:auto;
+        padding:2px;
+        margin-top:7px;
+    }
+  }
+  @media (min-width: 991px) and (max-width: 1200px) {
+    #p-pic img{
+        height:auto;
+        padding: 16px;
+        margin-top: 0px;
+    }
+  }
+  @media (max-width: 768px){
+    #p-pic{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    #user-details{
+        display: flex;
+        flex-flow: column;
+        justify-content: center;
+        align-items: center;
+    }
+    #rightSidebar{
+        display:none;
+    }
+    #leftSidebar{
+        display:none;
+    }
+  }
+  @media (max-width: 1320px) {
+    #searchbarInput{
+        display:none;
+    }
+    #searchbarBtn{
+        display:block !important;
+    }
+  }
+  @media (max-width: 992px) {
+    #navbarNav ul{
+        gap:35px;
+    }
+  }
+  @media (max-width: 768px) {
+    #navContainer{
+        padding-left: 40px !important;
+        padding-right: 0px !important;
+    }
+    .center-bodycontent{
+        padding-left: 0px !important;
+        padding-right: 0px !important;
+    }
+
+  }
+  @media (max-width: 650px) {
+    #navContainer{
+        padding-left: 0px !important;
+    }
+    #navbar{
+        padding-left: 7px !important;
+        padding-right: 5px !important;
+    }
+    #navbarNav ul{
+        gap:25px;
+    }
+    #searchbarInputMiddle{
+        margin-right: 45px !important;
+        margin-left: 20px;
+    }
+  }
+  @media (max-width: 480px) {
+    #navContainer{
+        padding-left: 0px !important;
+    }
+    #navbar{
+        padding-left: 10px !important;
+        padding-right:10px !important
+    }
+    #navbarNav ul{
+        gap:9px;
+    }
+    #userImage{
+        margin-left: 0px !important;
+    }
+    #sidelogo{
+        margin-right: 0px !important;
+    }
+  }
+  @media (min-width: 768px) and (max-width: 992px) {
+    #searchbarInputMiddle{
+        margin-right: 0px !important;
+    }
+}
+
+.center-bodycontent {
+    height: 100%;
+    overflow-y: scroll;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+.center-bodycontent::-webkit-scrollbar {
+    display: none;
+}
+#leftSidebar{
+    height: 100%;
+    overflow: hidden;
+}
+#rightSidebar{
+    height: 100%;
+    overflow: hidden;
+}
+
+#mainContainer{
+    min-height: 600px;
+    margin-top: 60px !important;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+#body-container{
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+#rightSidebarContainer,#leftSidebarContainer,#homepage,#notificationPage,#homePagePostsection{
+    background-color: #1f0447e3;
+    /* box-shadow: 0 2px 4px rgba(151, 95, 236, 0.5); */
+    border: 1px solid #827b7b70;
+    font-family: serif;
+    border-radius: 7px;
+}
+/* #leftSidebarContainer{
+    background-color: #1f0447e3;
+    box-shadow: 0 2px 4px rgba(151, 95, 236, 0.5);
+    font-family: serif;
+    border-radius: 7px;
+} */
+
+.rightSidebardivName{
+    font-size: 1.25rem !important;
+}
+.rightSidebardivs p{
+    color: #975fec;
+    margin-bottom: 10px;
+}
+
+
+#rightSidebarContainer a{
+    color: rgb(0, 255, 242);cursor: pointer; font-size: 14px;text-decoration:none;
+}
+.rightSidebardivs{
+    border-bottom: 1.5px solid #975fec;
+}
+/* Homepage */
+#addPhotosVideosModalInput,#shareModalInput{
+    background-color: rgb(61, 61, 107);
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(151, 95, 236, 0.5);
+    border: 1px solid #975fec;
+    height: 44px;
+    border-radius: 20px;
+}
+#addPhotosVideosModalInputdiv{
+    display: inline-block;
+    cursor: pointer;
+    width: 90%;
+}
+#dropZone{
+    border: 2px dashed #ccc;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+
+
 #userDropdown {
     background-color: #ffffff;
     border: 1px solid #ddd;
     box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
     z-index: 1000;
 
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    width: 250px;
+    background-color: #1f0447e3;
+    box-shadow: 0 4px 8px rgba(151, 95, 236, 0.5);
+    font-family: serif;border-radius: 7px;
+
+}
+#userDropdownAnchor{
+    padding-top: 2px;
+    padding-bottom: 2px;
+    text-decoration: none;
+    cursor: pointer;
 }
 
 #userDropdown .dropdown-item {
@@ -1509,11 +1730,21 @@ textarea::placeholder {
     box-shadow: 0 4px 8px rgba(151, 95, 236, 0.5);
 }
 
+.userProfiledropdownIcon{
+    font-size: 14px !important;
+    width: 18px !important;
+}
+
+
+
 /* For Modal */
 .modal-content {
     border-radius: 10px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 2px 4px rgba(151, 95, 236, 0.5);
     color: black;
+    /* background-color: #1f0447e3; */
+    background-color: #2f066de3;
+    /* border: 1px solid #ddd; */
 }
 
 .modal-body span {
