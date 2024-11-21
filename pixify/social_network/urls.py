@@ -82,8 +82,8 @@ urlpatterns = [
     # message
     path('chat/message/', views.MessageListView.as_view(), name='message'),
     path('chat/message/create', views.MessageCreateView.as_view(), name='message_create'),
-    path('chat/message/<int:message_id>/update', views.MessageUpdateView.as_view(), name='message_update'),
-    path('chat/message/<int:message_id>/delete', views.MessageDeleteView.as_view(), name='message_delete'),
+    path('chat/message/<int:message_id>/update/', views.MessageUpdateView.as_view(), name='message_update'),
+    path('chat/message/<int:message_id>/delete/', views.MessageDeleteView.as_view(), name='message_delete'),
     
     # auth
     path('request-otp/', views.RequestOTPView.as_view(), name='request_otp'),
