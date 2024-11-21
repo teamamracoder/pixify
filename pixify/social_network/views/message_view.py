@@ -18,9 +18,14 @@ class MessageCreateView(View):
         text = request.POST.get('message')
         media_url = request.POST.get('media_url', '')
         sender_id = auth_user
-        chat_id = request.POST.get('chat_id')
-        mentions = request.POST.get('mentions', '')
-        mention_ids = []
+        chat = chat_service.get_chat_by_id(request.POST.get('chat_id'))    
+        mentions= request.POST.getlist('mentions','[]')
+        message = message_service.create_message(text, media_url, sender_id, chat_id)       
+        for user in mentions:
+            message_mention_service.create_message_mentions(message,user,auth_user)        
+        return render(request, 'enduser/message/index.html')
+         
+         mention_ids = []
         if mentions == "all":           
             chat_members = ChatMember.objects.filter(chat_id=chat_id).exclude(member_id=auth_user)
             mention_ids = [member.member_id.id for member in chat_members]
@@ -32,8 +37,6 @@ class MessageCreateView(View):
             message_mention_service.create_message_mentions(message, user, auth_user)
         
         return redirect('message_list', chat_id=chat_id)
- 
-
 class MessageUpdateView(View):
     def get(self,request,chat_id):
         chat=chat_service.get_chat_by_id(chat_id)
