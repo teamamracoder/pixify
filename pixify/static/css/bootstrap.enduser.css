@@ -13917,11 +13917,12 @@ fieldset:disabled .btn {
 
 body {
   min-height: 100vh;
-  background-image: linear-gradient(#17082e 0%, #220b46 7%, #220b46 80%, #0c1f4c 100%);
-  text-shadow: 0 0 1px rgba(50, 251, 226, 0.3), 0 0 2px rgba(50, 251, 226, 0.3), 0 0 5px rgba(50, 251, 226, 0.2);
+  /* background-image: linear-gradient(#17082e 0%, #220b46 7%, #220b46 80%, #0c1f4c 100%); */
+  background-color: #1a0933;
+  /* text-shadow: 0 0 1px rgba(50, 251, 226, 0.3), 0 0 2px rgba(50, 251, 226, 0.3), 0 0 5px rgba(50, 251, 226, 0.2); */
 }
 
-h1,
+/* h1,
 .h1,
 h2,
 h3,
@@ -13934,7 +13935,7 @@ h6,
 .h5,
 .h6 {
   text-shadow: 0 0 1px rgba(50, 251, 226, 0.6), 0 0 3px rgba(50, 251, 226, 0.5), 0 0 0.5rem rgba(50, 251, 226, 0.3), 0 0 2rem rgba(50, 251, 226, 0.2);
-}
+} */
 
 .text-primary {
   text-shadow: 0 0 1px rgba(111, 66, 193, 0.3), 0 0 2px rgba(111, 66, 193, 0.3), 0 0 5px rgba(111, 66, 193, 0.2);

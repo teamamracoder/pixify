@@ -1,5 +1,9 @@
 from django.shortcuts import render,redirect
 from django.views import View
+
+from social_network.constants.default_values import Role
+from ..decorators import auth_required, role_required
+from social_network.decorators.exception_decorators import catch_error
 from ..services import chat_service, user_service,message_service, chat_member_service
 from django.http import JsonResponse
 from ..constants import ChatType
@@ -7,26 +11,41 @@ from ..models import User
 from django.utils import timezone
 
 class ChatListView(View):
+    @catch_error
+    @auth_required
+    @role_required(Role.ADMIN.value, Role.END_USER.value)
     def get(self, request):
         user = request.user
-        chats = chat_service.list_chats_by_user(user)
+        chats = chat_service.list_chats_by_user(user)               # chats must have at least one other member 
         followers, followings = chat_service.get_all_user_follow(user)
         chat_data = []
-
+        if not chats:
+            no_chat_message={"message":"No chats available"}
+            return render(request, 'enduser/chat/chats.html',no_chat_message)
         for chat in chats:
+            # member count condition here
+            # discard chats with 0 or 1 member only
             unread_messages = message_service.unread_count(chat, user)
-            unread_messages_display = '' if unread_messages == 0 else '4+' if unread_messages > 4 else str(unread_messages)
+            unread_messages_display = '' if unread_messages == 0 else '10+' if unread_messages > 10 else str(unread_messages)
 
             if not chat.latest_message:
                 chat.latest_message = ''
 
-            # if chat.type == ChatType.PERSONAL.value:
-            #     member = chat_service.get_recipient_for_personal(chat.id, user) # check this function again
-            #     title = f"{member.first_name} {member.last_name}"
-            #     chat_cover = member.profile_photo_url
-            # else:
-            title = chat.title             # if no title available thaen show all users as a simple list in the title position
-            chat_cover = chat.chat_cover  
+            if chat.type == ChatType.PERSONAL.value:
+                member = chat_service.get_recipient_for_personal(chat.id, user) 
+                if member:
+                    title = f"{member.first_name} {member.last_name}"
+                    chat_cover = member.profile_photo_url
+                else:
+                    title = ''
+                    chat_cover=''
+            elif chat.type == ChatType.GROUP.value:
+                title= chat_service.get_recipients_for_group(chat.id,user)
+                if chat.title:    
+                    title = chat.title 
+                else:
+                    title=title 
+                chat_cover = chat.chat_cover  
                 
             latest_message_timestamp = self.format_timestamp(chat.latest_message_timestamp)
             
@@ -61,7 +80,7 @@ class ChatListView(View):
         now = timezone.now()
         diff = now - timestamp
         if diff.days == 0:
-            return timestamp.strftime('%H:%M')
+            return timestamp.strftime('%I:%M %p')
         elif diff.days == 1:
             return 'Yesterday'
         elif diff.days < 7:
@@ -76,22 +95,21 @@ class ChatCreateView(View):
         return render(request, 'enduser/chat/chats.html',{'user':user})         
 
     def post(self,request):                
-        user=request.POST['user']
-        title = request.POST['titel','']
+        user=request.POST['user']        
         type = request.POST['type']
-        members = request.POST.getlist('membes')        
+        members = request.POST.getlist('members')        
+        if type == ChatType.PERSONAL.value:            
+            title = None
+            chat_cover = None
 
-        if type == ChatType.PERSONAL.value:    
-            other_user = User.objects.get(id=members)
-            title = other_user.first_name 
-            chat_cover = other_user.profile_photo_url            
-
-        elif type == ChatType.GROUP.value:                        
+        elif type == ChatType.GROUP.value:    
+            title = request.POST['titel','']                    
             chat_cover = request.POST.get('chat_cover', '')
     
-        chat=chat_service.create_chat(user,title, chat_cover,type)            
+        chat=chat_service.create_chat(user,title, chat_cover,type)           
+        members.append(user.id) 
         for member in members:   
-            chat_member_service.create_chat_member(chat,member)
+            chat_member_service.create_chat_member(chat,member,user)
         return redirect('chat/')         
 
 
@@ -99,34 +117,32 @@ class ChatDetailsView(View):
     def get(self, request, chat_id):
         user = request.user 
         chat = chat_service.get_chat_by_id(chat_id)
-        
-        ## need to implement
         messages = message_service.list_messages_by_chat_id(chat_id)
-        # if chat.type == ChatType.PERSONAL.value:
-        #     member = chat_service.get_recipient_for_personal(chat.id, user)
-        #     chat.title = f"{member.first_name} {member.last_name}"
-        #     chat.chat_cover = member.profile_photo_url
-        # else:
-        
-        chat.title = chat.title             # if no title available thaen show all users as a simple list in the title position
-        chat.chat_cover = chat.chat_cover  
+        if chat.type == ChatType.PERSONAL.value:
+            member = chat_service.get_recipient_for_personal(chat.id, user)
+            chat.title = f"{member.first_name} {member.last_name}"
+            chat.chat_cover = member.profile_photo_url
+        elif chat.type == ChatType.GROUP.value:
+            title= chat_service.get_recipients_for_group(chat.id,user)
+            if chat.title:    
+                chat.title = chat.title 
+            else:
+                chat.title=title 
+            chat.chat_cover = chat.chat_cover   
                 
-        return render(request, 'enduser/chat/messages.html',{'chat':chat,'messages':messages})
+        return render(request, 'enduser/chat/messages.html',{'chat':chat,'messages':messages,'user':user})
     
 class ChatUpdateView(View):   
     def get(self, request,chat_id):        
         return render(request, 'enduser/chat/chats.html',{'chat':chat_id})   
      
     def post(self,request,chat_id):
+        user=request.user
         chat  = chat_service.get_chat_by_id(chat_id)
-        title = request.POST['titel','']
-        members = request.POST.getlist('membes')
-        chat_cover = request.POST.get('chat_cover', '')
-        chat_service.update_chat(chat, title, chat_cover)    
-        for member in members:   
-            chat_member_service.delete_chat_member(chat_id,member)
+        title = request.POST['titel','']        
+        chat_cover = request.POST.get('chat_cover', '')                
+        chat_service.update_chat(chat, title, chat_cover, user)                  
         return redirect('chat/')
-
 
 class ChatDeleteView(View):  
     def post(self, request, chat_id):
@@ -135,9 +151,38 @@ class ChatDeleteView(View):
         return redirect('chat_list')
 
 class ChatListViewApi(View):
-   def get(self, request):
+    def get(self, request):
         user = request.user
-        chats = chat_service.list_chats_api(request, user)
-        return JsonResponse(list(chats), safe=False)
+        chats = chat_service.list_chats_by_user(user)
+        chat_data_list = []  # Initialize the list to store chat information
+
+        for chat in chats:
+            if chat.type == ChatType.PERSONAL.value:
+                member = chat_service.get_recipient_for_personal(chat.id, user)
+                title = f"{member.first_name} {member.last_name}"
+                chat_cover = member.profile_photo_url
+                chat_info = {
+                    'id': chat.id,
+                    'title': title,
+                    'chat_cover': chat_cover,
+                }
+            elif chat.type == ChatType.GROUP.value:
+                title = chat.title or chat_service.get_recipients_for_group(chat.id, user)
+                chat_cover = chat.chat_cover
+                chat_info = {
+                    'id': chat.id,
+                    'title': title,
+                    'chat_cover': chat_cover,
+                }
+            else:
+                chat_info = {
+                    'id': chat.id,
+                    'title': "Unknown Chat",
+                    'chat_cover': None, 
+                }
+            chat_data_list.append(chat_info)
+        chats = chat_service.list_chats_api(request,chat_data_list)
+        return JsonResponse(chats, safe=False)
+
     
 

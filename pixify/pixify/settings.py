@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 from env_config import env
 
@@ -99,7 +100,7 @@ LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
 
 USE_I18N = True
-USE_TZ = True
+USE_TZ = False
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
@@ -115,3 +116,9 @@ SESSION_COOKIE_NAME = 'sessionid'
 SESSION_COOKIE_SECURE = False  # Set to True if using HTTPS, otherwise False for local development
 SESSION_COOKIE_AGE = 1209600  # 2 weeks, or adjust as needed
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False  # Keeps session open after browser close if False
+
+
+
+# post media path
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'static/media')
