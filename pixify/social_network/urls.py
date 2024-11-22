@@ -114,8 +114,7 @@ urlpatterns = [
     path('', views.UserPostListView.as_view(), name='Userposts_list'),
 
 
-# comment
-    # path('comments/comment/create/',views.UserCommentCreatView.as_view(),name='usercomment_create')
+
 ]
 
 
