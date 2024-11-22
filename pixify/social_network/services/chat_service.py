@@ -1,74 +1,87 @@
-from ..models import Chat, User, ChatMember
+from ..models import Chat, User, ChatMember,Follower
+from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
+from django.db.models import Max
+from social_network.utils.common_utils import print_log
 from django.db.models import Q
 
+def list_chats_by_user(user):
+    user_chats = Chat.objects.filter(members=user).annotate(
+        latest_message_timestamp=Max('fk_chat_messages_chats_id__send_at'),
+        latest_message=Max('fk_chat_messages_chats_id__text')  
+    ).order_by('-latest_message_timestamp')
+    return user_chats
 
-# def list_chats():
-#   return models.Chat.objects.all()
-def list_chats(sort_by='title'):
-    return Chat.objects.all().order_by(sort_by)
-
-
-def create_chats(**kwargs):
-  chat= Chat.objects.create(
-     title=kwargs['title'],
-     type=kwargs['type'],
-     chat_cover=kwargs.get('chat_cover'),
-     is_active=kwargs.get('is_active', True),
-     created_by=kwargs['created_by']
-
-  )
-  return chat
-
-def list_chats():
-    return Chat.objects.all()
-
-def chat_details(chat_id):
-    return get_object_or_404(Chat, id=chat_id)
-
-def create_chat(user, members, type, is_active):
-            
-    chat = Chat.objects.create(members=members, created_by=user,type=type, is_active=is_active)        
-
-    # for member_id in members:
-    #     member = User.objects.get(id=member_id)
-    #     ChatMember.objects.create(chat_id=chat, member_id=member, created_by=user)
+def create_chat(user,title,chat_cover,type):
+    chat = Chat.objects.create(title=title,chat_cover=chat_cover,type=type,created_by=user)  
     return chat
 
-def update_chat(chat, title, members, chat_cover):    
-        chat.title = title  
-        chat.chat_cover = chat_cover                
-        chat.members.clear()                
-        for member_id in members:
-            member = User.objects.get(id=member_id)
-            ChatMember.objects.create(chat_id=chat, member_id=member)                
-        chat.save()
-        return chat    
+def update_chat(chat, title, chat_cover,user):    
+    chat.title = title  
+    chat.chat_cover = chat_cover    
+    chat.updated_by=user                           
+    chat.save()
+    return chat    
 
 def delete_chat(chat_id):
     chat = get_object_or_404(Chat, id=chat_id)
     chat.is_active = False
     chat.save()
     return chat
+  
+def get_chat_by_id(chat_id):
+    return get_object_or_404(Chat, id=chat_id, is_active=True)
+  
+def get_recipient_for_personal(chat_id,user):
+    # check this
+    try:
+        chat_member = ChatMember.objects.exclude(member_id=user.id).get(chat_id=chat_id)
+        if chat_member:
+            member = chat_member.member_id 
+            return member
+        return False
+    except Exception as e:
+        return False
 
 
-def get_user_data(user_id):    
-    followers = User.objects.filter(followers__followed_user=user_id).exclude(id=user_id)
-    followings = User.objects.filter(followings__user=user_id).exclude(id=user_id)
-    photo = User.profile_photo_url(User, 'profile') 
-    
-    return {
-        'user':user_id,
-        'followers': followers,
-        'followings': followings,
-        'photo': photo,
-    }
+def get_recipients_for_group(chat_id,user):
+        chat_members = ChatMember.objects.filter(chat_id=chat_id).exclude(member_id=user.id)
+        first_names = [chat_member.member_id.first_name for chat_member in chat_members]
+        return " , ".join(first_names)
 
-def details_chats(chat_id):
-    return Chat.objects(chat_id)
+def get_all_user_follow(user):
+    followers = Follower.objects.filter(follower=user, is_active=True).select_related('following')
+    followings = Follower.objects.filter(following=user, is_active=True).select_related('follower')
+    return followers, followings
 
-def get_chat (chat_id):
-    return get_object_or_404(Chat, id=chat_id)
+def list_chats_api(request,chat_data_list): 
+    search_query =request.GET.get('search', '')  
+    if search_query:
+        filtered_chats = [
+            chat for chat in chat_data_list 
+            if search_query.lower() in chat['title'].lower()
+        ]
+    else:
+        filtered_chats = chat_data_list
+    return filtered_chats
 
+  
+def list_followers_api(request, user):
+    search_query = request.GET.get('search', '')
+    if search_query:
+        followers = Follower.objects.filter(follower=user).filter(
+            Q(user_id__first_name__icontains=search_query) | Q(user_id__last_name__icontains=search_query)
+        ).values('user_id', 'user_id__first_name', 'user_id__last_name', 'user_id__email', 'user_id__profile_photo_url')
+
+        followings = Follower.objects.filter(following=user).filter(
+            Q(user_id__first_name__icontains=search_query) | Q(user_id__last_name__icontains=search_query)
+        ).values('user_id', 'user_id__first_name', 'user_id__last_name', 'user_id__email', 'user_id__profile_photo_url')
+        
+    else:
+        followers = Follower.objects.filter(follower=user).values('user_id', 'user_id__first_name', 'user_id__last_name', 'user_id__email', 'user_id__profile_photo_url')
+        followings = Follower.objects.filter(following=user).values('user_id', 'user_id__first_name', 'user_id__last_name', 'user_id__email', 'user_id__profile_photo_url')
+
+    response_data = {'followers': list(followers), 'followings': list(followings)}
+    return response_data
 
 

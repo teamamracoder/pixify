@@ -3,6 +3,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import login, logout
 from django.views import View
 from social_network.constants.default_values import ResponseMessageType
+from social_network.forms.auth_forms import RegisterForm, ReqOtpForm, VerifyOtpForm
 from social_network.packages.response import error_response, success_response
 from social_network.constants.error_messages import ErrorMessage
 from social_network.constants.success_messages import SuccessMessage
@@ -22,7 +23,11 @@ class RequestOTPView(View):
         return render(
             request,
             "auth/request_otp.html",
-            success_response(message=message, message_type=message_type),
+            success_response(
+                message=message,
+                message_type=message_type,
+                data={"req_otp_form": ReqOtpForm()},
+            ),
         )
 
     @catch_error
@@ -37,7 +42,10 @@ class RequestOTPView(View):
             return render(
                 request,
                 f"auth/verify_otp.html",
-                success_response(SuccessMessage.S000002.value, {"email": email}),
+                success_response(
+                    SuccessMessage.S000002.value,
+                    {"verify_otp_form": VerifyOtpForm(initial={"email": email})},
+                ),
             )
         else:
             request.session["message"] = ErrorMessage.E000003.value
@@ -49,9 +57,9 @@ class VerifyOTPView(View):
     @catch_error
     def post(self, request):
         email = request.POST.get("email")
-        otp_code = request.POST.get("otp_code")
+        otp = request.POST.get("otp")
 
-        if services.auth_service.verify_otp(email, otp_code):
+        if services.auth_service.verify_otp(email, otp):
             # get user by email
             user = services.user_service.get_user_by_email(email)
 
@@ -79,7 +87,7 @@ class VerifyOTPView(View):
                     "auth/register.html",
                     success_response(
                         SuccessMessage.S000003.value,
-                        {"email": email},
+                        {"register_form": RegisterForm(initial={"email": email})},
                     ),
                 )
         else:
@@ -89,7 +97,7 @@ class VerifyOTPView(View):
                 "auth/verify_otp.html",
                 error_response(
                     ErrorMessage.E000004.value,
-                    {"email": email},
+                    {"verify_otp_form": VerifyOtpForm(initial={"email": email})},
                 ),
             )
 
