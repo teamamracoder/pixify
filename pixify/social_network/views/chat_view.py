@@ -16,6 +16,9 @@ class ChatListView(View):
             no_chat_message="No chats available"
             return render(request, 'enduser/chat/chats.html',no_chat_message)
         for chat in chats:
+            member = chat_service.count_members(chat.id)
+            if member.count() < 2:
+                continue
             unread_messages = message_service.unread_count(chat, user)
             unread_messages_display = '' if unread_messages == 0 else '10+' if unread_messages > 10 else str(unread_messages)
 
@@ -36,17 +39,20 @@ class ChatListView(View):
                     title = chat.title 
                 else:
                     title=title 
-                chat_cover = chat.chat_cover  
+                if chat.chat_cover:
+                    chat_cover=chat.chat_cover
+                else:
+                    chat_cover=''        
                 
             latest_message_timestamp = self.format_timestamp(chat.latest_message_timestamp)
-            
             chat_info = {
                 'id': chat.id,
                 'title': title,
                 'chat_cover': chat_cover,
                 'latest_message_timestamp': latest_message_timestamp,
                 'latest_message': chat.latest_message,
-                'unread_messages': unread_messages_display
+                'unread_messages': unread_messages_display,
+                'is_group' :chat.type==ChatType.GROUP.value
             }
             chat_data.append(chat_info)
 
@@ -146,32 +152,39 @@ class ChatListViewApi(View):
     def get(self, request):
         user = request.user
         chats = chat_service.list_chats_by_user(user)
-        chat_data_list = []  # Initialize the list to store chat information
-
+        chat_data_list = []  
         for chat in chats:
             if chat.type == ChatType.PERSONAL.value:
                 member = chat_service.get_recipient_for_personal(chat.id, user)
                 title = f"{member.first_name} {member.last_name}"
-                chat_cover = member.profile_photo_url
-                chat_info = {
-                    'id': chat.id,
-                    'title': title,
-                    'chat_cover': chat_cover,
-                }
+                chat_cover = member.profile_photo_url or '/static/images/avatar.jpg'
+                if chat_cover:
+                    chat_info = {
+                        'id': chat.id,
+                        'title': title,
+                        'chat_cover': chat_cover,
+                    }
+                else:
+                    chat_info = {
+                        'id': chat.id,
+                        'title': title,
+                        'chat_cover': '/static/images/avatar.jpg',
+                    } 
             elif chat.type == ChatType.GROUP.value:
                 title = chat.title or chat_service.get_recipients_for_group(chat.id, user)
-                chat_cover = chat.chat_cover
-                chat_info = {
-                    'id': chat.id,
-                    'title': title,
-                    'chat_cover': chat_cover,
-                }
-            else:
-                chat_info = {
-                    'id': chat.id,
-                    'title': "Unknown Chat",
-                    'chat_cover': None, 
-                }
+                chat_cover = chat.chat_cover or '\static\images\group_pic.png'
+                if chat_cover:
+                    chat_info = {
+                        'id': chat.id,
+                        'title': title,
+                        'chat_cover': chat_cover,
+                    }
+                else:
+                    chat_info = {
+                        'id': chat.id,
+                        'title': title,
+                        'chat_cover':'\static\images\group_pic.png',
+                    } 
             chat_data_list.append(chat_info)
         chats = chat_service.list_chats_api(request,chat_data_list)
         return JsonResponse(chats, safe=False)

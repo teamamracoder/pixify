@@ -15,13 +15,13 @@
             <!-- Modal -->
             <div class="modal fade" id="example" tabindex="-1" role="dialog"
             aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-dialog modal-dialog-top" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <div class="input-group mb-3 " style="background-color:#B2B2B2; border-radius: 5px; ">
+                        <div class="input-group mb-3 " style=" border-radius: 5px; ">
                             <input type="text" id="search_chats" class="form-control" placeholder="Searching chats here....."
                                 aria-label="Example text with button addon" aria-describedby="button-addon1" />
-                                <button class="btn btn-secondary" type="button" id="button-addon1" id="searchbtn">
+                                <button class="btn btn-primary" type="button" id="button-addon1" id="searchbtn">
                                     <i class="bi bi-search"></i>
                                 </button>
                             </div>
@@ -47,7 +47,7 @@
                                         
                                         $("#fill").append(`
                                         <div class="list">
-                                         <img src="${chat.chat_cover}" id="profile-photo">
+                                        <img src="${chat.chat_cover}" id="profile-photo">
                                             <a href="/chat/${chat.id}" class="chat-item" id="hyperlink-text">${chat.title}</a><br>
                                             </div>
                                         `);
@@ -71,13 +71,15 @@
 
             <a href="#"
                 style="text-decoration: none; display: flex; flex-direction: column;">
-                
-                <img src="{{ chat.chat_cover }}" class="img-fluid" alt="" style="height: 40px; width:40px; border-radius: 50%" />
-
+                {% if chat.is_group %}  
+                <img src="{{ chat.chat_cover|default:'\static\images\group_pic.png' }}" class="img-fluid" alt="" style="height: 40px; width:40px; border-radius: 50%" />   
+                {% else %}  
+                <img src="{{ chat.chat_cover|default:'\static\images\avatar.jpg' }}" class="img-fluid" alt="" style="height: 40px; width:40px; border-radius: 50%" />   
+                {% endif %} 
                 <!-- Text next to the image -->
                 <div style="display: flex; flex-direction: column; flex-grow: 1">
                     <p style="margin: 0">
-                        <a href="{% url 'chat_details' chat_id=chat.id %}" id="hyperlink-text">
+                        <a href="{% url 'chat_details' chat_id=chat.id %}" id="hyperlink-text"class="chat-title ">
                             {{  chat.title  }}
                         </a>
                     </p>
@@ -235,6 +237,13 @@
 </script>
 
 <style>
+    .chat-title {
+        display: block;         
+        width: 50%;             
+        white-space: nowrap;    
+        overflow: hidden;        
+        text-overflow: ellipsis; 
+    }
     .list{
         margin:10px;
         background-color: rgb(170, 150, 291);
