@@ -1,41 +1,8 @@
+from social_network.constants.default_values import SortingOrder
+from social_network.packages.get_data import GetData
 from ..models import User
 from django.shortcuts import get_object_or_404
 from django.db.models import Q   
-
-
-# def list_users():
-#     return User.objects.all()
-
-# def create_user(first_name, last_name, email):
-#     return User.objects.create(first_name=first_name, last_name=last_name, email=email)
-
-# def get_user(user_id):
-#     return get_object_or_404(User, id=user_id)
-
-# def update_user(user, first_name, last_name, email):
-#     user.first_name = first_name
-#     user.last_name = last_name
-#     user.email = email
-#     user.save()
-#     return user
-
-# def delete_user(user):
-#     user.delete()
-
-# def list_users_api(request):
-#     search_query = request.GET['search']
-#     if search_query:
-#         # recipient name/ group name should start with search param
-#         users = User.objects.filter(first_name__icontains=search_query).values()
-#     else:
-#         users = User.objects.all().values()
-#     return users
-
-# def get_user_by_email(email):
-#     return User.objects.filter(email=email).first()
-
-
-
 
 # admin-user section
 def manage_list_users(sort_by='first_name'):
@@ -72,15 +39,17 @@ def manage_update_user(user, first_name,middle_name,last_name, email,dob,gender,
     user.save()
     return user
 
-def manage_list_users_filtered(search_query, sort_by='first_name'):
-    if search_query:
-        # Use Q objects to filter by first_name, last_name, or email
-        return User.objects.filter(
-            Q(first_name__icontains=search_query) | 
-            Q(last_name__icontains=search_query) |
-            Q(email__icontains=search_query)
-        ).order_by(sort_by)
-    return User.objects.all().order_by(sort_by)
+def manage_list_users_filtered(search_query, sorting_order, sort_by, page_number):
+    # get data
+    data = (
+        GetData(User)
+        .search(search_query,"first_name","last_name", "email")
+        .sort(sort_by, sorting_order)
+        .paginate(limit=3, page=page_number)
+        .execute()
+    )
+    # return data
+    return data
 
 
 
