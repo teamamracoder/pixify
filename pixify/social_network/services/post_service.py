@@ -53,6 +53,8 @@ def admin_list_posts_filtered(search_query, sort_by='posted_by'):
     return Post.objects.all().order_by(sort_by)
 
 
+
+# priya
 def user_post(post_Title,media_urls,user_id):
     return Post.objects.create(title=post_Title,media_url=media_urls,created_by_id=user_id,posted_by_id=user_id)
 
