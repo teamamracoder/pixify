@@ -6,8 +6,8 @@
 
 {%load static %}
 
- <div class="px-3  mb-3 mt-3 pb-1  ms-4 users"
-    style="background-color: #1f0447e3; box-shadow: 0 4px 8px rgba(151, 95, 236, 0.5); font-family: serif; border-radius: 7px;">
+ <div class="px-3 mb-3 mt-3 pb-1 users"
+    style="background-color: #1f0447e3;font-family: serif; border-radius: 7px;border: 1px solid #827b7b70;">
     <div class="text-center">
         <h3>About Us</h3>
     </div>
@@ -41,7 +41,7 @@
      {% comment %} Buttons -1{% endcomment %}
       <div class="accordion-item" style="background-color: #1f0447; color: #ffffff;" style="border:1px solid">
        <h2 class="accordion-header" id="headingOne">
-         <button class="accordion-button collapsed d-flex justify-content-between align-items-center" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne" style="background-color: #1f0447; color: #ffffff;">
+         <button class="accordion-button collapsed d-flex justify-content-between align-items-center" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne" style="background-color: #1f0447; color: #ffffff;padding-top: 1px;padding-bottom: 1px;">
            <span></span>
            <span class="icon">+</span>
          </button>
@@ -54,7 +54,7 @@
      </div>
      <div class="accordion-item" style="background-color: #1f0447; color: #ffffff;">
         <h2 class="accordion-header" id="headingTwo">
-          <button class="accordion-button collapsed d-flex justify-content-between align-items-center" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo" style="background-color: #1f0447; color: #ffffff;">
+          <button class="accordion-button collapsed d-flex justify-content-between align-items-center" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo" style="background-color: #1f0447; color: #ffffff;padding-top: 1px;padding-bottom: 1px;">
             <span></span>
             <span class="icon">+</span>
           </button>
@@ -79,7 +79,7 @@
             const icon = button.querySelector('.icon');
             const isCollapsed = button.classList.contains('collapsed');
             document.querySelectorAll('.accordion-button .icon').forEach(i => i.textContent = '+')
-            icon.textContent = isCollapsed ? '-' : '+';
+            icon.textContent = isCollapsed ? '+' : '-';
           });
         });
       </script>

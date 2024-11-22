@@ -48,6 +48,10 @@ class ResponseMessageType(Enum):
     WARNING='warning'
     INFO='info'
     NONE='null'
+
+class SortingOrder(Enum):
+    ASC='asc',
+    DESC='desc'
     
     
 # static values, insert these in master_lists table
