@@ -55,6 +55,13 @@ urlpatterns = [
     path('admin/chat/toggle-active/<int:chat_id>/', views.ManageToggleChatActiveView.as_view(), name='manage_toggle_chat_active'),
 
 
+    #comments
+     path('admin/comments/', views.ManageCommentListView.as_view(), name='manage_comment_list'),
+     path('admin/comments/create/', views.ManageCommentCreateView.as_view(), name='manage_comment_create'),
+     path('admin/comments/toggle-active/<int:comment_id>/', views.ManageToggleCommentActiveView.as_view(), name='manage_toggle_comment_active'),
+
+
+
 
     # notification
     path('notification/', views.NotificationView.as_view(), name='notification'),
