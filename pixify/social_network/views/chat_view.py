@@ -116,19 +116,33 @@ class ChatDetailsView(View):
         user = request.user 
         chat = chat_service.get_chat_by_id(chat_id)
         messages = message_service.list_messages_by_chat_id(chat_id)
+        # chat_data=[]
         if chat.type == ChatType.PERSONAL.value:
-            member = chat_service.get_recipient_for_personal(chat.id, user)
-            chat.title = f"{member.first_name} {member.last_name}"
-            chat.chat_cover = member.profile_photo_url
+            member = chat_service.get_recipient_for_personal(chat.id, user) 
+            if member:
+                title = f"{member.first_name} {member.last_name}"
+                chat_cover = member.profile_photo_url
+            else:
+                title = ''
+                chat_cover=''
         elif chat.type == ChatType.GROUP.value:
             title= chat_service.get_recipients_for_group(chat.id,user)
             if chat.title:    
-                chat.title = chat.title 
+                title = chat.title 
             else:
-                chat.title=title 
-            chat.chat_cover = chat.chat_cover   
-                
-        return render(request, 'enduser/chat/messages.html',{'chat':chat,'messages':messages,'user':user})
+                title=title 
+            if chat.chat_cover:
+                chat_cover=chat.chat_cover
+            else:
+                chat_cover=''            
+        chat_info = {
+            'id': chat.id,
+            'title': title,
+            'chat_cover': chat_cover,
+            'is_group' :chat.type==ChatType.GROUP.value
+        }
+        # chat_data.append(chat_info)       
+        return render(request, 'enduser/chat/messages.html',{'chat':chat_info,'messages':messages,'user':user})
     
 class ChatUpdateView(View):   
     def get(self, request,chat_id):        
