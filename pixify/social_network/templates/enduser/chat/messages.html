@@ -7,16 +7,15 @@
 <div class="chat-container">
     <div class="chat-header">
         <div class="user-info">
-            {% if ChatMember.chat_id > 2 %}
-                <img src="{{chat.chat_cover }}" alt="Group Chat" class="profile-pic">
+            {% if chat.is_group %}
+                <img src="{{chat.chat_cover|default:'\static\images\group_pic.png' }}" alt="Group Chat" class="profile-pic">
                 <span class="username">{{ chat.title }}</span>
             {% else %}
-                <img src="{{ chat.chat_cover }}" alt="Profile Picture" class="profile-pic">
+                <img src="{{ chat.chat_cover|default:'\static\images\avatar.jpg' }}" alt="Profile Picture" class="profile-pic">
                 <span class="username">{{ chat.title }}</span>
             {% endif %}
         </div>
     </div>
-
     <div class="chat-body">
         {% for message in messages %}
             {% if message.sender_id == user.id %}
