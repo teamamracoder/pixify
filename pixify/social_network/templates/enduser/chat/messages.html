@@ -7,24 +7,23 @@
 <div class="chat-container">
     <div class="chat-header">
         <div class="user-info">
-            {% if ChatMember.chat_id > 2 %}
-                <img src="{{chat.chat_cover }}" alt="Group Chat" class="profile-pic">
-                <span class="username">{{ chat.title }}</span>
+            {% if chat.is_group %}
+                <img src="{{chat.chat_cover|default:'\static\images\group_pic.png' }}" alt="Group Chat" class="profile-pic">
+                <span class="username G-msg_chat-title">{{ chat.title }}</span>
             {% else %}
-                <img src="{{ chat.chat_cover }}" alt="Profile Picture" class="profile-pic">
-                <span class="username">{{ chat.title }}</span>
+                <img src="{{ chat.chat_cover|default:'\static\images\avatar.jpg' }}" alt="Profile Picture" class="profile-pic">
+                <span class="username P-msg_chat-title">{{ chat.title }}</span>
             {% endif %}
         </div>
     </div>
-
     <div class="chat-body">
         {% for message in messages %}
             {% if message.sender_id.id == user.id %}
                 <div class="message sent">
                     <div class="message-content">
                         <div class="message-header">
-                            <img src="{{ chat.chat_cover }}" alt="Sender Profile Pic" class="message-profile-pic">
-                            <span class="message-username">{{ message.sender.username }}</span>
+                            <img src="{{ message.sender_id.profile_photo_url|default:'\static\images\avatar.jpg' }}" alt="Sender Profile Pic" class="message-profile-pic">
+                            <span class="message-username">{{ message.sender_id.first_name }}</span>
                         </div>
                         <span class="text-dark">{{ message.text }}</span>
                     </div>
@@ -54,7 +53,7 @@
                 <div class="message received float-end">
                     <div class="message-content">
                         <div class="message-header">
-                            <img src="{{ chat.chat_cover }}" alt="{{ message.sender_id.first_name }}'s Profile Picture" class="message-profile-pic">
+                            <img src="{{ message.sender_id.profile_photo_url|default:'\static\images\avatar.jpg' }}" alt="{{ message.sender_id.first_name }}'s Profile Picture" class="message-profile-pic">
                             <span class="message-username">{{ message.sender_id.first_name }}</span>
                         </div>
                         <span>{{ message.text }}</span>
@@ -306,6 +305,20 @@ $(document).ready(function () {
     }
 
     /* Header */
+    .G-msg_chat-title {
+        display: block;         
+        width: 55%;             
+        white-space: nowrap;    
+        overflow: hidden;        
+        text-overflow: ellipsis; 
+    }
+    .P-msg_chat-title {
+        display: block;         
+        width: 70%;             
+        white-space: nowrap;    
+        overflow: hidden;        
+        text-overflow: ellipsis; 
+    }
     .chat-header {
         background-color: #533b79;
         color: white;
