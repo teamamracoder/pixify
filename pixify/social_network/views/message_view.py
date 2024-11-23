@@ -16,12 +16,13 @@ class MessageCreateView(View):
     def post(self, request):
         auth_user = request.user
         text = request.POST.get('message')
-        media_url = request.POST.get('media_url')
-        if len(media_url)<0:
-            media_url=[]
+        media_url = request.POST.get('media_url',{})
         urls=[]
-        for data in media_url:
-            url = 'www.adaswd.com'      # apped the all url in urls
+        if media_url:
+            if len(media_url)<0:
+                media_url=[]
+            for data in media_url:
+                url = 'www.adaswd.com'      # apped the all url in urls
         chat = chat_service.get_chat_by_id(request.POST.get('chat_id'))    
         mentions = request.POST.get('mentions', '')                                           
         mention_ids = []        
@@ -47,7 +48,13 @@ class MessageUpdateView(View):
         user = request.user
         message = message_service.get_message_by_id(message_id)
         text = request.POST.get('message', '') 
-        media_url = request.POST.get('media_url', '')
+        media_url = request.POST.get('media_url',{})
+        urls=[]
+        if media_url:
+            if len(media_url)<0:
+                media_url=[]
+            for data in media_url:
+                url = 'www.adaswd.com' 
         mentions = request.POST.get('mentions', '')                                           
         mention_ids = []
 
@@ -56,7 +63,7 @@ class MessageUpdateView(View):
             mention_ids = [member.member_id.id for member in chat_members]
         else:
             mention_ids = [int(id) for id in re.split('[, ]+', mentions) if id]                        
-        message_service.update_message(message, text, media_url, user)                
+        message_service.update_message(message, text,urls, user)                
         message_mention_service.delete_message_mentions(message,user)                
         for user_id in mention_ids:
             mentioned_user = User.objects.get(id=user_id)
