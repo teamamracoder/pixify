@@ -46,30 +46,13 @@
                         <div class="col-6">{{post.description}}</div>
                     </div>
                 </li>
-
-                <!-- <li class="list-group-item">
-                    <div class="row">
-                        <div class="col-6">item 1</div>
-                        <div class="col-6">value 1</div>
-                    </div>
-                </li>
-
-                <li class="list-group-item">A second item</li>
-                <li class="list-group-item">A third item</li>
-                <li class="list-group-item">A fourth item</li>
-                <li class="list-group-item">And a fifth one</li>
-            </ul> -->
         </div>
         <div class="text-start">
-            <a href="{% url 'post_list' %}" class="btn btn-sm btn-outline-secondary">Back</a>
-            <a href="{% url 'post_update' post.id %}" class="btn btn-sm btn-primary">Edit</a>
+            <a href="{% url 'manage_post_list' %}" class="btn btn-sm btn-outline-secondary">Back</a>
+            <a href="{% url 'manage_post_update' post.id %}" class="btn btn-sm btn-primary">Edit</a>
+          
+
         </div>
     </div>
 </div>
-
-<!-- <div class="text-start">
-    <a href="{% url 'post_list' %}" class="btn btn-sm btn-outline-secondary">Back</a>
-    <a href="{% url 'post_update' post.id %}" class="btn btn-sm btn-primary">Edit</a>
-</div> -->
-
 {% endblock %}

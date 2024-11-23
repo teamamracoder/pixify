@@ -135,16 +135,13 @@ class ManageUserDeleteView(View):
         user = services.manage_user_service.manage_get_user(user_id)
         services.user_service.delete_user(user)
         return redirect('user_list')
-
-
+    
 class ManageToggleUserActiveView(View):
     def post(self, request, user_id):
         user = services.manage_user_service.manage_get_user(user_id)
         user.is_active = not user.is_active  # Toggle active status
         user.save()
         return JsonResponse({'is_active': user.is_active})
-
-
 
 class ManageUserProfileView(View):
     def get(self, request):

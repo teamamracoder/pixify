@@ -10,27 +10,27 @@ from ..constants import welcome_template, otp_template
 
 def send_otp(email):
     # generate otp
-    otp_code = generate_otp()
+    otp = generate_otp()
 
     # Store OTP in cache with an expiry time (e.g., 5 minutes)
-    cache.set(f"otp_{email}", otp_code, timeout=300)  # 300 seconds = 5 minutes
+    cache.set(f"otp_{email}", otp, timeout=300)  # 300 seconds = 5 minutes
 
     # print in console if debugging is on
-    print_log(f"OTP for user {email}: {otp_code}")
+    print_log(f"OTP for user {email}: {otp}")
 
     # send email
     is_send = send_email(
         email,
         otp_template.get_subject(),
-        otp_template.get_message(otp=otp_code),
+        otp_template.get_message(otp=otp),
     )
 
     return is_send
 
 
-def verify_otp(email, otp_code):
+def verify_otp(email, otp):
     cached_otp = cache.get(f"otp_{email}")
-    if cached_otp == otp_code:
+    if cached_otp == otp:
         # Invalidate the OTP after successful verification
         cache.delete(f"otp_{email}")
         return True
