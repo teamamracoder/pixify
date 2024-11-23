@@ -9,10 +9,10 @@
         <div class="user-info">
             {% if chat.is_group %}
                 <img src="{{chat.chat_cover|default:'\static\images\group_pic.png' }}" alt="Group Chat" class="profile-pic">
-                <span class="username">{{ chat.title }}</span>
+                <span class="username chat-title">{{ chat.title }}</span>
             {% else %}
                 <img src="{{ chat.chat_cover|default:'\static\images\avatar.jpg' }}" alt="Profile Picture" class="profile-pic">
-                <span class="username">{{ chat.title }}</span>
+                <span class="username chat-title">{{ chat.title }}</span>
             {% endif %}
         </div>
     </div>
@@ -238,6 +238,13 @@ $(document).ready(function () {
 
 <style>
     /* Overall Chat Container */
+    .chat-title {
+        display: block;         
+        width: 50%;             
+        white-space: nowrap;    
+        overflow: hidden;        
+        text-overflow: ellipsis; 
+    }
     .chat-container {
         height: 650px;
         background-color: #f2f2f2;
