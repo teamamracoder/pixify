@@ -19,3 +19,4 @@ from .friends_view import *
 from .manage_chat_view import *
 from .manage_notification_view import *
 from .manage_post_view import *
+from .manage_specific_user_view import *
