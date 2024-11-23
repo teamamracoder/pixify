@@ -21,8 +21,7 @@ class Post(models.Model):
     )
         
     title = models.CharField(max_length=50, blank=True, null=True)
-    description = models.TextField(blank=True, null=True)
-    
+    description = models.TextField(blank=True, null=True) 
     accessability = models.IntegerField(
         choices=[(level.value, level.name) for level in AccessLevel],
         blank= True,
@@ -32,6 +31,11 @@ class Post(models.Model):
     members = models.ManyToManyField(
         'User', through='PostSpecificUser', through_fields=('post_id', 'specific_user_id'), related_name='fk_members_post_users'
     )
+    
+    tags = models.ManyToManyField(
+        'User', through='PostUserTags', through_fields=('post', 'user'), related_name='fk_tags_post_users'
+    )
+    
     treat_as = models.IntegerField(
         choices=[(type.value, type.name) for type in SpecificUserTreatment],
         blank=True,
