@@ -1,5 +1,9 @@
 from django.shortcuts import render,redirect
 from django.views import View
+
+from social_network.constants.default_values import Role
+from ..decorators import auth_required, role_required
+from social_network.decorators.exception_decorators import catch_error
 from ..services import chat_service, user_service,message_service, chat_member_service
 from django.http import JsonResponse
 from ..constants import ChatType
@@ -7,13 +11,16 @@ from ..models import User
 from django.utils import timezone
 
 class ChatListView(View):
+    @catch_error
+    @auth_required
+    @role_required(Role.ADMIN.value, Role.END_USER.value)
     def get(self, request):
-        user = request.user 
-        chats = chat_service.list_chats_by_user(user)
+        user = request.user
+        chats = chat_service.list_chats_by_user(user)               # chats must have at least one other member 
         followers, followings = chat_service.get_all_user_follow(user)
         chat_data = []
         if not chats:
-            no_chat_message="No chats available"
+            no_chat_message={"message":"No chats available"}
             return render(request, 'enduser/chat/chats.html',no_chat_message)
         for chat in chats:
             member = chat_service.count_members(chat.id)
@@ -95,7 +102,6 @@ class ChatCreateView(View):
         user=request.POST['user']        
         type = request.POST['type']
         members = request.POST.getlist('members')        
-
         if type == ChatType.PERSONAL.value:            
             title = None
             chat_cover = None
