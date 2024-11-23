@@ -1,12 +1,13 @@
-document.addEventListener("DOMContentLoaded", function () {
-    const menuToggle = document.getElementById('menu-toggle');
-    const sidebarMain = document.getElementById('sidebarMain');
-    const mainContainer = document.querySelector('.col-10');
-
-    menuToggle.addEventListener('click', function () {
-        sidebarMain.classList.toggle('d-none'); // Show/hide sidebar
-        sidebarMain.classList.toggle('d-lg-block'); // Ensure desktop behavior is not affected
-        mainContainer.classList.toggle('col-12');
-        mainContainer.classList.toggle('col-10');
+$(document).ready(function () {
+    $('#sidebar-toggler').on('click', function () {
+        if ($('#sidebarMain').hasClass('d-lg-block')) {
+            $('#sidebarMain').removeClass('d-lg-block');
+            $('#main-container').removeClass('col-lg-10').addClass('col-lg-12');
+        } else {
+            $('#sidebarMain').addClass('d-lg-block');
+            $('#main-container').removeClass('col-lg-12').addClass('col-lg-10');
+        }
     });
+    //navbar populate
+    $('#navLinks').html($('#sidebarLinks').html());
 });
