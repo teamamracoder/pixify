@@ -35,7 +35,7 @@
                         <a class="nav-link" href="{% url 'user_list' %}">Users</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'post_list' %}">Posts</a>
+                        <a class="nav-link" href="{% url 'manage_post_list' %}">Posts</a>
                     </li>
                 </ul>
             </div>
@@ -158,11 +158,11 @@
                                     data-bs-parent="#accordionContainer">
                                     <div class="accordion-body p-0">
                                         <div class="list-group rounded-0">
-                                            <a href="{% url 'post_list' %}"
+                                            <a href="{% url 'manage_post_list' %}"
                                                 class="list-group-item list-group-item-action ui-bg-grey border-0 ps-4">
                                                 <i class="bi bi-tools fs-6 me-2"></i>
                                                 List</a>
-                                            <a href="{% url 'post_create' %}"
+                                            <a href="{% url 'manage_post_create' %}"
                                                 class="list-group-item list-group-item-action ui-bg-grey border-0 ps-4">
                                                 <i class="bi bi-diagram-3 fs-6 me-2"></i>
                                                 Create</a>                                          
