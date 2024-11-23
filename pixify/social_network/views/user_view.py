@@ -2,6 +2,10 @@ from django.http import HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, render, redirect
 from django.views import View
 
+from social_network.constants.default_values import SortingOrder
+from social_network.decorators.exception_decorators import catch_error
+from social_network.packages.response import success_response
+
 from ..forms.manage_user_forms import ManageUserUpdateForm
 from ..models.user_model import User
 
@@ -15,36 +19,31 @@ from ..forms import ManageUserCreateForm
 
 
 class ManageUserListView(View):
+    @catch_error
     def get(self, request):
         # Fetch the search query from the URL parameters
-        search_query = request.GET.get('search', '') 
-        sort_by = request.GET.get('sort_by', 'first_name')
-        sort_order = request.GET.get('sort_order', 'asc')
+        search_query = request.GET.get('search', '')
+        sort_by = request.GET.get('sort_by', "created_at")
+        sort_order = request.GET.get('sort_order', SortingOrder.DESC.value)
         page_number = request.GET.get('page', 1)
 
-        # Adjust sort order for descending order
-        if sort_order == 'desc':
-            sort_by = '-' + sort_by
+        # get data
+        data = services.manage_user_service.manage_list_users_filtered(
+            search_query=search_query,
+            sort_by=sort_by,
+            sorting_order=sort_order,
+            page_number=page_number
+        )
 
-        print(f"Search Query: {search_query}")
-        # Get filtered and sorted users based on search
-        users = services.manage_user_service.manage_list_users_filtered(search_query, sort_by)
+        # add more data
+        data["choices_gender"] = [{gender.value: gender.name} for gender in Gender]
 
-        # Paginate the users
-        paginator = Paginator(users, 10)  # Show 10 users per page
-        page_obj = paginator.get_page(page_number)
-
-        choices_gender = [{gender.value: gender.name} for gender in Gender]
-
-        return render(request, 'adminuser/user/list.html', {
-            'users': page_obj,
-            'choices_gender': choices_gender,
-            'sort_by': sort_by,
-            'sort_order': sort_order,
-            'search_query': search_query,  # Ensure this is being passed to the template
-            'page_obj': page_obj,
-        })
-
+        # return
+        return render(
+            request,
+            'adminuser/user/list.html',
+            success_response("User data fetched successfully", data)
+        ) 
 
 
 class ManageUserCreateView(View):
