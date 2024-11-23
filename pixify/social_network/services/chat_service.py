@@ -42,12 +42,19 @@ def get_recipient_for_personal(chat_id,user):
         return False
     except Exception as e:
         return False
+    
+def count_members(chat_id ):
+    members=ChatMember.objects.filter(chat_id=chat_id)
+    return members
+
 
 
 def get_recipients_for_group(chat_id,user):
-        chat_members = ChatMember.objects.filter(chat_id=chat_id).exclude(member_id=user.id)        # proper tarika implement
-        first_names = [chat_member.member_id.first_name for chat_member in chat_members]
-        first_names.insert(0,'You')   # jugaru tarika
+        chat_members = ChatMember.objects.filter(chat_id=chat_id)
+        first_names = [
+        'You' if chat_member.member_id == user else chat_member.member_id.first_name 
+        for chat_member in chat_members
+    ]
         return " , ".join(first_names)
 
 def get_all_user_follow(user):
