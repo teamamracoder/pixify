@@ -1802,3 +1802,9 @@ textarea::placeholder {
 html {
     scroll-behavior: smooth;
   }
+
+
+ .hidecomment{
+
+    display: none;
+ } 

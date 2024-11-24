@@ -59,7 +59,7 @@ def user_post(post_Title,media_urls,user_id):
     return Post.objects.create(title=post_Title,media_url=media_urls,created_by_id=user_id,posted_by_id=user_id)
 
 # priya
-def Postlist_posts(sort_by = 'created_at'):
-    return Post.objects.all().order_by(sort_by)
+def Postlist_posts():
+    return Post.objects.all()
 
 # comment
