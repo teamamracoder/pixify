@@ -35,6 +35,10 @@ urlpatterns = [
     path('admin/posts/<int:post_id>/details', views.ManagePostDetailView.as_view(), name='manage_post_detail'),
     path('admin/posts/<int:post_id>/update/', views.ManagePostUpdateView.as_view(), name='manage_post_update'),
     
+    #admin post specific user
+    # path('admin/posts/<int:post_id>/create_specific_user/', views.ManagePostSpecificUserView.as_view(), name='manage_post_specific_user'),
+    # path('admin/posts/specific_user_list/', views.ManagePostSpecificUserListView.as_view(), name='manage_post_specific_user_list'),
+    # path('admin/posts/specific_user_details/', views.ManagePostSpecificUserDetailView.as_view(), name='manage_post_specific_user_detail'),
 
 
     #chat

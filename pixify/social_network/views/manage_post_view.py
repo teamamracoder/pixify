@@ -27,17 +27,13 @@ class ManagePostCreateView(View):
         if form.is_valid():
              post_data = {
                     'posted_by': User.objects.get(id=request.POST['posted_by']),
-                    'created_by' : user,
-                    # 'created_by': User.objects.get(id=request.POST['posted_by']),
+                    'created_by' : user,  # curent user
                     'type': form.cleaned_data['type'],
                     'content_type': form.cleaned_data['content_type'],
-                    # 'media_url': request.POST.get('media_url', ''), 
                     'title': form.cleaned_data['title'],
                     'description': form.cleaned_data['description'],
                     'accessability': form.cleaned_data['accessability'],
-                    # 'members': request.POST.getlist('members'),  
-                    'treat_as': form.cleaned_data['treat_as'],
-                    # 'is_active': request.POST.get('is_active', 'on') == 'on'
+                    'treat_as': form.cleaned_data['treat_as']
                 }
              services.post_service.manage_create_post(**post_data) 
              return redirect('manage_post_list')
@@ -129,5 +125,3 @@ class ManageTogglePostActiveView(View):
         post.is_active = not post.is_active  # Toggle active status
         post.save()
         return JsonResponse({'is_active': post.is_active})
-    
-
