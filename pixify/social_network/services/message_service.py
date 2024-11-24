@@ -1,9 +1,19 @@
 from ..models import Message, MessageReadStatus,MessageMention
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 
 
-def list_messages_by_chat_id(chat_id):   # make message_read_status service and views for read_status
-    return Message.objects.filter(chat_id=chat_id,is_active=True)
+
+def list_messages_by_chat_id(chat_id,user_id):  
+    messages = Message.objects.filter(chat_id=chat_id, is_active=True)
+    for message in messages:
+        if not MessageReadStatus.objects.filter(message_id=message, read_by_id=user_id).exists():
+            MessageReadStatus.objects.create(
+                message_id=message,
+                read_by_id=user_id,
+                read_at=timezone.now(),
+                created_by_id=user_id) 
+    return messages
 
 def create_message(text, media_url, sender_id, chat):
     return Message.objects.create(

@@ -119,10 +119,9 @@ class ChatCreateView(View):
 
 class ChatDetailsView(View):
     def get(self, request, chat_id):
-        user = request.user 
+        user =request.user 
         chat = chat_service.get_chat_by_id(chat_id)
-        messages = message_service.list_messages_by_chat_id(chat_id)
-        # chat_data=[]
+        messages = message_service.list_messages_by_chat_id(chat_id,user.id)
         if chat.type == ChatType.PERSONAL.value:
             member = chat_service.get_recipient_for_personal(chat.id, user) 
             if member:
