@@ -1,4 +1,4 @@
-{% comment %} {% extends "../base.html" %}
+{% extends "../base.html" %}
 
 {% block title %}Comment List{% endblock %}
 
@@ -51,16 +51,16 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for comment in data.data %}
+                        {% for comment in data %}
                         <tr>
                             <td>
                                 <a class="text-decoration-none text-primary hover-bg" href="">
                                     {{ comment.comment }}
                                 </a>
                             </td>
-                            <td>{{ comment.post_id }}</td>
+                            <td>{{ comment.post_id.id }}</td>
                             <td>
-                                <button class="btn btn-sm toggle-status" data-user-id="{{ comment.id }}">
+                                <button class="btn btn-sm toggle-status" data-comment-id="{{ comment.id }}">
                                     {% if comment.is_active %}
                                     <i class="bi bi-toggle-on text-success"></i> Active
                                     {% else %}
@@ -77,169 +77,6 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <div class="current mr-auto">
                             <span class="text-info me-3">Total {{ data.pagination.total }} users</span>
-                            Page {{ data.pagination.current_page }} of {{ data.pagination.total_page }}.
-                        </div>
-                        <div class="step-links ml-auto">
-                            <nav aria-label="Page navigation example">
-                                <ul class="pagination">
-                                    {% if data.pagination.prev_page %}
-                                    <li class="page-item">
-                                        <a class="page-link"
-                                           href="?page=1&search={{ data.applied_options.search.text }}&sort_by={{ data.applied_options.sort.field }}&sort_order={{ data.applied_options.sort.order }}"
-                                           aria-label="Previous">
-                                            <span aria-hidden="true">&laquo;</span>
-                                        </a>
-                                    </li>
-                                    <li class="page-item">
-                                        <a class="page-link"
-                                           href="?page={{ data.pagination.prev_page }}&search={{ data.applied_options.search.text }}&sort_by={{ data.applied_options.sort.field }}&sort_order={{ data.applied_options.sort.order }}">
-                                            {{ data.pagination.prev_page }}
-                                        </a>
-                                    </li>
-                                    {% endif %}
-                                    <li class="page-item">
-                                        <a class="page-link active" href="#">{{ data.pagination.current_page }}</a>
-                                    </li>
-                                    {% if data.pagination.next_page %}
-                                    <li class="page-item">
-                                        <a class="page-link"
-                                           href="?page={{ data.pagination.next_page }}&search={{ data.applied_options.search.text }}&sort_by={{ data.applied_options.sort.field }}&sort_order={{ data.applied_options.sort.order }}">
-                                            {{ data.pagination.next_page }}
-                                        </a>
-                                    </li>
-                                    <li class="page-item">
-                                        <a class="page-link"
-                                           href="?page={{ data.pagination.total_page }}&search={{ data.applied_options.search.text }}&sort_by={{ data.applied_options.sort.field }}&sort_order={{ data.applied_options.sort.order }}"
-                                           aria-label="Next">
-                                            <span aria-hidden="true">&raquo;</span>
-                                        </a>
-                                    </li>
-                                    {% endif %}
-                                </ul>
-                            </nav>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script>
-    $(document).ready(function () {
-        $('.toggle-status').click(function () {
-            const commentId = $(this).data('comment-id');
-            const button = $(this);
-
-            $.ajax({
-                url: '/admin/comments/toggle-active/' + commentId + '/',
-                type: 'POST',
-                headers: {
-                    'X-CSRFToken': '{{ csrf_token }}' // Include CSRF token for security
-                },
-                success: function (response) {
-                    if (response.is_active) {
-                        button.html('<i class="bi bi-toggle-on text-success"></i> Active');
-                    } else {
-                        button.html('<i class="bi bi-toggle-off text-danger"></i> Inactive');
-                    }
-                },
-                error: function (xhr) {
-                    alert('Error updating status: ' + xhr.responseText);
-                }
-            });
-        });
-    });
-</script>
-{% endblock %} {% endcomment %}
-
-
-{% extends "../base.html" %}
-
-{% block title %}Comment List{% endblock %}
-
-{% block content %}
-<style>
-    .hover-bg:hover {
-        background-color: rgba(240, 242, 245, 0.1);
-        color: aqua;
-    }
-
-    .current {
-        font-weight: bold;
-    }
-</style>
-
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col">
-            <h2 class="text-center mb-4">Comment</h2>
-
-            <div class="d-flex justify-content-between mb-3">
-                <button class="btn btn-primary btn-sm"><a href="{% url 'manage_comment_create' %}"
-                        class="text-white text-decoration-none">Add Comment</a></button>
-
-                <form method="get" action="{% url 'manage_comment_list' %}">
-                    <div class="input-group" style="max-width: 300px;">
-                        <input type="text" class="form-control border-secondary" placeholder="Search"
-                            aria-label="Search" name="search" value="{{ data.applied_options.search.text }}">
-                        <button class="btn btn-outline-secondary">Search</button>
-                    </div>
-                </form>
-            </div>
-
-            <div class="table-responsive">
-                <table class="table table-bordered">
-                    <!-- new aaded by sujit -->
-                    <thead class="table-info text-white">
-                        <tr>
-                            <th>
-                                <a
-                                    href="?sort_by=comment&sort_order={% if data.applied_options.sort.order == 'asc' %}desc{% else %}asc{% endif %}">Comment
-                                </a>
-                            </th>
-                            <th>
-                                <a
-                                    href="?sort_by=post_id&sort_order={% if data.applied_options.sort.order == 'asc' %}desc{% else %}asc{% endif %}">Email</a>
-                            </th>
-                           
-                            <th>
-                                Status
-                            </th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-                        {% for comment in data.data %}
-                        <tr>
-                            <td>
-                            {{ comment.comment }} 
-                            </td>
-                            <td>
-                                {{ comment.post_id }}
-                            </td>
-                            
-                            <td>
-                                <button class="btn btn-sm toggle-status" data-comment-id="{{ comment.id }}">
-                                    {% if comment.is_active %}
-                                    <i class="bi bi-toggle-on text-success"></i> Active
-                                    {% else %}
-                                    <i class="bi bi-toggle-off text-danger"></i> Inactive
-                                    {% endif %}
-                                </button>
-                            </td>
-
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-
-
-                <!-- new added by sujit -->
-                <div class="container">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div class="current mr-auto">
-                            <span class="text-info me-3">Total {{ data.pagination.total }} comment</span>
                             Page {{ data.pagination.current_page }} of {{ data.pagination.total_page }}.
                         </div>
 
@@ -289,14 +126,10 @@
                         </div>
                     </div>
                 </div>
-
-
             </div>
         </div>
     </div>
 </div>
-
-
 
 <script>
     $(document).ready(function () {
@@ -308,10 +141,9 @@
                 url: '/admin/comments/toggle-active/' + commentId + '/',
                 type: 'POST',
                 headers: {
-                    'X-CSRFToken': '{{ csrf_token }}'  // Include CSRF token for security
+                    'X-CSRFToken': '{{ csrf_token }}' // Include CSRF token for security
                 },
                 success: function (response) {
-                    // Update the button's text and icon based on the new status
                     if (response.is_active) {
                         button.html('<i class="bi bi-toggle-on text-success"></i> Active');
                     } else {
@@ -325,7 +157,4 @@
         });
     });
 </script>
-
-
-
 {% endblock %}

@@ -42,28 +42,26 @@ from ..forms.manage_comment_form import ManageCommentCreateForm
  
 
 class ManageCommentListView(View):
-    @catch_error
-    def get(self, request):
-        # Fetch the search query from the URL parameters
-        search_query = request.GET.get('search', '')
-        sort_by = request.GET.get('sort_by', "created_at")
-        sort_order = request.GET.get('sort_order', SortingOrder.DESC.value)
-        page_number = request.GET.get('page', 1)
+    # @catch_error
+    # def get(self, request):
+    #     # Fetch the search query from the URL parameters
+    #     search_query = request.GET.get('search', '')
+    #     sort_by = request.GET.get('sort_by', "created_at")
+    #     sort_order = request.GET.get('sort_order', SortingOrder.DESC.value)
+    #     page_number = request.GET.get('page', 1)
 
         # get data
-        data = services.manage_comment_service.manage_list_comments_filtered(
-            search_query=search_query,
-            sort_by=sort_by,
-            sorting_order=sort_order,
-            page_number=page_number
-        )
-        # return
-        return render(
-            request,
-            'adminuser/comment/list.html',
-            success_response("User data fetched successfully", data)
-        ) 
-    
+        # data = services.manage_comment_service.manage_list_comments_filtered(
+        #     search_query=search_query,
+        #     sort_by=sort_by,
+        #     sorting_order=sort_order,
+        #     page_number=page_number
+        # )
+        # return 
+
+      def get (self,request):
+        data=services.manage_comment_service.manage_list_comments_filtered()
+        return render(request, 'adminuser/comment/list.html', {'data': data})
 
 
 

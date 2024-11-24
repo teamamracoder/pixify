@@ -20,14 +20,20 @@ def manage_create_comment(**kwargs):
 
 
 
-def manage_list_comments_filtered(search_query, sorting_order, sort_by, page_number):
-    # get data
-    data = (
-        GetData(Comment)
-        .search(search_query,"comment","post_id")
-        .sort(sort_by, sorting_order)
-        .paginate(limit=3, page=page_number)
-        .execute()
-    )
+# def manage_list_comments_filtered(search_query, sorting_order, sort_by, page_number):
+#     # get data
+#     data = (
+#         GetData(Comment)
+#         .search(search_query,"comment","post_id")
+#         .sort(sort_by, sorting_order)
+#         .paginate(limit=3, page=page_number)
+#         .execute()
+#     )
+#     return data
 
-    return data
+def manage_list_comments_filtered():
+    return models.Comment.objects.all()
+
+
+def manage_get_comment(comment_id):
+    return get_object_or_404(models.Comment, id=comment_id)
