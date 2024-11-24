@@ -10,11 +10,7 @@ from django.core.paginator import Paginator
 
 
 
-
-
-
-
-class CommentsView(View):
+class CommentsCreateView(View):
     def get(self, request):
         return render(request, 'enduser/comments/index.html')
     def post(self,request):                
@@ -23,6 +19,9 @@ class CommentsView(View):
          
          services.comment_service.user_comments_create(commentstext,user_id)
          return redirect('comments')
+    
+class Commentlistview(View):
+    comment_list=services.comment_service.comment_list()    
 
 
 

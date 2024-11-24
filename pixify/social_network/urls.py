@@ -66,7 +66,7 @@ urlpatterns = [
     # contact
     path('contactus/', views.ContactUsView.as_view(), name='contact'),
 
-    path('comments/', views.CommentsView.as_view(), name='comments'),
+    
 
     path('friendrequest/', views.FriendRequestView.as_view(), name='friendrequest'),
 
@@ -112,8 +112,8 @@ urlpatterns = [
     #for enduser post
     path('posts/create/', views.UserPostCreatView.as_view(),name='userpost_create'),
     path('', views.UserPostListView.as_view(), name='Userposts_list'),
-
-
+    #comment 
+    path('comments/', views.CommentsCreateView.as_view(), name='comments'),
 
 ]
 
