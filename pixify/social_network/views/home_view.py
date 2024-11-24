@@ -19,6 +19,7 @@ class HomeView(View):
         message_type = request.session.pop("message_type", "")
         # user post create by priya
         posts =services.post_service.Postlist_posts()
+        
         count_commnet =services.comment_service.get_count_comment(15)
         print(count_commnet)
         post_dict={

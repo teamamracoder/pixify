@@ -218,6 +218,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
 //For Comment
 // comment reply section by priya mitra
+
+
+
+
 document.addEventListener("DOMContentLoaded", () => {
     document.querySelectorAll(".view-comment").forEach((viewComment) => {
 
@@ -225,14 +229,19 @@ document.addEventListener("DOMContentLoaded", () => {
             document.querySelectorAll(".reply-open").forEach(reply => {
 
                 reply.style.display = "none";
-            });
+            });   
+            
             document.querySelectorAll(".view-comment").forEach(comment => {
-                comment.innerHTML = comment.innerHTML.replace("Hide reply", "View reply");
+            comment.innerHTML = comment.innerHTML.replace("Hide reply", "View reply");
+              
+
             });
 
             const replyOpen = viewComment.nextElementSibling;
             if (replyOpen.style.display === "none" || replyOpen.style.display === "") {
                 replyOpen.style.display = "block";
+
+                
                 viewComment.innerHTML = viewComment.innerHTML.replace("View reply", "Hide reply");
             } else {
                 replyOpen.style.display = "none";
