@@ -37,3 +37,8 @@ def manage_list_comments_filtered():
 
 def manage_get_comment(comment_id):
     return get_object_or_404(models.Comment, id=comment_id)
+
+
+
+def get_comment(comment_id):
+    return get_object_or_404(Comment, id=comment_id)

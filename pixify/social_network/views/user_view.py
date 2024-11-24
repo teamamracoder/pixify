@@ -67,6 +67,7 @@ class ManageUserCreateView(View):
 class ManageUserDetailView(View):
     def get(self, request, user_id):
         user = services.manage_user_service.manage_get_user(user_id)
+        
         return render(request, 'adminuser/user/detail.html', {'user': user})
 
 class ManageUserUpdateView(View):

@@ -29,14 +29,24 @@ urlpatterns = [
     path('admin/notifications/<int:notification_id>/update/', views.ManageNotificationUpdateView.as_view(), name='manage_notification_update'),
     # path('admin/notifications/<int:delete_id>/delete/', views.ManageNotificationDeleteView.as_view(), name='manage_notification_delete'),
 
-    # post
+ 
     path('admin/posts/', views.AdminPostListView.as_view(), name='post_list'),
     path('admin/posts/toggle-active/<int:post_id>/', views.AdminTogglePostActiveView.as_view(), name='toggle_post_active'),
     path('admin/posts/create/', views.AdminPostCreateView.as_view(), name='post_create'),
-    path('admin/posts/<int:post_id>/', views.AdminPostDetailView.as_view(), name='post_detail'),
+    path('admin/posts/<int:post_id>/ ', views.AdminPostDetailView.as_view(), name='post_detail'),
     path('admin/posts/<int:post_id>/update/', views.AdminPostUpdateView.as_view(), name='post_update'),
     path('admin/posts/<int:post_id>/delete/', views.AdminPostDeleteView.as_view(), name='post_delete'),
 
+
+
+
+
+#admin_post
+    # path('admin/posts/', views.ManagePostListView.as_view(), name='manage_post_list'),
+    # path('admin/posts/toggle-active/<int:post_id>/', views.ManageTogglePostActiveView.as_view(), name='toggle_post_active'),
+    # path('admin/posts/create/', views.ManagePostCreateView.as_view(), name='manage_post_create'),
+    # path('admin/posts/<int:post_id>/details', views.ManagePostDetailView.as_view(), name='manage_post_detail'),
+    # path('admin/posts/<int:post_id>/update/', views.ManagePostUpdateView.as_view(), name='manage_post_update'),
 
     #chat
     path('chat/', views.ChatListView.as_view(), name='chat_list'),

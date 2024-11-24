@@ -54,10 +54,32 @@
                 </li>
                 <li class="list-group-item">
                     <div class="row">
-                        <div class="col-6">Post Comments</div>
+                      <div class="col-6"><button type="button" style="outline:none;border:none;background:transparent;" data-bs-toggle="modal" data-bs-target="#exampleModal" data-bs-whatever="@getbootstrap">Post Comments</button></div>
                         <div class="col-6">{{post.description}}</div>
                     </div>
                 </li>
+             
+                {% comment %} modal for comments {% endcomment %}
+                
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+         <h5>All Comments </h1>
+
+        </div>
+        <div class="modal-body">
+          
+        </div>
+
+        <div class="modal-footer">
+          
+        </div>
+      </div>
+    </div>
+  </div>
+
+
                 <li class="list-group-item">
                     <div class="row">
                         <div class="col-6">Post Shares</div>
@@ -89,5 +111,10 @@
     <a href="{% url 'post_list' %}" class="btn btn-sm btn-outline-secondary">Back</a>
     <a href="{% url 'post_update' post.id %}" class="btn btn-sm btn-primary">Edit</a>
 </div> -->
+
+
+
+
+
 
 {% endblock %}

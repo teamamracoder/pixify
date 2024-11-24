@@ -67,8 +67,23 @@ class AdminPostCreateView(View):
 
 class AdminPostDetailView(View):
     def get(self, request, post_id):
+        
         post = services.post_service.get_post(post_id)
+
+
         return render(request, 'adminuser/post/detail.html', {'post': post})
+
+
+# class AdminPostDetailView(View):
+#      def get(self, request, post_id,comment_id):
+#         #  post_dic= {
+#         post = services.post_service.get_post(post_id)
+#         comment= services.manage_comment_service.get_comment(comment_id)
+#                 #    }
+#         return render(request, 'adminuser/post/detail.html', {'post': post ,'comment':comment},)
+
+
+
 
 class AdminPostUpdateView(View):
     def get(self, request, post_id):
