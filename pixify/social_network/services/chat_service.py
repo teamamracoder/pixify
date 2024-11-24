@@ -5,12 +5,15 @@ from django.db.models import Max
 from social_network.utils.common_utils import print_log
 from django.db.models import Q
 
+from django.db.models import Max, Q
+
 def list_chats_by_user(user):
     user_chats = Chat.objects.filter(members=user).annotate(
-        latest_message_timestamp=Max('fk_chat_messages_chats_id__send_at'),
-        latest_message=Max('fk_chat_messages_chats_id__text')  
+        latest_message_timestamp=Max('fk_chat_messages_chats_id__send_at', filter=Q(fk_chat_messages_chats_id__is_active=True)),
+        latest_message=Max('fk_chat_messages_chats_id__text', filter=Q(fk_chat_messages_chats_id__is_active=True))
     ).order_by('-latest_message_timestamp')
     return user_chats
+
 
 def create_chat(user,title,chat_cover,type):
     chat = Chat.objects.create(title=title,chat_cover=chat_cover,type=type,created_by=user)  
@@ -70,7 +73,7 @@ def list_chats_api(request,chat_data_list):
             if search_query.lower() in chat['title'].lower()
         ]
     else:
-        filtered_chats = chat_data_list
+        filtered_chats =''
     return filtered_chats
 
   
