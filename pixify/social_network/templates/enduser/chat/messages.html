@@ -19,28 +19,32 @@
     </div>
     <div class="chat-body">
         {% for message in messages %}
-            {% if message.sender_id == user.id %}
+            {% if message.sender_id.id == user.id %}
                 <div class="message sent">
                     <div class="message-content">
                         <div class="message-header">
                             <img src="{{ message.sender_id.profile_photo_url|default:'\static\images\avatar.jpg' }}" alt="Sender Profile Pic" class="message-profile-pic">
                             <span class="message-username">{{ message.sender_id.first_name }}</span>
                         </div>
-                        <span>{{ message.text }}</span>
+                        <span class="text-dark">{{ message.text }}</span>
                     </div>
                     <div class="message-footer">
+                        
                         <span class="time">{{ message.created_at|date:"h:i" }}</span>
+                        <div>
                         <i class="bi bi-three-dots-vertical" onclick="toggleOptions({{ message.id }})"></i>
                         <i class="bi bi-emoji-smile" onclick="toggleReactionPopup({{ message.id }})"></i>
+                        </div>
                     </div>
+                    
                     <div class="options-popup" id="options-{{ message.id }}" style="display: none;">
+                        {% if message.sender_id.id == user.id%}
                         <a href="#" onclick="editMessage('{{ message.id }}', '{{ message.text|escapejs }}')">Edit</a>
-                        <form method="POST" action="">
-                            {% csrf_token %}
-                            <button type="submit" class="delete-btn">Delete</button>
-                        </form>
+                        {%endif%}
+                        <a href="#" onclick="deleteMessage('{{ message.id }}')">Delete</a>
                         <a href="#" onclick="replyToMessage('{{ message.id }}', '{{ message.sender.username }}', '{{ message.text|escapejs }}')">Reply</a>
                     </div>
+                    
                     <div class="reaction-popup" id="reaction-popup-{{ message.id }}" style="display: none;">
                         <span onclick="addReaction('{{ message.id }}', '👍')">👍</span>
                         <span onclick="addReaction('{{ message.id }}', '❤️')">❤️</span>
@@ -51,27 +55,30 @@
                     <div class="reaction-display" id="reaction-display-{{ message.id }}"></div>
                 </div>
             {% else %}
-                <div class="message received">
+                <div class="message received float-end">
                     <div class="message-content">
                         <div class="message-header">
-                            <img src="{{ chat.chat_cover }}" alt="{{ message.sender_id.first_name }}'s Profile Picture" class="message-profile-pic">
+                            <img src="{{ message.sender_id.profile_photo_url|default:'\static\images\avatar.jpg' }}" alt="{{ message.sender_id.first_name }}'s Profile Picture" class="message-profile-pic">
                             <span class="message-username">{{ message.sender_id.first_name }}</span>
                         </div>
                         <span>{{ message.text }}</span>
                     </div>
                     <div class="message-footer">
                         <span class="time">{{ message.created_at|date:"h:i A" }}</span>
+                        <div>
                         <i class="bi bi-three-dots-vertical" onclick="toggleOptions({{ message.id }})"></i>
                         <i class="bi bi-emoji-smile" onclick="toggleReactionPopup({{ message.id }})"></i>
+                        </div>
                     </div>
-                    <div class="options-popup" id="options-{{ message.id }}" style="display: none;">
-                        <a href="#" onclick="editMessage('{{ message.id }}', '{{ message.text|escapejs }}')">Edit</a>
-                        <form method="POST" action="">
-                            {% csrf_token %}
-                            <button type="submit" class="delete-btn">Delete</button>
-                        </form>
-                        <a href="#" onclick="replyToMessage('{{ message.id }}', '{{ message.sender.username }}', '{{ message.text|escapejs }}')">Reply</a>
-                    </div>
+                   <div class="options-popup" id="options-{{ message.id }}" style="display: none;">
+                    {% if message.sender_id.id == user.id%}
+                    <a href="#" onclick="editMessage('{{ message.id }}', '{{ message.text|escapejs }}')">Edit</a>
+                    {%endif%}
+
+                    <a href="#" onclick="deleteMessage('{{ message.id }}')">Delete</a>
+                    <a href="#" onclick="replyToMessage('{{ message.id }}', '{{ message.sender.username }}', '{{ message.text|escapejs }}')">Reply</a>
+                </div>
+
                     <div class="reaction-popup" id="reaction-popup-{{ message.id }}" style="display: none;">
                         <span onclick="addReaction('{{ message.id }}', '👍')">👍</span>
                         <span onclick="addReaction('{{ message.id }}', '❤️')">❤️</span>
@@ -94,9 +101,16 @@
             </div>
         </div>
 
-<form id="messageForm" method="POST" action="message/create">
+
+
+        
+
+<form id="messageForm" method="POST" action="{% url 'message_create' %}">
     {% csrf_token %}
-    <input type="hidden" id="chat_id" name="chat_id" value={{chat.id}}> 
+    <input type="hidden" id="action" name="action" value="create"> <!-- Default to create -->
+    <input type="hidden" id="chat_id" name="chat_id" value="{{ chat.id }}"> 
+    <input type="hidden" id="message_id" name="message_id" value=""> <!-- Used for update/delete -->
+
     <div id="mentionModal" class="modal">
         <div class="modal-content" id="mention-suggestions">
             <!-- Mention suggestions will be displayed here -->
@@ -105,31 +119,48 @@
     <input type="text" name="message" id="message-input" placeholder="Type your message here..." required>
     <button type="submit">➤</button>
 </form>
-    </div>
+
+
+</div>
 </div>
 
 <script>
+    function setFormAction(action, messageId = '') {
+        document.getElementById('action').value = action;
+        document.getElementById('message_id').value = messageId;
+
+        let formAction = '';
+        if (action === 'update') {
+            formAction = `/chat/message/${messageId}/update/`;
+        } else if (action === 'delete') {
+            formAction = `/chat/message/${messageId}/delete/`;
+        } else {
+            formAction = `/chat/message/create/`;
+        }
+        document.getElementById('messageForm').action = formAction;
+    }
+
+
 
 $(document).ready(function () {
-    $('#message-input').on('input', function () {
+    var mentionedUsers = []; // Array to store mentioned user IDs
+
+    // jdi input hoy and oi specific input value ta @ hoy
+    $('#message-input').on('input', function (e) {
+        console.log(e)
         var messageText = $(this).val();
-        var chatId = $('#chat_id').val();         
-
+        var chatId = $('#chat_id').val();
         if (messageText.includes('@') && chatId) {
-            var searchQuery = messageText.split('@').pop().trim(); 
-            console.log('Search Query:', searchQuery);
-
+            var searchQuery = messageText.split('@').pop().trim();
             $.ajax({
-                url: `/message-mention/${chatId}?search=${searchQuery}`, 
+                url: `/message-mention/${chatId}?search=${searchQuery}`,        // extra_param = single/multiple selected_memnber_id 
                 type: 'GET',
                 success: function (res) {
-                    console.log('Response:', res);
-
+                    console.log(res)
                     if (Array.isArray(res) && res.length > 0) {
                         displayMentions(res);
                     } else {
-                        console.log('No members found or invalid response format');
-                        $('#mentionModal').hide(); 
+                        $('#mentionModal').hide();
                     }
                 },
                 error: function (xhr, status, error) {
@@ -137,13 +168,13 @@ $(document).ready(function () {
                 }
             });
         } else {
-            $('#mentionModal').hide(); 
+            $('#mentionModal').hide();
         }
     });
 
     function displayMentions(mentions) {
         var mentionSuggestions = $('#mention-suggestions');
-        mentionSuggestions.empty(); 
+        mentionSuggestions.empty();
 
         mentions.forEach(function (mention) {
             var mentionItem;
@@ -166,7 +197,7 @@ $(document).ready(function () {
             mentionSuggestions.append(mentionItem);
         });
 
-        $('#mentionModal').show(); 
+        $('#mentionModal').show();
     }
 
     $('#mention-suggestions').on('click', '.mention-item', function () {
@@ -175,15 +206,37 @@ $(document).ready(function () {
         var messageText = messageInput.val().trim();
         messageText = messageText.replace(/@\w*$/, mentionText + ' ').trim();
         messageInput.val(messageText);
+
+        // Add the mentioned user's ID to the array
+        var userId = $(this).data('member-id');
+        if (!mentionedUsers.includes(userId)) {
+            mentionedUsers.push(userId);
+        }
+
         $('#mentionModal').hide();
+        
+        // Return focus to the input field
+        messageInput.focus();
+    });
+
+    $('#messageForm').on('submit', function () {
+        // Add mentioned user IDs to a hidden input before submitting the form
+        $('<input>').attr({
+            type: 'hidden',
+            name: 'mentions',
+            value: mentionedUsers.join(',')
+        }).appendTo('#messageForm');
     });
 
     $(window).on('click', function (event) {
         if ($(event.target).is('#mentionModal')) {
-            $('#mentionModal').hide(); 
+            $('#mentionModal').hide();
         }
     });
 });
+
+
+
 
 
     function toggleOptions(messageId) {
@@ -208,12 +261,18 @@ $(document).ready(function () {
         }
         document.getElementById('reaction-popup-' + messageId).style.display = 'none';
     }
-      function editMessage(messageId, content) {
+    function editMessage(messageId, content) {
         const messageInput = document.querySelector('input[name="message"]');
         messageInput.value = content;
         messageInput.focus();
-        document.querySelector('form').action = `/message/${messageId}/edit/`;
+        setFormAction('update', messageId);
     }
+
+    function deleteMessage(messageId) {
+    setFormAction('delete', messageId);  // Dynamically set the form action to delete the message
+    document.getElementById('messageForm').submit();  // Submit the form
+}
+
 
     function replyToMessage(messageId, username, content) {
         const messageInput = document.querySelector('input[name="message"]');
@@ -233,15 +292,37 @@ $(document).ready(function () {
             document.querySelectorAll('.options-popup').forEach(popup => popup.style.display = 'none');
         }
     });
-  
+
+    // Function to scroll the chat body to the bottom
+function scrollToBottom() {
+    const chatBody = document.querySelector('.chat-body');
+    chatBody.scrollTop = chatBody.scrollHeight;
+}
+
+// Scroll to the bottom on page load
+document.addEventListener('DOMContentLoaded', function () {
+    scrollToBottom();
+});
+
+// Scroll to the bottom when a new message is added
+const chatBody = document.querySelector('.chat-body');
+const observer = new MutationObserver(scrollToBottom);
+
+observer.observe(chatBody, { childList: true });
+
 </script>
+
+
+
+
+
 
 
 <style>
     /* Overall Chat Container */
     .chat-container {
         height: 650px;
-        background-color: #f2f2f2;
+        background-color: #211237f2; /*shubhankar change only color*/
         border-radius: 10px;
         box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
         display: flex;
@@ -304,7 +385,23 @@ $(document).ready(function () {
         overflow-y: auto;
         display: flex;
         flex-direction: column;
+        scrollbar-width: thin; /* For Firefox */
+        scrollbar-color: #c7c5c5 #f2f2f2;
     }
+        /* Customize scrollbar for Webkit browsers */
+    .chat-body::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .chat-body::-webkit-scrollbar-thumb {
+        background-color: #c7c5c5;
+        border-radius: 10px;
+    }
+
+    .chat-body::-webkit-scrollbar-track {
+        background-color: #f2f2f2;
+    }
+
 
     .message {
         max-width: 80%;
@@ -325,13 +422,13 @@ $(document).ready(function () {
 
     .message.sent {
         align-self: flex-end;
-        background-color: #533b79;
+        background-color: #34b7f1; /*shubhankar change only color*/
         color: white;
     }
 
     .message.received {
         align-self: flex-start;
-        background-color: #d1c6d3;
+        background-color:#3b1fa0ab ; /*shubhankar change only color*/
         color: #333333;
     }
 
@@ -377,28 +474,30 @@ $(document).ready(function () {
 
     .message-footer .bi-three-dots-vertical {
         cursor: pointer;
-        font-size: 12px; /* Smaller icon */
+        font-size: 18px; /* Smaller icon */
         margin-left: 5px;
     }
 
+/* shubhankar */
+/* start */
     .options-popup {
-        display: none;
-        position: absolute;
-        top: 25px;
-        left: 100%; /* Align the options to the right of the message */
-        margin-left: 10px;
-        background-color: #fff;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        width: 160px;
-        font-size: 14px;
-        z-index: 10;
+    position: absolute; 
+    top: 20px;         
+    left: 50%;         
+    transform: translateX(-50%); 
+    z-index: 1000;    
+    width: 100px;     
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    background: #fff;   
+    border-radius: 8px;
+    padding: 16px;
     }
+    /* end */
 
     .options-popup a {
         display: block;
-        padding: 10px;
+        padding: 5px;
+        padding-left: 10px;
         color: #333;
         text-decoration: none;
         border-bottom: 1px solid #ccc;
@@ -537,7 +636,7 @@ $(document).ready(function () {
     .bi-emoji-smile {
         font-size: 20px;
         cursor: pointer;
-        color: gray;
+        color: red; /*shubhankar change only color*/
     }
     
     .bi-emoji-smile:hover {
@@ -585,5 +684,10 @@ $(document).ready(function () {
         font-weight: bold;
     }
     /*end A*/
+
+
+
+
+    
 </style>
 {% endblock %} add a action when i type "@" in the form 
