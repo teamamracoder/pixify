@@ -60,13 +60,11 @@ class ManageChatUpdateForm(forms.Form):
 # Manage_Member_Chat
 # ===========================================
 class ManageMemberChatCreateForm(forms.Form):
-   user_id = forms.CharField(
-        label="User_Id",
-        
+    member_id = forms.CharField(
+        label="Member_Id",       
         widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "Enter User Id"})
-    )
-    
-chat_id = forms.IntegerField(
-    label="Chat_Id",
-    widget=forms.TextInput(attrs={"class": "form-control","placeholder": "Enter Chat Id"})
-    )
+    )   
+    chat_id = forms.CharField(
+        label="Chat_Id",
+        widget=forms.TextInput(attrs={"class": "form-control","placeholder": "Enter Chat Id"})
+        )
