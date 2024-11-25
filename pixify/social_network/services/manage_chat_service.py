@@ -4,13 +4,8 @@ from django.db.models import Q
 
 
 
-
-
-
-#=====================================================
 def manage_list_chats():
   return Chat.objects.all()
-
 
 def manage_create_chats(title,type,created_by,chat_cover):
   return Chat.objects.create(title=title,type=type,created_by=created_by,chat_cover=chat_cover)
@@ -41,3 +36,5 @@ def manage_list_chats_filtered(search_query, sort_by='title'):
             Q(chat_cover__icontains=search_query)
         ).order_by(sort_by)
     return Chat.objects.all().order_by(sort_by)
+
+
