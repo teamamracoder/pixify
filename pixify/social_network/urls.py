@@ -108,7 +108,7 @@ urlpatterns = [
     # message reply
     path('message-reply/<int:message_id>/', views.MessageReplyCreateView.as_view(), name='message_reply'),
 
-    path('posts/create/', views.UserPostCreatView.as_view()),
+    # path('posts/create/', views.UserPostCreatView.as_view()),
 ]
 
 
