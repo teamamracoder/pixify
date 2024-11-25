@@ -20,10 +20,14 @@ class CommentsCreateView(View):
          services.comment_service.user_comments_create(commentstext,user_id)
          return redirect('comments')
     
-class Commentlistview(View):
-    comment_list=services.comment_service.comment_list()    
+# class Commentlistview(View):
+#     comment_list=services.comment_service.comment_list()    
 
 
+class CommentsListView(View):
+     def get (self,request):
+         comment_list=services.comment_service.comment_list()
+         return render (request,'enduser/home/index.html',{'comment_list':comment_list})
 
 
      
