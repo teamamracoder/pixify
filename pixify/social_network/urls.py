@@ -45,6 +45,8 @@ urlpatterns = [
     path('chat/<int:chat_id>/delete', views.ChatDeleteView.as_view(), name='chat_delete'),
     path('chat/<int:chat_id>/create-members', views.ChatMemeberCreateView.as_view(), name='create_members'),
     path('chat/<int:chat_id>/delete-members', views.ChatMemeberDeleteView.as_view(), name='delete_members'),
+    
+    # admin users
 
     path('admin/chat/', views.ManageChatListView.as_view(), name='manage_chat_list'),
     path('admin/chat/create/', views.ManageChatCreateView.as_view(), name='manage_chat_create'),
@@ -52,6 +54,8 @@ urlpatterns = [
     path('admin/chat/<int:chat_id>/update/', views.ManageChatUpdateView.as_view(), name='manage_chat_update'),
    # path('admin/chat/<int:chat_id>/delete/', views.ManageChatDeleteView.as_view(), name='manage_chat_delete'),
     path('admin/chat/toggle-active/<int:chat_id>/', views.ManageToggleChatActiveView.as_view(), name='manage_toggle_chat_active'),
+    path('admin/chat/membercreate/', views.ManageMemberChatCreateView.as_view(), name='manage_chat_membercreate'),
+    path('admin/chat/memberlist/', views.ManageMemberChatListView.as_view(), name='manage_chat_memberlist'),
     
 
 

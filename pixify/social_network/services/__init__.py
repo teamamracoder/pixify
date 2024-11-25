@@ -11,3 +11,5 @@ from .chat_service import *
 from .manage_chat_service import *
 from .manage_notification_service import *
 from .manage_specific_user_service import *
+
+from .manage_chat_member_service import *
