@@ -20,3 +20,4 @@ def comment_list():
     return models.Comment.objects.all()
 
 
+
