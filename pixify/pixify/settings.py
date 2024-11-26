@@ -55,6 +55,8 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'pixify.wsgi.application'
+# ASGI_APPLICATION = 'pixify.asgi.application'
+
 
 DATABASES = {
     'default': {
