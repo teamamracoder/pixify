@@ -1,14 +1,34 @@
-from ..models import Chat, User, ChatMember,Follower
+from ..models import Chat, User, ChatMember,Follower,Message
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
-from django.db.models import Max
+from django.db.models import Max,Q,Subquery,OuterRef,F
+from django.db.models.functions import Coalesce
+from social_network.utils.common_utils import print_log
+
 
 def list_chats_by_user(user):
-    user_chats = Chat.objects.filter(members=user).annotate(
-        latest_message_timestamp=Max('fk_chat_messages_chats_id__send_at'),
-        latest_message=Max('fk_chat_messages_chats_id__text')  
-    ).order_by('-latest_message_timestamp')
+    user_chats = Chat.objects.filter(
+        members=user, 
+        is_active=True
+        ).annotate(
+        # Use Coalesce to fallback to created_at if no messages exist
+        latest_message_timestamp=Coalesce(
+            Max('fk_chat_messages_chats_id__send_at', filter=Q(is_active=True)),
+            F('created_at')
+        )
+    ).order_by('-latest_message_timestamp')    
+
+    user_chats = user_chats.annotate(
+        latest_message=Subquery(
+            Message.objects.filter(
+                chat_id=OuterRef('pk'), 
+                is_active=True 
+            ).order_by('-created_at')  
+            .values('text')[:1]  
+        )
+    )
     return user_chats
+
 
 def create_chat(user,title,chat_cover,type):
     chat = Chat.objects.create(title=title,chat_cover=chat_cover,type=type,created_by=user)
@@ -40,12 +60,19 @@ def get_recipient_for_personal(chat_id,user):
         return False
     except Exception as e:
         return False
+    
+def count_members(chat_id ):
+    members=ChatMember.objects.filter(chat_id=chat_id)
+    return members
+
 
 
 def get_recipients_for_group(chat_id,user):
-        chat_members = ChatMember.objects.filter(chat_id=chat_id).exclude(member_id=user.id)        # proper tarika implement
-        first_names = [chat_member.member_id.first_name for chat_member in chat_members]
-        first_names.insert(0,'You')   # jugaru tarika
+        chat_members = ChatMember.objects.filter(chat_id=chat_id)
+        first_names = [
+        'You' if chat_member.member_id == user else chat_member.member_id.first_name 
+        for chat_member in chat_members
+    ]
         return " , ".join(first_names)
 
 def get_all_user_follow(user):
@@ -61,7 +88,7 @@ def list_chats_api(request,chat_data_list):
             if search_query.lower() in chat['title'].lower()
         ]
     else:
-        filtered_chats = chat_data_list
+        filtered_chats =''
     return filtered_chats
 
 def get_existing_personal_chat(type, user_id, member):
