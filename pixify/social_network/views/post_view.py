@@ -65,24 +65,27 @@ class AdminPostCreateView(View):
         return redirect('post_list')
 
 
-class AdminPostDetailView(View):
-    def get(self, request, post_id):
-        
-        post = services.post_service.get_post(post_id)
-
-
-        return render(request, 'adminuser/post/detail.html', {'post': post})
-
-
 # class AdminPostDetailView(View):
-#      def get(self, request, post_id,comment_id):
-#         #  post_dic= {
+#     def get(self, request, post_id):
+        
 #         post = services.post_service.get_post(post_id)
-#         comment= services.manage_comment_service.get_comment(comment_id)
-#                 #    }
-#         return render(request, 'adminuser/post/detail.html', {'post': post ,'comment':comment},)
 
 
+#         return render(request, 'adminuser/post/detail.html', {'post': post})
+
+
+class AdminPostDetailView(View):
+     def get(self, request, post_id):
+        
+        comment_count =services.post_service.get_comment_count_by_post(post_id)
+        print(comment_count)
+        post_dic= {
+        'post' : services.post_service.get_post(post_id),
+        'comment': services.manage_comment_service.manage_list_comments_filtered(post_id),
+                   }
+        return render(request, 'adminuser/post/detail.html', {'post_dic':post_dic, 'comment_count':comment_count},)
+
+        
 
 
 class AdminPostUpdateView(View):

@@ -3,7 +3,7 @@
 {% block title %}Post Details{% endblock %}
 
 {% block content %}
-
+{%load static %}
 <h1 class="text-center">Post Details</h1>
 
 
@@ -29,33 +29,33 @@
                 <li class="list-group-item">
                     <div class="row">
                         <div class="col-6">Post id</div>
-                        <div class="col-6">{{ post.id }}</div>
+                        <div class="col-6">{{ post_dic.post.id }}</div>
                     </div>
                 </li>
 
                 <li class="list-group-item">
                     <div class="row">
                         <div class="col-6">Post title</div>
-                        <div class="col-6">{{post.title}}</div>
+                        <div class="col-6">{{post_dic.post.title}}</div>
                     </div>
                 </li>
 
                 <li class="list-group-item">
                     <div class="row">
                         <div class="col-6">Post Description</div>
-                        <div class="col-6">{{post.description}}</div>
+                        <div class="col-6">{{post_dic.post.description}}</div>
                     </div>
                 </li>
                 <li class="list-group-item">
                     <div class="row">
                         <div class="col-6">Post Likes</div>
-                        <div class="col-6">{{post.posted_by.id}}</div>
+                        <div class="col-6">{{post_dic.post.posted_by.id}}</div>
                     </div>
                 </li>
                 <li class="list-group-item">
                     <div class="row">
-                      <div class="col-6"><button type="button" style="outline:none;border:none;background:transparent;" data-bs-toggle="modal" data-bs-target="#exampleModal" data-bs-whatever="@getbootstrap">Post Comments</button></div>
-                        <div class="col-6">{{post.description}}</div>
+                      <div class="col-6"><a type="button" style="outline:none;border:none;background:transparent;" data-bs-toggle="modal" data-bs-target="#exampleModal" data-bs-whatever="@getbootstrap">Post Comments</a></div>
+                        <div class="col-6">{{comment_count}}</div>
                     </div>
                 </li>
              
@@ -65,11 +65,25 @@
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-         <h5>All Comments </h1>
+         <h5 class="text-center">All Comments </h1>
 
         </div>
-        <div class="modal-body">
-          
+        <div class="modal-body" style="scroll-y: auto;">
+            {%for com in post_dic.comment%}
+            <div class="d-flex py-1">
+                <img src="{% static 'images/green.png'%}" alt="User" class="rounded-circle"
+                    style="width:25px; height:25px;">
+                <div class="d-flex" style="flex-direction: column;width:100%">
+                    <div class="comment-text mb-0 ps-2 py-1  rounded px-3"
+                        style="background-color: gray;margin-left: 8px;width: 100%;">
+                        <span class="d-block">{{ user.first_name }} {{ user.middle_name }} {{ user.last_name }} </span>
+                        <span class="fw-light ps-1" style="font-size:13px">{{com.comment}}</span>
+                    </div>
+                </div>
+
+            </div>
+            {%endfor%}
+
         </div>
 
         <div class="modal-footer">
@@ -83,36 +97,17 @@
                 <li class="list-group-item">
                     <div class="row">
                         <div class="col-6">Post Shares</div>
-                        <div class="col-6">{{post.description}}</div>
+                        <div class="col-6">none</div>
                     </div>
                 </li>
 
-                <!-- <li class="list-group-item">
-                    <div class="row">
-                        <div class="col-6">item 1</div>
-                        <div class="col-6">value 1</div>
-                    </div>
-                </li>
-
-                <li class="list-group-item">A second item</li>
-                <li class="list-group-item">A third item</li>
-                <li class="list-group-item">A fourth item</li>
-                <li class="list-group-item">And a fifth one</li>
-            </ul> -->
         </div>
         <div class="text-start">
             <a href="{% url 'post_list' %}" class="btn btn-sm btn-outline-secondary">Back</a>
-            <a href="{% url 'post_update' post.id %}" class="btn btn-sm btn-primary">Edit</a>
+            <a href="{% url 'post_update' post_dic.post.id %}" class="btn btn-sm btn-primary">Edit</a> 
         </div>
     </div>
 </div>
-
-<!-- <div class="text-start">
-    <a href="{% url 'post_list' %}" class="btn btn-sm btn-outline-secondary">Back</a>
-    <a href="{% url 'post_update' post.id %}" class="btn btn-sm btn-primary">Edit</a>
-</div> -->
-
-
 
 
 

@@ -1,4 +1,5 @@
-from ..models import Post,User
+
+from ..models import Post,User,Comment
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
 
@@ -20,7 +21,9 @@ def update_post(post, title, description):
 def delete_post(post):
     post.delete()
 
-
+def get_comment_count_by_post(post_id):
+    comment_count = Comment.objects.filter(post_id=post_id, reply_for__isnull=True, is_active=True).count()
+    return comment_count
 
 # new added by sujit
 def admin_list_posts(sort_by = 'title'):
