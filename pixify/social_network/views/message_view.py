@@ -26,27 +26,20 @@ class MessageCreateView(View):
         text = request.POST.get('message')
         chat = chat_service.get_chat_by_id(request.POST.get('chat_id'))
         mentions = request.POST.get('mentions', '')
-
-        print(f"Message: {text}")
-        print(f"Mentions: {mentions}")
-
         mention_ids = []
         if 'all' in mentions.split(','):
+
             chat_members = ChatMember.objects.filter(chat_id=chat).exclude(member_id=auth_user)
             mention_ids = [member.member_id.id for member in chat_members]
         else:
             mention_ids = [int(id) for id in mentions.split(',') if id.isdigit()]
-        
-        print(f"Mention IDs: {mention_ids}")
-
         media_urls = []
         for file in request.FILES.getlist('media_files'):
             file_name = default_storage.save(file.name, ContentFile(file.read()))
             media_url = default_storage.url(file_name)
             media_urls.append(media_url)
 
-        message = message_service.create_message(text, media_urls, auth_user, chat)
-        print(f"Created Message: {message}")        
+        message = message_service.create_message(text, media_urls, auth_user, chat)  
         message_read_status_service.create_message_read_status(message,auth_user)
         for user in mention_ids:   
             mentioned_user=user_service.get_user(user)
@@ -68,7 +61,6 @@ class MessageUpdateView(View):
         text = request.POST.get('message', '') 
         media_url = request.POST.get('media_url', '{}')
         mentions = request.POST.get('mentions', '')            
-
         mention_ids = []
 
         if mentions == "all":
