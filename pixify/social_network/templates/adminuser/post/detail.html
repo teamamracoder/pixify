@@ -72,10 +72,10 @@
             {%for com in post_dic.comment%}
             <div class="d-flex py-1">
                 <img src="{% static 'images/green.png'%}" alt="User" class="rounded-circle"
-                    style="width:25px; height:25px;">
+                    style="width:40px; height:40px;">
                 <div class="d-flex" style="flex-direction: column;width:100%">
                     <div class="comment-text mb-0 ps-2 py-1  rounded px-3"
-                        style="background-color: gray;margin-left: 8px;width: 100%;">
+                        style="background-color: #FEF3E2;margin-left: 8px;width: 100%;">
                         <span class="d-block">{{ user.first_name }} {{ user.middle_name }} {{ user.last_name }} </span>
                         <span class="fw-light ps-1" style="font-size:13px">{{com.comment}}</span>
                     </div>
