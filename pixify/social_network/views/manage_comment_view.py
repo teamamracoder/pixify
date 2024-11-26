@@ -50,13 +50,12 @@ class ManageCommentListView(View):
     #     sort_order = request.GET.get('sort_order', SortingOrder.DESC.value)
     #     page_number = request.GET.get('page', 1)
 
-        # get data
-        # data = services.manage_comment_service.manage_list_comments_filtered(
-        #     search_query=search_query,
-        #     sort_by=sort_by,
-        #     sorting_order=sort_order,
-        #     page_number=page_number
-        # )
+    #     data = services.manage_comment_service.manage_list_comments(
+    #         search_query=search_query,
+    #         sort_by=sort_by,
+    #         sorting_order=sort_order,
+    #         page_number=page_number
+    #     )
         # return 
 
       def get (self,request):
