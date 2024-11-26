@@ -1,17 +1,31 @@
-from ..models import Chat, User, ChatMember,Follower
+from ..models import Chat, User, ChatMember,Follower,Message
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
-from django.db.models import Max
+from django.db.models import Max,Q,Subquery,OuterRef,F
+from django.db.models.functions import Coalesce
 from social_network.utils.common_utils import print_log
-from django.db.models import Q
-
-from django.db.models import Max, Q
 
 def list_chats_by_user(user):
-    user_chats = Chat.objects.filter(members=user).annotate(
-        latest_message_timestamp=Max('fk_chat_messages_chats_id__send_at', filter=Q(fk_chat_messages_chats_id__is_active=True)),
-        latest_message=Max('fk_chat_messages_chats_id__text', filter=Q(fk_chat_messages_chats_id__is_active=True))
-    ).order_by('-latest_message_timestamp')
+    user_chats = Chat.objects.filter(
+        members=user, 
+        is_active=True
+        ).annotate(
+        # Use Coalesce to fallback to created_at if no messages exist
+        latest_message_timestamp=Coalesce(
+            Max('fk_chat_messages_chats_id__send_at', filter=Q(is_active=True)),
+            F('created_at')
+        )
+    ).order_by('-latest_message_timestamp')    
+
+    user_chats = user_chats.annotate(
+        latest_message=Subquery(
+            Message.objects.filter(
+                chat_id=OuterRef('pk'), 
+                is_active=True 
+            ).order_by('-created_at')  
+            .values('text')[:1]  
+        )
+    )
     return user_chats
 
 
