@@ -40,7 +40,7 @@ urlpatterns = [
 
     #chat
     path('chat/', views.ChatListView.as_view(), name='chat_list'),
-    path('chat/create', views.ChatCreateView.as_view(), name='chat_create'),
+    path('chat/create/', views.ChatCreateView.as_view(), name='chat_create'),
     path('chat/<int:chat_id>', views.ChatDetailsView.as_view(), name='chat_details'),
     path('chat/<int:chat_id>/update', views.ChatUpdateView.as_view(), name='chat_update'),
     path('chat/<int:chat_id>/delete', views.ChatDeleteView.as_view(), name='chat_delete'),
@@ -107,7 +107,7 @@ urlpatterns = [
     path('message-mention/<int:chat_id>', views.MessageMentionListViewApi.as_view(), name='message_mention'),
     
     # message reply
-    path('message-reply/<int:message_id>/', views.MessageReplyCreateView.as_view(), name='message_reply'),
+    path('chat/message-reply/<int:message_id>/', views.MessageReplyCreateView.as_view(), name='message_reply'),
 
     path('posts/create/', views.UserPostCreatView.as_view()),
 ]
