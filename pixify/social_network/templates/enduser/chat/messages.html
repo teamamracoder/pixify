@@ -30,13 +30,13 @@
                     </div>
                     <div class="message-footer">
                         
-                        <span class="time">{{ message.created_at|date:"h:i" }}</span>
+                        <span class="time">{{ message.created_at|date:"h:i A" }}</span>
                         <i class="bi bi-three-dots-vertical" onclick="toggleOptions({{ message.id }})"></i>
                         <i class="bi bi-emoji-smile" onclick="toggleReactionPopup({{ message.id }})"></i>
                     </div>
                     <div class="options-popup" id="options-{{ message.id }}" style="display: none;">
                         {% if message.sender_id.id == user.id%}
-                        <a href="#" onclick="editMessage('{{ message.id }}', '{{ message.text|escapejs }}')">Edit</a>
+                        <a href="#" onclick="editMessage('{{ message.id }}', '{{ message.text|escapejs }}')">Edit</a>                       
                         {%endif%}
                         <a href="#" onclick="deleteMessage('{{ message.id }}')">Delete</a>
                         <a href="#" onclick="replyToMessage('{{ message.id }}', '{{ message.sender.username }}', '{{ message.text|escapejs }}')">Reply</a>
@@ -69,9 +69,9 @@
                     <a href="#" onclick="editMessage('{{ message.id }}', '{{ message.text|escapejs }}')">Edit</a>
                     {%endif%}
 
-    <a href="#" onclick="deleteMessage('{{ message.id }}')">Delete</a>
-    <a href="#" onclick="replyToMessage('{{ message.id }}', '{{ message.sender.username }}', '{{ message.text|escapejs }}')">Reply</a>
-</div>
+                    <a href="#" onclick="deleteMessage('{{ message.id }}')">Delete</a>
+                    <a href="#" onclick="replyToMessage('{{ message.id }}', '{{ message.sender.username }}', '{{ message.text|escapejs }}')">Reply</a>    
+                    </div>
 
                     <div class="reaction-popup" id="reaction-popup-{{ message.id }}" style="display: none;">
                         <span onclick="addReaction('{{ message.id }}', '👍')">👍</span>
@@ -87,74 +87,68 @@
     </div>
 
     <div class="chat-footer">
-
         <div id="reply-preview" style="display: none;">
             <div class="reply-message">
                 <span class="close-reply" onclick="cancelReply()">✖</span>
                 <span class="reply-username"></span>: <span class="reply-text"></span>
             </div>
         </div>
-
-
-
         
+        <form id="messageForm" method="POST" action="{% url 'message_create' %}">
+            {% csrf_token %}
+            <input type="hidden" id="action" name="action" value="create"> <!-- Default to create -->
+            <input type="hidden" id="chat_id" name="chat_id" value="{{ chat.id }}"> 
+            <input type="hidden" id="message_id" name="message_id" value=""> <!-- Used for update/delete -->
 
-<form id="messageForm" method="POST" action="{% url 'message_create' %}">
-    {% csrf_token %}
-    <input type="hidden" id="action" name="action" value="create"> <!-- Default to create -->
-    <input type="hidden" id="chat_id" name="chat_id" value="{{ chat.id }}"> 
-    <input type="hidden" id="message_id" name="message_id" value=""> <!-- Used for update/delete -->
-
-    <div id="mentionModal" class="modal">
-        <div class="modal-content" id="mention-suggestions">
-            <!-- Mention suggestions will be displayed here -->
-        </div>
+            <div id="mentionModal" class="modal">
+                <div class="modal-content" id="mention-suggestions">
+                    <!-- Mention suggestions will be displayed here -->
+                </div>
+            </div>
+            <input type="text" name="message" id="message-input" placeholder="Type your message here..." required>
+            <button type="submit">➤</button>
+        </form>
     </div>
-    <input type="text" name="message" id="message-input" placeholder="Type your message here..." required>
-    <button type="submit">➤</button>
-</form>
-
-
-</div>
 </div>
 
 <script>
-    function setFormAction(action, messageId = '') {
-        document.getElementById('action').value = action;
-        document.getElementById('message_id').value = messageId;
 
-        let formAction = '';
-        if (action === 'update') {
-            formAction = `/chat/message/${messageId}/update/`;
-        } else if (action === 'delete') {
-            formAction = `/chat/message/${messageId}/delete/`;
-        } else {
-            formAction = `/chat/message/create/`;
-        }
-        document.getElementById('messageForm').action = formAction;
+function setFormAction(action, messageId = '', chatId = '') {
+    document.getElementById('action').value = action;
+    document.getElementById('message_id').value = messageId;
+    document.getElementById('chat_id').value = chatId || document.querySelector('input[name="chat_id"]').value;
+
+    let formAction = '';
+    if (action === 'reply') {
+        formAction = `/chat/message-reply/${messageId}/`;
+    } else if (action === 'update') {
+        formAction = `/chat/message/${messageId}/update/`;
+    } else if (action === 'delete') {
+        formAction = `/chat/message/${messageId}/delete/`;
+    } else {
+        formAction = `/chat/message/create/`;
     }
-
-
+    document.getElementById('messageForm').action = formAction;
+}
 
 $(document).ready(function () {
     var mentionedUsers = []; // Array to store mentioned user IDs
 
-    // jdi input hoy and oi specific input value ta @ hoy
+    // Detect @ and initiate mention search
     $('#message-input').on('input', function (e) {
-        console.log(e)
         var messageText = $(this).val();
         var chatId = $('#chat_id').val();
-        if (messageText.includes('@') && chatId) {
-            var searchQuery = messageText.split('@').pop().trim();
+
+        // Check if the last character typed is '@'
+        if (messageText.endsWith('@') && chatId) {
             $.ajax({
-                url: `/message-mention/${chatId}?search=${searchQuery}`,        // extra_param = single/multiple selected_memnber_id 
+                url: `/message-mention/${chatId}?search=`, // Empty search query to show all possible mentions
                 type: 'GET',
                 success: function (res) {
-                    console.log(res)
                     if (Array.isArray(res) && res.length > 0) {
-                        displayMentions(res);
+                        displayMentions(res);  // Display the suggestions in modal
                     } else {
-                        $('#mentionModal').hide();
+                        $('#mentionModal').hide();  // Hide modal if no results
                     }
                 },
                 error: function (xhr, status, error) {
@@ -162,17 +156,19 @@ $(document).ready(function () {
                 }
             });
         } else {
-            $('#mentionModal').hide();
+            $('#mentionModal').hide();  // Hide modal if the last character is not '@'
         }
     });
 
+    // Function to display mention suggestions
     function displayMentions(mentions) {
         var mentionSuggestions = $('#mention-suggestions');
-        mentionSuggestions.empty();
+        mentionSuggestions.empty();  // Clear previous suggestions
 
         mentions.forEach(function (mention) {
             var mentionItem;
 
+            // Check if the mention is for a user or a special case (like @everyone)
             if (mention.member_id === 'all') {
                 mentionItem = `
                     <div class="mention-item" data-member-id="${mention.member_id}">
@@ -188,18 +184,22 @@ $(document).ready(function () {
                     </div>
                 `;
             }
-            mentionSuggestions.append(mentionItem);
+            mentionSuggestions.append(mentionItem);  // Add each mention to the suggestions
         });
 
-        $('#mentionModal').show();
+        $('#mentionModal').show();  // Show modal with suggestions
     }
 
+    // Handle selection of a mention
     $('#mention-suggestions').on('click', '.mention-item', function () {
-        var mentionText = $(this).text().trim();
+        var mentionText = $(this).text().trim();  // Get the selected mention text
         var messageInput = $('#message-input');
-        var messageText = messageInput.val().trim();
-        messageText = messageText.replace(/@\w*$/, mentionText + ' ').trim();
-        messageInput.val(messageText);
+        var messageText = messageInput.val();
+        var atSymbolPos = messageText.lastIndexOf('@');
+
+        // Replace the text after '@' with the selected mention
+        messageText = messageText.substring(0, atSymbolPos) + mentionText + ' ';
+        messageInput.val(messageText);  // Set the input field with the selected mention
 
         // Add the mentioned user's ID to the array
         var userId = $(this).data('member-id');
@@ -207,30 +207,29 @@ $(document).ready(function () {
             mentionedUsers.push(userId);
         }
 
+        // Hide the mention modal after selecting a mention
         $('#mentionModal').hide();
-        
-        // Return focus to the input field
+
+        // Focus back to the input field after selection
         messageInput.focus();
     });
 
+    // Handle form submission, add mentioned user IDs to the form
     $('#messageForm').on('submit', function () {
-        // Add mentioned user IDs to a hidden input before submitting the form
         $('<input>').attr({
             type: 'hidden',
             name: 'mentions',
-            value: mentionedUsers.join(',')
+            value: mentionedUsers.join(',')  // Join mentioned user IDs
         }).appendTo('#messageForm');
     });
 
+    // Close the mention modal if clicked outside the modal
     $(window).on('click', function (event) {
         if ($(event.target).is('#mentionModal')) {
-            $('#mentionModal').hide();
+            $('#mentionModal').hide();  // Hide modal when clicking outside
         }
     });
 });
-
-
-
 
     function toggleOptions(messageId) {
         const popup = document.getElementById('options-' + messageId);
@@ -268,17 +267,19 @@ $(document).ready(function () {
 
 
     function replyToMessage(messageId, username, content) {
-        const messageInput = document.querySelector('input[name="message"]');
-        document.getElementById('reply-preview').style.display = 'block';
-        document.querySelector('.reply-username').textContent = username;
-        document.querySelector('.reply-text').textContent = content;
+    const messageInput = document.querySelector('input[name="message"]');
+    document.getElementById('reply-preview').style.display = 'block';
+    document.querySelector('.reply-username').textContent = username;
+    document.querySelector('.reply-text').textContent = content;
 
-        messageInput.focus();
-    }
+    messageInput.focus();
+    setFormAction('reply', messageId);
+}
 
-    function cancelReply() {
-        document.getElementById('reply-preview').style.display = 'none';
-    }
+function cancelReply() {
+    document.getElementById('reply-preview').style.display = 'none';
+    setFormAction('create');
+}
 
     document.addEventListener('click', function (event) {
         if (!event.target.closest('.options-popup') && !event.target.closest('.bi-three-dots-vertical')) {
@@ -462,12 +463,13 @@ $(document).ready(function () {
     }
 
     .chat-footer form {
-        display: flex;
+        display: flex wrap;
         flex: 1;
         align-items: center;
     }
 
     .chat-footer input[type="text"] {
+        width:85%;
         flex: 1;
         padding: 12px;
         font-size: 14px;
