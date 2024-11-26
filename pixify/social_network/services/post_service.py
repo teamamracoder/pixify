@@ -60,6 +60,6 @@ def user_post(post_Title,media_urls,user_id):
 
 # priya
 def Postlist_posts():
-    return Post.objects.all()
+    return Post.objects.all().order_by('-created_at')
 
 # comment

@@ -20,4 +20,7 @@ def comment_list():
     return models.Comment.objects.all()
 
 
+def comments_filtered(post_id):
+    return  Comment.objects.filter(post_id_id=post_id)
+
 
