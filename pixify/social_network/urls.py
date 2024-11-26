@@ -116,7 +116,7 @@ urlpatterns = [
    
     #comment 
     path('comments/', views.CommentsCreateView.as_view(), name='comments'),
-    path('comment/list',views.CommentsListView.as_view(), name='comments_list'),
+    path('',views.CommentsListView.as_view(), name='comments_list'),
     # path('<int:post_id>/',views.UserPostDetail.as_view(),name="Userdetail" ),
 
 
