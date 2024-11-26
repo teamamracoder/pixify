@@ -25,7 +25,7 @@ class HomeView(View):
                   'posts':posts,
                   'name':'priya',
                   'comment_list':comment_list,
-                  'count_commnet' :services.comment_service.get_count_comment(34)
+                  'count_commnet' :services.comment_service.get_count_comment(15)
                   
                 }
         

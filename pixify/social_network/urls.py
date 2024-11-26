@@ -112,9 +112,14 @@ urlpatterns = [
     #for enduser post
     path('posts/create/', views.UserPostCreatView.as_view(),name='userpost_create'),
     path('', views.UserPostListView.as_view(), name='Userposts_list'),
+
+   
     #comment 
     path('comments/', views.CommentsCreateView.as_view(), name='comments'),
-    path('comment/list',views.CommentsListView.as_view(), name='comments_list')
+    path('comment/list',views.CommentsListView.as_view(), name='comments_list'),
+    # path('<int:post_id>/',views.UserPostDetail.as_view(),name="Userdetail" ),
+
+
 
 ]
 

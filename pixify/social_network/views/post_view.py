@@ -142,4 +142,13 @@ class UserPostListView(View):
     
     
 
-       
+# class UserPostDetail(View):
+#     def get(self, request, post_id):
+#          comment_dic= {
+#          'post' : services.post_service.get_post(post_id),
+#          'comment': services.comment_service.comments_filtered(post_id)
+#                    }
+#          return render(request, 'enduser/home/index.html', {'comment_dic':comment_dic})
+
+
+        

@@ -13,6 +13,7 @@ from django.core.paginator import Paginator
 class CommentsCreateView(View):
     def get(self, request):
         return render(request, 'enduser/comments/index.html')
+    
     def post(self,request):                
          user_id = request.user.id
          commentstext=request.POST['comment_text']
@@ -30,7 +31,6 @@ class CommentsListView(View):
          return render (request,'enduser/home/index.html',{'comment_list':comment_list})
 
 
-     
  
        
    

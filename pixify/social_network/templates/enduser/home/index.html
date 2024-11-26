@@ -78,6 +78,7 @@
 
 
 <!--Post Section-->
+
  <div class="pt-1 pb-3 px-2 mb-2 fw-semibold mt-4" style="border: 1px solid black;border-radius: 3px;">
 
     <div class="container mt-4">
@@ -167,7 +168,7 @@
   </div>
 </div>
 </div>
-
+<div class="py-3 mt-2 mb-5" id="homePagePostsection">
 {% if post_dict.posts %}
     {% for post in post_dict.posts %}
  <div class="container post-center pb-3 mb-3">
@@ -201,7 +202,9 @@
     <div class="post-react-det">
         <div class="post-react">
             <i class="fa-regular fa-heart"></i>
-            <span  data-toggle="modal" data-target="#exampleModalCenter"  ><i class="fa-regular fa-comment"></i></span>
+         {% comment %} <span  data-toggle="modal" data-target="#exampleModalCenter"><a href="{% url 'Userdetail' post.id %}">
+                <i class="fa-regular fa-comment"></i></a></span>  {% endcomment %}
+           <span  data-toggle="modal" data-target="#exampleModalCenter"><i class="fa-regular fa-comment"></i></span>
             <i class="fa-regular fa-bookmark"></i>
             <i class="fa-solid fa-share-nodes"  data-bs-toggle="modal" data-bs-target="#shareModal"></i>
 
@@ -213,7 +216,7 @@
 {% endif %}  
 
 
-<div class="py-3 mt-2 mb-5" id="homePagePostsection">
+{% comment %} <div class="py-3 mt-2 mb-5" id="homePagePostsection"> {% endcomment %}
 
 <div class="container post-center mb-3">
     <div class="post-box">
@@ -654,7 +657,7 @@
     <div class="comment-section" >
         
         <div style="height:50px;"> </div>
-        <div class="comment-box p-1" style="  height:500px; overflow-y: scroll;">
+        <div class="comment-box p-1 com" style="  height:500px; overflow-y: scroll;">
         {% for com in post_dict.comment_list%} 
             <div class="pt-2 pe-2" style="height: auto;">
                 <div class="d-flex py-1">
@@ -736,7 +739,7 @@
 
 
 {% comment %} input box comment {% endcomment %}
-  <form action="" method="post" class=" bottom-0 position-absolute" >
+  <form action="" method="post" class=" bottom-0 " >
     {% csrf_token %}
      <div class="" id="CommentsectionTextarea">
             <div class="ms-2 rounded "
