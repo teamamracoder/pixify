@@ -111,94 +111,30 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <div class="input-group mb-3">
+                                                                    
+                    <div class="parchat-container">
+                        <div class="parchat-trend-text">Make A Conversation</div>
+                        <div class="parchat-input-wrapper">
+                            <input type="text" id="parchat-searchin" class="parchat-form-control" placeholder="Search Name" aria-label="Search Name">
+                            <button class="parchat-btn parchat-btn-outline-secondary" type="button" id="parchat-searchbtn" style="border-top-right-radius: 10px; border-bottom-right-radius: 10px;">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                        <div id="parchat-filled" class="parchat-profile-grid">
+                            <!-- Profile items go here -->
+                        </div>
+                        <button class="parchat-arrow-button" id="arrow-button">
+                            <i class='far fa-hand-point-right'></i>
+                        </button>
+                    </div>
 
-
-                        
-                       
-
-    <div class="input-wrapper">
-        <input type="text" id="searchin" class="form-control" placeholder="Search Name" aria-label="Search Name">
-    </div>
-    <button class="btn btn-outline-secondary" type="button" id="button-addon1" id="searchbtn"style="border-top-right-radius : 10px;border-bottom-right-radius : 10px;">
-        <i class="bi bi-search"></i>
-    </button>
-    <div id="filled" style="padding-top: 10px;">
-    <!-- Combined follower and following data will be inserted here -->
-    </div>
-
-   <script>
-    $(document).ready(function () {
-        let selectedItems = []; // Array to store selected item IDs
-
-        function fetchFollowersAndFollowings(searchQuery = '') {
-            $.ajax({
-                url: '/chat/followers/api?search=' + searchQuery,
-                type: 'GET',
-                success: function (res) {
-                    console.log(res); // Print the returned JSON object to the console for debugging
-                    var combinedHtml = '';
-
-                        res.followers.forEach(function (follower) {
-                        combinedHtml += `
-                            <div class="user-item" id="user-${follower.user_id}" ondblclick="toggleSelection(${follower.user_id})">
-                                <div class="user-content">
-                                    <img src="${follower.user_id__profile_photo_url}" alt="${follower.user_id__first_name}'s profile photo" class="profile-photo">
-                                    <a href="/chat/${follower.user_id}">${follower.user_id__first_name} ${follower.user_id__last_name}</a>
-                                </div>
-                            </div>
-                        `;
-                    });
-
-                        res.followings.forEach(function (following) {
-                        combinedHtml += `
-                          <div class="user-item" id="user-${following.user_id}" ondblclick="toggleSelection(${following.user_id})">
-                                <div class="user-content">
-                                    <img src="${following.user_id__profile_photo_url}" alt="${following.user_id__first_name}'s profile photo" class="profile-photo">
-                                    <a href="/chat/${following.user_id}">${following.user_id__first_name} ${following.user_id__last_name}</a>
-                                </div>
-                            </div>
-                        `;
-                    });
-
-                    $("#filled").html(combinedHtml);
-
-                // Reapply selected class to previously selected items
-                    selectedItems.forEach(function (itemId) {
-                        $(`#user-${itemId}`).addClass('selected');
-                    });
-                },
-            error: function (xhr, status, error) {
-                console.log(xhr);
-            },
-        });
-    }
-
-    // Fetch all followers and followings on page load
-    fetchFollowersAndFollowings();
-
-    // Fetch followers and followings as the user types in the search bar
-        $("#searchin").on('input', function () {
-            fetchFollowersAndFollowings($(this).val());
-        });
-
-    // Function to handle user selection on double-tap
-        window.toggleSelection = function (userId) {
-            const element = $(`#user-${userId}`);
-            element.toggleClass('selected');
-
-            if (element.hasClass('selected')) {
-            // Add to selectedItems array if selected
-                if (!selectedItems.includes(userId)) {
-                    selectedItems.push(userId);
-                }
-            } else {
-            // Remove from selectedItems array if deselected
-                selectedItems = selectedItems.filter(id => id !== userId);
-            }
-        }
-    });
-    </script>
-
+                    <!-- Modal for displaying user details -->
+                    <div id="parchat-userModal" class="parchat-modal">
+                        <div class="parchat-modal-content">
+                            <span class="parchat-close">&times;</span>
+                            <div id="parchat-user-details"></div>
+                        </div>
+                    </div>
                 </div>
 
             </div>
@@ -207,27 +143,265 @@
     </div>
 </div>
 
-<script>
-    const allItems = document.querySelectorAll(".item");
-    // Array to store selected items
-    const selectedItems = [];
+   <script>
+    
+    
+$(document).ready(function () {
+    let selectedItems = []; // Array to store selected item IDs
+    let holdTimer;
+    let holdTriggered = false;
+    let redirectEnabled = true;  // Flag to determine if redirection is enabled
 
-    function toggleSelect(element, item) {
-        // Toggle the selection state
-        if (selectedItems.includes(item)) {
-            // If item is already selected, remove it from the array and update styling
-            const index = selectedItems.indexOf(item);
-            selectedItems.splice(index, 1);
-            element.classList.remove("selected");
-        } else {
-            // If item is not selected, add it to the array and update styling
-            selectedItems.push(item);
-            element.classList.add("selected");
-        }
-        // Display selected items
-        document.getElementById("selectedItems").innerText =
-            selectedItems.join(", ");
+    console.log('Initial selectedItems:', selectedItems);
+
+    // Function to fetch followers and followings based on the search query
+    function fetchFollowersAndFollowings(searchQuery = '') {
+        $.ajax({
+            url: '/chat/followers/api?search=' + searchQuery,
+            type: 'GET',
+            success: function (res) {
+                var combinedHtml = '';
+                const fallbackImage = '/static/images/avatar.jpg';
+
+                // Render followers
+                res.followers.forEach(function (follower) {
+                    const profileImage = follower.user_id__profile_photo_url || fallbackImage;
+                    combinedHtml += `
+                        <div class="parchat-selection-body" id="user-${follower.user_id}" data-user-id="${follower.user_id}">
+                            <img src="${profileImage}" alt="${follower.user_id__first_name}'s profile photo" class="parchat-profile-photo">
+                            <input type="checkbox" class="parchat-checkbox" id="checkbox-${follower.user_id}" onchange="checkSelection(${follower.user_id})" onclick="event.stopPropagation();">
+                            <div class="parchat-profile-text">${follower.user_id__first_name} ${follower.user_id__last_name}</div>
+                        </div>
+                    `;
+                });
+
+                // Render followings
+                res.followings.forEach(function (following) {
+                    const profileImage = following.user_id__profile_photo_url || fallbackImage;
+                    combinedHtml += `
+                        <div class="parchat-selection-body" id="user-${following.user_id}" data-user-id="${following.user_id}">
+                            <img src="${profileImage}" alt="${following.user_id__first_name}'s profile photo" class="parchat-profile-photo">
+                            <input type="checkbox" class="parchat-checkbox" id="checkbox-${following.user_id}" onchange="checkSelection(${following.user_id})" onclick="event.stopPropagation();">
+                            <div class="parchat-profile-text">${following.user_id__first_name} ${following.user_id__last_name}</div>
+                        </div>
+                    `;
+                });
+
+                // Update profiles in the DOM
+                $("#parchat-filled").html(combinedHtml);
+
+                // Reapply selected class to previously selected items
+                selectedItems.forEach(function (itemId) {
+                    $(`#user-${itemId}`).addClass('selected');
+                    $(`#checkbox-${itemId}`).prop('checked', true);
+                });
+
+                updateArrowButtonVisibility();
+                applyPressHoldFunctionality();
+            },
+            error: function (xhr, status, error) {
+                console.log(xhr);
+            },
+        });
     }
+
+    // Apply press-and-hold functionality for selecting profiles
+    function applyPressHoldFunctionality() {
+        $(".parchat-selection-body").mousedown(function (event) {
+            let userId = $(this).data('user-id');
+            if (event.target.classList.contains('parchat-checkbox')) {
+                return; // Ignore mousedown on checkbox
+            }
+            holdTimer = setTimeout(function () {
+                selectProfile(userId);
+                holdTriggered = true; // Mark the hold as triggered
+                showUserDetails(userId); // Show the user details in the modal
+            }, 1000); // 1 second hold
+        }).mouseup(function (event) {
+            clearTimeout(holdTimer);
+
+            // Only trigger the regular click if hold was NOT triggered
+            if (!holdTriggered && !$(event.target).hasClass('parchat-checkbox')) {
+                if (redirectEnabled) {
+                    let userId = $(this).data('user-id');
+                    redirectToChat(userId);  // Handle the regular click event here
+                }
+            }
+            holdTriggered = false; // Reset holdTriggered after mouseup
+        }).mouseleave(function () {
+            clearTimeout(holdTimer);
+            holdTriggered = false; // Reset on mouse leave
+        });
+    }
+
+    // Select the profile when pressed or clicked
+    window.selectProfile = function (userId) {
+        $(`#user-${userId}`).toggleClass('selected');
+
+        // Show checkboxes on all profiles
+        $('.parchat-checkbox').css('display', 'block');
+
+        // Automatically check the selected profile's checkbox
+        if ($(`#user-${userId}`).hasClass('selected')) {
+            $(`#checkbox-${userId}`).prop('checked', true);
+            if (!selectedItems.includes(userId)) {
+                selectedItems.push(userId);
+            }
+        } else {
+            $(`#checkbox-${userId}`).prop('checked', false);
+            selectedItems = selectedItems.filter(id => id !== userId);
+        }
+
+        console.log('Selected items after toggle:', selectedItems);
+
+        updateArrowButtonVisibility();
+        updateRedirectState();
+        updateCheckboxVisibility();
+    }
+
+    // Handle changes in the checkbox (selection)
+    window.checkSelection = function (userId) {
+        const element = $(`#user-${userId}`);
+
+        if ($(`#checkbox-${userId}`).is(':checked')) {
+            element.addClass('selected');
+            if (!selectedItems.includes(userId)) {
+                selectedItems.push(userId);
+            }
+        } else {
+            element.removeClass('selected');
+            selectedItems = selectedItems.filter(id => id !== userId);
+        }
+
+        console.log('Selected items after checkbox change:', selectedItems);
+
+        updateArrowButtonVisibility();
+        updateRedirectState();
+        updateCheckboxVisibility();
+    }
+
+    // Update the visibility of the arrow button based on the number of selected items
+    function updateArrowButtonVisibility() {
+        console.log('Selected items length:', selectedItems.length);
+        if (selectedItems.length > 1) {
+            $('#arrow-button').css('display', 'block');
+            console.log('Arrow button shown');
+        } else {
+            $('#arrow-button').css('display', 'none');
+            console.log('Arrow button hidden');
+        }
+    }
+
+    // Update the redirect state (if no items are selected, enable redirection)
+    function updateRedirectState() {
+        if (selectedItems.length === 0) {
+            redirectEnabled = true; // Allow redirect when no checkboxes are selected
+        } else {
+            redirectEnabled = false; // Prevent redirect when any checkbox is selected
+        }
+    }
+
+    // Update the checkbox visibility based on selected items
+    function updateCheckboxVisibility() {
+        if (selectedItems.length === 0) {
+            // Hide checkboxes when no items are selected
+            $('.parchat-checkbox').hide();
+        } else if (selectedItems.length > 1) {
+            // Show checkboxes when more than 1 item is selected
+            $('.parchat-checkbox').show();
+        }
+    }
+
+    let arrowButton = document.getElementById('arrow-button');
+    if (arrowButton) {
+        arrowButton.addEventListener('click', function() {
+            console.log('Arrow button clicked. Selected items:', selectedItems);
+
+            if (selectedItems.length === 1) {
+                createChat(1, selectedItems); // Convert type to integer and pass array
+            } else if (selectedItems.length > 1) {
+                createChat(2, selectedItems); // Convert type to integer
+            }
+        });
+    } else {
+        console.error("Arrow button element not found!");
+    }
+
+    // Redirect to chat with the selected user
+    window.redirectToChat = function (userId) {
+        if (redirectEnabled) {
+            createChat(1, [userId]); // Pass an array with the single userId
+        }
+    }
+
+    $.ajaxSetup({
+        headers: {
+            'X-CSRFToken': $('meta[name="csrf-token"]').attr('content') // Set CSRF token in the headers
+        }
+    });
+
+    // Function to create a chat with the selected members
+    function createChat(type, members) {
+        $.ajax({
+            url: '/chat/create/',
+            type: 'POST',
+            contentType: 'application/json', // Set content type to JSON
+            data: JSON.stringify({
+                type: type,
+                members: members,
+                _token: $('meta[name="csrf-token"]').attr('content') // CSRF token for security
+            }),
+            success: function (res) {
+                window.location.href = '/chat/' + res.chat_id;
+            },
+            error: function (xhr, status, error) {
+                console.log('Error:', xhr, status, error);
+            }
+        });
+    }
+
+    // Show user details in a modal
+    function showUserDetails(userId) {
+        $.ajax({
+            url: `/chat/user/details/${userId}`,
+            type: 'GET',
+            success: function (data) {
+                // Populate the modal with user details
+                $('#parchat-user-details').html(`
+                    <h3>${data.name}</h3>
+                    <p>${data.bio}</p>
+                    <p>Email: ${data.email}</p>
+                `);
+
+                // Show the modal
+                $('#parchat-userModal').show();
+            },
+            error: function (xhr, status, error) {
+                console.log('Error fetching user details:', error);
+            }
+        });
+    }
+
+    // Close modal on clicking the close button
+    $('#parchat-userModal .parchat-close').click(function() {
+        $('#parchat-userModal').hide();
+    });
+
+    // Event listener for dynamic search
+    $('#parchat-searchin').on('input', function () {
+        const searchQuery = $(this).val();
+        fetchFollowersAndFollowings(searchQuery); // Fetch followers and followings based on the search query
+    });
+
+    // Event listener for search button click
+    $('#parchat-searchbtn').click(function () {
+        const searchQuery = $('#parchat-searchin').val();
+        fetchFollowersAndFollowings(searchQuery); // Trigger search when button is clicked
+    });
+
+    // Fetch all followers and followings on page load
+    fetchFollowersAndFollowings();
+});
 </script>
 
 <style>
@@ -643,6 +817,149 @@
     background-color : rgb(86 185 200);
     border-top-right-radius:0px;
     border-bottom-right-radius:0px;
+}
+
+.parchat-container {
+    width: 90%;
+    padding: 20px;
+    position: relative; /* Ensure relative positioning for children */
+}
+
+.parchat-trend-text {
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+.parchat-input-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.parchat-profile-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+}
+
+.parchat-selection-body {
+    height: 85px;
+    width: 85px;
+    position: relative;
+    display: inline-block;
+    margin: 10px;
+    cursor: pointer;
+    border: 2px solid transparent;
+    border-radius: 50%;
+    padding: 10px;
+    transition: transform 0.2s, border-color 0.2s;
+}
+
+.parchat-selection-body.selected {
+    border-color: #007BFF;
+    background-color: rgba(0, 123, 255, 0.1); /* Light blue background for selected profiles */
+}
+
+.parchat-profile-photo {
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+}
+
+.parchat-checkbox {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 15px;
+    height: 15px;
+    background-color: white;
+    border-radius: 50%;
+    border: 2px solid #333;
+    display: none;
+}
+
+.parchat-profile-text {
+    text-align: center;
+    margin-top: 10px;
+}
+
+.parchat-form-control,
+.parchat-btn,
+.parchat-btn-outline-secondary {
+    background-color: #3D3D6B;
+    color: black;
+    margin-top: 10px;
+    padding: 10px;
+    font-size: 16px;
+}
+
+.parchat-form-control {
+    flex-grow: 1;
+}
+
+.parchat-btn-outline-secondary {
+    background-color: black;
+    color: #333;
+    border: 1px solid #ccc;
+}
+
+.parchat-modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1000; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgba(0, 0, 0, 0.4); /* Black with opacity */
+}
+
+.parchat-modal-content {
+    background-color: #fefefe;
+    margin: 15% auto; /* 15% from the top and centered */
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%; /* Fixed width */
+    max-width: 600px; /* Add a max-width to limit expansion */
+    height: 400px; /* Fixed height */
+    overflow-y: auto; /* Make the modal content scrollable */
+    position: relative;
+}
+
+.parchat-close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.parchat-close:hover,
+.parchat-close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+#arrow-button {
+    display: none; /* Hide by default */
+    position: fixed;
+  
+}
+
+.parchat-arrow-button {
+    display: none; /* Hide by default */
+    position: absolute; /* Position inside parent */
+    bottom: 26%; /* Adjust based on parent height */
+    right: 35%;
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 20px;
 }
 
 </style>

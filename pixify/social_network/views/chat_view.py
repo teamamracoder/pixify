@@ -1,15 +1,13 @@
 from django.shortcuts import render,redirect
 from django.views import View
-
 from social_network.constants.default_values import Role
 from ..decorators import auth_required, role_required
 from social_network.decorators.exception_decorators import catch_error
 from ..services import chat_service, user_service,message_service, chat_member_service
 from django.http import JsonResponse
 from ..constants import ChatType
-from ..models import User
 from django.utils import timezone
-
+import json
 class ChatListView(View):
     @catch_error
     @auth_required
@@ -93,30 +91,38 @@ class ChatListView(View):
             return timestamp.strftime('%d/%m/%Y')
 
 
-class ChatCreateView(View):
-    def get(self, request):
+class ChatCreateView(View): 
+    def get(self, request): 
         user = user_service.get_user(request)
-        return render(request, 'enduser/chat/chats.html',{'user':user})         
+        return render(request, 'enduser/chat/chats.html',{'user':user})
+ 
+    def post(self, request):
+        user = request.user
+        data = json.loads(request.body.decode('utf-8'))
+        chat_type = int(data.get('type'))
+        members = data.get('members', [])
 
-    def post(self,request):                
-        user=request.POST['user']        
-        type = request.POST['type']
-        members = request.POST.getlist('members')        
-        if type == ChatType.PERSONAL.value:            
-            title = None
-            chat_cover = None
+        if chat_type == ChatType.PERSONAL.value:
+            member = members[0]
+            existing_chat = chat_service.get_existing_personal_chat(chat_type,user.id, member)
+            if existing_chat:
+                return JsonResponse({'chat_id': existing_chat.id})
 
-        elif type == ChatType.GROUP.value:    
-            title = request.POST['titel','']                    
-            chat_cover = request.POST.get('chat_cover', '')
-    
-        chat=chat_service.create_chat(user,title, chat_cover,type)           
-        members.append(user.id) 
-        for member in members:   
-            chat_member_service.create_chat_member(chat,member,user)
-        return redirect('chat/')         
+            chat = chat_service.create_chat(user, None, None, ChatType.PERSONAL.value)
+            chat_member_service.create_chat_member(chat.id, user.id, user)
+            chat_member_service.create_chat_member(chat.id, member, user)
+            return JsonResponse({'chat_id': chat.id})
 
+        elif chat_type == ChatType.GROUP.value:
+            title = data.get('title', '')
+            chat_cover = data.get('chat_cover', '')
+            chat = chat_service.create_chat(user, title, chat_cover, chat_type)
+            members.append(user.id)
+            for member in members:
+                chat_member_service.create_chat_member(chat.id, member, user)
 
+            return JsonResponse({'chat_id': chat.id})
+ 
 class ChatDetailsView(View):
     def get(self, request, chat_id):
         user =request.user 

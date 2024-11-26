@@ -5,6 +5,7 @@ from django.db.models import Max,Q,Subquery,OuterRef,F
 from django.db.models.functions import Coalesce
 from social_network.utils.common_utils import print_log
 
+
 def list_chats_by_user(user):
     user_chats = Chat.objects.filter(
         members=user, 
@@ -30,15 +31,15 @@ def list_chats_by_user(user):
 
 
 def create_chat(user,title,chat_cover,type):
-    chat = Chat.objects.create(title=title,chat_cover=chat_cover,type=type,created_by=user)  
+    chat = Chat.objects.create(title=title,chat_cover=chat_cover,type=type,created_by=user)
     return chat
 
-def update_chat(chat, title, chat_cover,user):    
-    chat.title = title  
-    chat.chat_cover = chat_cover    
-    chat.updated_by=user                           
+def update_chat(chat, title, chat_cover,user):
+    chat.title = title
+    chat.chat_cover = chat_cover
+    chat.updated_by=user
     chat.save()
-    return chat    
+    return chat
 
 def delete_chat(chat_id):
     chat = get_object_or_404(Chat, id=chat_id)
@@ -90,23 +91,11 @@ def list_chats_api(request,chat_data_list):
         filtered_chats =''
     return filtered_chats
 
-  
-def list_followers_api(request, user):
-    search_query = request.GET.get('search', '')
-    if search_query:
-        followers = Follower.objects.filter(follower=user).filter(
-            Q(user_id__first_name__icontains=search_query) | Q(user_id__last_name__icontains=search_query)
-        ).values('user_id', 'user_id__first_name', 'user_id__last_name', 'user_id__email', 'user_id__profile_photo_url')
+def get_existing_personal_chat(type, user_id, member):
+    chats = Chat.objects.filter(type=type)
 
-        followings = Follower.objects.filter(following=user).filter(
-            Q(user_id__first_name__icontains=search_query) | Q(user_id__last_name__icontains=search_query)
-        ).values('user_id', 'user_id__first_name', 'user_id__last_name', 'user_id__email', 'user_id__profile_photo_url')
-        
-    else:
-        followers = Follower.objects.filter(follower=user).values('user_id', 'user_id__first_name', 'user_id__last_name', 'user_id__email', 'user_id__profile_photo_url')
-        followings = Follower.objects.filter(following=user).values('user_id', 'user_id__first_name', 'user_id__last_name', 'user_id__email', 'user_id__profile_photo_url')
-
-    response_data = {'followers': list(followers), 'followings': list(followings)}
-    return response_data
-
-
+    for chat in chats:
+        members = list(chat.members.values_list('id', flat=True))
+        if len(members) == 2 and user_id in members and member in members:
+            return chat
+    return None
