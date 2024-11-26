@@ -3,7 +3,7 @@ from django.db import models
 class MessageReaction(models.Model):
     reacted_by=models.ForeignKey('User', on_delete=models.CASCADE,related_name='fk_reacted_messagereactions_users_id')
     message_id=models.ForeignKey('Message', on_delete=models.CASCADE,related_name='fk_reacted_messagereactions_messages_id')
-    # reaction_type=models.CharField()
+    reaction_id=models.ForeignKey('MasterList', on_delete=models.CASCADE,related_name='fk_reaction_messagereactions_master_list_id')
     
     is_active=models.BooleanField(db_default=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True, blank=True)
