@@ -10,17 +10,33 @@ from django.core.paginator import Paginator
 
 
 
+# class CommentsCreateView(View):
+#     def get(self, request):
+#         return render(request, 'enduser/comments/index.html')
+    
+#     def post(self,request):                
+#          user_id = request.user.id
+#          commentstext=request.POST['comment_text']
+         
+#          services.comment_service.user_comments_create(commentstext,user_id)
+#          return redirect('comments')
+    
 class CommentsCreateView(View):
     def get(self, request):
-        return render(request, 'enduser/comments/index.html')
+        return render(request, 'enduser/home/index.html')
     
     def post(self,request):                
          user_id = request.user.id
          commentstext=request.POST['comment_text']
          
          services.comment_service.user_comments_create(commentstext,user_id)
-         return redirect('comments')
+         return redirect('comments_list')
     
+
+
+
+
+
 # class Commentlistview(View):
 #     comment_list=services.comment_service.comment_list()    
 

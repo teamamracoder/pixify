@@ -5,7 +5,7 @@
 {% block content %}
 
 {%load static %}
-{% comment %} <div class="px-3 py-3 mt-3"
+<div class="px-3 py-3 mt-3"
     style="background-color: #1f0447e3;box-shadow: 0 4px 8px rgba(151, 95, 236, 0.5);font-family: serif;border-radius: 7px;">
     <div>
     <div class=" d-flex align-items-center">
@@ -179,11 +179,11 @@
 
 
 
-</div> {% endcomment %}
+</div> 
 
 
 
-{% comment %} <form action="" method="post">
+ <form action="" method="post">
     {% csrf_token %}
      <div class="d-flex align-items-start mb-2 mt-3" id="CommentsectionTextarea">
             <img src="{% static 'images/avatar.jpg'%}" alt="User" class="rounded-circle"
@@ -203,11 +203,11 @@
             </div>
     </div>
 </form> 
-</div>{% endcomment %}
+</div>
 
 
 {% comment %} comment modal by priya {% endcomment %}
-
+{% comment %} 
 <div class="modal-content d-flex" >
 
 <div style="display: flex;  ">
@@ -284,10 +284,10 @@
                             <span style="font-size:11px;cursor:pointer;">Like</span>
                             <span style="font-size:11px;  cursor: pointer;" class="com-reply">Reply</span>
                         </div>
-                        <span class="view-comment" style="cursor: pointer; font-size:14px;margin-left:12px;">View reply</span>
+                        <span class="view-comment" style="cursor: pointer; font-size:14px;margin-left:12px;">View reply</span> {% endcomment %}
 
                          {% comment %} inner reply {% endcomment %}
-                        <div style=" display:none;" class="reply-open">
+                        {% comment %} <div style=" display:none;" class="reply-open">
                             
                             
                             <div class="d-flex py-1">
@@ -329,15 +329,15 @@
 
                            
 
-                        </div>
+                        </div> {% endcomment %}
                         {% comment %} end inner reply {% endcomment %}
-                    </div>
+                    {% comment %} </div>
                 </div>
-            </div>
+            </div> {% endcomment %}
 
-        {%endfor%} 
+        {% comment %} {%endfor%}  {% endcomment %}
 
-     </div>
+     {% comment %} </div> {% endcomment %}
 
 
        
@@ -345,7 +345,7 @@
 
 
 {% comment %} input box comment {% endcomment %}
-  <form action="" method="post" class=" bottom-0 position-absolute" >
+  {% comment %} <form action="" method="post" class=" bottom-0 position-absolute" >
     {% csrf_token %}
      <div class="" id="CommentsectionTextarea">
             <div class="ms-2 rounded "
@@ -367,15 +367,15 @@
     </div>
    </form> 
 
-</div>
+</div> {% endcomment %}
           
 {% comment %} input box comment {% endcomment %}
 
- </div> 
+ {% comment %} </div> 
 
 </div>
 
-</div>
+</div> {% endcomment %}
 
 
 
