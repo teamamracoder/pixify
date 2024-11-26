@@ -1,4 +1,4 @@
-from ..models import Message
+from ..models import Message,MessageReadStatus
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
