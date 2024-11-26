@@ -13,17 +13,20 @@ class MessageCreateView(View):
         return render(request, 'enduser/message/index.html',{'chat':chat})  
     
     def post(self, request):        
-        text = request.POST['text']
-        media_url = request.POST['media_url','']
-        sender_id = request.POST['sender_id']
-        chat_id = request.POST['chat_id']
-        reply_for_message_id=request.POST['reply_for_messages_id']
-        mentions= request.POST.getlist('mentions','')
-        message = message_service.create_message(text, media_url, sender_id, chat_id, reply_for_message_id)
-        for user in mentions:
-            message_mention_service.create_message_mentions(message,user)        
-        return render(request, 'enduser/message/index.html')
-
+        auth_user=request.user
+        text = request.POST.get('message')
+        media_url = request.POST.get('media_url','')
+        sender_id = auth_user
+        chat = chat_service.get_chat_by_id(request.POST.get('chat_id'))
+        message = message_service.create_message(text, media_url, sender_id, chat)
+        # error in mention
+        # mentions= request.POST.getlist('mentions','[]')
+        # print(len(mentions))
+        # if len(mentions)>0:    
+        #     for user in mentions:
+        #         message_mention_service.create_message_mentions(message,user,auth_user)        
+        return redirect('chat_details', chat_id=chat.id)
+         
 class MessageUpdateView(View):
     def get(self,request,chat_id):
         chat=chat_service.get_chat_by_id(chat_id)
@@ -31,7 +34,7 @@ class MessageUpdateView(View):
      
     def post(self, request, message_id):
         message = message_service.get_message_by_id(message_id)        
-        text = request.POST['text']
+        text = request.POST['text','']
         media_url = request.POST['media_url','']
         message_service.update_message(message, text, media_url)
         return render(request, 'enduser/message/index.html')

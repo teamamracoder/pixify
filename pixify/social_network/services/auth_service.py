@@ -2,7 +2,7 @@ from django.core.cache import cache
 import random
 
 from social_network.models.user_model import User
-from social_network.utils.common_utils import generate_otp, print_log
+from social_network.utils.common_utils import generate_otp, is_debugging, print_log
 from social_network.utils.mail_utils import send_email
 from .. import models
 from ..constants import welcome_template, otp_template
@@ -29,6 +29,8 @@ def send_otp(email):
 
 
 def verify_otp(email, otp):
+    if is_debugging():
+        return True
     cached_otp = cache.get(f"otp_{email}")
     if cached_otp == otp:
         # Invalidate the OTP after successful verification
