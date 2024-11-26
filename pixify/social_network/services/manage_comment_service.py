@@ -21,6 +21,13 @@ def manage_list_comments_filtered(post_id):
     return models.Comment.objects.filter(post_id=post_id, reply_for__isnull=True, is_active=True)
 
 
+def manage_list_comments():
+    return models.Comment.objects.all()
+
+
+
+
+
 def manage_get_comment(comment_id):
     return get_object_or_404(models.Comment, id=comment_id)
 

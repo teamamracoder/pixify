@@ -60,7 +60,7 @@ class ManageCommentListView(View):
         # return 
 
       def get (self,request):
-        data=services.manage_comment_service.manage_list_comments_filtered()
+        data=services.manage_comment_service.manage_list_comments()
         return render(request, 'adminuser/comment/list.html', {'data': data})
 
 
