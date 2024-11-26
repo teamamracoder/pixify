@@ -1,11 +1,11 @@
-from ..models import Message, MessageReadStatus,MessageMention
+from ..models import Message
 from django.shortcuts import get_object_or_404
 
 
 def list_messages_by_chat_id(chat_id):   # make message_read_status service and views for read_status
     return Message.objects.filter(chat_id=chat_id,is_active=True)
 
-def create_message(text, media_url, sender_id, chat):
+def create_message(text, media_url,sender_id, chat):
     return Message.objects.create(
         text=text,
         media_url=media_url,
@@ -29,17 +29,16 @@ def delete_message(message,user):
         message.updated_by=user
         message.save()
 
-def reply_message(user, text, media_url, sender_id, chat_id, reply_for_message_id):    
-    message = Message.objects.create(
+def reply_message(user, text, media_urls, sender_id, chat_id, reply_for_message):
+    return Message.objects.create(
         text=text,
-        media_url=media_url,
+        media_url=media_urls,
         sender_id=sender_id,
         chat_id=chat_id,
-        reply_for_message_id=reply_for_message_id,
+        reply_for_message_id=reply_for_message,
+        created_by=user
     )
-        
-    return message    
-
+ 
 def unread_count(chat,user):    
     unread_count = Message.objects.filter(
         chat_id=chat
