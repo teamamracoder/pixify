@@ -16,7 +16,7 @@ class ChatListView(View):
     @role_required(Role.ADMIN.value, Role.END_USER.value)
     def get(self, request):
         user = request.user
-        chats = chat_service.list_chats_by_user(user)               # chats must have at least one other member 
+        chats = chat_service.list_chats_by_user(user)               
         followers, followings = chat_service.get_all_user_follow(user)
         chat_data = []
         if not chats:
@@ -30,7 +30,7 @@ class ChatListView(View):
             unread_messages_display = '' if unread_messages == 0 else '10+' if unread_messages > 10 else str(unread_messages)
 
             if not chat.latest_message:
-                chat.latest_message = ''
+                chat.latest_message = 'No messages yet'
 
             if chat.type == ChatType.PERSONAL.value:
                 member = chat_service.get_recipient_for_personal(chat.id, user) 
@@ -119,10 +119,9 @@ class ChatCreateView(View):
 
 class ChatDetailsView(View):
     def get(self, request, chat_id):
-        user = request.user 
+        user =request.user 
         chat = chat_service.get_chat_by_id(chat_id)
-        messages = message_service.list_messages_by_chat_id(chat_id)
-        # chat_data=[]
+        messages = message_service.list_messages_by_chat_id(chat_id,user.id)
         if chat.type == ChatType.PERSONAL.value:
             member = chat_service.get_recipient_for_personal(chat.id, user) 
             if member:

@@ -2,6 +2,7 @@
 
 {% block title %}Chat{% endblock %}
 
+
 {% block content %}
 {% load static %}
 <div class="chat-container">
@@ -307,7 +308,7 @@ $(document).ready(function () {
     /* Header */
     .G-msg_chat-title {
         display: block;         
-        width: 55%;             
+        width: 35%;             
         white-space: nowrap;    
         overflow: hidden;        
         text-overflow: ellipsis; 
@@ -369,6 +370,9 @@ $(document).ready(function () {
         transition: all 0.3s ease;
         background-color: #ffffff;
         box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.1);
+        word-wrap: break-word; 
+        overflow-wrap: break-word; 
+        word-break: break-word;
     }
 
     .message.sent {
