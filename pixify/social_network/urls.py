@@ -40,13 +40,14 @@ urlpatterns = [
     # path('admin/posts/specific_user_list/', views.ManagePostSpecificUserListView.as_view(), name='manage_post_specific_user_list'),
     # path('admin/posts/specific_user_details/', views.ManagePostSpecificUserDetailView.as_view(), name='manage_post_specific_user_detail'),
 
-
     #chat
     path('chat/', views.ChatListView.as_view(), name='chat_list'),
     path('chat/create', views.ChatCreateView.as_view(), name='chat_create'),
     path('chat/<int:chat_id>', views.ChatDetailsView.as_view(), name='chat_details'),
     path('chat/<int:chat_id>/update', views.ChatUpdateView.as_view(), name='chat_update'),
     path('chat/<int:chat_id>/delete', views.ChatDeleteView.as_view(), name='chat_delete'),
+    path('chat/<int:chat_id>/create-members', views.ChatMemeberCreateView.as_view(), name='create_members'),
+    path('chat/<int:chat_id>/delete-members', views.ChatMemeberDeleteView.as_view(), name='delete_members'),
 
     path('admin/chat/', views.ManageChatListView.as_view(), name='manage_chat_list'),
     path('admin/chat/create/', views.ManageChatCreateView.as_view(), name='manage_chat_create'),
@@ -59,16 +60,16 @@ urlpatterns = [
 
     # notification
     path('notification/', views.NotificationView.as_view(), name='notification'),
-    
+
     # profile
     path('profile/', views.EnduserprofileView.as_view(), name='userprofile'),
-    
+
     # aboutus
     path('aboutus/', views.AboutUsView.as_view(), name='aboutus'),
 
     # contact
     path('contactus/', views.ContactUsView.as_view(), name='contact'),
-    
+
     path('comments/', views.CommentsView.as_view(), name='comments'),
 
     path('friendrequest/', views.FriendRequestView.as_view(), name='friendrequest'),
@@ -81,10 +82,10 @@ urlpatterns = [
     path('userprofile/', views.UserprofileView.as_view(), name='userprofile'),
 
     # message
-    path('message/', views.MessageListView.as_view(), name='message'),
-    path('message/create', views.MessageCreateView.as_view(), name='message_create'),
-    path('message/<int:message_id>/update', views.MessageUpdateView.as_view(), name='message_update'),
-    path('message/<int:message_id>/delete', views.MessageDeleteView.as_view(), name='message_delete'),
+    path('chat/message/', views.MessageListView.as_view(), name='message'),
+    path('chat/message/create', views.MessageCreateView.as_view(), name='message_create'),
+    path('chat/message/<int:message_id>/update', views.MessageUpdateView.as_view(), name='message_update'),
+    path('chat/message/<int:message_id>/delete', views.MessageDeleteView.as_view(), name='message_delete'),
     
     # auth
     path('request-otp/', views.RequestOTPView.as_view(), name='request_otp'),
@@ -92,23 +93,25 @@ urlpatterns = [
     path('logout/', views.LogoutView.as_view(), name='logout'),
     path('register/', views.UserRegistrationView.as_view(), name='register'),
     path('resend-otp/', views.ResendOTPView.as_view(), name='resend_otp'),
-    
-    #chatlist api 
+
+    #chatlist api
     path('chat/chats/api', views.ChatListViewApi.as_view(), name='chats_api'),
-    
-    #flolowers api 
+
+    #flolowers api
     path('chat/followers/api', views.FollowerListViewApi.as_view(), name='followers_api'),
-    
+
      # message reaction
     path('message-reaction/create/', views.MessageReactionCreateView.as_view(), name='message_reaction_create'),
     path('message-reaction/<int:message_reaction_id>/update/', views.MessageReactionUpdateView.as_view(), name='message_reaction_update'),
     path('message-reaction/<int:message_reaction_id>/delete/', views.MessageReactionDeleteView.as_view(), name='message_reaction_delete'),
 
-    # message mention
-    path('message-mention/<int:message_id>', views.MessageMentionCreateView.as_view(), name='message_mention'),
+    # message mention list api
+    path('message-mention/<int:chat_id>', views.MessageMentionListViewApi.as_view(), name='message_mention'),
     
     # message reply
     path('message-reply/<int:message_id>/', views.MessageReplyCreateView.as_view(), name='message_reply'),
+
+    path('posts/create/', views.UserPostCreatView.as_view()),
 ]
 
 

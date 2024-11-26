@@ -13,6 +13,10 @@ from ..models import User
 from django.core.paginator import Paginator 
 from django.http import HttpResponseBadRequest
 from ..forms import ManagePostCreateForm
+from social_network.packages.response import success_response
+from social_network.constants.default_values import SortingOrder
+
+
 
 class ManagePostCreateView(View):
     @catch_error
@@ -43,31 +47,25 @@ class ManagePostCreateView(View):
 class ManagePostListView(View):
     def get(self, request):
         # Fetch the search query from the URL parameters
-        search_query = request.GET.get('search', '') 
-        sort_by = request.GET.get('sort_by', 'posted_by')
-        sort_order = request.GET.get('sort_order', 'asc')
+        search_query = request.GET.get('search', '')
+        sort_by = request.GET.get('sort_by', "created_at")
+        sort_order = request.GET.get('sort_order', SortingOrder.DESC.value)
         page_number = request.GET.get('page', 1)
 
-
-        # Adjust sort order for descending order
-        if sort_order == 'desc':
-            sort_by = '-' + sort_by
-
-        print(f"Search Query: {search_query}")
-        # Get filtered and sorted users based on search
-        posts = services.post_service.manage_list_posts_filtered(search_query, sort_by)
-
-        # Paginate the users
-        paginator = Paginator(posts, 10)  # Show 10 users per page
-        page_obj = paginator.get_page(page_number)
-
-        return render(request, 'adminuser/post/list.html', {
-            'posts': page_obj,
-            'sort_by': sort_by,
-            'sort_order': sort_order,
-            'search_query': search_query,  # Ensure this is being passed to the template
-            'page_obj': page_obj,
-        })
+        # get data
+        data = services.post_service.manage_list_posts_filtered(
+            search_query=search_query,
+            sort_by=sort_by,
+            sorting_order=sort_order,
+            page_number=page_number
+        )
+        # return
+        # print(data)
+        # posted_by = services.post_service.manage_get_user(data.posted_by_id)
+        return render(request,
+            'adminuser/post/list.html',
+            success_response("post data fetched successfully", data)
+        ) 
 
 class ManagePostDetailView(View):
     def get(self, request, post_id):
@@ -105,9 +103,6 @@ class ManagePostUpdateView(View):
             post.save()  
             return redirect('manage_post_list')
         return render(request, 'adminuser/post/update.html', {"form": form, "post_id": post.id})
-
-
-
 
 class ManagePostDeleteView(View):
     def get(self, request, post_id):

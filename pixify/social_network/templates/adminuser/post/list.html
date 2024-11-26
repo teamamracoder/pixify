@@ -44,11 +44,11 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for post in posts %}
+                        {% for post in data.data %}
                         <tr>
                             <td>
                                 <a class="text-decoration-none text-primary hover-bg" href="{% url 'manage_post_detail' post.id %}">
-                                    {{ post.posted_by.first_name }} {{ post.posted_by.last_name }} 
+                                    {{ post.id }}
                                 </a>
                             </td>
                             <td>{{ post.title }}</td>
