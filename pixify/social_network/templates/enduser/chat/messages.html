@@ -31,9 +31,12 @@
                     <div class="message-footer">
                         
                         <span class="time">{{ message.created_at|date:"h:i A" }}</span>
+                        <div>
                         <i class="bi bi-three-dots-vertical" onclick="toggleOptions({{ message.id }})"></i>
                         <i class="bi bi-emoji-smile" onclick="toggleReactionPopup({{ message.id }})"></i>
+                        </div>
                     </div>
+                    
                     <div class="options-popup" id="options-{{ message.id }}" style="display: none;">
                         {% if message.sender_id.id == user.id%}
                         <a href="#" onclick="editMessage('{{ message.id }}', '{{ message.text|escapejs }}')">Edit</a>                       
@@ -41,6 +44,7 @@
                         <a href="#" onclick="deleteMessage('{{ message.id }}')">Delete</a>
                         <a href="#" onclick="replyToMessage('{{ message.id }}', '{{ message.sender.username }}', '{{ message.text|escapejs }}')">Reply</a>
                     </div>
+                    
                     <div class="reaction-popup" id="reaction-popup-{{ message.id }}" style="display: none;">
                         <span onclick="addReaction('{{ message.id }}', '👍')">👍</span>
                         <span onclick="addReaction('{{ message.id }}', '❤️')">❤️</span>
@@ -61,17 +65,19 @@
                     </div>
                     <div class="message-footer">
                         <span class="time">{{ message.created_at|date:"h:i A" }}</span>
+                        <div>
                         <i class="bi bi-three-dots-vertical" onclick="toggleOptions({{ message.id }})"></i>
                         <i class="bi bi-emoji-smile" onclick="toggleReactionPopup({{ message.id }})"></i>
+                        </div>
                     </div>
                    <div class="options-popup" id="options-{{ message.id }}" style="display: none;">
                     {% if message.sender_id.id == user.id%}
                     <a href="#" onclick="editMessage('{{ message.id }}', '{{ message.text|escapejs }}')">Edit</a>
                     {%endif%}
 
-                    <a href="#" onclick="deleteMessage('{{ message.id }}')">Delete</a>
-                    <a href="#" onclick="replyToMessage('{{ message.id }}', '{{ message.sender.username }}', '{{ message.text|escapejs }}')">Reply</a>    
-                    </div>
+    <a href="#" onclick="deleteMessage('{{ message.id }}')">Delete</a>
+    <a href="#" onclick="replyToMessage('{{ message.id }}', '{{ message.sender.username }}', '{{ message.text|escapejs }}')">Reply</a>
+</div>
 
                     <div class="reaction-popup" id="reaction-popup-{{ message.id }}" style="display: none;">
                         <span onclick="addReaction('{{ message.id }}', '👍')">👍</span>
@@ -231,6 +237,9 @@ $(document).ready(function () {
     });
 });
 
+
+
+
     function toggleOptions(messageId) {
         const popup = document.getElementById('options-' + messageId);
         popup.style.display = popup.style.display === 'none' ? 'block' : 'none';
@@ -286,7 +295,29 @@ function cancelReply() {
             document.querySelectorAll('.options-popup').forEach(popup => popup.style.display = 'none');
         }
     });
+
+    // Function to scroll the chat body to the bottom
+function scrollToBottom() {
+    const chatBody = document.querySelector('.chat-body');
+    chatBody.scrollTop = chatBody.scrollHeight;
+}
+
+// Scroll to the bottom on page load
+document.addEventListener('DOMContentLoaded', function () {
+    scrollToBottom();
+});
+
+// Scroll to the bottom when a new message is added
+const chatBody = document.querySelector('.chat-body');
+const observer = new MutationObserver(scrollToBottom);
+
+observer.observe(chatBody, { childList: true });
+
 </script>
+
+
+
+
 
 
 
@@ -294,7 +325,7 @@ function cancelReply() {
     /* Overall Chat Container */
     .chat-container {
         height: 650px;
-        background-color: #f2f2f2;
+        background-color: #211237f2; /*shubhankar change only color*/
         border-radius: 10px;
         box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
         display: flex;
@@ -357,7 +388,23 @@ function cancelReply() {
         overflow-y: auto;
         display: flex;
         flex-direction: column;
+        scrollbar-width: thin; /* For Firefox */
+        scrollbar-color: #c7c5c5 #f2f2f2;
     }
+        /* Customize scrollbar for Webkit browsers */
+    .chat-body::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .chat-body::-webkit-scrollbar-thumb {
+        background-color: #c7c5c5;
+        border-radius: 10px;
+    }
+
+    .chat-body::-webkit-scrollbar-track {
+        background-color: #f2f2f2;
+    }
+
 
     .message {
         max-width: 80%;
@@ -378,13 +425,13 @@ function cancelReply() {
 
     .message.sent {
         align-self: flex-end;
-        background-color: #533b79;
+        background-color: #34b7f1; /*shubhankar change only color*/
         color: white;
     }
 
     .message.received {
         align-self: flex-start;
-        background-color: #d1c6d3;
+        background-color:#3b1fa0ab ; /*shubhankar change only color*/
         color: #333333;
     }
 
@@ -410,7 +457,7 @@ function cancelReply() {
 
     .message-username {
         font-weight: bold;
-        color: #533b79;
+        color: #fff;
         font-size: 14px;
     }
 
@@ -430,28 +477,30 @@ function cancelReply() {
 
     .message-footer .bi-three-dots-vertical {
         cursor: pointer;
-        font-size: 12px; /* Smaller icon */
+        font-size: 18px; /* Smaller icon */
         margin-left: 5px;
     }
 
+/* shubhankar */
+/* start */
     .options-popup {
-        display: none;
-        position: absolute;
-        top: 25px;
-        left: 100%; /* Align the options to the right of the message */
-        margin-left: 10px;
-        background-color: #fff;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        width: 160px;
-        font-size: 14px;
-        z-index: 10;
+    position: absolute; 
+    top: 20px;         
+    left: 50%;         
+    transform: translateX(-50%); 
+    z-index: 1000;    
+    width: 100px;     
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    background: #fff;   
+    border-radius: 8px;
+    padding: 16px;
     }
+    /* end */
 
     .options-popup a {
         display: block;
-        padding: 10px;
+        padding: 5px;
+        padding-left: 10px;
         color: #333;
         text-decoration: none;
         border-bottom: 1px solid #ccc;
@@ -591,7 +640,7 @@ function cancelReply() {
     .bi-emoji-smile {
         font-size: 20px;
         cursor: pointer;
-        color: gray;
+        color: red; /*shubhankar change only color*/
     }
     
     .bi-emoji-smile:hover {
@@ -639,5 +688,10 @@ function cancelReply() {
         font-weight: bold;
     }
     /*end A*/
+
+
+
+
+    
 </style>
 {% endblock %} add a action when i type "@" in the form 

@@ -197,7 +197,7 @@ class ChatListViewApi(View):
                     } 
             elif chat.type == ChatType.GROUP.value:
                 title = chat.title or chat_service.get_recipients_for_group(chat.id, user)
-                chat_cover = chat.chat_cover or '\static\images\group_pic.png'
+                chat_cover = chat.chat_cover or '/static/images/group_pic.png'
                 if chat_cover:
                     chat_info = {
                         'id': chat.id,
@@ -208,7 +208,7 @@ class ChatListViewApi(View):
                     chat_info = {
                         'id': chat.id,
                         'title': title,
-                        'chat_cover':'\static\images\group_pic.png',
+                        'chat_cover':'/static/images/group_pic.png',
                     } 
             chat_data_list.append(chat_info)
         chats = chat_service.list_chats_api(request,chat_data_list)
