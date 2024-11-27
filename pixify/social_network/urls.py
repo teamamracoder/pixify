@@ -26,7 +26,11 @@ urlpatterns = [
     path('admin/notifications/create/', views.ManageNotificationCreateView.as_view(), name='manage_notification_create'),
     path('admin/notifications/<int:notification_id>/detail/', views.ManageNotificationDetailView.as_view(), name='manage_notification_detail'),
     path('admin/notifications/<int:notification_id>/update/', views.ManageNotificationUpdateView.as_view(), name='manage_notification_update'),
-    # path('admin/notifications/<int:delete_id>/delete/', views.ManageNotificationDeleteView.as_view(), name='manage_notification_delete'),
+ 
+    # admin message
+    path('admin/messages/', views.ManageMessageListView.as_view(), name='manage_message_list'),
+    path('admin/messages/create/', views.ManageMessageCreateView.as_view(), name='manage_message_create'),
+    path('admin/messages/toggle-active/<int:message_id>/', views.ManageToggleMessageActiveView.as_view(), name='manage_toggle_message_active'),
 
     #manage-post
     path('admin/posts/', views.ManagePostListView.as_view(), name='manage_post_list'),

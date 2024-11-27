@@ -23,3 +23,4 @@ from .manage_specific_user_view import *
 from .chat_member_view import *
 from .manage_chat_member_view import *
 from .manage_comment_view import *
+from .manage_message_view import *
