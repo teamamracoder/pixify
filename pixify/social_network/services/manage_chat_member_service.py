@@ -5,10 +5,10 @@ from django.db.models import Q
 
 
 
-def manage_member_create_chats(member_id,chat_id):
-  return ChatMember.objects.create(member_id=member_id,chat_id=chat_id)
+def manage_member_create_chats(member_id_id,chat_id_id):
+  return ChatMember.objects.create(member_id_id=member_id_id,chat_id_id=chat_id_id)
 
-def manage_member_list_chats_filtered(search_query, sort_by='title'):
+def manage_member_list_chats_filtered(search_query, sort_by='member_id_id'):
     if search_query:
         
         return ChatMember.objects.filter(

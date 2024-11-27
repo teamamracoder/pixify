@@ -8,20 +8,30 @@
         <div class="p-3 fnd-pic" style="justify-content: space-between; display: flex">
             <h2 class="mobile-hide">Chats</h2>
             <div class="input-wrapper">
-                <button class="icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" height="25px" width="25px">
-                        <path stroke-linejoin="round" stroke-linecap="round" stroke-width="1.5" stroke="#fff"
-                            d="M11.5 21C16.7467 21 21 16.7467 21 11.5C21 6.25329 16.7467 2 11.5 2C6.25329 2 2 6.25329 2 11.5C2 16.7467 6.25329 21 11.5 21Z">
-                        </path>
-                        <path stroke-linejoin="round" stroke-linecap="round" stroke-width="1.5" stroke="#fff"
-                            d="M22 22L20 20"></path>
-                    </svg>
+                <button data-toggle="modal" data-target="#example" class="border-0 bg-transparent">
+                    <i class="bi bi-search" style="font-size:30px" ></i>
                 </button>
-                <input placeholder="search.." class="input" name="text" type="text" id="search_chats" />
-                <div id="fill">
-
+            </div>
+            <!-- Modal -->
+            <div class="modal fade" id="example" tabindex="-1" role="dialog"
+            aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <div class="input-group mb-3 " style="background-color:#B2B2B2; border-radius: 5px; ">
+                            <input type="text" id="search_chats" class="form-control" placeholder="Searching chats here....."
+                                aria-label="Example text with button addon" aria-describedby="button-addon1" />
+                                <button class="btn btn-secondary" type="button" id="button-addon1" id="searchbtn">
+                                    <i class="bi bi-search"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <h6 style="padding-left:10px; color: rgb(178, 190, 181);font-size:15px; ">Search results : <hr></h6>
+                        <div id="fill" >       
+                        </div>
+                    </div>
                 </div>
-
+            </div>
                 <script>
                     $(document).ready(function () {
                         $("#search_chats").on('input', function () {
@@ -29,68 +39,72 @@
                                 url: '/chat/chats/api?search=' + $(this).val(),
                                 type: 'GET',
                                 success: function (res) {
-                                    console.log(res)
-                                    $("#fill").html(`
-                       <a href="chat/id">res.first_name></a>
-                        `);
+                                    // Clear previous results
+                                    $("#fill").html('');
+                    
+                                    // Append each chat to the DOM
+                                    res.forEach(chat => {
+                                        
+                                        $("#fill").append(`
+                                        <div class="list">
+                                         <img src="${chat.chat_cover}" id="profile-photo">
+                                            <a href="/chat/${chat.id}" class="chat-item" id="hyperlink-text">${chat.title}</a><br>
+                                            </div>
+                                        `);
+                                    });
                                 },
-                                error: function (xhr, status, error) {
-                                    console.log(xhr)
-                                },
-                            });
-                        })
+                        error: function (xhr, status, error) {
+                            console.log(xhr)
+                        },
                     });
-                </script>
-
-            </div>
-        </div>
+                })
+            });
+        </script>        
     </div>
+</div>
 
 
     <!-- Peoples -->
     {% for chat in chats %}
     <div style="border: 1px solid black; border-radius: 3px" class="m-2">
-        <div class="p-3 fnd-pic">
+        <div class="p-3 fnd-pic" style="display:flex; gap:20px;">
 
             <a href="#"
-                style="text-decoration: none;display: flex;align-items: center;gap: 20px;justify-content: space-between;">
+                style="text-decoration: none; display: flex; flex-direction: column;">
                 
-                <img src="{{ chat.chat_cover }}" class="img-fluid" alt="" style="height: 40px; border-radius: 50%" />
+                <img src="{{ chat.chat_cover }}" class="img-fluid" alt="" style="height: 40px; width:40px; border-radius: 50%" />
 
                 <!-- Text next to the image -->
                 <div style="display: flex; flex-direction: column; flex-grow: 1">
                     <p style="margin: 0">
-                        <a href="{% url 'chat_details' chat_id=chat.id %}">
-                            {{  chat.title  }} <i class="bi bi-patch-check prof-check"></i>
+                        <a href="{% url 'chat_details' chat_id=chat.id %}" id="hyperlink-text">
+                            {{  chat.title  }}
                         </a>
                     </p>
                     <p style="margin: 0; color: gray; font-size: 0.9em">
                         {{  chat.latest_message }}
                     </p>
                 </div>
-
                 <!-- Right-aligned section with badge and timestamp -->
                 <div style="display: flex;flex-direction: column;align-items: flex-end;padding-right: 20px;">
-                    <p style="margin-top: 0; padding-right: 10px">
+                    <p style="margin-top: 10px;">
                         <span
-                            class="position-absolute translate-middle badge rounded-pill bg-danger">{{ chat.unread_messages }}</span>
+                            class="position-absolute translate-middle badge rounded-pill bg-danger" id="unread_color">{{ chat.unread_messages }}</span>
                     </p>
-                    <p style="margin-top: 10px; margin-bottom: 0; padding-right: 20px">
+                    <p style="margin-top: 15px; margin-bottom: 0; padding-right: 10px">
                         <span
                             class="position-absolute translate-middle badge rounded-pill">{{ chat.latest_message_timestamp }}</span>
                     </p>
                 </div>
-
             </a>
-
         </div>
     </div>
     {% endfor %}
 
 
-    <div style="position:absolute; bottom:30px; right:20px;">
+    <div style="position: absolute;bottom: 33px;right: 28px;background-color: #1f0647;height: 40px;width: 40px;border-radius: 50%;display: flex;justify-content: center;align-content: center;align-items: center;">
         <button data-toggle="modal" data-target="#exampleModalCenter" class="border-0 bg-transparent">
-            <i class="text-light bi bi-plus-circle fs-1" style="background-color: #1f0647;"></i>
+            <i class="text-light bi bi-plus-circle fs-1"></i>
         </button>
     </div>
 
@@ -102,43 +116,100 @@
                 <div class="modal-header">
                     <div class="input-group mb-3">
 
-                        <button class="btn btn-outline-secondary" type="button" id="button-addon1" id="searchbtn">
-                            <i class="bi bi-search"></i>
-                        </button>
 
-                        <input type="text" id="searchin" class="form-control" placeholder="Search Name"
-                            aria-label="Example text with button addon" aria-describedby="button-addon1" />
+                        
+                       
 
-                        <div id="filled">
-                            <a href="">followers</a>
-                        </div>
+    <div class="input-wrapper">
+        <input type="text" id="searchin" class="form-control" placeholder="Search Name" aria-label="Search Name">
+    </div>
+    <button class="btn btn-outline-secondary" type="button" id="button-addon1" id="searchbtn"style="border-top-right-radius : 10px;border-bottom-right-radius : 10px;">
+        <i class="bi bi-search"></i>
+    </button>
+    <div id="filled" style="padding-top: 10px;">
+    <!-- Combined follower and following data will be inserted here -->
+    </div>
 
-                        <script>
-                            $(document).ready(function () {
-                                $("#searchin").on('input', function () {
-                                    $.ajax({
-                                        url: '/chat/followers/api?search=' + $(this).val(),
-                                        type: 'GET',
-                                        success: function (res) {
-                                            console.log(res)
-                                            $("#filled").html(`
-                               <a href="chat/${follower.id}">${follower.first_name}</a><br/>
-                            `);
-                                        },
-                                        error: function (xhr, status, error) {
-                                            console.log(xhr)
-                                        },
-                                    });
-                                })
-                            });
-                        </script>
-                    </div>
+   <script>
+    $(document).ready(function () {
+        let selectedItems = []; // Array to store selected item IDs
+
+        function fetchFollowersAndFollowings(searchQuery = '') {
+            $.ajax({
+                url: '/chat/followers/api?search=' + searchQuery,
+                type: 'GET',
+                success: function (res) {
+                    console.log(res); // Print the returned JSON object to the console for debugging
+                    var combinedHtml = '';
+
+                        res.followers.forEach(function (follower) {
+                        combinedHtml += `
+                            <div class="user-item" id="user-${follower.user_id}" ondblclick="toggleSelection(${follower.user_id})">
+                                <div class="user-content">
+                                    <img src="${follower.user_id__profile_photo_url}" alt="${follower.user_id__first_name}'s profile photo" class="profile-photo">
+                                    <a href="/chat/${follower.user_id}">${follower.user_id__first_name} ${follower.user_id__last_name}</a>
+                                </div>
+                            </div>
+                        `;
+                    });
+
+                        res.followings.forEach(function (following) {
+                        combinedHtml += `
+                          <div class="user-item" id="user-${following.user_id}" ondblclick="toggleSelection(${following.user_id})">
+                                <div class="user-content">
+                                    <img src="${following.user_id__profile_photo_url}" alt="${following.user_id__first_name}'s profile photo" class="profile-photo">
+                                    <a href="/chat/${following.user_id}">${following.user_id__first_name} ${following.user_id__last_name}</a>
+                                </div>
+                            </div>
+                        `;
+                    });
+
+                    $("#filled").html(combinedHtml);
+
+                // Reapply selected class to previously selected items
+                    selectedItems.forEach(function (itemId) {
+                        $(`#user-${itemId}`).addClass('selected');
+                    });
+                },
+            error: function (xhr, status, error) {
+                console.log(xhr);
+            },
+        });
+    }
+
+    // Fetch all followers and followings on page load
+    fetchFollowersAndFollowings();
+
+    // Fetch followers and followings as the user types in the search bar
+        $("#searchin").on('input', function () {
+            fetchFollowersAndFollowings($(this).val());
+        });
+
+    // Function to handle user selection on double-tap
+        window.toggleSelection = function (userId) {
+            const element = $(`#user-${userId}`);
+            element.toggleClass('selected');
+
+            if (element.hasClass('selected')) {
+            // Add to selectedItems array if selected
+                if (!selectedItems.includes(userId)) {
+                    selectedItems.push(userId);
+                }
+            } else {
+            // Remove from selectedItems array if deselected
+                selectedItems = selectedItems.filter(id => id !== userId);
+            }
+        }
+    });
+    </script>
 
                 </div>
-                </a>
+
             </div>
+            </a>
         </div>
     </div>
+</div>
 
 <script>
     const allItems = document.querySelectorAll(".item");
@@ -164,6 +235,28 @@
 </script>
 
 <style>
+    .list{
+        margin:10px;
+        background-color: rgb(170, 150, 291);
+        border-radius:5px;
+        border:10px white;
+        padding:10px;
+    }
+    #unread_color{
+        background-color:#ffffff63 !important;
+    }
+    #profile-photo {
+        width: 40px;
+        height: 40px;
+        border-radius:50%;
+        margin-right: 10px;
+    }
+    
+    #hyperlink-text{
+        text-decoration:none;
+        color:white;
+        font-size:17px;
+    }
     #p-pic img {
         padding: 15px 20px;
         height: 180px;
@@ -176,7 +269,7 @@
     }
 
     .input-wrapper {
-        display: flex;
+        /* display: flex; */
         align-items: center;
         justify-content: center;
         gap: 15px;
@@ -195,6 +288,10 @@
         box-shadow: 0px 0px 3px #f3f3f3;
         padding-right: 40px;
         color: #fff;
+    }
+    #search_chats{
+        background:none;
+        box-shadow:none;
     }
 
     .input::placeholder,
@@ -247,6 +344,12 @@
         color: white;
     }
 
+    .modal-align{
+        display:flex;
+        justify-content:center;
+        align-item:center;
+    }
+
     /* Base styles are already set; adding media queries for responsiveness */
 
     @media (max-width: 1200px) {
@@ -271,7 +374,7 @@
     /* Hide the element on screens smaller than 768px (or your desired breakpoint) */
     @media only screen and (max-width: 768px) {
         .mobile-hide {
-            display: none;
+            
         }
     }
 
@@ -304,12 +407,11 @@
         }
 
         .fnd-pic {
-            flex-direction: column;
             align-items: flex-start;
         }
 
         .input-wrapper {
-            width: 100%;
+            width: 25%;
         }
 
         .icon,
@@ -331,7 +433,7 @@
         }
 
         .input-wrapper {
-            width: 100%;
+            width: 20%;
             gap: 5px;
         }
 
@@ -345,6 +447,53 @@
             font-size: 0.9rem;
         }
     }
+
+/*Message mention */
+    
+.profile-photo {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+.user-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    padding: 5px; /* Increase padding for larger touch area */
+    cursor: pointer;
+    width: 100%; /* Ensure the item spans the full width of its container */
+    box-sizing: border-box; /* Ensure padding is included in the width */
+}
+
+.user-item .user-content {
+    display: flex;
+    align-items: center;
+    flex: 1;
+}
+
+.user-item.selected {
+    background-color: #11dbf940;
+    border: 3px solid #ccc;
+    border-radius: 30px;
+    width: 370px; /* Correct syntax to ensure the item spans the full width */
+}
+
+.user-item a {
+    text-decoration: none;
+    color: inherit; /* Ensure the link inherits the color for readability */
+}
+
+#searchin {
+    height:40px;
+    width: 320px; 
+    border-radius:15px;
+    background-color : rgb(86 185 200);
+    border-top-right-radius:0px;
+    border-bottom-right-radius:0px;
+}
+
 </style>
 </div>
 {% endblock %}
