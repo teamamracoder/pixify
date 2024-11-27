@@ -4,20 +4,22 @@
 
 {% block content %}
 <style>
-        .hover-bg:hover {
+    .hover-bg:hover {
         background-color: rgba(240, 242, 245, 0.1);
         color:aqua; 
-    }
+    }   
+    .current {
+        font-weight: bold;
+    }   
 </style>
 
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col">
             <h2 class="text-center mb-4">Notifications</h2>
-
             <div class="d-flex justify-content-between mb-3">
-                <button class="btn btn-primary btn-sm"><a href="{% url 'manage_notification_create' %}" class="text-white text-decoration-none">Add Notifications</a></button>
-               
+                <button class="btn btn-primary btn-sm"><a href="{% url 'manage_notification_create' %}"
+                     class="text-white text-decoration-none">Add Notification</a></button>               
                 <form method="get" action="{% url 'manage_notification_list' %}">
                     <div class="input-group" style="max-width: 300px;">
                         <input type="text" class="form-control border-secondary" placeholder="Search" aria-label="Search" name="search" value="{{ search_query }}">
@@ -27,17 +29,17 @@
             </div>
 
             <div class="table-responsive">
-                <table class="table table-hover">
+                <table class="table table-bordered">
                     <thead class="table-info text-white"> 
                         <tr>
                             <th>
-                                <a href="?sort_by=text&sort_order={% if sort_order == 'asc' %}desc{% else %}asc{% endif %}">Text</a>
+                                <a class="text-decoration-none" href="?sort_by=text&sort_order={% if data.applied_options.sort.order == 'asc' %}desc{% else %}asc{% endif %}">Text</a>
                             </th>
                             <th>
-                                <a href="?sort_by=media_url&sort_order={% if sort_order == 'asc' %}desc{% else %}asc{% endif %}">Media URL</a>
+                                <a class="text-decoration-none" href="?sort_by=media_url&sort_order={% if data.applied_options.sort.order == 'asc' %}desc{% else %}asc{% endif %}">Media URL</a>
                             </th>
                             <th>
-                                <a href="?sort_by=is_read&sort_order={% if sort_order == 'asc' %}desc{% else %}asc{% endif %}">IS_Read</a>
+                                <a class="text-decoration-none" href="?sort_by=is_read&sort_order={% if data.applied_options.sort.order == 'asc' %}desc{% else %}asc{% endif %}">IS_Read</a>
                             </th>
                             <th>
                                 Status
@@ -45,22 +47,16 @@
                         </tr>
                     </thead>
 
-
                     <tbody>
-                        {% for notification in notifications %}
+                        {% for notification in data.data %}
                         <tr>
                             <td>
                                 <a class="text-decoration-none text-primary hover-bg" href="{% url 'manage_notification_detail' notification.id %}">
                                     {{notification.text }}
                                 </a>
-                            </td>                      
-                                                    
+                            </td>                                                                        
                             <td>{{ notification.media_url }}</td>
-
                             <td>{{ notification.is_read }}</td>
-
-
-
                             <td>
                                 <button class="btn btn-sm toggle-status" data-notification-id="{{ notification.id }}">
                                     {% if notification.is_active %}
@@ -70,39 +66,64 @@
                                     {% endif %}
                                 </button>
                             </td>
-
-
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
 
-
-                <div class="pagination">
-                    <span class="step-links">
-                        {% if notifications.has_previous %}
-                            <a href="?page=1&search={{ search_query }}&sort_by={{ sort_by }}&sort_order={{ sort_order }}">First</a>
-                            <a href="?page={{ notifications.previous_page_number }}&search={{ search_query }}&sort_by={{ sort_by }}&sort_order={{ sort_order }}">Previous</a>
-                        {% endif %}
-                
-                        <span class="current">
-                            Page {{ notifications.number }} of {{ notifications.paginator.num_pages }}.
-                        </span>
-                
-                        {% if notifications.has_next %}
-                            <a href="?page={{ notifications.next_page_number }}&search={{ search_query }}&sort_by={{ sort_by }}&sort_order={{ sort_order }}">Next</a>
-                            <a href="?page={{ notifications.paginator.num_pages }}&search={{ search_query }}&sort_by={{ sort_by }}&sort_order={{ sort_order }}">Last</a>
-                        {% endif %}
-                    </span>
+                <div class="container">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="current mr-auto">
+                            <span class="text-info me-3">Total {{ data.pagination.total }} notifications</span>
+                            Page {{ data.pagination.current_page }} of {{ data.pagination.total_page }}.
+                        </div>
+                        <div class="step-links ml-auto">
+                            <nav aria-label="Page navigation example">
+                                <ul class="pagination">
+                                    {% if data.pagination.prev_page %}
+                                    <li class="page-item">
+                                        <a class="page-link"
+                                            href="?page=1&search={{ data.applied_options.search.text }}&sort_by={{ data.applied_options.sort.field }}&sort_order={{ data.applied_options.sort.order }}"
+                                            aria-label="Previous">
+                                            <span aria-hidden="true">&laquo;</span>
+                                        </a>
+                                    </li>
+                                    <li class="page-item">
+                                        <a class="page-link"
+                                            href="?page={{ data.pagination.prev_page }}&search={{ data.applied_options.search.text }}&sort_by={{ data.applied_options.sort.field }}&sort_order={{ data.applied_options.sort.order }}">{{ data.pagination.prev_page }}
+                                        </a>
+                                    </li>
+                                    {% endif %}
+                                    <li class="page-item">
+                                        <a class="page-link active" href="#">
+                                            {{ data.pagination.current_page }}
+                                        </a>
+                                    </li>
+                                    {% if data.pagination.next_page %}
+                                    <li class="page-item">
+                                        <a class="page-link"
+                                            href="?page={{ data.pagination.next_page }}&search={{ data.applied_options.search.text }}&sort_by={{ data.applied_options.sort.field }}&sort_order={{ data.applied_options.sort.order }}">
+                                            {{ data.pagination.next_page }}
+                                        </a>
+                                    </li>
+                                    <li class="page-item">
+                                        <a class="page-link"
+                                            href="?page={{ data.pagination.total_page }}&search={{ data.applied_options.search.text }}&sort_by={{ data.applied_options.sort.field }}&sort_order={{ data.applied_options.sort.order }}"
+                                            aria-label="Next">
+                                            <span aria-hidden="true">&raquo;</span>
+                                        </a>
+                                    </li>
+                                    {% endif %}
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
                 </div>
-
-
-
+                
             </div>
         </div>
     </div>
 </div>
-
 
 <script>
     $(document).ready(function() {
