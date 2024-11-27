@@ -9,7 +9,7 @@ urlpatterns = [
     path('', views.HomeView.as_view(), name='home'),
 
 
-    # user
+    # manage-user
     path('admin/users/', views.ManageUserListView.as_view(), name='user_list'),
     path('admin/users/profile', views.ManageUserProfileView.as_view(), name='user_profile'),
     path('admin/users/toggle-active/<int:user_id>/', views.ManageToggleUserActiveView.as_view(), name='toggle_user_active'),
@@ -20,7 +20,7 @@ urlpatterns = [
 
 
 
-    #admin_notification
+    #manage-notification
     path('admin/notifications/', views.ManageNotificationListView.as_view(), name='manage_notification_list'),
     path('admin/notifications/toggle-active/<int:notification_id>/', views.ManageToggleNotificationActiveView.as_view(), name='manage_toggle_Notification_active'),
     path('admin/notifications/create/', views.ManageNotificationCreateView.as_view(), name='manage_notification_create'),
@@ -28,7 +28,7 @@ urlpatterns = [
     path('admin/notifications/<int:notification_id>/update/', views.ManageNotificationUpdateView.as_view(), name='manage_notification_update'),
     # path('admin/notifications/<int:delete_id>/delete/', views.ManageNotificationDeleteView.as_view(), name='manage_notification_delete'),
 
-    #admin_post
+    #manage-post
     path('admin/posts/', views.ManagePostListView.as_view(), name='manage_post_list'),
     path('admin/posts/toggle-active/<int:post_id>/', views.ManageTogglePostActiveView.as_view(), name='toggle_post_active'),
     path('admin/posts/create/', views.ManagePostCreateView.as_view(), name='manage_post_create'),
@@ -46,8 +46,7 @@ urlpatterns = [
     path('chat/<int:chat_id>/create-members', views.ChatMemeberCreateView.as_view(), name='create_members'),
     path('chat/<int:chat_id>/delete-members', views.ChatMemeberDeleteView.as_view(), name='delete_members'),
     
-    # admin users
-
+    # manage-chat
     path('admin/chat/', views.ManageChatListView.as_view(), name='manage_chat_list'),
     path('admin/chat/create/', views.ManageChatCreateView.as_view(), name='manage_chat_create'),
     path('admin/chat/<int:chat_id>/', views.ManageChatDetailView.as_view(), name='manage_chat_detail'),
@@ -56,6 +55,14 @@ urlpatterns = [
     path('admin/chat/toggle-active/<int:chat_id>/', views.ManageToggleChatActiveView.as_view(), name='manage_toggle_chat_active'),
     path('admin/chat/membercreate/', views.ManageMemberChatCreateView.as_view(), name='manage_chat_membercreate'),
     path('admin/chat/memberlist/', views.ManageMemberChatListView.as_view(), name='manage_chat_memberlist'),
+
+    # manage-comment
+    path('admin/comments/', views.ManageCommentListView.as_view(), name='manage_comment_list'),
+    path('admin/comments/create/', views.ManageCommentCreateView.as_view(), name='manage_comment_create'),
+    path('admin/comments/toggle-active/<int:comment_id>/', views.ManageToggleCommentActiveView.as_view(), name='manage_toggle_comment_active'),
+
+
+        
     
 
 
