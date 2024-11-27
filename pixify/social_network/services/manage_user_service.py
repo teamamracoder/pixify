@@ -1,3 +1,5 @@
+from social_network.constants.default_values import SortingOrder
+from social_network.packages.get_data import GetData
 from ..models import User
 from django.shortcuts import get_object_or_404
 from django.db.models import Q   
@@ -37,15 +39,16 @@ def manage_update_user(user, first_name,middle_name,last_name, email,dob,gender,
     user.save()
     return user
 
-def manage_list_users_filtered(search_query, sort_by='first_name'):
-    if search_query:
-        # Use Q objects to filter by first_name, last_name, or email
-        return User.objects.filter(
-            Q(first_name__icontains=search_query) | 
-            Q(last_name__icontains=search_query) |
-            Q(email__icontains=search_query)
-        ).order_by(sort_by)
-    return User.objects.all().order_by(sort_by)
-
+def manage_list_users_filtered(search_query, sorting_order, sort_by, page_number):
+    # get data
+    data = (
+        GetData(User)
+        .search(search_query,"first_name","last_name", "email")
+        .sort(sort_by, sorting_order)
+        .paginate(limit=3, page=page_number)
+        .execute()
+    )
+    # return data
+    return data
 
 

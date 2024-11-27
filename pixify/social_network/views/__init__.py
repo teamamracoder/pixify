@@ -18,4 +18,5 @@ from .birthday_view import *
 from .friends_view import *
 from .manage_chat_view import *
 from .manage_notification_view import *
+from .chat_member_view import *
 from .manage_chat_member_view import *
