@@ -1,14 +1,15 @@
+from pyexpat.errors import messages
 from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
 from django.views import View 
-from .. import services
+from ..import services
 from ..models import Notification
 from django.core.paginator import Paginator
 from ..constants.default_values import SortingOrder
 from ..decorators.exception_decorators import catch_error
 from ..decorators import auth_required, role_required
 from ..packages.response import success_response
-from ..forms.manage_notification_forms import ManageNotificationCreateForm, ManageNotificationUpdateForm
+from ..forms import ManageNotificationCreateForm, ManageNotificationUpdateForm
     
 class ManageNotificationListView(View):
     @catch_error
@@ -43,22 +44,22 @@ class ManageNotificationCreateView(View):
         form = ManageNotificationCreateForm()
         return render(request, 'adminuser/notification/create.html', {"form": form})
 
-    # @catch_error
     def post(self, request):
-        user=request.user
-        # if request.method == 'POST':
+        user = request.user
         form = ManageNotificationCreateForm(request.POST)
         if form.is_valid():
             notification_data = {
                 'text': form.cleaned_data['text'],
                 'media_url': form.cleaned_data['media_url'],
-                'is_read': form.cleaned_data['is_read'],
-                'receiver_id':user,              
+                'receiver_id': user,
                 'created_by': user
             }
             services.manage_notification_service.manage_create_notification(**notification_data)
+            # messages.success(request, "Notification created successfully")
             return redirect('manage_notification_list')
-        return render(request, 'adminuser/notification/create.html', {"form": form})
+        return render(request, 'adminuser/notification/create.html',   success_response(
+                message=messages),
+                {"form": form})
 
 class ManageNotificationUpdateView(View):
     @catch_error
@@ -82,7 +83,6 @@ class ManageNotificationUpdateView(View):
             # notification.receiver_id = form.cleaned_data['receiver_id']
             # notification.is_raed = form.cleaned_data['is_raed']            
             notification.save()  # Save the updated user instance
-
             return redirect('manage_notification_list')
         return render(request, 'adminuser/notification/update.html', {"form": form, "notification_id": notification.id})
 
@@ -91,4 +91,9 @@ class ManageToggleNotificationActiveView(View):
         notification = services.manage_notification_service.manage_get_notification(notification_id)
         notification.is_active = not notification.is_active  
         notification.save()
-        return JsonResponse({'is_active': notification.is_active})  
+        # return JsonResponse({'is_active': notification.is_active})  
+        return JsonResponse({
+            'is_active': notification.is_active,
+            'message': 'Notification status updated successfully',
+            'message_type': 'success'
+        })
