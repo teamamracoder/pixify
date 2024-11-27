@@ -24,3 +24,4 @@ def delete_user(user):
 
 def get_user_by_email(email):
     return User.objects.filter(email=email).first()
+

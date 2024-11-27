@@ -3,8 +3,7 @@
 #======================================================================
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views import View
-
-from ..models.chat_model import Chat
+from django.core.paginator import Paginator 
 
 from ..import services
 from ..constants.default_values import Role
@@ -56,7 +55,7 @@ class ManageMemberChatListView(View):
         chat = services.manage_chat_member_service.manage_member_list_chats_filtered(search_query, sort_by)
 
         # Paginate the users
-        paginator = paginator(chat, 10)  # Show 10 users per page
+        paginator = Paginator(chat, 10)  # Show 10 users per page
         page_obj = paginator.get_page(page_number)        
 
         return render(request, 'adminuser/chat/memberlist.html', {

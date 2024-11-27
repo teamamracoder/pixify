@@ -13,8 +13,9 @@
                     <h2 class="text-info">Update Chat</h2>
                 </div>
                 <div class="card-body">
-                    <form method="post">
+                    <form method="post" id="manage_chat_form">
                         {% csrf_token %}
+                        {{ data.manage_chat_form.as_p }} 
                         <div class="row">
                             <div class="form-group col-md-4 col-lg-4 col-sm-12 mb-3">
                                 {{ form.title.label_tag }}
@@ -57,6 +58,36 @@
     </div>
 </div>
 
+<script>
+    $(document).ready(function () {
+        $("#manage_chat_form").validate({
+            rules: {
+                title: {
+                    required: true,
+                    minlength: 3,
+                    maxlength: 50
+                },
+                chat_cover: {
+                    required: true,
+                    minlength: 5,
+                    maxlength: 150
+                },
+            },
+            messages: {
+                title: {
+                    required: "Please enter title.",
+                    minlength: "title must be at least 3 characters.",
+                    maxlength: "title cannot exceed 50 characters."
+                },
+                chat_cover: {
+                    required: "Please enter chat_cover.",
+                    minlength: "chat_cover must be at least 5 characters.",
+                    maxlength: "chat_cover cannot exceed 150 characters."
+                },
+            }
+        });
+    });
+</script>
 
 
 {% endblock %}

@@ -52,4 +52,3 @@ def manage_list_users_filtered(search_query, sorting_order, sort_by, page_number
     return data
 
 
-
