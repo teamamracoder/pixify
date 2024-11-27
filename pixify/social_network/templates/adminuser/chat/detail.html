@@ -53,7 +53,7 @@
 </div>
 
 <!-- First Modal -->
-<div class="modal fade" id="userInfoModal"  tabindex="-1" aria-labelledby="userInfoModalLabel" aria-hidden="true">
+<div class="modal fade" id="userInfoModal" tabindex="-1" aria-labelledby="userInfoModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header bg-info text-white">
@@ -62,20 +62,18 @@
             </div>
             <div class="modal-body">
                 <!-- User Details -->
-              
-                <div class="d-flex align-items-center mb-4">
-                    <img src="https://tse1.mm.bing.net/th?id=OIP.ULdaKJ-nJlOAZqR5lToUWgHaHa&pid=Api&P=0&h=220" alt="User Image" class="rounded-circle me-3" style="width: 50px; height: 50px;">
-                    <div>
-                        <h5 class="mb-0">{{ user.first_name }} {{ user.last_name }}</h5>
-                    </div>
-                </div>             
-        
-            </div>
-
-            <div class="container mt-5">
-                <h5>active/deactive</h5>
-                <div class="d-flex align-items-center">
-                    <!-- Toggle Button -->
+                <div class="d-flex align-items-center justify-content-between mb-4">
+                    <!-- Left Section: User Info -->
+                    <div class="d-flex align-items-center">
+                        <img src="https://tse1.mm.bing.net/th?id=OIP.ULdaKJ-nJlOAZqR5lToUWgHaHa&pid=Api&P=0&h=220" 
+                             alt="User Image" 
+                             class="rounded-circle me-3" 
+                             style="width: 50px; height: 50px;">
+                        <div>
+                            <h5 class="mb-0">{{ user.first_name }} {{ user.last_name }}</h5>
+                        </div>
+                    </div>                   
+                    <!-- Right Section: Toggle Button -->
                     <div class="form-check form-switch">
                         <input 
                             class="form-check-input toggle-btn" 
@@ -87,10 +85,6 @@
                     </div>
                 </div>
             </div>
-        
-
-
-
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 <button type="button" class="btn btn-primary" data-bs-target="#secondModal" data-bs-toggle="modal" data-bs-dismiss="modal">
@@ -100,11 +94,6 @@
         </div>
     </div>
 </div>
-
-<!-- Second Modal -->
-
-
-
 
 <script>
 // JavaScript to handle toggle
@@ -139,6 +128,5 @@ document.querySelector('.toggle-btn').addEventListener('change', function () {
     });
 });
 </script>
-
 
 {% endblock %}
