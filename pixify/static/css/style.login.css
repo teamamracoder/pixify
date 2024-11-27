@@ -1,6 +1,6 @@
 /*request OTP*/
 .full-screen-image {
-    width: 83vw;
+    width: 100vw;
     height: 100vh;
     object-fit: cover;
 }
@@ -18,7 +18,7 @@
 }
 
 @media (max-width: 767.98px) {
-    body {
+    .login_mainContainer {
         background-color: #1a0933;
         display: flex;
         align-items: center;
@@ -32,7 +32,7 @@
         top: auto;
         left: auto;
         transform: none;
-        width: 80%;
+        width: 90%;
         background-color: #1a0933;
         padding: 20px;
         border-radius: 0;
@@ -45,7 +45,7 @@
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-        width: 80%;
+        width: 90%;
         background-color: #1a0933;
         padding: 20px;
         border-radius: 8px;
@@ -156,7 +156,7 @@
 }
 
 @media (max-width: 767.98px) {
-    body {
+    .login_mainContainer {
         background-color: #1a0933;
         display: flex;
         align-items: center;
@@ -170,14 +170,14 @@
         top: auto;
         left: auto;
         transform: none;
-        width: 80%;
+        width: 90%;
         background-color: #1a0933;
         padding: 20px;
         border-radius: 0;
     }
 }
 
-@media (min-width: 250px) and (max-width: 767.98px) {
+/* @media (min-width: 250px) and (max-width: 767.98px) {
     .input-container {
         position: fixed;
         top: 50%;
@@ -188,7 +188,7 @@
         padding: 20px;
         border-radius: 8px;
     }
-}
+} */
 
 @media (min-width: 768px) and (max-width: 1199.98px) {
     .input-container {
@@ -318,7 +318,7 @@
 }
 
 @media (max-width: 767.98px) {
-    body {
+    .login_mainContainer {
         background-color: #1a0933;
         display: flex;
         align-items: center;
@@ -332,13 +332,13 @@
         top: auto;
         left: auto;
         transform: none;
-        width: 80%;
+        width: 90%;
         background-color: #1a0933;
         padding: 20px;
         border-radius: 0;
     }
 }
-
+/*
 @media (min-width: 250px) and (max-width: 767.98px) {
     .input-container {
         position: fixed;
@@ -350,7 +350,7 @@
         padding: 20px;
         border-radius: 8px;
     }
-}
+} */
 
 @media (min-width: 768px) and (max-width: 1199.98px) {
     .input-container {
@@ -438,7 +438,7 @@
     }
 }
 
-#req_otp_form,#register_form,#verify_otp_form label{
+#req_otp_form label,#register_form label,#verify_otp_form label{
     font-size: 1.25rem !important;
     margin-bottom: 0.5rem;
 }
