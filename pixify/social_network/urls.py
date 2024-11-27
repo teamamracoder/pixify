@@ -18,6 +18,8 @@ urlpatterns = [
     path('admin/users/<int:user_id>/update/', views.ManageUserUpdateView.as_view(), name='user_update'),
     path('admin/users/<int:user_id>/delete/', views.ManageUserDeleteView.as_view(), name='user_delete'),
 
+    path('change-my-theme/', views.ChangeMyThemeView.as_view(), name='change_my_theme'),
+
 
 
     #manage-notification

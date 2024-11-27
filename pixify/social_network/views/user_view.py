@@ -113,5 +113,10 @@ class ManageUserProfileView(View):
     def get(self, request):
         return render(request, 'adminuser/user/user_profile.html')
     
-
+class ChangeMyThemeView(View):
+    def post(self, request):
+        theme = request.POST.get('theme')
+        user = services.user_service.get_user(request.user.id)
+        services.user_service.change_theme(user, ui_mode=theme)
+        return JsonResponse(success_response('Theme changed to {theme} mode', {'theme': theme}))
 
