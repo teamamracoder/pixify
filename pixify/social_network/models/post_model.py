@@ -21,9 +21,7 @@ class Post(models.Model):
     )
         
     title = models.CharField(max_length=50, blank=True, null=True)
-    description = models.TextField(blank=True, null=True)
-    
-    
+    description = models.TextField(blank=True, null=True) 
     accessability = models.IntegerField(
         choices=[(level.value, level.name) for level in AccessLevel],
         blank= True,
