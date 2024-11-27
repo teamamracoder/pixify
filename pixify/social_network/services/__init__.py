@@ -10,3 +10,4 @@ from .message_mention_service import *
 from .chat_service import *
 from .manage_chat_service import *
 from .manage_notification_service import *
+from .comment_service import *
