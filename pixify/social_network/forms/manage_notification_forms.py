@@ -13,22 +13,22 @@ class ManageNotificationCreateForm(forms.Form):
         ],
         widget=forms.TextInput(attrs={"class": "form-control"})
     )
-    
+
     media_url = forms.URLField(
-        label="Media_URL",      
+        label="Media_URL",
         widget=forms.TextInput(attrs={"class": "form-control"})
     )
-    
+
     receiver_id = forms.CharField(
-        label="Receiver_ID",       
+        label="Receiver_ID",
         widget=forms.TextInput(attrs={"class": "form-control"})
     )
-    
+
     is_read = forms.BooleanField(
         label="is_read",
         widget=forms.TextInput(attrs={"class": "form-control"})
     )
-    
+
 
 class ManageNotificationUpdateForm(forms.Form):
     text = forms.CharField(
@@ -39,15 +39,15 @@ class ManageNotificationUpdateForm(forms.Form):
         ],
         widget=forms.TextInput(attrs={"class": "form-control"})
     )
-    
-    
+
+
     media_url = forms.URLField(
         label="media_url",
-      
+
         widget=forms.TextInput(attrs={"class": "form-control"})
     )
-    
+
     receiver_id = forms.CharField(
-        label="Receiver_ID",     
+        label="Receiver_ID",
         widget=forms.TextInput(attrs={"class": "form-control"})
     )
