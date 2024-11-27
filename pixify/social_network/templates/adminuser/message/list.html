@@ -1,46 +1,40 @@
 {% extends "../base.html" %}
 
-{% block title %}Notification List{% endblock %}
+{% block title %}Messages List{% endblock %}
 
 {% block content %}
 <style>
     .hover-bg:hover {
         background-color: rgba(240, 242, 245, 0.1);
         color:aqua; 
-    }   
+    }
     .current {
         font-weight: bold;
-    }   
+    }
 </style>
-
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col">
-            <h2 class="text-center mb-4">Notifications</h2>
+            <h2 class="text-center mb-4">Messages</h2>
             <div class="d-flex justify-content-between mb-3">
-                <button class="btn btn-primary btn-sm"><a href="{% url 'manage_notification_create' %}"
-                     class="text-white text-decoration-none">Add Notification</a></button>               
-                <form method="get" action="{% url 'manage_notification_list' %}">
+                <button class="btn btn-primary btn-sm"><a href="{% url 'manage_message_create' %}" class="text-white text-decoration-none">Add Messages</a></button>     
+                <form method="get" action="{% url 'manage_message_list' %}">
                     <div class="input-group" style="max-width: 300px;">
                         <input type="text" class="form-control border-secondary" placeholder="Search" aria-label="Search" name="search" value="{{ search_query }}">
                         <button class="btn btn-outline-secondary">Search</button>
                     </div>
                 </form>
             </div>
-
             <div class="table-responsive">
                 <table class="table table-bordered">
                     <thead class="table-info text-white"> 
                         <tr>
                             <th>
-                                <a class="text-decoration-none" href="?sort_by=text&sort_order={% if data.applied_options.sort.order == 'asc' %}desc{% else %}asc{% endif %}">Text</a>
+                                <a class="text-decoration-none" href="?sort_by=text&sort_order={% if  data.applied_options.sort.order == 'asc' %}desc{% else %}asc{% endif %}">Text</a>
                             </th>
                             <th>
-                                <a class="text-decoration-none" href="?sort_by=media_url&sort_order={% if data.applied_options.sort.order == 'asc' %}desc{% else %}asc{% endif %}">Media URL</a>
-                            </th>
-                            <th>
-                                <a class="text-decoration-none" href="?sort_by=is_read&sort_order={% if data.applied_options.sort.order == 'asc' %}desc{% else %}asc{% endif %}">IS_Read</a>
-                            </th>
+                                <a class="text-decoration-none" href="?sort_by=media_url&sort_order={% if  data.applied_options.sort.order == 'asc' %}desc{% else %}asc{% endif %}">Media URL</a>
+                            </th>                                  
                             <th>
                                 Status
                             </th>
@@ -48,18 +42,17 @@
                     </thead>
 
                     <tbody>
-                        {% for notification in data.data %}
+                        {% for message in data.data %}
                         <tr>
                             <td>
-                                <a class="text-decoration-none text-primary hover-bg" href="{% url 'manage_notification_detail' notification.id %}">
-                                    {{notification.text }}
+                                <a class="text-decoration-none text-primary hover-bg" href="#">
+                                    {{message.text }}
                                 </a>
-                            </td>                                                                        
-                            <td>{{ notification.media_url }}</td>
-                            <td>{{ notification.is_read }}</td>
+                            </td>                      
+                            <td>{{ message.media_url }}</td>                                             
                             <td>
-                                <button class="btn btn-sm toggle-status" data-notification-id="{{ notification.id }}">
-                                    {% if notification.is_active %}
+                                <button class="btn btn-sm toggle-status" data-message-id="{{ message.id }}">
+                                    {% if message.is_active %}
                                         <i class="bi bi-toggle-on text-success"></i> Active
                                     {% else %}
                                         <i class="bi bi-toggle-off text-danger"></i> Inactive
@@ -74,7 +67,7 @@
                 <div class="container">
                     <div class="d-flex justify-content-between align-items-center">
                         <div class="current mr-auto">
-                            <span class="text-info me-3">Total {{ data.pagination.total }} notifications</span>
+                            <span class="text-info me-3">Total {{ data.pagination.total }} messages</span>
                             Page {{ data.pagination.current_page }} of {{ data.pagination.total_page }}.
                         </div>
                         <div class="step-links ml-auto">
@@ -119,7 +112,7 @@
                         </div>
                     </div>
                 </div>
-                
+
             </div>
         </div>
     </div>
@@ -128,11 +121,11 @@
 <script>
     $(document).ready(function() {
         $('.toggle-status').click(function() {
-            const notificationId = $(this).data('notification-id');
+            const messageId = $(this).data('message-id');
             const button = $(this);
 
             $.ajax({
-                url: '/admin/notifications/toggle-active/' + notificationId + '/',
+                url: '/admin/messages/toggle-active/' + messageId + '/',
                 type: 'POST',
                 headers: {
                     'X-CSRFToken': '{{ csrf_token }}'  // Include CSRF token for security
