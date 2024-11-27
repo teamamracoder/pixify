@@ -52,6 +52,93 @@
         </div>       
 </div>
 
+<!-- First Modal -->
+<div class="modal fade" id="userInfoModal"  tabindex="-1" aria-labelledby="userInfoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title" id="userInfoModalLabel">User Information</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- User Details -->
+              
+                <div class="d-flex align-items-center mb-4">
+                    <img src="https://tse1.mm.bing.net/th?id=OIP.ULdaKJ-nJlOAZqR5lToUWgHaHa&pid=Api&P=0&h=220" alt="User Image" class="rounded-circle me-3" style="width: 50px; height: 50px;">
+                    <div>
+                        <h5 class="mb-0">{{ user.first_name }} {{ user.last_name }}</h5>
+                    </div>
+                </div>             
+        
+            </div>
+
+            <div class="container mt-5">
+                <h5>active/deactive</h5>
+                <div class="d-flex align-items-center">
+                    <!-- Toggle Button -->
+                    <div class="form-check form-switch">
+                        <input 
+                            class="form-check-input toggle-btn" 
+                            type="checkbox" 
+                            id="toggleUserStatus" 
+                            data-user-id="123" 
+                            checked>
+                        <label class="form-check-label" for="toggleUserStatus">Active</label>
+                    </div>
+                </div>
+            </div>
+        
+
+
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" data-bs-target="#secondModal" data-bs-toggle="modal" data-bs-dismiss="modal">
+                    Edit Info
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Second Modal -->
+
+
+
+
+<script>
+// JavaScript to handle toggle
+document.querySelector('.toggle-btn').addEventListener('change', function () {
+    const userId = this.getAttribute('data-user-id');
+    const isActive = this.checked;
+
+    fetch(`/toggle_user_status/${userId}/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}' // Ensure you pass the CSRF token from Django
+        },
+        body: JSON.stringify({ is_active: isActive })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            alert(`User has been ${isActive ? 'activated' : 'deactivated'}`);
+        } else {
+            alert('Failed to toggle user status.');
+        }
+    })
+    .catch(error => {
+        console.error('There was a problem with the fetch operation:', error);
+        alert('Error toggling user status.');
+    });
+});
+</script>
 
 
 <div class="modal fade" id="userInfoModal" tabindex="-1" aria-labelledby="userInfoModalLabel" aria-hidden="true">
