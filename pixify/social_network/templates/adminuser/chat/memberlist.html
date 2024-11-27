@@ -1,21 +1,26 @@
 {% extends "../base.html" %}
 
-{% block title %}Chat List{% endblock %}
+{% block title %}Chat Member List{% endblock %}
 
 {% block content %}
-
+<style>
+        .hover-bg:hover {
+        background-color: rgba(240, 242, 245, 0.1);
+        color:aqua; 
+    }
+</style>
 
 <div class="container-fluid my-5">
     <div class="row justify-content-center">
         <div class="col-12 col-md-12 col-lg-12">
             <div class="">
                 <div class="card-header text-center">
-                    <h2 class="">Chat List</h2>
+                    <h2 class="">Chat Member List</h2>
                 </div>
                 <div class="d-flex justify-content-between mb-3">
-                    <button class="btn btn-primary btn-sm"><a href="{% url 'manage_chat_create' %}" class="text-white text-decoration-none">Add Chat</a></button>
+                    <button class="btn btn-primary btn-sm"><a href="{% url 'manage_chat_membercreate' %}" class="text-white text-decoration-none">Add Member</a></button>
                    
-                    <form method="get" action="{% url 'manage_chat_list' %}">
+                    <form method="get" action="{% url 'manage_chat_memberlist' %}">
                         <div class="input-group" style="max-width: 300px;">
                             <input type="text" class="form-control border-secondary" placeholder="Search" aria-label="Search" name="search" value="{{ search_query }}">
                             <button class="btn btn-outline-secondary">Search</button>
@@ -28,39 +33,32 @@
                             <thead class="table-info text-white"> 
                                 <tr>
                                     <th>
-                                        <a href="?sort_by=title&sort_order={% if sort_order == 'asc' %}desc{% else %}asc{% endif %}">Title</a>
+                                        <a href="?sort_by=member_id&sort_order={% if sort_order == 'asc' %}desc{% else %}asc{% endif %}">Member_Id</a>
                                     </th>
                                     <th>
-                                        <a href="?sort_by=type&sort_order={% if sort_order == 'asc' %}desc{% else %}asc{% endif %}">Type
+                                        <a href="?sort_by=chat_id&sort_order={% if sort_order == 'asc' %}desc{% else %}asc{% endif %}">Chat_Id
 
                                         </th>                                 
-                                    <th>
-                                        <a href="?sort_by=chat_cover&sort_order={% if sort_order == 'asc' %}desc{% else %}asc{% endif %}">Chat_Cover</a>
-                                    </th>
+                                    
                                     <th>Status</th>                            
                                 </tr>
                             </thead>
                             <tbody>
-                                {% for chat in chats %}
+                             
                                 <tr>
                                     <td>                                       
-                                        <a class="text-decoration-none text-primary hover-bg" href="{% url 'manage_chat_detail' chat.id %}">
-                                            {{ chat.title }} 
+                                        <a class="text-decoration-none text-primary hover-bg" href="{% url '#' %}">
+                                            {{ chat.member_id }} 
                                         </a>                                       
                                     </td>
-                                    <td>
-                                        {% for type in choices_type %}
-                                        {% for name, value in type.items %}
-                                            <!-- Check if the gender matches user.gender and display it -->
-                                            {% if name == chat.type %}
-                                                {{ value }}
-                                            {% endif %}
-                                        {% endfor %}
-                                    {% endfor %}
-
-                                    </td>
+                                  
+                                    <tr>
+                                        <td>                                       
+                                            <a class="text-decoration-none text-primary hover-bg" href="{% url '#'%}">
+                                                {{ chat.chat_id }} 
+                                            </a>                                       
+                                        </td>    
                                     
-                                    <td>{{ chat.chat_cover }}</td>
                                     <td>
                                         <button class="btn btn-sm toggle-status" data-chat-id="{{ chat.id }}">
                                             {% if chat.is_active %}
@@ -73,7 +71,7 @@
                                     
                                     
                                 </tr>
-                                {% endfor %}
+                                    
                             </tbody>
                         </table>
 

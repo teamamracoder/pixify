@@ -1,0 +1,25 @@
+/* Responsive Styles */
+@media (max-width: 992px) {
+    #sidebarMain {
+        position: absolute;
+        z-index: 1050; /* Ensure it appears above other elements */
+        width: 250px;
+        height: 100%;
+        background-color: #fff;
+        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+        transform: translateX(-100%);
+        transition: transform 0.3s ease-in-out;
+    }
+
+    #sidebarMain.d-lg-block {
+        transform: translateX(0);
+    }
+
+    .col-10 {
+        transition: margin-left 0.3s ease-in-out;
+    }
+
+    .col-12 {
+        margin-left: 0 !important;
+    }
+}
