@@ -13,45 +13,74 @@
                     <h2 class="text-info">Create Notification</h2>
                 </div>
                 <div class="card-body">
-                    <form method="post">
+                    <form method="post" id="notification_form">
                         {% csrf_token %}
+                        {{ data.notification_form.as_p }}
                         <div class="row">
-                            <div class="form-group col-md-4 col-lg-5 col-sm-12 mb-3">
-                                <label for="text">Text: </label>
-                                <input type="text" class="form-control" id="text" name="text">
+                            <div class="form-group col-md-4 col-lg-4 col-sm-12 mb-3">
+                                {{ form.text.label_tag }}
+                                {{ form.text }}
+                               
                             </div>
-                            <div class="form-group col-md-4 col-lg-5 col-sm-12 mb-3">
-                                <label for="mediaurl">Media URL: </label>
-                                <input type="text" class="form-control" id="media_url" name="media_url">
+                            <div class="form-group col-md-4 col-lg-4 col-sm-12 mb-3">
+                                {{ form.media_url.label_tag }}
+                                {{ form.media_url }}
+                                {% if form.media_url.errors %}
+                                    <div class="text-danger">{{ form.media_url.errors }}</div>
+                                {% endif %}
                             </div>
-                           
+                            <div class="form-group col-md-4 col-lg-4 col-sm-12 mb-3">
+                                {{ form.receiver_id.label_tag }}
+                                {{ form.receiver_id }}
+                                {% if form.receiver_id.errors %}
+                                    <div class="text-danger">{{ form.receiver_id.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>          
+                                                                                              
+                
+                        <!-- Repeat for other fields -->
+                        <div class="text-start">
+                            <a href="{% url 'manage_notification_list' %}" class="btn btn-sm btn-outline-secondary">Back</a>
+                            <button type="submit" class="btn btn-sm btn-primary">Save</button>
                         </div>
-                        <div class="row">
-                            <div class="form-group col-md-4 col-lg-5 col-sm-12 mb-3">
-                                <label for="receiverid">Receiver_ID</label>
-                                <input type="text" class="form-control" id="receiver_id" name="receiver_id">
-                            </div>
-
-                            <div class="form-group col-md-4 col-lg-5 col-sm-12 mb-3">
-                                <label for="isread">IS_Read</label>
-                                <input type="text" class="form-control" id="is_read" name="is_read">
-                                <input type="hidden" name="created_by" id="created_by" value="1">
-                            </div>
-                            
-                        </div>            
-                            <div class="container my-2">
-                                <button class="btn btn-outline-secondary btn-sm">
-                                    <a  class="text-decoration-none"  href="{% url 'manage_notification_list' %}">Back</a>
-                                 </button> 
-                                <button class="btn btn-primary btn-sm" type="submit">Save</button>                                              
-                        </div>
-                    </form>
+                    </form>                    
                 </div>
             </div>
         </div>       
     </div>
 </div>
 
+<script>
+    $(document).ready(function () {
+        $("#notification_form").validate({
+            rules: {
+                text: {
+                    required: true,
+                    minlength: 5,
+                    maxlength: 50
+                },
+                media_url: {
+                    required: true,
+                    minlength: 5,
+                    maxlength: 150
+                },
+            },
+            messages: {
+                text: {
+                    required: "Please enter text.",
+                    minlength: "text must be at least 5 characters.",
+                    maxlength: "text cannot exceed 50 characters."
+                },
+                media_url: {
+                    required: "Please enter media_url.",
+                    minlength: "media_url must be at least 5 characters.",
+                    maxlength: "media_url cannot exceed 150 characters."
+                },
+            }
+        });
+    });
+</script>
 
 
 {% endblock %}

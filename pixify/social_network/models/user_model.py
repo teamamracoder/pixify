@@ -36,6 +36,9 @@ class User(AbstractUser):
     )
     country = models.CharField(max_length=40, blank=True, db_default='INDIA')
     # timezone 
+    fcm_token = models.CharField(max_length=512, blank=True, null=True)
+    
+    
     is_active = models.BooleanField(db_default=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True, blank=True)
     updated_at = models.DateTimeField(auto_now=True, blank=True)
