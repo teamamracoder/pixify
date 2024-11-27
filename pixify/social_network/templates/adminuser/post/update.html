@@ -13,8 +13,9 @@
                     <h2 class="text-info">Update Post</h2>
                 </div>
                 <div class="card-body">
-                    <form method="post">
+                    <form method="post" id="post_form">
                         {% csrf_token %}
+                        {{ data.post_form.as_p }}
                         <div class="row">
                             <div class="form-group col-md-4 col-lg-4 col-sm-12 mb-3">
                                 {{ form.posted_by.label_tag }}
@@ -98,5 +99,34 @@
 </div>
 
 
-
+<script>
+    $(document).ready(function () {
+        $("#post_form").validate({
+            rules: {
+                title: {
+                    required: true,
+                    minlength: 5,
+                    maxlength: 50
+                },
+                description: {
+                    required: true,
+                    minlength: 5,
+                    maxlength: 150
+                },
+            },
+            messages: {
+                title: {
+                    required: "Please enter title.",
+                    minlength: "title must be at least 5 characters.",
+                    maxlength: "title cannot exceed 50 characters."
+                },
+                description: {
+                    required: "Please enter description.",
+                    minlength: "description must be at least 5 characters.",
+                    maxlength: "description cannot exceed 150 characters."
+                },
+            }                   
+        });
+    });
+</script>
 {% endblock %}
