@@ -15,10 +15,13 @@
     <script src="{% static 'js/script.js' %}"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     
+
+    
+
 </head>
 
 <body>
-<!-- 
+    <!-- 
     <nav class="navbar navbar-expand-lg bg-primary" data-bs-theme="dark">
         <div class="container-fluid">
             <a class="navbar-brand" href="/">Pixify</a>
@@ -50,19 +53,22 @@
             </button>
             <!-- Brand Name -->
             <a class="navbar-brand" href="#">Admin Dashboard</a>
-            
+
             <!-- Navbar Collapse -->
             <div class="collapse navbar-collapse">
                 <!-- Push this ul to the right side -->
                 <ul class="navbar-nav ms-auto">
                     <!-- Notification Button -->
                     <li class="nav-item dropdown">
-                        <a class="nav-link position-relative me-2" href="#" id="notificationDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <a class="nav-link position-relative me-2" href="#" id="notificationDropdown" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="bi bi-bell fs-4"></i> <!-- Notification bell icon -->
-                            <span class="badge bg-danger position-absolute top-1 start-90 translate-middle rounded-pill ">5</span>
- <!-- Notification count badge -->
+                            <span
+                                class="badge bg-danger position-absolute top-1 start-90 translate-middle rounded-pill ">5</span>
+                            <!-- Notification count badge -->
                         </a>
-                        <ul class="dropdown-menu dropdown-menu-end p-3" aria-labelledby="notificationDropdown" style="min-width: 250px;">
+                        <ul class="dropdown-menu dropdown-menu-end p-3" aria-labelledby="notificationDropdown"
+                            style="min-width: 250px;">
                             <li><a class="dropdown-item" href="#">Notification 1</a></li>
                             <li><a class="dropdown-item" href="#">Notification 2</a></li>
                             <li><a class="dropdown-item" href="#">Notification 3</a></li>
@@ -74,7 +80,7 @@
             </div>
         </div>
     </nav>
-    
+
 
 
 
@@ -140,7 +146,7 @@
                                                 class="list-group-item list-group-item-action ui-bg-grey border-0 ps-4">
                                                 <i class="bi bi-diagram-3 fs-6 me-2"></i>
                                                 Create</a>
-                                            
+
                                         </div>
                                     </div>
                                 </div>
@@ -165,7 +171,7 @@
                                             <a href="{% url 'manage_post_create' %}"
                                                 class="list-group-item list-group-item-action ui-bg-grey border-0 ps-4">
                                                 <i class="bi bi-diagram-3 fs-6 me-2"></i>
-                                                Create</a>                                          
+                                                Create</a>
                                         </div>
                                     </div>
                                 </div>
@@ -183,14 +189,14 @@
                                     data-bs-parent="#accordionContainer">
                                     <div class="accordion-body p-0">
                                         <div class="list-group rounded-0">
-                                            <a href="{% url 'manage_chat_list' %}"                                              
-                                              class="list-group-item list-group-item-action ui-bg-grey border-0 ps-4">
+                                            <a href="{% url 'manage_chat_list' %}"
+                                                class="list-group-item list-group-item-action ui-bg-grey border-0 ps-4">
                                                 <i class="bi bi-chat-dots fs-6 me-2"></i>
                                                 List</a>
-                                                <a href="{% url 'manage_chat_create' %}"
+                                            <a href="{% url 'manage_chat_create' %}"
                                                 class="list-group-item list-group-item-action ui-bg-grey border-0 ps-4">
                                                 <i class="bi bi-telephone-inbound me-2 fs-6"></i>
-                                               Create</a>
+                                                Create</a>
                                         </div>
                                     </div>
                                 </div>
@@ -226,20 +232,20 @@
             </div>
 
             <div class="col-10">
-                <main class="container" >
+                <main class="container">
                     {% block content %}
                     <!-- Page-specific content will go here -->
                     {% endblock %}
                 </main>
             </div>
         </div>
-        
+
     </div>
 
 
-    
 
-    
+
+
 
     <footer>
         <p>&copy; 2024 Pixify App</p>

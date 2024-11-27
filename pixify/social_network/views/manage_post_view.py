@@ -1,18 +1,16 @@
+from pyexpat.errors import messages
 from django.shortcuts import get_object_or_404, render, redirect
 from django.http import HttpResponseBadRequest, JsonResponse
 from django.views import View
 
-from ..forms.manage_post_forms import ManagePostUpdateForm
-from ..models.post_specific_user_model import PostSpecificUser
-from ..forms.manage_user_forms import ManageUserCreateForm
+from ..forms.manage_post_forms import ManagePostUpdateForm,ManagePostCreateForm
+
 from ..models.post_model import Post
 from ..decorators.exception_decorators import catch_error
-# from ..forms.manage_post_forms import ManagePostCreateForm, ManagePostUpdateForm, ManagePostSpecificUserForm
 from .. import services
 from ..models import User
 from django.core.paginator import Paginator 
 from django.http import HttpResponseBadRequest
-from ..forms import ManagePostCreateForm
 from social_network.packages.response import success_response
 from social_network.constants.default_values import SortingOrder
 
@@ -21,15 +19,16 @@ from social_network.constants.default_values import SortingOrder
 class ManagePostCreateView(View):
     @catch_error
     def get(self,request):
-        form = ManagePostCreateForm()
+        form = ManagePostCreateForm() #Form Initialization:
         return render(request, 'adminuser/post/create.html', {"form": form})
+    
 
     @catch_error
     def post(self, request):
-        user = request.user
-        form = ManagePostCreateForm(request.POST)
+        user = request.user # reffers to currently logged-in user 
+        form = ManagePostCreateForm(request.POST) # data submitted through an HTML form
         if form.is_valid():
-             post_data = {
+             post_data = {  
                     'posted_by': User.objects.get(id=request.POST['posted_by']),
                     'created_by' : user,  # curent user
                     'type': form.cleaned_data['type'],
@@ -41,7 +40,9 @@ class ManagePostCreateView(View):
                 }
              services.post_service.manage_create_post(**post_data) 
              return redirect('manage_post_list')
-        return render(request, 'adminuser/post/create.html', {"form": form})
+        return render(request, 'adminuser/post/create.html',   success_response(
+                message=messages),
+                {"form": form})
 
 
 class ManagePostListView(View):
@@ -59,19 +60,20 @@ class ManagePostListView(View):
             sorting_order=sort_order,
             page_number=page_number
         )
-        # return
-        # print(data)
-        # posted_by = services.post_service.manage_get_user(data.posted_by_id)
         return render(request,
             'adminuser/post/list.html',
             success_response("post data fetched successfully", data)
         ) 
-
-class ManagePostDetailView(View):
-    def get(self, request, post_id):
-        post = services.post_service.manage_get_post(post_id)
-        return render(request, 'adminuser/post/detail.html', {'post': post,'post_id':post_id})
     
+class ManagePostDetailView(View):
+     def get(self, request, post_id):
+        comment_count =services.post_service.get_comment_count_by_post(post_id)
+        # print(comment_count  4)
+        post_dic= {
+        'post' : services.post_service.manage_get_post(post_id),
+        'comment': services.post_service.manage_list_comments_filtered(post_id),
+                   }
+        return render(request, 'adminuser/post/detail.html', {'post_dic':post_dic, 'comment_count':comment_count},)
 
 class ManagePostUpdateView(View):
     @catch_error
@@ -102,7 +104,10 @@ class ManagePostUpdateView(View):
             post.treat_as = form.cleaned_data['treat_as']
             post.save()  
             return redirect('manage_post_list')
-        return render(request, 'adminuser/post/update.html', {"form": form, "post_id": post.id})
+        # return render(request, 'adminuser/post/update.html', {"form": form, "post_id": post.id})
+        return render(request, 'adminuser/post/create.html',   success_response(
+                message=messages),
+                {"form": form,"post_id": post.id})
 
 class ManagePostDeleteView(View):
     def get(self, request, post_id):
