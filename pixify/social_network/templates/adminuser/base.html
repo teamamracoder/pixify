@@ -8,13 +8,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}My Django App{% endblock %}</title>
     <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
-    <link rel="stylesheet" href="{% static 'css/bootstrap.modified.css' %}">
+    <link rel="stylesheet" href="{% static 'css/toastr.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/bootstrap.adminuser.css' %}">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css" rel="stylesheet">
     <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
-    <script src="{% static 'js/script.js' %}"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    
+    <script src="{% static 'js/script.js' %}"></script>   
+    <script src="{% static 'js/jquery-3.7.1.min.js' %}"></script>
+    <script src="{% static 'js/jquery.validate.min.js' %}"></script>
+    <script src="{% static 'js/toastr.min.js' %}"></script>
 </head>
 
 <body>
@@ -75,9 +77,6 @@
         </div>
     </nav>
     
-
-
-
     <div class="container-fluid">
         <div class="row">
             <!-- changing d-lg-block from #sidebarMain will effect js at the end of this file which -->
@@ -217,7 +216,8 @@
                                                 Create</a>
                                         </div>
                                     </div>
-                                </div>
+                                </div>                         
+
                             </div>
                         </div>
                     </a>
@@ -232,14 +232,8 @@
                     {% endblock %}
                 </main>
             </div>
-        </div>
-        
+        </div>        
     </div>
-
-
-    
-
-    
 
     <footer>
         <p>&copy; 2024 Pixify App</p>
@@ -263,4 +257,33 @@
         //navbar populate
         $('#navLinks').html($('#sidebarLinks').html());
     });
+</script>
+
+<script type="text/javascript">
+    const show_toastr = (message, type) => {
+        // check if message is null or empty string
+        if (!message) return;
+
+        // show toast message based on type
+        switch (type) {
+            case 'info':
+                toastr.info(message);
+                break;
+            case 'warning':
+                toastr.warning(message);
+                break;
+            case 'success':
+                toastr.success(message);
+                break;
+            case 'error':
+                toastr.error(message);
+                break;
+            default:
+                break;
+        }
+    }
+
+    // call show toast message
+    show_toastr("{{ message|escapejs }}", "{{ message_type|escapejs }}");
+
 </script>
