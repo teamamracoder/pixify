@@ -16,9 +16,9 @@
             <h2 class="text-center mb-4">Posts</h2>
             <div class="d-flex justify-content-between mb-3">
                 <div>
-                    <button class="btn btn-primary btn-sm"><a href="{% url 'post_create' %}" class="text-white text-decoration-none"></a>Add Post</button>
+                    <button class="btn btn-primary btn-sm"><a href="{% url 'manage_post_create' %}" class="text-white text-decoration-none">Add Post</a></button>
                 </div>
-                <form method="get" action="{% url 'post_list' %}">
+                <form method="get" action="{% url 'manage_post_list' %}">
                     <div class="input-group" style="max-width: 300px;">
                         <input type="text" class="form-control border-secondary" placeholder="Search"
                                aria-label="Search" name="search" value="{{ search_query }}">
@@ -26,7 +26,6 @@
                     </div>
                 </form>
             </div>
-            
             <div class="table-responsive">
                 <table class="table table-hover">
                     <thead class="table-info text-white"> 
@@ -48,15 +47,14 @@
                         {% for post in posts %}
                         <tr>
                             <td>
-                                <a class="text-decoration-none text-primary hover-bg" href="{% url 'post_detail' post.id %}">
+                                <a class="text-decoration-none text-primary hover-bg" href="{% url 'manage_post_detail' post.id %}">
                                     {{ post.posted_by.first_name }} {{ post.posted_by.last_name }} 
                                 </a>
                             </td>
                             <td>{{ post.title }}</td>
                             <td>
-                                {{ post.media_url }}
+                                {{ post.description }}
                             </td>
-                            
                                 <td>
                                     <button class="btn btn-sm toggle-status" data-post-id="{{ post.id }}">
                                         {% if post.is_active %}
@@ -66,8 +64,6 @@
                                         {% endif %}
                                     </button>
                                 </td>
-                                
-                            
                         </tr>
                         {% endfor %}
                     </tbody>

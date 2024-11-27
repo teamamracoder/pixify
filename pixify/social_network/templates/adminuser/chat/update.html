@@ -1,7 +1,7 @@
 
 {% extends "../base.html" %}
 
-{% block title %}Chat Update{% endblock %}
+{% block title %}Update Chat{% endblock %}
 
 {% block content %}
 
@@ -10,56 +10,51 @@
         <div class="col-12 col-md-12 col-lg-12">
             <div class="card shadow-sm">
                 <div class="card-header text-center">
-                    <h2 class="text-info">Chat Update</h2>
+                    <h2 class="text-info">Update Chat</h2>
                 </div>
                 <div class="card-body">
                     <form method="post">
                         {% csrf_token %}
                         <div class="row">
-                            <div class="mb-3">
-                                <label for="title" class="form-label">Title</label>
-                                <input type="text" class="form-control" id="title" name="title" value="{{chat.title}}">
+                            <div class="form-group col-md-4 col-lg-4 col-sm-12 mb-3">
+                                {{ form.title.label_tag }}
+                                {{ form.title }}
+                                {% if form.title.errors %}
+                                    <div class="text-danger">{{ form.title.errors }}</div>
+                                {% endif %}
                             </div>
-                            
-                            
-                            <div class="row">
-                                <div class="mb-3">
-                                    <label for="type" class="form-label">Type</label>
-                                    <select id="type" name="type" value="{{ chat.type }}" class="form-select">
+                            <div class="form-group col-md-4 col-lg-4 col-sm-12 mb-3">
+                                {{ form.type.label_tag }}                               
+                                <select id="type" name="type" value="{{ chat.type }}" class="form-select">
                                         {% for type in choices_type %}
                                             {% for name, value in type.items %}
                                                 <option value="{{ name }}">{{ value }}</option>
                                             {% endfor %}
                                         {% endfor %}
-                                    </select>
-                                </div>
-                                
-
-                                <div class="mb-3">
-                                    <label for="chat_cover" class="form-label">Chat_Cover</label>
-                                    <input type="chat_cover" class="form-control" id="chat_cover" name="chat_cover" value="{{chat.chat_cover}}">
-                                </div>
-
-                              
-                                
-    
-                                <div class="form-group form-check">
-                                    <input type="checkbox" name="is_active" class="form-check-input" id="is_active" checked>
-                                    <label class="form-check-label" for="is_active">Is Active</label>
-                                </div>
-                           
-                        </div>
-                             
-                       
-
+                                    </select> 
+                                {% if form.type.errors %}
+                                    <div class="text-danger">{{ form.type.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="form-group col-md-4 col-lg-4 col-sm-12 mb-3">
+                                {{ form.chat_cover.label_tag }}
+                                {{ form.chat_cover }}
+                                {% if form.chat_cover.errors %}
+                                    <div class="text-danger">{{ form.chat_cover.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>                        
+                        <!-- Repeat for other fields -->
                         <div class="text-start">
                             <a href="{% url 'manage_chat_list' %}" class="btn btn-sm btn-outline-secondary">Back</a>
                             <button type="submit" class="btn btn-sm btn-primary">Save</button>
                         </div>
                     </form>
+                    
                 </div>
             </div>
         </div>       
+    </div>
 </div>
 
 

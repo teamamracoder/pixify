@@ -1,9 +1,15 @@
-{% load static %}
 
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Responsive Admin Panel</title>
+    
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css" rel="stylesheet">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}My Django App{% endblock %}</title>
@@ -13,77 +19,54 @@
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css" rel="stylesheet">
     <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
-    <script src="{% static 'js/script.js' %}"></script>   
+    <script src="{% static 'js/script.js' %}"></script>
     <script src="{% static 'js/jquery-3.7.1.min.js' %}"></script>
     <script src="{% static 'js/jquery.validate.min.js' %}"></script>
     <script src="{% static 'js/toastr.min.js' %}"></script>
+
+
+    <style>
+        .offcanvas {
+            transition: transform 0.6s ease-in-out !important;  
+        }
+    </style>
 </head>
-
 <body>
-<!-- 
-    <nav class="navbar navbar-expand-lg bg-primary" data-bs-theme="dark">
+    
+    <nav class="navbar navbar-expand-lg navbar-light bg-info fixed-top">
         <div class="container-fluid">
-            <a class="navbar-brand" href="/">Pixify</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav">
-                    <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="/">Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'user_list' %}">Users</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'post_list' %}">Posts</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav> -->
-
-    <nav class="navbar navbar-expand-lg navbar-light" style="background-color: #e3f2fd;">
-        <div class="container-fluid">
-            <!-- Menu Button -->
-            <button class="btn btn-light me-3" id="menu-toggle">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <!-- Brand Name -->
-            <a class="navbar-brand" href="#">Admin Dashboard</a>
             
-            <!-- Navbar Collapse -->
-            <div class="collapse navbar-collapse">
-                <!-- Push this ul to the right side -->
-                <ul class="navbar-nav ms-auto">
-                    <!-- Notification Button -->
-                    <li class="nav-item dropdown">
-                        <a class="nav-link position-relative me-2" href="#" id="notificationDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="bi bi-bell fs-4"></i> <!-- Notification bell icon -->
-                            <span class="badge bg-danger position-absolute top-1 start-90 translate-middle rounded-pill ">5</span>
- <!-- Notification count badge -->
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end p-3" aria-labelledby="notificationDropdown" style="min-width: 250px;">
-                            <li><a class="dropdown-item" href="#">Notification 1</a></li>
-                            <li><a class="dropdown-item" href="#">Notification 2</a></li>
-                            <li><a class="dropdown-item" href="#">Notification 3</a></li>
-                            <li><a class="dropdown-item" href="#">Notification 4</a></li>
-                            <li><a class="dropdown-item" href="#">Notification 5</a></li>
-                        </ul>
-                    </li>
-                </ul>
-            </div>
+            <button class="btn btn-info me-3" data-bs-toggle="offcanvas" data-bs-target="#sidebar" aria-controls="sidebar">
+                <i class="bi bi-list"></i>
+            </button>
+            <a class="navbar-brand" href="#">Admin Dashboard</a>
+
+            
+            <a class="nav-link position-relative me-3" href="#" id="notificationDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-bell fs-4"></i>
+                <span class="badge bg-danger position-absolute top-0 start-100 translate-middle rounded-pill">5</span>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end p-3" aria-labelledby="notificationDropdown" style="min-width: 250px;">
+                <li><a class="dropdown-item" href="#">Notification 1</a></li>
+                <li><a class="dropdown-item" href="#">Notification 2</a></li>
+                <li><a class="dropdown-item" href="#">Notification 3</a></li>
+                <li><a class="dropdown-item" href="#">Notification 4</a></li>
+                <li><a class="dropdown-item" href="#">Notification 5</a></li>
+                <li><a class="dropdown-item" href="#">Notification 3</a></li>
+                <li><a class="dropdown-item" href="#">Notification 4</a></li>
+                <li><a class="dropdown-item" href="#">Notification 5</a></li>
+            </ul>
         </div>
     </nav>
+
     
-    <div class="container-fluid">
-        <div class="row">
-            <!-- changing d-lg-block from #sidebarMain will effect js at the end of this file which -->
-            <div class="col-2 p-0 d-none d-lg-block"
-                style="min-height: 100vh; box-shadow: rgba(16, 178, 228, 0.521) 0px 3px 7px;" id="sidebarMain">
-                <div class="list-group rounded-0 d-none d-lg-block" id="sidebarLinks">
-                    <div class="list-group-item list-group-item-action bg-light border-0 border-end active"
+    <div class="offcanvas offcanvas-start " tabindex="-1" id="sidebar" aria-labelledby="sidebarLabel">
+        <div class="offcanvas-header">
+            <h5 id="sidebarLabel">Admin Menu</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body">
+            <div class="list-group-item list-group-item-action bg-light border-0 border-end active"
                         aria-current="true">
                         <a href="#" class="text-dark text-decoration-none">
                             <i class="bi bi-border-all"></i>
@@ -105,12 +88,12 @@
                                     data-bs-parent="#accordionContainer">
                                     <div class="accordion-body p-0">
                                         <div class="list-group rounded-0">
-                                            <a href="{% url 'user_profile' %}"
+                                            <a href="{%url 'user_profile'%}"
                                                 class="list-group-item list-group-item-action ui-bg-grey border-0 ps-4">
                                                 <i class="bi bi-person-check fs-5 me-2"></i>
                                                 my profile
                                             </a>
-                                            <a href="{% url 'logout' %}"
+                                            <a href="{%url 'logout'%}"
                                                 class="list-group-item list-group-item-action ui-bg-grey border-0 ps-4">
                                                 <i class="bi bi-box-arrow-right fs-6 me-2"></i>
                                                 logout</a>
@@ -139,7 +122,7 @@
                                                 class="list-group-item list-group-item-action ui-bg-grey border-0 ps-4">
                                                 <i class="bi bi-diagram-3 fs-6 me-2"></i>
                                                 Create</a>
-                                            
+
                                         </div>
                                     </div>
                                 </div>
@@ -157,14 +140,14 @@
                                     data-bs-parent="#accordionContainer">
                                     <div class="accordion-body p-0">
                                         <div class="list-group rounded-0">
-                                            <a href="{% url 'post_list' %}"
+                                            <a href="{% url 'manage_post_list' %}"
                                                 class="list-group-item list-group-item-action ui-bg-grey border-0 ps-4">
                                                 <i class="bi bi-tools fs-6 me-2"></i>
                                                 List</a>
-                                            <a href="{% url 'post_create' %}"
+                                            <a href="{% url 'manage_post_create' %}"
                                                 class="list-group-item list-group-item-action ui-bg-grey border-0 ps-4">
                                                 <i class="bi bi-diagram-3 fs-6 me-2"></i>
-                                                Create</a>                                          
+                                                Create</a>
                                         </div>
                                     </div>
                                 </div>
@@ -182,14 +165,14 @@
                                     data-bs-parent="#accordionContainer">
                                     <div class="accordion-body p-0">
                                         <div class="list-group rounded-0">
-                                            <a href="{% url 'manage_chat_list' %}"                                              
-                                              class="list-group-item list-group-item-action ui-bg-grey border-0 ps-4">
+                                            <a href="{% url 'manage_chat_list' %}"
+                                                class="list-group-item list-group-item-action ui-bg-grey border-0 ps-4">
                                                 <i class="bi bi-chat-dots fs-6 me-2"></i>
                                                 List</a>
-                                                <a href="{% url 'manage_chat_create' %}"
+                                            <a href="{% url 'manage_chat_create' %}"
                                                 class="list-group-item list-group-item-action ui-bg-grey border-0 ps-4">
                                                 <i class="bi bi-telephone-inbound me-2 fs-6"></i>
-                                               Create</a>
+                                                Create</a>
                                         </div>
                                     </div>
                                 </div>
@@ -216,74 +199,55 @@
                                                 Create</a>
                                         </div>
                                     </div>
-                                </div>                         
-
+                                </div>
                             </div>
+
+
                         </div>
                     </a>
                 </div>
-
+             
             </div>
-
-            <div class="col-10">
-                <main class="container" >
-                    {% block content %}
-                    <!-- Page-specific content will go here -->
-                    {% endblock %}
-                </main>
-            </div>
-        </div>        
+        </div>
+        <div class="col-12 col-sm-12 mt-5 center-bodycontent" style="height:100vh; overflow-y: scroll;scroll-behavior: auto;">
+            <main class="container">
+                {% block content %}
+                <!-- Page-specific content will go here -->
+                {% endblock %}
+            </main>
+        </div>
     </div>
 
-    <footer>
-        <p>&copy; 2024 Pixify App</p>
-    </footer>
-</body>
+    
+    <script>
+        
+        const show_toastr = (message, type) => {
+            // check if message is null or empty string
+            if (!message) return;
 
-</html>
-
-
-<script>
-    $(document).ready(function () {
-        $('#sidebar-toggler').on('click', function () {
-            if ($('#sidebarMain').hasClass('d-lg-block')) {
-                $('#sidebarMain').removeClass('d-lg-block');
-                $('#main-container').removeClass('col-lg-10').addClass('col-lg-12');
-            } else {
-                $('#sidebarMain').addClass('d-lg-block');
-                $('#main-container').removeClass('col-lg-12').addClass('col-lg-10');
+            // show toast message based on type
+            switch (type) {
+                case 'info':
+                    toastr.info(message);
+                    break;
+                case 'warning':
+                    toastr.warning(message);
+                    break;
+                case 'success':
+                    toastr.success(message);
+                    break;
+                case 'error':
+                    toastr.error(message);
+                    break;
+                default:
+                    break;
             }
-        });
-        //navbar populate
-        $('#navLinks').html($('#sidebarLinks').html());
-    });
-</script>
-
-<script type="text/javascript">
-    const show_toastr = (message, type) => {
-        // check if message is null or empty string
-        if (!message) return;
-
-        // show toast message based on type
-        switch (type) {
-            case 'info':
-                toastr.info(message);
-                break;
-            case 'warning':
-                toastr.warning(message);
-                break;
-            case 'success':
-                toastr.success(message);
-                break;
-            case 'error':
-                toastr.error(message);
-                break;
-            default:
-                break;
         }
-    }
 
-    // call show toast message
-    show_toastr("{{ message|escapejs }}", "{{ message_type|escapejs }}");
+        // call show toast message
+        show_toastr("{{ message|escapejs }}", "{{ message_type|escapejs }}");
 
-</script>
+
+    </script>
+</body>
+</html>
