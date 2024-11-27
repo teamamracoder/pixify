@@ -66,7 +66,10 @@ class ManageChatUpdateView(View):
             chat.chat_cover = form.cleaned_data['chat_cover']
             chat.save()  
             return redirect('manage_chat_list')
-        return render(request, 'adminuser/chat/update.html', {"form": form, "chat_id": chat.id})
+        #return render(request, 'adminuser/chat/update.html', {"form": form, "chat_id": chat.id})
+        return render(request, 'adminuser/chat/update.html',   success_response(
+            message=messages),
+                {"form": form})
 
 
 class ManageChatListView(View):
