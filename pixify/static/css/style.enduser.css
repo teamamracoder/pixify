@@ -1787,4 +1787,16 @@ textarea::placeholder {
     border: none;
 }
 
+
+  .center-bodycontent ::-webkit-scrollbar {
+    width: 1px;
+  }
+  .com ::-webkit-scrollbar {
+      width: 1px;
+    }
+  html {
+      scroll-behavior: smooth;
+      
+    }
+  
 /*End Subhasis*Thank you for your business! We look forward to working with you again.
