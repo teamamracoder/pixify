@@ -66,3 +66,5 @@ def user_post(post_Title,media_urls,user_id):
 def Postlist_posts():
     return Post.objects.all()
 
+# def manage_get_comments(comment_id):
+#     return get_object_or_404(Comment, id=comment_id)

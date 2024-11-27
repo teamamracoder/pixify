@@ -78,11 +78,11 @@ class AdminPostDetailView(View):
      def get(self, request, post_id):
         
         comment_count =services.post_service.get_comment_count_by_post(post_id)
-        print(comment_count)
         post_dic= {
         'post' : services.post_service.get_post(post_id),
         'comment': services.manage_comment_service.manage_list_comments_filtered(post_id),
                    }
+        print(post_dic)
         return render(request, 'adminuser/post/detail.html', {'post_dic':post_dic, 'comment_count':comment_count},)
 
         
@@ -159,5 +159,9 @@ class UserPostListView(View):
         return render(request, 'enduser/home/index.html', {'post_dict': post_dict})
     
     
-
-       
+# class ManageToggleCommentsActiveView(View):
+#      def post(self, request, comment_id):
+#         comment = services.post_service.manage_get_comments(comment_id)
+#         comment.is_active = not comment.is_active  
+#         comment.save()
+#         return JsonResponse({'is_active': comment.is_active})  

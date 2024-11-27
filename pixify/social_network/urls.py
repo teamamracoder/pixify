@@ -36,7 +36,7 @@ urlpatterns = [
     path('admin/posts/<int:post_id>/ ', views.AdminPostDetailView.as_view(), name='post_detail'),
     path('admin/posts/<int:post_id>/update/', views.AdminPostUpdateView.as_view(), name='post_update'),
     path('admin/posts/<int:post_id>/delete/', views.AdminPostDeleteView.as_view(), name='post_delete'),
-
+    # path('admin/posts/toggle-active/<int:comment_id>/', views.ManageToggleCommentsActiveView.as_view(), name='manage_toggle_comments_active'),
 
 
 

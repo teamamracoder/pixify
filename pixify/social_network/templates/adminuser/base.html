@@ -221,6 +221,33 @@
                                 </div>
                                 
                             </div>
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed px-3" type="button"
+                                        data-bs-toggle="collapse" data-bs-target="#user" aria-expanded="false"
+                                        aria-controls="user">
+                                        <i class="bi bi-chat-square-dots me-2 fs-5"></i>
+                                        Comment
+                                    </button>
+                                </h2>
+                                <div id="user" class="accordion-collapse collapse" data-bs-parent="#accordionContainer">
+                                    <div class="accordion-body p-0">
+                                        <div class="list-group rounded-0">
+                                            <a href="{% url 'manage_comment_list' %}"
+                                                class="list-group-item list-group-item-action ui-bg-grey border-0 ps-4">
+                                    
+                                                <i class="bi bi-chat-left-dots me-2 fs-5"></i>
+                                                List</a>
+                                            <a href="{% url 'manage_comment_create' %}"
+                                                class="list-group-item list-group-item-action ui-bg-grey border-0 ps-4">
+                                                
+                                                <i class="bi bi-chat-text-fill me-2 fs-5"></i>
+                                                Create</a>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                            </div>
                         </div>
                     </a>
                 </div>
