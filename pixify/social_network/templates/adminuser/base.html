@@ -15,8 +15,11 @@
     <title>{% block title %}My Django App{% endblock %}</title>
     <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
     <link rel="stylesheet" href="{% static 'css/toastr.min.css' %}">
+    {% if request.user.ui_mode == 1 %}
+    <link rel="stylesheet" href="{% static 'css/bootstrap.adminuser-light.css' %}">
+    {% else %}
     <link rel="stylesheet" href="{% static 'css/bootstrap.adminuser-dark.css' %}">
-    {% comment %} <link rel="stylesheet" href="{% static 'css/bootstrap.adminuser-light.css' %}"> {% endcomment %}
+    {% endif %}
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css" rel="stylesheet">
     <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
