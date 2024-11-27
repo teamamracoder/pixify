@@ -16,36 +16,47 @@
                     <form method="post">
                         {% csrf_token %}
                         <div class="row">
-                            <div class="form-group col-md-4 col-lg-5 col-sm-12 mb-3">
-                                <label for="text">Text: </label>
-                                <input type="text" class="form-control" id="text" name="text">
-                            </div>
-                            <div class="form-group col-md-4 col-lg-5 col-sm-12 mb-3">
-                                <label for="mediaurl">Media URL: </label>
-                                <input type="text" class="form-control" id="media_url" name="media_url">
-                            </div>
-                           
-                        </div>
-                        <div class="row">
-                            <div class="form-group col-md-4 col-lg-5 col-sm-12 mb-3">
-                                <label for="receiverid">Receiver_ID</label>
-                                <input type="text" class="form-control" id="receiver_id" name="receiver_id">
+                            <div class="form-group col-md-4 col-lg-4 col-sm-12 mb-3">
+                                {{ form.text.label_tag }}
+                                {{ form.text }}
+                                {% if form.text.errors %}
+                                    <div class="text-danger">{{ form.text.errors }}</div>
+                                {% endif %}
                             </div>
 
-                            <div class="form-group col-md-4 col-lg-5 col-sm-12 mb-3">
-                                <label for="isread">IS_Read</label>
-                                <input type="text" class="form-control" id="is_read" name="is_read">
-                                <input type="hidden" name="created_by" id="created_by" value="1">
+                            <div class="form-group col-md-4 col-lg-4 col-sm-12 mb-3">
+                                {{ form.media_url.label_tag }}
+                                {{ form.media_url }}
+                                {% if form.media_url.errors %}
+                                    <div class="text-danger">{{ form.media_url.errors }}</div>
+                                {% endif %}
                             </div>
-                            
-                        </div>            
-                            <div class="container my-2">
-                                <button class="btn btn-outline-secondary btn-sm">
-                                    <a  class="text-decoration-none"  href="{% url 'manage_notification_list' %}">Back</a>
-                                 </button> 
-                                <button class="btn btn-primary btn-sm" type="submit">Save</button>                                              
+
+                            <div class="form-group col-md-4 col-lg-4 col-sm-12 mb-3">
+                                {{ form.receiver_id.label_tag }}
+                                {{ form.receiver_id }}
+                                {% if form.receiver_id.errors %}
+                                    <div class="text-danger">{{ form.receiver_id.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    
+                        <div class="row">
+                            <div class="form-group col-md-6 col-lg-6 col-sm-12 mb-3">
+                                {{ form.is_read.label_tag }}
+                                {{ form.is_read }}
+                                {% if form.is_read.errors %}
+                                    <div class="text-danger">{{ form.is_read.errors }}</div>
+                                {% endif %}
+                            </div>                                                                           
+                        </div>
+                        <!-- Repeat for other fields -->
+                        <div class="text-start">
+                            <a href="{% url 'manage_notification_list' %}" class="btn btn-sm btn-outline-secondary">Back</a>
+                            <button type="submit" class="btn btn-sm btn-primary">Save</button>
                         </div>
                     </form>
+                    
                 </div>
             </div>
         </div>       

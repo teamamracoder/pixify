@@ -12,8 +12,8 @@ def manage_create_notification(**kwargs):
             receiver_id=kwargs['receiver_id'],
             text=kwargs['text'],           
             media_url=kwargs.get('media_url'),
-            is_read=kwargs['is_read'],  
-            is_active=kwargs.get('is_active', True), 
+            # is_read=kwargs['is_read'],  
+            # is_active=kwargs.get('is_active', True), 
             created_by=kwargs['created_by'] 
         )
     return notification
