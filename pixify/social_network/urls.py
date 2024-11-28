@@ -57,8 +57,13 @@ urlpatterns = [
     path('admin/chat/<int:chat_id>/update/', views.ManageChatUpdateView.as_view(), name='manage_chat_update'),
    # path('admin/chat/<int:chat_id>/delete/', views.ManageChatDeleteView.as_view(), name='manage_chat_delete'),
     path('admin/chat/toggle-active/<int:chat_id>/', views.ManageToggleChatActiveView.as_view(), name='manage_toggle_chat_active'),
+    
+    # manage-chat-member
     path('admin/chat/membercreate/', views.ManageMemberChatCreateView.as_view(), name='manage_chat_membercreate'),
     path('admin/chat/memberlist/', views.ManageMemberChatListView.as_view(), name='manage_chat_memberlist'),
+    
+    path('admin/chat/toggle-activee/<int:member_id>/', views.ManageToggleChatMemberActiveView.as_view(), name='manage_chat_member_toggle_active'),
+
 
     # manage-comment
     path('admin/comments/', views.ManageCommentListView.as_view(), name='manage_comment_list'),

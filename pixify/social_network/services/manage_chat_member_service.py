@@ -3,7 +3,8 @@ from django.shortcuts import get_object_or_404
 from django.db.models import Q
 
 
-
+def manage_get_chat_member(member_id):
+   return get_object_or_404 (ChatMember , id=member_id)
 
 def manage_member_create_chats(member_id_id,chat_id_id):
   return ChatMember.objects.create(member_id_id=member_id_id,chat_id_id=chat_id_id)
