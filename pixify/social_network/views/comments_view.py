@@ -25,11 +25,11 @@ class CommentsCreateView(View):
     def get(self, request):
         return render(request, 'enduser/home/index.html')
     
-    def post(self,request,post_id):                
+    def post(self,request):                
          user_id = request.user.id
          commentstext=request.POST['comment_text']
          
-         services.comment_service.user_comments_create(commentstext,user_id,post_id)
+         services.comment_service.user_comments_create(commentstext,user_id)
          return redirect('comments_list')
     
 
