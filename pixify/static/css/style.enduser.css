@@ -600,11 +600,11 @@ i {
 .notification-text {
     color: #fffeff;
     padding-left: 6px;
-    font-size: small;
+    font-size: 15px;
 }
 
 .time-text {
-    font-size: 0.9rem;
+    font-size: 0.7rem;
     color: #ffffff;
 }
 
