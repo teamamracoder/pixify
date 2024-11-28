@@ -53,7 +53,10 @@ class SortingOrder(Enum):
     ASC='asc',
     DESC='desc'
     
-    
+class UIMODES(Enum):
+    LIGHT=1
+    DARK=2
+
 # static values, insert these in master_lists table
 class Reactions:
     LOVE = '<i class="bi bi-suit-heart-fill text-danger"></i>'
