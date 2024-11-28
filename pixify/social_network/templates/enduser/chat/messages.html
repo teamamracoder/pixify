@@ -95,22 +95,29 @@
             </div>
         </div>
         
-        <form id="messageForm" method="POST" action="{% url 'message_create' %}">
-            {% csrf_token %}
-            <input type="hidden" id="action" name="action" value="create"> <!-- Default to create -->
-            <input type="hidden" id="chat_id" name="chat_id" value="{{ chat.id }}"> 
-            <input type="hidden" id="message_id" name="message_id" value=""> <!-- Used for update/delete -->
-
-            <div id="mentionModal" class="modal">
-                <div class="modal-content" id="mention-suggestions">
-                    <!-- Mention suggestions will be displayed here -->
-                </div>
-            </div>
-            <input type="text" name="message" id="message-input" placeholder="Type your message here..." required>
-            <button type="submit">➤</button>
-        </form>
+ <form id="messageForm" method="POST" action="{% url 'message_create' %}" enctype="multipart/form-data">
+    {% csrf_token %}
+    <input type="hidden" id="action" name="action" value="create">
+    <input type="hidden" id="chat_id" name="chat_id" value="{{ chat.id }}">
+    <input type="hidden" id="message_id" name="message_id" value="">
+    <input type="hidden" name="mentions" id="mentions">
+    <input type="file" id="file-input" name="media_files" style="display: none;" accept="image/*,video/*" multiple>
+    <div id="mentionModal" class="parmess-modal">
+        <div class="parmess-modal-content" id="mention-suggestions"></div>
     </div>
-</div>
+    <div id="file-names" class="parmess-file-names"></div>
+    <div class="message-input-wrapper">
+        <button type="button" id="parmess-select-file-button" class="parmess-select-file-button">
+            <i class="fa fa-paperclip"></i>
+        </button>
+        <input type="text" name="message" id="message-input" placeholder="Type your message here..." required>
+        <button type="submit">➤</button>
+    </div>
+</form>
+     
+
+    </div>
+    </div>
 
 <script>
 
@@ -132,107 +139,178 @@ function setFormAction(action, messageId = '', chatId = '') {
     document.getElementById('messageForm').action = formAction;
 }
 
+
 $(document).ready(function () {
-    var mentionedUsers = []; // Array to store mentioned user IDs
+    var mentionedUsers = new Set();
+    var excludedUsers = new Set();
+    var mentionedAll = false;
+    var mentionTriggered = false;
 
-    // Detect @ and initiate mention search
-    $('#message-input').on('input', function (e) {
-        var messageText = $(this).val();
-        var chatId = $('#chat_id').val();
-
-        // Check if the last character typed is '@'
-        if (messageText.endsWith('@') && chatId) {
-            $.ajax({
-                url: `/message-mention/${chatId}?search=`, // Empty search query to show all possible mentions
-                type: 'GET',
-                success: function (res) {
-                    if (Array.isArray(res) && res.length > 0) {
-                        displayMentions(res);  // Display the suggestions in modal
-                    } else {
-                        $('#mentionModal').hide();  // Hide modal if no results
-                    }
-                },
-                error: function (xhr, status, error) {
-                    console.error('Error:', error);
-                }
-            });
-        } else {
-            $('#mentionModal').hide();  // Hide modal if the last character is not '@'
-        }
-    });
-
-    // Function to display mention suggestions
-    function displayMentions(mentions) {
-        var mentionSuggestions = $('#mention-suggestions');
-        mentionSuggestions.empty();  // Clear previous suggestions
-
-        mentions.forEach(function (mention) {
-            var mentionItem;
-
-            // Check if the mention is for a user or a special case (like @everyone)
-            if (mention.member_id === 'all') {
-                mentionItem = `
-                    <div class="mention-item" data-member-id="${mention.member_id}">
-                        <i class="fas fa-users" style="font-size:24px; color:black"></i>
-                        @${mention.member_id__first_name} ${mention.member_id__last_name}
-                    </div>
-                `;
+    function updateMentionedUsers(messageText) {
+        var mentionedRegex = /@(\w+)/g;
+        var match;
+        var newMentionedUsers = new Set();
+        
+        while ((match = mentionedRegex.exec(messageText)) !== null) {
+            var userId = match[1];
+            if (userId === 'all') {
+                mentionedAll = true;
+                newMentionedUsers.add('all');
             } else {
-                mentionItem = `
-                    <div class="mention-item" data-member-id="${mention.member_id}">
-                        <img src="${mention.member_id__profile_photo_url}" alt="${mention.member_id__first_name}'s profile photo" class="profile-photo">
-                        @${mention.member_id__first_name} ${mention.member_id__last_name}
-                    </div>
-                `;
+                var userElement = $(`.mention-item[data-member-id="${userId}"]`);
+                if (userElement.length > 0) {
+                    var actualUserId = userElement.data('member-id');
+                    newMentionedUsers.add(actualUserId);
+                }
             }
-            mentionSuggestions.append(mentionItem);  // Add each mention to the suggestions
+        }
+        
+        // Handle removed users
+        mentionedUsers.forEach(user => {
+            if (!newMentionedUsers.has(user)) {
+                excludedUsers.add(user);
+            }
+        });
+        
+        // Handle newly added users
+        newMentionedUsers.forEach(user => {
+            if (!mentionedUsers.has(user)) {
+                excludedUsers.delete(user);
+            }
         });
 
-        $('#mentionModal').show();  // Show modal with suggestions
+        // Update mentioned users set
+        mentionedUsers = new Set([...newMentionedUsers]);
+        console.log("Updated mentioned users:", Array.from(mentionedUsers));
+        console.log("Updated excluded users:", Array.from(excludedUsers));
     }
 
-    // Handle selection of a mention
-    $('#mention-suggestions').on('click', '.mention-item', function () {
-        var mentionText = $(this).text().trim();  // Get the selected mention text
-        var messageInput = $('#message-input');
-        var messageText = messageInput.val();
-        var atSymbolPos = messageText.lastIndexOf('@');
+    $('#message-input').on('input', function () {
+        var messageText = $(this).val();
+        var cursorPosition = this.selectionStart;
+        var lastChar = messageText.charAt(cursorPosition - 1);
 
-        // Replace the text after '@' with the selected mention
-        messageText = messageText.substring(0, atSymbolPos) + mentionText + ' ';
-        messageInput.val(messageText);  // Set the input field with the selected mention
-
-        // Add the mentioned user's ID to the array
-        var userId = $(this).data('member-id');
-        if (!mentionedUsers.includes(userId)) {
-            mentionedUsers.push(userId);
+        if (lastChar === '@') {
+            mentionTriggered = true;
+            displayMentionList('');
+        } else if (lastChar === ' ' || lastChar === '') {
+            $('#mentionModal').hide();
+        } else if (mentionTriggered) {
+            var atIndex = messageText.lastIndexOf('@');
+            if (atIndex !== -1 && cursorPosition > atIndex + 1) {
+                var searchQuery = messageText.slice(atIndex + 1, cursorPosition).trim();
+                if (searchQuery.length > 0) {
+                    displayMentionList(searchQuery);
+                } else {
+                    $('#mentionModal').hide();
+                }
+            }
         }
-
-        // Hide the mention modal after selecting a mention
-        $('#mentionModal').hide();
-
-        // Focus back to the input field after selection
-        messageInput.focus();
+        
+        updateMentionedUsers(messageText);
     });
 
-    // Handle form submission, add mentioned user IDs to the form
+    function displayMentionList(searchQuery) {
+        var chatId = $('#chat_id').val();
+        var excludeUsers = Array.from(excludedUsers).join(',');
+
+        console.log("Search Query:", searchQuery);
+        console.log("Exclude Users:", excludeUsers);
+        console.log("Mentioned All:", mentionedAll);
+
+        $.ajax({
+            url: `/message-mention/${chatId}?search=${encodeURIComponent(searchQuery)}&exclude=${encodeURIComponent(excludeUsers)}&mentionedAll=${mentionedAll}`,
+            type: 'GET',
+            success: function (res) {
+                if (Array.isArray(res) && res.length > 0) {
+                    var mentionSuggestions = $('#mention-suggestions');
+                    mentionSuggestions.empty();
+
+                    res.forEach(function (mention) {
+                        var mentionItem = createMentionItem(mention);
+                        mentionSuggestions.append(mentionItem);
+                    });
+
+                    $('#mentionModal').show();
+                } else {
+                    console.log("No mentions found");
+                    $('#mentionModal').hide();
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('Error:', error);
+            }
+        });
+    }
+
+    function createMentionItem(mention) {
+        if (mention.member_id === 'all') {
+            return `
+                <div class="mention-item" data-member-id="${mention.member_id}">
+                    <i class="fas fa-users" style="font-size:24px; color:black"></i>
+                    @All
+                </div>
+            `;
+        } else {
+            return `
+                <div class="mention-item" data-member-id="${mention.member_id}">
+                    <img src="${mention.member_id__profile_photo_url}" alt="${mention.member_id__first_name}'s profile photo" class="profile-photo">
+                    @${mention.member_id__first_name} ${mention.member_id__last_name}
+                </div>
+            `;
+        }
+    }
+
+    $('#mention-suggestions').on('click', '.mention-item', function () {
+        var mentionText = $(this).text().trim();
+        var messageInput = $('#message-input');
+        var messageText = messageInput.val();
+        var cursorPosition = messageInput[0].selectionStart;
+        var newText = messageText.slice(0, messageText.lastIndexOf('@')) + mentionText + ' ' + messageText.slice(cursorPosition);
+
+        messageInput.val(newText);
+        messageInput.focus();
+
+        var userId = $(this).data('member-id');
+        if (userId === 'all') {
+            mentionedAll = true;
+            mentionedUsers.add('all');
+        } else {
+            mentionedUsers.add(userId.toString());
+            excludedUsers.delete(userId.toString());
+        }
+
+        $('#mentionModal').hide();
+        mentionTriggered = false;
+    });
+
+    $('#message-input').on('keyup', function () {
+        var messageText = $(this).val();
+        updateMentionedUsers(messageText);
+    });
+
     $('#messageForm').on('submit', function () {
+        var excludeUsers = Array.from(excludedUsers).join(',');
         $('<input>').attr({
             type: 'hidden',
             name: 'mentions',
-            value: mentionedUsers.join(',')  // Join mentioned user IDs
+            value: Array.from(mentionedUsers).join(',')
         }).appendTo('#messageForm');
+        $('<input>').attr({
+            type: 'hidden',
+            name: 'exclude',
+            value: excludeUsers
+        }).appendTo('#messageForm');
+        console.log("Form submitted with mentions:", Array.from(mentionedUsers));
+        console.log("Form submitted with exclude:", excludeUsers);
     });
 
-    // Close the mention modal if clicked outside the modal
     $(window).on('click', function (event) {
         if ($(event.target).is('#mentionModal')) {
-            $('#mentionModal').hide();  // Hide modal when clicking outside
+            $('#mentionModal').hide();
         }
     });
 });
-
-
 
 
     function toggleOptions(messageId) {
@@ -546,7 +624,7 @@ observer.observe(chatBody, { childList: true });
     }
 
     .chat-footer input[type="text"] {
-        width:85%;
+        width:77%;
         flex: 1;
         padding: 12px;
         font-size: 14px;
@@ -572,47 +650,6 @@ observer.observe(chatBody, { childList: true });
         background-color: #3e2b5c;
     }
 
-
-/*start Partha*/
-/* Custom styles for mention modal */
-.modal {
-    display: none; /* Hidden by default */
-    position: fixed; /* Stay in place */
-    z-index: 1000; /* Sit on top */
-    left: 0;
-    top: 0;
-    width: 100%; /* Full width */
-    height: 100%; /* Full height */
-    overflow: hidden; /* Prevent scroll */
-    background-color: rgba(0, 0, 0, 0.4); /* Black with opacity */
-}
-
-.modal-content {
-    background-color: #fefefe;
-    
-    margin-top: 21%;
-    margin-left: 33%;
-    padding: 20px;
-    border: 1px solid #888;
-    width: 250px; /* Could be more or less, depending on screen size */
-    max-height: 40%; /* Ensure the modal is not too tall */
-    overflow-y: auto; /* Enable vertical scroll if content is too tall */
-}
-
-
-
-.mention-item:hover {
-    background-color: #ddd; /* Background color on hover */
-    color: #000; /* Text color on hover */
-}
-
-.profile-photo {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    margin-right: 10px;
-}
-/*end Partha*/
 
 /*start A*/
     .dropdown {
@@ -699,10 +736,89 @@ observer.observe(chatBody, { childList: true });
         font-weight: bold;
     }
     /*end A*/
+    
+    /*Start Partha*/
 
+    .parmess-modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background-color: rgba(0, 0, 0, 0.4);
+    }
 
+    .parmess-modal-content {
+        background-color: #fefefe;
+        margin-top: 21%;
+        margin-left: 33%;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 250px;
+        max-height: 40%;
+        overflow-y: auto;
+    }
 
+    .parmess-close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
 
+    .parmess-close:hover,
+    .parmess-close:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .mention-item:hover {
+        background-color: #ddd;
+        color: #000;
+    }
+
+    .profile-photo {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        margin-right: 10px;
+    }
+
+    .parmess-file-names {
+        margin-bottom: 10px;
+        font-size: 14px;
+        color: black;
+        max-width: 100%;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        width: 100%;
+    }
+
+    .parmess-file-name, .parmess-file-count {
+        width: 100%;
+        color: black;
+        display: inline-block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        max-width: calc(100% - 20px);
+        padding: 2px 5px;
+        background-color: #786e6e;
+        border-radius: 3px;
+    }
+
+    .message-input-wrapper {
+        display: flex;
+        align-items: center;
+        width: 100%;
+    }
+
+    /*End Partha*/    
     
 </style>
 {% endblock %} add a action when i type "@" in the form 
