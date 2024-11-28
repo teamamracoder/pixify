@@ -44,8 +44,6 @@ class ManageUserListView(View):
             'adminuser/user/list.html',
             success_response("User data fetched successfully", data)
         ) 
-
-
 class ManageUserCreateView(View):
     @catch_error
     def get(self, request):

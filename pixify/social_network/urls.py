@@ -33,12 +33,16 @@ urlpatterns = [
     path('admin/messages/toggle-active/<int:message_id>/', views.ManageToggleMessageActiveView.as_view(), name='manage_toggle_message_active'),
 
     #manage-post
-    path('admin/posts/', views.ManagePostListView.as_view(), name='manage_post_list'),
-    path('admin/posts/toggle-active/<int:post_id>/', views.ManageTogglePostActiveView.as_view(), name='toggle_post_active'),
     path('admin/posts/create/', views.ManagePostCreateView.as_view(), name='manage_post_create'),
+    path('admin/posts/', views.ManagePostListView.as_view(), name='manage_post_list'),
     path('admin/posts/<int:post_id>/details', views.ManagePostDetailView.as_view(), name='manage_post_detail'),
+    path('admin/posts/toggle-active/<int:post_id>/', views.ManageTogglePostActiveView.as_view(), name='toggle_post_active'), 
     path('admin/posts/<int:post_id>/update/', views.ManagePostUpdateView.as_view(), name='manage_post_update'),
     
+    #admin post specific user
+    # path('admin/posts/<int:post_id>/create_specific_user/', views.ManagePostSpecificUserView.as_view(), name='manage_post_specific_user'),
+    # path('admin/posts/specific_user_list/', views.ManagePostSpecificUserListView.as_view(), name='manage_post_specific_user_list'),
+    # path('admin/posts/specific_user_details/', views.ManagePostSpecificUserDetailView.as_view(), name='manage_post_specific_user_detail'),
 
 
     #chat

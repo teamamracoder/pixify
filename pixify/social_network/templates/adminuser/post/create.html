@@ -13,8 +13,9 @@
                 </div>
                 <div class="spaci p-3 ">
                     <classds="card-body">
-                        <form method="post">
+                        <form method="post" id="post_form">
                             {% csrf_token %}
+                            {{ data.post_form.as_p }}
                             <div class="row">
                                 <div class="form-group col-md-4 col-lg-4 col-sm-12 mb-3">
                                     {{ form.posted_by.label_tag }}
@@ -38,19 +39,34 @@
                                     {% endif %}
                                 </div>
                             </div>
+
+
                             <div class="row">
-                                <div class="form-group col-md-6 col-lg-6 col-sm-12 mb-3">
-                                    {{ form.media_url.label_tag }}
-                                    {{ form.media_url }}
-                                    {% if form.media_url.errors %}
-                                    <div class="text-danger">{{ form.media_url.errors }}</div>
-                                    {% endif %}
-                                </div>
                                 <div class="form-group col-md-6 col-lg-6 col-sm-12 mb-3">
                                     {{ form.title.label_tag }}
                                     {{ form.title }}
                                     {% if form.title.errors %}
                                     <div class="text-danger">{{ form.title.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="form-group col-md-6 col-lg-6 col-sm-12 mb-3">
+                                    {{ form.accessability.label_tag }}
+                                    {{ form.accessability }}
+                                    {% if form.accessability.errors %}
+                                    <div class="text-danger">{{ form.accessability.errors }}</div>
+                                    {% endif %}
+                                </div>
+                               
+                            </div>
+                            <div class="row">
+
+
+                                <div class="form-group col-md-6 col-lg-6 col-sm-12 mb-3">
+                                    {{ form.treat_as.label_tag }}
+                                    {{ form.treat_as }}
+                                    {% if form.treat_as.errors %}
+                                    <div class="text-danger">{{ form.treat_as.errors }}</div>
                                     {% endif %}
                                 </div>
                                 <div class="form-group col-md-6 col-lg-6 col-sm-12 mb-3">
@@ -60,27 +76,8 @@
                                     <div class="text-danger">{{ form.description.errors }}</div>
                                     {% endif %}
                                 </div>
-                                <div class="form-group col-md-6 col-lg-6 col-sm-12 mb-3">
-                                    {{ form.accessability.label_tag }}
-                                    {{ form.accessability }}
-                                    {% if form.accessability.errors %}
-                                    <div class="text-danger">{{ form.accessability.errors }}</div>
-                                    {% endif %}
-                                </div>
-                                <div class="form-group col-md-6 col-lg-6 col-sm-12 mb-3">
-                                    {{ form.members.label_tag }}
-                                    {{ form.members }}
-                                    {% if form.members.errors %}
-                                    <div class="text-danger">{{ form.members.errors }}</div>
-                                    {% endif %}
-                                </div>
-                                <div class="form-group col-md-6 col-lg-6 col-sm-12 mb-3">
-                                    {{ form.treat_as.label_tag }}
-                                    {{ form.treat_as }}
-                                    {% if form.treat_as.errors %}
-                                    <div class="text-danger">{{ form.treat_as.errors }}</div>
-                                    {% endif %}
-                                </div>
+
+
                             </div>
                             <!-- Repeat for other fields -->
                             <div class="text-start">
@@ -94,4 +91,38 @@
         </div>
     </div>
 </div>
+
+
+<script>
+    $(document).ready(function () {
+        $("#post_form").validate({
+            rules: {
+                title: {
+                    required: true,
+                    minlength: 5,
+                    maxlength: 50
+                },
+                description: {
+                    required: true,
+                    minlength: 5,
+                    maxlength: 150
+                },
+            },
+            messages: {
+                title: {
+                    required: "Please enter title.",
+                    minlength: "title must be at least 5 characters.",
+                    maxlength: "title cannot exceed 50 characters."
+                },
+                description: {
+                    required: "Please enter description.",
+                    minlength: "description must be at least 5 characters.",
+                    maxlength: "description cannot exceed 150 characters."
+                },
+            }                   
+        });
+    });
+</script>
+
+
 {% endblock %}

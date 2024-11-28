@@ -1,12 +1,17 @@
-from ..models import Post
+from ..models import User,Post,Comment
 from django.shortcuts import get_object_or_404
-from django.db.models import Q
+from social_network.packages.get_data import GetData
+
+from .. import models
 
 def manage_list_posts():
     return Post.objects.all()
 
 def manage_get_post(post_id):
     return get_object_or_404(Post, id=post_id)
+
+def manage_get_user(posted_by):
+    return get_object_or_404(User, id=posted_by)
 
 def manage_update_post(post, title, description):
     post.title = title
@@ -24,22 +29,38 @@ def manage_list_posts(sort_by = 'title'):
     return Post.objects.all().order_by(sort_by)
 
 def manage_create_post(**kwargs):
-    post = Post.objects.create(
+    post = Post.objects.create( # creating a new post object
             posted_by=kwargs['posted_by'],
             created_by=kwargs['created_by'],
             title=kwargs['title'],
             description=kwargs['description'],
         )
-    return post
+    return post # return current post(object)
 
-def manage_list_posts_filtered(search_query,sort_by='posted_by'):
-    if search_query:
-        # Use Q objects to filter by posted_by, title, or descriptions
-        return Post.objects.filter(
-            Q(posted_by__icontains=search_query) |
-            Q(title__icontains=search_query) |
-            Q(description__icontains=search_query)
-        ).order_by(sort_by)
-    return Post.objects.all().order_by(sort_by)    
+
+
+def manage_list_posts_filtered(search_query, sorting_order, sort_by, page_number):
+    # get data
+    data = (
+        GetData(Post)
+        .search(search_query,"post_by","title", "description")
+        .sort(sort_by, sorting_order)
+        .paginate(limit=10, page=page_number)
+        .execute()
+    )
+    # return data
+    return data
+
+def user_post(post_Title,media_urls,user_id):
+    return Post.objects.create(title=post_Title,media_url=media_urls,created_by_id=user_id,posted_by_id=user_id)
+
+def get_comment_count_by_post(post_id):
+    comment_count = Comment.objects.filter(post_id=post_id, reply_for__isnull=True, is_active=True).count()
+    return comment_count
+
+
+def manage_list_comments_filtered(post_id):
+    return models.Comment.objects.filter(post_id=post_id, reply_for__isnull=True, is_active=True)
+
 
 
