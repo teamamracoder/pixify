@@ -1,0 +1,133 @@
+{% extends "../base.html" %}
+
+{% block title %}Chat Member List{% endblock %}
+
+{% block content %}
+<style>
+        .hover-bg:hover {
+        background-color: rgba(240, 242, 245, 0.1);
+        color:aqua; 
+    }
+</style>
+
+<div class="container-fluid my-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-12 col-lg-12">
+            <div class="">
+                <div class="card-header text-center">
+                    <h2 class="">Chat Member List</h2>
+                </div>
+                <div class="d-flex justify-content-between mb-3">
+                    <button class="btn btn-primary btn-sm"><a href="{% url 'manage_chat_membercreate' %}" class="text-white text-decoration-none">Add Member</a></button>
+                   
+                    <form method="get" action="{% url 'manage_chat_memberlist' %}">
+                        <div class="input-group" style="max-width: 300px;">
+                            <input type="text" class="form-control border-secondary" placeholder="Search" aria-label="Search" name="search" value="{{ search_query }}">
+                            <button class="btn btn-outline-secondary">Search</button>
+                        </div>
+                    </form>
+                </div>
+                            
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-info text-white"> 
+                                <tr>
+                                    <th>
+                                        <a href="?sort_by=member_id_id&sort_order={% if sort_order == 'asc' %}desc{% else %}asc{% endif %}">Member_Id</a>
+                                    </th>
+                                    <th>
+                                        <a href="?sort_by=chat_id_id&sort_order={% if sort_order == 'asc' %}desc{% else %}asc{% endif %}">Chat_Id
+
+                                        </th>                                 
+                                    
+                                    <th>Status</th>                            
+                                </tr>
+                            </thead>
+                            <tbody>
+                             
+                                <tr>
+                                    <td>                                       
+                                        <a class="text-decoration-none text-primary hover-bg" href="#">
+                                            {{ chat_member.member_id_id }} 
+                                        </a>                                       
+                                    </td>
+                                                       
+                                        <td>                                       
+                                            
+                                                {{ chat_member.chat_id_id }} 
+                                                                              
+                                        </td>    
+                                    
+                                    <td>
+                                        <button class="btn btn-sm toggle-status" data-chat-id="{{ chat_member.id }}">
+                                            {% if chat_member.is_active %}
+                                                <i class="bi bi-toggle-on text-success"></i> Active
+                                            {% else %}
+                                                <i class="bi bi-toggle-off text-danger"></i> Inactive
+                                            {% endif %}
+                                        </button>
+                                    </td>
+                                    
+                                    
+                                </tr>
+                                    
+                            </tbody>
+                        </table>
+
+                        <div class="pagination">
+                            <span class="step-links">
+                                {% if chats.has_previous %}
+                                    <a href="?page=1&search={{ search_query }}&sort_by={{ sort_by }}&sort_order={{ sort_order }}">First</a>
+                                    <a href="?page={{ chats.previous_page_number }}&search={{ search_query }}&sort_by={{ sort_by }}&sort_order={{ sort_order }}">Previous</a>
+                                {% endif %}
+                        
+                                <span class="current">
+                                    Page {{ chats.number }} of {{ chats.paginator.num_pages }}.
+                                </span>
+                        
+                                {% if chats.has_next %}
+                                    <a href="?page={{ chats.next_page_number }}&search={{ search_query }}&sort_by={{ sort_by }}&sort_order={{ sort_order }}">Next</a>
+                                    <a href="?page={{ chats.paginator.num_pages }}&search={{ search_query }}&sort_by={{ sort_by }}&sort_order={{ sort_order }}">Last</a>
+                                {% endif %}
+                            </span>
+                        </div>
+
+                    </div>
+                        </div>
+                    
+                </div>
+            </div>
+        </div>       
+</div>
+
+
+<script>
+    $(document).ready(function() {
+        $('.toggle-status').click(function() {
+            const chatId = $(this).data('chat-id');
+            const button = $(this);
+
+            $.ajax({
+                url: '/admin/chat/toggle-active/' + chatId + '/',
+                type: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'  // Include CSRF token for security
+                },
+                success: function(response) {
+                    // Update the button's text and icon based on the new status
+                    if (response.is_active) {
+                        button.html('<i class="bi bi-toggle-on text-success"></i> Active');
+                    } else {
+                        button.html('<i class="bi bi-toggle-off text-danger"></i> Inactive');
+                    }
+                },
+                error: function(xhr) {
+                    alert('Error updating status: ' + xhr.responseText);
+                }
+            });
+        });
+    });
+</script>
+
+
+{% endblock %}

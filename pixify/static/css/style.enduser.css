@@ -21,9 +21,9 @@ nav {
 }
 
 .topnav {
-    /* width: 220px; */
+
     height: 35px;
-    /* margin-top: 6px; */
+   
 
 }
 
@@ -1293,26 +1293,26 @@ textarea::placeholder {
     position: absolute;
     top: 58px;
     left: 50%;
-    color: #e90acb;
+    color:#2f066de3;
     transform: translateX(-50%);
     font-family: "Roboto" sans-serif;
     font-size: 18px;
 }
 
 .stories-full-view .story #dp {
-    margin-left: 35%;
-    top: -60%;
+    margin-left: 34%;
+    top: -63%;
 }
 
 .stories-full-view .story .time-line {
     height: 2px;
     width: 40%;
-    top: 20%;
-    left: 30%;
-    background: rgb(255, 21, 204);
-    border-radius: 5px;
+    top: 9%;
+    left: 27.5%;
+    background: #2f066de3;
+    border-radius: 50%;
     position: absolute;
-    animation: timeline 3s linear forwards;
+    animation: timeline 10s linear forwards;
 
 }
 
@@ -1322,7 +1322,7 @@ textarea::placeholder {
     }
 
     100% {
-        width: 40%;
+        width: 45%;
     }
 }
 
@@ -1330,7 +1330,7 @@ textarea::placeholder {
     position: relative;
     margin-top: -170px;
     margin-left: 8px;
-    border: 3px solid #ff2bbf;
+    border: 3px solid #4f0cb4e3;
     height: 40px;
     width: 40px;
     border-radius: 50%;
@@ -1787,4 +1787,16 @@ textarea::placeholder {
     border: none;
 }
 
-/*End Subhasis*/
+
+  .center-bodycontent ::-webkit-scrollbar {
+    width: 1px;
+  }
+  .com ::-webkit-scrollbar {
+      width: 1px;
+    }
+  html {
+      scroll-behavior: smooth;
+      
+    }
+  
+/*End Subhasis*Thank you for your business! We look forward to working with you again.

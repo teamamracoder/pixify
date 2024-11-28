@@ -1,7 +1,7 @@
 
 {% extends "../base.html" %}
 
-{% block title %}Chat Create{% endblock %}
+{% block title %}Create Chat{% endblock %}
 
 {% block content %}
 
@@ -10,60 +10,90 @@
         <div class="col-12 col-md-12 col-lg-12">
             <div class="card shadow-sm">
                 <div class="card-header text-center">
-                    <h2 class="text-info">Chat Create</h2>
+                    <h2 class="text-info">Create Chat</h2>
                 </div>
                 <div class="card-body">
-                    <form method="post">
+                    <form method="post" id="manage_chat_form" >
                         {% csrf_token %}
+                       {{ data.manage_chat_form.as_p }} 
                         <div class="row">
-                            <div class="mb-3">
-                                <label for="title" class="form-label">Title</label>
-                                <input type="text" class="form-control" id="title" name="title" placeholder="title" required>
+                            <div class="form-group col-md-4 col-lg-4 col-sm-12 mb-3">
+                                {{ form.title.label_tag }}
+                                {{ form.title }}
+                                {% if form.title.errors %}
+                                    <div class="text-danger">{{ form.title.errors }}</div>
+                                {% endif %}
                             </div>
 
-                                <div class="mb-3">
-                                    <label for="type" class="form-label">Type</label>
-                                    <select id="type" name="type" class="form-select">
+                            <div class="form-group col-md-4 col-lg-4 col-sm-12 mb-3">
+                                {{ form.type.label_tag }}
+                                <select id="type" name="type" value="{{ chat.type }}" class="form-select">
                                         {% for type in choices_type %}
                                             {% for name, value in type.items %}
                                                 <option value="{{ name }}">{{ value }}</option>
                                             {% endfor %}
                                         {% endfor %}
-                                    </select>
+                                    </select> 
+                                    {% if form.type.errors %}
+                                        <div class="text-danger">{{ form.type.errors }}</div>
+                                    {% endif %}
                                 </div>
-                
-                                
-                                
-                                
-                                
-                                
-                                <div class="mb-3">
-                                    <label for="chat_cover" class="form-label">Chat_Cover</label>
-                                    <input type="chat_cover" class="form-control" id="chat_cover" name="chat_cover" placeholder="URL" required> 
-                                </div>
-
-                                <input type="hidden" id="created_by" name="created_by" value="1">
-                                <!-- <input type="hidden" id="updated_by" name="updated_by" value="1"> -->
     
-                                <div class="form-group form-check">
-                                    <input type="checkbox" name="is_active" class="form-check-input" id="is_active" checked>
-                                    <label class="form-check-label" for="is_active">Is Active</label>
+                                <div class="form-group col-md-4 col-lg-4 col-sm-12 mb-3">
+                                    {{ form.chat_cover.label_tag }}
+                                    {{ form.chat_cover }}
+                                    {% if form.chat_cover.errors %}
+                                        <div class="text-danger">{{ form.chat_cover.errors }}</div>
+                                    {% endif %}
                                 </div>
-                           
+    
                         </div>
-                             
-                       
-
+                    
+                        
+                        <!-- Repeat for other fields -->
                         <div class="text-start">
                             <a href="{% url 'manage_chat_list' %}" class="btn btn-sm btn-outline-secondary">Back</a>
                             <button type="submit" class="btn btn-sm btn-primary">Save</button>
                         </div>
                     </form>
+                    
                 </div>
             </div>
         </div>       
+    </div>
 </div>
 
+
+<script>
+    $(document).ready(function () {
+        $("#manage_chat_form").validate({
+            rules: {
+                title: {
+                    required: true,
+                    minlength: 3,
+                    maxlength: 50
+                },
+                chat_cover: {
+                    required: true,
+                    minlength: 5,
+                    maxlength: 150
+                },
+            },
+            messages: {
+                title: {
+                    required: "Please enter title.",
+                    minlength: "title must be at least 3 characters.",
+                    maxlength: "title cannot exceed 50 characters."
+                },
+                chat_cover: {
+                    required: "Please enter chat_cover.",
+                    minlength: "chat_cover must be at least 5 characters.",
+                    maxlength: "chat_cover cannot exceed 150 characters."
+                },
+            }
+        });
+    });
+</script>
 
 
 {% endblock %}
