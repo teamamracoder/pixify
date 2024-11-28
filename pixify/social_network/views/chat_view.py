@@ -92,6 +92,9 @@ class ChatListView(View):
 
 
 class ChatCreateView(View): 
+    @catch_error
+    @auth_required
+    @role_required(Role.ADMIN.value, Role.END_USER.value)
     def get(self, request): 
         user = user_service.get_user(request)
         return render(request, 'enduser/chat/chats.html',{'user':user})
@@ -124,6 +127,9 @@ class ChatCreateView(View):
             return JsonResponse({'chat_id': chat.id})
  
 class ChatDetailsView(View):
+    @catch_error
+    @auth_required
+    @role_required(Role.ADMIN.value, Role.END_USER.value)
     def get(self, request, chat_id):
         user =request.user 
         chat = chat_service.get_chat_by_id(chat_id)
@@ -157,6 +163,9 @@ class ChatDetailsView(View):
         return render(request, 'enduser/chat/messages.html',{'chat':chat_info,'messages':messages,'user':user,'reactions':reactions})
     
 class ChatUpdateView(View):   
+    @catch_error
+    @auth_required
+    @role_required(Role.ADMIN.value, Role.END_USER.value)
     def get(self, request,chat_id):        
         return render(request, 'enduser/chat/chats.html',{'chat':chat_id})   
      
@@ -169,6 +178,9 @@ class ChatUpdateView(View):
         return redirect('chat/')
 
 class ChatDeleteView(View):  
+    @catch_error
+    @auth_required
+    @role_required(Role.ADMIN.value, Role.END_USER.value)
     def post(self, request, chat_id):
         chat = chat_service.get_chat_by_id(chat_id)
         chat_service.delete_chat(chat)
@@ -214,6 +226,3 @@ class ChatListViewApi(View):
             chat_data_list.append(chat_info)
         chats = chat_service.list_chats_api(request,chat_data_list)
         return JsonResponse(chats, safe=False)
-
-    
-
