@@ -1,6 +1,7 @@
-from ..models import Message,MessageReadStatus
+from ..models import Message,MessageReadStatus,MasterList
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from ..constants import MasterType
 
 
 
@@ -57,3 +58,7 @@ def unread_count(chat,user):
         fk_message_msg_status_messages_id__read_by=user
     ).count()  
     return unread_count
+
+def show_reactions():
+    reactions = MasterList.objects.filter(type=MasterType.REACTION.value, is_active=True).values("name", "value")
+    return list(reactions) 
