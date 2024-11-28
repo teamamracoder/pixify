@@ -18,7 +18,6 @@ def manage_delete_post(post):
     post.delete()
 
 
-
 # new added by sujit
 def manage_list_posts(sort_by = 'title'): 
     return Post.objects.all().order_by(sort_by)
@@ -51,5 +50,9 @@ def user_post(post_Title,media_urls,user_id):
 # priya
 def Postlist_posts():
     return Post.objects.all().order_by('-created_at')
+
+def get_post(post_id):
+    return get_object_or_404(Post, id=post_id)
+
 
 # comment

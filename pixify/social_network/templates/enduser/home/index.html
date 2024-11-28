@@ -214,9 +214,9 @@
     <div class="post-react-det">
         <div class="post-react">
             <i class="fa-regular fa-heart"></i>
-         {% comment %} <span  data-toggle="modal" data-target="#exampleModalCenter"><a href="{% url 'Userdetail' post.id %}">
-                <i class="fa-regular fa-comment"></i></a></span>  {% endcomment %}
-           <span  data-toggle="modal" data-target="#exampleModalCenter"><i class="fa-regular fa-comment"></i></span>
+          {% comment %} <span  data-toggle="modal" data-target="#exampleModalCenter" ><a href="{% url 'comments' post.id %}">
+                <i class="fa-regular fa-comment"></i></a></span>   {% endcomment %}
+          <span  data-toggle="modal" data-target="#exampleModalCenter"><i class="fa-regular fa-comment"></i></span> 
             <i class="fa-regular fa-bookmark"></i>
             <i class="fa-solid fa-share-nodes"  data-bs-toggle="modal" data-bs-target="#shareModal"></i>
 
@@ -226,6 +226,15 @@
 </div>   
 {% endfor %}
 {% endif %}  
+
+
+
+
+
+
+
+
+
 
 
 {% comment %} <div class="py-3 mt-2 mb-5" id="homePagePostsection"> {% endcomment %}
@@ -729,14 +738,35 @@
                     <i class="bi bi-emoji-smile text-light fs-8"></i>
                     <i class="bi bi-filetype-gif text-light fs-8"></i>
                     <i class="bi bi-stickies text-light fs-8"></i>
-                   <button type="submit " class="ms-auto " style="background-color:transparent;outline:none;border:none;"> <i class="bi bi-symmetry-horizontal  fs-7 text-info "type="submit"></i></button>
+                   <button id="createcomment" type"submit" class="ms-auto " style="background-color:transparent;outline:none;border:none;"> <i class="bi bi-symmetry-horizontal  fs-7 text-info "type="submit"></i></button>
                 </div>
             </div>
     </div>
    </form> 
 
 </div>
-          
+        
+
+
+
+{% comment %} comment script by priya {% endcomment %}
+{% comment %} <script>
+    $(document).ready(function () {
+        $("#createcomment").click(function () {
+            $.ajax({
+                url: "comments/<int:post_id>/ ",
+                type: "POST",
+                success: function (data) {
+                    console.log(data); // Handle the JSON response
+                    
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error:", error);
+                }
+            });
+        });
+    });
+</script> {% endcomment %}
 {% comment %} input box comment {% endcomment %}
 
  </div> 
