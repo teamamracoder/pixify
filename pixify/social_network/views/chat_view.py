@@ -127,6 +127,7 @@ class ChatDetailsView(View):
     def get(self, request, chat_id):
         user =request.user 
         chat = chat_service.get_chat_by_id(chat_id)
+        reactions=message_service.show_reactions()
         messages = message_service.list_messages_by_chat_id(chat_id,user.id)
         if chat.type == ChatType.PERSONAL.value:
             member = chat_service.get_recipient_for_personal(chat.id, user) 
@@ -153,7 +154,7 @@ class ChatDetailsView(View):
             'is_group' :chat.type==ChatType.GROUP.value
         }
         # chat_data.append(chat_info)       
-        return render(request, 'enduser/chat/messages.html',{'chat':chat_info,'messages':messages,'user':user})
+        return render(request, 'enduser/chat/messages.html',{'chat':chat_info,'messages':messages,'user':user,'reactions':reactions})
     
 class ChatUpdateView(View):   
     def get(self, request,chat_id):        

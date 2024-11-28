@@ -28,15 +28,13 @@
                         </div>
                         <span class="text-dark">{{ message.text }}</span>
                     </div>
-                    <div class="message-footer">
-                        
+                    <div class="message-footer">  
                         <span class="time">{{ message.created_at|date:"h:i A" }}</span>
                         <div>
                         <i class="bi bi-three-dots-vertical" onclick="toggleOptions({{ message.id }})"></i>
                         <i class="bi bi-emoji-smile" onclick="toggleReactionPopup({{ message.id }})"></i>
                         </div>
-                    </div>
-                    
+                    </div> 
                     <div class="options-popup" id="options-{{ message.id }}" style="display: none;">
                         {% if message.sender_id.id == user.id%}
                         <a href="#" onclick="editMessage('{{ message.id }}', '{{ message.text|escapejs }}')">Edit</a>                       
@@ -44,13 +42,12 @@
                         <a href="#" onclick="deleteMessage('{{ message.id }}')">Delete</a>
                         <a href="#" onclick="replyToMessage('{{ message.id }}', '{{ message.sender.username }}', '{{ message.text|escapejs }}')">Reply</a>
                     </div>
-                    
                     <div class="reaction-popup" id="reaction-popup-{{ message.id }}" style="display: none;">
-                        <span onclick="addReaction('{{ message.id }}', '👍')">👍</span>
-                        <span onclick="addReaction('{{ message.id }}', '❤️')">❤️</span>
-                        <span onclick="addReaction('{{ message.id }}', '😂')">😂</span>
-                        <span onclick="addReaction('{{ message.id }}', '😮')">😮</span>
-                        <span onclick="addReaction('{{ message.id }}', '😢')">😢</span>
+                        {% for reaction in reactions %}
+                        <span onclick="addReaction('{{ message.id }}', '{{ reaction.name }}', '{{ reaction.value|escapejs }}')">
+                            {{ reaction.value|safe }}
+                        </span>
+                        {% endfor %}
                     </div>
                     <div class="reaction-display" id="reaction-display-{{ message.id }}"></div>
                 </div>
@@ -75,23 +72,21 @@
                     <a href="#" onclick="editMessage('{{ message.id }}', '{{ message.text|escapejs }}')">Edit</a>
                     {%endif%}
 
-    <a href="#" onclick="deleteMessage('{{ message.id }}')">Delete</a>
-    <a href="#" onclick="replyToMessage('{{ message.id }}', '{{ message.sender.username }}', '{{ message.text|escapejs }}')">Reply</a>
-</div>
-
-                    <div class="reaction-popup" id="reaction-popup-{{ message.id }}" style="display: none;">
-                        <span onclick="addReaction('{{ message.id }}', '👍')">👍</span>
-                        <span onclick="addReaction('{{ message.id }}', '❤️')">❤️</span>
-                        <span onclick="addReaction('{{ message.id }}', '😂')">😂</span>
-                        <span onclick="addReaction('{{ message.id }}', '😮')">😮</span>
-                        <span onclick="addReaction('{{ message.id }}', '😢')">😢</span>
-                    </div>
-                    <div class="reaction-display" id="reaction-display-{{ message.id }}"></div>
+                    <a href="#" onclick="deleteMessage('{{ message.id }}')">Delete</a>
+                    <a href="#" onclick="replyToMessage('{{ message.id }}', '{{ message.sender.username }}', '{{ message.text|escapejs }}')">Reply</a>
+                </div>
+                <div class="reaction-popup" id="reaction-popup-{{ message.id }}" style="display: none;">
+                    {% for reaction in reactions %}
+                    <span onclick="addReaction('{{ message.id }}', '{{ reaction.name }}', '{{ reaction.value|escapejs }}')">
+                        {{ reaction.value|safe }}
+                    </span>
+                    {% endfor %}
+                </div>
+                <div class="reaction-display" id="reaction-display-{{ message.id }}"></div>
                 </div>
             {% endif %}
         {% endfor %}
     </div>
-
     <div class="chat-footer">
         <div id="reply-preview" style="display: none;">
             <div class="reply-message">
@@ -250,18 +245,34 @@ $(document).ready(function () {
         popup.style.display = popup.style.display === 'none' ? 'flex' : 'none';
     }
 
-    function addReaction(messageId, reaction) {
+    function addReaction(messageId, reactionName, reactionValue) {
         const display = document.getElementById('reaction-display-' + messageId);
-        const existingReaction = [...display.children].find(child => child.textContent.includes(reaction));
-        if (existingReaction) {
-            existingReaction.textContent = `${reaction} ${parseInt(existingReaction.textContent.split(' ')[1]) + 1}`;
-        } else {
-            const newReaction = document.createElement('span');
-            newReaction.textContent = `${reaction} 1`;
-            display.appendChild(newReaction);
+        if (!display) {
+            console.error(`Reaction display element not found for messageId: ${messageId}`);
+            return;
         }
-        document.getElementById('reaction-popup-' + messageId).style.display = 'none';
+        const existingReactions = Array.from(display.children);
+        existingReactions.forEach((child) => {
+            if (child.dataset.userReaction === "true") {
+                display.removeChild(child);
+            }
+        });
+        const newReaction = document.createElement('span');
+        newReaction.dataset.reaction = reactionName; 
+        newReaction.dataset.userReaction = "true";
+        newReaction.innerHTML = `
+            ${reactionValue} <span class="reaction-count">1</span>
+        `;
+        newReaction.style.marginRight = '10px'; 
+        display.appendChild(newReaction);
+        const popup = document.getElementById('reaction-popup-' + messageId);
+        if (popup) {
+            popup.style.display = 'none';
+        } else {
+            console.error(`Reaction popup not found for messageId: ${messageId}`);
+        }
     }
+    
     function editMessage(messageId, content) {
         const messageInput = document.querySelector('input[name="message"]');
         messageInput.value = content;
