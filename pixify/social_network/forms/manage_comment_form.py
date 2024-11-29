@@ -1,8 +1,6 @@
 from django import forms
 
 
-
-
 class ManageCommentCreateForm(forms.Form):
     comment = forms.CharField(
         label="Comment",

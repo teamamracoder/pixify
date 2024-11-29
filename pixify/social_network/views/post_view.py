@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import os
 from django.shortcuts import render, redirect
 from django.http import HttpResponseBadRequest, JsonResponse
@@ -53,3 +54,5 @@ class UserPostCreatView(View):
 
 #         services.post_service.user_post(post_Title, media_urls)
 #         return redirect('home')
+=======
+>>>>>>> 339241cfdc240eebedbec45d5f5ead4bf098398a

@@ -21,7 +21,7 @@
 
             <div class="d-flex justify-content-between mb-3">
                 <button class="btn btn-primary btn-sm">
-                    <a href="{% url 'manage_comment_create' %}" class="text-white text-decoration-none">Add User</a>
+                    <a href="{% url 'manage_comment_create' %}" class="text-white text-decoration-none">Add Comment</a>
                 </button>
 
                 <form method="get" action="{% url 'manage_comment_list' %}">
@@ -137,7 +137,7 @@
 
             $.ajax({
                 url: '/admin/comments/toggle-active/' + commentId + '/',
-                type: 'Comment',
+                type: 'POST',
                 headers: {
                     'X-CSRFToken': '{{ csrf_token }}' // Include CSRF token for security
                 },
