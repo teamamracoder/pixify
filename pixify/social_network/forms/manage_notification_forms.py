@@ -12,13 +12,13 @@ class ManageNotificationCreateForm(forms.Form):
             MaxLengthValidator(50, message="Text at least 60 characters.")
         ],
         widget=forms.TextInput(attrs={"class": "form-control"})
-    )    
+    )  
     media_url = forms.URLField(
-        label="Media_URL",      
+        label="Media_URL",
         widget=forms.TextInput(attrs={"class": "form-control"})
-    )    
+    )
     receiver_id = forms.CharField(
-        label="Receiver_ID",       
+        label="Receiver_ID",
         widget=forms.TextInput(attrs={"class": "form-control"})
     )    
 
@@ -37,6 +37,6 @@ class ManageNotificationUpdateForm(forms.Form):
         widget=forms.TextInput(attrs={"class": "form-control"})
     )
     receiver_id = forms.CharField(
-        label="Receiver_ID",     
+        label="Receiver_ID",
         widget=forms.TextInput(attrs={"class": "form-control"})
     )

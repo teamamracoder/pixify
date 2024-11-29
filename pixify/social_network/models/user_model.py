@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
-from social_network.constants.default_values import Role
+from social_network.constants.default_values import Role, UIMODES
 from ..constants import Gender, RelationShipStatus
 from django.contrib.auth.models import AbstractUser
 
@@ -36,6 +36,13 @@ class User(AbstractUser):
     )
     country = models.CharField(max_length=40, blank=True, db_default='INDIA')
     # timezone 
+    fcm_token = models.CharField(max_length=512, blank=True, null=True)
+    ui_mode = models.IntegerField(
+        choices=[(mode.value, mode.name) for mode in UIMODES],
+        blank=True,
+        db_default=UIMODES.LIGHT.value
+    )
+    
     is_active = models.BooleanField(db_default=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True, blank=True)
     updated_at = models.DateTimeField(auto_now=True, blank=True)

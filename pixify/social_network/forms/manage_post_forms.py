@@ -37,7 +37,7 @@ class ManagePostCreateForm(forms.Form):
     description = forms.CharField(
         label="Description",
         required=False,
-        widget=forms.Textarea(attrs={"class": "form-control", "placeholder": "Enter post description", "rows": 5})
+        widget=forms.Textarea(attrs={"class": "form-control", "placeholder": "Enter post description", "rows": 2})
     )
     accessability = forms.ChoiceField(
         label="Accessibility",

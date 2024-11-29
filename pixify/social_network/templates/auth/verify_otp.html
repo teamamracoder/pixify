@@ -3,17 +3,43 @@
 {% block title %}Welcome to Pixify{% endblock %}
 
 {% block content %}
+{%load static %}
 
-<h2>Verify your email to continue</h2>
-<div class="row">
-    <div class="col-md-6">
+ <div class="m-0" style="background-color: #1a0933;">
+<div class="container-fluid p-0">
+    <div class="row m-0">
+        <div class="col-12 col-md-4 input-container">
         <form method="post" action="{% url 'verify_otp' %}" id="verify_otp_form">
-            {% csrf_token %}
-            {{ data.verify_otp_form.as_p }}
-            <button type="submit" class="btn btn-sm btn-primary my-2">Verify</button>
+                {% csrf_token %}
+            <div class="">
+                <h3 class="text-white fw-bold">PIXIFY</h3>
+                <h1 class="mt-3 fw-bold" style="color: #ecc18a;">WELCOME TO PIXIFY</h1>
+            </div>
+            <div class="mt-5" style="color: #ecc18a;">
+                {{ data.verify_otp_form.as_p }}
+                {% comment %} <label for="otp" class="form-label fs-5">OTP</label> {% endcomment %}
+                {% comment %} <input type="text" name="otp" id="otp" class="form-control form-control-lg mb-2 col-5" placeholder="Enter otp"> {% endcomment %}
+            </div>
+
+            <div class="d-flex-when-small mt-4">
+                <button type="submit" class="btn btn-lg w-100 w-md-auto"
+                    style="background-color: #E6C7A5; border-color: #E6C7A5;color: white;">Verify</button>
+                <button id="resendOTP" class="btn btn-lg text-dark w-100 w-md-auto"
+                    style="background-color: #E6C7A5; border-color: #E6C7A5;" type="button">
+                    <span id="resendText">Resend</span>
+                    <span id="timer" class="d-none"></span>
+                </button>
+            </div>
         </form>
-        <button id="resendOTP" class="border-0 bg-transparent text-light text-decoration-underline my-2">Resend OTP</button>
+
+        </div>
+        <div class="col-12 col-md-8 p-0 d-none d-md-block">
+            <img src="{% static 'images/bg_image.jpeg'%}" alt="Full Screen Image" class="full-screen-image">
+            <div class="shape1"></div>
+            <div class="shape2"></div>
+        </div>
     </div>
+</div>
 </div>
 
 <script>
@@ -35,37 +61,53 @@
             }
         });
     });
-
+    const resendText = document.getElementById('resendText');
+    const timerSpan = document.getElementById('timer');
     const resendBtn = $("#resendOTP");
-    resendBtn.click(
-        () => {
-            resendBtn.text("sending...").addClass('disabled');
-            $.ajax({
-                url: "{% url 'resend_otp' %}",
-                method: 'POST',
-                data: { email: $('#id_email').val() },
-                headers: { "X-CSRFToken": "{{ csrf_token }}" },
-                complete: (res) => {
-                    // get data from response
-                    const data = res.responseJSON;
-                    // show toast message
-                    if (data.success) {
-                        toastr.success(data.message);
-                        // timer
-                        resendBtn.text("3:00");
-                        // reset button after 3 min
-                        const timeout = 20000; // currently it is 20 sec - (set 3 min - 1000*60*3)
-                        setTimeout(() => { resendBtn.text("Resend OTP").removeClass('disabled') }, timeout);
-                    } else {
-                        // show toast message
-                        toastr.warning(data.message);
-                        // reset resend button if failed
-                        resendBtn.text("Resend OTP").removeClass('disabled');
-                    }
+    let timer;
+
+    resendBtn.click(() => {
+
+        timer = 30;
+        resendBtn.prop('disabled', true);
+        resendText.classList.add('d-none');
+        timerSpan.classList.remove('d-none');
+        timerSpan.textContent = `${timer}s`;
+        countdown = setInterval(() => {
+            if (timer === 0) {
+                clearInterval(countdown);
+                resendBtn.prop('disabled', false);
+                resendText.classList.remove('d-none');
+                timerSpan.classList.add('d-none');
+                resendBtn.textContent = 'Resend';
+            } else {
+                timer--;
+                timerSpan.textContent = `${timer}s`;
+            }
+        }, 1000);
+        $.ajax({
+            url: "{% url 'resend_otp' %}",
+            method: 'POST',
+            data: { email: $('#id_email').val() },
+            headers: { "X-CSRFToken": "{{ csrf_token }}" },
+            complete: (res) => {
+                const data = res.responseJSON;
+
+                if (data.success) {
+                    // Show success toast
+                    toastr.success(data.message);
+
+                } else {
+                    // Show warning toast
+                    toastr.warning(data.message);
+
+                    // Reset button text and re-enable
+
                 }
-            })
-        }
-    )
+            }
+        });
+    });
+
 
 </script>
 
