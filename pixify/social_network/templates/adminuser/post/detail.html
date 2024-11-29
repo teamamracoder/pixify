@@ -40,7 +40,6 @@
                             <div class="col-6">{{post_dic.post.title}}</div>
                         </div>
                     </li>
-
                     <li class="list-group-item">
                         <div class="row">
                             <div class="col-6">Post Description</div>
@@ -63,16 +62,13 @@
                             <div class="col-6">{{comment_count}}</div>
                         </div>
                     </li>
-
                     {% comment %} modal for comments {% endcomment %}
-
                     <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel"
                         aria-hidden="true">
                         <div class="modal-dialog">
                             <div class="modal-content">
                                 <div class="modal-header">
                                     <h5 class="text-center">All Comments </h1>
-
                                 </div>
                                 <div class="modal-body" style="scroll-y: auto;">
                                     {%for com in post_dic.comment%}
@@ -88,15 +84,15 @@
                                                     class="fw-light ps-1 d-flex justify-content-between align-items-center"
                                                     style="font-size:13px">
                                                     {{com.comment}}
-                                                    <button class="btn btn-sm toggle-status" data-post-id="{{ comment.id }}">
+                                                    <button class="btn btn-sm toggle-status"
+                                                        data-post-id="{{ comment.id }}">
                                                         {% if comment.is_active %}
-                                                            <i class="bi bi-toggle-on text-success"></i> Active
+                                                        <i class="bi bi-toggle-on text-success"></i> Active
                                                         {% else %}
-                                                            <i class="bi bi-toggle-off text-danger"></i> Inactive
+                                                        <i class="bi bi-toggle-off text-danger"></i> Inactive
                                                         {% endif %}
                                                     </button>
                                                 </span>
-
                                             </div>
                                         </div>
                                     </div>
@@ -121,23 +117,19 @@
         </div>
     </div>
 
-
-
-
-
     <script>
-        $(document).ready(function() {
-            $('.toggle-status').click(function() {
+        $(document).ready(function () {
+            $('.toggle-status').click(function () {
                 const commentId = $(this).data('comment-id');
                 const button = $(this);
-    
+
                 $.ajax({
                     url: '/admin/posts/toggle-active/' + commentId + '/',
                     type: 'COMMENT',
                     headers: {
                         'X-CSRFToken': '{{ csrf_token }}'  // Include CSRF token for security
                     },
-                    success: function(response) {
+                    success: function (response) {
                         // Update the button's text and icon based on the new status
                         if (response.is_active) {
                             button.html('<i class="bi bi-toggle-on text-success"></i> Active');
@@ -145,7 +137,7 @@
                             button.html('<i class="bi bi-toggle-off text-danger"></i> Inactive');
                         }
                     },
-                    error: function(xhr) {
+                    error: function (xhr) {
                         alert('Error updating status: ' + xhr.responseText);
                     }
                 });

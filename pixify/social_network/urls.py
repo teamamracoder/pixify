@@ -10,6 +10,7 @@ urlpatterns = [
 
 
     # user
+    
     path('admin/users/', views.ManageUserListView.as_view(), name='user_list'),
     path('admin/users/profile', views.ManageUserProfileView.as_view(), name='user_profile'),
     path('admin/users/toggle-active/<int:user_id>/', views.ManageToggleUserActiveView.as_view(), name='toggle_user_active'),
@@ -29,6 +30,7 @@ urlpatterns = [
     # path('admin/notifications/<int:delete_id>/delete/', views.ManageNotificationDeleteView.as_view(), name='manage_notification_delete'),
 
     #admin_post
+    
     path('admin/posts/create/', views.ManagePostCreateView.as_view(), name='manage_post_create'),
     path('admin/posts/', views.ManagePostListView.as_view(), name='manage_post_list'),
     path('admin/posts/<int:post_id>/details', views.ManagePostDetailView.as_view(), name='manage_post_detail'),
@@ -56,6 +58,15 @@ urlpatterns = [
     path('admin/chat/<int:chat_id>/update/', views.ManageChatUpdateView.as_view(), name='manage_chat_update'),
     path('admin/chat/<int:chat_id>/delete/', views.ManageChatDeleteView.as_view(), name='manage_chat_delete'),
     path('admin/chat/toggle-active/<int:chat_id>/', views.ManageToggleChatActiveView.as_view(), name='manage_toggle_chat_active'),
+
+
+
+    ####
+     path('admin/comments/', views.ManageCommentListView.as_view(), name='manage_comment_list'),
+     path('admin/comments/create/', views.ManageCommentCreateView.as_view(), name='manage_comment_create'),
+     path('admin/comments/toggle-active/<int:comment_id>/', views.ManageToggleCommentActiveView.as_view(), name='manage_toggle_comment_active'),
+
+
 
 
 
@@ -113,6 +124,16 @@ urlpatterns = [
     path('message-reply/<int:message_id>/', views.MessageReplyCreateView.as_view(), name='message_reply'),
 
     path('posts/create/', views.UserPostCreatView.as_view()),
+
+
+
+
+
+
+
+
+     path('posts/create/', views.UserPostCreatView.as_view(),name='userpost_create'),
+
 ]
 
 
