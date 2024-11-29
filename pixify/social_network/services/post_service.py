@@ -37,14 +37,14 @@ def manage_create_post(**kwargs):
         )
     return post
 
-def manage_list_posts_filtered(search_query,sort_by='posted_by'):
-    if search_query:
-        # Use Q objects to filter by posted_by, title, or descriptions
-        return Post.objects.filter(
-            Q(posted_by__icontains=search_query) |
-            Q(title__icontains=search_query) |
-            Q(description__icontains=search_query)
-        ).order_by(sort_by)
-    return Post.objects.all().order_by(sort_by)    
+# def manage_list_posts_filtered(search_query,sort_by='posted_by'):
+#     if search_query:
+#         # Use Q objects to filter by posted_by, title, or descriptions
+#         return Post.objects.filter(
+#             Q(posted_by__icontains=search_query) |
+#             Q(title__icontains=search_query) |
+#             Q(description__icontains=search_query)
+#         ).order_by(sort_by)
+#     return Post.objects.all().order_by(sort_by)    
 
 
