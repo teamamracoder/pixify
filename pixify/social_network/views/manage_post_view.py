@@ -67,13 +67,13 @@ class ManagePostListView(View):
     
 class ManagePostDetailView(View):
      def get(self, request, post_id):
-        comment_count =services.post_service.get_comment_count_by_post(post_id)
         # print(comment_count  4)
+        comment_count = services.get_comment_count_by_post(post_id)
         post_dic= {
         'post' : services.post_service.manage_get_post(post_id),
-        'comment': services.post_service.manage_list_comments_filtered(post_id),
+         'comment': services.post_service.manage_list_comments_filtered(post_id),
                    }
-        return render(request, 'adminuser/post/detail.html', {'post_dic':post_dic, 'comment_count':comment_count},)
+        return render(request, 'adminuser/post/detail.html', {'post_dic':post_dic,'comment_count':comment_count})
 
 class ManagePostUpdateView(View):
     @catch_error
