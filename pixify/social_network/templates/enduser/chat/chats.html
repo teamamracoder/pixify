@@ -1,7 +1,7 @@
 {% extends "enduser/base.html" %} {% block title %}Pixify-Message{% endblock %}
 {% block content %} {% load static %}
 
-<div class="px-3 py-3 mt-3 users"
+<div class="px-3 py-3 mt-3 users chats-list-box"
     style="background-color: #1f0447e3;box-shadow: 0 4px 8px rgba(151, 95, 236, 0.5);font-family: serif;border-radius: 7px;position:relative;">
     <!-- heading -->
     <div class="m-2">
@@ -80,7 +80,7 @@
             <!-- Middle Section -->
             <div class="content-div">
                 <p class="chat-title">
-                    <a href="{% url 'chat_details' chat_id=chat.id %}" id="hyperlink-text" class="chat_title">
+                    <a href="{% url 'message' chat_id=chat.id %}" id="hyperlink-text" class="chat_title">
                         {{ chat.title }}
                     </a>
                 </p>
@@ -400,8 +400,14 @@ $(document).ready(function () {
     });
 
     // Fetch all followers and followings on page load
-    fetchFollowersAndFollowings();
+    fetchFollowersAndFollowings();    
 });
+
+$(document).ready(function() {
+    var navbarHeight = $('#navbar').outerHeight();
+    $('.chats-list-box').css('height', 'calc(100vh - ' + (navbarHeight * 2) + 'px)');    
+});
+
 </script>
 
 <style>
@@ -886,22 +892,22 @@ $(document).ready(function () {
 
 .parchat-form-control,
 .parchat-btn,
-.parchat-btn-outline-secondary {
+.parchat-btn-outline-secondary {    
     background-color: #3D3D6B;
-    color: black;
+    color: ffffff;
     margin-top: 10px;
     padding: 10px;
     font-size: 16px;
 }
 
 .parchat-form-control {
+
     flex-grow: 1;
 }
 
 .parchat-btn-outline-secondary {
     background-color: black;
-    color: #333;
-    border: 1px solid #ccc;
+    color: #333;    
 }
 
 .parchat-modal {
