@@ -127,40 +127,9 @@ class ChatCreateView(View):
             return JsonResponse({'chat_id': chat.id})
  
 class ChatDetailsView(View):
-    @catch_error
-    @auth_required
-    @role_required(Role.ADMIN.value, Role.END_USER.value)
-    def get(self, request, chat_id):
-        user =request.user 
-        chat = chat_service.get_chat_by_id(chat_id)
-        messages = message_service.list_messages_by_chat_id(chat_id,user.id)
-        if chat.type == ChatType.PERSONAL.value:
-            member = chat_service.get_recipient_for_personal(chat.id, user) 
-            if member:
-                title = f"{member.first_name} {member.last_name}"
-                chat_cover = member.profile_photo_url
-            else:
-                title = ''
-                chat_cover=''
-        elif chat.type == ChatType.GROUP.value:
-            title= chat_service.get_recipients_for_group(chat.id,user)
-            if chat.title:    
-                title = chat.title 
-            else:
-                title=title 
-            if chat.chat_cover:
-                chat_cover=chat.chat_cover
-            else:
-                chat_cover=''            
-        chat_info = {
-            'id': chat.id,
-            'title': title,
-            'chat_cover': chat_cover,
-            'is_group' :chat.type==ChatType.GROUP.value
-        }
-        # chat_data.append(chat_info)       
-        return render(request, 'enduser/chat/messages.html',{'chat':chat_info,'messages':messages,'user':user})
-    
+    def get(self, request,chat_id):
+        return render(request,'enduser/chat/chat_details.html',{'chat_id':chat_id})
+
 class ChatUpdateView(View):   
     @catch_error
     @auth_required
@@ -225,3 +194,5 @@ class ChatListViewApi(View):
             chat_data_list.append(chat_info)
         chats = chat_service.list_chats_api(request,chat_data_list)
         return JsonResponse(chats, safe=False)
+    
+  

@@ -1,0 +1,322 @@
+{% extends "enduser/base.html" %}
+
+{% block title %}group_chat_details{% endblock %}
+
+
+{% block content %}
+{% load static %}
+
+<div class="header">
+    <h1>Group Chat Details</h1>
+    <button class="exit-btn">Exit Group</button>
+  </div>
+
+  <!-- Group Details -->
+  <div class="group-details">
+    <img src="C:\Users\rick\Pictures\WhatsApp Image 2024-11-09 at 01.22.38_8513412f.jpg" alt="Group Photo">
+    <h2>Blue Crew</h2>
+    <p>Group Description: A friendly group for casual discussions!</p>
+    <p class="total-members">Total Members: <span id="member-count">4</span></p>
+  </div>
+
+  <!-- Member List -->
+  <div class="member-list">
+    <h3>Members</h3>
+    <ul id="member-list">
+      <li>rick bose<span>Admin</span></li>
+      <li>protap</li>
+      <li>Sourik</li>
+      <li>subham</li>
+    </ul>
+    <button class="add-member-btn" onclick="openModal()">Add Member</button>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal" id="addMemberModal">
+    <div class="modal-content">
+      <span class="modal-close" onclick="closeModal()">&times;</span>
+      <h3>Add Member</h3>
+      <input type="text" id="new-member-name" placeholder="Enter member name">
+      <button onclick="addMember()">Add</button>
+    </div>
+  </div>
+<script>
+    const modal = document.getElementById("addMemberModal");
+    const memberList = document.getElementById("member-list");
+    const memberCount = document.getElementById("member-count");
+
+    function openModal() {
+      modal.style.display = "flex";
+    }
+
+    function closeModal() {
+      modal.style.display = "none";
+    }
+
+    function addMember() {
+      const memberName = document.getElementById("new-member-name").value;
+      if (memberName.trim()) {
+        const li = document.createElement("li");
+        li.textContent = memberName;
+        memberList.appendChild(li);
+        memberCount.textContent = parseInt(memberCount.textContent) + 1;
+        document.getElementById("new-member-name").value = "";
+        closeModal();
+      }
+    }
+
+    window.onclick = function (event) {
+      if (event.target === modal) {
+        closeModal();
+      }
+    };
+  </script>
+
+<style>
+    /* General Styles */
+    body {
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f9f9f9;
+      color: #333;
+    }
+
+    /* Header Section */
+    .header {
+      background-color: #4a90e2;
+      color: white;
+      padding: 20px;
+      text-align: center;
+      position: relative;
+    }
+
+    .header .exit-btn {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: white;
+      color: #4a90e2;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .header .exit-btn:hover {
+      background: #e0eaff;
+    }
+
+    /* Group Details Section */
+    .group-details {
+      text-align: center;
+      padding: 20px;
+    }
+
+    .group-details img {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      border: 4px solid #4a90e2;
+      margin-bottom: 20px;
+    }
+
+    .group-details h2 {
+      font-size: 24px;
+      margin-bottom: 10px;
+      color: #4a90e2;
+    }
+
+    .group-details p {
+      font-size: 16px;
+      color: #666;
+      margin: 5px 0;
+    }
+
+    .group-details .total-members {
+      font-weight: bold;
+      color: #333;
+    }
+
+    /* Member List */
+    .member-list {
+      max-width: 600px;
+      margin: 20px auto;
+      padding: 20px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .member-list h3 {
+      font-size: 20px;
+      margin-bottom: 15px;
+      color: #4a90e2;
+    }
+
+    .member-list ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .member-list li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .member-list li:last-child {
+      border-bottom: none;
+    }
+
+    .member-list li span {
+      color: #666;
+    }
+
+    /* Add Members Button */
+    .add-member-btn {
+      display: block;
+      width: 100%;
+      text-align: center;
+      margin: 20px auto 0 auto;
+      padding: 10px 15px;
+      background-color: #4a90e2;
+      color: white;
+      font-weight: bold;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .add-member-btn:hover {
+      background-color: #3578cc;
+    }
+
+    /* Modal Styles */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      text-align: center;
+    }
+
+    .modal-content h3 {
+      margin-bottom: 15px;
+      color: #4a90e2;
+    }
+
+    .modal-content input {
+      width: 90%;
+      padding: 10px;
+      margin-bottom: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+
+    .modal-content button {
+      padding: 10px 15px;
+      background: #4a90e2;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .modal-content button:hover {
+      background: #3578cc;
+    }
+
+    .modal-close {
+      color: #666;
+      font-size: 20px;
+      cursor: pointer;
+      position: absolute;
+      top: 10px;
+      right: 10px;
+    }
+
+    .modal-close:hover {
+      color: #333;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .header {
+        padding: 15px;
+      }
+
+      .header .exit-btn {
+        top: 15px;
+        right: 15px;
+        padding: 8px 12px;
+      }
+
+      .group-details img {
+        width: 100px;
+        height: 100px;
+      }
+
+      .group-details h2 {
+        font-size: 20px;
+      }
+
+      .group-details p {
+        font-size: 14px;
+      }
+
+      .member-list {
+        padding: 15px;
+      }
+
+      .member-list h3 {
+        font-size: 18px;
+      }
+
+      .member-list li {
+        font-size: 14px;
+      }
+
+      .add-member-btn {
+        padding: 8px 12px;
+        font-size: 14px;
+      }
+
+      .modal-content {
+        padding: 15px;
+      }
+
+      .modal-content h3 {
+        font-size: 18px;
+      }
+
+      .modal-content input {
+        font-size: 14px;
+      }
+
+      .modal-content button {
+        font-size: 14px;
+        padding: 8px 12px;
+      }
+    }
+  </style>
+
+  {% endblock %}
