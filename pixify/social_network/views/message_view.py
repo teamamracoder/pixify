@@ -8,10 +8,43 @@ from social_network.constants.default_values import Role
 from ..decorators import auth_required, role_required
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
+from ..constants import ChatType
 
 class MessageListView(View):
-    def get(self, request):
-        return render(request, 'enduser/message/index.html')  
+    @catch_error
+    @auth_required
+    @role_required(Role.ADMIN.value, Role.END_USER.value)
+    def get(self, request, chat_id):
+        user =request.user 
+        chat = chat_service.get_chat_by_id(chat_id)
+        messages = message_service.list_messages_by_chat_id(chat_id,user.id)
+        if chat.type == ChatType.PERSONAL.value:
+            member = chat_service.get_recipient_for_personal(chat.id, user) 
+            if member:
+                title = f"{member.first_name} {member.last_name}"
+                chat_cover = member.profile_photo_url
+            else:
+                title = ''
+                chat_cover=''
+        elif chat.type == ChatType.GROUP.value:
+            title= chat_service.get_recipients_for_group(chat.id,user)
+            if chat.title:    
+                title = chat.title 
+            else:
+                title=title 
+            if chat.chat_cover:
+                chat_cover=chat.chat_cover
+            else:
+                chat_cover=''            
+        chat_info = {
+            'id': chat.id,
+            'title': title,
+            'chat_cover': chat_cover,
+            'is_group' :chat.type==ChatType.GROUP.value
+        }
+        # chat_data.append(chat_info)       
+        return render(request, 'enduser/chat/messages.html',{'chat':chat_info,'messages':messages,'user':user})
+     
 
 class MessageCreateView(View): 
     @catch_error
@@ -45,7 +78,7 @@ class MessageCreateView(View):
             mentioned_user=user_service.get_user(user)
             message_mention_service.create_message_mentions(message, mentioned_user, auth_user)
 
-        return redirect('chat_details', chat_id=chat.id)
+        return redirect('message', chat_id=chat.id)
 
 class MessageUpdateView(View): 
     @catch_error
@@ -72,7 +105,7 @@ class MessageUpdateView(View):
         message_mention_service.delete_message_mentions(message,user)
         for mentioned_user in mention_ids:
             message_mention_service.create_message_mentions(message, mentioned_user, user)
-        return redirect('chat_details', chat_id=message.chat_id.id)
+        return redirect('message', chat_id=message.chat_id.id)
 
 class MessageDeleteView(View):
     @catch_error
@@ -85,7 +118,7 @@ class MessageDeleteView(View):
         chat_id = message.chat_id.id
         message_service.delete_message(message, user)
         message_mention_service.delete_message_mentions(message,user)
-        return redirect('chat_details', chat_id=chat_id)
+        return redirect('message', chat_id=chat_id)
 
 class MessageReplyCreateView(View): 
     @catch_error
@@ -119,4 +152,4 @@ class MessageReplyCreateView(View):
         for mentioned_user in mention_ids:
             message_mention_service.create_message_mentions(message, mentioned_user, auth_user)
             
-        return redirect('chat_details', chat_id=chat.id)
+        return redirect('message', chat_id=chat.id)
