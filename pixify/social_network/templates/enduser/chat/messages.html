@@ -25,6 +25,7 @@
                     <div class="parent-message"> 
                         <span>{{ message.reply_for_message_id.sender_id.first_name }}: </span> 
                         <span>{{ message.reply_for_message_id.text }}</span> 
+                        <span >{{ message.media_url}}</span>
                     </div> 
                     {% endif %}
                         <div class="message-header">
@@ -33,6 +34,8 @@
                         </div>
                         
                         <span class="text-dark">{{ message.text }}</span>
+                        <span> {{ message.media_url}}</span>
+
                     </div>
                     <div class="message-footer">
                         
@@ -67,6 +70,7 @@
                     <div class="parent-message"> 
                         <span>{{ message.reply_for_message_id.sender_id.first_name }}: </span> 
                         <span>{{ message.reply_for_message_id.text }}</span> 
+                        <span {{ message.media_url}}</span>
                     </div> 
                     {% endif %}
                         <div class="message-header">
@@ -74,6 +78,7 @@
                             <span class="message-username">{{ message.sender_id.first_name }}</span>
                         </div>
                         <span>{{ message.text }}</span>
+                        <span> {{ message.media_url}}</span>
                     </div>
                     <div class="message-footer">
                         <span class="time">{{ message.created_at|date:"h:i A" }}</span>
@@ -110,27 +115,46 @@
                 <span class="close-reply" onclick="cancelReply()">✖</span>
                 <span class="reply-username"></span>: <span class="reply-text"></span>
             </div>
-        </div>
+    </div>
         
- <form id="messageForm" method="POST" action="{% url 'message_create' %}" enctype="multipart/form-data">
+<form id="messageForm" method="POST" action="{% url 'message_create' %}" enctype="multipart/form-data">
     {% csrf_token %}
     <input type="hidden" id="action" name="action" value="create">
     <input type="hidden" id="chat_id" name="chat_id" value="{{ chat.id }}">
     <input type="hidden" id="message_id" name="message_id" value="">
     <input type="hidden" name="mentions" id="mentions">
+    
+    <!-- File input (hidden) -->
     <input type="file" id="file-input" name="media_files" style="display: none;" accept="image/*,video/*" multiple>
+
+    <!-- Mention modal -->
     <div id="mentionModal" class="parmess-modal">
         <div class="parmess-modal-content" id="mention-suggestions"></div>
-    </div>
-    <div id="file-names" class="parmess-file-names"></div>
+    </div>    
+    <!-- File previews -->
+    <div id="file-previews" class="parmess-file-previews"></div>
+
+    <!-- Message input and submit button -->
     <div class="message-input-wrapper">
-        <button type="button" id="parmess-select-file-button" class="parmess-select-file-button">
+        <button type="button" id="parmess-button" class="parmess-button">
             <i class="fa fa-paperclip"></i>
         </button>
-        <input type="text" name="message" id="message-input" placeholder="Type your message here..." required>
-        <button type="submit">➤</button>
+        <input type="text" name="message" id="message-input" placeholder="Type your message here...">
+        <button class="parmess-button" type="submit">➤</button>
     </div>
 </form>
+
+<!-- File upload warning modal -->
+<div id="fileWarningModal" class="parmess-modal">
+    <div class="parmess-modal-content">
+        <span class="parmess-close">&times;</span>
+        <p style="color:red">You can only upload up to 10 files at a time.</p>
+    </div>
+</div>
+
+
+
+
      
 
     </div>
@@ -350,7 +374,121 @@ $(document).ready(function () {
 
 
 
+// Handle file button click
+document.getElementById('parmess-button').addEventListener('click', function () {
+    document.getElementById('file-input').click();
+});
 
+// Declare fileArray and selectedFiles outside the event listener to ensure they persist
+let fileArray = [];
+let selectedFiles = new Set();
+
+// Prevent "Enter" from submitting the form unintentionally during file input or previews
+document.getElementById('file-input').addEventListener('keydown', function (event) {
+    if (event.key === 'Enter') {
+        event.preventDefault(); // Prevent default action on the file input
+    }
+});
+
+document.getElementById('file-input').addEventListener('change', function () {
+    const fileInput = document.getElementById('file-input');
+    const files = Array.from(fileInput.files);
+    const maxFiles = 10;
+    const modal = document.getElementById('fileWarningModal');
+    const span = document.getElementsByClassName('parmess-close')[0];
+    const filePreviewsDiv = document.getElementById('file-previews');
+
+    // Close the modal
+    span.onclick = function () {
+        modal.style.display = 'none';
+    };
+
+    // Close modal when clicking outside
+    window.onclick = function (event) {
+        if (event.target === modal) {
+            modal.style.display = 'none';
+        }
+    };
+
+    // If more than 10 files are selected, show the warning modal
+    if (files.length + fileArray.length > maxFiles) {
+        modal.style.display = 'block';
+        fileInput.value = ''; // Reset the file input
+    } else {
+        const newFiles = files.filter(file => !selectedFiles.has(file.name));
+
+        if (newFiles.length < files.length) {
+            alert('Some files were already selected and will be ignored. Please check your selection.');
+        }
+
+        // Add new files to the existing array and update selectedFiles
+        fileArray.push(...newFiles);
+        newFiles.forEach(file => selectedFiles.add(file.name));
+
+        // Process each selected file
+        const updatePreviews = (files) => {
+            filePreviewsDiv.innerHTML = ''; // Clear current previews
+            files.forEach((file, index) => {
+                const fileReader = new FileReader();
+
+                fileReader.onload = function (event) {
+                    const previewDiv = document.createElement('div');
+                    previewDiv.className = 'parmess-file-preview';
+
+                    const removeButton = document.createElement('button');
+                    removeButton.innerHTML = '&times;';
+                    removeButton.className = 'remove-button';
+                    removeButton.onclick = function () {
+                        previewDiv.remove();
+                        selectedFiles.delete(file.name);
+                        fileArray.splice(index, 1);
+                        const newFileList = new DataTransfer();
+                        fileArray.forEach(f => newFileList.items.add(f));
+                        fileInput.files = newFileList.files;
+                    };
+
+                    if (file.type.startsWith('image/')) {
+                        const img = document.createElement('img');
+                        img.src = event.target.result;
+                        img.style.maxHeight = '100px'; // Adjusted preview size
+                        previewDiv.appendChild(img);
+                    } else if (file.type.startsWith('video/')) {
+                        const video = document.createElement('video');
+                        video.src = event.target.result;
+                        video.controls = true;
+                        video.style.maxHeight = '100px'; // Adjusted preview size
+                        previewDiv.appendChild(video);
+                    } else {
+                        // Display the file name for non-media files
+                        previewDiv.textContent = file.name;
+                    }
+
+                    previewDiv.appendChild(removeButton);
+                    filePreviewsDiv.appendChild(previewDiv);
+                };
+
+                fileReader.readAsDataURL(file);
+            });
+        };
+
+        updatePreviews(fileArray);
+    }
+
+    // After file selection, focus back to the message input
+    document.getElementById('message-input').focus();
+});
+
+// Ensure "Enter" submits the form when the message input is focused or empty
+document.getElementById('message-input').addEventListener('keydown', function (event) {
+    const messageInput = document.getElementById('message-input');
+    if (event.key === 'Enter') {
+        // Always prevent the default "Enter" behavior (new line) and submit the form
+        event.preventDefault();
+
+        // Submit the form even if the message field is empty
+        document.getElementById('messageForm').submit();
+    }
+});
 
 
 
@@ -634,19 +772,13 @@ observer.observe(chatBody, { childList: true });
 
     /* Footer */
     .chat-footer {
-        padding: 12px;
-        background-color: #e6e6e6;
-        border-top: 1px solid #ddd;
+        padding: 4px;
+        background-color: #e6e6e6;        
         display: flex;
         justify-content: space-between;
         flex-direction: column;
     }
 
-    .chat-footer form {
-        display: flex wrap;
-        flex: 1;
-        align-items: center;
-    }
 
     .chat-footer input[type="text"] {
         width:77%;
@@ -660,21 +792,6 @@ observer.observe(chatBody, { childList: true });
         color: white;
         margin-right: 10px;
     }
-
-    .chat-footer button {
-        padding: 12px 20px;
-        background-color: #533b79;
-        color: white;
-        border: none;
-        border-radius: 50%;
-        cursor: pointer;
-        font-size: 16px;
-    }
-
-    .chat-footer button:hover {
-        background-color: #3e2b5c;
-    }
-
 
 /*start A*/
     .dropdown {
@@ -813,30 +930,6 @@ observer.observe(chatBody, { childList: true });
         margin-right: 10px;
     }
 
-    .parmess-file-names {
-        margin-bottom: 10px;
-        font-size: 14px;
-        color: black;
-        max-width: 100%;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        width: 100%;
-    }
-
-    .parmess-file-name, .parmess-file-count {
-        width: 100%;
-        color: black;
-        display: inline-block;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        max-width: calc(100% - 20px);
-        padding: 2px 5px;
-        background-color: #786e6e;
-        border-radius: 3px;
-    }
-
     .message-input-wrapper {
         display: flex;
         align-items: center;
@@ -866,6 +959,59 @@ observer.observe(chatBody, { childList: true });
     color: #555;
 }
 
+
+.parmess-file-preview {
+    position: relative;
+    margin-right: 10px;
+    display: inline-block;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.parmess-file-previews {
+    display: flex;
+    overflow-x: auto;
+    margin-bottom: 5px;
+    max-width: 100%;
+    background-color: rgb(32 17 55);    
+}
+
+
+.parmess-file-preview img, .parmess-file-preview video {
+    max-height: 100px;
+    display: block;
+}
+
+.remove-button {
+    position: absolute;
+    top: 2px; /* Adjusted for better positioning */
+    right: 2px; /* Adjusted for better positioning */
+    background: red;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    font-size: 10px;
+    width: 15px;
+    height: 15px;
+    cursor: pointer;
+    line-height: 15px;
+    text-align: center;
+    padding: 0;
+    z-index: 10; /* Ensure it appears above other elements */
+}
+
+
+    .parmess-button {
+        padding: 12px 20px;
+        background-color: #533b79;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        cursor: pointer;
+        font-size: 16px;
+    }
+    .parmess-button:hover {
+        background-color: #3e2b5c;
+    }
 
     /*End Partha*/    
     
