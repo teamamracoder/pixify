@@ -2,7 +2,6 @@
 
 {% block title %}Chat{% endblock %}
 
-
 {% block content %}
 {% load static %}
 <div class="chat-container">
@@ -22,9 +21,12 @@
             {% if message.sender_id.id == user.id %}
                 <div class="message sent">
                     <div class="message-content">
-                        <div style="border:1px solid black;">
-                            hi
-                        </div>
+                    {% if message.reply_for_message_id %} 
+                    <div class="parent-message"> 
+                        <span>{{ message.reply_for_message_id.sender_id.first_name }}: </span> 
+                        <span>{{ message.reply_for_message_id.text }}</span> 
+                    </div> 
+                    {% endif %}
                         <div class="message-header">
                             <img src="{{ message.sender_id.profile_photo_url|default:'\static\images\avatar.jpg' }}" alt="Sender Profile Pic" class="message-profile-pic">
                             <span class="message-username">{{ message.sender_id.first_name }}</span>
@@ -61,6 +63,12 @@
             {% else %}
                 <div class="message received float-end">
                     <div class="message-content">
+                    {% if message.reply_for_message_id %} 
+                    <div class="parent-message"> 
+                        <span>{{ message.reply_for_message_id.sender_id.first_name }}: </span> 
+                        <span>{{ message.reply_for_message_id.text }}</span> 
+                    </div> 
+                    {% endif %}
                         <div class="message-header">
                             <img src="{{ message.sender_id.profile_photo_url|default:'\static\images\avatar.jpg' }}" alt="{{ message.sender_id.first_name }}'s Profile Picture" class="message-profile-pic">
                             <span class="message-username">{{ message.sender_id.first_name }}</span>
@@ -834,6 +842,30 @@ observer.observe(chatBody, { childList: true });
         align-items: center;
         width: 100%;
     }
+
+
+.parent-message {
+    padding: 10px;
+    background-color: #e0e0e0;
+    border-left: 4px solid #4caf50;
+    border-radius: 8px;
+    margin-bottom: 5px;
+    margin-top: 5px;    
+    color: #333;
+}
+
+.parent-message span:first-child {
+    font-size: 15px;
+    color:black;
+    font-weight: bold;
+    margin-right: 5px;
+}
+
+.parent-message span:last-child {
+    font-size: 14px;
+    color: #555;
+}
+
 
     /*End Partha*/    
     
