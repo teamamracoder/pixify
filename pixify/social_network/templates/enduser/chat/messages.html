@@ -150,181 +150,200 @@ function setFormAction(action, messageId = '', chatId = '') {
 
 
 
-    $(document).ready(function () {
-        let mentionedUsers = new Set(); // Store mentioned user IDs
-        let mentionedAll = false; // Track if "@all" is mentioned
-        let mentionTriggered = false; // Track if mention is triggered
 
-        // Initialize mentionedUsers set
-        function initializeMentionedUsers() {
-            mentionedUsers.clear();
-            mentionedAll = false;
-            console.log("Mentioned users initialized:", Array.from(mentionedUsers));
-        }
+$(document).ready(function () {
+    let mentionedUsers = new Set();
+    let mentionedAll = false;
+    let mentionTriggered = false;
+    let typingTimer;
+    const debounceDelay = 300;
+    const fallbackImage = '/static/images/avatar.jpg';
 
-        // Update mentioned users when typing
-        function updateMentionedUsers(messageText) {
-            const mentionedRegex = /@(\w+)/g;
-            const newMentionedUsers = new Set();
-            let match;
+    // Function to initialize mentioned users
+    function initializeMentionedUsers() {
+        mentionedUsers.clear();
+        mentionedAll = false;
+        console.log("Mentioned users initialized:", Array.from(mentionedUsers));
+    }
 
-            // Track each user mentioned in the input
-            while ((match = mentionedRegex.exec(messageText)) !== null) {
-                const userId = match[1];
-                console.log("Mentioned user ID:", userId); // Log mentioned user ID
+    // Function to update mentioned users based on the message text
+    function updateMentionedUsers(messageText) {
+        const mentionedRegex = /@(\w+)/g;
+        let match;
+        mentionedUsers.clear();
 
-                if (userId === 'all') {
-                    mentionedAll = true; // Explicitly set @all as true when found
-                    newMentionedUsers.add('all');
-                } else {
-                    newMentionedUsers.add(userId.toString()); // Ensure user ID is a string
-                }
-            }
-
-            // Update mentionedUsers set to reflect the current mentions
-            mentionedUsers = newMentionedUsers;
-
-            // Explicitly check for @all presence and update mentionedAll flag
-            mentionedAll = mentionedUsers.has('all'); 
-
-            console.log("New mentioned users:", Array.from(newMentionedUsers)); // Log new mentioned users
-            console.log("Updated mentioned users after update:", Array.from(mentionedUsers)); // Log the updated mentioned users
-            console.log("Mentioned @all:", mentionedAll);  // Log the updated value of mentionedAll
-        }
-
-        // Display mention list suggestions
-        function displayMentionList(searchQuery) {
-            const chatId = $('#chat_id').val();
-            const excludeUsers = Array.from(mentionedUsers).join(',');
-
-            // Log the data being sent to the backend
-            console.log("Sending data to backend:", { search: searchQuery, exclude: excludeUsers, mentionedAll });
-
-            $.ajax({
-                url: `/message-mention/${chatId}/`,
-                type: 'GET',
-                data: { search: searchQuery, exclude: excludeUsers, mentionedAll },
-                success: function (res) {
-                    const mentionSuggestions = $('#mention-suggestions').empty();
-
-                    // If no mentions are found, show a 'No results' message
-                    if (res.length === 0) {
-                        mentionSuggestions.append('<div class="parmess-mention-item no-results">No results found</div>');
-                    } else {
-                        res.forEach(mention => {
-                            // Exclude already mentioned users and @all if mentioned
-                            if (mention.member_id !== 'all' || !mentionedAll) {
-                                mentionSuggestions.append(createMentionItem(mention));
-                            }
-                        });
-                    }
-
-                    $('#mentionModal').show();
-                },
-                error: function(xhr, status, error) {
-                    console.error("Error fetching mentions:", error);
-                }
-            });
-        }
-
-        // Create mention item HTML with member ID and profile photo
-        const fallbackImage = '/static/images/avatar.jpg';
-
-        function createMentionItem(mention) {
-            const profileImage = mention.member_id__profile_photo_url || fallbackImage;
-
-            if (mention.member_id === 'all') {
-                return `
-                    <div class="mention-item" data-member-id="all">
-                        <i class="fas fa-users" style=" color:black;font-size:18px"></i> All
-                    </div>`;
-            }
-
-            return `
-                <div class="mention-item" data-member-id="${mention.member_id}">
-                    <img src="${profileImage}" alt="${mention.member_id__first_name} ${mention.member_id__last_name}" class="profile-photo" />
-                    ${mention.member_id__first_name} ${mention.member_id__last_name}
-                </div>`;
-        }
-
-        // Handle message input
-        $('#message-input').on('input', function () {
-            const messageText = $(this).val();
-            const cursorPosition = this.selectionStart;
-            const lastChar = messageText.charAt(cursorPosition - 1);
-
-            // Trigger mention list when @ is typed
-            if (lastChar === '@') {
-                mentionTriggered = true;
-                displayMentionList('');
-            } else if (!lastChar.trim() || !mentionTriggered) {
-                $('#mentionModal').hide();
-            } else if (mentionTriggered) {
-                const atIndex = messageText.lastIndexOf('@');
-                const searchQuery = messageText.slice(atIndex + 1, cursorPosition).trim();
-                searchQuery ? displayMentionList(searchQuery) : $('#mentionModal').hide();
-            }
-
-            updateMentionedUsers(messageText); // Update mentioned users list based on message content
-        });
-
-        // Handle mention item click
-        $('#mention-suggestions').on('click', '.mention-item', function () {
-            const mentionText = $(this).text().trim();
-            const userId = $(this).data('member-id');
-            const messageInput = $('#message-input');
-            const messageText = messageInput.val();
-            const cursorPosition = messageInput[0].selectionStart;
-
-            const atIndex = messageText.lastIndexOf('@', cursorPosition - 1);
-            const newText = `${messageText.slice(0, atIndex)}@${mentionText} ${messageText.slice(cursorPosition)}`;
-
-            messageInput.val(newText).focus();
-
-            // Update the mentioned users set
+        while ((match = mentionedRegex.exec(messageText)) !== null) {
+            const userId = match[1];
             if (userId === 'all') {
                 mentionedAll = true;
+                mentionedUsers.add('all');
             } else {
                 mentionedUsers.add(userId.toString());
             }
+        }
 
+        mentionedAll = mentionedUsers.has('all');
+        console.log("Updated mentioned users:", Array.from(mentionedUsers));
+    }
+
+    // Function to create mention item
+    function createMentionItem(mention) {
+        const profileImage = mention.member_id__profile_photo_url || fallbackImage;
+
+        if (mention.member_id === 'all') {
+            return `
+                <div class="mention-item" data-member-id="all">
+                    <i class="fas fa-users" style="color:black; font-size:18px;"></i> All
+                </div>`;
+        }
+
+        return `
+            <div class="mention-item" data-member-id="${mention.member_id}">
+                <img src="${profileImage}" alt="${mention.member_id__first_name} ${mention.member_id__last_name}" class="profile-photo" />
+                ${mention.member_id__first_name} ${mention.member_id__last_name}
+            </div>`;
+    }
+
+    // Function to display mention suggestions
+    function displayMentionList(searchQuery) {
+        const mentionSuggestions = $('#mention-suggestions').empty();
+        const chatId = $('#chat_id').val();
+        const excludeUsers = Array.from(mentionedUsers).join(',');
+
+        $.ajax({
+            url: `/message-mention/${chatId}/`,
+            type: 'GET',
+            data: { search: searchQuery, exclude: excludeUsers, mentionedAll },
+            success: function (res) {
+                console.log("Mention suggestions response:", res);
+                if (!mentionedUsers.has('all')) {
+                    mentionSuggestions.append(createMentionItem({
+                        member_id: 'all',
+                        member_id__first_name: 'All',
+                        member_id__last_name: '',
+                        member_id__profile_photo_url: '<i class="fas fa-users" style="color:black; font-size:18px;"></i>',
+                    }));
+                }
+
+                const filteredResults = res.filter(mention => mention.member_id !== 'all');
+                if (filteredResults.length > 0 || !mentionedUsers.has('all')) {
+                    filteredResults.forEach(mention => {
+                        mentionSuggestions.append(createMentionItem(mention));
+                    });
+                    $('#mentionModal').show();
+                } else {
+                    $('#mentionModal').hide();
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error("Error fetching mentions:", error);
+            }
+        });
+    }
+
+    // Function to handle message input for mentions
+    $('#message-input').on('input', function () {
+        const messageText = $(this).val();
+        const cursorPosition = this.selectionStart;
+        const lastChar = messageText.charAt(cursorPosition - 1);
+
+        clearTimeout(typingTimer);
+
+        if (mentionedAll && !messageText.includes('@all')) {
+            mentionedAll = false;
             $('#mentionModal').hide();
-            mentionTriggered = false;
+            return;
+        }
 
-            console.log("Updated mentioned users after click:", Array.from(mentionedUsers));
-        });
+        if (lastChar === '@') {
+            mentionTriggered = true;
 
-        // Attach hidden fields on form submit
-        $('#messageForm').on('submit', function () {
-            const mentionsValue = Array.from(mentionedUsers).join(',');
-            const excludeValue = Array.from(mentionedUsers).join(',');
-
-            // Log the data being attached to the form
-            console.log("Form data:", { mentions: mentionsValue, exclude: excludeValue });
-
-            $('<input>', {
-                type: 'hidden',
-                name: 'mentions',
-                value: mentionsValue,
-            }).appendTo(this);
-
-            $('<input>', {
-                type: 'hidden',
-                name: 'exclude',
-                value: excludeValue,
-            }).appendTo(this);
-        });
-
-        // Initialize mentioned users on load
-        initializeMentionedUsers();
-
-        // Close modal when clicking outside
-        $(window).on('click', function (event) {
-            if ($(event.target).is('#mentionModal')) {
+            typingTimer = setTimeout(function () {
+                displayMentionList('');
+            }, debounceDelay);
+        } else if (!lastChar.trim() || !mentionTriggered) {
+            $('#mentionModal').hide();
+        } else if (mentionTriggered) {
+            const atIndex = messageText.lastIndexOf('@');
+            const searchQuery = messageText.slice(atIndex + 1, cursorPosition).trim();
+            if (searchQuery) {
+                typingTimer = setTimeout(function () {
+                    displayMentionList(searchQuery);
+                }, debounceDelay);
+            } else {
                 $('#mentionModal').hide();
+            }
+        }
+
+        updateMentionedUsers(messageText);
+    });
+
+    // Function to handle click on mention item
+    $('#mention-suggestions').on('click', '.mention-item', function () {
+        if ($(this).hasClass('non-selectable')) {
+            return;
+        }
+
+        const mentionText = $(this).text().trim();
+        const userId = $(this).data('member-id');
+        const messageInput = $('#message-input');
+        const messageText = messageInput.val();
+        const cursorPosition = messageInput[0].selectionStart;
+
+        const atIndex = messageText.lastIndexOf('@', cursorPosition - 1);
+        const newText = `${messageText.slice(0, atIndex)}@${mentionText} ${messageText.slice(cursorPosition)}`;
+
+        messageInput.val(newText).focus();
+
+        if (userId === 'all') {
+            mentionedAll = true;
+            mentionedUsers.clear();
+            $('#mentionModal').hide();
+        } else {
+            mentionedUsers.add(userId.toString());
+        }
+
+        mentionTriggered = false;
+        console.log("Updated mentioned users after click:", Array.from(mentionedUsers));
+
+        $('#mentionModal').hide();
+    });
+
+    // Function to submit message form
+    $('#message-form').submit(function (event) {
+        event.preventDefault();
+
+        const messageText = $('#message-input').val();
+        const mentions = Array.from(mentionedUsers).join(',');
+
+        $.ajax({
+            url: '/chat/message/create',
+            type: 'POST',
+            data: {
+                message: messageText,
+                mentions: mentions,
+                chat_id: $('#chat_id').val(),
+                csrfmiddlewaretoken: $('input[name="csrfmiddlewaretoken"]').val(),
+                media_files: $('#media_files')[0].files
+            },
+            success: function (response) {
+                console.log('Message sent:', response);
+                // Optionally update the UI with the new message
+            },
+            error: function (xhr, status, error) {
+                console.error("Error sending message:", error);
             }
         });
     });
+
+    // Initialize mentioned users
+    initializeMentionedUsers();
+});
+
+
+
+
+
 
 
     function toggleOptions(messageId) {
