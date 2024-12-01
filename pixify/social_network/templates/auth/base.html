@@ -12,11 +12,12 @@
     <link rel="stylesheet" href="{% static 'css/toastr.min.css' %}">
     <link rel="stylesheet" href="{% static 'css/style.enduser.css' %}">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style.login.css' %}">
     <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
     <script src="{% static 'js/jquery-3.7.1.min.js' %}"></script>
     <script src="{% static 'js/jquery.validate.min.js' %}"></script>
     <script src="{% static 'js/toastr.min.js' %}"></script>
-    <script src="{% static 'js/script.js' %}"></script>
+
 </head>
 
 <body>
@@ -27,9 +28,9 @@
         {% endblock %}
     </main>
 
-    <footer>
+    {% comment %} <footer>
         <p>&copy; 2024 Pixify App</p>
-    </footer>
+    </footer> {% endcomment %}
 
     <script type="text/javascript">
         const show_toastr = (message, type) => {
