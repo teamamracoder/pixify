@@ -23,7 +23,7 @@
             {% for notify in notification_list %}
             {% if notify.is_read %}
             <div class="notification-item d-flex align-items-start mb-3">
-                <img src="{% static 'images/logo.png' %}" alt="Profile Picture" class="profile-pic">
+                <img src="https://cdn-icons-png.flaticon.com/128/6997/6997662.png" alt="Profile Picture" class="profile-pic">
                 <div class="ps-2">
                     <p class="notification-text mb-1">
                         {{ notify.text }}
@@ -35,7 +35,7 @@
             </div>
             {% else %}
             <div class="notification-item-active d-flex align-items-start mb-3">
-                <img src="{% static 'images/logo.png' %}" alt="Profile Picture" class="profile-pic">
+                <img src="https://cdn-icons-png.flaticon.com/128/16683/16683419.png" alt="Profile Picture" class="profile-pic">
                 <div class="ps-2">
                     <p class="notification-text mb-1">
                         {{ notify.text }}
