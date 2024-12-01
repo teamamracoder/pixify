@@ -8,23 +8,31 @@ from social_network.models.notification_model import Notification
 def count_notification():
     return Notification.objects.all()
 
+
+
+
 from datetime import datetime, timedelta
 from django.utils.timezone import now
 
 def time_ago(time):
     diff = now() - time
     seconds = diff.total_seconds()
-    minutes = seconds // 60
-    hours = minutes // 60
-    days = hours // 24
-
+    
     if seconds < 60:
         return "just now"
-    elif minutes < 60:
+    
+    minutes = seconds // 60
+    if minutes < 60:
         return f"{int(minutes)}m"
-    elif hours < 24:
+    
+    hours = minutes // 60
+    if hours < 24:
         return f"{int(hours)}h"
-    elif days < 7:
+    
+    days = hours // 24
+    if days < 7:
         return f"{int(days)}d"
-    else:
-        return time.strftime('%b %d, %Y')
+    
+  
+    return time.strftime('%b %d, %Y')
+
