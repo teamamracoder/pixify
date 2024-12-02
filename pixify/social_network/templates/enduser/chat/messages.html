@@ -20,70 +20,96 @@
     <div class="chat-body">
         {% for message in messages %}
             {% if message.sender_id.id == user.id %}
-                <div class="message sent">
-                    <div class="message-content">
-                        <div class="message-header">
-                            <img src="{{ message.sender_id.profile_photo_url|default:'\static\images\avatar.jpg' }}" alt="Sender Profile Pic" class="message-profile-pic">
-                            <span class="message-username">{{ message.sender_id.first_name }}</span>
-                        </div>
-                        <span class="text-dark">{{ message.text }}</span>
+            <div class="message sent">
+                <div class="message-content">
+                    <div class="message-header">
+                        <img src="{{ message.sender_id.profile_photo_url|default:'\static\images\avatar.jpg' }}" alt="Sender Profile Pic" class="message-profile-pic">
+                        <span class="message-username">{{ message.sender_id.first_name }}</span>
                     </div>
-                    <div class="message-footer">  
-                        <span class="time">{{ message.created_at|date:"h:i A" }}</span>
-                        <div>
-                        <i class="bi bi-three-dots-vertical" onclick="toggleOptions({{ message.id }})"></i>
-                        <i class="bi bi-emoji-smile" onclick="toggleReactionPopup({{ message.id }})"></i>
-                        </div>
-                    </div> 
-                    <div class="options-popup" id="options-{{ message.id }}" style="display: none;">
-                        {% if message.sender_id.id == user.id%}
-                        <a href="#" onclick="editMessage('{{ message.id }}', '{{ message.text|escapejs }}')">Edit</a>                       
-                        {%endif%}
-                        <a href="#" onclick="deleteMessage('{{ message.id }}')">Delete</a>
-                        <a href="#" onclick="replyToMessage('{{ message.id }}', '{{ message.sender.username }}', '{{ message.text|escapejs }}')">Reply</a>
-                    </div>
-                    <div class="reaction-popup" id="reaction-popup-{{ message.id }}" style="display: none;">
-                        {% for reaction in reactions %}
-                        <span onclick="addReaction('{{ message.id }}', '{{ reaction.name }}', '{{ reaction.value|escapejs }}')">
-                            {{ reaction.value|safe }}
-                        </span>
-                        {% endfor %}
-                    </div>
-                    <div class="reaction-display" id="reaction-display-{{ message.id }}"></div>
+                    <span class="text-dark">{{ message.text }}</span>
                 </div>
-            {% else %}
-                <div class="message received float-end">
-                    <div class="message-content">
-                        <div class="message-header">
-                            <img src="{{ message.sender_id.profile_photo_url|default:'\static\images\avatar.jpg' }}" alt="{{ message.sender_id.first_name }}'s Profile Picture" class="message-profile-pic">
-                            <span class="message-username">{{ message.sender_id.first_name }}</span>
-                        </div>
-                        <span>{{ message.text }}</span>
-                    </div>
-                    <div class="message-footer">
-                        <span class="time">{{ message.created_at|date:"h:i A" }}</span>
-                        <div>
+                <div class="message-footer">
+                    <span class="time">{{ message.created_at|date:"h:i A" }}</span>
+                    <div>
                         <i class="bi bi-three-dots-vertical" onclick="toggleOptions({{ message.id }})"></i>
                         <i class="bi bi-emoji-smile" onclick="toggleReactionPopup({{ message.id }})"></i>
-                        </div>
                     </div>
-                   <div class="options-popup" id="options-{{ message.id }}" style="display: none;">
-                    {% if message.sender_id.id == user.id%}
-                    <a href="#" onclick="editMessage('{{ message.id }}', '{{ message.text|escapejs }}')">Edit</a>
-                    {%endif%}
-
+                </div>
+                <div class="options-popup" id="options-{{ message.id }}" style="display: none;">
+                    {% if message.sender_id.id == user.id %}
+                        <a href="#" onclick="editMessage('{{ message.id }}', '{{ message.text|escapejs }}')">Edit</a>
+                    {% endif %}
                     <a href="#" onclick="deleteMessage('{{ message.id }}')">Delete</a>
                     <a href="#" onclick="replyToMessage('{{ message.id }}', '{{ message.sender.username }}', '{{ message.text|escapejs }}')">Reply</a>
                 </div>
-                <div class="reaction-popup" id="reaction-popup-{{ message.id }}" style="display: none;">
-                    {% for reaction in reactions %}
-                    <span onclick="addReaction('{{ message.id }}', '{{ reaction.name }}', '{{ reaction.value|escapejs }}')">
-                        {{ reaction.value|safe }}
-                    </span>
-                    {% endfor %}
+                <div class="reaction-container" id="reaction-container-{{ message.id }}">
+                    <div class="reaction-popup" id="reaction-popup-{{ message.id }}" style="display: none;">
+                        {% for reaction in reactions %}
+                            <span onclick="reactionManager.addReaction('{{ message.id }}', '{{ reaction.name }}', '{{ reaction.value|escapejs }}')">
+                                {{ reaction.value|safe }}
+                            </span>
+                        {% endfor %}
+                    </div>
+                    <div class="reaction-display" id="reaction-display-{{ message.id }}"></div>
+                    <div>
+                        {% if chat.seen_by_all %}
+                            <span class="message-seen">
+                                <i class="fa-solid fa-check-double" style="color: #06bec1;"></i> <!-- Double check icon -->
+                            </span>
+                        {% else %}
+                            <span class="message-sent">
+                                <i class="fa fa-check"></i> <!-- Single check icon -->
+                            </span>
+                        {% endif %}
+                    </div>
                 </div>
-                <div class="reaction-display" id="reaction-display-{{ message.id }}"></div>
+            </div>
+            
+            {% else %}
+            <div class="message received float-end">
+                <div class="message-content">
+                    <div class="message-header">
+                        <img src="{{ message.sender_id.profile_photo_url|default:'\static\images\avatar.jpg' }}" alt="{{ message.sender_id.first_name }}'s Profile Picture" class="message-profile-pic">
+                        <span class="message-username">{{ message.sender_id.first_name }}</span>
+                    </div>
+                    <span>{{ message.text }}</span>
                 </div>
+                <div class="message-footer">
+                    <span class="time">{{ message.created_at|date:"h:i A" }}</span>
+                    <div>
+                        <i class="bi bi-three-dots-vertical" onclick="toggleOptions({{ message.id }})"></i>
+                        <i class="bi bi-emoji-smile" onclick="toggleReactionPopup({{ message.id }})"></i>
+                    </div>
+                </div>
+                <div class="options-popup" id="options-{{ message.id }}" style="display: none;">
+                    {% if message.sender_id.id == user.id %}
+                        <a href="#" onclick="editMessage('{{ message.id }}', '{{ message.text|escapejs }}')">Edit</a>
+                    {% endif %}
+                    <a href="#" onclick="deleteMessage('{{ message.id }}')">Delete</a>
+                    <a href="#" onclick="replyToMessage('{{ message.id }}', '{{ message.sender.username }}', '{{ message.text|escapejs }}')">Reply</a>
+                </div>
+                <div class="reaction-container" id="reaction-container-{{ message.id }}">
+                    <div class="reaction-popup" id="reaction-popup-{{ message.id }}" style="display: none;">
+                        {% for reaction in reactions %}
+                            <span onclick="reactionManager.addReaction('{{ message.id }}', '{{ reaction.name }}', '{{ reaction.value|escapejs }}')">
+                                {{ reaction.value|safe }}
+                            </span>
+                        {% endfor %}
+                    </div>
+                    <div class="reaction-display" id="reaction-display-{{ message.id }}"></div>
+                    <div>
+                        {% if chat.seen_by_all %}
+                            <span class="message-seen">
+                                <i class="fa-solid fa-check-double" style="color: #06bec1;"></i> <!-- Double check icon -->
+                            </span>
+                        {% else %}
+                            <span class="message-sent">
+                                <i class="fa fa-check"></i> <!-- Single check icon -->
+                            </span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
             {% endif %}
         {% endfor %}
     </div>
@@ -322,35 +348,133 @@ $(document).ready(function () {
         const popup = document.getElementById('reaction-popup-' + messageId);
         popup.style.display = popup.style.display === 'none' ? 'flex' : 'none';
     }
-
-    function addReaction(messageId, reactionName, reactionValue) {
-        const display = document.getElementById('reaction-display-' + messageId);
-        if (!display) {
-            console.error(`Reaction display element not found for messageId: ${messageId}`);
-            return;
+  
+ 
+    class ReactionManager {
+        constructor() {
+            this.reactionContainers = {};
         }
-        const existingReactions = Array.from(display.children);
-        existingReactions.forEach((child) => {
-            if (child.dataset.userReaction === "true") {
-                display.removeChild(child);
+    
+        init(messageId) {
+            const container = document.getElementById(`reaction-container-${messageId}`);
+            if (!container) {
+                console.error(`Reaction container not found for messageId: ${messageId}`);
+                return;
             }
-        });
-        const newReaction = document.createElement('span');
-        newReaction.dataset.reaction = reactionName; 
-        newReaction.dataset.userReaction = "true";
-        newReaction.innerHTML = `
-            ${reactionValue} <span class="reaction-count">1</span>
-        `;
-        newReaction.style.marginRight = '10px'; 
-        display.appendChild(newReaction);
-        const popup = document.getElementById('reaction-popup-' + messageId);
-        if (popup) {
-            popup.style.display = 'none';
-        } else {
-            console.error(`Reaction popup not found for messageId: ${messageId}`);
+            this.reactionContainers[messageId] = container;
+            this.loadReactions(messageId);
+        }
+    
+        addReaction(messageId, reactionName, reactionValue) {
+            const popup = document.getElementById(`reaction-popup-${messageId}`);
+            const data = {
+                message_id: messageId,
+                reaction_name: reactionName,
+                reaction_value: reactionValue,
+            };
+    
+            fetch('/message-reaction/create/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}',
+                },
+                body: JSON.stringify(data),
+            })
+                .then((response) => response.json())
+                .then((responseData) => {
+                    if (responseData.success) {
+                        if (popup) popup.style.display = 'none'; // Automatically hide popup
+                        this.loadReactions(messageId); // Reload reactions dynamically
+                    } else {
+                        console.error('Failed to add reaction:', responseData.error);
+                    }
+                })
+                .catch((error) => {
+                    console.error('Error while adding reaction:', error);
+                });
+        }
+    
+        loadReactions(messageId) {
+            const display = document.getElementById(`reaction-display-${messageId}`);
+            if (!display) {
+                console.error(`Reaction display not found for messageId: ${messageId}`);
+                return;
+            }
+    
+            fetch(`/message-reactions/${messageId}/`)
+                .then((response) => response.json())
+                .then((data) => {
+                    display.innerHTML = '';
+    
+                    const uniqueReactions = new Map();
+                    data.reactions.forEach((reaction) => {
+                        const { reaction: reactionType, reaction_count: count } = reaction;
+                        uniqueReactions.set(reactionType, count);
+                    });
+    
+                    uniqueReactions.forEach((count, reactionType) => {
+                        const reactionElement = document.createElement('span');
+                        reactionElement.innerHTML = `${reactionType} ${count}`;
+                        reactionElement.style.marginRight = '10px';
+                        reactionElement.style.cursor = 'pointer';
+    
+                        reactionElement.addEventListener('click', () => this.deleteReaction(messageId));
+                        reactionElement.addEventListener('dbclick', () => this.detailsReaction_modal(messageId));
+    
+                        // Add long-press to view reaction details
+                        let pressTimer;
+                        reactionElement.addEventListener('mousedown', (e) => {
+                            e.preventDefault();
+                            pressTimer = setTimeout(() => this.showReactionDetails(messageId, reactionType), 500);
+                        });
+                        reactionElement.addEventListener('mouseup', () => clearTimeout(pressTimer));
+                        reactionElement.addEventListener('mouseleave', () => clearTimeout(pressTimer));
+    
+                        display.appendChild(reactionElement);
+                    });
+                })
+                .catch((error) => {
+                    console.error('Error while loading reactions:', error);
+                });
+        }
+        
+        deleteReaction(messageId) {
+            const data = { message_id: messageId };
+    
+            fetch('/message-reaction/delete/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}',
+                },
+                body: JSON.stringify(data),
+            })
+                .then((response) => response.json())
+                .then((responseData) => {
+                    if (responseData.success) {
+                        this.loadReactions(messageId); // Reload reactions dynamically
+                    } else {
+                        console.error('Failed to delete reaction:', responseData.error);
+                    }
+                })
+                .catch((error) => {
+                    console.error('Error while deleting reaction:', error);
+                });
         }
     }
     
+    const reactionManager = new ReactionManager();
+    document.addEventListener('DOMContentLoaded', () => {
+        const messageIds = [...document.querySelectorAll('.reaction-container')].map(container =>
+            container.id.split('-')[2]
+        );
+        messageIds.forEach((messageId) => {
+            reactionManager.init(messageId);
+        });
+    });
+
+
     function editMessage(messageId, content) {
         const messageInput = document.querySelector('input[name="message"]');
         messageInput.value = content;
@@ -514,7 +638,7 @@ observer.observe(chatBody, { childList: true });
 
     .message.sent {
         align-self: flex-end;
-        background-color: #34b7f1; /*shubhankar change only color*/
+        background-color:rgba(50, 251, 226, 0.3); /*shubhankar change only color*/
         color: white;
     }
 
@@ -727,10 +851,8 @@ observer.observe(chatBody, { childList: true });
     }
     
     .reaction-display span {
-        padding: 5px 8px;
-        background-color: #e0e0e0;
         border-radius: 10px;
-        font-size: 12px;
+        font-size: 20px;
         display: inline-flex;
         align-items: center;
         font-weight: bold;

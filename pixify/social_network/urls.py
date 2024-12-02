@@ -115,9 +115,9 @@ urlpatterns = [
     path('chat/followers/api', views.FollowerListViewApi.as_view(), name='followers_api'),
 
      # message reaction
+    path('message-reactions/<int:message_id>/', views.MessageReactionsListView.as_view(), name='message_reaction'),
     path('message-reaction/create/', views.MessageReactionCreateView.as_view(), name='message_reaction_create'),
-    path('message-reaction/<int:message_reaction_id>/update/', views.MessageReactionUpdateView.as_view(), name='message_reaction_update'),
-    path('message-reaction/<int:message_reaction_id>/delete/', views.MessageReactionDeleteView.as_view(), name='message_reaction_delete'),
+    path('message-reaction/delete/', views.MessageReactionDeleteView.as_view(), name='message_reaction_delete'),
 
     # message mention list api
     path('message-mention/<int:chat_id>/', views.MessageMentionListViewApi.as_view(), name='message_mention'),

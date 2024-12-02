@@ -65,16 +65,16 @@
 
 
     <!-- Peoples -->
-    {% for chat in chats %}
+{% for chat in chats %}
     <div style="border: 1px solid black; border-radius: 3px" class="m-2">
         <div class="chat-item">
             <!-- Image Section -->
             <div class="image-div">
                 {% if chat.is_group %}
-                <img src="{{ chat.chat_cover|default:'\static\images\group_pic.png' }}" alt="Chat Cover" class="profile-photo">
-                {% else%}
-                <img src="{{ chat.chat_cover|default:'\static\images\avatar.jpg' }}" alt="Chat Cover" class="profile-photo">
-                {% endif %}          
+                    <img src="{{ chat.chat_cover|default:'/static/images/group_pic.png' }}" alt="Chat Cover" class="profile-photo">
+                {% else %}
+                    <img src="{{ chat.chat_cover|default:'/static/images/avatar.jpg' }}" alt="Chat Cover" class="profile-photo">
+                {% endif %}
             </div>
         
             <!-- Middle Section -->
@@ -84,18 +84,38 @@
                         {{ chat.title }}
                     </a>
                 </p>
-                <p class="chat-message chat_title">{{ chat.latest_message }}</p>
+                {% if chat.latest_message %}
+                   <p class="chat-message chat_title">{{ chat.latest_message }}</p>
+                {% else %}
+                   <p class="chat-message chat_title">No messages yet</p>
+                {% endif %}
             </div>
         
             <!-- Right-aligned Section -->
             <div class="badge-div">
                 <span class="badge unread-messages">{{ chat.unread_messages }}</span>
                 <span class="timestamp">{{ chat.latest_message_timestamp }}</span>
+                
+                {% if chat.is_group %}
+                    {% if chat.latest_message %}
+                        {% if chat.seen_by_all %}
+                            <span class="message-seen"><i class="fa-solid fa-check-double" style="color: #06bec1;"></i></span>  <!-- Double check icon -->
+                        {% else %}
+                            <span class="message-sent"><i class="fa fa-check"></i></span>  <!-- Single check icon -->
+                        {% endif %}
+                    {% endif %}
+                {% else %}
+                    {% if chat.seen_by_all %}
+                        <span class="message-seen"><i class="fa-solid fa-check-double" style="color: #06bec1;"></i></span>  <!-- Double check icon -->
+                    {% else %}
+                        <span class="message-sent"><i class="fa fa-check"></i></span>  <!-- Single check icon -->
+                    {% endif %}
+                {% endif %}
             </div>
         </div>
-        
     </div>
-    {% endfor %}
+{% endfor %}
+
 
 
     <div style="position: absolute;bottom: 33px;right: 28px;background-color: #1f0647;height: 40px;width: 40px;border-radius: 50%;display: flex;justify-content: center;align-content: center;align-items: center;">
