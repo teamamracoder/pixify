@@ -8,8 +8,10 @@
     <div class="chat-header">
         <div class="user-info">
             {% if chat.is_group %}
-                 <a href="{% url 'chat_details' chat_id=chat.id %}"><img src="{{chat.chat_cover|default:'\static\images\group_pic.png' }}" alt="Group Chat" class="profile-pic"></a>
-                <a href="{% url 'chat_details' chat_id=chat.id %}"  class="username G-msg_chat-title">{{ chat.title }}</a>
+                <a href="{% url 'chat_details' chat_id=chat.id %}">
+                    <img src="{{ chat.chat_cover|default:'\static\images\group_pic.png' }}" alt="Group Chat" class="profile-pic">
+                </a>
+                <a href="{% url 'chat_details' chat_id=chat.id %}" class="username G-msg_chat-title">{{ chat.title }}</a>
             {% else %}
                 <img src="{{ chat.chat_cover|default:'\static\images\avatar.jpg' }}" alt="Profile Picture" class="profile-pic">
                 <span class="username P-msg_chat-title">{{ chat.title }}</span>
@@ -21,39 +23,38 @@
             {% if message.sender_id.id == user.id %}
                 <div class="message sent">
                     <div class="message-content">
-                    {% if message.reply_for_message_id %} 
-                    <div class="parent-message"> 
-                        <span>{{ message.reply_for_message_id.sender_id.first_name }}: </span> 
-                        <span>{{ message.reply_for_message_id.text }}</span> 
-                        <span >{{ message.media_url}}</span>
-                    </div> 
-                    {% endif %}
+                        {% if message.reply_for_message_id %}
+                            <div class="parent-message">
+                                <span>{{ message.reply_for_message_id.sender_id.first_name }}: </span>
+                                <span>{{ message.reply_for_message_id.text }}</span>
+                                {% if message.media_url %}
+                                    <span>{{ message.media_url }}</span>
+                                {% endif %}
+                            </div>
+                        {% endif %}
                         <div class="message-header">
                             <img src="{{ message.sender_id.profile_photo_url|default:'\static\images\avatar.jpg' }}" alt="Sender Profile Pic" class="message-profile-pic">
                             <span class="message-username">{{ message.sender_id.first_name }}</span>
                         </div>
-                        
                         <span class="text-dark">{{ message.text }}</span>
-                        <span> {{ message.media_url}}</span>
-
+                        {% if message.media_url %}
+                            <span>{{ message.media_url }}</span>
+                        {% endif %}
                     </div>
                     <div class="message-footer">
-                        
                         <span class="time">{{ message.created_at|date:"h:i A" }}</span>
                         <div>
-                        <i class="bi bi-three-dots-vertical" onclick="toggleOptions({{ message.id }})"></i>
-                        <i class="bi bi-emoji-smile" onclick="toggleReactionPopup({{ message.id }})"></i>
+                            <i class="bi bi-three-dots-vertical" onclick="toggleOptions({{ message.id }})"></i>
+                            <i class="bi bi-emoji-smile" onclick="toggleReactionPopup({{ message.id }})"></i>
                         </div>
                     </div>
-                    
                     <div class="options-popup" id="options-{{ message.id }}" style="display: none;">
-                        {% if message.sender_id.id == user.id%}
-                        <a href="#" onclick="editMessage('{{ message.id }}', '{{ message.text|escapejs }}')">Edit</a>                       
-                        {%endif%}
+                        {% if message.sender_id.id == user.id %}
+                            <a href="#" onclick="editMessage('{{ message.id }}', '{{ message.text|escapejs }}')">Edit</a>
+                        {% endif %}
                         <a href="#" onclick="deleteMessage('{{ message.id }}')">Delete</a>
                         <a href="#" onclick="replyToMessage('{{ message.id }}', '{{ message.sender.username }}', '{{ message.text|escapejs }}')">Reply</a>
                     </div>
-                    
                     <div class="reaction-popup" id="reaction-popup-{{ message.id }}" style="display: none;">
                         <span onclick="addReaction('{{ message.id }}', '👍')">👍</span>
                         <span onclick="addReaction('{{ message.id }}', '❤️')">❤️</span>
@@ -66,36 +67,38 @@
             {% else %}
                 <div class="message received float-end">
                     <div class="message-content">
-                    {% if message.reply_for_message_id %} 
-                    <div class="parent-message"> 
-                        <span>{{ message.reply_for_message_id.sender_id.first_name }}: </span> 
-                        <span>{{ message.reply_for_message_id.text }}</span> 
-                        <span {{ message.media_url}}</span>
-                    </div> 
-                    {% endif %}
+                        {% if message.reply_for_message_id %}
+                            <div class="parent-message">
+                                <span>{{ message.reply_for_message_id.sender_id.first_name }}: </span>
+                                <span>{{ message.reply_for_message_id.text }}</span>
+                                {% if message.media_url %}
+                                    <span>{{ message.reply_for_message_id.media_url }}</span>
+                                {% endif %}
+                            </div>
+                        {% endif %}
                         <div class="message-header">
                             <img src="{{ message.sender_id.profile_photo_url|default:'\static\images\avatar.jpg' }}" alt="{{ message.sender_id.first_name }}'s Profile Picture" class="message-profile-pic">
                             <span class="message-username">{{ message.sender_id.first_name }}</span>
                         </div>
                         <span>{{ message.text }}</span>
-                        <span> {{ message.media_url}}</span>
+                        {% if message.media_url %}
+                            <span>{{ message.media_url }}</span>
+                        {% endif %}
                     </div>
                     <div class="message-footer">
                         <span class="time">{{ message.created_at|date:"h:i A" }}</span>
                         <div>
-                        <i class="bi bi-three-dots-vertical" onclick="toggleOptions({{ message.id }})"></i>
-                        <i class="bi bi-emoji-smile" onclick="toggleReactionPopup({{ message.id }})"></i>
+                            <i class="bi bi-three-dots-vertical" onclick="toggleOptions({{ message.id }})"></i>
+                            <i class="bi bi-emoji-smile" onclick="toggleReactionPopup({{ message.id }})"></i>
                         </div>
                     </div>
-                   <div class="options-popup" id="options-{{ message.id }}" style="display: none;">
-                    {% if message.sender_id.id == user.id%}
-                    <a href="#" onclick="editMessage('{{ message.id }}', '{{ message.text|escapejs }}')">Edit</a>
-                    {%endif%}
-
-    <a href="#" onclick="deleteMessage('{{ message.id }}')">Delete</a>
-    <a href="#" onclick="replyToMessage('{{ message.id }}', '{{ message.sender.username }}', '{{ message.text|escapejs }}')">Reply</a>
-</div>
-
+                    <div class="options-popup" id="options-{{ message.id }}" style="display: none;">
+                        {% if message.sender_id.id == user.id %}
+                            <a href="#" onclick="editMessage('{{ message.id }}', '{{ message.text|escapejs }}')">Edit</a>
+                        {% endif %}
+                        <a href="#" onclick="deleteMessage('{{ message.id }}')">Delete</a>
+                        <a href="#" onclick="replyToMessage('{{ message.id }}', '{{ message.sender.username }}', '{{ message.text|escapejs }}')">Reply</a>
+                    </div>
                     <div class="reaction-popup" id="reaction-popup-{{ message.id }}" style="display: none;">
                         <span onclick="addReaction('{{ message.id }}', '👍')">👍</span>
                         <span onclick="addReaction('{{ message.id }}', '❤️')">❤️</span>
@@ -108,389 +111,391 @@
             {% endif %}
         {% endfor %}
     </div>
-
     <div class="chat-footer">
         <div id="reply-preview" style="display: none;">
             <div class="reply-message">
                 <span class="close-reply" onclick="cancelReply()">✖</span>
                 <span class="reply-username"></span>: <span class="reply-text"></span>
             </div>
-    </div>
-        
-<form id="messageForm" method="POST" action="{% url 'message_create' %}" enctype="multipart/form-data">
-    {% csrf_token %}
-    <input type="hidden" id="action" name="action" value="create">
-    <input type="hidden" id="chat_id" name="chat_id" value="{{ chat.id }}">
-    <input type="hidden" id="message_id" name="message_id" value="">
-    <input type="hidden" name="mentions" id="mentions">
-    
-    <!-- File input (hidden) -->
-    <input type="file" id="file-input" name="media_files" style="display: none;" accept="image/*,video/*" multiple>
-
-    <!-- Mention modal -->
-    <div id="mentionModal" class="parmess-modal">
-        <div class="parmess-modal-content" id="mention-suggestions"></div>
-    </div>    
-    <!-- File previews -->
-    <div id="file-previews" class="parmess-file-previews"></div>
-
-    <!-- Message input and submit button -->
-    <div class="message-input-wrapper">
-        <button type="button" id="parmess-button" class="parmess-button">
-            <i class="fa fa-paperclip"></i>
-        </button>
-        <input type="text" name="message" id="message-input" placeholder="Type your message here...">
-        <button class="parmess-button" type="submit">➤</button>
-    </div>
-</form>
-
-<!-- File upload warning modal -->
-<div id="fileWarningModal" class="parmess-modal">
-    <div class="parmess-modal-content">
-        <span class="parmess-close">&times;</span>
-        <p style="color:red">You can only upload up to 10 files at a time.</p>
+        </div>
+        <form id="messageForm" method="POST" action="{% url 'message_create' %}" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="hidden" id="action" name="action" value="create">
+            <input type="hidden" id="chat_id" name="chat_id" value="{{ chat.id }}">
+            <input type="hidden" id="chat_type" name="chat_type" value="{{ chat.type }}">
+            <input type="hidden" id="message_id" name="message_id" value="">
+            <input type="hidden" name="mentions" id="mentions">
+            <!-- File input (hidden) -->
+            <input type="file" id="file-input" name="media_files" style="display: none;" accept="image/*,video/*" multiple>
+            <!-- Mention modal -->
+            <div id="mentionModal" class="parmess-modal">
+                <div class="parmess-modal-content" id="mention-suggestions"></div>
+            </div>
+            <!-- File previews -->
+            <div id="file-previews" class="parmess-file-previews"></div>
+            <!-- Message input and submit button -->
+            <div class="message-input-wrapper">
+                <button type="button" id="parmess-button" class="parmess-button">
+                    <i class="fa fa-paperclip"></i>
+                </button>
+                <input type="text" name="message" id="message-input" placeholder="Type your message here...">
+                <button class="parmess-button" type="submit">➤</button>
+            </div>
+        </form>
+        <!-- File upload warning modal -->
+        <div id="fileWarningModal" class="parmess-modal">
+            <div class="parmess-modal-content">
+                <span class="parmess-close">&times;</span>
+                <p style="color:red">You can only upload up to 10 files at a time.</p>
+            </div>
+        </div>
     </div>
 </div>
 
-
-
-
-     
-
-    </div>
-    </div>
-
 <script>
 
-function setFormAction(action, messageId = '', chatId = '') {
-    document.getElementById('action').value = action;
-    document.getElementById('message_id').value = messageId;
-    document.getElementById('chat_id').value = chatId || document.querySelector('input[name="chat_id"]').value;
+    function setFormAction(action, messageId = '', chatId = '') {
+        document.getElementById('action').value = action;
+        document.getElementById('message_id').value = messageId;
+        document.getElementById('chat_id').value = chatId || document.querySelector('input[name="chat_id"]').value;
 
-    let formAction = '';
-    if (action === 'reply') {
-        formAction = `/chat/message-reply/${messageId}/`;
-    } else if (action === 'update') {
-        formAction = `/chat/message/${messageId}/update/`;
-    } else if (action === 'delete') {
-        formAction = `/chat/message/${messageId}/delete/`;
-    } else {
-        formAction = `/chat/message/create/`;
-    }
-    document.getElementById('messageForm').action = formAction;
-}
-
-
-
-
-$(document).ready(function () {
-    let mentionedUsers = new Set();
-    let mentionedAll = false;
-    let mentionTriggered = false;
-    let typingTimer;
-    const debounceDelay = 300;
-    const fallbackImage = '/static/images/avatar.jpg';
-
-    // Function to initialize mentioned users
-    function initializeMentionedUsers() {
-        mentionedUsers.clear();
-        mentionedAll = false;
-        console.log("Mentioned users initialized:", Array.from(mentionedUsers));
+        let formAction = '';
+        if (action === 'reply') {
+            formAction = `/chat/message-reply/${messageId}/`;
+        } else if (action === 'update') {
+            formAction = `/chat/message/${messageId}/update/`;
+        } else if (action === 'delete') {
+            formAction = `/chat/message/${messageId}/delete/`;
+        } else {
+            formAction = `/chat/message/create/`;
+        }
+        document.getElementById('messageForm').action = formAction;
     }
 
-    // Function to update mentioned users based on the message text
-    function updateMentionedUsers(messageText) {
-        const mentionedRegex = /@(\w+)/g;
-        let match;
-        mentionedUsers.clear();
+    $(document).ready(function () {
+        let mentionedUsers = new Set();
+        let mentionedAll = false;
+        let mentionTriggered = false;
+        let typingTimer;
+        const debounceDelay = 100;
+        const fallbackImage = '/static/images/avatar.jpg';
 
-        while ((match = mentionedRegex.exec(messageText)) !== null) {
-            const userId = match[1];
-            if (userId === 'all') {
-                mentionedAll = true;
-                mentionedUsers.add('all');
-            } else {
-                mentionedUsers.add(userId.toString());
-            }
+        function initializeMentionedUsers() {
+            mentionedUsers.clear();
+            mentionedAll = false;
+            console.log("Mentioned users initialized:", Array.from(mentionedUsers));
         }
 
-        mentionedAll = mentionedUsers.has('all');
-        console.log("Updated mentioned users:", Array.from(mentionedUsers));
-    }
+        function updateMentionedUsers(messageText) {
+            console.log("updateMentionedUsers called");
+            const mentionedRegex = /@(\w+)/g;
+            let match;
+            mentionedUsers.clear();
 
-    // Function to create mention item
-    function createMentionItem(mention) {
-        const profileImage = mention.member_id__profile_photo_url || fallbackImage;
+            while ((match = mentionedRegex.exec(messageText)) !== null) {
+                const userId = match[1];
+                if (userId === 'all') {
+                    mentionedAll = true;
+                    mentionedUsers.add('all');
+                } else {
+                    mentionedUsers.add(userId.toString());
+                }
+            }
 
-        if (mention.member_id === 'all') {
+            mentionedAll = mentionedUsers.has('all');
+            console.log("Updated mentioned users:", Array.from(mentionedUsers));
+            const mentions = $('#mentions').val();
+            console.log("Mentions value:", mentions);
+
+            $('#mentions').val(Array.from(mentionedUsers).join(','));
+
+            console.log("Mentions before submitting:", $('#mentions').val());
+        }
+
+        function createMentionItem(mention) {
+            const profileImage = mention.member_id__profile_photo_url || fallbackImage;
+
+            if (mention.member_id === 'all') {
+                return `
+                    <div class="mention-item" data-member-id="all">
+                        <i class="fas fa-users" style="color:black; font-size:18px;"></i> All
+                    </div>`;
+            }
+
             return `
-                <div class="mention-item" data-member-id="all">
-                    <i class="fas fa-users" style="color:black; font-size:18px;"></i> All
+                <div class="mention-item" data-member-id="${mention.member_id}">
+                    <img src="${profileImage}" alt="${mention.member_id__first_name} ${mention.member_id__last_name}" class="profile-photo" />
+                    ${mention.member_id__first_name} ${mention.member_id__last_name}
                 </div>`;
         }
 
-        return `
-            <div class="mention-item" data-member-id="${mention.member_id}">
-                <img src="${profileImage}" alt="${mention.member_id__first_name} ${mention.member_id__last_name}" class="profile-photo" />
-                ${mention.member_id__first_name} ${mention.member_id__last_name}
-            </div>`;
-    }
+        function displayMentionList(searchQuery) {
+            const mentionSuggestions = $('#mention-suggestions').empty();
+            const chatId = $('#chat_id').val();
+            const chatType = $('#chat_type').val();
 
-    // Function to display mention suggestions
-    function displayMentionList(searchQuery) {
-        const mentionSuggestions = $('#mention-suggestions').empty();
-        const chatId = $('#chat_id').val();
-        const excludeUsers = Array.from(mentionedUsers).join(',');
+            console.log(`Chat Type: ${chatType}`);
 
-        $.ajax({
-            url: `/message-mention/${chatId}/`,
-            type: 'GET',
-            data: { search: searchQuery, exclude: excludeUsers, mentionedAll },
-            success: function (res) {
-                console.log("Mention suggestions response:", res);
-                if (!mentionedUsers.has('all')) {
-                    mentionSuggestions.append(createMentionItem({
-                        member_id: 'all',
-                        member_id__first_name: 'All',
-                        member_id__last_name: '',
-                        member_id__profile_photo_url: '<i class="fas fa-users" style="color:black; font-size:18px;"></i>',
-                    }));
+            if (chatType != '2') {
+                console.log("Not a group chat, hiding mentions.");
+                $('#mentionModal').hide();
+                return;
+            }
+
+            const excludeUsers = Array.from(mentionedUsers).join(',');
+
+            $.ajax({
+                url: `/message-mention/${chatId}/`,
+                type: 'GET',
+                data: { search: searchQuery, exclude: excludeUsers, mentionedAll },
+                success: function (res) {
+                    console.log("Mention suggestions response:", res);
+
+                    if (!mentionedUsers.has('all')) {
+                        mentionSuggestions.append(createMentionItem({
+                            member_id: 'all',
+                            member_id__first_name: 'All',
+                            member_id__last_name: '',
+                            member_id__profile_photo_url: '<i class="fas fa-users" style="color:black; font-size:18px;"></i>',
+                        }));
+                    }
+
+                    const filteredResults = res.filter(mention => mention.member_id !== 'all');
+                    console.log("Filtered results:", filteredResults);
+
+                    if (filteredResults.length > 0 || !mentionedUsers.has('all')) {
+                        filteredResults.forEach(mention => {
+                            mentionSuggestions.append(createMentionItem(mention));
+                        });
+                        $('#mentionModal').show();
+                    } else {
+                        $('#mentionModal').hide();
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error fetching mentions:", error);
                 }
+            });
+        }
 
-                const filteredResults = res.filter(mention => mention.member_id !== 'all');
-                if (filteredResults.length > 0 || !mentionedUsers.has('all')) {
-                    filteredResults.forEach(mention => {
-                        mentionSuggestions.append(createMentionItem(mention));
-                    });
-                    $('#mentionModal').show();
+        $('#message-input').on('input', function () {
+            const messageText = $(this).val();
+            const cursorPosition = this.selectionStart;
+            const lastChar = messageText.charAt(cursorPosition - 1);
+
+            clearTimeout(typingTimer);
+
+            if (mentionedAll && !messageText.includes('@all')) {
+                mentionedAll = false;
+                $('#mentionModal').hide();
+                return;
+            }
+
+            if (lastChar === '@') {
+                mentionTriggered = true;
+
+                typingTimer = setTimeout(function () {
+                    displayMentionList('');
+                }, debounceDelay);
+            } else if (!lastChar.trim() || !mentionTriggered) {
+                $('#mentionModal').hide();
+            } else if (mentionTriggered) {
+                const atIndex = messageText.lastIndexOf('@');
+                const searchQuery = messageText.slice(atIndex + 1, cursorPosition).trim();
+                if (searchQuery) {
+                    typingTimer = setTimeout(function () {
+                        displayMentionList(searchQuery);
+                    }, debounceDelay);
                 } else {
                     $('#mentionModal').hide();
                 }
-            },
-            error: function (xhr, status, error) {
-                console.error("Error fetching mentions:", error);
             }
+
+            updateMentionedUsers(messageText);
         });
-    }
 
-    // Function to handle message input for mentions
-    $('#message-input').on('input', function () {
-        const messageText = $(this).val();
-        const cursorPosition = this.selectionStart;
-        const lastChar = messageText.charAt(cursorPosition - 1);
+        $('#mention-suggestions').on('click', '.mention-item', function () {
+            // Prevent clicking on non-selectable items
+            if ($(this).hasClass('non-selectable')) {
+                return;
+            }
 
-        clearTimeout(typingTimer);
+            // Get mention details
+            const mentionText = $(this).text().trim();
+            const userId = $(this).data('member-id');
+            const messageInput = $('#message-input');
+            const messageText = messageInput.val();
+            const cursorPosition = messageInput[0].selectionStart;
 
-        if (mentionedAll && !messageText.includes('@all')) {
-            mentionedAll = false;
-            $('#mentionModal').hide();
-            return;
-        }
+            // Find the '@' symbol position and insert the mention at the cursor
+            const atIndex = messageText.lastIndexOf('@', cursorPosition - 1);
+            const newText = `${messageText.slice(0, atIndex)}@${mentionText} ${messageText.slice(cursorPosition)}`;
+            messageInput.val(newText).focus();
 
-        if (lastChar === '@') {
-            mentionTriggered = true;
-
-            typingTimer = setTimeout(function () {
-                displayMentionList('');
-            }, debounceDelay);
-        } else if (!lastChar.trim() || !mentionTriggered) {
-            $('#mentionModal').hide();
-        } else if (mentionTriggered) {
-            const atIndex = messageText.lastIndexOf('@');
-            const searchQuery = messageText.slice(atIndex + 1, cursorPosition).trim();
-            if (searchQuery) {
-                typingTimer = setTimeout(function () {
-                    displayMentionList(searchQuery);
-                }, debounceDelay);
+            // Update mentionedUsers set
+            if (userId === 'all') {
+                mentionedAll = true;
+                mentionedUsers.clear();  // Clear previous mentions
+                mentionedUsers.add('all');  // Add 'all' to mentionedUsers
             } else {
-                $('#mentionModal').hide();
+                mentionedUsers.add(userId.toString());  // Add the userId to mentionedUsers set
             }
-        }
 
-        updateMentionedUsers(messageText);
-    });
+            mentionTriggered = false;
+            $('#mentionModal').hide();  // Hide the mention modal after selection
 
-    // Function to handle click on mention item
-    $('#mention-suggestions').on('click', '.mention-item', function () {
-        if ($(this).hasClass('non-selectable')) {
-            return;
-        }
+            // Update the hidden field with the latest mentions
+            $('#mentions').val(Array.from(mentionedUsers).join(','));
+        });
 
-        const mentionText = $(this).text().trim();
-        const userId = $(this).data('member-id');
-        const messageInput = $('#message-input');
-        const messageText = messageInput.val();
-        const cursorPosition = messageInput[0].selectionStart;
+        $('#message-form').submit(function (event) {
+            event.preventDefault();
 
-        const atIndex = messageText.lastIndexOf('@', cursorPosition - 1);
-        const newText = `${messageText.slice(0, atIndex)}@${mentionText} ${messageText.slice(cursorPosition)}`;
+            // Ensure mentions field has the latest data
+            $('#mentions').val(Array.from(mentionedUsers).join(','));
 
-        messageInput.val(newText).focus();
+            // Log to ensure the value is correct
+            console.log("Mentions before submitting:", $('#mentions').val());
 
-        if (userId === 'all') {
-            mentionedAll = true;
-            mentionedUsers.clear();
-            $('#mentionModal').hide();
-        } else {
-            mentionedUsers.add(userId.toString());
-        }
+            const messageText = $('#message-input').val();
+            const mentions = $('#mentions').val();  // This now includes the mentions selected
+            const chatId = $('#chat_id').val();
 
-        mentionTriggered = false;
-        console.log("Updated mentioned users after click:", Array.from(mentionedUsers));
-
-        $('#mentionModal').hide();
-    });
-
-    // Function to submit message form
-    $('#message-form').submit(function (event) {
-        event.preventDefault();
-
-        const messageText = $('#message-input').val();
-        const mentions = Array.from(mentionedUsers).join(',');
-
-        $.ajax({
-            url: '/chat/message/create',
-            type: 'POST',
-            data: {
-                message: messageText,
-                mentions: mentions,
-                chat_id: $('#chat_id').val(),
-                csrfmiddlewaretoken: $('input[name="csrfmiddlewaretoken"]').val(),
-                media_files: $('#media_files')[0].files
-            },
-            success: function (response) {
-                console.log('Message sent:', response);
-                // Optionally update the UI with the new message
-            },
-            error: function (xhr, status, error) {
-                console.error("Error sending message:", error);
-            }
+            $.ajax({
+                url: '/chat/message/create',
+                type: 'POST',
+                data: {
+                    message: messageText,
+                    mentions: mentions,  // Send the updated mentions data to the backend
+                    chat_id: chatId,
+                    csrfmiddlewaretoken: $('input[name="csrfmiddlewaretoken"]').val(),
+                    media_files: $('#file-input')[0].files
+                },
+                success: function (response) {
+                    console.log('Message sent:', response);
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error sending message:", error);
+                }
+            });
         });
     });
 
-    // Initialize mentioned users
-    initializeMentionedUsers();
-});
+    // Handle file button click
+    document.getElementById('parmess-button').addEventListener('click', function () {
+        document.getElementById('file-input').click();
+    });
 
+    // Declare fileArray and selectedFiles outside the event listener to ensure they persist
+    let fileArray = [];
+    let selectedFiles = new Set();
 
+    // Prevent "Enter" from submitting the form unintentionally during file input or previews
+    document.getElementById('file-input').addEventListener('keydown', function (event) {
+        if (event.key === 'Enter') {
+            event.preventDefault(); // Prevent default action on the file input
+        }
+    });
 
-// Handle file button click
-document.getElementById('parmess-button').addEventListener('click', function () {
-    document.getElementById('file-input').click();
-});
+    document.getElementById('file-input').addEventListener('change', function () {
+        const fileInput = document.getElementById('file-input');
+        const files = Array.from(fileInput.files);
+        const maxFiles = 10;
+        const modal = document.getElementById('fileWarningModal');
+        const span = document.getElementsByClassName('parmess-close')[0];
+        const filePreviewsDiv = document.getElementById('file-previews');
 
-// Declare fileArray and selectedFiles outside the event listener to ensure they persist
-let fileArray = [];
-let selectedFiles = new Set();
-
-// Prevent "Enter" from submitting the form unintentionally during file input or previews
-document.getElementById('file-input').addEventListener('keydown', function (event) {
-    if (event.key === 'Enter') {
-        event.preventDefault(); // Prevent default action on the file input
-    }
-});
-
-document.getElementById('file-input').addEventListener('change', function () {
-    const fileInput = document.getElementById('file-input');
-    const files = Array.from(fileInput.files);
-    const maxFiles = 10;
-    const modal = document.getElementById('fileWarningModal');
-    const span = document.getElementsByClassName('parmess-close')[0];
-    const filePreviewsDiv = document.getElementById('file-previews');
-
-    // Close the modal
-    span.onclick = function () {
-        modal.style.display = 'none';
-    };
-
-    // Close modal when clicking outside
-    window.onclick = function (event) {
-        if (event.target === modal) {
+        // Close the modal
+        span.onclick = function () {
             modal.style.display = 'none';
-        }
-    };
-
-    // If more than 10 files are selected, show the warning modal
-    if (files.length + fileArray.length > maxFiles) {
-        modal.style.display = 'block';
-        fileInput.value = ''; // Reset the file input
-    } else {
-        const newFiles = files.filter(file => !selectedFiles.has(file.name));
-
-        if (newFiles.length < files.length) {
-            alert('Some files were already selected and will be ignored. Please check your selection.');
-        }
-
-        // Add new files to the existing array and update selectedFiles
-        fileArray.push(...newFiles);
-        newFiles.forEach(file => selectedFiles.add(file.name));
-
-        // Process each selected file
-        const updatePreviews = (files) => {
-            filePreviewsDiv.innerHTML = ''; // Clear current previews
-            files.forEach((file, index) => {
-                const fileReader = new FileReader();
-
-                fileReader.onload = function (event) {
-                    const previewDiv = document.createElement('div');
-                    previewDiv.className = 'parmess-file-preview';
-
-                    const removeButton = document.createElement('button');
-                    removeButton.innerHTML = '&times;';
-                    removeButton.className = 'remove-button';
-                    removeButton.onclick = function () {
-                        previewDiv.remove();
-                        selectedFiles.delete(file.name);
-                        fileArray.splice(index, 1);
-                        const newFileList = new DataTransfer();
-                        fileArray.forEach(f => newFileList.items.add(f));
-                        fileInput.files = newFileList.files;
-                    };
-
-                    if (file.type.startsWith('image/')) {
-                        const img = document.createElement('img');
-                        img.src = event.target.result;
-                        img.style.maxHeight = '100px'; // Adjusted preview size
-                        previewDiv.appendChild(img);
-                    } else if (file.type.startsWith('video/')) {
-                        const video = document.createElement('video');
-                        video.src = event.target.result;
-                        video.controls = true;
-                        video.style.maxHeight = '100px'; // Adjusted preview size
-                        previewDiv.appendChild(video);
-                    } else {
-                        // Display the file name for non-media files
-                        previewDiv.textContent = file.name;
-                    }
-
-                    previewDiv.appendChild(removeButton);
-                    filePreviewsDiv.appendChild(previewDiv);
-                };
-
-                fileReader.readAsDataURL(file);
-            });
         };
 
-        updatePreviews(fileArray);
-    }
+        // Close modal when clicking outside
+        window.onclick = function (event) {
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        };
 
-    // After file selection, focus back to the message input
-    document.getElementById('message-input').focus();
-});
+        // If more than 10 files are selected, show the warning modal
+        if (files.length + fileArray.length > maxFiles) {
+            modal.style.display = 'block';
+            fileInput.value = ''; // Reset the file input
+        } else {
+            const newFiles = files.filter(file => !selectedFiles.has(file.name));
 
-// Ensure "Enter" submits the form when the message input is focused or empty
-document.getElementById('message-input').addEventListener('keydown', function (event) {
-    const messageInput = document.getElementById('message-input');
-    if (event.key === 'Enter') {
-        // Always prevent the default "Enter" behavior (new line) and submit the form
-        event.preventDefault();
+            if (newFiles.length < files.length) {
+                alert('Some files were already selected and will be ignored. Please check your selection.');
+            }
 
-        // Submit the form even if the message field is empty
-        document.getElementById('messageForm').submit();
-    }
-});
+            // Add new files to the existing array and update selectedFiles
+            fileArray.push(...newFiles);
+            newFiles.forEach(file => selectedFiles.add(file.name));
 
+            // Process each selected file
+            const updatePreviews = (files) => {
+                filePreviewsDiv.innerHTML = ''; // Clear current previews
+                files.forEach((file, index) => {
+                    const fileReader = new FileReader();
 
+                    fileReader.onload = function (event) {
+                        const previewDiv = document.createElement('div');
+                        previewDiv.className = 'parmess-file-preview';
+
+                        const removeButton = document.createElement('button');
+                        removeButton.innerHTML = '&times;';
+                        removeButton.className = 'remove-button';
+                        removeButton.onclick = function () {
+                            previewDiv.remove();
+                            selectedFiles.delete(file.name);
+                            fileArray.splice(index, 1);
+                            const newFileList = new DataTransfer();
+                            fileArray.forEach(f => newFileList.items.add(f));
+                            fileInput.files = newFileList.files;
+                        };
+
+                        if (file.type.startsWith('image/')) {
+                            const img = document.createElement('img');
+                            img.src = event.target.result;
+                            img.style.maxHeight = '100px'; // Adjusted preview size
+                            previewDiv.appendChild(img);
+                        } else if (file.type.startsWith('video/')) {
+                            const video = document.createElement('video');
+                            video.src = event.target.result;
+                            video.controls = true;
+                            video.style.maxHeight = '100px'; // Adjusted preview size
+                            previewDiv.appendChild(video);
+                        } else {
+                            // Display the file name for non-media files
+                            previewDiv.textContent = file.name;
+                        }
+
+                        previewDiv.appendChild(removeButton);
+                        filePreviewsDiv.appendChild(previewDiv);
+                    };
+
+                    fileReader.readAsDataURL(file);
+                });
+            };
+
+            updatePreviews(fileArray);
+        }
+
+        // After file selection, focus back to the message input
+        document.getElementById('message-input').focus();
+    });
+
+    // Ensure "Enter" submits the form when the message input is focused or empty
+    document.getElementById('message-input').addEventListener('keydown', function (event) {
+        const messageInput = document.getElementById('message-input');
+        if (event.key === 'Enter') {
+            // Always prevent the default "Enter" behavior (new line) and submit the form
+            event.preventDefault();
+
+            // Submit the form even if the message field is empty
+            document.getElementById('messageForm').submit();
+        }
+    });
 
     function toggleOptions(messageId) {
         const popup = document.getElementById('options-' + messageId);
@@ -514,6 +519,7 @@ document.getElementById('message-input').addEventListener('keydown', function (e
         }
         document.getElementById('reaction-popup-' + messageId).style.display = 'none';
     }
+
     function editMessage(messageId, content) {
         const messageInput = document.querySelector('input[name="message"]');
         messageInput.value = content;
@@ -522,25 +528,24 @@ document.getElementById('message-input').addEventListener('keydown', function (e
     }
 
     function deleteMessage(messageId) {
-    setFormAction('delete', messageId);  // Dynamically set the form action to delete the message
-    document.getElementById('messageForm').submit();  // Submit the form
-}
-
+        setFormAction('delete', messageId);  // Dynamically set the form action to delete the message
+        document.getElementById('messageForm').submit();  // Submit the form
+    }
 
     function replyToMessage(messageId, username, content) {
-    const messageInput = document.querySelector('input[name="message"]');
-    document.getElementById('reply-preview').style.display = 'block';
-    document.querySelector('.reply-username').textContent = username;
-    document.querySelector('.reply-text').textContent = content;
+        const messageInput = document.querySelector('input[name="message"]');
+        document.getElementById('reply-preview').style.display = 'block';
+        document.querySelector('.reply-username').textContent = username;
+        document.querySelector('.reply-text').textContent = content;
 
-    messageInput.focus();
-    setFormAction('reply', messageId);
-}
+        messageInput.focus();
+        setFormAction('reply', messageId);
+    }
 
-function cancelReply() {
-    document.getElementById('reply-preview').style.display = 'none';
-    setFormAction('create');
-}
+    function cancelReply() {
+        document.getElementById('reply-preview').style.display = 'none';
+        setFormAction('create');
+    }
 
     document.addEventListener('click', function (event) {
         if (!event.target.closest('.options-popup') && !event.target.closest('.bi-three-dots-vertical')) {
@@ -549,21 +554,22 @@ function cancelReply() {
     });
 
     // Function to scroll the chat body to the bottom
-function scrollToBottom() {
+    function scrollToBottom() {
+        const chatBody = document.querySelector('.chat-body');
+        chatBody.scrollTop = chatBody.scrollHeight;
+    }
+
+    // Scroll to the bottom on page load
+    document.addEventListener('DOMContentLoaded', function () {
+        scrollToBottom();
+    });
+
+    // Scroll to the bottom when a new message is added
     const chatBody = document.querySelector('.chat-body');
-    chatBody.scrollTop = chatBody.scrollHeight;
-}
+    const observer = new MutationObserver(scrollToBottom);
 
-// Scroll to the bottom on page load
-document.addEventListener('DOMContentLoaded', function () {
-    scrollToBottom();
-});
+    observer.observe(chatBody, { childList: true });
 
-// Scroll to the bottom when a new message is added
-const chatBody = document.querySelector('.chat-body');
-const observer = new MutationObserver(scrollToBottom);
-
-observer.observe(chatBody, { childList: true });
 
 </script>
 
@@ -977,7 +983,7 @@ observer.observe(chatBody, { childList: true });
 
 
 .parmess-file-preview img, .parmess-file-preview video {
-    max-height: 100px;
+    max-height: 50px;
     display: block;
 }
 

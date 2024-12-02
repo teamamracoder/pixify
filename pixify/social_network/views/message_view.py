@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.views import View 
-from ..models import ChatMember
+from ..models import ChatMember,User
 from ..services import message_service, chat_service, message_mention_service,message_read_status_service, user_service
 import re
 from social_network.decorators.exception_decorators import catch_error
@@ -40,44 +40,56 @@ class MessageListView(View):
             'id': chat.id,
             'title': title,
             'chat_cover': chat_cover,
-            'is_group' :chat.type==ChatType.GROUP.value
+            'is_group' :chat.type==ChatType.GROUP.value,
+            'type':chat.type
         }
         # chat_data.append(chat_info)       
         return render(request, 'enduser/chat/messages.html',{'chat':chat_info,'messages':messages,'user':user})
      
 
-class MessageCreateView(View): 
+class MessageCreateView(View):
     @catch_error
     @auth_required
     @role_required(Role.ADMIN.value, Role.END_USER.value)
     def get(self, request, chat_id):
         chat = chat_service.get_chat_by_id(chat_id)
         return render(request, 'enduser/message/index.html', {'chat': chat})
-    
+
     def post(self, request):
         auth_user = request.user
         text = request.POST.get('message')
         chat = chat_service.get_chat_by_id(request.POST.get('chat_id'))
-        mentions = request.POST.get('mentions', '')
+        mentions = request.POST.get('mentions','')       
+        mention_list = mentions.split(',')  # Split mentions into individual names       
         mention_ids = []
-        if 'all' in mentions.split(','):
 
-            chat_members = ChatMember.objects.filter(chat_id=chat).exclude(member_id=auth_user)
-            mention_ids = [member.member_id.id for member in chat_members]
-        else:
-            mention_ids = [int(id) for id in mentions.split(',') if id.isdigit()]
+        numeric_ids = [id for id in mention_list if id.isdigit()]
+        mention_ids = numeric_ids[:]
+
+        for username in mention_list:
+            username = username.strip()
+            if username.lower() == 'all': 
+                chat_members = ChatMember.objects.filter(chat_id=chat).exclude(member_id=auth_user)
+                mention_ids.extend(member.member_id.id for member in chat_members)
+            else:
+                user_obj = User.objects.filter(first_name__iexact=username).first()
+                if user_obj:
+                    mention_ids.append(user_obj.id)
+
+        print(mention_ids)        
         media_urls = []
         for file in request.FILES.getlist('media_files'):
             file_name = default_storage.save(file.name, ContentFile(file.read()))
             media_url = default_storage.url(file_name)
             media_urls.append(media_url)
-
+        
         message = message_service.create_message(text, media_urls, auth_user, chat)  
-        message_read_status_service.create_message_read_status(message,auth_user)
-        for user in mention_ids:   
-            mentioned_user=user_service.get_user(user)
+        message_read_status_service.create_message_read_status(message, auth_user)
+        
+        for user in mention_ids:
+            mentioned_user = user_service.get_user(user)
             message_mention_service.create_message_mentions(message, mentioned_user, auth_user)
-
+        
         return redirect('message', chat_id=chat.id)
 
 class MessageUpdateView(View): 
