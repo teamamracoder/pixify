@@ -25,15 +25,16 @@ jobs:
 
     - name: Deploy to DigitalOcean
       env:
-        HOST: ${{ secrets.HOST }}
-        USER: ${{ secrets.USER }}
-        PRIVATE_KEY: ${{ secrets.MYKEY }}
+        USER: SocialNetworkDev
+        HOST: 139.59.88.36
         PROJECT_PATH: /var/www/pixify
       run: |
-      
+        # Write the private key to a temporary file
+        echo "${{ secrets.MYKEY }}" > private_key
+        chmod 600 private_key
 
-        # Use SSH with the private key
-        ssh -i myKey -o StrictHostKeyChecking=no $USER@$HOST <<EOF
+        # SSH to the server and execute commands
+        ssh -i private_key -o StrictHostKeyChecking=no $USER@$HOST <<EOF
         cd $PROJECT_PATH
         git pull
         source venv/bin/activate
@@ -42,4 +43,5 @@ jobs:
         sudo systemctl restart nginx
         EOF
 
-       
+        # Clean up the private key
+        rm private_key
