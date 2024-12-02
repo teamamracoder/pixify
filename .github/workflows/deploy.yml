@@ -25,7 +25,7 @@ jobs:
 
     - name: Deploy to DigitalOcean
       env:
-        USER: SocialNetworkDev
+        USER: root
         HOST: 139.59.88.36
         PROJECT_PATH: /var/www/pixify
       run: |
