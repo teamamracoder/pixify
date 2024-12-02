@@ -3,14 +3,15 @@ from django.db.models import Q
 from social_network.utils.common_utils import print_log 
  
 def create_message_mentions(message,user,auth_user):
-    MessageMention.objects.create(message=message,user=user,created_by=auth_user)
+    MessageMention.objects.create(message=message,user=user,created_by=auth_user,is_active=True)
 
-def delete_message_mentions(message,user):
-    mentions = MessageMention.objects.filter(message=message)
+def delete_message_mentions(message, user, users_to_remove):
+    mentions = MessageMention.objects.filter(message=message, user_id__in=users_to_remove)
     for mention in mentions:
         mention.is_active = False
-        mention.updated_by=user
+        mention.updated_by = user
         mention.save()
+
 
 def list_messages_mention_Api(chat, user, search_query, exclude_ids, mentioned_all):
     print_log(f"Search Query: {search_query}, Exclude IDs: {exclude_ids}, Mentioned All: {mentioned_all}")
@@ -44,3 +45,5 @@ def list_messages_mention_Api(chat, user, search_query, exclude_ids, mentioned_a
         mention_list.insert(0, {"member_id": "all","member_id__first_name": "All","member_id__last_name": "","member_id__profile_photo_url": '<i class="fas fa-users" style="color:black; font-size:18px;"></i>',})    
     return mention_list
 
+def get_message_mentions(message):
+    return MessageMention.objects.filter(message=message)

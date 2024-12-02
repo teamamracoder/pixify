@@ -104,20 +104,53 @@ class MessageUpdateView(View):
         user = request.user
         message = message_service.get_message_by_id(message_id)
         text = request.POST.get('message', '') 
-        media_url = request.POST.get('media_url', '{}')
-        mentions = request.POST.get('mentions', '')            
+        media_urls = []
+        for file in request.FILES.getlist('media_files'):
+            file_name = default_storage.save(file.name, ContentFile(file.read()))
+            media_url = default_storage.url(file_name)
+            media_urls.append(media_url)
+        
+        mentions = request.POST.get('mentions', '')
+        mention_list = mentions.split(',')       
         mention_ids = []
 
-        if mentions == "all":
-            chat_members = ChatMember.objects.filter(chat_id=message.chat_id).exclude(member_id=request.user)
-            mention_ids = [member.member_id.id for member in chat_members]
-        else:
-            mention_ids = [int(id) for id in re.split('[, ]+', mentions) if id]
-        message_service.update_message(message, text, media_url, user)
-        message_mention_service.delete_message_mentions(message,user)
-        for mentioned_user in mention_ids:
-            message_mention_service.create_message_mentions(message, mentioned_user, user)
+        numeric_ids = [id for id in mention_list if id.isdigit()]
+        mention_ids = numeric_ids[:]
+
+        for username in mention_list:
+            username = username.strip()
+            if username.lower() == 'all': 
+                chat_members = ChatMember.objects.filter(chat_id=message.chat_id).exclude(member_id=user)
+                mention_ids.extend(member.member_id.id for member in chat_members)
+            else:
+                user_obj = User.objects.filter(first_name__iexact=username).first()
+                if user_obj:
+                    mention_ids.append(user_obj.id)
+
+        current_mentions = message_mention_service.get_message_mentions(message)
+        current_mention_ids = set(current_mentions.values_list('user_id', flat=True))
+
+        new_mention_ids = set(mention_ids)
+        removed_mentions = current_mention_ids - new_mention_ids
+        added_mentions = new_mention_ids - current_mention_ids
+
+        print(new_mention_ids)
+        print(removed_mentions)
+        print(added_mentions)
+        print(message)
+
+        message_service.update_message(message, text, media_urls, user)
+
+        for mentioned_user in removed_mentions:
+            mentioned_user_instance = user_service.get_user(mentioned_user)
+            message_mention_service.delete_message_mentions(message, user, [mentioned_user_instance])
+
+        for mentioned_user in added_mentions:
+            mentioned_user_instance = user_service.get_user(mentioned_user)
+            message_mention_service.create_message_mentions(message, mentioned_user_instance, user)
+        
         return redirect('message', chat_id=message.chat_id.id)
+
 
 class MessageDeleteView(View):
     @catch_error
@@ -125,11 +158,19 @@ class MessageDeleteView(View):
     @role_required(Role.ADMIN.value, Role.END_USER.value)
     
     def post(self, request, message_id): 
-        user = request.user
+        auth_user = request.user
         message = message_service.get_message_by_id(message_id)
-        chat_id = message.chat_id.id
-        message_service.delete_message(message, user)
-        message_mention_service.delete_message_mentions(message,user)
+        chat_id = message.chat_id.id        
+        current_mentions = message_mention_service.get_message_mentions(message.id)
+
+        print("hiiiiiiiiiii")
+        print(current_mentions)
+
+        for mentioned_user in current_mentions:            
+            mentioned_user_instance = user_service.get_user(mentioned_user.user_id)
+            message_mention_service.delete_message_mentions(message, auth_user, [mentioned_user_instance])   
+
+        message_service.delete_message(message, auth_user)  
         return redirect('message', chat_id=chat_id)
 
 class MessageReplyCreateView(View): 
@@ -144,24 +185,32 @@ class MessageReplyCreateView(View):
         auth_user = request.user
         message = message_service.get_message_by_id(message_id)
         text = request.POST.get('message', '')
-        media_urls = request.POST.getlist('media_url', '{}')
+        
+        media_urls = []
+        for file in request.FILES.getlist('media_files'):
+            file_name = default_storage.save(file.name, ContentFile(file.read()))
+            media_url = default_storage.url(file_name)
+            media_urls.append(media_url)
+        
         chat_id = request.POST.get('chat_id')
         chat = chat_service.get_chat_by_id(chat_id)
         reply_for_message = message
-        sender_id=auth_user
         mentions = request.POST.get('mentions', '')
- 
+
+        mention_list = mentions.split(',')
         mention_ids = []
-        if '@All' in mentions.split(','):
+
+        if '@All' in mention_list:
             chat_members = ChatMember.objects.filter(chat_id=chat.id).exclude(member_id=auth_user)
-            mention_ids = [member.member_id.id for member in chat_members]
+            mention_ids.extend([member.member_id.id for member in chat_members])
         else:
-            mention_ids = [int(id) for id in re.split('[, ]+', mentions) if id.isdigit()]
-       
-        reply_message=message_service.reply_message(auth_user,text,media_urls,sender_id,chat,reply_for_message)
-        message_read_status_service.create_message_read_status(reply_message,auth_user)
+            mention_ids.extend([int(id) for id in mention_list if id.isdigit()])
+
+        reply_message = message_service.reply_message(auth_user, text, media_urls, auth_user, chat, reply_for_message)
+        message_read_status_service.create_message_read_status(reply_message, auth_user)
         
         for mentioned_user in mention_ids:
-            message_mention_service.create_message_mentions(message, mentioned_user, auth_user)
+            mentioned_user_instance = user_service.get_user(mentioned_user)
+            message_mention_service.create_message_mentions(reply_message, mentioned_user_instance, auth_user)
             
         return redirect('message', chat_id=chat.id)
