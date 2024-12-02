@@ -27,14 +27,14 @@ jobs:
       env:
         HOST: ${{ secrets.HOST }}
         USER: ${{ secrets.USER }}
-        PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+        PRIVATE_KEY: ${{ secrets.MYKEY }}
         PROJECT_PATH: /var/www/pixify
       run: |
        # Write the private key to a temporary file
-        echo "${{ secrets.PRIVATE_KEY }}" > private_key
+        echo "${{ secrets.MYKEY }}" > MYKEY
         chmod 600 private_key
         
-        ssh -i "${{ secrets.PRIVATE_KEY }}" -o StrictHostKeyChecking=no $USER@$HOST << 'EOF'
+        ssh -i "${{ secrets.MYKEY }}" -o StrictHostKeyChecking=no $USER@$HOST << 'EOF'
         cd $PROJECT_PATH
         git pull
         source venv/bin/activate
@@ -43,4 +43,4 @@ jobs:
         sudo systemctl restart nginx
         EOF
          # Clean up the private key
-        rm private_key
+        rm MYKEY
