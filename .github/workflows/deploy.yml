@@ -33,7 +33,7 @@ jobs:
       
 
         # Use SSH with the private key
-        ssh -i private_key -o StrictHostKeyChecking=no $USER@$HOST <<EOF
+        ssh -i myKey -o StrictHostKeyChecking=no $USER@$HOST <<EOF
         cd $PROJECT_PATH
         git pull
         source venv/bin/activate
