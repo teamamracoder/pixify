@@ -62,3 +62,6 @@ def unread_count(chat,user):
 def show_reactions():
     reactions = MasterList.objects.filter(type=MasterType.REACTION.value, is_active=True).values("name", "value")
     return list(reactions) 
+
+def get_latest_message(chat_id):
+    return Message.objects.filter(chat_id=chat_id, is_active=True).order_by('-send_at').first()

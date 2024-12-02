@@ -1,26 +1,44 @@
-from ..models  import  MessageReaction 
-from django.shortcuts import get_object_or_404
+from ..models import MessageReaction,MasterList
 
+def get_active_message_reactions(message_id):
+    reactions = MessageReaction.objects.filter(
+        message_id=message_id,
+        is_active=True
+    ).select_related('reacted_by', 'reaction_id')
+    return reactions
 
-def create_message_reaction(reacted_by,message_id,reaction_type):
-    return MessageReaction.objects.create(
-        reacted_by= reacted_by,
-        message_id = message_id,
-        reaction_type =reaction_type
+def get_reaction_count(message_id, reaction_id):
+    return MessageReaction.objects.filter(
+        message_id=message_id,
+        reaction_id=reaction_id,
+        is_active=True
+    ).count()
+
+def get_reaction_by_name(reaction_name):
+    return MasterList.objects.filter(name=reaction_name).first()
+
+def create_or_update_message_reaction(message_id, user, reaction):
+    reaction_instance, created = MessageReaction.objects.update_or_create(
+        message_id_id=message_id,
+        reacted_by=user,
+        defaults={
+            'reaction_id': reaction,
+            'created_by': user,
+            'is_active': True  
+        }
     )
-    
-def get_message_reaction_by_id(message_id):
-    return get_object_or_404(MessageReaction, id=message_id)
+    return reaction_instance, created
 
-def update_message_reaction(reacted_by,message_reaction,reaction_type):
-    reacted_by= reacted_by,
-    message_reaction = message_reaction,
-    reaction_type = reaction_type
-    message_reaction.save()
-    return message_reaction
+def get_active_reaction(message_id, user):
+    return MessageReaction.objects.filter(
+        message_id=message_id,
+        reacted_by=user,
+        is_active=True
+    ).first()
 
-def delete_message_reaction(message_reaction):
-    message_reaction.is_active=False
-    message_reaction.save()
-     
-    # make this function sourik: get all reactions using message_id
+def deactivate_reaction(reaction_instance):
+    reaction_instance.is_active = False
+    reaction_instance.save()
+    return reaction_instance
+
+

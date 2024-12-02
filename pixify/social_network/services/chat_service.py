@@ -1,5 +1,5 @@
-from ..models import Chat, User, ChatMember,Follower,Message
-from django.contrib.auth.models import User
+from ..constants import ChatType
+from ..models import Chat, User, ChatMember,Follower,Message,MessageReadStatus
 from django.shortcuts import get_object_or_404
 from django.db.models import Max,Q,Subquery,OuterRef,F
 from django.db.models.functions import Coalesce
@@ -8,26 +8,49 @@ from social_network.utils.common_utils import print_log
 
 def list_chats_by_user(user):
     user_chats = Chat.objects.filter(
-        members=user, 
+        members=user,
         is_active=True
-        ).annotate(
-        # Use Coalesce to fallback to created_at if no messages exist
+    ).annotate(
         latest_message_timestamp=Coalesce(
             Max('fk_chat_messages_chats_id__send_at', filter=Q(is_active=True)),
             F('created_at')
         )
-    ).order_by('-latest_message_timestamp')    
-
-    user_chats = user_chats.annotate(
+    ).annotate(
         latest_message=Subquery(
             Message.objects.filter(
-                chat_id=OuterRef('pk'), 
-                is_active=True 
-            ).order_by('-created_at')  
-            .values('text')[:1]  
+                chat_id=OuterRef('pk'),
+                is_active=True
+            ).order_by('-send_at') 
+            .values('text')[:1]
         )
+    ).order_by('-latest_message_timestamp')
+    user_chats = user_chats.filter(
+        Q(latest_message__isnull=False) | Q(type=ChatType.GROUP.value)
     )
-    return user_chats
+    chat_data = []
+    for chat in user_chats:
+        latest_message = Message.objects.filter(chat_id=chat.id).last() 
+        seen_by_all = False  
+        if latest_message:
+            seen_by_all = is_message_seen_by_all(latest_message)
+        
+        chat_data.append({
+            'chat': chat,
+            'seen_by_all': seen_by_all
+        })
+    return chat_data
+
+def is_message_seen_by_all(message):
+    members = User.objects.filter(
+        chatmember__chat_id=message.chat_id,
+        chatmember__is_active=True
+    )
+    read_by_count = MessageReadStatus.objects.filter(
+        message_id=message,
+        is_active=True  
+    ).values('read_by').distinct().count()
+    return read_by_count == members.count()
+
 
 
 def create_chat(user,title,chat_cover,type):
@@ -99,3 +122,10 @@ def get_existing_personal_chat(type, user_id, member):
         if len(members) == 2 and user_id in members and member in members:
             return chat
     return None
+
+def list_chats_by_user_api(user):
+    user_chats = Chat.objects.filter(
+        members=user,
+        is_active=True
+    )
+    return user_chats
