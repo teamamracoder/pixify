@@ -30,7 +30,10 @@ jobs:
         PRIVATE_KEY: ${{ secrets.MYKEY }}
         PROJECT_PATH: /var/www/pixify
       run: |
-      
+      # Write the private key to a temporary file
+        echo "${{ secrets.MYKEY }}" > MYKEY
+        chmod 600 MYKEY
+        
         ssh -i "${{ secrets.MYKEY }}" -o StrictHostKeyChecking=no $USER@$HOST << 'EOF'
         cd $PROJECT_PATH
         git pull
@@ -40,3 +43,5 @@ jobs:
         sudo systemctl restart nginx
         EOF
         
+      # Clean up the private key
+        rm MYKEY
