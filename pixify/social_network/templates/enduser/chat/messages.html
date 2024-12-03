@@ -53,7 +53,7 @@
                             <a href="#" onclick="editMessage('{{ message.id }}', '{{ message.text|escapejs }}')">Edit</a>
                         {% endif %}
                         <a href="#" onclick="deleteMessage('{{ message.id }}')">Delete</a>
-                        <a href="#" onclick="replyToMessage('{{ message.id }}', '{{ message.sender.username }}', '{{ message.text|escapejs }}')">Reply</a>
+                        <a href="#" onclick="replyToMessage('{{ message.id }}', '{{ message.sender_id.first_name|escapejs }}', '{{ message.text|escapejs }}')">Reply</a>
                     </div>
                     <div class="reaction-popup" id="reaction-popup-{{ message.id }}" style="display: none;">
                         <span onclick="addReaction('{{ message.id }}', '👍')">👍</span>
@@ -97,7 +97,7 @@
                             <a href="#" onclick="editMessage('{{ message.id }}', '{{ message.text|escapejs }}')">Edit</a>
                         {% endif %}
                         <a href="#" onclick="deleteMessage('{{ message.id }}')">Delete</a>
-                        <a href="#" onclick="replyToMessage('{{ message.id }}', '{{ message.sender.username }}', '{{ message.text|escapejs }}')">Reply</a>
+                        <a href="#" onclick="replyToMessage('{{ message.id }}', '{{ message.sender_id.first_name|escapejs }}', '{{ message.text|escapejs }}')">Reply</a>
                     </div>
                     <div class="reaction-popup" id="reaction-popup-{{ message.id }}" style="display: none;">
                         <span onclick="addReaction('{{ message.id }}', '👍')">👍</span>
@@ -115,7 +115,7 @@
         <div id="reply-preview" style="display: none;">
             <div class="reply-message">
                 <span class="close-reply" onclick="cancelReply()">✖</span>
-                <span class="reply-username"></span>: <span class="reply-text"></span>
+                <span class="reply-username"></span><span style="color:black">:</span> <span class="reply-text"></span>
             </div>
         </div>
         <form id="messageForm" method="POST" action="{% url 'message_create' %}" enctype="multipart/form-data">
@@ -821,10 +821,6 @@
         background-color: #f0f0f0;
     }
 
-    #mention-suggestions {
-        transform: translateY(-100%);
-        margin-bottom: 10px;
-    }
     .message-footer {
         position: relative;
         display: flex;
@@ -901,13 +897,14 @@
 
     .parmess-modal-content {
         background-color: #fefefe;
-        margin-top: 21%;
+        margin-top: 35%;
         margin-left: 33%;
         padding: 20px;
         border: 1px solid #888;
         width: 250px;
         max-height: 40%;
         overflow-y: auto;
+        transform: translateY(-100%);
     }
 
     .parmess-close {
@@ -1019,6 +1016,17 @@
         background-color: #3e2b5c;
     }
 
+    .reply-username{
+        color:black;
+        font-weight:bold;
+    }
+    .reply-text{
+        color:black;
+    }
+
+    .close-reply{
+        color:red;
+    }
     /*End Partha*/    
     
 </style>

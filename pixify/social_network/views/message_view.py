@@ -75,8 +75,7 @@ class MessageCreateView(View):
                 user_obj = User.objects.filter(first_name__iexact=username).first()
                 if user_obj:
                     mention_ids.append(user_obj.id)
-
-        print(mention_ids)        
+              
         media_urls = []
         for file in request.FILES.getlist('media_files'):
             file_name = default_storage.save(file.name, ContentFile(file.read()))
@@ -134,11 +133,6 @@ class MessageUpdateView(View):
         removed_mentions = current_mention_ids - new_mention_ids
         added_mentions = new_mention_ids - current_mention_ids
 
-        print(new_mention_ids)
-        print(removed_mentions)
-        print(added_mentions)
-        print(message)
-
         message_service.update_message(message, text, media_urls, user)
 
         for mentioned_user in removed_mentions:
@@ -162,9 +156,6 @@ class MessageDeleteView(View):
         message = message_service.get_message_by_id(message_id)
         chat_id = message.chat_id.id        
         current_mentions = message_mention_service.get_message_mentions(message.id)
-
-        print("hiiiiiiiiiii")
-        print(current_mentions)
 
         for mentioned_user in current_mentions:            
             mentioned_user_instance = user_service.get_user(mentioned_user.user_id)
