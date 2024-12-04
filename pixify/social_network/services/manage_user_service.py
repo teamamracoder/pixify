@@ -14,15 +14,16 @@ def manage_get_user(user_id):
 def manage_create_user(**kwargs):
     user = User.objects.create(
         first_name=kwargs['first_name'],
-        # middle_name=kwargs['middle_name'],
+        middle_name=kwargs['middle_name'],
         last_name=kwargs['last_name'],
-        # dob=kwargs['dob'],
         email=kwargs['email'],
-        # address=kwargs['address'],
-        # gender=kwargs['gender'],
-        # relationship_status=kwargs['relationship_status'],
-        # hobbies=kwargs['hobbies'],
-        roles=kwargs['roles']    
+        dob=kwargs['dob'],
+        address=kwargs['address'],
+        gender=kwargs['gender'],
+        relationship_status=kwargs['relationship_status'],
+        hobbies=kwargs['hobbies'],
+        roles=kwargs['roles'],
+        created_by=kwargs['created_by'] 
     )
     return user
 
@@ -45,7 +46,7 @@ def manage_list_users_filtered(search_query, sorting_order, sort_by, page_number
         GetData(User)
         .search(search_query,"first_name","last_name", "email")
         .sort(sort_by, sorting_order)
-        .paginate(limit=3, page=page_number)
+        .paginate(limit=10, page=page_number)
         .execute()
     )
     # return data

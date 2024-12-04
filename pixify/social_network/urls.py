@@ -14,9 +14,8 @@ urlpatterns = [
     path('admin/users/profile', views.ManageUserProfileView.as_view(), name='user_profile'),
     path('admin/users/toggle-active/<int:user_id>/', views.ManageToggleUserActiveView.as_view(), name='toggle_user_active'),
     path('admin/users/create/', views.ManageUserCreateView.as_view(), name='user_create'),
-    path('admin/users/<int:user_id>/', views.ManageUserDetailView.as_view(), name='user_detail'),
+    path('admin/users/<int:user_id>/detail/', views.ManageUserDetailView.as_view(), name='user_detail'),
     path('admin/users/<int:user_id>/update/', views.ManageUserUpdateView.as_view(), name='user_update'),
-    path('admin/users/<int:user_id>/delete/', views.ManageUserDeleteView.as_view(), name='user_delete'),
 
     path('change-my-theme/', views.ChangeMyThemeView.as_view(), name='change_my_theme'),
 
