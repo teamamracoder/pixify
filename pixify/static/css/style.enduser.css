@@ -561,7 +561,33 @@ i {
 
 
 }
-
+.center-bodycontent ::-webkit-scrollbar {
+    width: 1px;
+  }
+  .com ::-webkit-scrollbar {
+      width: 1px;
+    }
+  html {
+      scroll-behavior: smooth;
+      
+    }
+/* comment modal reponsiv by priya */
+    @media (max-width: 768px) {
+    .comment-div {
+        flex-direction: column;
+     
+            }
+            
+        }
+        @media (max-width: 480px) {
+            .comment-div {
+                flex-direction: column;
+               
+            } 
+             
+                
+        }
+ 
 /* side bar */
 
 
@@ -1786,17 +1812,4 @@ textarea::placeholder {
     outline: none;
     border: none;
 }
-
-
-  .center-bodycontent ::-webkit-scrollbar {
-    width: 1px;
-  }
-  .com ::-webkit-scrollbar {
-      width: 1px;
-    }
-  html {
-      scroll-behavior: smooth;
-      
-    }
-  
 /*End Subhasis*Thank you for your business! We look forward to working with you again.

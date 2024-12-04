@@ -130,8 +130,9 @@ urlpatterns = [
 
    
     #comment 
-    path('comments/', views.CommentsCreateView.as_view(), name='comments'),
-    path('',views.CommentsListView.as_view(), name='comments_list'),
+    # path('comments/<int:post_id>/', views.CommentsCreateView.as_view(), name='comments'),
+    path('comments/',  views.CommentsCreateView.as_view(), name='comment'),
+    path('comments/getComment/',views.CommentsListView.as_view(), name='comments_list'),
     # path('<int:post_id>/',views.UserPostDetail.as_view(),name="Userdetail" ),
 
 

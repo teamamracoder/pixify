@@ -10,6 +10,44 @@ from ..models import User
 from django.core.paginator import Paginator
 
 
+
+from datetime import datetime, timedelta, timezone
+from django.utils.timezone import now
+
+# def time_ago(time):
+#     diff = now() - time
+#     seconds = diff.total_seconds()
+#     minutes = seconds // 60
+#     hours = minutes // 60
+#     days = hours // 24
+
+#     if seconds < 60:
+#         return "just now"
+#     elif minutes < 60:
+#         return f"{int(minutes)}m"
+#     elif hours < 24:
+#         return f"{int(hours)}h"
+#     elif days < 7:
+#         return f"{int(days)}d"
+#     else:
+#         return time.strftime('%b %d, %Y')
+def time_ago(dt):
+    now = datetime.now(timezone.utc)
+    diff = now - dt
+
+    seconds = diff.total_seconds()
+    if seconds < 60:
+        return "just now"
+    elif seconds < 3600:
+        return f"{int(seconds // 60)} minutes ago"
+    elif seconds < 86400:
+        return f"{int(seconds // 3600)} hours ago"
+    elif seconds < 604800:
+        return f"{int(seconds // 86400)} days ago"
+    else:
+        return f"{int(seconds // 604800)} weeks ago"
+    
+    
 class AdminPostListView(View):
     def get(self, request):
         # Fetch the search query from the URL parameters
@@ -130,13 +168,16 @@ class UserPostCreatView(View):
 
 
 
-#display post for enduser create by priya
+# display post for enduser create by priya
 class UserPostListView(View):
     def get(self, request):
+        
         posts = services.post_service.Postlist_posts()
+        
         post_dict={
                   'posts':posts,
                   'name':'priya',
+                  'count_commnet' :services.comment_service.get_count_comment()
                 }
         return render(request, 'enduser/home/index.html', {'post_dict': post_dict})
     
