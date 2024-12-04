@@ -12,24 +12,25 @@
                     <h2 class="text-info">Create User</h2>
                 </div>
                 <div class="card-body">
-                    <form method="post">
+                    <form method="post" id="user_form">
                         {% csrf_token %}
+                        {{ data.user_form.as_p }}
                         <div class="row">
-                            <div class="form-group col-md-4 mb-3">
+                            <div class="form-group col-md-4 col-lg-4 col-sm-12 mb-3">
                                 {{ form.first_name.label }}
                                 {{ form.first_name }}
                                 {% if form.first_name.errors %}
                                     <div class="text-danger">{{ form.first_name.errors }}</div>
                                 {% endif %}
                             </div>
-                            <div class="form-group col-md-4 mb-3">
+                            <div class="form-group col-md-4 col-lg-4 col-sm-12 mb-3">
                                 {{ form.middle_name.label }}
                                 {{ form.middle_name }}
                                 {% if form.middle_name.errors %}
                                     <div class="text-danger">{{ form.middle_name.errors }}</div>
                                 {% endif %}
                             </div>
-                            <div class="form-group col-md-4 mb-3">
+                            <div class="form-group col-md-4 col-lg-4 col-sm-12 mb-3">
                                 {{ form.last_name.label }}
                                 {{ form.last_name }}
                                 {% if form.last_name.errors %}
@@ -39,31 +40,58 @@
                         </div>
                     
                         <div class="row">
-                            <div class="form-group col-md-6 mb-3">
+                            <div class="form-group col-md-4 col-lg-4 col-sm-12 mb-3">
                                 {{ form.email.label }}
                                 {{ form.email }}
                                 {% if form.email.errors %}
                                     <div class="text-danger">{{ form.email.errors }}</div>
                                 {% endif %}
                             </div>
-                            <div class="form-group col-md-6 mb-3">
+                            
+                            <div class="form-group col-md-4 col-lg-4 col-sm-12 mb-3">
+                                {{ form.gender.label }}
+                                <select id="gender" name="gender" class="form-select">
+                                    <!-- Default "None" option -->
+                                    <option value="" selected>Select Gender</option>
+                                    {% for gender in choices_gender %}
+                                        {% for name, value in gender.items %}
+                                            <option value="{{ name }}" {% if user.gender == name %}selected{% endif %}>{{ value }}</option>
+                                        {% endfor %}
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="form-group col-md-4 col-lg-4 col-sm-12 mb-3">
+                                {{ form.relationship_status.label }}
+                                <select id="relationship_status" name="relationship_status" class="form-select">
+                                    <!-- Default "None" option -->
+                                    <option value="" selected>Select Status</option>
+                                    {% for choices_relationship in choices_relationship %}
+                                        {% for name, value in choices_relationship.items %}
+                                            <option value="{{ name }}" {% if user.relationship_status == name %}selected{% endif %}>{{ value }}</option>
+                                        {% endfor %}
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-md-4 col-lg-4 col-sm-12 mb-3">
                                 {{ form.hobbies.label }}
                                 {{ form.hobbies }}
                                 {% if form.hobbies.errors %}
                                     <div class="text-danger">{{ form.hobbies.errors }}</div>
                                 {% endif %}
                             </div>
-                        </div>
-                    
-                        <div class="row">
-                            <div class="form-group col-md-4 mb-3">
+                            
+
+                            <div class="form-group col-md-4 col-lg-4 col-sm-12 mb-3">
                                 {{ form.dob.label }}
                                 {{ form.dob }}
                                 {% if form.dob.errors %}
                                     <div class="text-danger">{{ form.dob.errors }}</div>
                                 {% endif %}
                             </div>
-                            <div class="form-group col-md-4 mb-3">
+                            <div class="form-group col-md-4 col-lg-4 col-sm-12 mb-3">
                                 {{ form.address.label }}
                                 {{ form.address }}
                                 {% if form.address.errors %}
@@ -76,13 +104,51 @@
                             <a href="{% url 'user_list' %}" class="btn btn-sm btn-outline-secondary">Back</a>
                             <button type="submit" class="btn btn-sm btn-primary">Save</button>
                         </div>
-                    </form>
-                    
-                    
+                    </form>    
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+
+<script>
+    $(document).ready(function () {
+        $("#user_form").validate({
+            rules: {
+                first_name: {
+                    required: true,
+                    minlength: 2,
+                    maxlength: 50
+                },
+                last_name: {
+                    required: true,
+                    minlength: 2,
+                    maxlength: 150
+                },
+                email: {
+                    required: true,
+                    maxlength: 150
+                },
+            },
+            messages: {
+                first_name: {
+                    required: "Please enter firstname.",
+                    minlength: "firstname must be at least 2 characters.",
+                    maxlength: "firstname cannot exceed 50 characters."
+                },
+                last_name: {
+                    required: "Please enter lastname.",
+                    minlength: "lastname must be at least 2 characters.",
+                    maxlength: "lastname cannot exceed 20 characters."
+                },
+                email: {
+                    required: "Please enter email.",
+                    maxlength: "email cannot exceed 50 characters."
+                },
+            }
+        });
+    });
+</script>
 
 {% endblock %}
