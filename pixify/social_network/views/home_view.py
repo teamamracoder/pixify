@@ -1,6 +1,7 @@
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 from django.views import View
 
+from .. models.post_model import Post
 from social_network import services
 from social_network.constants.default_values import Role
 from social_network.decorators.exception_decorators import catch_error
@@ -17,16 +18,20 @@ class HomeView(View):
     def get(self, request):
         message = request.session.pop("message", "")
         message_type = request.session.pop("message_type", "")
-        # user post create by priya
+        
         posts =services.post_service.Postlist_posts()
-        comment_list=services.comment_service.comment_list()
-
+       
+        post_id = request.GET.get('post_id')
+        
+        comment_list = services.comment_service.comment_list(post_id)
         post_dict={
                   'posts':posts,
                   'name':'priya',
                   'comment_list':comment_list,
-                  'count_commnet' :services.comment_service.get_count_comment(15)
-                  
+               
+
+                  'count_commnet' :services.comment_service.get_count_comment(55),
+                 
                 }
         
         context = success_response(message=message, message_type=message_type)
