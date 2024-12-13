@@ -118,6 +118,7 @@ urlpatterns = [
     path('message-reactions/<int:message_id>/', views.MessageReactionsListView.as_view(), name='message_reaction'),
     path('message-reaction/create/', views.MessageReactionCreateView.as_view(), name='message_reaction_create'),
     path('message-reaction/delete/', views.MessageReactionDeleteView.as_view(), name='message_reaction_delete'),
+    path('reaction-details/<int:message_id>/<str:reaction_type>/', views.ReactionDetailsView.as_view(), name='reaction-details'),
 
     # message mention list api
     path('message-mention/<int:chat_id>/', views.MessageMentionListViewApi.as_view(), name='message_mention'),
