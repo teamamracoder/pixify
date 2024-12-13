@@ -4,6 +4,15 @@
 
 {% block content %}
 {% load static %}
+
+{% if success_message %}
+    <script>
+        $(document).ready(function() {
+            toastr.success("{{ success_message }}");
+        });
+    </script>
+{% endif %}
+
 <div class="chat-container">
     <div class="chat-header">
         <div class="user-info">
@@ -570,6 +579,17 @@
 
     observer.observe(chatBody, { childList: true });
 
+    //Toast notification implementation
+    $(document).ready(function() {
+        const urlParams = new URLSearchParams(window.location.search); 
+        const message = urlParams.get('message');
+        if (message)
+        { toastr.success(decodeURIComponent(message)); } 
+    });
+
+    document.addEventListener('DOMContentLoaded', function() { 
+        document.getElementById('message-input').focus(); 
+    });
 
 </script>
 

@@ -8,6 +8,7 @@ from django.http import JsonResponse
 from ..constants import ChatType
 from django.utils import timezone
 import json
+from social_network.constants.success_messages import SuccessMessage
 class ChatListView(View):
     @catch_error
     @auth_required
@@ -106,17 +107,29 @@ class ChatCreateView(View):
         members = data.get('members', [])
 
         if chat_type == ChatType.PERSONAL.value:
+
             member = members[0]
             existing_chat = chat_service.get_existing_personal_chat(chat_type,user.id, member)
             if existing_chat:
-                return JsonResponse({'chat_id': existing_chat.id})
+
+                return JsonResponse({
+                    'chat_id': existing_chat.id,
+                    'message':SuccessMessage.S000008.value
+                    }                
+                )                
 
             chat = chat_service.create_chat(user, None, None, ChatType.PERSONAL.value)
             chat_member_service.create_chat_member(chat.id, user.id, user)
             chat_member_service.create_chat_member(chat.id, member, user)
-            return JsonResponse({'chat_id': chat.id})
+
+            return JsonResponse({
+                'chat_id': chat.id,
+                'message':SuccessMessage.S000007.value
+                }                
+            )            
 
         elif chat_type == ChatType.GROUP.value:
+
             title = data.get('title', '')
             chat_cover = data.get('chat_cover', '')
             chat = chat_service.create_chat(user, title, chat_cover, chat_type)
@@ -124,7 +137,12 @@ class ChatCreateView(View):
             for member in members:
                 chat_member_service.create_chat_member(chat.id, member, user)
 
-            return JsonResponse({'chat_id': chat.id})
+            # return JsonResponse({'chat_id': chat.id})
+            return JsonResponse({
+                'chat_id': chat.id,
+                'message':SuccessMessage.S000007.value
+                }                
+            )
  
 class ChatDetailsView(View):
     def get(self, request,chat_id):
