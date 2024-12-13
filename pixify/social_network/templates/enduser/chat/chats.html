@@ -84,33 +84,38 @@
                         {{ chat.title }}
                     </a>
                 </p>
-                {% if chat.latest_message %}
-                   <p class="chat-message chat_title">{{ chat.latest_message }}</p>
-                {% else %}
-                   <p class="chat-message chat_title">No messages yet</p>
-                {% endif %}
+                <div style="display:flex">
+                <span class="timestamp">
+                    {% if chat.is_group %}
+                        {% if chat.seen_by_all %}
+                            ✔️✔️
+                            {% else %}
+                            <!-- Show single tick if not seen by all -->
+                            ✔️
+                        {% endif %}
+                    {% else %}
+                        {% if chat.seen_by_all %}
+                        ✔️✔️
+                        {% else %}
+                    <!-- Show single tick if not seen by all -->
+                        ✔️
+                        {% endif %}
+                    {% endif %}
+                    </span>
+                    <span>
+                        {% if chat.latest_message %}
+                            <p class="chat-message chat_title">{{ chat.latest_message }}</p>
+                        {% else %}
+                            <p class="chat-message chat_title">No messages yet</p>
+                        {% endif %}
+                    </span>
+                </div>
             </div>
         
             <!-- Right-aligned Section -->
             <div class="badge-div">
                 <span class="badge unread-messages">{{ chat.unread_messages }}</span>
                 <span class="timestamp">{{ chat.latest_message_timestamp }}</span>
-                
-                {% if chat.is_group %}
-                    {% if chat.latest_message %}
-                        {% if chat.seen_by_all %}
-                            <span class="message-seen"><i class="fa-solid fa-check-double" style="color: #06bec1;"></i></span>  <!-- Double check icon -->
-                        {% else %}
-                            <span class="message-sent"><i class="fa fa-check"></i></span>  <!-- Single check icon -->
-                        {% endif %}
-                    {% endif %}
-                {% else %}
-                    {% if chat.seen_by_all %}
-                        <span class="message-seen"><i class="fa-solid fa-check-double" style="color: #06bec1;"></i></span>  <!-- Double check icon -->
-                    {% else %}
-                        <span class="message-sent"><i class="fa fa-check"></i></span>  <!-- Single check icon -->
-                    {% endif %}
-                {% endif %}
             </div>
         </div>
     </div>
@@ -608,7 +613,7 @@ $(document).ready(function () {
     display: flex;
     flex-direction: column;
     align-items: flex-end;
-    gap: 5px;
+    gap: 15px;
     width: 80px; /* Fixed width for consistent alignment */
 }
 

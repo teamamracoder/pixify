@@ -3,7 +3,7 @@ from django.views import View
 from social_network.constants.default_values import Role
 from ..decorators import auth_required, role_required
 from social_network.decorators.exception_decorators import catch_error
-from ..services import chat_service, user_service,message_service, chat_member_service
+from ..services import chat_service, user_service,message_service, chat_member_service,message_reaction_service
 from django.http import JsonResponse
 from ..constants import ChatType
 from django.utils import timezone
@@ -134,10 +134,16 @@ class ChatDetailsView(View):
     def get(self, request, chat_id):
         user = request.user
         chat = chat_service.get_chat_by_id(chat_id)
-        reactions = message_service.show_reactions()
+        reactions = message_reaction_service.show_reactions()
         messages = message_service.list_messages_by_chat_id(chat_id, user.id)
+
+        # Check if each message has been seen by all members
+        for message in messages:
+            message.seen_by_all = chat_service.is_message_seen_by_all(message)
+
         latest_message = message_service.get_latest_message(chat_id)
         seen_by_all = False
+
         if latest_message:
             seen_by_all = chat_service.is_message_seen_by_all(latest_message)
 
@@ -153,8 +159,6 @@ class ChatDetailsView(View):
             title = chat_service.get_recipients_for_group(chat.id, user)
             if chat.title:
                 title = chat.title
-            else:
-                title = title
             if chat.chat_cover:
                 chat_cover = chat.chat_cover
             else:
@@ -165,7 +169,7 @@ class ChatDetailsView(View):
             'title': title,
             'chat_cover': chat_cover,
             'is_group': chat.type == ChatType.GROUP.value,
-            'seen_by_all': seen_by_all 
+            'seen_by_all': seen_by_all  # This is for the latest message
         }
 
         return render(request, 'enduser/chat/messages.html', {
@@ -174,6 +178,8 @@ class ChatDetailsView(View):
             'user': user,
             'reactions': reactions
         })
+
+
 
 class ChatUpdateView(View):   
     @catch_error

@@ -15,7 +15,6 @@ class MessageReactionsListView(View):
             reactions =message_reaction_service.get_active_message_reactions(message_id)
             reaction_data = [
                 {
-                    'user': reaction.reacted_by.first_name + reaction.reacted_by.last_name,
                     'reaction': reaction.reaction_id.value,
                     'reaction_count': message_reaction_service.get_reaction_count(message_id, reaction.reaction_id)
                 }
@@ -33,9 +32,9 @@ class MessageReactionCreateView(View):
         try:
             data = json.loads(request.body)
             message_id = data.get('message_id')
-            reaction_name = data.get('reaction_name')
+            reaction_id = data.get('reaction_id')
             user = request.user
-            reaction = message_reaction_service.get_reaction_by_name(reaction_name)
+            reaction = message_reaction_service.get_reaction_by_name(reaction_id)
             if not reaction:
                 return JsonResponse({'success': False, 'error': 'Invalid reaction'}, status=400)
             message_reaction_service.create_or_update_message_reaction(message_id, user, reaction)
@@ -63,6 +62,17 @@ class MessageReactionDeleteView(View):
 
         except Exception as e:
             return JsonResponse({'success': False, 'error': str(e)}, status=400)
+
+class ReactionDetailsView(View):
+    @catch_error
+    @auth_required
+    @role_required(Role.ADMIN.value, Role.END_USER.value)
+    def get(self, request, message_id, reaction_type):
+        try:
+            reaction_data = message_reaction_service.get_reaction_details(message_id, reaction_type)
+            return JsonResponse(reaction_data, status=200)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
 
     
 
