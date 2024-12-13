@@ -323,13 +323,45 @@ $(document).ready(function () {
     } else {
         console.error("Arrow button element not found!");
     }
-
+    
     // Redirect to chat with the selected user
     window.redirectToChat = function (userId) {
         if (redirectEnabled) {
-            createChat(1, [userId]); // Pass an array with the single userId
+            checkExistingChat(userId, function (existingChat) {
+                if (existingChat && existingChat.chat_id) {
+                    // Redirect to the existing chat
+                    window.location.href = '/chat/' + existingChat.chat_id + '/message/?message=' + encodeURIComponent(existingChat.message || ''); 
+                } else {
+                    // Create a new chat if no existing chat is found
+                    createChat(1, [userId]);
+                }
+            });
         }
+    };
+
+    // Function to check if a chat already exists
+    function checkExistingChat(userId, callback) {
+        $.ajax({
+            url: '/chat/create/', // Endpoint to check or create chat
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({
+                type: 1, // Chat type (personal chat)
+                members: [userId], // User ID to check chat with
+                _token: $('meta[name="csrf-token"]').attr('content') // CSRF token for security
+            }),
+            success: function (res) {
+                // Pass the response to the callback function
+                callback(res);
+            },
+            error: function (xhr, status, error) {
+                console.log('Error:', xhr, status, error);
+                // Call callback with null on error
+                callback(null);
+            }
+        });
     }
+
 
     $.ajaxSetup({
         headers: {
@@ -348,8 +380,8 @@ $(document).ready(function () {
                 members: members,
                 _token: $('meta[name="csrf-token"]').attr('content') // CSRF token for security
             }),
-            success: function (res) {
-                window.location.href = '/chat/' + res.chat_id;
+           success: function (res) { 
+            window.location.href = '/chat/' + res.chat_id + '/message/?message=' + encodeURIComponent(res.message); 
             },
             error: function (xhr, status, error) {
                 console.log('Error:', xhr, status, error);

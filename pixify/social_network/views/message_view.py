@@ -9,6 +9,7 @@ from ..decorators import auth_required, role_required
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from ..constants import ChatType
+from social_network.constants.success_messages import SuccessMessage
 
 class MessageListView(View):
     @catch_error
@@ -18,6 +19,8 @@ class MessageListView(View):
         user =request.user 
         chat = chat_service.get_chat_by_id(chat_id)
         messages = message_service.list_messages_by_chat_id(chat_id,user.id)
+        success_message = request.session.pop('success_message', None)
+
         if chat.type == ChatType.PERSONAL.value:
             member = chat_service.get_recipient_for_personal(chat.id, user) 
             if member:
@@ -43,8 +46,14 @@ class MessageListView(View):
             'is_group' :chat.type==ChatType.GROUP.value,
             'type':chat.type
         }
-        # chat_data.append(chat_info)       
-        return render(request, 'enduser/chat/messages.html',{'chat':chat_info,'messages':messages,'user':user})
+
+        return render(request, 'enduser/chat/messages.html', {
+            'chat': chat_info,
+            'messages': messages,
+            'user': user, 
+            'success_message': success_message 
+            }
+        )
      
 
 class MessageCreateView(View):
@@ -88,6 +97,9 @@ class MessageCreateView(View):
         for user in mention_ids:
             mentioned_user = user_service.get_user(user)
             message_mention_service.create_message_mentions(message, mentioned_user, auth_user)
+
+        # Store the success message in the session 
+        request.session['success_message'] = SuccessMessage.S000009.value
         
         return redirect('message', chat_id=chat.id)
 
@@ -143,6 +155,7 @@ class MessageUpdateView(View):
             mentioned_user_instance = user_service.get_user(mentioned_user)
             message_mention_service.create_message_mentions(message, mentioned_user_instance, user)
         
+        request.session['success_message'] = SuccessMessage.S000010.value
         return redirect('message', chat_id=message.chat_id.id)
 
 
@@ -162,6 +175,8 @@ class MessageDeleteView(View):
             message_mention_service.delete_message_mentions(message, auth_user, [mentioned_user_instance])   
 
         message_service.delete_message(message, auth_user)  
+
+        request.session['success_message'] = SuccessMessage.S000011.value
         return redirect('message', chat_id=chat_id)
 
 class MessageReplyCreateView(View): 
@@ -203,5 +218,6 @@ class MessageReplyCreateView(View):
         for mentioned_user in mention_ids:
             mentioned_user_instance = user_service.get_user(mentioned_user)
             message_mention_service.create_message_mentions(reply_message, mentioned_user_instance, auth_user)
-            
+
+        request.session['success_message'] = SuccessMessage.S000012.value            
         return redirect('message', chat_id=chat.id)
