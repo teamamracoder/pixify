@@ -865,12 +865,6 @@ $(document).ready(function() {
     margin-bottom: 20px;
 }
 
-.parchat-input-wrapper {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 20px;
-}
-
 .parchat-profile-grid {
     display: flex;
     flex-wrap: wrap;
@@ -919,7 +913,6 @@ $(document).ready(function() {
     margin-top: 10px;
 }
 
-.parchat-form-control,
 .parchat-btn,
 .parchat-btn-outline-secondary {    
     background:none;    
@@ -929,7 +922,8 @@ $(document).ready(function() {
 }
 
 .parchat-form-control {
-
+    background:none;
+    padding:10px;
     flex-grow: 1;
 }
 
@@ -995,6 +989,37 @@ $(document).ready(function() {
     cursor: pointer;
     font-size: 20px;
 }
+
+.parchat-input-wrapper {
+    display: flex;
+    align-items: center;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 5px;
+    max-width: 300px;
+    margin: 0 auto;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.parchat-form-control {
+    background: none;
+    padding: 10px;
+    flex-grow: 1;
+    border: none;
+    outline: none;
+    font-size: 16px;
+}
+
+.parchat-form-control::placeholder {
+    color: #aaa;
+}
+
+.parchat-input-wrapper:focus-within {
+    border-color: #007BFF;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
 
 </style>
 </div>
