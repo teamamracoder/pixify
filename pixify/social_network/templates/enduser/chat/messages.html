@@ -45,11 +45,16 @@
                             <img src="{{ message.sender_id.profile_photo_url|default:'\static\images\avatar.jpg' }}" alt="Sender Profile Pic" class="message-profile-pic">
                             <span class="message-username">{{ message.sender_id.first_name }}</span>
                         </div>
-                        <span class="text-dark">{{ message.text }}</span>
+                        <span class="edited-message">{{ message.text }}</span>
                         {% if message.media_url %}
                             <span>{{ message.media_url }}</span>
                         {% endif %}
                     </div>
+                        {% if message.updated_by %}                            
+                            <div class="edited-messages">                                
+                                <span class="edited-message" id="edited_tag">(Edited)</span></span>
+                            </div>
+                        {% endif %}
                     <div class="message-footer">
                         <span class="time">{{ message.created_at|date:"h:i A" }}</span>
                         <div>
@@ -94,6 +99,11 @@
                             <span>{{ message.media_url }}</span>
                         {% endif %}
                     </div>
+                        {% if message.updated_by %}                            
+                            <div class="edited-messages">                                
+                                <span class="edited-message" id="edited_tag">(Edited)</span></span>
+                            </div>
+                        {% endif %}                    
                     <div class="message-footer">
                         <span class="time">{{ message.created_at|date:"h:i A" }}</span>
                         <div>
@@ -1046,6 +1056,9 @@
 
     .close-reply{
         color:red;
+    }
+    .edited-message{
+        color:black;
     }
     /*End Partha*/    
     
