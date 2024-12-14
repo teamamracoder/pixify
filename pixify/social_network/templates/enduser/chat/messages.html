@@ -162,14 +162,16 @@
             </div>
         </form>
         <!-- File upload warning modal -->
-        <div id="fileWarningModal" class="parmess-modal">
-            <div class="parmess-modal-content">
+        <div id="fileWarningModal" class="parmess-file-modal">
+            <div class="parmess-file-modal-content">
                 <span class="parmess-close">&times;</span>
-                <p style="color:red">You can only upload up to 10 files at a time.</p>
+                <!-- Warning message dynamically updated by JS -->
+                <span class="parmess-warning-text" style="text-align: center; display: block; margin-top: 20px; font-size: 16px;"></span>
             </div>
         </div>
     </div>
 </div>
+
 
 <script>
 
@@ -421,7 +423,8 @@
         const files = Array.from(fileInput.files);
         const maxFiles = 10;
         const modal = document.getElementById('fileWarningModal');
-        const span = document.getElementsByClassName('parmess-close')[0];
+        const modalWarningText = document.querySelector('.parmess-warning-text'); // Select the warning text span
+        const span = document.querySelector('.parmess-close'); // Ensure proper modal close button selection
         const filePreviewsDiv = document.getElementById('file-previews');
 
         // Close the modal
@@ -429,76 +432,78 @@
             modal.style.display = 'none';
         };
 
-        // Close modal when clicking outside
-        window.onclick = function (event) {
-            if (event.target === modal) {
-                modal.style.display = 'none';
-            }
-        };
+    // Close modal when clicking outside
+    window.onclick = function (event) {
+        if (event.target === modal) {
+            modal.style.display = 'none';
+        }
+    };
 
-        // If more than 10 files are selected, show the warning modal
-        if (files.length + fileArray.length > maxFiles) {
+    // If more than 10 files are selected, show the warning modal
+    if (files.length + fileArray.length > maxFiles) {
+        modalWarningText.textContent = 'You can only upload up to 10 files at a time.';
+        modal.style.display = 'block';
+        fileInput.value = ''; // Reset the file input
+    } else {
+        const newFiles = files.filter(file => !selectedFiles.has(file.name));
+
+        if (newFiles.length < files.length) {
+            modalWarningText.textContent = 'Some files were already selected and will be ignored. Please check your selection.';
             modal.style.display = 'block';
-            fileInput.value = ''; // Reset the file input
-        } else {
-            const newFiles = files.filter(file => !selectedFiles.has(file.name));
+        }
 
-            if (newFiles.length < files.length) {
-                alert('Some files were already selected and will be ignored. Please check your selection.');
-            }
+        // Add new files to the existing array and update selectedFiles
+        fileArray.push(...newFiles);
+        newFiles.forEach(file => selectedFiles.add(file.name));
 
-            // Add new files to the existing array and update selectedFiles
-            fileArray.push(...newFiles);
-            newFiles.forEach(file => selectedFiles.add(file.name));
+        // Process each selected file
+        const updatePreviews = (files) => {
+            filePreviewsDiv.innerHTML = ''; // Clear current previews
+            files.forEach((file, index) => {
+                const fileReader = new FileReader();
 
-            // Process each selected file
-            const updatePreviews = (files) => {
-                filePreviewsDiv.innerHTML = ''; // Clear current previews
-                files.forEach((file, index) => {
-                    const fileReader = new FileReader();
+                fileReader.onload = function (event) {
+                    const previewDiv = document.createElement('div');
+                    previewDiv.className = 'parmess-file-preview';
 
-                    fileReader.onload = function (event) {
-                        const previewDiv = document.createElement('div');
-                        previewDiv.className = 'parmess-file-preview';
-
-                        const removeButton = document.createElement('button');
-                        removeButton.innerHTML = '&times;';
-                        removeButton.className = 'remove-button';
-                        removeButton.onclick = function () {
-                            previewDiv.remove();
-                            selectedFiles.delete(file.name);
-                            fileArray.splice(index, 1);
-                            const newFileList = new DataTransfer();
-                            fileArray.forEach(f => newFileList.items.add(f));
-                            fileInput.files = newFileList.files;
-                        };
-
-                        if (file.type.startsWith('image/')) {
-                            const img = document.createElement('img');
-                            img.src = event.target.result;
-                            img.style.maxHeight = '100px'; // Adjusted preview size
-                            previewDiv.appendChild(img);
-                        } else if (file.type.startsWith('video/')) {
-                            const video = document.createElement('video');
-                            video.src = event.target.result;
-                            video.controls = true;
-                            video.style.maxHeight = '100px'; // Adjusted preview size
-                            previewDiv.appendChild(video);
-                        } else {
-                            // Display the file name for non-media files
-                            previewDiv.textContent = file.name;
-                        }
-
-                        previewDiv.appendChild(removeButton);
-                        filePreviewsDiv.appendChild(previewDiv);
+                    const removeButton = document.createElement('button');
+                    removeButton.innerHTML = '&times;';
+                    removeButton.className = 'remove-button';
+                    removeButton.onclick = function () {
+                        previewDiv.remove();
+                        selectedFiles.delete(file.name);
+                        fileArray.splice(index, 1);
+                        const newFileList = new DataTransfer();
+                        fileArray.forEach(f => newFileList.items.add(f));
+                        fileInput.files = newFileList.files;
                     };
 
-                    fileReader.readAsDataURL(file);
-                });
-            };
+                    if (file.type.startsWith('image/')) {
+                        const img = document.createElement('img');
+                        img.src = event.target.result;
+                        img.style.maxHeight = '100px'; // Adjusted preview size
+                        previewDiv.appendChild(img);
+                    } else if (file.type.startsWith('video/')) {
+                        const video = document.createElement('video');
+                        video.src = event.target.result;
+                        video.controls = true;
+                        video.style.maxHeight = '100px'; // Adjusted preview size
+                        previewDiv.appendChild(video);
+                    } else {
+                        // Display the file name for non-media files
+                        previewDiv.textContent = file.name;
+                    }
 
-            updatePreviews(fileArray);
-        }
+                    previewDiv.appendChild(removeButton);
+                    filePreviewsDiv.appendChild(previewDiv);
+                };
+
+                fileReader.readAsDataURL(file);
+            });
+        };
+
+        updatePreviews(fileArray);
+    }
 
         // After file selection, focus back to the message input
         document.getElementById('message-input').focus();
@@ -509,7 +514,7 @@
         const messageInput = document.getElementById('message-input');
         if (event.key === 'Enter') {
             // Always prevent the default "Enter" behavior (new line) and submit the form
-            event.preventDefault();
+            event.preventDefault(); // Prevent default "Enter" behavior
 
             // Submit the form even if the message field is empty
             document.getElementById('messageForm').submit();
@@ -602,11 +607,6 @@
     });
 
 </script>
-
-
-
-
-
 
 
 <style>
@@ -970,67 +970,67 @@
     }
 
 
-.parent-message {
-    padding: 10px;
-    background-color: #e0e0e0;
-    border-left: 4px solid #4caf50;
-    border-radius: 8px;
-    margin-bottom: 5px;
-    margin-top: 5px;    
-    color: #333;
-}
+    .parent-message {
+        padding: 10px;
+        background-color: #e0e0e0;
+        border-left: 4px solid #4caf50;
+        border-radius: 8px;
+        margin-bottom: 5px;
+        margin-top: 5px;    
+        color: #333;
+    }
 
-.parent-message span:first-child {
-    font-size: 15px;
-    color:black;
-    font-weight: bold;
-    margin-right: 5px;
-}
+    .parent-message span:first-child {
+        font-size: 15px;
+        color:black;
+        font-weight: bold;
+        margin-right: 5px;
+    }
 
-.parent-message span:last-child {
-    font-size: 14px;
-    color: #555;
-}
-
-
-.parmess-file-preview {
-    position: relative;
-    margin-right: 10px;
-    display: inline-block;
-    background-color: rgba(0, 0, 0, 0.5);
-}
-
-.parmess-file-previews {
-    display: flex;
-    overflow-x: auto;
-    margin-bottom: 5px;
-    max-width: 100%;
-    background-color: rgb(32 17 55);    
-}
+    .parent-message span:last-child {
+        font-size: 14px;
+        color: #555;
+    }
 
 
-.parmess-file-preview img, .parmess-file-preview video {
-    max-height: 50px;
-    display: block;
-}
+    .parmess-file-preview {
+        position: relative;
+        margin-right: 10px;
+        display: inline-block;
+        background-color: rgba(0, 0, 0, 0.5);
+    }
 
-.remove-button {
-    position: absolute;
-    top: 2px; /* Adjusted for better positioning */
-    right: 2px; /* Adjusted for better positioning */
-    background: red;
-    color: white;
-    border: none;
-    border-radius: 50%;
-    font-size: 10px;
-    width: 15px;
-    height: 15px;
-    cursor: pointer;
-    line-height: 15px;
-    text-align: center;
-    padding: 0;
-    z-index: 10; /* Ensure it appears above other elements */
-}
+    .parmess-file-previews {
+        display: flex;
+        overflow-x: auto;
+        margin-bottom: 5px;
+        max-width: 100%;
+        background-color: rgb(32 17 55);    
+    }
+
+
+    .parmess-file-preview img, .parmess-file-preview video {
+        max-height: 50px;
+        display: block;
+    }
+
+    .remove-button {
+        position: absolute;
+        top: 2px; /* Adjusted for better positioning */
+        right: 2px; /* Adjusted for better positioning */
+        background: red;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        font-size: 10px;
+        width: 15px;
+        height: 15px;
+        cursor: pointer;
+        line-height: 15px;
+        text-align: center;
+        padding: 0;
+        z-index: 10; /* Ensure it appears above other elements */
+    }
 
 
     .parmess-button {
@@ -1059,6 +1059,54 @@
     }
     .edited-message{
         color:black;
+    }
+
+   .parmess-file-modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1000; /* On top of other elements */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgba(0, 0, 0, 0.5); /* Black background with opacity */
+    }
+
+    .parmess-file-modal-content {
+        position: absolute;
+        background-color: #fff;
+        margin: auto; /* Auto margin for centering */
+        padding: 20px;
+        border: 1px solid #888;
+        width: 50%; /* Adjust width as needed */
+        max-width: 400px;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%); /* Center the modal */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        border-radius: 8px;
+        text-align: center; /* Center align text inside */
+    }
+
+    .parmess-close {
+        color: #aaa;
+        float: right;
+        font-size: 24px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    .parmess-close:hover,
+    .parmess-close:focus {
+        color: #000;
+        text-decoration: none;
+    }
+
+    .parmess-warning-text {
+        margin-top: 10px;
+        font-size: 16px;
+        color: red;
     }
     /*End Partha*/    
     

@@ -141,7 +141,7 @@ class MessageUpdateView(View):
         current_mentions = message_mention_service.get_message_mentions(message)
         current_mention_ids = set(current_mentions.values_list('user_id', flat=True))
 
-        new_mention_ids = set(mention_ids)
+        new_mention_ids = set(mention_ids)        
         removed_mentions = current_mention_ids - new_mention_ids
         added_mentions = new_mention_ids - current_mention_ids
 

@@ -2,11 +2,30 @@ from ..models import ChatMember,MessageMention,User
 from django.db.models import Q
 from social_network.utils.common_utils import print_log 
  
-def create_message_mentions(message,user,auth_user):
-    MessageMention.objects.create(message=message,user=user,created_by=auth_user,is_active=True)
+def create_message_mentions(message, user, auth_user):
+    # Check if the mention already exists (based on message_id and user_id)
+    mention = MessageMention.objects.filter(message=message, user=user).first()
+
+    if mention:
+        # If the mention already exists, update it
+        mention.is_active = True  # Or other fields if needed
+        mention.created_by = auth_user
+        mention.save()
+    else:
+        # If the mention doesn't exist, create a new one
+        MessageMention.objects.create(
+            message=message,
+            user=user,
+            created_by=auth_user,
+            is_active=True
+        )
+
 
 def delete_message_mentions(message, user, users_to_remove):
-    mentions = MessageMention.objects.filter(message=message, user_id__in=users_to_remove)
+    mentions = MessageMention.objects.filter(
+        message=message, 
+        user_id__in=users_to_remove
+    )
     for mention in mentions:
         mention.is_active = False
         mention.updated_by = user
