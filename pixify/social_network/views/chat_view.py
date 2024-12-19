@@ -8,6 +8,10 @@ from django.http import JsonResponse
 from ..constants import ChatType
 from django.utils import timezone
 import json
+from social_network.packages.response import success_response
+from social_network.constants.default_values import ResponseMessageType
+from social_network.constants.success_messages import SuccessMessage
+
 class ChatListView(View):
     @catch_error
     @auth_required
@@ -73,7 +77,19 @@ class ChatListView(View):
                 'photo': following.follower.profile_photo_url,
             })
 
-        return render(request, 'enduser/chat/chats.html', {'chats': chat_data, 'follow': follow_data})
+        return render(
+            request,
+            'enduser/chat/chats.html',
+            success_response(               
+            message=request.session.pop("message", SuccessMessage.S000007.value),
+            message_type=request.session.pop(
+            "message_type", ResponseMessageType.INFO.value
+        ),
+            data= {
+                'chats': chat_data,
+                'follow': follow_data
+                }
+            ))
 
     def format_timestamp(self, timestamp):
         if not timestamp:
@@ -172,12 +188,20 @@ class ChatDetailsView(View):
             'seen_by_all': seen_by_all  # This is for the latest message
         }
 
-        return render(request, 'enduser/chat/messages.html', {
+        return render(request, 'enduser/chat/messages.html',
+            success_response(               
+            message=request.session.pop("message", SuccessMessage.S000008.value),
+            message_type=request.session.pop(
+            "message_type", ResponseMessageType.INFO.value
+        ),
+            data={
             'chat': chat_info,
             'messages': messages,
             'user': user,
             'reactions': reactions
-        })
+        }
+        ))
+        
 
 
 
