@@ -45,7 +45,7 @@ def deactivate_reaction(reaction_instance):
 
 def get_reaction_details(message_id, reaction_type):
     reactions = get_active_message_reactions(message_id)
-    default_gif_url="https://t4.ftcdn.net/jpg/05/11/55/91/360_F_511559113_UTxNAE1EP40z1qZ8hIzGNrB0LwqwjruK.jpg"
+    default_gif_url='/static/images/avatar.jpg'
     user_reactions = [
         {
             "name": f"{reaction.reacted_by.first_name or ''} {reaction.reacted_by.last_name or ''}".strip(),
