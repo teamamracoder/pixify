@@ -1,4 +1,4 @@
-from ..models import MessageReaction,MasterList
+from ..models import MessageReaction,MasterList,Message
 from ..constants import MasterType
 
 
@@ -65,6 +65,44 @@ def get_reaction_details(message_id, reaction_type):
 def show_reactions():
     reactions = MasterList.objects.filter(type=MasterType.REACTION.value, is_active=True).values("id", "value")
     return list(reactions) 
+
+def latest_reaction(chat, user):
+    # Initialize the return dictionary with default keys and None values
+    latest_reaction_message = {
+        'reaction': None,
+        'reacted_message': None,
+        'created_at': None,
+        'reacted_by': None,  
+    }
+    latest_reaction = MessageReaction.objects.filter(
+        message_id__chat_id=chat,
+        is_active=True
+    ).order_by('-created_at')
+    
+    if latest_reaction.exists():
+        reaction_instance = latest_reaction.first()
+        reaction = MasterList.objects.filter(
+            id=reaction_instance.reaction_id.id,
+            type=MasterType.REACTION.value,
+            is_active=True
+        ).values('value')
+        
+        if reaction.exists():
+            reaction_value = reaction.first()['value']
+            message_text = reaction_instance.message_id.text  
+            reacted_by = "You" if reaction_instance.created_by == user else str(reaction_instance.created_by.first_name)
+            latest_reaction_message.update({
+                'reaction': reaction_value,
+                'reacted_message': message_text,
+                'created_at': reaction_instance.created_at,
+                'reacted_by': reacted_by, 
+            })
+    
+    return latest_reaction_message
+
+
+
+
 
 
 

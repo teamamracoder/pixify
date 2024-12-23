@@ -22,19 +22,31 @@ class ChatListView(View):
         followers, followings = chat_service.get_all_user_follow(user)
         chat_data = []
         if not chats:
-            no_chat_message={"message":"No chats available"}
+            no_chat_message = {"message": "No chats available"}
             return render(request, 'enduser/chat/chats.html', no_chat_message)
 
         for chat_info in chats:
             chat = chat_info['chat']
+            if not chat.id:
+                continue
+
             seen_by_all = chat_info['seen_by_all']
             member = chat_service.count_members(chat.id)
+            latest_reaction = message_reaction_service.latest_reaction(chat, user)
             if member.count() < 2:
-                continue
+                continue  
+            latest_reaction_timestamp = ''
+            latest_reaction_type = ''
+            if latest_reaction:
+                latest_reaction_timestamp = self.format_timestamp(latest_reaction['created_at'])
+                latest_reaction_type = latest_reaction['reaction']
+                latest_reaction_message=latest_reaction['reacted_message']
+                latest_reaction_message_reacted_by=latest_reaction['reacted_by']
+
             unread_messages = message_service.unread_count(chat, user)
             unread_messages_display = '' if unread_messages == 0 else '10+' if unread_messages > 10 else str(unread_messages)
             if chat.type == ChatType.PERSONAL.value:
-                member = chat_service.get_recipient_for_personal(chat.id, user) 
+                member = chat_service.get_recipient_for_personal(chat.id, user)
                 if member:
                     title = f"{member.first_name} {member.last_name}"
                     chat_cover = member.profile_photo_url
@@ -42,18 +54,11 @@ class ChatListView(View):
                     title = ''
                     chat_cover = ''
             elif chat.type == ChatType.GROUP.value:
-                title = chat_service.get_recipients_for_group(chat.id, user)
-                if chat.title:
-                    title = chat.title
-                else:
-                    title = title
-                if chat.chat_cover:
-                    chat_cover = chat.chat_cover
-                else:
-                    chat_cover = ''
-                
+                title = chat.title or chat_service.get_recipients_for_group(chat.id, user)
+                chat_cover = chat.chat_cover or ''
+
             latest_message_timestamp = self.format_timestamp(chat.latest_message_timestamp)
-            chat_info = {
+            chat_data.append({
                 'id': chat.id,
                 'title': title,
                 'chat_cover': chat_cover,
@@ -61,9 +66,12 @@ class ChatListView(View):
                 'latest_message': chat.latest_message,
                 'unread_messages': unread_messages_display,
                 'is_group': chat.type == ChatType.GROUP.value,
-                'seen_by_all': seen_by_all 
-            }
-            chat_data.append(chat_info)
+                'seen_by_all': seen_by_all,
+                'latest_reaction_timestamp': latest_reaction_timestamp,
+                'latest_reaction': latest_reaction_type,
+                'latest_reaction_message':latest_reaction_message,
+                'latest_reaction_message_reacted_by':latest_reaction_message_reacted_by
+            })
 
         follow_data = []
         for follower in followers:
@@ -76,25 +84,22 @@ class ChatListView(View):
                 'title': f"{following.follower.first_name} {following.follower.last_name}",
                 'photo': following.follower.profile_photo_url,
             })
-
         return render(
             request,
             'enduser/chat/chats.html',
-            success_response(               
-            message=request.session.pop("message", SuccessMessage.S000007.value),
-            message_type=request.session.pop(
-            "message_type", ResponseMessageType.INFO.value
-        ),
-            data= {
-                'chats': chat_data,
-                'follow': follow_data
+            success_response(
+                message=request.session.pop("message", SuccessMessage.S000007.value),
+                message_type=request.session.pop("message_type", ResponseMessageType.INFO.value),
+                data={
+                    'chats': chat_data,
+                    'follow': follow_data
                 }
-            ))
+            )
+        )
 
     def format_timestamp(self, timestamp):
         if not timestamp:
             return ''
-
         now = timezone.now()
         diff = now - timestamp
         if diff.days == 0:
