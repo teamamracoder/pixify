@@ -97,14 +97,17 @@
                         {% if chat.seen_by_all %}
                         ✔️✔️
                         {% else %}
-                    <!-- Show single tick if not seen by all -->
                         ✔️
                         {% endif %}
                     {% endif %}
                     </span>
                     <span>
-                        {% if chat.latest_message %}
-                            <p class="chat-message chat_title">{{ chat.latest_message }}</p>
+                        {% if chat.latest_message or chat.latest_reaction %}
+                            {% if chat.latest_message_timestamp > chat.latest_reaction_timestamp %}
+                                <p class="chat-message chat_title">{{ chat.latest_message }}</p>
+                            {% else %}
+                                <p class="chat-message chat_title">{{chat.latest_reaction_message_reacted_by}} :  Reacted  {{ chat.latest_reaction|safe }}  on "{{chat.latest_reaction_message}}"</p>
+                            {% endif %}
                         {% else %}
                             <p class="chat-message chat_title">No messages yet</p>
                         {% endif %}
@@ -115,8 +118,19 @@
             <!-- Right-aligned Section -->
             <div class="badge-div">
                 <span class="badge unread-messages">{{ chat.unread_messages }}</span>
-                <span class="timestamp">{{ chat.latest_message_timestamp }}</span>
+                <span class="timestamp">
+                    {% if chat.latest_message or chat.latest_reaction %}
+                        {% if chat.latest_message_timestamp > chat.latest_reaction_timestamp %}
+                            {{ chat.latest_message_timestamp }}
+                        {% else %}
+                            {{ chat.latest_reaction_timestamp }}
+                        {% endif %}
+                    {% else %}
+                        No messages yet
+                    {% endif %}
+                </span>
             </div>
+            
         </div>
     </div>
 {% endfor %}
