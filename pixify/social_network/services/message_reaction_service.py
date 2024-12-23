@@ -20,15 +20,21 @@ def get_reaction_by_name(reaction_id):
     return MasterList.objects.filter(id=reaction_id).first()
 
 def create_or_update_message_reaction(message_id, user, reaction):
+    # Create or update the MessageReaction instance
     reaction_instance, created = MessageReaction.objects.update_or_create(
         message_id_id=message_id,
         reacted_by=user,
         defaults={
             'reaction_id': reaction,
             'created_by': user,
-            'is_active': True  
+            'is_active': True
         }
     )
+
+    # If not created (i.e., updated), explicitly update the `updated_at` field
+    if not created:
+        reaction_instance.save(update_fields=['updated_at'])
+
     return reaction_instance, created
 
 def get_active_reaction(message_id, user):
@@ -72,12 +78,14 @@ def latest_reaction(chat, user):
         'reaction': None,
         'reacted_message': None,
         'created_at': None,
-        'reacted_by': None,  
+        'reacted_by': None,
     }
+    
+    # Get the latest reaction for the chat
     latest_reaction = MessageReaction.objects.filter(
         message_id__chat_id=chat,
         is_active=True
-    ).order_by('-created_at')
+    ).order_by('-updated_at', '-created_at')
     
     if latest_reaction.exists():
         reaction_instance = latest_reaction.first()
@@ -89,15 +97,20 @@ def latest_reaction(chat, user):
         
         if reaction.exists():
             reaction_value = reaction.first()['value']
-            message_text = reaction_instance.message_id.text  
-            reacted_by = "You" if reaction_instance.created_by == user else str(reaction_instance.created_by.first_name)
+            message_text = reaction_instance.message_id.text
+            reacted_by = "You" if reaction_instance.updated_by == user else str(reaction_instance.created_by.first_name)
+            reaction_time = (
+                reaction_instance.updated_at
+                if reaction_instance.created_at != reaction_instance.updated_at
+                else reaction_instance.created_at
+            )
+            
             latest_reaction_message.update({
                 'reaction': reaction_value,
                 'reacted_message': message_text,
-                'created_at': reaction_instance.created_at,
-                'reacted_by': reacted_by, 
+                'created_at': reaction_time,
+                'reacted_by': reacted_by,
             })
-    
     return latest_reaction_message
 
 
