@@ -84,6 +84,7 @@ class ChatListView(View):
                 'title': f"{following.follower.first_name} {following.follower.last_name}",
                 'photo': following.follower.profile_photo_url,
             })
+        print(chat_data)
         return render(
             request,
             'enduser/chat/chats.html',
