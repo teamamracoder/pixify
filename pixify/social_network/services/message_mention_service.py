@@ -60,8 +60,6 @@ def list_messages_mention_Api(chat, user, search_query, exclude_ids, mentioned_a
 
     mention_list = list(mention.values('member_id', 'member_id__first_name', 'member_id__last_name', 'member_id__profile_photo_url'))
     
-    if not mentioned_all:
-        mention_list.insert(0, {"member_id": "all","member_id__first_name": "All","member_id__last_name": "","member_id__profile_photo_url": '<i class="fas fa-users" style="color:black; font-size:18px;"></i>',})    
     return mention_list
 
 def get_message_mentions(message):

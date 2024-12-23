@@ -1,7 +1,7 @@
 from ..models import Message,MessageReadStatus
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
-
+from datetime import timedelta
 
 
 def list_messages_by_chat_id(chat_id,user_id):  
@@ -57,3 +57,8 @@ def unread_count(chat,user):
         fk_message_msg_status_messages_id__read_by=user
     ).count()  
     return unread_count
+
+def is_editable(message):
+        # Check if the message can be edited within 10 minutes of creation.
+        time_difference = timezone.now() - message.created_at
+        return time_difference <= timedelta(minutes=10)
