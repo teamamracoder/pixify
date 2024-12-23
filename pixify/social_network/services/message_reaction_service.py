@@ -98,7 +98,7 @@ def latest_reaction(chat, user):
         if reaction.exists():
             reaction_value = reaction.first()['value']
             message_text = reaction_instance.message_id.text
-            reacted_by = "You" if reaction_instance.updated_by == user else str(reaction_instance.created_by.first_name)
+            reacted_by = "You" if reaction_instance.created_by == user else str(reaction_instance.created_by.first_name)
             reaction_time = (
                 reaction_instance.updated_at
                 if reaction_instance.created_at != reaction_instance.updated_at
