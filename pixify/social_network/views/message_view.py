@@ -2,7 +2,6 @@ from django.shortcuts import render, redirect
 from django.views import View 
 from ..models import ChatMember,User
 from ..services import message_service, chat_service, message_mention_service,message_read_status_service, user_service
-import re
 from social_network.decorators.exception_decorators import catch_error
 from social_network.constants.default_values import Role
 from ..decorators import auth_required, role_required
@@ -11,52 +10,56 @@ from django.core.files.base import ContentFile
 from ..constants import ChatType
 from social_network.constants.success_messages import SuccessMessage
 
-class MessageListView(View):
+
+class MessageListView(View): 
     @catch_error
     @auth_required
     @role_required(Role.ADMIN.value, Role.END_USER.value)
     def get(self, request, chat_id):
-        user =request.user 
+        user = request.user
         chat = chat_service.get_chat_by_id(chat_id)
-        messages = message_service.list_messages_by_chat_id(chat_id,user.id)
+        messages = message_service.list_messages_by_chat_id(chat_id, user.id)
         success_message = request.session.pop('success_message', None)
 
+        # Check if each message is editable (within the last 10 minutes)
+        for message in messages:
+            message.is_editable = message_service.is_editable(message)
+
+        # Chat-related logic (personal/group chat details)
         if chat.type == ChatType.PERSONAL.value:
-            member = chat_service.get_recipient_for_personal(chat.id, user) 
+            member = chat_service.get_recipient_for_personal(chat.id, user)
             if member:
                 title = f"{member.first_name} {member.last_name}"
                 chat_cover = member.profile_photo_url
             else:
                 title = ''
-                chat_cover=''
+                chat_cover = ''
         elif chat.type == ChatType.GROUP.value:
-            title= chat_service.get_recipients_for_group(chat.id,user)
-            if chat.title:    
-                title = chat.title 
-            else:
-                title=title 
+            title = chat_service.get_recipients_for_group(chat.id, user)
+            if chat.title:
+                title = chat.title
             if chat.chat_cover:
-                chat_cover=chat.chat_cover
+                chat_cover = chat.chat_cover
             else:
-                chat_cover=''            
+                chat_cover = ''
+
         chat_info = {
             'id': chat.id,
             'title': title,
             'chat_cover': chat_cover,
-            'is_group' :chat.type==ChatType.GROUP.value,
-            'type':chat.type
+            'is_group': chat.type == ChatType.GROUP.value,
+            'type': chat.type
         }
 
         return render(request, 'enduser/chat/messages.html', {
             'chat': chat_info,
             'messages': messages,
-            'user': user, 
-            'success_message': success_message 
-            }
-        )
-     
+            'user': user,
+            'success_message': success_message
+        })
+         
 
-class MessageCreateView(View):
+class MessageCreateView(View): 
     @catch_error
     @auth_required
     @role_required(Role.ADMIN.value, Role.END_USER.value)
@@ -71,7 +74,7 @@ class MessageCreateView(View):
         mentions = request.POST.get('mentions','')       
         mention_list = mentions.split(',')  # Split mentions into individual names       
         mention_ids = []
-
+ 
         numeric_ids = [id for id in mention_list if id.isdigit()]
         mention_ids = numeric_ids[:]
 
@@ -91,7 +94,7 @@ class MessageCreateView(View):
             media_url = default_storage.url(file_name)
             media_urls.append(media_url)
         
-        message = message_service.create_message(text, media_urls, auth_user, chat)  
+        message = message_service.create_message(text, media_urls, auth_user, chat)
         message_read_status_service.create_message_read_status(message, auth_user)
         
         for user in mention_ids:

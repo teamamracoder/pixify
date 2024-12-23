@@ -64,7 +64,9 @@
                     </div>
                     <div class="options-popup" id="options-{{ message.id }}" style="display: none;">
                         {% if message.sender_id.id == user.id %}
+                        {% if message.is_editable %}
                             <a href="#" onclick="editMessage('{{ message.id }}', '{{ message.text|escapejs }}')">Edit</a>
+                        {% endif %}                        
                         {% endif %}
                         <a href="#" onclick="deleteMessage('{{ message.id }}')">Delete</a>
                         <a href="#" onclick="replyToMessage('{{ message.id }}', '{{ message.sender_id.first_name|escapejs }}', '{{ message.text|escapejs }}')">Reply</a>
@@ -215,7 +217,7 @@
 
             while ((match = mentionedRegex.exec(messageText)) !== null) {
                 const userId = match[1];
-                if (userId === 'all') {
+                if (userId === 'All') {
                     mentionedAll = true;
                     mentionedUsers.add('all');
                 } else {
@@ -306,19 +308,21 @@
 
             clearTimeout(typingTimer);
 
-            if (mentionedAll && !messageText.includes('@all')) {
+            // If @all was mentioned previously, but the user no longer has it in the input,
+            // set mentionedAll to false only if it's explicitly removed.
+            if (mentionedAll && !messageText.includes('@All')) {
                 mentionedAll = false;
-                $('#mentionModal').hide();
-                return;
-            }
-
+            }         
+                     
+            // Check if the current position has a "@" symbol to trigger mentions
             if (lastChar === '@') {
                 mentionTriggered = true;
 
                 typingTimer = setTimeout(function () {
                     displayMentionList('');
                 }, debounceDelay);
-            } else if (!lastChar.trim() || !mentionTriggered) {
+            } else if (!lastChar.trim()) {
+                mentionTriggered = false;
                 $('#mentionModal').hide();
             } else if (mentionTriggered) {
                 const atIndex = messageText.lastIndexOf('@');
