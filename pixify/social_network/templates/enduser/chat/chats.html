@@ -21,9 +21,6 @@
                         <div class="input-group mb-3 " style=" border-radius: 5px; ">
                             <input type="text" id="search_chats" class="form-control" placeholder="Searching chats here....."
                                 aria-label="Example text with button addon" aria-describedby="button-addon1" />
-                                <button class="btn btn-primary" type="button" id="button-addon1" id="searchbtn">
-                                    <i class="bi bi-search"></i>
-                                </button>
                             </div>
                         </div>
                         <h6 style="padding-left:10px; color: rgb(178, 190, 181);font-size:15px; ">Search results : <hr></h6>
@@ -124,8 +121,6 @@
                         {% else %}
                             {{ chat.latest_reaction_timestamp }}
                         {% endif %}
-                    {% else %}
-                        No messages yet
                     {% endif %}
                 </span>
             </div>
@@ -455,7 +450,7 @@ $(document).ready(function () {
 <style>
     .modal-list{
         margin:10px;
-        background-color: rgb(170, 150, 291);
+        background-color: rgb(60 42 138 / 52%);
         border-radius:5px;
         border:10px white;
         padding:10px;
