@@ -23,7 +23,17 @@ class ChatListView(View):
         chat_data = []
         if not chats:
             no_chat_message = {"message": "No chats available"}
-            return render(request, 'enduser/chat/chats.html', no_chat_message)
+            return render(
+            request,
+            'enduser/chat/chats.html',
+            success_response(
+                message=request.session.pop("message", SuccessMessage.S000009.value),
+                message_type=request.session.pop("message_type", ResponseMessageType.INFO.value),
+                data={
+                    'no_chats':no_chat_message
+                }
+            )
+        )
 
         for chat_info in chats:
             chat = chat_info['chat']

@@ -10,3 +10,4 @@ class SuccessMessage(Enum):
     S000006 = "Welcome to pixify, please login to continue"
     S000007 = "open chat list"
     S000008 = "open message list"
+    S000009 = "no chats available"

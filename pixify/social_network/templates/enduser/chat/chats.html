@@ -23,7 +23,6 @@
                                 aria-label="Example text with button addon" aria-describedby="button-addon1" />
                             </div>
                         </div>
-                        <h6 style="padding-left:10px; color: rgb(178, 190, 181);font-size:15px; ">Search results : <hr></h6>
                         <div id="fill" >       
                         </div>
                     </div>
@@ -60,7 +59,7 @@
     </div>
 </div>
 
-
+    {% if data.chats %}
     <!-- Peoples -->
     {% for chat in data.chats %}
     <div style="border: 1px solid black; border-radius: 3px" class="m-2">
@@ -127,6 +126,10 @@
         </div>
     </div>
 {% endfor %}
+{% else %}
+<hr>
+<p class="chat-message chat_title">No chats available yet</p>
+{% endif %}
 
 <!-- Auto-Reload Logic -->
 <script>
