@@ -162,60 +162,9 @@ class ChatDetailsView(View):
     @catch_error
     @auth_required
     @role_required(Role.ADMIN.value, Role.END_USER.value)
-    def get(self, request, chat_id):
-        user = request.user
-        chat = chat_service.get_chat_by_id(chat_id)
-        reactions = message_reaction_service.show_reactions()
-        messages = message_service.list_messages_by_chat_id(chat_id, user.id)
-
-        # Check if each message has been seen by all members
-        for message in messages:
-            message.seen_by_all = chat_service.is_message_seen_by_all(message)
-
-        latest_message = message_service.get_latest_message(chat_id)
-        seen_by_all = False
-
-        if latest_message:
-            seen_by_all = chat_service.is_message_seen_by_all(latest_message)
-
-        if chat.type == ChatType.PERSONAL.value:
-            member = chat_service.get_recipient_for_personal(chat.id, user)
-            if member:
-                title = f"{member.first_name} {member.last_name}"
-                chat_cover = member.profile_photo_url
-            else:
-                title = ''
-                chat_cover = ''
-        elif chat.type == ChatType.GROUP.value:
-            title = chat_service.get_recipients_for_group(chat.id, user)
-            if chat.title:
-                title = chat.title
-            if chat.chat_cover:
-                chat_cover = chat.chat_cover
-            else:
-                chat_cover = ''
-
-        chat_info = {
-            'id': chat.id,
-            'title': title,
-            'chat_cover': chat_cover,
-            'is_group': chat.type == ChatType.GROUP.value,
-            'seen_by_all': seen_by_all  # This is for the latest message
-        }
-
-        return render(request, 'enduser/chat/messages.html',
-            success_response(               
-            message=request.session.pop("message", SuccessMessage.S000008.value),
-            message_type=request.session.pop(
-            "message_type", ResponseMessageType.INFO.value
-        ),
-            data={
-            'chat': chat_info,
-            'messages': messages,
-            'user': user,
-            'reactions': reactions
-        }
-        ))
+    def get(self, request,chat_id):        
+        return render(request, 'enduser/chat/chats.html',{'chat':chat_id})  
+    
         
 
 
