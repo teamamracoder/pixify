@@ -76,7 +76,7 @@
             <!-- Middle Section -->
             <div class="content-div">
                 <p class="chat-title">
-                    <a href="{% url 'chat_details' chat_id=chat.id %}" id="hyperlink-text" class="chat_title">
+                    <a href="{% url 'message' chat_id=chat.id %}" id="hyperlink-text" class="chat_title">
                         {{ chat.title }}
                     </a>
                 </p>
@@ -453,11 +453,11 @@ $(document).ready(function () {
 <style>
     .modal-list{
         margin:10px;
-        background-color: rgb(60 42 138 / 52%);
         border-radius:5px;
         border:10px white;
         padding:10px;
         display:flex;
+        border: 2px solid #7474c1;
     
     }
     #unread_color{

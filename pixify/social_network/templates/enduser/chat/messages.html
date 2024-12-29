@@ -116,7 +116,7 @@
  <form id="messageForm" method="POST" action="{% url 'message_create' %}" enctype="multipart/form-data">
     {% csrf_token %}
     <input type="hidden" id="action" name="action" value="create">
-    <input type="hidden" id="chat_id" name="chat_id" value="{{ chat.id }}">
+    <input type="hidden" id="chat_id" name="chat_id" value="{{ data.chat.id }}">
     <input type="hidden" id="message_id" name="message_id" value="">
     <input type="hidden" name="mentions" id="mentions">
     <input type="file" id="file-input" name="media_files" style="display: none;" accept="image/*,video/*" multiple>
