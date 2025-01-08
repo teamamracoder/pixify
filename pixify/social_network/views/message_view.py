@@ -10,7 +10,7 @@ from django.core.files.base import ContentFile
 from ..constants import ChatType
 from social_network.constants.success_messages import SuccessMessage
 from collections import defaultdict
-from pixify.social_network.packages.response import success_response 
+from social_network.packages.response import success_response
 
 class MessageListView(View):
     @catch_error
@@ -49,9 +49,10 @@ class MessageListView(View):
             else:
                 chat_cover = ''
 
-        chat_info = {
+        chat_info = {            
             'id': chat.id,
             'title': title,
+            'type':chat.type,
             'chat_cover': chat_cover,
             'is_group': chat.type == ChatType.GROUP.value,
             'seen_by_all': seen_by_all  # This is for the latest message
