@@ -112,7 +112,7 @@
                 </div>
             </div>
             <input type="text" name="message" id="message-input" placeholder="Type your message here..." required>
-            <button type="submit">➤</button>
+            <button type="submit" class="button_responsive">➤</button>
         </form>
     </div>
 </div>
@@ -315,7 +315,82 @@ observer.observe(chatBody, { childList: true });
 
 </script>
 
+<script src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script>
+<script>
+// Connect to the Socket.IO server
+const socket = io("http://localhost:8000");
 
+// Event when connected to the server
+socket.on("connect", () => {
+    console.log("Connected to the server");
+});
+
+
+// Handle incoming messages
+socket.on("response", (data) => {
+    console.log("New message received:", data);
+
+    // Append message to the chat body
+    const chatBody = document.querySelector(".chat-body");
+    const messageDiv = document.createElement("div");
+    messageDiv.classList.add("received");
+
+    const messageContent = `
+        <div class="message-container">
+            <div class="message-content">
+                <span>${data.message}</span>
+            </div>
+            <div class="message-time">
+                <span>${new Date().toLocaleTimeString()}</span>
+            </div>
+        </div>
+    `;
+    messageDiv.innerHTML = messageContent;
+    chatBody.appendChild(messageDiv);
+
+    // Scroll to bottom
+    chatBody.scrollTop = chatBody.scrollHeight;
+});
+
+// Send a message
+function sendMessage() {
+    const input = document.getElementById("message-input");
+    const message = input.value.trim();
+
+    if (message) {
+        // Emit the message event
+        socket.emit("message", message);
+
+        // Display the sent message in the chat
+        const chatBody = document.querySelector(".chat-body");
+        // const messageDiv = document.createElement("div");
+        messageDiv.classList.add("sent");
+
+        const messageContent = `
+            <div class="message-container">
+                <div class="message-content">
+                    <span>${message}</span>
+                </div>
+                <div class="message-time">
+                    <span>${new Date().toLocaleTimeString()}</span>
+                </div>
+            </div>
+        `;
+        messageDiv.innerHTML = messageContent;
+        chatBody.appendChild(messageDiv);
+
+        // Clear input and scroll to bottom
+        input.value = "";
+        chatBody.scrollTop = chatBody.scrollHeight;
+    }
+}
+
+// Attach sendMessage to the send button
+document.querySelector("button[type='submit']").addEventListener("click", (event) => {
+    event.preventDefault();
+    sendMessage();
+});
+</script>
 
 
 
@@ -324,7 +399,7 @@ observer.observe(chatBody, { childList: true });
 <style>
     /* Overall Chat Container */
     .chat-container {
-        height: 650px;
+        height: 620px;
         background-color: #211237f2; /*shubhankar change only color*/
         border-radius: 10px;
         box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
@@ -335,6 +410,9 @@ observer.observe(chatBody, { childList: true });
         margin: 0 auto;
         font-family: 'Arial', sans-serif;
         color: black;  /* Set default text color to black */
+    }
+    .center-bodycontent {
+    margin-top: 16px;
     }
 
     /* Header */
@@ -689,6 +767,81 @@ observer.observe(chatBody, { childList: true });
     }
     /*end A*/
 
+    @media (max-width: 1200px) {
+    .chat-container {
+        max-width: 75%;
+    }
+
+    .username {
+        font-size: 1.4rem;
+    }
+    .chat-footer form{
+        display: flex;
+    }
+}
+
+/* Medium Desktops (992px and below) */
+@media (max-width: 992px) {
+    .chat-container {
+        max-width: 85%;
+    }
+
+    .username {
+        font-size: 1.3rem;
+    }
+
+    .profile-pic {
+        width: 45px;
+        height: 45px;
+    }
+    .chat-footer form{
+        display: flex;
+    }
+}
+  
+    @media (max-width: 768px) {
+    .chat-container {
+        height: 90vh;
+        max-width: 100%;
+    }
+    .chat-footer form{
+        display: flex;
+    }
+    .center-bodycontent {
+    display: contents;
+
+    }   
+}
+@media (max-width: 480px) {
+    .chat-container {
+        height: 95vh;
+        border-radius: 0; /* No border-radius on small screens */
+    }
+
+    .profile-pic {
+        width: 30px;
+        height: 30px;
+    }
+
+    .username {
+        font-size: 1rem;
+    }
+
+    .message {
+        font-size: 0.8rem;
+        padding: 6px 8px;
+    }
+
+    .chat-footer input[type="text"] {
+        font-size: 0.8rem;
+    }
+
+    .chat-footer button {
+        font-size: 0.8rem;
+        padding: 6px;
+    }
+
+}
 
 
 
