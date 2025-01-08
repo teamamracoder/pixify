@@ -145,6 +145,9 @@ class ChatCreateView(View):
             )
  
 class ChatDetailsView(View):
+    @catch_error
+    @auth_required
+    @role_required(Role.ADMIN.value, Role.END_USER.value)
     def get(self, request,chat_id):
         return render(request,'enduser/chat/chat_details.html',{'chat_id':chat_id})
 
