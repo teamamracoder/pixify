@@ -66,9 +66,10 @@ class ChatListView(View):
             elif chat.type == ChatType.GROUP.value:
                 title = chat.title or chat_service.get_recipients_for_group(chat.id, user)
                 chat_cover = chat.chat_cover or ''
-
+            print(chat.latest_message_sender_id)
             latest_message_timestamp = self.format_timestamp(chat.latest_message_timestamp)
             chat_data.append({
+                'user':user,
                 'id': chat.id,
                 'title': title,
                 'chat_cover': chat_cover,
@@ -80,7 +81,8 @@ class ChatListView(View):
                 'latest_reaction_timestamp': latest_reaction_timestamp,
                 'latest_reaction': latest_reaction_type,
                 'latest_reaction_message':latest_reaction_message,
-                'latest_reaction_message_reacted_by':latest_reaction_message_reacted_by
+                'latest_reaction_message_reacted_by':latest_reaction_message_reacted_by,
+                'latest_message_sender_id':chat.latest_message_sender_id
             })
 
         follow_data = []
