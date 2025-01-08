@@ -44,7 +44,7 @@
                                         $("#fill").append(`
                                         <div class="modal-list">
                                         <img src="${chat.chat_cover}" id="profile-photo">
-                                            <a href="/chat/${chat.id}" class="chats-item" id="hyperlink-text">${chat.title}</a><br>
+                                            <a href="${chat.id}/message/" class="chats-item" id="hyperlink-text">${chat.title}</a><br>
                                         </div>
                                         `);
                                     });
@@ -82,6 +82,7 @@
                 </p>
                 <div style="display:flex">
                     <span class="timestamp">
+                       {% if chat.latest_message_sender_id == user.id and chat.latest_message_timestamp >= chat.latest_reaction_timestamp %}
                         {% if chat.is_group %}
                             {% if chat.seen_by_all %}
                                 ✔️✔️
@@ -95,10 +96,11 @@
                                 ✔️
                             {% endif %}
                         {% endif %}
+                        {% endif %}
                     </span>
                     <span>
                         {% if chat.latest_message or chat.latest_reaction %}
-                            {% if chat.latest_message_timestamp > chat.latest_reaction_timestamp %}
+                            {% if chat.latest_message_timestamp >= chat.latest_reaction_timestamp %}
                                 <p class="chat-message chat_title">{{ chat.latest_message }}</p>
                             {% else %}
                                 <p class="chat-message chat_title">{{ chat.latest_reaction_message_reacted_by }} : Reacted {{ chat.latest_reaction|safe }} on "{{ chat.latest_reaction_message }}"</p>

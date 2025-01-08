@@ -23,6 +23,14 @@ def list_chats_by_user(user):
             ).order_by('-send_at') 
             .values('text')[:1]
         )
+        ).annotate(
+        latest_message_sender_id=Subquery(
+            Message.objects.filter(
+                chat_id=OuterRef('pk'),
+                is_active=True
+            ).order_by('-send_at')
+            .values('sender_id')[:1]
+        )
     ).order_by('-latest_message_timestamp')
     user_chats = user_chats.filter(
         Q(latest_message__isnull=False) | Q(type=ChatType.GROUP.value)
@@ -36,7 +44,8 @@ def list_chats_by_user(user):
         
         chat_data.append({
             'chat': chat,
-            'seen_by_all': seen_by_all
+            'seen_by_all': seen_by_all,
+            'latest_message_sender_id':chat.latest_message_sender_id
         })
     return chat_data
 
