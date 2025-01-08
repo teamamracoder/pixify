@@ -27,112 +27,82 @@
             {% endif %}
         </div>
     </div>
-    <div class="chat-body">
-        {% for message in messages %}
-            {% if message.sender_id.id == user.id %}
-                <div class="message sent">
-                    <div class="message-content">
-                        {% if message.reply_for_message_id %}
-                            <div class="parent-message">
-                                <span>{{ message.reply_for_message_id.sender_id.first_name }}: </span>
-                                <span>{{ message.reply_for_message_id.text }}</span>
-                                {% if message.media_url %}
-                                    <span>{{ message.media_url }}</span>
-                                {% endif %}
-                            </div>
-                        {% endif %}
-                        <div class="message-header">
-                            <img src="{{ message.sender_id.profile_photo_url|default:'\static\images\avatar.jpg' }}" alt="Sender Profile Pic" class="message-profile-pic">
-                            <span class="message-username">{{ message.sender_id.first_name }}</span>
+
+<div id="chat-body" class="chat-body">
+    <div class="timestamp-scrollbar" id="timestamp-scrollbar"></div>
+
+    {% for date_group in grouped_messages %}
+        <div id="message-timestamp" class="message-timestamp">
+            <span>{{ date_group.0 }}</span> <!-- Display the formatted date or "Today" -->
+            </div>
+        
+        {% for message in date_group.1 %}
+            <div class="message {% if message.sender_id.id == user.id %}sent{% else %}received float-end{% endif %}">
+                <div class="message-content">
+                    <!-- Reply message part -->
+                    {% if message.reply_for_message_id %}
+                        <div class="parent-message">
+                            <span>{{ message.reply_for_message_id.sender_id.first_name }}: </span>
+                            <span>{{ message.reply_for_message_id.text }}</span>
+                            {% if message.reply_for_message_id.media_url %}
+                                <span>{{ message.reply_for_message_id.media_url }}</span>
+                            {% endif %}
                         </div>
-                        <span class="edited-message">{{ message.text }}</span>
-                        {% if message.media_url %}
-                            <span>{{ message.media_url }}</span>
-                        {% endif %}
+                    {% endif %}
+                    <div class="message-header">
+                        <img src="{{ message.sender_id.profile_photo_url|default:'\static\images\avatar.jpg' }}" alt="Sender Profile Pic" class="message-profile-pic">
+                        <span class="message-username">{{ message.sender_id.first_name }}</span>
                     </div>
-                        {% if message.updated_by %}                            
-                            <div class="edited-messages">                                
-                                <span class="edited-message" id="edited_tag">(Edited)</span></span>
-                            </div>
-                        {% endif %}
-                    <div class="message-footer">
-                        <span class="time">{{ message.created_at|date:"h:i A" }}</span>
-                        <div>
-                            <i class="bi bi-three-dots-vertical" onclick="toggleOptions({{ message.id }})"></i>
-                            <i class="bi bi-emoji-smile" onclick="toggleReactionPopup({{ message.id }})"></i>
-                        </div>
+                    <!-- Normal message part -->
+                    <span class="edited-message">{{ message.text }}</span>
+                    {% if message.media_url %}
+                        <span>{{ message.media_url }}</span>
+                    {% endif %}
+                </div>
+                <!-- Edited message part -->
+                {% if message.updated_by %}
+                    <div class="edited-messages">
+                        <span class="edited-message" id="edited_tag">(Edited)</span>
+                    </div> 
+                {% endif %}
+                <div class="message-footer">
+                    <span class="time">{{ message.created_at|date:"h:i A" }}</span>
+                    <div>
+                        <i class="bi bi-three-dots-vertical" onclick="toggleOptions({{ message.id }})"></i>
+                        <i class="bi bi-emoji-smile" onclick="toggleReactionPopup({{ message.id }})"></i>
                     </div>
-                    <div class="options-popup" id="options-{{ message.id }}" style="display: none;">
-                        {% if message.sender_id.id == user.id %}
+                </div>
+                <div class="options-popup" id="options-{{ message.id }}" style="display: none;">
+                    {% if message.sender_id.id == user.id %}
                         {% if message.is_editable %}
                             <a href="#" onclick="editMessage('{{ message.id }}', '{{ message.text|escapejs }}')">Edit</a>
-                        {% endif %}                        
                         {% endif %}
-                        <a href="#" onclick="deleteMessage('{{ message.id }}')">Delete</a>
-                        <a href="#" onclick="replyToMessage('{{ message.id }}', '{{ message.sender_id.first_name|escapejs }}', '{{ message.text|escapejs }}')">Reply</a>
-                    </div>
-                    <div class="reaction-popup" id="reaction-popup-{{ message.id }}" style="display: none;">
-                        <span onclick="addReaction('{{ message.id }}', '👍')">👍</span>
-                        <span onclick="addReaction('{{ message.id }}', '❤️')">❤️</span>
-                        <span onclick="addReaction('{{ message.id }}', '😂')">😂</span>
-                        <span onclick="addReaction('{{ message.id }}', '😮')">😮</span>
-                        <span onclick="addReaction('{{ message.id }}', '😢')">😢</span>
-                    </div>
-                    <div class="reaction-display" id="reaction-display-{{ message.id }}"></div>
+                    {% endif %}
+                    <a href="#" onclick="deleteMessage('{{ message.id }}')">Delete</a>
+                    <a href="#" onclick="replyToMessage('{{ message.id }}', '{{ message.sender_id.first_name|escapejs }}', '{{ message.text|escapejs }}')">Reply</a>
                 </div>
-            {% else %}
-                <div class="message received float-end">
-                    <div class="message-content">
-                        {% if message.reply_for_message_id %}
-                            <div class="parent-message">
-                                <span>{{ message.reply_for_message_id.sender_id.first_name }}: </span>
-                                <span>{{ message.reply_for_message_id.text }}</span>
-                                {% if message.media_url %}
-                                    <span>{{ message.reply_for_message_id.media_url }}</span>
-                                {% endif %}
-                            </div>
-                        {% endif %}
-                        <div class="message-header">
-                            <img src="{{ message.sender_id.profile_photo_url|default:'\static\images\avatar.jpg' }}" alt="{{ message.sender_id.first_name }}'s Profile Picture" class="message-profile-pic">
-                            <span class="message-username">{{ message.sender_id.first_name }}</span>
-                        </div>
-                        <span>{{ message.text }}</span>
-                        {% if message.media_url %}
-                            <span>{{ message.media_url }}</span>
-                        {% endif %}
-                    </div>
-                        {% if message.updated_by %}                            
-                            <div class="edited-messages">                                
-                                <span class="edited-message" id="edited_tag">(Edited)</span></span>
-                            </div>
-                        {% endif %}                    
-                    <div class="message-footer">
-                        <span class="time">{{ message.created_at|date:"h:i A" }}</span>
-                        <div>
-                            <i class="bi bi-three-dots-vertical" onclick="toggleOptions({{ message.id }})"></i>
-                            <i class="bi bi-emoji-smile" onclick="toggleReactionPopup({{ message.id }})"></i>
-                        </div>
-                    </div>
-                    <div class="options-popup" id="options-{{ message.id }}" style="display: none;">
-                        {% if message.sender_id.id == user.id %}
-                            <a href="#" onclick="editMessage('{{ message.id }}', '{{ message.text|escapejs }}')">Edit</a>
-                        {% endif %}
-                        <a href="#" onclick="deleteMessage('{{ message.id }}')">Delete</a>
-                        <a href="#" onclick="replyToMessage('{{ message.id }}', '{{ message.sender_id.first_name|escapejs }}', '{{ message.text|escapejs }}')">Reply</a>
-                    </div>
-                    <div class="reaction-popup" id="reaction-popup-{{ message.id }}" style="display: none;">
-                        <span onclick="addReaction('{{ message.id }}', '👍')">👍</span>
-                        <span onclick="addReaction('{{ message.id }}', '❤️')">❤️</span>
-                        <span onclick="addReaction('{{ message.id }}', '😂')">😂</span>
-                        <span onclick="addReaction('{{ message.id }}', '😮')">😮</span>
-                        <span onclick="addReaction('{{ message.id }}', '😢')">😢</span>
-                    </div>
-                    <div class="reaction-display" id="reaction-display-{{ message.id }}"></div>
+                <div class="reaction-popup" id="reaction-popup-{{ message.id }}" style="display: none;">
+                    <span onclick="addReaction('{{ message.id }}', '👍')">👍</span>
+                    <span onclick="addReaction('{{ message.id }}', '❤️')">❤️</span>
+                    <span onclick="addReaction('{{ message.id }}', '😂')">😂</span>
+                    <span onclick="addReaction('{{ message.id }}', '😮')">😮</span>
+                    <span onclick="addReaction('{{ message.id }}', '😢')">😢</span>
                 </div>
-            {% endif %}
+                <div class="reaction-display" id="reaction-display-{{ message.id }}"></div>
+            </div>
+            
         {% endfor %}
-    </div>
+    {% endfor %}
+</div>
+
+
+
     <div class="chat-footer">
+
+        <div id="scroll-to-bottom" class="scroll-to-bottom" style="display: none;">
+            <i class="bi bi-arrow-down-circle-fill"></i> <!-- Bootstrap arrow icon -->
+        </div>
+
         <div id="reply-preview" style="display: none;">
             <div class="reply-message">
                 <span class="close-reply" onclick="cancelReply()">✖</span>
@@ -178,21 +148,24 @@
 <script>
 
     function setFormAction(action, messageId = '', chatId = '') {
+        // Retrieve chatId dynamically if not provided
+        chatId = chatId || document.querySelector('input[name="chat_id"]').value;
+
+        // Update hidden fields
         document.getElementById('action').value = action;
         document.getElementById('message_id').value = messageId;
-        document.getElementById('chat_id').value = chatId || document.querySelector('input[name="chat_id"]').value;
+        document.getElementById('chat_id').value = chatId;
 
-        let formAction = '';
-        if (action === 'reply') {
-            formAction = `/chat/message-reply/${messageId}/`;
-        } else if (action === 'update') {
-            formAction = `/chat/message/${messageId}/update/`;
-        } else if (action === 'delete') {
-            formAction = `/chat/message/${messageId}/delete/`;
-        } else {
-            formAction = `/chat/message/create/`;
-        }
-        document.getElementById('messageForm').action = formAction;
+        // Map actions to URLs
+        const actionsMap = {
+            reply: `/chat/message-reply/${messageId}/`,
+            update: `/chat/message/${messageId}/update/`,
+            delete: `/chat/message/${messageId}/delete/`,
+            create: `/chat/message/create/`
+        };
+
+        // Set the form's action attribute
+        document.getElementById('messageForm').action = actionsMap[action] || actionsMap.create;
     }
 
     $(document).ready(function () {
@@ -513,18 +486,6 @@
         document.getElementById('message-input').focus();
     });
 
-    // Ensure "Enter" submits the form when the message input is focused or empty
-    document.getElementById('message-input').addEventListener('keydown', function (event) {
-        const messageInput = document.getElementById('message-input');
-        if (event.key === 'Enter') {
-            // Always prevent the default "Enter" behavior (new line) and submit the form
-            event.preventDefault(); // Prevent default "Enter" behavior
-
-            // Submit the form even if the message field is empty
-            document.getElementById('messageForm').submit();
-        }
-    });
-
     function toggleOptions(messageId) {
         const popup = document.getElementById('options-' + messageId);
         popup.style.display = popup.style.display === 'none' ? 'block' : 'none';
@@ -606,9 +567,158 @@
         { toastr.success(decodeURIComponent(message)); } 
     });
 
+    // Focusing the input field on page load
     document.addEventListener('DOMContentLoaded', function() { 
         document.getElementById('message-input').focus(); 
     });
+
+    // Prevent empty message on form submission (via button)
+    document.getElementById('messageForm').addEventListener('submit', function (event) {
+        const messageInput = document.getElementById('message-input');
+        const message = messageInput.value.trim(); // Trim whitespace to check if it's empty
+
+        if (!message) {
+            event.preventDefault(); // Prevent form submission
+            
+            messageInput.focus(); // Set focus back to the input field
+        }
+    });
+
+    // Handle Enter key in the input field to prevent empty submission
+    document.getElementById('message-input').addEventListener('keydown', function (event) {
+        if (event.key === 'Enter') {
+            const messageInput = document.getElementById('message-input');
+            const message = messageInput.value.trim(); // Trim whitespace to check if it's empty
+
+            if (!message) {
+                event.preventDefault(); // Prevent form submission
+                
+                messageInput.focus(); // Set focus back to the input field
+            } else {
+                // Let the form handle the submission naturally
+                event.preventDefault(); // Prevent default Enter behavior
+                document.getElementById('messageForm').submit(); // Standard form submission
+            }
+        }
+    });
+
+    //Show the scroll-to-bottom button based on scroll
+    document.addEventListener("DOMContentLoaded", function () {
+        const chatBody = document.querySelector('.chat-body');
+        const scrollToBottomBtn = document.getElementById('scroll-to-bottom');
+
+        // Function to remove smooth scrolling from chat body
+        function disableSmoothScrolling() {
+            chatBody.style.scrollBehavior = 'auto';
+        }
+
+        // Function to apply smooth scrolling to chat body
+        function enableSmoothScrolling() {
+            chatBody.style.scrollBehavior = 'smooth';
+        }
+
+        // Show or hide the scroll-to-bottom button based on scroll position
+        chatBody.addEventListener('scroll', function () {
+            if (chatBody.scrollTop < chatBody.scrollHeight - chatBody.clientHeight - 200) {
+                // Show the arrow when user scrolls up (200px above the bottom)
+                scrollToBottomBtn.style.display = 'block';
+            } else {
+                // Hide the arrow when at the bottom of the chat
+                scrollToBottomBtn.style.display = 'none';
+            }
+        });
+
+        // Scroll to the bottom when the arrow is clicked and enable smooth scroll
+        scrollToBottomBtn.addEventListener('click', function () {
+            enableSmoothScrolling();
+            chatBody.scrollTop = chatBody.scrollHeight;
+            
+            // Disable smooth scrolling after scrolling is complete to avoid interfering with future scrolls
+            setTimeout(disableSmoothScrolling, 500); // Adjust time if necessary for smoother behavior
+        });
+    });
+
+    //Scroll Indicator Implement
+    document.addEventListener("DOMContentLoaded", function () {
+        const chatBody = document.getElementById("chat-body");
+        const messages = document.querySelectorAll(".message");
+        const timestampContainer = document.getElementById("timestamp-scrollbar");
+
+        chatBody.addEventListener("scroll", function () {
+            console.log("Scroll event triggered.");
+            updateScrollIndicator();
+        });
+
+    function updateScrollIndicator() {
+        const scrollPosition = chatBody.scrollTop + (chatBody.offsetHeight / 2); // Center of the chat body
+        console.log("Current scroll position (center of viewport):", scrollPosition);
+
+        let closestMessage = null;
+        let closestDistance = Infinity;
+
+        // Loop through each message to find the closest one to the center of the chat body
+        messages.forEach((message, index) => {
+            const messageTop = message.offsetTop;
+            const messageBottom = messageTop + message.offsetHeight;
+            const distance = Math.abs(scrollPosition - (messageTop + messageBottom) / 2);
+
+            console.log(`Message ${index + 1}: Top = ${messageTop}, Bottom = ${messageBottom}, Distance = ${distance}`);
+
+            if (distance < closestDistance) {
+                closestDistance = distance;
+                closestMessage = message;
+            }
+        });
+
+        if (closestMessage) {
+            console.log("Closest message identified:", closestMessage);
+
+            // Find the nearest .message-timestamp element *above* the closest message
+            let groupTimestamp = null;
+            let sibling = closestMessage.previousElementSibling;
+
+            while (sibling) {
+                if (sibling.classList.contains("message-timestamp")) {
+                    groupTimestamp = sibling.querySelector("span");
+                    break;
+                }
+                sibling = sibling.previousElementSibling;
+            }
+
+            if (groupTimestamp) {
+                console.log("Group timestamp found:", groupTimestamp.innerText);
+                showTimestampIndicator(groupTimestamp.innerText, closestMessage);
+            } else {
+                console.log("No group timestamp found for the closest message.");
+            }
+        } else {
+            console.log("No closest message identified.");
+        }
+    }
+        
+        function showTimestampIndicator(timestampText, closestMessage) {
+        const timestampIndicator = document.getElementById("timestamp-scrollbar");
+
+        // Set the timestamp text
+        timestampIndicator.innerText = timestampText;
+        
+        // Style the indicator to appear in the middle of the chat body
+        // timestampIndicator.style.top = `${chatBody.offsetHeight / 2 - timestampIndicator.offsetHeight / 2}px`; // Center vertically
+        timestampIndicator.style.display = "block"; // Ensure it's visible
+
+        // Clear any previous timeout to avoid premature disappearance
+        if (window.timestampTimeout) {
+            clearTimeout(window.timestampTimeout);
+        }
+
+        // Set a timeout to hide the indicator after 2 seconds
+        window.timestampTimeout = setTimeout(() => {
+            timestampIndicator.style.display = "none";
+        }, 200);
+    }
+
+    });
+
 
 </script>
 
@@ -1060,6 +1170,7 @@
 
     .close-reply{
         color:red;
+        cursor: pointer;
     }
     .edited-message{
         color:black;
@@ -1111,6 +1222,40 @@
         margin-top: 10px;
         font-size: 16px;
         color: red;
+    }
+
+    .scroll-to-bottom {
+        position: fixed;
+        top: 88%;
+        left: 50%;
+        transform: translate(-50%, -50%); /* This will center the arrow */    
+        color: white;
+        border-radius: 50%;
+        padding: 10px;
+        cursor: pointer;
+        font-size: 30px;
+        display: none; /* Initially hidden */
+        z-index: 1000; /* Ensure it's on top of other elements */
+    }
+
+    .message-timestamp{
+        margin-left: 50%;
+    }
+
+    #timestamp-scrollbar {
+        position: fixed;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(0, 0, 0, 0.7);
+        color: #fff;
+        padding: 10px 20px;
+        border-radius: 5px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        display: none; /* Initially hidden */
+        z-index: 1000;
+        font-size: 14px;
+        white-space: nowrap;
+        pointer-events: none; /* Prevent interference with user interaction */
     }
     /*End Partha*/    
     

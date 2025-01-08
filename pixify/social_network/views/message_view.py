@@ -9,7 +9,7 @@ from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from ..constants import ChatType
 from social_network.constants.success_messages import SuccessMessage
-
+from collections import defaultdict
 
 class MessageListView(View): 
     @catch_error
@@ -25,6 +25,22 @@ class MessageListView(View):
         for message in messages:
             message.is_editable = message_service.is_editable(message)
 
+        # Apply the timestamp formatting function to each message
+        for message in messages:
+            message.formatted_timestamp = message_service.format_timestamp(message.created_at)
+
+        # Group the messages by their formatted timestamp
+        grouped_messages = defaultdict(list)                
+
+        for message in messages:            
+            grouped_messages[message.formatted_timestamp].append(message)
+
+        # Convert defaultdict to a list of tuples to make it easier to iterate in the template
+        grouped_messages_list = [(date, sorted(messages, key=lambda x: x.created_at)) if date == 'Today' else (date, messages) for date, messages in grouped_messages.items()]
+        
+        # Sort grouped messages based on the custom sort key
+        grouped_messages_list = sorted(grouped_messages_list, key=lambda x: message_service.sort_key(x)[0])   
+                
         # Chat-related logic (personal/group chat details)
         if chat.type == ChatType.PERSONAL.value:
             member = chat_service.get_recipient_for_personal(chat.id, user)
@@ -53,7 +69,7 @@ class MessageListView(View):
 
         return render(request, 'enduser/chat/messages.html', {
             'chat': chat_info,
-            'messages': messages,
+            'grouped_messages': grouped_messages_list,  # Send the grouped messages list to the template
             'user': user,
             'success_message': success_message
         })
