@@ -1,322 +1,461 @@
 {% extends "enduser/base.html" %}
 
-{% block title %}group_chat_details{% endblock %}
-
+{% block title %}Group Chat Details{% endblock %}
 
 {% block content %}
 {% load static %}
 
-<div class="header">
-    <h1>Group Chat Details</h1>
+<div class="group-chat-container">
+  <div class="header">
+    <!-- Group Name with Edit Button -->
+    <h1 class="group-name">
+      <span id="group-name-text">rick's gang </span>
+      <button class="edit-btn" onclick="editGroupName()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pen-fill" viewBox="0 0 16 16">
+          <path d="m13.498.795.149-.149a1.207 1.207 0 1 1 1.707 1.708l-.149.148a1.5 1.5 0 0 1-.059 2.059L4.854 14.854a.5.5 0 0 1-.233.131l-4 1a.5.5 0 0 1-.606-.606l1-4a.5.5 0 0 1 .131-.232l9.642-9.642a.5.5 0 0 0-.642.056L6.854 4.854a.5.5 0 1 1-.708-.708L9.44.854A1.5 1.5 0 0 1 11.5.796a1.5 1.5 0 0 1 1.998-.001"/>
+        </svg>
+      </button>
+    </h1>
     <button class="exit-btn">Exit Group</button>
   </div>
 
-  <!-- Group Details -->
+  <!-- Group Details Section -->
   <div class="group-details">
-    <img src="C:\Users\rick\Pictures\WhatsApp Image 2024-11-09 at 01.22.38_8513412f.jpg" alt="Group Photo">
-    <h2>Blue Crew</h2>
-    <p>Group Description: A friendly group for casual discussions!</p>
+    <!-- Group Photo with Edit Button -->
+    <div class="group-photo-container">
+      <img src="{{ '\static\images\group_pic.png' }}" alt="Group Photo" class="group-photo">
+      <button class="edit-btn" onclick="editGroupPhoto()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-image" viewBox="0 0 16 16">
+          <path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0"/>
+          <path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1z"/>
+        </svg>
+      </button>
+    </div>
+    <p class="group-description">
+      group discussions!
+      <button class="edit-btn" onclick="editGroupDescription()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pen-fill" viewBox="0 0 16 16">
+          <path d="m13.498.795.149-.149a1.207 1.207 0 1 1 1.707 1.708l-.149.148a1.5 1.5 0 0 1-.059 2.059L4.854 14.854a.5.5 0 0 1-.233.131l-4 1a.5.5 0 0 1-.606-.606l1-4a.5.5 0 0 1 .131-.232l9.642-9.642a.5.5 0 0 0-.642.056L6.854 4.854a.5.5 0 1 1-.708-.708L9.44.854A1.5 1.5 0 0 1 11.5.796a1.5 1.5 0 0 1 1.998-.001"/>
+        </svg>
+      </button>
+    </p>
     <p class="total-members">Total Members: <span id="member-count">4</span></p>
   </div>
 
-  <!-- Member List -->
+  <!-- Member List Section -->
   <div class="member-list">
     <h3>Members</h3>
     <ul id="member-list">
-      <li>rick bose<span>Admin</span></li>
+      <li>rick bose<span class="role">Admin</span></li>
       <li>protap</li>
       <li>Sourik</li>
       <li>subham</li>
     </ul>
-    <button class="add-member-btn" onclick="openModal()">Add Member</button>
+    <button class="add-member-btn" onclick="openAddMemberModal()">
+      <i class="bi bi-person-fill-add"></i>
+    </button>
   </div>
 
-  <!-- Modal -->
+  <!-- Modal for Adding Member -->
   <div class="modal" id="addMemberModal">
     <div class="modal-content">
-      <span class="modal-close" onclick="closeModal()">&times;</span>
+      <span class="modal-close" onclick="closeAddMemberModal()">&times;</span>
       <h3>Add Member</h3>
       <input type="text" id="new-member-name" placeholder="Enter member name">
       <button onclick="addMember()">Add</button>
     </div>
   </div>
+
+  <!-- Modal for Editing Group Name -->
+  <div class="modal" id="editGroupNameModal">
+    <div class="modal-content">
+      <span class="modal-close" onclick="closeEditGroupNameModal()">&times;</span>
+      <h3>Edit Group Name</h3>
+      <form id="group-name-form">
+        <input type="text" id="group-name-input" placeholder="Enter new group name" value="Blue Crew">
+        <button type="submit">Save</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal for Editing Group Description -->
+  <div class="modal" id="editGroupDescriptionModal">
+    <div class="modal-content">
+      <span class="modal-close" onclick="closeEditGroupDescriptionModal()">&times;</span>
+      <h3>Edit Group Description</h3>
+      <form id="group-description-form">
+        <textarea id="group-description-input" placeholder="Enter new description">A friendly group for casual discussions!</textarea>
+        <button type="submit">Save</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal for Editing Group Photo -->
+  <div class="modal" id="editGroupPhotoModal">
+    <div class="modal-content">
+      <span class="modal-close" onclick="closeEditGroupPhotoModal()">&times;</span>
+      <h3>Edit Group Photo</h3>
+      <input type="file" id="group-photo-input" accept="image/*">
+      <button onclick="saveGroupPhoto()">Save</button>
+    </div>
+  </div>
+</div>
+
 <script>
-    const modal = document.getElementById("addMemberModal");
-    const memberList = document.getElementById("member-list");
-    const memberCount = document.getElementById("member-count");
+  // Modals
+  const addMemberModal = document.getElementById("addMemberModal");
+  const editGroupNameModal = document.getElementById("editGroupNameModal");
+  const editGroupDescriptionModal = document.getElementById("editGroupDescriptionModal");
+  const editGroupPhotoModal = document.getElementById("editGroupPhotoModal");
 
-    function openModal() {
-      modal.style.display = "flex";
+  // Modal Actions
+  function openAddMemberModal() {
+    addMemberModal.style.display = "flex";
+  }
+
+  function closeAddMemberModal() {
+    addMemberModal.style.display = "none";
+  }
+
+  function openEditGroupNameModal() {
+    editGroupNameModal.style.display = "flex";
+  }
+
+  function closeEditGroupNameModal() {
+    editGroupNameModal.style.display = "none";
+  }
+
+  function openEditGroupDescriptionModal() {
+    editGroupDescriptionModal.style.display = "flex";
+  }
+
+  function closeEditGroupDescriptionModal() {
+    editGroupDescriptionModal.style.display = "none";
+  }
+
+  function openEditGroupPhotoModal() {
+    editGroupPhotoModal.style.display = "flex";
+  }
+
+  function closeEditGroupPhotoModal() {
+    editGroupPhotoModal.style.display = "none";
+  }
+
+  // Add Member Function
+  function addMember() {
+    const memberName = document.getElementById("new-member-name").value;
+    if (memberName.trim()) {
+      const li = document.createElement("li");
+      li.textContent = memberName;
+      document.getElementById("member-list").appendChild(li);
+      document.getElementById("member-count").textContent = parseInt(document.getElementById("member-count").textContent) + 1;
+      document.getElementById("new-member-name").value = "";
+      closeAddMemberModal();
     }
+  }
 
-    function closeModal() {
-      modal.style.display = "none";
+  // Edit Group Name
+  function editGroupName() {
+    openEditGroupNameModal();
+  }
+
+  document.getElementById("group-name-form").onsubmit = function(event) {
+    event.preventDefault();
+    const newName = document.getElementById("group-name-input").value;
+    document.getElementById("group-name-text").textContent = newName;
+    closeEditGroupNameModal();
+  };
+
+  // Edit Group Description
+  function editGroupDescription() {
+    openEditGroupDescriptionModal();
+  }
+
+  document.getElementById("group-description-form").onsubmit = function(event) {
+    event.preventDefault();
+    const newDescription = document.getElementById("group-description-input").value;
+    document.querySelector(".group-description").textContent = newDescription;
+    closeEditGroupDescriptionModal();
+  };
+
+  // Edit Group Photo
+  function editGroupPhoto() {
+    openEditGroupPhotoModal();
+  }
+
+  function saveGroupPhoto() {
+    const photoInput = document.getElementById("group-photo-input");
+    const file = photoInput.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        document.querySelector(".group-photo").src = e.target.result;
+      };
+      reader.readAsDataURL(file);
     }
-
-    function addMember() {
-      const memberName = document.getElementById("new-member-name").value;
-      if (memberName.trim()) {
-        const li = document.createElement("li");
-        li.textContent = memberName;
-        memberList.appendChild(li);
-        memberCount.textContent = parseInt(memberCount.textContent) + 1;
-        document.getElementById("new-member-name").value = "";
-        closeModal();
-      }
-    }
-
-    window.onclick = function (event) {
-      if (event.target === modal) {
-        closeModal();
-      }
-    };
-  </script>
-
+    closeEditGroupPhotoModal();
+  }
+</script>
 <style>
-    /* General Styles */
-    body {
-      font-family: 'Arial', sans-serif;
-      margin: 0;
-      padding: 0;
-      background-color: #f9f9f9;
-      color: #333;
-    }
+  body {
+    font-family: 'Arial', sans-serif;
+  --bs-secondary: #373a3c;
+    margin: 0;
+    padding: 0;
+  }
 
-    /* Header Section */
-    .header {
-      background-color: #4a90e2;
-      color: white;
-      padding: 20px;
-      text-align: center;
-      position: relative;
-    }
+  /* Group Chat Container */
+  .group-chat-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 20px;
+  }
 
-    .header .exit-btn {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      background: white;
-      color: #4a90e2;
-      border: none;
-      padding: 10px 15px;
-      border-radius: 5px;
-      cursor: pointer;
-      font-weight: bold;
-    }
+  /* Header Section */
+  .header {
+    background-color: #6a4c9c; /* Purple Background */
+    color: white;
+    padding: 25px 30px;
+    border-radius: 10px;
+    width: 100%;
+    max-width: 650px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  }
 
-    .header .exit-btn:hover {
-      background: #e0eaff;
-    }
+  .group-name {
+    font-size: 28px;
+    margin: 0;
+    display: inline-flex;
+    align-items: center;
+  }
 
-    /* Group Details Section */
-    .group-details {
-      text-align: center;
-      padding: 20px;
-    }
+  .edit-btn {
+    background: none;
+    border: none;
+    margin-left: 10px;
+    cursor: pointer;
+  }
 
-    .group-details img {
-      width: 120px;
-      height: 120px;
-      border-radius: 50%;
-      border: 4px solid #4a90e2;
-      margin-bottom: 20px;
-    }
+  .edit-icon {
+    width: 20px;
+    height: 20px;
+    vertical-align: middle;
+  }
 
-    .group-details h2 {
-      font-size: 24px;
-      margin-bottom: 10px;
-      color: #4a90e2;
-    }
+  .exit-btn {
+    background-color: #7a5fb1;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+  }
 
-    .group-details p {
-      font-size: 16px;
-      color: #666;
-      margin: 5px 0;
-    }
+  .exit-btn:hover {
+    background-color: #5a3b89;
+  }
 
-    .group-details .total-members {
-      font-weight: bold;
-      color: #333;
-    }
+  /* Group Details Section */
+  .group-details {
+    background-color:#6a4c9c;
+    text-align: center;
+    margin-top: 30px;
+    padding: 20px;
+    border-radius: 8px;
+    width: 100%;
+    max-width: 650px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  }
 
-    /* Member List */
-    .member-list {
-      max-width: 600px;
-      margin: 20px auto;
-      padding: 20px;
-      background: white;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    }
+  .group-photo {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 4px solid #6a4c9c;
+    margin-bottom: 20px;
+  }
 
-    .member-list h3 {
-      font-size: 20px;
-      margin-bottom: 15px;
-      color: #4a90e2;
-    }
+  .group-description {
+    font-size: 16px;
+    color: black;
+    margin: 5px 0;
+    display: inline-flex;
+    align-items: center;
+  }
 
-    .member-list ul {
-      list-style: none;
-      padding: 0;
-    }
+  .total-members {
+    font-weight: bold;
+    color: #333;
+  }
 
-    .member-list li {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 10px 0;
-      border-bottom: 1px solid #f0f0f0;
-    }
+  /* Member List Section */
+  .member-list {
+    background-color: white;
+    margin-top: 20px;
+    padding: 20px;
+    width: 100%;
+    max-width: 650px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  }
 
-    .member-list li:last-child {
-      border-bottom: none;
-    }
+  .member-list h3 {
+    font-size: 20px;
+    color: #6a4c9c;
+    margin-bottom: 15px;
+  }
 
-    .member-list li span {
-      color: #666;
-    }
+  .member-list ul {
+    list-style: none;
+    padding: 0;
+  }
 
-    /* Add Members Button */
-    .add-member-btn {
-      display: block;
-      width: 100%;
-      text-align: center;
-      margin: 20px auto 0 auto;
-      padding: 10px 15px;
-      background-color: #4a90e2;
-      color: white;
-      font-weight: bold;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      transition: 0.3s;
-    }
+  .member-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #f0f0f0;
+    color: #333;
+  }
 
-    .add-member-btn:hover {
-      background-color: #3578cc;
-    }
+  .member-list li:last-child {
+    border-bottom: none;
+  }
 
-    /* Modal Styles */
-    .modal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.5);
-      justify-content: center;
-      align-items: center;
-    }
+  .member-list .role {
+    color: #7a5fb1;
+    font-weight: bold;
+  }
 
-    .modal-content {
-      background: white;
-      padding: 20px;
-      border-radius: 8px;
-      width: 90%;
-      max-width: 400px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-      text-align: center;
-    }
+  /* Add Member Button */
+  .add-member-btn {
+    width: 40px; /* Adjust width */
+    height: 40px; /* Adjust height */
+    background-color: #6a4c9c;
+    color: white;
+    font-weight: bold;
+    border: none;
+    border-radius: 50%; /* Make the button round */
+    cursor: pointer;
+    margin-top: 20px;
+    transition: background-color 0.3s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .add-member-btn i {
+    font-size: 20px; /* Adjust the icon size to fit inside the smaller button */
+  }
+  
+  .add-member-btn:hover {
+    background-color: #5a3b89;
+  }
 
-    .modal-content h3 {
-      margin-bottom: 15px;
-      color: #4a90e2;
-    }
+  .plus-icon {
+    width: 24px;
+    height: 24px;
+  }
 
-    .modal-content input {
-      width: 90%;
-      padding: 10px;
-      margin-bottom: 10px;
-      border: 1px solid #ddd;
-      border-radius: 5px;
-    }
+  /* Modal Styles */
+  .modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    align-items: center;
+    justify-content: center;
+  }
 
-    .modal-content button {
-      padding: 10px 15px;
-      background: #4a90e2;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
+  .modal-content {
+    background:#373a3c;
+    padding: 20px;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    text-align: center;
+  }
 
-    .modal-content button:hover {
-      background: #3578cc;
-    }
+  .modal-content input {
+    width: 90%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+  }
 
-    .modal-close {
-      color: #666;
-      font-size: 20px;
-      cursor: pointer;
-      position: absolute;
-      top: 10px;
-      right: 10px;
-    }
+  .modal-content button {
+    padding: 10px 15px;
+    background-color: #6a4c9c;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
 
-    .modal-close:hover {
-      color: #333;
-    }
+  .modal-content button:hover {
+    background-color: #5a3b89;
+  }
 
-    /* Responsive Design */
-    @media (max-width: 768px) {
-      .header {
-        padding: 15px;
-      }
+  .modal-close {
+    font-size: 25px;
+    cursor: pointer;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+  }
 
-      .header .exit-btn {
-        top: 15px;
-        right: 15px;
-        padding: 8px 12px;
-      }
+  .modal-close:hover {
+    color: #333;
+  }
 
-      .group-details img {
-        width: 100px;
-        height: 100px;
-      }
+  /* Modal Styles for Editing Group Name and Description */
+  .modal-content input,
+  .modal-content textarea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+  }
 
-      .group-details h2 {
-        font-size: 20px;
-      }
+  .modal-content button {
+    padding: 10px 15px;
+    background-color: #6a4c9c;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
 
-      .group-details p {
-        font-size: 14px;
-      }
+  .modal-content button:hover {
+    background-color: #5a3b89;
+  }
 
-      .member-list {
-        padding: 15px;
-      }
+  .modal-close {
+    font-size: 25px;
+    cursor: pointer;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+  }
 
-      .member-list h3 {
-        font-size: 18px;
-      }
+  .modal-close:hover {
+    color: #333;
+  }
+</style>
 
-      .member-list li {
-        font-size: 14px;
-      }
-
-      .add-member-btn {
-        padding: 8px 12px;
-        font-size: 14px;
-      }
-
-      .modal-content {
-        padding: 15px;
-      }
-
-      .modal-content h3 {
-        font-size: 18px;
-      }
-
-      .modal-content input {
-        font-size: 14px;
-      }
-
-      .modal-content button {
-        font-size: 14px;
-        padding: 8px 12px;
-      }
-    }
-  </style>
-
-  {% endblock %}
+{% endblock %}
