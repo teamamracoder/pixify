@@ -21,12 +21,8 @@
                         <div class="input-group mb-3 " style=" border-radius: 5px; ">
                             <input type="text" id="search_chats" class="form-control" placeholder="Searching chats here....."
                                 aria-label="Example text with button addon" aria-describedby="button-addon1" />
-                                <button class="btn btn-primary" type="button" id="button-addon1" id="searchbtn">
-                                    <i class="bi bi-search"></i>
-                                </button>
                             </div>
                         </div>
-                        <h6 style="padding-left:10px; color: rgb(178, 190, 181);font-size:15px; ">Search results : <hr></h6>
                         <div id="fill" >       
                         </div>
                     </div>
@@ -48,7 +44,7 @@
                                         $("#fill").append(`
                                         <div class="modal-list">
                                         <img src="${chat.chat_cover}" id="profile-photo">
-                                            <a href="/chat/${chat.id}" class="chats-item" id="hyperlink-text">${chat.title}</a><br>
+                                            <a href="${chat.id}/message/" class="chats-item" id="hyperlink-text">${chat.title}</a><br>
                                         </div>
                                         `);
                                     });
@@ -63,18 +59,18 @@
     </div>
 </div>
 
-
+    {% if data.chats %}
     <!-- Peoples -->
-    {% for chat in chats %}
+    {% for chat in data.chats %}
     <div style="border: 1px solid black; border-radius: 3px" class="m-2">
         <div class="chat-item">
             <!-- Image Section -->
             <div class="image-div">
                 {% if chat.is_group %}
-                <img src="{{ chat.chat_cover|default:'\static\images\group_pic.png' }}" alt="Chat Cover" class="profile-photo">
-                {% else%}
-                <img src="{{ chat.chat_cover|default:'\static\images\avatar.jpg' }}" alt="Chat Cover" class="profile-photo">
-                {% endif %}          
+                    <img src="{{ chat.chat_cover|default:'/static/images/group_pic.png' }}" alt="Chat Cover" class="profile-photo">
+                {% else %}
+                    <img src="{{ chat.chat_cover|default:'/static/images/avatar.jpg' }}" alt="Chat Cover" class="profile-photo">
+                {% endif %}
             </div>
         
             <!-- Middle Section -->
@@ -84,18 +80,70 @@
                         {{ chat.title }}
                     </a>
                 </p>
-                <p class="chat-message chat_title">{{ chat.latest_message }}</p>
+                <div style="display:flex">
+                    <span class="timestamp">
+                       {% if chat.latest_message_sender_id == user.id and chat.latest_message_timestamp >= chat.latest_reaction_timestamp %}
+                        {% if chat.is_group %}
+                            {% if chat.seen_by_all %}
+                                ✔️✔️
+                            {% else %}
+                                ✔️
+                            {% endif %}
+                        {% else %}
+                            {% if chat.seen_by_all %}
+                                ✔️✔️
+                            {% else %}
+                                ✔️
+                            {% endif %}
+                        {% endif %}
+                        {% endif %}
+                    </span>
+                    <span>
+                        {% if chat.latest_message or chat.latest_reaction %}
+                            {% if chat.latest_message_timestamp >= chat.latest_reaction_timestamp %}
+                                <p class="chat-message chat_title">{{ chat.latest_message }}</p>
+                            {% else %}
+                                <p class="chat-message chat_title">{{ chat.latest_reaction_message_reacted_by }} : Reacted {{ chat.latest_reaction|safe }} on "{{ chat.latest_reaction_message }}"</p>
+                            {% endif %}
+                        {% else %}
+                            <p class="chat-message chat_title">No messages yet</p>
+                        {% endif %}
+                    </span>
+                </div>
             </div>
         
             <!-- Right-aligned Section -->
             <div class="badge-div">
                 <span class="badge unread-messages">{{ chat.unread_messages }}</span>
-                <span class="timestamp">{{ chat.latest_message_timestamp }}</span>
+                <span class="timestamp">
+                    {% if chat.latest_message or chat.latest_reaction %}
+                        {% if chat.latest_message_timestamp > chat.latest_reaction_timestamp %}
+                            {{ chat.latest_message_timestamp }}
+                        {% else %}
+                            {{ chat.latest_reaction_timestamp }}
+                        {% endif %}
+                    {% endif %}
+                </span>
             </div>
         </div>
-        
     </div>
-    {% endfor %}
+{% endfor %}
+{% else %}
+<hr>
+<p class="chat-message chat_title">No chats available yet</p>
+{% endif %}
+
+<!-- Auto-Reload Logic -->
+<script>
+  // Reload the page if navigated to from cache
+  window.addEventListener('pageshow', function (event) {
+    if (event.persisted) {
+      // Reload the page to ensure fresh data
+      window.location.reload();
+    }
+  });
+</script>
+
 
 
     <div style="position: absolute;bottom: 33px;right: 28px;background-color: #1f0647;height: 40px;width: 40px;border-radius: 50%;display: flex;justify-content: center;align-content: center;align-items: center;">
@@ -442,11 +490,11 @@ $(document).ready(function() {
 <style>
     .modal-list{
         margin:10px;
-        background-color: rgb(170, 150, 291);
         border-radius:5px;
         border:10px white;
         padding:10px;
         display:flex;
+        border: 2px solid #7474c1;
     
     }
     #unread_color{
@@ -623,7 +671,7 @@ $(document).ready(function() {
     display: flex;
     flex-direction: column;
     align-items: flex-end;
-    gap: 5px;
+    gap: 15px;
     width: 80px; /* Fixed width for consistent alignment */
 }
 

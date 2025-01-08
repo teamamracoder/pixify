@@ -59,12 +59,12 @@ class UIMODES(Enum):
 
 # static values, insert these in master_lists table
 class Reactions:
-    LOVE = '<i class="bi bi-suit-heart-fill text-danger"></i>'
-    LIKE = '<i class="bi bi-hand-thumbs-up-fill text-success"></i>'
-    ANGRY = '<i class="bi bi-emoji-angry-fill text-warning"></i>'
-    SAD = '<i class="bi bi-emoji-frown-fill text-secondary"></i>'
-    SMILE = '<i class="bi bi-emoji-grin-fill text-success"></i>'
-    CARE = '<i class="bi bi-hearts text-danger"></i>'
-    WOW = '<i class="bi bi-emoji-surprise-fill text-info"></i>'
-    KISS = '<i class="bi bi-emoji-kiss-fill text-danger"></i>'
-    HEARTBROKE = '<i class="bi bi-heartbreak-fill text-dark"></i>'
+    LOVE = '<i class="fa-solid fa-heart" style="color: #eb0505;"></i>'
+    LIKE = '<i class="fa-solid fa-thumbs-up" style="color: #ffec1a;"></i>'
+    ANGRY = '<i class="fa-solid fa-face-angry" style="color: #ff0a0a;"></i>'
+    SAD = '<i class="fa-solid fa-face-sad-tear" style="color: #ffcb0f;"></i>'
+    SMILE = '<i class="fa-solid fa-face-smile-beam" style="color: #FFD43B;"></i>'
+    WOW = '<i class="fa-solid fa-face-surprise" style="color: #FFD43B;"></i>'
+    KISS = '<i class="fa-solid fa-face-kiss-beam" style="color: #FFD43B;"></i>'
+    HEARTBROKE = '<i class="fa-solid fa-heart-crack" style="color: #d40202;"></i>'
+    FAKESMILE= '<i class="fa-solid fa-face-grin-beam-sweat" style="color: #FFD43B;"></i>'
