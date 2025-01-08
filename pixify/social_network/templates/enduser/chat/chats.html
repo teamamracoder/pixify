@@ -1,7 +1,7 @@
 {% extends "enduser/base.html" %} {% block title %}Pixify-Message{% endblock %}
 {% block content %} {% load static %}
 
-<div class="px-3 py-3 mt-3 users"
+<div class="px-3 py-3 mt-3 users chats-list-box"
     style="background-color: #1f0447e3;box-shadow: 0 4px 8px rgba(151, 95, 236, 0.5);font-family: serif;border-radius: 7px;position:relative;">
     <!-- heading -->
     <div class="m-2">
@@ -164,9 +164,6 @@
                         <div class="parchat-trend-text">Make A Conversation</div>
                         <div class="parchat-input-wrapper">
                             <input type="text" id="parchat-searchin" class="parchat-form-control" placeholder="Search Name" aria-label="Search Name">
-                            <button class="parchat-btn parchat-btn-outline-secondary" type="button" id="parchat-searchbtn" style="border-top-right-radius: 10px; border-bottom-right-radius: 10px;">
-                                <i class="fas fa-search"></i>
-                            </button>
                         </div>
                         <div id="parchat-filled" class="parchat-profile-grid">
                             <!-- Profile items go here -->
@@ -374,13 +371,45 @@ $(document).ready(function () {
     } else {
         console.error("Arrow button element not found!");
     }
-
+    
     // Redirect to chat with the selected user
     window.redirectToChat = function (userId) {
         if (redirectEnabled) {
-            createChat(1, [userId]); // Pass an array with the single userId
+            checkExistingChat(userId, function (existingChat) {
+                if (existingChat && existingChat.chat_id) {
+                    // Redirect to the existing chat
+                    window.location.href = '/chat/' + existingChat.chat_id + '/message/?message=' + encodeURIComponent(existingChat.message || ''); 
+                } else {
+                    // Create a new chat if no existing chat is found
+                    createChat(1, [userId]);
+                }
+            });
         }
+    };
+
+    // Function to check if a chat already exists
+    function checkExistingChat(userId, callback) {
+        $.ajax({
+            url: '/chat/create/', // Endpoint to check or create chat
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({
+                type: 1, // Chat type (personal chat)
+                members: [userId], // User ID to check chat with
+                _token: $('meta[name="csrf-token"]').attr('content') // CSRF token for security
+            }),
+            success: function (res) {
+                // Pass the response to the callback function
+                callback(res);
+            },
+            error: function (xhr, status, error) {
+                console.log('Error:', xhr, status, error);
+                // Call callback with null on error
+                callback(null);
+            }
+        });
     }
+
 
     $.ajaxSetup({
         headers: {
@@ -399,8 +428,8 @@ $(document).ready(function () {
                 members: members,
                 _token: $('meta[name="csrf-token"]').attr('content') // CSRF token for security
             }),
-            success: function (res) {
-                window.location.href = '/chat/' + res.chat_id;
+           success: function (res) { 
+            window.location.href = '/chat/' + res.chat_id + '/message/?message=' + encodeURIComponent(res.message); 
             },
             error: function (xhr, status, error) {
                 console.log('Error:', xhr, status, error);
@@ -448,8 +477,14 @@ $(document).ready(function () {
     });
 
     // Fetch all followers and followings on page load
-    fetchFollowersAndFollowings();
+    fetchFollowersAndFollowings();    
 });
+
+$(document).ready(function() {
+    var navbarHeight = $('#navbar').outerHeight();
+    $('.chats-list-box').css('height', 'calc(100vh - ' + (navbarHeight * 2) + 'px)');    
+});
+
 </script>
 
 <style>
@@ -823,192 +858,216 @@ $(document).ready(function () {
 
 /*Message mention */
     
-.profile-photo {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    margin-right: 10px;
-}
+    .profile-photo {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        margin-right: 10px;
+    }
 
-.user-item {
-    display: flex;
-    align-items: center;
-    margin-bottom: 10px;
-    padding: 5px; /* Increase padding for larger touch area */
-    cursor: pointer;
-    width: 100%; /* Ensure the item spans the full width of its container */
-    box-sizing: border-box; /* Ensure padding is included in the width */
-}
+    .user-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+        padding: 5px; /* Increase padding for larger touch area */
+        cursor: pointer;
+        width: 100%; /* Ensure the item spans the full width of its container */
+        box-sizing: border-box; /* Ensure padding is included in the width */
+    }
 
-.user-item .user-content {
-    display: flex;
-    align-items: center;
-    flex: 1;
-}
+    .user-item .user-content {
+        display: flex;
+        align-items: center;
+        flex: 1;
+    }
 
-.user-item.selected {
-    background-color: #11dbf940;
-    border: 3px solid #ccc;
-    border-radius: 30px;
-    width: 370px; /* Correct syntax to ensure the item spans the full width */
-}
+    .user-item.selected {
+        background-color: #11dbf940;
+        border: 3px solid #ccc;
+        border-radius: 30px;
+        width: 370px; /* Correct syntax to ensure the item spans the full width */
+    }
 
-.user-item a {
-    text-decoration: none;
-    color: inherit; /* Ensure the link inherits the color for readability */
-}
+    .user-item a {
+        text-decoration: none;
+        color: inherit; /* Ensure the link inherits the color for readability */
+    }
 
-#searchin {
-    height:40px;
-    width: 320px; 
-    border-radius:15px;
-    background-color : rgb(86 185 200);
-    border-top-right-radius:0px;
-    border-bottom-right-radius:0px;
-}
+    #searchin {
+        height:40px;
+        width: 320px; 
+        border-radius:15px;
+        background-color : rgb(86 185 200);
+        border-top-right-radius:0px;
+        border-bottom-right-radius:0px;
+    }
 
-.parchat-container {
-    width: 90%;
-    padding: 20px;
-    position: relative; /* Ensure relative positioning for children */
-}
+    .parchat-container {
+        width: 90%;
+        padding: 20px;
+        position: relative; /* Ensure relative positioning for children */
+    }
 
-.parchat-trend-text {
-    font-size: 24px;
-    margin-bottom: 20px;
-}
+    .parchat-trend-text {
+        font-size: 24px;
+        margin-bottom: 20px;
+    }
 
-.parchat-input-wrapper {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 20px;
-}
+    .parchat-profile-grid {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 20px;
+    }
 
-.parchat-profile-grid {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 20px;
-}
+    .parchat-selection-body {
+        height: 85px;
+        width: 85px;
+        position: relative;
+        display: inline-block;
+        margin: 10px;
+        cursor: pointer;
+        border: 2px solid transparent;
+        border-radius: 50%;
+        padding: 10px;
+        transition: transform 0.2s, border-color 0.2s;
+    }
 
-.parchat-selection-body {
-    height: 85px;
-    width: 85px;
-    position: relative;
-    display: inline-block;
-    margin: 10px;
-    cursor: pointer;
-    border: 2px solid transparent;
-    border-radius: 50%;
-    padding: 10px;
-    transition: transform 0.2s, border-color 0.2s;
-}
+    .parchat-selection-body.selected {
+        border-color: #007BFF;
+        background-color: rgba(0, 123, 255, 0.1); /* Light blue background for selected profiles */
+    }
 
-.parchat-selection-body.selected {
-    border-color: #007BFF;
-    background-color: rgba(0, 123, 255, 0.1); /* Light blue background for selected profiles */
-}
+    .parchat-profile-photo {
+        border-radius: 50%;
+        width: 60px;
+        height: 60px;
+    }
 
-.parchat-profile-photo {
-    border-radius: 50%;
-    width: 60px;
-    height: 60px;
-}
+    .parchat-checkbox {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        width: 15px;
+        height: 15px;
+        background-color: white;
+        border-radius: 50%;
+        border: 2px solid #333;
+        display: none;
+    }
 
-.parchat-checkbox {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    width: 15px;
-    height: 15px;
-    background-color: white;
-    border-radius: 50%;
-    border: 2px solid #333;
-    display: none;
-}
+    .parchat-profile-text {
+        text-align: center;
+        margin-top: 10px;
+    }
 
-.parchat-profile-text {
-    text-align: center;
-    margin-top: 10px;
-}
+    .parchat-btn,
+    .parchat-btn-outline-secondary {    
+        background:none;    
+        margin-top: 10px;
+        padding: 10px;
+        font-size: 16px;
+    }
 
-.parchat-form-control,
-.parchat-btn,
-.parchat-btn-outline-secondary {
-    background-color: #3D3D6B;
-    color: black;
-    margin-top: 10px;
-    padding: 10px;
-    font-size: 16px;
-}
+    .parchat-form-control {
+        background:none;
+        padding:10px;
+        flex-grow: 1;
+    }
 
-.parchat-form-control {
-    flex-grow: 1;
-}
+    .parchat-btn-outline-secondary {
+        background-color: black;
+        color: #333;    
+    }
 
-.parchat-btn-outline-secondary {
-    background-color: black;
-    color: #333;
-    border: 1px solid #ccc;
-}
+    .parchat-modal {
+        display: none; /* Hidden by default */
+        position: fixed; /* Stay in place */
+        z-index: 1000; /* Sit on top */
+        left: 0;
+        top: 0;
+        width: 100%; /* Full width */
+        height: 100%; /* Full height */
+        overflow: auto; /* Enable scroll if needed */
+        background-color: rgba(0, 0, 0, 0.4); /* Black with opacity */
+    }
 
-.parchat-modal {
-    display: none; /* Hidden by default */
-    position: fixed; /* Stay in place */
-    z-index: 1000; /* Sit on top */
-    left: 0;
-    top: 0;
-    width: 100%; /* Full width */
-    height: 100%; /* Full height */
-    overflow: auto; /* Enable scroll if needed */
-    background-color: rgba(0, 0, 0, 0.4); /* Black with opacity */
-}
+    .parchat-modal-content {
+        background-color: #fefefe;
+        margin: 15% auto; /* 15% from the top and centered */
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%; /* Fixed width */
+        max-width: 600px; /* Add a max-width to limit expansion */
+        height: 400px; /* Fixed height */
+        overflow-y: auto; /* Make the modal content scrollable */
+        position: relative;
+    }
 
-.parchat-modal-content {
-    background-color: #fefefe;
-    margin: 15% auto; /* 15% from the top and centered */
-    padding: 20px;
-    border: 1px solid #888;
-    width: 80%; /* Fixed width */
-    max-width: 600px; /* Add a max-width to limit expansion */
-    height: 400px; /* Fixed height */
-    overflow-y: auto; /* Make the modal content scrollable */
-    position: relative;
-}
+    .parchat-close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
 
-.parchat-close {
-    color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
-}
+    .parchat-close:hover,
+    .parchat-close:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+    }
 
-.parchat-close:hover,
-.parchat-close:focus {
-    color: black;
-    text-decoration: none;
-    cursor: pointer;
-}
+    #arrow-button {
+        display: none; /* Hide by default */
+        position: fixed;
+    
+    }
 
-#arrow-button {
-    display: none; /* Hide by default */
-    position: fixed;
-  
-}
+    .parchat-arrow-button {
+        display: none; /* Hide by default */
+        position: absolute; /* Position inside parent */
+        bottom: 26%; /* Adjust based on parent height */
+        right: 35%;
+        background-color: #007BFF;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        padding: 10px 20px;
+        cursor: pointer;
+        font-size: 20px;
+    }
 
-.parchat-arrow-button {
-    display: none; /* Hide by default */
-    position: absolute; /* Position inside parent */
-    bottom: 26%; /* Adjust based on parent height */
-    right: 35%;
-    background-color: #007BFF;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    padding: 10px 20px;
-    cursor: pointer;
-    font-size: 20px;
-}
+    .parchat-input-wrapper {
+        display: flex;
+        align-items: center;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 5px;
+        max-width: 300px;
+        margin: 0 auto;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .parchat-form-control {
+        background: none;
+        padding: 10px;
+        flex-grow: 1;
+        border: none;
+        outline: none;
+        font-size: 16px;
+    }
+
+    .parchat-form-control::placeholder {
+        color: #aaa;
+    }
+
+    .parchat-input-wrapper:focus-within {
+        border-color: #007BFF;
+        box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+    }
+
 
 </style>
 </div>
