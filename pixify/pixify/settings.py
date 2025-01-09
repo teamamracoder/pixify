@@ -39,7 +39,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
 ]
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",  # Replace with your frontend origin
+    "http://localhost:8000",  # Replace with your frontend origin
 ]
 
 ROOT_URLCONF = 'pixify.urls'
