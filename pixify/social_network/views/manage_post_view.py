@@ -69,10 +69,13 @@ class ManagePostDetailView(View):
      def get(self, request, post_id):
         # print(comment_count  4)
         comment_count = services.get_comment_count_by_post(post_id)
+
         post_dic= {
         'post' : services.post_service.manage_get_post(post_id),
          'comment': services.post_service.manage_list_comments_filtered(post_id),
                    }
+        
+        print(post_dic)
         return render(request, 'adminuser/post/detail.html', {'post_dic':post_dic,'comment_count':comment_count})
 
 class ManagePostUpdateView(View):
@@ -125,3 +128,12 @@ class ManageTogglePostActiveView(View):
         post.is_active = not post.is_active  # Toggle active status
         post.save()
         return JsonResponse({'is_active': post.is_active})
+    
+
+class ManageToggleCommentActiveView(View):
+     def post(self, request, comment_id):
+        comment = services.post_service.manage_get_comment(comment_id)
+        comment.is_active = not comment.is_active  
+        comment.save()
+        return JsonResponse({'is_active': comment.is_active})  
+     
