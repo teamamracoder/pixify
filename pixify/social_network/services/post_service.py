@@ -31,10 +31,10 @@ def manage_list_posts(sort_by = 'title'):
 
 def manage_create_post(**kwargs):
     post = Post.objects.create( # creating a new post object
-            posted_by=kwargs['posted_by'],
-            created_by=kwargs['created_by'],
-            title=kwargs['title'],
-            description=kwargs['description'],
+            posted_by = kwargs['posted_by'],
+            created_by = kwargs['created_by'],
+            title = kwargs['title'],
+            description = kwargs['description'],
         )
     return post
 

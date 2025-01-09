@@ -1,6 +1,6 @@
 from pyexpat.errors import messages
 from django.shortcuts import get_object_or_404, render, redirect
-from django.http import HttpResponseBadRequest, JsonResponse
+from django.http import JsonResponse
 from django.views import View
 
 from ..forms.manage_post_forms import ManagePostUpdateForm,ManagePostCreateForm
@@ -20,11 +20,11 @@ class ManagePostCreateView(View):
     @catch_error
     def get(self,request):
         form = ManagePostCreateForm() #Form Initialization:
-        return render(request, 'adminuser/post/create.html', {"form": form})
+        return render(request,'adminuser/post/create.html', {"form": form})# empty form
     
 
     @catch_error
-    def post(self, request):
+    def post(self, request): 
         user = request.user # reffers to currently logged-in user 
         form = ManagePostCreateForm(request.POST) # data submitted through an HTML form
         if form.is_valid():
@@ -43,7 +43,6 @@ class ManagePostCreateView(View):
         return render(request, 'adminuser/post/create.html',   success_response(
                 message=messages),
                 {"form": form})
-
 
 class ManagePostListView(View):
     def get(self, request):
