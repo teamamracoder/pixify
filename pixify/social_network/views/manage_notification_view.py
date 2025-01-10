@@ -75,12 +75,14 @@ class ManageNotificationUpdateView(View):
 
     @catch_error
     def post(self, request, notification_id):
+        user=request.users
         notification = get_object_or_404(Notification, id=notification_id)
         form = ManageNotificationUpdateForm(request.POST)
         if form.is_valid():
             notification.text = form.cleaned_data['text']
             notification.media_url = form.cleaned_data.get('media_url')
             # notification.receiver_id = form.cleaned_data['receiver_id']
+            notification.receiver_id=user
             # notification.is_raed = form.cleaned_data['is_raed']            
             notification.save()  # Save the updated user instance
             return redirect('manage_notification_list')
