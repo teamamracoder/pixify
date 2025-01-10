@@ -5,11 +5,11 @@
 {% block content %}
 {% load static %}
 
-<div class="group-chat-container">
+<d<div class="group-chat-container">
   <div class="header">
     <!-- Group Name with Edit Button -->
     <h1 class="group-name">
-      <span id="group-name-text">rick's gang </span>
+      <span id="group-name-text">{{ data.chat.title }}</span>  <!-- Display the chat title dynamically -->
       <button class="edit-btn" onclick="editGroupName()">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pen-fill" viewBox="0 0 16 16">
           <path d="m13.498.795.149-.149a1.207 1.207 0 1 1 1.707 1.708l-.149.148a1.5 1.5 0 0 1-.059 2.059L4.854 14.854a.5.5 0 0 1-.233.131l-4 1a.5.5 0 0 1-.606-.606l1-4a.5.5 0 0 1 .131-.232l9.642-9.642a.5.5 0 0 0-.642.056L6.854 4.854a.5.5 0 1 1-.708-.708L9.44.854A1.5 1.5 0 0 1 11.5.796a1.5 1.5 0 0 1 1.998-.001"/>
@@ -23,7 +23,7 @@
   <div class="group-details">
     <!-- Group Photo with Edit Button -->
     <div class="group-photo-container">
-      <img src="{{ '\static\images\group_pic.png' }}" alt="Group Photo" class="group-photo">
+      <img src="{{ data.chat.chat_cover }}" alt="Group Photo" class="group-photo">
       <button class="edit-btn" onclick="editGroupPhoto()">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-image" viewBox="0 0 16 16">
           <path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0"/>
@@ -32,74 +32,68 @@
       </button>
     </div>
     <p class="group-description">
-      group discussions!
+      {{ data.chat.description }}  <!-- Display group description dynamically -->
       <button class="edit-btn" onclick="editGroupDescription()">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pen-fill" viewBox="0 0 16 16">
           <path d="m13.498.795.149-.149a1.207 1.207 0 1 1 1.707 1.708l-.149.148a1.5 1.5 0 0 1-.059 2.059L4.854 14.854a.5.5 0 0 1-.233.131l-4 1a.5.5 0 0 1-.606-.606l1-4a.5.5 0 0 1 .131-.232l9.642-9.642a.5.5 0 0 0-.642.056L6.854 4.854a.5.5 0 1 1-.708-.708L9.44.854A1.5 1.5 0 0 1 11.5.796a1.5 1.5 0 0 1 1.998-.001"/>
         </svg>
       </button>
     </p>
-    <p class="total-members">Total Members: <span id="member-count">4</span></p>
+    <p class="total-members">Total Members: <span id="member-count">{{ data.chat.members|length }}</span></p> <!-- Count members dynamically -->
   </div>
 
   <!-- Member List Section -->
   <div class="member-list">
     <h3>Members</h3>
     <ul id="member-list">
-      <li>rick bose<span class="role">Admin</span></li>
-      <li>protap</li>
-      <li>Sourik</li>
-      <li>subham</li>
-    </ul>
+      {% for member in data.chat.members %}
+        {% if member.id == data.user %}
+          <li>
+            <div class="member-title">
+              <img src="{{ member.profile }}" class="profile-pic">
+              {{ member.first_name }}
+            </div>
+            {% if member.id == data.chat.created_by %}<span class="role">Group admin</span>{% endif %}
+          </li>
+        {% endif %}
+      {% endfor %}
+
+      {% for member in data.chat.members %}
+      {% if member.id == data.chat.created_by and member.id != data.user %}
+        <li>
+          <div class="member-title">
+            <img src="{{ member.profile }}" class="profile-pic">
+            {{ member.first_name }}
+          </div>
+          {% if member.id == data.chat.created_by %}<span class="role">Group admin</span>{% endif %}
+        </li>
+      {% endif %}
+    {% endfor %}
+      
+      {% for member in data.chat.members %}
+        {% if member.id != data.user and  member.id != data.chat.created_by %}
+          <li>
+            <div class="member-title">
+              <img src="{{ member.profile }}" class="profile-pic">
+              {{ member.first_name }}
+            </div>
+            {% if member.id == data.chat.created_by %}<span class="role">Group admin</span>{% endif %}
+          </li>
+        {% endif %}
+      {% endfor %}
+      
+      {% if data.chat.members|length == 0 %}
+        <li>No members in this chat.</li>
+      {% endif %}
+    </ul>   
     <button class="add-member-btn" onclick="openAddMemberModal()">
       <i class="bi bi-person-fill-add"></i>
     </button>
   </div>
 
+
   <!-- Modal for Adding Member -->
-  <div class="modal" id="addMemberModal">
-    <div class="modal-content">
-      <span class="modal-close" onclick="closeAddMemberModal()">&times;</span>
-      <h3>Add Member</h3>
-      <input type="text" id="new-member-name" placeholder="Enter member name">
-      <button onclick="addMember()">Add</button>
-    </div>
-  </div>
-
-  <!-- Modal for Editing Group Name -->
-  <div class="modal" id="editGroupNameModal">
-    <div class="modal-content">
-      <span class="modal-close" onclick="closeEditGroupNameModal()">&times;</span>
-      <h3>Edit Group Name</h3>
-      <form id="group-name-form">
-        <input type="text" id="group-name-input" placeholder="Enter new group name" value="Blue Crew">
-        <button type="submit">Save</button>
-      </form>
-    </div>
-  </div>
-
-  <!-- Modal for Editing Group Description -->
-  <div class="modal" id="editGroupDescriptionModal">
-    <div class="modal-content">
-      <span class="modal-close" onclick="closeEditGroupDescriptionModal()">&times;</span>
-      <h3>Edit Group Description</h3>
-      <form id="group-description-form">
-        <textarea id="group-description-input" placeholder="Enter new description">A friendly group for casual discussions!</textarea>
-        <button type="submit">Save</button>
-      </form>
-    </div>
-  </div>
-
-  <!-- Modal for Editing Group Photo -->
-  <div class="modal" id="editGroupPhotoModal">
-    <div class="modal-content">
-      <span class="modal-close" onclick="closeEditGroupPhotoModal()">&times;</span>
-      <h3>Edit Group Photo</h3>
-      <input type="file" id="group-photo-input" accept="image/*">
-      <button onclick="saveGroupPhoto()">Save</button>
-    </div>
-  </div>
-</div>
+  
 
 <script>
   // Modals
@@ -197,6 +191,9 @@
   }
 </script>
 <style>
+  .member-title{
+    color:rgb(1, 8, 13);
+  }
   body {
     font-family: 'Arial', sans-serif;
   --bs-secondary: #373a3c;
