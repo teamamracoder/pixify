@@ -200,7 +200,7 @@
              <span style="font-size:14px;color:#e9e6e6c7;">Upload his profile picture</span>  </h6>
         
         
-         <span style="font-size:11px;margin-left: 15px;position: relative;bottom: 10px;" class="py-1">{{ post.created_at|timesince }} ago <i class="bi bi-globe-americas p-1" style="font-size:10px"></i></span>
+         <span style="font-size:11px;margin-left: 15px;position: relative;bottom: 14px;" class="py-1">{{ post.created_at|timesince }} ago <i class="bi bi-globe-americas p-1" style="font-size:10px"></i></span>
          
         </div>
     </div>
@@ -562,10 +562,9 @@
             <div class="post-center pb-3 " style="margin-left: 0px;">
                 <p class="px-3 pt-2" style="font-size:15px; margin: 0; margin-bottom: 5px;" >wow cool</p>
         
-                <div class="post-box pb-2">
-        
-        
-                    <div class="post-des-img">
+                <div class="post-box pb-2" id="photo_com">
+{% comment %}         
+        <div class="post-des-img">
                         <img src="{% static 'images/priya.jpg' %}" class="img-fluid" alt="Responsive image">
                     </div>
                     <div class="">
@@ -576,7 +575,9 @@
                                 <span style="font-size:12px;color:#e9e6e6c7;" class="ms-auto pe-2">5 comments</span>
                             </div>
                         </div>
-                    </div>
+                    </div>  {% endcomment %}
+
+
                 </div>
             </div>
         </div>
@@ -677,15 +678,36 @@
                     csrfmiddlewaretoken: '{{ csrf_token }}',
                   },
                 success: function (data) {
+                    console.log(data)
                     
-                    /*$('#commentsDiv').html(data);*/
 
                      const postid= FirstPostId
                      document.getElementById("postidd").value = postid;
                     const commentList = $('#commentList');
+                    const photo_com = $('#photo_com');
                     
                     commentList.empty(); // Clear previous comments
+                   
+ const postItem = `
+                    <div class="post-des-img">
+                    
+                     ${data.posts[0].media_url.map(post => `
+            <img src="static${post}" class="img-fluid" alt="Responsive image">
+        `).join('')}
+                    </div>
+                    <div class="">
+                        <div>
+                            <div class="d-flex align-items-center px-2 ">
+                                <i class="bi bi-hand-thumbs-up pe-1"style="font-size:12px"></i> <i class="bi bi-heart  "style="font-size:12px"></i>
+                                <span style="font-size:12px;color:#e9e6e6c7;" class="px-2"> Rima Das, Sribash Sarkar and <span>9</span> others</span>
+                                <span style="font-size:12px;color:#e9e6e6c7;" class="ms-auto pe-2">5 comments</span>
+                            </div>
+                        </div>
+                    </div>`
+                    photo_com.html(postItem);
                     if (data.comments.length > 0) {
+
+
                         data.comments.forEach(comment => {
                             
                             const commentItem = `
@@ -700,7 +722,8 @@
                              style="background-color:#311e4ee3;width: 100%;">
                             <span class="d-block fw-bold">Rima Das</span>
                               <li class="list-group-item">
-                                    <span style="font-size:13px">${comment.comment}</span>
+                                <span style="font-size:13px">${comment.comment}</span>
+                                    
                                    
                                 </li>
                         </div>  
@@ -801,12 +824,123 @@
           csrfmiddlewaretoken: '{{ csrf_token }}',
         },
         headers: { "X-CSRFToken": "{{ csrf_token }}" }, 
-        success: function (response) {
+        success: function (data) {
+            console.log("response",data)
 
             // Refresh the comments section
            
 
           $('#commentText').val(''); // Clear textarea
+          const commentList = $('#commentList');
+          const photo_com = $('#photo_com');
+          
+          commentList.empty(); // Clear previous comments
+         
+const postItem = `
+          <div class="post-des-img">
+          
+           ${data.posts[0].media_url.map(post => `
+  <img src="static${post}" class="img-fluid" alt="Responsive image">
+`).join('')}
+          </div>
+          <div class="">
+              <div>
+                  <div class="d-flex align-items-center px-2 ">
+                      <i class="bi bi-hand-thumbs-up pe-1"style="font-size:12px"></i> <i class="bi bi-heart  "style="font-size:12px"></i>
+                      <span style="font-size:12px;color:#e9e6e6c7;" class="px-2"> Rima Das, Sribash Sarkar and <span>9</span> others</span>
+                      <span style="font-size:12px;color:#e9e6e6c7;" class="ms-auto pe-2">5 comments</span>
+                  </div>
+              </div>
+          </div>`
+          photo_com.html(postItem);
+          if (data.comments.length > 0) {
+
+
+              data.comments.forEach(comment => {
+                  
+                  const commentItem = `
+                      
+                 
+                 <div class="d-flex py-1">
+
+          <img src="{% static 'images/green.png'%}" alt="User" class="rounded-circle"
+              style="width:35px; height:35px;">
+          <div class="" class="d-flex" style="flex-direction: column;">
+                <div class="comment-text mb-0 ps-2 py-1 rounded px-3"
+                   style="background-color:#311e4ee3;width: 100%;">
+                  <span class="d-block fw-bold">Rima Das</span>
+                    <li class="list-group-item">
+                      <span style="font-size:13px">${comment.comment}</span>
+                          
+                         
+                      </li>
+              </div>  
+              
+
+              <div class="d-flex p-1" style="gap:20px; margin-left: 17px;">
+                  <span style="font-size:11px;cursor:pointer;">${new Date(comment.created_at).toLocaleString([],  { weekday: 'long' })} ${new Date(comment.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                  <span style="font-size:11px;cursor:pointer;">Like</span>
+                  <span style="font-size:11px;  cursor: pointer;" class="com-reply">Reply</span>
+              </div>
+              <span class="view-comment" style="cursor: pointer; font-size:14px;margin-left:12px;">View reply</span>
+         
+
+
+              <div style=" display:none;" class="reply-open">
+                  <div class="d-flex py-1">
+                      <img src="{% static 'images/green.png'%}" alt="User" class="rounded-circle"
+                          style="width:25px; height:25px;">
+                      <div class="d-flex" style="flex-direction: column;width:100%">
+                          <div class="comment-text mb-0 ps-2 py-1  rounded px-3"
+                              style="background-color: #311e4ee3;margin-left: 8px;width: 100%;">
+                              <span class="d-block">Priya Mitra</span>
+                              <span class="fw-light ps-1" style="font-size:11px">Wow ! What a picture Lorem
+                                  ipsum, dolor sit amet consectetur.</span>
+                          </div>
+                          <div class="d-flex p-1" style="gap:20px; margin-left: 17px;">
+                              <span style="font-size:11px;cursor:pointer;">16h</span>
+                              <span style="font-size:11px;cursor:pointer;">Like</span>
+                              <span style="font-size:11px;cursor:pointer;" class="com-reply">Reply</span>
+                          </div>
+                      </div>
+
+                  </div>
+                  <div class="d-flex py-1">
+                      <img src="{% static 'images/green.png'%}" alt="User" class="rounded-circle"
+                          style="width:25px; height:25px;">
+                      <div class="d-flex" style="flex-direction: column;width:100%">
+                          <div class="comment-text mb-0 ps-2 py-1  rounded px-3"
+                              style="background-color: #311e4ee3;margin-left: 8px;width: 100%;">
+                              <span class="d-block">Priya Mitra</span>
+                              <span class="fw-light ps-1" style="font-size:11px">Wow ! What a picture Lorem
+                                  ipsum, dolor sit amet consectetur.</span>
+                          </div>
+                          <div class="d-flex p-1" style="gap:20px; margin-left: 17px;">
+                              <span style="font-size:11px;cursor:pointer;">16h</span>
+                              <span style="font-size:11px;cursor:pointer;">Like</span>
+                              <span style="font-size:11px;cursor:pointer;" class="com-reply">Reply</span>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          
+
+              
+          </div>
+      </div>
+                 
+                 
+                 
+                      `;
+
+                      
+                  commentList.append(commentItem);
+              });
+          } else {
+              commentList.append('<li class="list-group-item">No comments available.</li>');
+          }
+
+         // $('#commentModal').modal('show');
           // Optionally, refresh comments or append new comment
         },
         error: function (xhr) {
