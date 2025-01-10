@@ -1,4 +1,4 @@
-from django.shortcuts import render,redirect
+from django.shortcuts import get_object_or_404, render,redirect
 from django.views import View
 from social_network.constants.default_values import Role
 from ..decorators import auth_required, role_required
@@ -48,7 +48,6 @@ class ChatListView(View):
             latest_reaction_timestamp = ''
             latest_reaction_type = ''
             if latest_reaction:
-                latest_reaction_timestamp = self.format_timestamp(latest_reaction['created_at'])
                 latest_reaction_type = latest_reaction['reaction']
                 latest_reaction_message=latest_reaction['reacted_message']
                 latest_reaction_message_reacted_by=latest_reaction['reacted_by']
@@ -66,19 +65,17 @@ class ChatListView(View):
             elif chat.type == ChatType.GROUP.value:
                 title = chat.title or chat_service.get_recipients_for_group(chat.id, user)
                 chat_cover = chat.chat_cover or ''
-            print(chat.latest_message_sender_id)
-            latest_message_timestamp = self.format_timestamp(chat.latest_message_timestamp)
             chat_data.append({
                 'user':user,
                 'id': chat.id,
                 'title': title,
                 'chat_cover': chat_cover,
-                'latest_message_timestamp': latest_message_timestamp,
+                'latest_message_timestamp': chat.latest_message_timestamp,
                 'latest_message': chat.latest_message,
                 'unread_messages': unread_messages_display,
                 'is_group': chat.type == ChatType.GROUP.value,
                 'seen_by_all': seen_by_all,
-                'latest_reaction_timestamp': latest_reaction_timestamp,
+                'latest_reaction_timestamp': latest_reaction['created_at'],
                 'latest_reaction': latest_reaction_type,
                 'latest_reaction_message':latest_reaction_message,
                 'latest_reaction_message_reacted_by':latest_reaction_message_reacted_by,
@@ -108,21 +105,6 @@ class ChatListView(View):
                 }
             )
         )
-
-    def format_timestamp(self, timestamp):
-        if not timestamp:
-            return ''
-        now = timezone.now()
-        diff = now - timestamp
-        if diff.days == 0:
-            return timestamp.strftime('%I:%M %p')
-        elif diff.days == 1:
-            return 'Yesterday'
-        elif diff.days < 7:
-            return timestamp.strftime('%A')
-        else:
-            return timestamp.strftime('%d/%m/%Y')
-
 
 
 class ChatCreateView(View): 
@@ -176,13 +158,27 @@ class ChatCreateView(View):
                 'message':SuccessMessage.S000007.value
                 }                
             )
- 
+
 class ChatDetailsView(View):
     @catch_error
     @auth_required
     @role_required(Role.ADMIN.value, Role.END_USER.value)
-    def get(self, request,chat_id):
-        return render(request,'enduser/chat/chat_details.html',{'chat_id':chat_id})
+    def get(self, request, chat_id):
+        user = request.user
+        chat = chat_service.chat_details(chat_id,user.id)    
+        return render(
+            request,
+            'enduser/chat/chat_details.html',
+            success_response(
+                message=request.session.pop("message", SuccessMessage.S000007.value),
+                message_type=request.session.pop("message_type", ResponseMessageType.INFO.value),
+                data={
+                    'chat': chat,
+                    'user':user,
+                }
+            )
+        )
+
 
 class ChatUpdateView(View):   
     @catch_error

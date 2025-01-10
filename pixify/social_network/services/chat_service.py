@@ -138,3 +138,35 @@ def list_chats_by_user_api(user):
         is_active=True
     )
     return user_chats
+
+def chat_details(chat_id, user):
+    chat = get_object_or_404(Chat, id=chat_id)
+    active_members = ChatMember.objects.filter(chat_id=chat, is_active=True)
+    if not chat.title and active_members.exists():
+        chat_title = ', '.join([member.member_id.first_name if member.member_id.id != user else "You" for member in active_members])
+    else:
+        chat_title = chat.title
+    chat_data = {
+        'id': chat.id,
+        'title': chat_title,
+        'chat_cover': chat.chat_cover if chat.chat_cover else '/static/images/group_pic.png', 
+        'created_by':chat.created_by,
+        'is_group': chat.type == ChatType.GROUP.value,
+        'members': [
+            {
+                'id': member.member_id,
+                'first_name': "You" if member.member_id.id == user else member.member_id.first_name +" "+ member.member_id.last_name,
+                'profile': member.member_id.profile_photo_url if member.member_id.profile_photo_url else '/static/images/avatar.jpg'
+            }
+            for member in active_members 
+        ]
+    }
+
+    return chat_data
+
+
+
+
+
+
+
