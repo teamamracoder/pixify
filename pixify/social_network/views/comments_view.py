@@ -45,7 +45,11 @@ class CommentsCreateView(View):
          user_id = request.user.id
          commentstext=request.POST['comment_text']    
          services.comment_service.user_comments_create(commentstext,user_id,post_id)
-         return redirect('comments_list')
+        #  return redirect('comments_list')
+         post_del=list(services.comment_service.get_post(post_id).values())
+         print("post details",post_del)
+         comment_list = services.comment_service.comment_list(post_id)
+         return JsonResponse({ "status": "success", "comments":list(comment_list),"posts":list(post_del)})
            
    
 
@@ -54,32 +58,37 @@ class CommentsListView(View):
      
     def get(self, request):
          post_id = request.GET.get('post_id') 
-         print(post_id)
-         
-         
+         post_del=list(services.comment_service.get_post(post_id).values())
+         print("post details",post_del)
          comment_list = services.comment_service.comment_list(post_id)
-         return JsonResponse({ "status": "success", "comments":list(comment_list) })
-       
+         return JsonResponse({ "status": "success", "comments":list(comment_list),"posts":list(post_del)})
+
+
 
 # class CommentsListView(View):
+     
 #     def get(self, request):
-#          comments={
-#          'comment_list' :services.comment_service.comment_list(48),
-#          'post_del': services.post_service.get_post(48)
+#          post_id = request.GET.get('post_id') 
+#          comment_list={
+#          'post_del':services.comment_service.get_post(post_id),
+#          'comment' : services.comment_service.comment_list(post_id)
 #          }
-#          return JsonResponse({"status": "success","comments":list(comments)})
-       
+
+#          return JsonResponse({ "status": "success", "comments":list(comment_list)})
 
 # class CommentsListView(View):
+     
 #     def get(self, request):
-         
-#          comment_list =services.comment_service.comment_list(54),
-#          post_del= services.post_service.get_post(54)
-        
-#          return JsonResponse({ "status": "success","post_del":list(post_del),"comments":list(comment_list) })
-       
- 
-       
-   
-  
-   
+#          post_id = request.GET.get('post_id') 
+#          post_del=services.comment_service.get_post(post_id)
+#          comment=services.comment_service.comment_list(post_id)
+#          print(comment)
+#          print(post_del)
+
+#          comment_list={
+#          'post_del':[post_del],
+#          'comment' : [comment]
+#          }
+#          print(comment_list)
+#          return JsonResponse({ "status": "success",'comments':list(comment_list)})
+                

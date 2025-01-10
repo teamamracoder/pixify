@@ -52,8 +52,11 @@ def Postlist_posts():
     return Post.objects.all().order_by('-created_at')
 
 
-def get_post(post_id):
-    return get_object_or_404(Post, id=post_id)
+# def get_post(post_id):
+#      return get_object_or_404(Post, id=post_id)
+
+
+
 
 
 

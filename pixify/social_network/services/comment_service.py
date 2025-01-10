@@ -13,8 +13,8 @@ def user_comments_create(commentstext,user_id,post_id):
 # ,post_id_id=post_id
 
 
-def get_count_comment(post_id):
-    return Comment.objects.filter(post_id_id=post_id).count()
+def get_count_comment(postid):
+    return Comment.objects.filter(post_id_id=postid).count()
 
 
 def comment_list(post_id):
@@ -28,6 +28,8 @@ def comments_filtered(post_id):
     return  Comment.objects.filter(post_id_id=post_id)
 
 
-def get_post(post_id):
-    return get_object_or_404(Post, id=post_id)
+# def get_post(post_id):
+#     return get_object_or_404(Post, id=post_id)
 
+def get_post(post_id):
+    return Post.objects.filter(id=post_id)

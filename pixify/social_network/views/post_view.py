@@ -1,4 +1,5 @@
 import os
+
 from django.shortcuts import render, redirect
 from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import render, redirect
@@ -6,7 +7,7 @@ from django.views import View
 
 from pixify import settings
 from .. import services
-from ..models import User
+from ..models import User,Comment,Post
 from django.core.paginator import Paginator
 
 
@@ -174,11 +175,13 @@ class UserPostListView(View):
         
         posts = services.post_service.Postlist_posts()
         
+        
         post_dict={
                   'posts':posts,
                   'name':'priya',
-                  'count_commnet' :services.comment_service.get_count_comment()
+                  'count_commnet' :services.comment_service.get_count_comment(59)
                 }
+        
         return render(request, 'enduser/home/index.html', {'post_dict': post_dict})
     
     
