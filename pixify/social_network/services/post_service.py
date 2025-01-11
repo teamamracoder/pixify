@@ -1,4 +1,4 @@
-from ..models import User,Post,Comment
+from ..models import User,Post,Comment,PostReaction
 from ..packages.get_data import GetData
 from django.shortcuts import get_object_or_404
 from social_network.packages.get_data import GetData
@@ -13,6 +13,8 @@ def manage_get_post(post_id):
 
 def manage_get_user(posted_by):
     return get_object_or_404(User, id=posted_by)
+
+
 
 def manage_update_post(post, title, description):
     post.title = title
@@ -59,6 +61,19 @@ def get_comment_count_by_post(post_id):
 
 def manage_list_comments_filtered(post_id):
     return models.Comment.objects.filter(post_id=post_id, reply_for__isnull=True, is_active=True)
+
+def manage_list_likes_filtered(post_id):
+    return models.PostReaction.objects.filter(post_id=post_id).values_list('reacted_by_id', flat=True)
+
+
+
+def get_post_user(post_likes):
+    post_liked_users = User.objects.filter(id__in=post_likes)
+    post_liked_users_data = [  {'id': user.id,'first_name': user.first_name,'middle_name': user.middle_name,'last_name': user.last_name, }
+                            for user in post_liked_users
+                       ]
+    return {'post_liked_users' : post_liked_users_data}
+
 
 
 

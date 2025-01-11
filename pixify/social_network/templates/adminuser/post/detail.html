@@ -18,7 +18,6 @@
                         <div class="d-flex " style="flex-direction: column;">
                             <span class="u-name px-1" style="font-size:20px;"> {{ user.first_name }} {{ user.last_name}}
                             </span>
-
                         </div>
                     </div>
                     {% for media in post_dic.post.media_url %}
@@ -61,8 +60,11 @@
                     </li>
                     <li class="list-group-item">
                         <div class="row">
-                            <div class="col-6">Post Likes</div>
+                            <div class="col-6"><a type="button" style="outline:none;border:none;background:transparent;"
+                                data-bs-toggle="modal" data-bs-target="#exampleModal1"
+                                data-bs-whatever="@getbootstrap">Post Likes</a></div>
                             <div class="col-6">{{post_dic.post.posted_by.id}}</div>
+                            
                         </div>
                     </li>
                     <li class="list-group-item">
@@ -116,13 +118,59 @@
                             </div>
                         </div>
                     </div>
+
+
+                    
+
+
+                    <div class="modal fade" id="exampleModal1" tabindex="-1" aria-labelledby="exampleModalLabel1"
+                    aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="text-center">All Raection </h1>
+                            </div>
+                            <div class="modal-body" style="scroll-y: auto;">
+                                {%for com in post_dic.post_likes%}
+                                <div class="d-flex py-1">
+                                       
+
+                                    <div class="d-flex" style="flex-direction: column;width:100%">
+                                        <div class="comment-text mb-0 ps-2 py-1  rounded px-3"
+                                            style="background-color: #FEF3E2;margin-left: 8px;width: 100%;">
+                                            <span class="d-block">  </span>
+                                            <span
+                                                class="fw-light ps-1 d-flex justify-content-between align-items-center"
+                                                style="font-size:13px">
+                                                {{com }}
+                                                <button class="btn btn-sm toggle-status"
+                                                    data-comment-id="{{ comment.id }}">
+                                                    {% if comment.is_active %}
+                                                        <i class="bi bi-toggle-on text-success"></i> Active
+                                                    {% else %}
+                                                    <i class="bi bi-toggle-off text-danger"></i> Inactive
+                                                    {% endif %}
+                                                </button>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                {%endfor%}
+                            </div>
+
+                            
+                            <div class="modal-footer">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                  
                     <li class="list-group-item">
                         <div class="row">
                             <div class="col-6">Post Shares</div>
                             <div class="col-6">none</div>
                         </div>
                     </li>
-
             </div>
             <div class="text-start">
                 <a href="{% url 'manage_post_list' %}" class="btn btn-sm btn-outline-secondary">Back</a>
