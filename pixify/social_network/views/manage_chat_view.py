@@ -110,7 +110,8 @@ class ManageChatDetailView(View):
             request,
             'adminuser/chat/detail.html',
             {'chat': chat, 'chat_member': chat_member, "choices_type": choices_type}
-        )        
+        )  
+        
 
 class ManageToggleChatActiveView(View):
     def post(self, request, chat_id):

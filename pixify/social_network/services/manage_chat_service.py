@@ -22,6 +22,8 @@ def manage_get_member(chat_id):
 #     user_chat_members = [member.user for member in chat_members]
 #     return user_chat_members
 
+# def get_member(chat_id):
+#    manage_member=
 
 def manage_get_chat(chat_id):
    return get_object_or_404 (Chat , id=chat_id)
