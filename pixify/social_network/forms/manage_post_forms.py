@@ -50,6 +50,8 @@ class ManagePostCreateForm(forms.Form):
         required=False,
         widget=forms.Select(attrs={"class": "form-control"})
     )
+    # file = models.FileField()
+
 class ManagePostUpdateForm(forms.Form):
     posted_by = forms.CharField(
         label="Posted By",
