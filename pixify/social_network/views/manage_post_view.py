@@ -1,6 +1,6 @@
 from pyexpat.errors import messages
 from django.shortcuts import get_object_or_404, render, redirect
-from django.http import HttpResponseBadRequest, JsonResponse
+from django.http import JsonResponse
 from django.views import View
 
 from ..forms.manage_post_forms import ManagePostUpdateForm,ManagePostCreateForm
@@ -20,11 +20,11 @@ class ManagePostCreateView(View):
     @catch_error
     def get(self,request):
         form = ManagePostCreateForm() #Form Initialization:
-        return render(request, 'adminuser/post/create.html', {"form": form})
+        return render(request,'adminuser/post/create.html', {"form": form})# empty form
     
 
     @catch_error
-    def post(self, request):
+    def post(self, request): 
         user = request.user # reffers to currently logged-in user 
         form = ManagePostCreateForm(request.POST) # data submitted through an HTML form
         if form.is_valid():
@@ -41,15 +41,16 @@ class ManagePostCreateView(View):
              services.post_service.manage_create_post(**post_data) 
              return redirect('manage_post_list')
         return render(request, 'adminuser/post/create.html',   success_response(
-                message=messages),
+                message = messages),
                 {"form": form})
 
-
 class ManagePostListView(View):
+
     def get(self, request):
+       
         # Fetch the search query from the URL parameters
         search_query = request.GET.get('search', '')
-        sort_by = request.GET.get('sort_by', "created_at")
+        sort_by = request.GET.get('sort_by', 'posted_by')
         sort_order = request.GET.get('sort_order', SortingOrder.DESC.value)
         page_number = request.GET.get('page', 1)
 
@@ -67,12 +68,17 @@ class ManagePostListView(View):
     
 class ManagePostDetailView(View):
      def get(self, request, post_id):
-        # print(comment_count  4)
+        
         comment_count = services.get_comment_count_by_post(post_id)
+        post_likes = services.post_service.manage_list_likes_filtered(post_id)
+        post_liked_users = services.get_post_user(post_likes)
+        print(f"Values of user {post_liked_users}")
         post_dic= {
-        'post' : services.post_service.manage_get_post(post_id),
-         'comment': services.post_service.manage_list_comments_filtered(post_id),
-                   }
+            'post' : services.post_service.manage_get_post(post_id),
+            'comment': services.post_service.manage_list_comments_filtered(post_id),
+            'post_likes' : post_likes ,
+            'post_liked_users' : post_liked_users
+        }
         return render(request, 'adminuser/post/detail.html', {'post_dic':post_dic,'comment_count':comment_count})
 
 class ManagePostUpdateView(View):
@@ -125,3 +131,12 @@ class ManageTogglePostActiveView(View):
         post.is_active = not post.is_active  # Toggle active status
         post.save()
         return JsonResponse({'is_active': post.is_active})
+    
+
+class ManageToggleCommentActiveView(View):
+     def post(self, request, comment_id):
+        comment = services.post_service.manage_get_comment(comment_id)
+        comment.is_active = not comment.is_active  
+        comment.save()
+        return JsonResponse({'is_active': comment.is_active})  
+     

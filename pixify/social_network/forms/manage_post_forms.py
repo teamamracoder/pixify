@@ -50,6 +50,8 @@ class ManagePostCreateForm(forms.Form):
         required=False,
         widget=forms.Select(attrs={"class": "form-control"})
     )
+    # file = models.FileField()
+
 class ManagePostUpdateForm(forms.Form):
     posted_by = forms.CharField(
         label="Posted By",
@@ -76,7 +78,7 @@ class ManagePostUpdateForm(forms.Form):
     description = forms.CharField(
         label="Description",
         required=False,
-        widget=forms.Textarea(attrs={"class": "form-control", "placeholder": "Enter post description", "rows": 5})
+        widget=forms.Textarea(attrs={"class": "form-control", "placeholder": "Enter post description", "rows": 2})
     )
     accessability = forms.ChoiceField(
         label="Accessibility",
