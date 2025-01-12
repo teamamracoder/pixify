@@ -42,6 +42,7 @@ urlpatterns = [
     path('admin/posts/<int:post_id>/details', views.ManagePostDetailView.as_view(), name='manage_post_detail'),
     path('admin/posts/toggle-active/<int:post_id>/', views.ManageTogglePostActiveView.as_view(), name='toggle_post_active'), 
     path('admin/posts/<int:post_id>/update/', views.ManagePostUpdateView.as_view(), name='manage_post_update'),
+    path('admin/posts/toggle-active/<int:comment_id>/', views.ManageToggleCommentActiveView.as_view(), name='manage_toggle_comment_active'),
     
     #admin post specific user
     # path('admin/posts/<int:post_id>/create_specific_user/', views.ManagePostSpecificUserView.as_view(), name='manage_post_specific_user'),
@@ -71,7 +72,7 @@ urlpatterns = [
     # manage-comment
     path('admin/comments/', views.ManageCommentListView.as_view(), name='manage_comment_list'),
     path('admin/comments/create/', views.ManageCommentCreateView.as_view(), name='manage_comment_create'),
-    path('admin/comments/toggle-active/<int:comment_id>/', views.ManageToggleCommentActiveView.as_view(), name='manage_toggle_comment_active'),
+    # path('admin/comments/toggle-active/<int:comment_id>/', views.ManageToggleCommentActiveView.as_view(), name='manage_toggle_comment_active'),
 
 
         
