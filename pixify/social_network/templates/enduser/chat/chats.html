@@ -81,33 +81,45 @@
                     </a>
                 </p>
                 <div style="display:flex">
-                    <span class="timestamp">
-                       {% if chat.latest_message_sender_id == user.id and chat.latest_message_timestamp >= chat.latest_reaction_timestamp %}
+                    <span class="chat-message">
+                       {% if chat.latest_message_sender_id == user.id and chat.latest_message_time >= chat.latest_reaction_time %}
                         {% if chat.is_group %}
+                        
                             {% if chat.seen_by_all %}
-                            <i class="bi bi-check2-all" style="color:rgb(115, 10, 213);"></i>
+                            <i class="bi bi-check2-all"></i>
                             {% else %}
                             <i class="bi bi-check2"></i>
                             {% endif %}
+                            You : 
+                        
                         {% else %}
+                       
                             {% if chat.seen_by_all %}
-                            <i class="bi bi-check2-all" style="color:rgb(115, 10, 213);"></i>
+                                <i class="bi bi-check2-all"></i>
                             {% else %}
-                            <i class="bi bi-check2"></i>
+                                <i class="bi bi-check2"></i>
                             {% endif %}
-                        {% endif %}
-                        {% endif %}
+                     
+                        {% endif %} 
+                        {% else %}   
+                         {% if chat.is_group %} 
+                            {{chat.latest_message_sender_name}}: 
+                         {% comment %} {% else %}
+                           {{chat.latest_message_sender_name}}: {% endcomment %}
+                        {% endif %} 
+                      {% endif %}
                     </span>
                     <span>
-                        {% if chat.latest_message or chat.latest_reaction %}
-                            {% if chat.latest_message_timestamp >= chat.latest_reaction_timestamp %}
-                                <p class="chat-message chat_title">{{ chat.latest_message }}</p>
-                            {% else %}
-                                <p class="chat-message chat_title">{{ chat.latest_reaction_message_reacted_by }} : Reacted {{ chat.latest_reaction|safe }} on "{{ chat.latest_reaction_message }}"</p>
-                            {% endif %}
+                    {% if chat.latest_message %}
+                        {% if chat.latest_reaction_time == '' or chat.latest_message_time >= chat.latest_reaction_time %}
+                            <p class="chat-message chat_title">{{ chat.latest_message }}</p>
                         {% else %}
-                            <p class="chat-message chat_title">No messages yet</p>
+                            <p class="chat-message chat_title">{{ chat.latest_reaction_message_reacted_by }} : Reacted {{ chat.latest_reaction|safe }} on "{{ chat.latest_message }}"</p>
                         {% endif %}
+                    {% else %}
+                        <p class="chat-message chat_title">No messages yet</p>
+                    {% endif %}
+                    
                     </span>
                 </div>
             </div>
@@ -116,13 +128,7 @@
             <div class="badge-div">
                 <span class="badge unread-messages">{{ chat.unread_messages }}</span>
                 <span class="timestamp">
-                    {% if chat.latest_message or chat.latest_reaction %}
-                    {% if chat.latest_message_timestamp > chat.latest_reaction_timestamp %}
-                        <span class="timestamp1" data-timestamp="{{ chat.latest_message_timestamp|date:'Y-m-d H:i:s' }}"></span>
-                    {% else %}
-                        <span class="timestamp1" data-timestamp="{{ chat.latest_reaction_timestamp|date:'Y-m-d H:i:s' }}"></span>
-                    {% endif %}
-                {% endif %}                                    
+                        <span class="timestamp">{{ chat.latest_message_timestamp }}</span>                                  
                 </span>
             </div>
         </div>
@@ -189,47 +195,6 @@
 </div>
 
 <script>
-document.addEventListener("DOMContentLoaded", function() {
-    // Helper function to format the timestamp
-    function formatTimestamp(timestamp) {
-        const now = new Date();
-        const diff = now - timestamp;
-        let formattedTime = '';
-
-        // If the difference is less than a day
-        if (diff < 24 * 60 * 60 * 1000) {
-            // Show time in HH:MM AM/PM format (12-hour format)
-            let hours = timestamp.getHours();
-            let minutes = timestamp.getMinutes();
-            let ampm = hours >= 12 ? 'PM' : 'AM';
-            hours = hours % 12;
-            hours = hours ? hours : 12; // 0 becomes 12
-            minutes = minutes < 10 ? '0' + minutes : minutes;
-            formattedTime = `${hours}:${minutes} ${ampm}`;
-        } else if (diff < 48 * 60 * 60 * 1000) {
-            formattedTime = 'Yesterday';
-        } else if (diff < 7 * 24 * 60 * 60 * 1000) {
-            // Show day of the week (e.g., Monday, Tuesday)
-            const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-            formattedTime = days[timestamp.getDay()];
-        } else {
-            // Format as DD/MM/YYYY if older than 7 days
-            formattedTime = ('0' + timestamp.getDate()).slice(-2) + '/' + ('0' + (timestamp.getMonth() + 1)).slice(-2) + '/' + timestamp.getFullYear();
-        }
-
-        return formattedTime;
-    }
-
-    // Find all timestamp elements and format them
-    const timestampElements = document.querySelectorAll('.timestamp1');
-
-    timestampElements.forEach(function(element) {
-        const timestampString = element.getAttribute('data-timestamp');
-        const timestamp = new Date(timestampString);
-        element.textContent = formatTimestamp(timestamp);
-    });
-});   
-    
 $(document).ready(function () {
     let selectedItems = []; // Array to store selected item IDs
     let holdTimer;
