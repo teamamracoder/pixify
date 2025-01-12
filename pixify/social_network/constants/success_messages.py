@@ -16,4 +16,4 @@ class SuccessMessage(Enum):
     S000012 = "Successfully Message Replied "
     S000013 = "open chat list"
     S000014 = "open message list"
-    S000015 = "no chats available"
+   

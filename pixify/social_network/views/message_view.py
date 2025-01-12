@@ -60,7 +60,7 @@ class MessageListView(View):
 
         return render(request, 'enduser/chat/messages.html',
             success_response(               
-            message=request.session.pop("message", SuccessMessage.S000008.value),
+            message=request.session.pop("message", SuccessMessage.S000014.value),
             message_type=request.session.pop(
             "message_type", ResponseMessageType.INFO.value
         ),
@@ -116,7 +116,7 @@ class MessageCreateView(View):
             message_mention_service.create_message_mentions(message, mentioned_user, auth_user)
 
         # Store the success message in the session 
-        request.session['success_message'] = SuccessMessage.S000009.value
+        request.session['success_message'] = SuccessMessage.S000014.value
         
         return redirect('message', chat_id=chat.id)
 

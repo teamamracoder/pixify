@@ -45,7 +45,6 @@ def list_chats_by_user(user):
         chat_data.append({
             'chat': chat,
             'seen_by_all': seen_by_all,
-            'latest_message_sender_id':chat.latest_message_sender_id
         })
     return chat_data
 
@@ -163,6 +162,19 @@ def chat_details(chat_id, user):
     }
 
     return chat_data
+def latest_message_sender_name(chat_latest_message_sender_id, user_id):
+    if user_id == chat_latest_message_sender_id:
+        sender_name = 'You'
+    else:
+        # Fetch the sender's first name from the User model
+        sender = User.objects.filter(id=chat_latest_message_sender_id).values('first_name').first()
+        sender_name = sender['first_name'] if sender else ''  # Safely access first_name
+
+    # Return the name as a dictionary
+    name = {
+        'sender_name': sender_name
+    }
+    return name
 
 
 
