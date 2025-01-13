@@ -14,10 +14,11 @@
                 <div class="card-body ">
                     <div class="position-relative">
                         <img src="https://png.pngtree.com/png-clipart/20230927/original/pngtree-man-avatar-image-for-profile-png-image_13001877.png" class="rounded-circle img-fluid" style="width: 150px;" />
-                        <h3 class="mb-3">{{ user.first_name }} {{ user.middle_name }} {{ user.last_name }}</h3>
-                        <p class="text-muted mb-3">#tanka123456</p>
+                        <h3 class="mb-3">
+                            {{ user.first_name }} {% if user.middle_name %}{{ user.middle_name }} {% endif %}{{ user.last_name }}
+                        </h3>
                     </div>
-                    <h5 class="mb-3">User Attributes</h5>
+                    
                     <div class="row">
                         <ul class="list-group list-group-flush">
                             <li class="list-group-item">
@@ -27,44 +28,24 @@
                                         href="#">{{ user.email }}</a>
                                 </div>
                             </li>
-
-                            <!-- <li class="list-group-item">
-                                <div class="row">
-                                    <div class="col-6">Contact</div>
-                                    <a class="col-6">+91 - 7029******</a>
-                                </div>
-                            </li> -->
-
                             <li class="list-group-item">
                                 <div class="row">
-                                    <div class="col-6">Signup</div>
+                                    <div class="col-6">Joined </div>
                                     <div class="col-6">{{ user.created_at }}</div>
                                 </div>
                             </li>
-
-
                             <li class="list-group-item">
                                 <div class="row">
-                                    <div class="col-6">Web Session</div>
-                                    <div class="col-6">63</div>
+                                    <div class="col-6">Device</div>
+                                    <div class="col-6">{{ context.device }}</div>
                                 </div>
                             </li>
-
-                            <li class="list-group-item">
-                                <div class="row">
-                                    <div class="col-6">Language</div>
-                                    <div class="col-6">en-US</div>
-                                </div>
-                            </li>
-
                             <li class="list-group-item">
                                 <div class="row">
                                     <div class="col-6">Browser</div>
-                                    <div class="col-6">Opera</div>
+                                    <div class="col-6">{{ context.browser }}</div>
                                 </div>
                             </li>
-
-
                         </ul>
                     </div>
                 </div>
@@ -78,28 +59,28 @@
                     <ul class="list-group list-group-flush">
                         <li class="list-group-item">
                             <div class="row">
-                                <div class="col-6">item 1</div>
+                                <div class="col-6">Posts</div>
+                                <div class="col-6">100</div>
+                            </div>
+                        </li>
+
+                        <li class="list-group-item">
+                            <div class="row">
+                                <div class="col-6">Followers</div>
+                                <div class="col-6">100</div>
+                            </div>
+                        </li>
+
+                        <li class="list-group-item">
+                            <div class="row">
+                                <div class="col-6">Item 1</div>
                                 <div class="col-6">value 1</div>
                             </div>
                         </li>
 
                         <li class="list-group-item">
                             <div class="row">
-                                <div class="col-6">item 1</div>
-                                <div class="col-6">value 1</div>
-                            </div>
-                        </li>
-
-                        <li class="list-group-item">
-                            <div class="row">
-                                <div class="col-6">item 1</div>
-                                <div class="col-6">value 1</div>
-                            </div>
-                        </li>
-
-                        <li class="list-group-item">
-                            <div class="row">
-                                <div class="col-6">item 1</div>
+                                <div class="col-6">Item 1</div>
                                 <div class="col-6">value 1</div>
                             </div>
                         </li>
