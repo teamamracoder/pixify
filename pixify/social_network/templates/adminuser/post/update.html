@@ -6,6 +6,7 @@
 {% block content %}
 
 <div class="container-fluid my-5">
+
     <div class="row justify-content-center">
         <div class="col-12 col-md-12 col-lg-12">
             <div class="card shadow-sm">
@@ -16,75 +17,61 @@
                     <form method="post" id="post_form">
                         {% csrf_token %}
                         {{ data.post_form.as_p }}
-                        <div class="row">
-                            <div class="form-group col-md-4 col-lg-4 col-sm-12 mb-3">
-                                {{ form.posted_by.label_tag }}
-                                {{ form.posted_by }}
-                                {% if form.posted_by.errors %}
-                                <div class="text-danger">{{ form.posted_by.errors }}</div>
-                                {% endif %}
+                         <div class="row">
+                                <div class="form-group col-md-6 col-lg-6 col-sm-12 mb-3">
+                                    {{ form.posted_by.label_tag }}
+                                    {{ form.posted_by }}
+                                    {% if form.posted_by.errors %}
+                                    <div class="text-danger">{{ form.posted_by.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="form-group col-md-6 col-lg-6 col-sm-12 mb-3">
+                                    {{ form.type.label_tag }}
+                                    {{ form.type }}
+                                    {% if form.type.errors %}
+                                    <div class="text-danger">{{ form.type.errors }}</div>
+                                    {% endif %}
+                                </div>
                             </div>
-                            <div class="form-group col-md-4 col-lg-4 col-sm-12 mb-3">
-                                {{ form.type.label_tag }}
-                                {{ form.type }}
-                                {% if form.type.errors %}
-                                <div class="text-danger">{{ form.type.errors }}</div>
-                                {% endif %}
+                            <div class="row">
+                                <div class="form-group col-md-6 col-lg-6 col-sm-12 mb-3">
+                                    {{ form.content_type.label_tag }}
+                                    {{ form.content_type }}
+                                    {% if form.content_type.errors %}
+                                    <div class="text-danger">{{ form.content_type.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="form-group col-md-6 col-lg-6 col-sm-12 mb-3">
+                                    {{ form.title.label_tag }}
+                                    {{ form.title }}
+                                    {% if form.title.errors %}
+                                    <div class="text-danger">{{ form.title.errors }}</div>
+                                    {% endif %}
+                                </div>
                             </div>
-                            <div class="form-group col-md-4 col-lg-4 col-sm-12 mb-3">
-                                {{ form.content_type.label_tag }}
-                                {{ form.content_type }}
-                                {% if form.content_type.errors %}
-                                <div class="text-danger">{{ form.content_type.errors }}</div>
-                                {% endif %}
+                            <div class="row">
+                                <div class="form-group col-md-6 col-lg-6 col-sm-12 mb-3">
+                                    {{ form.accessability.label_tag }}
+                                    {{ form.accessability }}
+                                    {% if form.accessability.errors %}
+                                    <div class="text-danger">{{ form.accessability.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="form-group col-md-6 col-lg-6 col-sm-12 mb-3">
+                                    {{ form.treat_as.label_tag }}
+                                    {{ form.treat_as }}
+                                    {% if form.treat_as.errors %}
+                                    <div class="text-danger">{{ form.treat_as.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="form-group col-md-12 col-lg-12 col-sm-12 mb-3">
+                                    {{ form.description.label_tag }}
+                                    {{ form.description }}
+                                    {% if form.description.errors %}
+                                    <div class="text-danger">{{ form.description.errors }}</div>
+                                    {% endif %}
+                                </div>
                             </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="form-group col-md-6 col-lg-6 col-sm-12 mb-3">
-                                {{ form.media_url.label_tag }}
-                                {{ form.media_url }}
-                                {% if form.media_url.errors %}
-                                <div class="text-danger">{{ form.media_url.errors }}</div>
-                                {% endif %}
-                            </div>
-
-                            <div class="form-group col-md-6 col-lg-6 col-sm-12 mb-3">
-                                {{ form.title.label_tag }}
-                                {{ form.title }}
-                                {% if form.title.errors %}
-                                <div class="text-danger">{{ form.title.errors }}</div>
-                                {% endif %}
-                            </div>
-                            <div class="form-group col-md-6 col-lg-6 col-sm-12 mb-3">
-                                {{ form.description.label_tag }}
-                                {{ form.description }}
-                                {% if form.description.errors %}
-                                <div class="text-danger">{{ form.description.errors }}</div>
-                                {% endif %}
-                            </div>
-                            <div class="form-group col-md-6 col-lg-6 col-sm-12 mb-3">
-                                {{ form.accessability.label_tag }}
-                                {{ form.accessability }}
-                                {% if form.accessability.errors %}
-                                <div class="text-danger">{{ form.accessability.errors }}</div>
-                                {% endif %}
-                            </div>
-                            <div class="form-group col-md-6 col-lg-6 col-sm-12 mb-3">
-                                {{ form.members.label_tag }}
-                                {{ form.members }}
-                                {% if form.members.errors %}
-                                <div class="text-danger">{{ form.members.errors }}</div>
-                                {% endif %}
-                            </div>
-                            <div class="form-group col-md-6 col-lg-6 col-sm-12 mb-3">
-                                {{ form.treat_as.label_tag }}
-                                {{ form.treat_as }}
-                                {% if form.treat_as.errors %}
-                                <div class="text-danger">{{ form.treat_as.errors }}</div>
-                                {% endif %}
-                            </div>
-                        </div>
                         <!-- Repeat for other fields -->
                         <div class="text-start">
                             <a href="{% url 'manage_post_list' %}" class="btn btn-sm btn-outline-secondary">Back</a>
