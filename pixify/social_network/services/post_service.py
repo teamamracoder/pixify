@@ -62,6 +62,7 @@ def get_comment_count_by_post(post_id):
 def manage_list_comments_filtered(post_id):
     return models.Comment.objects.filter(post_id=post_id, reply_for__isnull=True, is_active=True)
 
+
 def manage_list_likes_filtered(post_id):
     return models.PostReaction.objects.filter(post_id=post_id).values_list('reacted_by_id', flat=True)
 
@@ -73,6 +74,7 @@ def get_post_user(post_likes):
                             for user in post_liked_users
                        ]
     return {'post_liked_users' : post_liked_users_data}
+
 
 
 
