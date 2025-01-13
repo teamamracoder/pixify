@@ -38,8 +38,7 @@ def manage_create_post(**kwargs):
             title = kwargs['title'],
             description = kwargs['description'],
         )
-    return post # return current post(object)
-
+    return post
 
 
 
@@ -63,16 +62,20 @@ def get_comment_count_by_post(post_id):
 def manage_list_comments_filtered(post_id):
     return models.Comment.objects.filter(post_id=post_id, reply_for__isnull=True, is_active=True)
 
-=========
-def manage_list_posts_filtered(search_query,sort_by='posted_by'):
-    if search_query:
-        # Use Q objects to filter by posted_by, title, or descriptions
-        return Post.objects.filter(
-            Q(posted_by__icontains=search_query) |
-            Q(title__icontains=search_query) |
-            Q(description__icontains=search_query)
-        ).order_by(sort_by)
-    return Post.objects.all().order_by(sort_by)    
->>>>>>>>> Temporary merge branch 2
+
+def manage_list_likes_filtered(post_id):
+    return models.PostReaction.objects.filter(post_id=post_id).values_list('reacted_by_id', flat=True)
+
+
+
+def get_post_user(post_likes):
+    post_liked_users = User.objects.filter(id__in=post_likes)
+    post_liked_users_data = [  {'id': user.id,'first_name': user.first_name,'middle_name': user.middle_name,'last_name': user.last_name, }
+                            for user in post_liked_users
+                       ]
+    return {'post_liked_users' : post_liked_users_data}
+
+
+
 
 
