@@ -18,7 +18,7 @@
                         {{ data.user_form.as_p }}
                         <div class="row">
                             <div class="form-group col-md-4 col-lg-4 col-sm-12 mb-3">
-                                <label for="firstName">First Name</label>
+                                <label for="firstName">First Name<span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" name="first_name" id="first_name" value="{{ user.first_name }}" placeholder="Enter your first name">
                             </div>
                             <div class="form-group col-md-4 col-lg-4 col-sm-12 mb-3">
@@ -26,19 +26,19 @@
                                 <input type="text" class="form-control" name="middle_name" id="middle_name" value="{% if user.middle_name %}{{ user.middle_name }} {% endif %}" placeholder="Enter your middle name">
                             </div>
                             <div class="form-group col-md-4 col-lg-4 col-sm-12 mb-3">
-                                <label for="lastName">Last Name</label>
+                                <label for="lastName">Last Name<span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" name="last_name" id="last_name" value="{{ user.last_name }}" placeholder="Enter your last name">
                             </div>
                         </div>
 
                         <div class="row">
                             <div class="form-group col-md-4 col-lg-4 col-sm-12 mb-3">
-                                <label for="email">Email</label>
-                                <input type="email" class="form-control" name="email" id="email" value="{{ user.email }}" placeholder="Enter email">
+                                <label for="email">Email<span class="text-danger"> *readonly</span></label>
+                                <input type="email" class="form-control" name="email" id="email" value="{{ user.email }}" placeholder="Enter email" readonly>
                             </div>
 
                             <!-- Gender Dropdown -->
-                            <div class="form-group col-md-4 col-lg-4 col-sm-12 mb-3">
+                            <div class="form-group col-md-4 col-lg-4 col-sm-12 mb-3" style="display: none;">
                                 <label for="gender" class="form-label">Gender</label>
                                 <select id="gender" name="gender" class="form-select">
                                     <option value="" {% if user.gender is none %}selected{% endif %}>Select Gender</option>
@@ -53,7 +53,7 @@
                             </div>
                         
                             <!-- Relationship Status Dropdown -->
-                            <div class="form-group col-md-4 col-lg-4 col-sm-12 mb-3">
+                            <div class="form-group col-md-4 col-lg-4 col-sm-12 mb-3" style="display: none;">
                                 <label for="relationship_status" class="form-label">Relationship Status</label>
                                 <select id="relationship_status" name="relationship_status" class="form-select">
                                     <option value="" {% if user.relationship_status is none %}selected{% endif %}>Select Status</option>
@@ -66,22 +66,21 @@
                                     {% endfor %}
                                 </select>
                             </div>
+                            <div class="form-group col-md-4 col-lg-4 col-sm-12 mb-3">
+                                <label for="hobbies">Hobbies</label>
+                                <input type="text" class="form-control" id="hobbies" name="hobbies" value="{% if user.hobbies %}{{ user.hobbies }} {% endif %}" placeholder="Enter hobbies (comma-separated)">
+                            </div>
+                            <div class="form-group col-md-4 col-lg-4 col-sm-12 mb-3">
+                                <label for="dob">D.O.B</label>
+                                <input type="date" name="dob" id="dob" value="{{ user.dob|date:'Y-m-d' }}" class="form-control">  
+                            </div>
                             
                         </div>
                         
                         
                         <div class="row">
-                            <div class="form-group col-md-4 col-lg-4 col-sm-12 mb-3">
-                                <label for="hobbies">Hobbies</label>
-                                <input type="text" class="form-control" id="hobbies" name="hobbies" value="{% if user.hobbies %}{{ user.hobbies }} {% endif %}" placeholder="Enter hobbies (comma-separated)">
-                            </div>
-
-                            <div class="form-group col-md-4 col-lg-4 col-sm-12 mb-3">
-                                <label for="dob">D.O.B</label>
-                                <input type="date" name="dob" id="dob" value="{{ user.dob|date:'Y-m-d' }}" class="form-control">  
-                            </div>
-
-                            <div class="form-group col-md-4 col-lg-4 col-sm-12 mb-3">
+                           
+                            <div class="form-group col-md-12 col-lg-12 col-sm-12 mb-3">
                                 <label for="address">Address</label>
                                 <textarea type="text" name="address" class="form-control" id="address" value="" placeholder="Enter Address">{% if user.address %}{{ user.address }} {% endif %}</textarea>
                             </div>
@@ -119,21 +118,33 @@
             messages: {
                 first_name: {
                     required: "Please enter firstname.",
-                    minlength: "firstname must be at least 2 characters.",
-                    maxlength: "firstname cannot exceed 50 characters."
+                    minlength: "Firstname must be at least 2 characters.",
+                    maxlength: "Firstname cannot exceed 50 characters."
                 },
                 last_name: {
                     required: "Please enter lastname.",
-                    minlength: "lastname must be at least 2 characters.",
-                    maxlength: "lastname cannot exceed 20 characters."
+                    minlength: "Lastname must be at least 2 characters.",
+                    maxlength: "Lastname cannot exceed 150 characters."
                 },
                 email: {
                     required: "Please enter email.",
-                    maxlength: "email cannot exceed 50 characters."
+                    maxlength: "Email cannot exceed 150 characters."
                 },
+            },
+            errorPlacement: function (error, element) {
+                error.addClass('error');  // Add 'error' class to style the error message
+                error.insertAfter(element); // Place the error message after the input field
             }
         });
     });
 </script>
+
+<style>
+    .error {
+        color: red;
+        font-size: 0.875rem; /* Optional: Adjust font size */
+        font-weight: normal;
+    }
+</style>
 
 {% endblock %}
