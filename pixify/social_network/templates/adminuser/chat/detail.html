@@ -42,7 +42,7 @@
                         <div class="text-start">
                             <a href="{% url 'manage_chat_list' %}" class="btn btn-sm btn-outline-secondary">Back</a>
                             <a href="{% url 'manage_chat_update' chat.id %}" class="btn btn-sm btn-primary">Edit</a>
-                            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#userInfoModal">
+                            <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#userInfoModal">
                                 Manage Member
                             </button>
                         </div>
@@ -57,11 +57,12 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header bg-info text-white">
-                <h5 class="modal-title" id="userInfoModalLabel">User Information</h5>
+                <h5 class="modal-title" id="userInfoModalLabel">Chat Members</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <!-- User Details -->
+                {% for member in chat_members %}
                 <div class="d-flex align-items-center justify-content-between mb-4">
                     <!-- Left Section: User Info -->
                     <div class="d-flex align-items-center">
@@ -70,63 +71,54 @@
                              class="rounded-circle me-3" 
                              style="width: 50px; height: 50px;">
                         <div>
-                            <h5 class="mb-0">{{ user.first_name }} {{ user.last_name }}</h5>
+                            <h5 class="mb-0">{{ member.first_name }} {{ member.last_name }}</h5>
                         </div>
                     </div>                   
                     <!-- Right Section: Toggle Button -->
                     <div class="form-check form-switch">
-                        <input 
-                            class="form-check-input toggle-btn" 
-                            type="checkbox" 
-                            id="toggleUserStatus" 
-                            data-user-id="123" 
-                            checked>
-                        <label class="form-check-label" for="toggleUserStatus">Active</label>
+                        <button class="btn btn-sm toggle-status" data-chat-member-id="{{ member.id }}">
+                            {% if member.is_active %}
+                                <i class="bi bi-toggle-on text-success"></i> Active
+                            {% else %}
+                                <i class="bi bi-toggle-off text-danger"></i> Inactive
+                            {% endif %}
+                        </button>
                     </div>
                 </div>
+                {% endfor %}
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" data-bs-target="#secondModal" data-bs-toggle="modal" data-bs-dismiss="modal">
-                    Edit Info
-                </button>
-            </div>
+            
         </div>
     </div>
 </div>
 
 <script>
 // JavaScript to handle toggle
-document.querySelector('.toggle-btn').addEventListener('change', function () {
-    const userId = this.getAttribute('data-user-id');
-    const isActive = this.checked;
+$(document).ready(function() {
+        $('.toggle-status').click(function() {
+            const memberId = $(this).data('chat-member-id');
+            const button = $(this);
 
-    fetch(`/toggle_user_status/${userId}/`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': '{{ csrf_token }}' // Ensure you pass the CSRF token from Django
-        },
-        body: JSON.stringify({ is_active: isActive })
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        return response.json();
-    })
-    .then(data => {
-        if (data.success) {
-            alert(`User has been ${isActive ? 'activated' : 'deactivated'}`);
-        } else {
-            alert('Failed to toggle user status.');
-        }
-    })
-    .catch(error => {
-        console.error('There was a problem with the fetch operation:', error);
-        alert('Error toggling user status.');
+            $.ajax({
+                url: '/admin/chat/toggle-activee/' + memberId + '/',
+                type: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'  // Include CSRF token for security
+                },
+                success: function(response) {
+                    // Update the button's text and icon based on the new status
+                    if (response.is_active) {
+                        button.html('<i class="bi bi-toggle-on text-success"></i> Active');
+                    } else {
+                        button.html('<i class="bi bi-toggle-off text-danger"></i> Inactive');
+                    }
+                },
+                error: function(xhr) {
+                    alert('Error updating status: ' + xhr.responseText);
+                }
+            });
+        });
     });
-});
 </script>
 
 {% endblock %}

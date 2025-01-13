@@ -13,67 +13,76 @@
                     <h2 class="text-info">Update User</h2>
                 </div>
                 <div class="card-body">
-                    <form method="post">
+                    <form method="post" id="user_form">
                         {% csrf_token %}
+                        {{ data.user_form.as_p }}
                         <div class="row">
                             <div class="form-group col-md-4 col-lg-4 col-sm-12 mb-3">
-                                <label for="firstName">FirstName</label>
+                                <label for="firstName">First Name<span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" name="first_name" id="first_name" value="{{ user.first_name }}" placeholder="Enter your first name">
                             </div>
                             <div class="form-group col-md-4 col-lg-4 col-sm-12 mb-3">
-                                <label for="middleName">MiddleName</label>
-                                <input type="text" class="form-control" name="middle_name" id="middle_name" value="{{ user.middle_name }}" placeholder="Enter your middle name">
+                                <label for="middleName">Middle Name</label>
+                                <input type="text" class="form-control" name="middle_name" id="middle_name" value="{% if user.middle_name %}{{ user.middle_name }} {% endif %}" placeholder="Enter your middle name">
                             </div>
                             <div class="form-group col-md-4 col-lg-4 col-sm-12 mb-3">
-                                <label for="lastName">LastName</label>
+                                <label for="lastName">Last Name<span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" name="last_name" id="last_name" value="{{ user.last_name }}" placeholder="Enter your last name">
                             </div>
                         </div>
 
                         <div class="row">
-                            <div class="form-group col-md-6 col-lg-6 col-sm-12 mb-3">
-                                <label for="email">Email</label>
-                                <input type="email" class="form-control" name="email" id="email" value="{{ user.email }}" placeholder="abc123@gmail.com">
+                            <div class="form-group col-md-4 col-lg-4 col-sm-12 mb-3">
+                                <label for="email">Email<span class="text-danger"> *readonly</span></label>
+                                <input type="email" class="form-control" name="email" id="email" value="{{ user.email }}" placeholder="Enter email" readonly>
                             </div>
-                            <div class="form-group col-md-6 col-lg-6 col-sm-12 mb-3">
-                                <label for="hobbies">Hobbies</label>
-                                <input type="text" class="form-control" id="hobbies" name="hobbies" value="{{ user.hobbies }}" placeholder="Enter hobbies (comma-separated)">
-                            </div>
-                        </div>
 
-                        <div class="row">
-                            <div class="col-md-4">
+                            <!-- Gender Dropdown -->
+                            <div class="form-group col-md-4 col-lg-4 col-sm-12 mb-3" style="display: none;">
                                 <label for="gender" class="form-label">Gender</label>
-                                <select id="gender" name="gender" value="{{ user.gender }}" class="form-select">
+                                <select id="gender" name="gender" class="form-select">
+                                    <option value="" {% if user.gender is none %}selected{% endif %}>Select Gender</option>
                                     {% for gender in choices_gender %}
-                                        {% for name, value in gender.items %}
-                                            <option value="{{ name }}">{{ value }}</option>
+                                        {% for key, value in gender.items %}
+                                            <option value="{{ key }}" {% if key == user.gender %}selected{% endif %}>
+                                                {{ value }}
+                                            </option>
                                         {% endfor %}
                                     {% endfor %}
                                 </select>
                             </div>
-            
-                            <div class="col-md-4">
-                                <label for="gender" class="form-label">Relationship Status</label>
-                                <select id="relationship_status" name="relationship_status" value="{{ user.relationship_status }}" class="form-select">
-                                    {% for choices_relationship in choices_relationship_status %}
-                                        {% for name, value in choices_relationship.items %}
-                                            <option value="{{ value }}">{{ name }}</option>
+                        
+                            <!-- Relationship Status Dropdown -->
+                            <div class="form-group col-md-4 col-lg-4 col-sm-12 mb-3" style="display: none;">
+                                <label for="relationship_status" class="form-label">Relationship Status</label>
+                                <select id="relationship_status" name="relationship_status" class="form-select">
+                                    <option value="" {% if user.relationship_status is none %}selected{% endif %}>Select Status</option>
+                                    {% for relationship in choices_relationship_status %}
+                                        {% for key, value in relationship.items %}
+                                            <option value="{{ key }}" {% if key == user.relationship_status %}selected{% endif %}>
+                                                {{ value }}
+                                            </option>
                                         {% endfor %}
                                     {% endfor %}
                                 </select>
                             </div>
-            
-                            
-                        </div>
-                        <div class="row">
-                            <div class="form-group col-md-6 col-lg-6 col-sm-12 mb-3">
+                            <div class="form-group col-md-4 col-lg-4 col-sm-12 mb-3">
+                                <label for="hobbies">Hobbies</label>
+                                <input type="text" class="form-control" id="hobbies" name="hobbies" value="{% if user.hobbies %}{{ user.hobbies }} {% endif %}" placeholder="Enter hobbies (comma-separated)">
+                            </div>
+                            <div class="form-group col-md-4 col-lg-4 col-sm-12 mb-3">
                                 <label for="dob">D.O.B</label>
                                 <input type="date" name="dob" id="dob" value="{{ user.dob|date:'Y-m-d' }}" class="form-control">  
                             </div>
-                            <div class="form-group col-md-6 col-lg-6 col-sm-12 mb-3">
+                            
+                        </div>
+                        
+                        
+                        <div class="row">
+                           
+                            <div class="form-group col-md-12 col-lg-12 col-sm-12 mb-3">
                                 <label for="address">Address</label>
-                                <textarea type="text" name="address" class="form-control" id="address" value="" placeholder="Enter Address">{{ user.address }}</textarea>
+                                <textarea type="text" name="address" class="form-control" id="address" value="" placeholder="Enter Address">{% if user.address %}{{ user.address }} {% endif %}</textarea>
                             </div>
                         </div>
                         <div class="text-start">
@@ -86,5 +95,56 @@
         </div>
     </div>
 </div>
+
+<script>
+    $(document).ready(function () {
+        $("#user_form").validate({
+            rules: {
+                first_name: {
+                    required: true,
+                    minlength: 2,
+                    maxlength: 50
+                },
+                last_name: {
+                    required: true,
+                    minlength: 2,
+                    maxlength: 150
+                },
+                email: {
+                    required: true,
+                    maxlength: 150
+                },
+            },
+            messages: {
+                first_name: {
+                    required: "Please enter firstname.",
+                    minlength: "Firstname must be at least 2 characters.",
+                    maxlength: "Firstname cannot exceed 50 characters."
+                },
+                last_name: {
+                    required: "Please enter lastname.",
+                    minlength: "Lastname must be at least 2 characters.",
+                    maxlength: "Lastname cannot exceed 150 characters."
+                },
+                email: {
+                    required: "Please enter email.",
+                    maxlength: "Email cannot exceed 150 characters."
+                },
+            },
+            errorPlacement: function (error, element) {
+                error.addClass('error');  // Add 'error' class to style the error message
+                error.insertAfter(element); // Place the error message after the input field
+            }
+        });
+    });
+</script>
+
+<style>
+    .error {
+        color: red;
+        font-size: 0.875rem; /* Optional: Adjust font size */
+        font-weight: normal;
+    }
+</style>
 
 {% endblock %}

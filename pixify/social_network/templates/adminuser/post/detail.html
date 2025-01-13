@@ -75,7 +75,7 @@
                             <div class="col-6">{{comment_count}}</div>
                         </div>
                     </li>
-
+                
                     {% comment %} modal for comments {% endcomment %}
 
                     <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel"
@@ -171,10 +171,11 @@
                             <div class="col-6">none</div>
                         </div>
                     </li>
+
             </div>
             <div class="text-start">
                 <a href="{% url 'manage_post_list' %}" class="btn btn-sm btn-outline-secondary">Back</a>
-                <a href="{% url 'manage_post_update' post_dic.post.id %}" class="btn btn-sm btn-primary">Edit</a>
+                <a href="{% url 'manage_post_update' post_dic.post.id %}" class="btn btn-sm btn-primary">Edit</a> 
             </div>
         </div>
     </div>
@@ -185,9 +186,10 @@
             $('.toggle-status').click(function () {
                 const commentId = $(this).data('comment-id');  // Use correct data attribute
                 const button = $(this);
+    
                 $.ajax({
-                    url: '/admin/comments/toggle-active/' + commentId + '/',  // Correct route
-                    type: 'POST',
+                    url: '/admin/posts/toggle-active/' + commentId + '/',
+                    type: 'COMMENT',
                     headers: {
                         'X-CSRFToken': '{{ csrf_token }}'  // Include CSRF token
                     },
@@ -206,4 +208,5 @@
             });
         });
     </script>
-    {% endblock %}
+
+{% endblock %}
