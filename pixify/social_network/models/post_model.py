@@ -3,7 +3,6 @@ from ..constants import PostType, AccessLevel, PostContentType, SpecificUserTrea
 from django.contrib.postgres.fields import ArrayField
 
 class Post(models.Model):
-    file = models.FileField(upload_to='adminPost/',max_length=200, null=True, blank=True)
     posted_by = models.ForeignKey('User', on_delete=models.CASCADE, related_name='fk_post_posts_users_id')
     type = models.IntegerField(
         choices=[(type.value, type.name) for type in PostType],
