@@ -18,11 +18,3 @@ class CommentReaction(models.Model):
         return f"ID: {self.id}, Created at: {self.created_at}, Active: {self.is_active}"
 
 
-
-
-
-
-
-
-
-
