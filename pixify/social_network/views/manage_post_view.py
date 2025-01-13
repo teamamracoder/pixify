@@ -71,13 +71,18 @@ class ManagePostDetailView(View):
         
         comment_count = services.get_comment_count_by_post(post_id)
         post_likes = services.post_service.manage_list_likes_filtered(post_id)
-        post_liked_users = services.get_post_user(post_likes)
-        print(f"Values of user {post_liked_users}")
+        print(f"Values of post likes... {post_likes}")
+
+        # post_liked_users = services.get_post_user(post_likes)
+        user_first_names = services.get_post_user(post_likes)
+        # print(f"Values of post likes... {post_liked_users}")
+    
+
         post_dic= {
             'post' : services.post_service.manage_get_post(post_id),
             'comment': services.post_service.manage_list_comments_filtered(post_id),
-            'post_likes' : post_likes ,
-            'post_liked_users' : post_liked_users
+            'post_likes' : post_likes, 
+            'user_first_names': user_first_names
         }
         return render(request, 'adminuser/post/detail.html', {'post_dic':post_dic,'comment_count':comment_count})
 

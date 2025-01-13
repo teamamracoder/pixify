@@ -4,6 +4,12 @@
 
 {% block content %}
 {%load static %}
+<style>
+    .hover-classes:hover{
+        color: blue;
+        
+    }
+</style>
 <h1 class="text-center">Post Details</h1>
 <div class="row">
     <div class="col-md-4 ">
@@ -60,16 +66,15 @@
                     </li>
                     <li class="list-group-item">
                         <div class="row">
-                            <div class="col-6"><a type="button" style="outline:none;border:none;background:transparent;"
+                            <div class="col-6"><a type="button" class="hover-classes" style="text-decoration: none;"
                                 data-bs-toggle="modal" data-bs-target="#exampleModal1"
                                 data-bs-whatever="@getbootstrap">Post Likes</a></div>
                             <div class="col-6">{{post_dic.post.posted_by.id}}</div>
-                            
                         </div>
                     </li>
                     <li class="list-group-item">
                         <div class="row">
-                            <div class="col-6"><a type="button" style="outline:none;border:none;background:transparent;"
+                            <div class="col-6"><a type="button" class="hover-classes" style="text-decoration: none;"
                                     data-bs-toggle="modal" data-bs-target="#exampleModal"
                                     data-bs-whatever="@getbootstrap">Post Comments</a></div>
                             <div class="col-6">{{comment_count}}</div>
@@ -98,6 +103,7 @@
                                                 <span
                                                     class="fw-light ps-1 d-flex justify-content-between align-items-center"
                                                     style="font-size:13px">
+
                                                     {{com.comment}}
                                                     <button class="btn btn-sm toggle-status"
                                                         data-comment-id="{{ comment.id }}">
@@ -131,10 +137,13 @@
                                 <h5 class="text-center">All Raection </h1>
                             </div>
                             <div class="modal-body" style="scroll-y: auto;">
-                                {%for com in post_dic.post_likes%}
+                               
                                 <div class="d-flex py-1">
                                        
-
+                               
+                                    <li></li> 
+                                 
+                                 
                                     <div class="d-flex" style="flex-direction: column;width:100%">
                                         <div class="comment-text mb-0 ps-2 py-1  rounded px-3"
                                             style="background-color: #FEF3E2;margin-left: 8px;width: 100%;">
@@ -142,7 +151,9 @@
                                             <span
                                                 class="fw-light ps-1 d-flex justify-content-between align-items-center"
                                                 style="font-size:13px">
-                                                {{com }}
+                                                {% for val in post_dic. %}
+                                                         {{ val }}
+                                                {%endfor%}
                                                 <button class="btn btn-sm toggle-status"
                                                     data-comment-id="{{ comment.id }}">
                                                     {% if comment.is_active %}
@@ -150,12 +161,15 @@
                                                     {% else %}
                                                     <i class="bi bi-toggle-off text-danger"></i> Inactive
                                                     {% endif %}
+                                                    
                                                 </button>
                                             </span>
                                         </div>
                                     </div>
+                                
                                 </div>
-                                {%endfor%}
+                               
+                           
                             </div>
 
                             

@@ -66,14 +66,19 @@ def manage_list_likes_filtered(post_id):
     return models.PostReaction.objects.filter(post_id=post_id).values_list('reacted_by_id', flat=True)
 
 
-
 def get_post_user(post_likes):
+    # Fetch users based on the list of IDs
     post_liked_users = User.objects.filter(id__in=post_likes)
-    post_liked_users_data = [  {'id': user.id,'first_name': user.first_name,'middle_name': user.middle_name,'last_name': user.last_name, }
-                            for user in post_liked_users
-                       ]
-    return {'post_liked_users' : post_liked_users_data}
+    # Extract and return only the first_name of each user
+    return [user.first_name for user in post_liked_users]
 
+
+# def get_post_user(post_likes):
+#     post_liked_users = User.objects.filter(id__in=post_likes)
+#     post_liked_users_data = [  {'id': user.id,'first_name': user.first_name,'middle_name': user.middle_name,'last_name': user.last_name, }
+#                             for user in post_liked_users
+#                        ]
+#     return {'post_liked_users' : post_liked_users_data}
 
 
 

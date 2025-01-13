@@ -70,23 +70,163 @@
                                     <div class="text-danger">{{ form.description.errors }}</div>
                                     {% endif %}
                                 </div>
-                                <!-- <label for="addPost"></label>
+                                <label for="addPost"></label>
                                 <div class="pb-1" data-bs-toggle="modal" data-bs-target="#addPost" id="addPost">
                                     <input class="form-control" placeholder="" id="addPost"></input>
-                              </div> -->
+                              </div>
                             </div>
                             <!-- Repeat for other fields -->
                             <div class="text-start">
                                 <a href="{% url 'manage_post_list' %}" class="btn btn-sm btn-outline-secondary">Back</a>
                                 <button type="submit" class="btn btn-sm btn-primary">Save</button>
                             </div>
+<!-- --------------------------------------------------------------------------------------------------------------------- -->
+                            <div class="modal fade" id="addPost" tabindex="-1" aria-labelledby="addPost"
+                            aria-hidden="true" >
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                  <!-- <form action="posts/create/" method="post" enctype="multipart/form-data"> -->
+                                      {% csrf_token %}
+                                    <div class="modal-header">
+                                      <h5 class="modal-title mx-auto" id="addPost">Create Post</h5>
+                                      <button type="button" class="btn-close text-white" data-bs-dismiss="modal" aria-label="Close" style="margin-left: 0px;"></button>
+                                    </div>
+                          
+                                    <div class="modal-body">
+                          
+                                        <div class="d-flex align-items-center mb-3" style="margin-top:10px;">
+                                            <img src=""
+                                                class="user-avatar me-2">
+                                            <span class="fw-bold "style="color:white">Priya Mitra</span>
+                                        </div>
+                                        <div class="mb-3  ">
+                                            <textarea class="form-control  " name="postTitle" placeholder="What do you want to talk about?" rows="2"
+                                                style="resize: none;background-color: #27236e"></textarea>
+                                        </div>
+                          
+                                        <div class="mb-3" >
+                                              <label for="fileInput" class="file-upload-label" style="width: 100%; outline:none; border:none">
+                                                <input type="file" name="postFiles" class="form-control d-none" id="fileInput" multiple>
+                                                <div
+                                                    id="dropZone">
+                                                    <p style="color:black;" class="select">Drag and drop photos or videos, or click to browse</p>
+                                                    <i class="bi bi-image" style="color:black; font-size:22px;" class="inner"></i>
+                                                </div>
+                                            </label>
+                          
+                                          <div class="con">
+                                          </div>
+                                      </div> 
+                          
+                          
+                                      <div class="pt-1 pb-3 px-2 mb-2 fw-semibold text-dark rounded" >
+                                          <div class=" d-flex justify-content-between rounded p-2" style="border:1px solid black;align-items:center;background-color:white;" >
+                          
+                                              <span class="">Add to your post</span>
+                          
+                                              <div class="gap-3 d-flex md-icon ">
+                                              <i class="bi bi-images text-success" ></i>
+                                              <i class="bi bi-tag text-primary"></i>
+                                              <i class="bi bi-emoji-smile text-warning"></i>
+                                              <i class="bi bi-geo-alt-fill text-danger"></i>
+                                              <i class="bi bi-filetype-gif text-info"></i>
+                                          </div>  
+                                          </div>
+                          
+                                      </div>
+                                    </div>
+                                    <div class="justify-content-center mx-auto mb-3">
+                                        <button type="submit" class="btn text-dark  mx-auto b_btn px-3 d-flex" style="background-color:white;">Post</button>
+                                    </div>
+                                </div>
+                            </div>
+                          </div>
+                          </div>
+<!-- --------------------------------------------------------------------------------------------------------------------- -->
                         </form>
-
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="modal fade" id="addPost" tabindex="-1" aria-labelledby="addPost"
+  aria-hidden="true" >
+  <div class="modal-dialog">
+      <div class="modal-content">
+        <!-- <form action="posts/create/" method="post" enctype="multipart/form-data"> -->
+            {% csrf_token %}
+          <div class="modal-header">
+            <h5 class="modal-title mx-auto" id="addPost">Create Post</h5>
+            <button type="button" class="btn-close text-white" data-bs-dismiss="modal" aria-label="Close" style="margin-left: 0px;"></button>
+          </div>
+
+          <div class="modal-body">
+
+              <div class="d-flex align-items-center mb-3" style="margin-top:10px;">
+                  <img src=""
+                      class="user-avatar me-2">
+                  <span class="fw-bold "style="color:white">Priya Mitra</span>
+              </div>
+              <div class="mb-3  ">
+                  <textarea class="form-control  " name="postTitle" placeholder="What do you want to talk about?" rows="2"
+                      style="resize: none;background-color: #27236e"></textarea>
+              </div>
+
+              <div class="mb-3" >
+                    <label for="fileInput" class="file-upload-label" style="width: 100%; outline:none; border:none">
+                      <input type="file" name="postFiles" class="form-control d-none" id="fileInput" multiple>
+                      <div
+                          id="dropZone">
+                          <p style="color:black;" class="select">Drag and drop photos or videos, or click to browse</p>
+                          <i class="bi bi-image" style="color:black; font-size:22px;" class="inner"></i>
+                      </div>
+                  </label>
+
+                <div class="con">
+                </div>
+            </div> 
+
+
+            <div class="pt-1 pb-3 px-2 mb-2 fw-semibold text-dark rounded" >
+                <div class=" d-flex justify-content-between rounded p-2" style="border:1px solid black;align-items:center;background-color:white;" >
+
+                    <span class="">Add to your post</span>
+
+                    <div class="gap-3 d-flex md-icon ">
+                    <i class="bi bi-images text-success" ></i>
+                    <i class="bi bi-tag text-primary"></i>
+                    <i class="bi bi-emoji-smile text-warning"></i>
+                    <i class="bi bi-geo-alt-fill text-danger"></i>
+                    <i class="bi bi-filetype-gif text-info"></i>
+                </div>  
+                </div>
+
+            </div>
+          </div>
+          <div class="justify-content-center mx-auto mb-3">
+              <button type="submit" class="btn text-dark  mx-auto b_btn px-3 d-flex" style="background-color:white;">Post</button>
+          </div>
+      </div>
+  </div>
+</div>
+</div>
+
+
+
+
+
 
 
 <script>
