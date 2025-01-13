@@ -124,8 +124,9 @@ class ManageUserDetailView(View):
 class ManageUserUpdateView(View):
     @catch_error
     def get(self, request, user_id):
-        choices_gender = [{gender.value: gender.name} for gender in Gender]
-        choices_relationship_status = [{relationship_status.value: relationship_status.name} for relationship_status in RelationShipStatus]
+        # choices_gender = [{gender.value: gender.name} for gender in Gender]
+        # choices_relationship_status = [{relationship_status.value: relationship_status.name} for relationship_status in RelationShipStatus]
+       
         user = get_object_or_404(User, id=user_id)
 
         # Pre-populate form with existing user data
@@ -133,10 +134,10 @@ class ManageUserUpdateView(View):
             'first_name': user.first_name,
             'middle_name': user.middle_name,
             'last_name': user.last_name,
-            'email': user.email,
-            'gender': user.gender,
+            # 'email': user.email,
+            # 'gender': user.gender,
             'address': user.address,
-            'relationship_status': user.relationship_status,
+            # 'relationship_status': user.relationship_status,
             'hobbies': user.hobbies,
             'dob': user.dob
         })
@@ -144,8 +145,8 @@ class ManageUserUpdateView(View):
         return render(request, 'adminuser/user/update.html', {
             'form': form,
             'user': user,
-            'choices_gender': choices_gender,
-            'choices_relationship_status': choices_relationship_status
+            # 'choices_gender': choices_gender,
+            # 'choices_relationship_status': choices_relationship_status
         })
 
     @catch_error
@@ -163,14 +164,14 @@ class ManageUserUpdateView(View):
             user.last_name = form.cleaned_data['last_name']
 
             # Only update email if it has changed
-            new_email = form.cleaned_data['email']
-            if new_email != user.email:  # If email is different from the current one
-                user.email = new_email
+            # new_email = form.cleaned_data['email']
+            # if new_email != user.email:  # If email is different from the current one
+            #     user.email = new_email
     
-            user.gender = form.cleaned_data['gender']
+            # user.gender = form.cleaned_data['gender']
             user.address = form.cleaned_data['address']
             user.hobbies = form.cleaned_data['hobbies']
-            user.relationship_status = form.cleaned_data['relationship_status']
+            # user.relationship_status = form.cleaned_data['relationship_status']
             
             dob = form.cleaned_data.get('dob')
             if dob:
@@ -187,8 +188,8 @@ class ManageUserUpdateView(View):
         return render(request, 'adminuser/user/update.html', {
             'form': form,
             'user_id': user.id,
-            'choices_gender': choices_gender,
-            'choices_relationship_status': choices_relationship_status
+            # 'choices_gender': choices_gender,
+            # 'choices_relationship_status': choices_relationship_status
         })
     
 class ManageToggleUserActiveView(View):

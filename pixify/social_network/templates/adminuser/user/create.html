@@ -17,7 +17,7 @@
                         {{ data.user_form.as_p }}
                         <div class="row">
                             <div class="form-group col-md-4 col-lg-4 col-sm-12 mb-3">
-                                {{ form.first_name.label }}
+                                {{ form.first_name.label }}<span class="text-danger">*</span>
                                 {{ form.first_name }}
                                 {% if form.first_name.errors %}
                                     <div class="text-danger">{{ form.first_name.errors }}</div>
@@ -31,7 +31,7 @@
                                 {% endif %}
                             </div>
                             <div class="form-group col-md-4 col-lg-4 col-sm-12 mb-3">
-                                {{ form.last_name.label }}
+                                {{ form.last_name.label }}<span class="text-danger">*</span>
                                 {{ form.last_name }}
                                 {% if form.last_name.errors %}
                                     <div class="text-danger">{{ form.last_name.errors }}</div>
@@ -41,7 +41,7 @@
                     
                         <div class="row">
                             <div class="form-group col-md-4 col-lg-4 col-sm-12 mb-3">
-                                {{ form.email.label }}
+                                {{ form.email.label }}<span class="text-danger">*</span>
                                 {{ form.email }}
                                 {% if form.email.errors %}
                                     <div class="text-danger">{{ form.email.errors }}</div>
@@ -134,21 +134,34 @@
             messages: {
                 first_name: {
                     required: "Please enter firstname.",
-                    minlength: "firstname must be at least 2 characters.",
-                    maxlength: "firstname cannot exceed 50 characters."
+                    minlength: "Firstname must be at least 2 characters.",
+                    maxlength: "Firstname cannot exceed 50 characters."
                 },
                 last_name: {
                     required: "Please enter lastname.",
-                    minlength: "lastname must be at least 2 characters.",
-                    maxlength: "lastname cannot exceed 20 characters."
+                    minlength: "Lastname must be at least 2 characters.",
+                    maxlength: "Lastname cannot exceed 150 characters."
                 },
                 email: {
                     required: "Please enter email.",
-                    maxlength: "email cannot exceed 50 characters."
+                    maxlength: "Email cannot exceed 150 characters."
                 },
+            },
+            errorPlacement: function (error, element) {
+                error.addClass('error');  // Add 'error' class to style the error message
+                error.insertAfter(element); // Place the error message after the input field
             }
         });
     });
 </script>
+
+<style>
+    .error {
+        color: red;
+        font-size: 0.875rem; /* Optional: Adjust font size */
+        font-weight: normal;
+    }
+</style>
+
 
 {% endblock %}

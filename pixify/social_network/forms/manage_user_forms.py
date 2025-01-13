@@ -61,13 +61,12 @@ class ManageUserUpdateForm(forms.ModelForm):
     """Form for updating user data"""
     class Meta:
         model = User
-        fields = ['first_name', 'middle_name', 'last_name', 'email', 'dob', 'gender', 'address', 'relationship_status', 'hobbies']
+        fields = ['first_name', 'middle_name', 'last_name', 'dob', 'address', 'hobbies']
         
         widgets = {
             'first_name': forms.TextInput(attrs={"class": "form-control", "placeholder": "Enter your first name"}),
             'middle_name': forms.TextInput(attrs={"class": "form-control", "placeholder": "Enter your middle name"}),
             'last_name': forms.TextInput(attrs={"class": "form-control", "placeholder": "Enter your last name"}),
-            'email': forms.EmailInput(attrs={"class": "form-control", "placeholder": "abc123@gmail.com"}),
             'dob': forms.DateInput(attrs={"class": "form-control", "type": "date"}),
             'address': forms.Textarea(attrs={"class": "form-control", "placeholder": "Enter Address", "rows": 2}),
             'hobbies': forms.TextInput(attrs={"class": "form-control", "placeholder": "Enter hobbies (comma-separated)"}),
@@ -77,11 +76,8 @@ class ManageUserUpdateForm(forms.ModelForm):
             'first_name': "First Name",
             'middle_name': "Middle Name",
             'last_name': "Last Name",
-            'email': "Email",
             'dob': "Date of Birth",
-            'gender': "Gender",
             'address': "Address",
-            'relationship_status': "Relationship Status",
             'hobbies': "Hobbies",
         }
 
