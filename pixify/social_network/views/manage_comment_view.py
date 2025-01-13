@@ -14,6 +14,7 @@ from ..decorators.exception_decorators import catch_error
 from ..decorators import auth_required, role_required
 from ..packages.response import success_response
 from ..forms.manage_comment_form import ManageCommentCreateForm
+
     
 
 # class ManageCommentListView(View):
@@ -91,9 +92,5 @@ class ManageCommentCreateView(View):
 
 
 
-class ManageToggleCommentActiveView(View):
-     def post(self, request, comment_id):
-        comment = services.manage_comment_service.manage_get_comment(comment_id)
-        comment.is_active = not comment.is_active  
-        comment.save()
-        return JsonResponse({'is_active': comment.is_active})  
+
+     
