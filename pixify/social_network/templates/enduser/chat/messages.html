@@ -6,18 +6,18 @@
 {% load static %}
 
 {% if success_message %}
-    <script>
-        $(document).ready(function() {
-            toastr.success("{{ success_message }}");
-        });
-    </script>
+<script>
+    $(document).ready(function() {
+        toastr.success("{{ success_message }}");
+    });
+</script>
 {% endif %}
 
 <div class="chat-container">
     <div class="chat-header">
         <div class="user-info">
             {% if data.chat.is_group %}
-                <img src="{{data.chat.chat_cover|default:'\static\images\group_pic.png' }}" alt="Group Chat" class="profile-pic">
+                <img src="{{ data.chat.chat_cover|default:'\static\images\group_pic.png' }}" alt="Group Chat" class="profile-pic">
                 <span class="username G-msg_chat-title">{{ data.chat.title }}</span>
             {% else %}
                 <img src="{{ data.chat.chat_cover|default:'\static\images\avatar.jpg' }}" alt="Profile Picture" class="profile-pic">
@@ -25,135 +25,143 @@
             {% endif %}
         </div>
     </div>
-    <div class="chat-body">
-        {% for message in data.messages %}
-            {% if message.sender_id.id == user.id %}
-                <!-- Sent Message Block -->
-                <div class="message sent">
-                    <div class="message-content">
-                        <div class="message-header">
-                            <img src="{{ message.sender_id.profile_photo_url|default:'\static\images\avatar.jpg' }}" alt="Sender Profile Pic" class="message-profile-pic">
-                            <span class="message-username">{{ message.sender_id.first_name }}</span>
-                        </div>
-                        <span class="text-dark">{{ message.text }}</span>
-                    </div>
-                    <div class="message-footer">
-                        <span class="time">{{ message.created_at|date:"h:i A" }}</span>
-                        <div>
-                            <i class="bi bi-three-dots-vertical" onclick="toggleOptions({{ message.id }})"></i>
-                            <i class="bi bi-emoji-smile" onclick="toggleReactionPopup({{ message.id }})"></i>
-                        </div>
-                    </div>
-                    <div class="options-popup" id="options-{{ message.id }}" style="display: none;">
-                        {% if message.sender_id.id == user.id %}
-                            <a href="#" onclick="editMessage('{{ message.id }}', '{{ message.text|escapejs }}')">Edit</a>
-                        {% endif %}
-                        <a href="#" onclick="deleteMessage('{{ message.id }}')">Delete</a>
-                        <a href="#" onclick="replyToMessage('{{ message.id }}', '{{ message.sender.username }}', '{{ message.text|escapejs }}')">Reply</a>
-                    </div>
-                    <div class="reaction-container" id="reaction-container-{{ message.id }}">
-                        <div class="reaction-popup" id="reaction-popup-{{ message.id }}" style="display: none;">
-                            {% for reaction in data.reactions %}
-                                <span onclick="reactionManager.addReaction('{{ message.id }}', '{{ reaction.id }}', '{{ reaction.value|escapejs }}')">
-                                    {{ reaction.value|safe }}
-                                </span>
-                            {% endfor %}
-                        </div>
-                        <div class="reaction-display" id="reaction-display-{{ message.id }}"></div>
-                    </div>
-                    
-                    <!-- Seen status (single or double tick) -->
-                    <div class="seen-status">
-                        {% if message.seen_by_all %}
-                            <!-- Show double tick if seen by all -->
-                            ✔️✔️
-                        {% else %}
-                            <!-- Show single tick if not seen by all -->
-                            ✔️
-                        {% endif %}
-                    </div>
-                </div>
-                
-            {% else %}
-                <!-- Received Message Block -->
-                <div class="message received float-end">
-                    <div class="message-content">
-                        <div class="message-header">
-                            <img src="{{ message.sender_id.profile_photo_url|default:'\static\images\avatar.jpg' }}" alt="{{ message.sender_id.first_name }}'s Profile Picture" class="message-profile-pic">
-                            <span class="message-username">{{ message.sender_id.first_name }}</span>
-                        </div>
-                        <span>{{ message.text }}</span>
-                    </div>
-                    <div class="message-footer">
-                        <span class="time">{{ message.created_at|date:"h:i A" }}</span>
-                        <div>
-                            <i class="bi bi-three-dots-vertical" onclick="toggleOptions({{ message.id }})"></i>
-                            <i class="bi bi-emoji-smile" onclick="toggleReactionPopup({{ message.id }})"></i>
-                        </div>
-                    </div>
-                    <div class="options-popup" id="options-{{ message.id }}" style="display: none;">
-                        {% if message.sender_id.id == user.id %}
-                            <a href="#" onclick="editMessage('{{ message.id }}', '{{ message.text|escapejs }}')">Edit</a>
-                        {% endif %}
-                        <a href="#" onclick="deleteMessage('{{ message.id }}')">Delete</a>
-                        <a href="#" onclick="replyToMessage('{{ message.id }}', '{{ message.sender.username }}', '{{ message.text|escapejs }}')">Reply</a>
-                    </div>
-                    <div class="reaction-container" id="reaction-container-{{ message.id }}">
-                        <div class="reaction-popup" id="reaction-popup-{{ message.id }}" style="display: none;">
-                            {% for reaction in data.reactions %}
-                                <span onclick="reactionManager.addReaction('{{ message.id }}', '{{ reaction.id }}', '{{ reaction.value|escapejs }}')">
-                                    {{ reaction.value|safe }}
-                                </span>
-                            {% endfor %}
-                        </div>
-                        <div class="reaction-display" id="reaction-display-{{ message.id }}"></div>
-                    </div>
-                </div>
-            {% endif %}
-        {% endfor %}
-    </div>
-    
-    <div class="chat-footer">
 
+    <div class="chat-body" id="chat-body">
+        <div class="timestamp-scrollbar" id="timestamp-scrollbar"></div>
+
+    {% for date_group in data.grouped_messages %}
+        <div id="message-timestamp" class="message-timestamp">
+            <span>{{ date_group.0 }}</span> <!-- Display the formatted date or "Today" -->
+        </div>
+
+        {% for message in data.messages %}
+            <div class="message {% if message.sender_id.id == user.id %}sent{% else %}received{% endif %}">
+            <div id="message-{{ message.id}}">
+                <div class="message-content">
+
+                    {% if message.reply_for_message_id %}
+                        <div class="parent-message">
+                                <span>{{ message.reply_for_message_id.sender_id.first_name }}: </span>
+                                <span>{{ message.reply_for_message_id.text }}</span>
+                            {% if message.reply_for_message_id.media_url %}
+                                <span>{{ message.reply_for_message_id.media_url }}</span>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+
+                    <div class="message-header">
+                        <img src="{{ message.sender_id.profile_photo_url|default:'\static\images\avatar.jpg' }}" alt="{{ message.sender_id.first_name }}'s Profile Picture" class="message-profile-pic">
+                        <span class="message-username">{{ message.sender_id.first_name }}</span>
+                    </div>
+                    <span class="message-text">{{ message.text }}</span>
+                    {% if message.media_url %}
+                    <span class="message-media">{{ message.media_url }}</span>
+                    {% endif %}
+
+                    {% if message.updated_by %}
+                    <div class="edited-messages">
+                        <span class="edited-tag">(Edited)</span>
+                    </div>
+                    {% endif %}
+                
+                </div>
+            </div>                
+
+                <div class="message-footer">
+                    <span class="time">{{ message.created_at|date:"h:i A" }}</span>
+                    <div class="message-options">
+                        <i class="bi bi-three-dots-vertical" onclick="toggleOptions({{ message.id }})"></i>
+                        <i class="bi bi-emoji-smile" onclick="toggleReactionPopup({{ message.id }})"></i>
+                    </div>
+                    <div class="options-popup" id="options-{{ message.id }}" style="display: none;">
+                    {% if message.sender_id.id == user.id %}
+                        {% if message.is_editable %}
+                            <a href="#" onclick="editMessage('{{ message.id }}', '{{ message.text|escapejs }}')">Edit</a>
+                        {% endif %}
+                    {% endif %}
+                        <a href="#" onclick="deleteMessage('{{ message.id }}')">Delete</a>
+                        <a href="#" onclick="replyMessage('{{ message.id }}', '{{ message.sender_id.first_name }}', '{{ message.text|escapejs }}')">Reply</a>
+                    </div>
+                </div>
+
+                <div class="reaction-container" id="reaction-container-{{ message.id }}">
+                    <div class="reaction-popup" id="reaction-popup-{{ message.id }}" style="display: none;">
+                        {% for reaction in data.reactions %}
+                        <span onclick="reactionManager.addReaction('{{ message.id }}', '{{ reaction.id }}', '{{ reaction.value|escapejs }}')">
+                            {{ reaction.value|safe }}
+                        </span>
+                        {% endfor %}
+                    </div>
+                    <div class="reaction-display" id="reaction-display-{{ message.id }}"></div>
+                </div>
+
+                <div class="seen-status">
+                    {% if message.seen_by_all %}
+                    <i class="bi bi-check2-all"></i>
+                    {% else %}
+                    <i class="bi bi-check2"></i>
+                    {% endif %}
+                </div>
+            </div>            
+        {% endfor %}
+    {% endfor %}
+    </div>
+
+    <div class="chat-footer">
         <div id="scroll-to-bottom" class="scroll-to-bottom" style="display: none;">
-            <i class="bi bi-arrow-down-circle-fill"></i> <!-- Bootstrap arrow icon -->
+            <i class="bi bi-arrow-down-circle-fill"></i>
         </div>
 
         <div id="reply-preview" style="display: none;">
             <div class="reply-message">
                 <span class="close-reply" onclick="cancelReply()">✖</span>
-                <span class="reply-username"></span><span style="color:black">:</span> <span class="reply-text"></span>
+                <span class="reply-username"></span><span style="color:black">:</span>
+                <span class="reply-text"></span>
             </div>
         </div>
-        <form id="messageForm" method="POST" action="{% url 'message_create' %}" enctype="multipart/form-data">
+
+        <div class="edit-preview" id="edit-preview">
+            <div class="edit-message-bar">
+                <span>Edit message</span>
+                <span class="edit-text"></span>
+                <button class="cancel-edit" style="color:red; margin-left: 135px;" onclick="cancelEdit()">X</button>
+            </div>
+            <div class="message-input">
+                <span></span>
+                
+                
+            </div>
+        </div>
+
+
+
+        <form id="messageForm" enctype="multipart/form-data">
             {% csrf_token %}
             <input type="hidden" id="action" name="action" value="create">
             <input type="hidden" id="chat_id" name="chat_id" value="{{ data.chat.id }}">
             <input type="hidden" id="chat_type" name="chat_type" value="{{ data.chat.type }}">
             <input type="hidden" id="message_id" name="message_id" value="">
             <input type="hidden" name="mentions" id="mentions">
-            <!-- File input (hidden) -->
             <input type="file" id="file-input" name="media_files" style="display: none;" accept="image/*,video/*" multiple>
-            <!-- Mention modal -->
+
             <div id="mentionModal" class="parmess-modal">
                 <div class="parmess-modal-content" id="mention-suggestions"></div>
             </div>
-            <!-- File previews -->
+
             <div id="file-previews" class="parmess-file-previews"></div>
-            <!-- Message input and submit button -->
+
             <div class="message-input-wrapper">
                 <button type="button" id="parmess-button" class="parmess-button">
                     <i class="fa fa-paperclip"></i>
                 </button>
                 <input type="text" name="message" id="message-input" placeholder="Type your message here...">
-                <button class="parmess-button" type="submit">➤</button>
+                <button class="parmess-button" type="submit">➤</button>                
             </div>
         </form>
-        <!-- File upload warning modal -->
+
         <div id="fileWarningModal" class="parmess-file-modal">
             <div class="parmess-file-modal-content">
                 <span class="parmess-close">&times;</span>
-                <!-- Warning message dynamically updated by JS -->
                 <span class="parmess-warning-text" style="text-align: center; display: block; margin-top: 20px; font-size: 16px;"></span>
             </div>
         </div>
@@ -161,28 +169,11 @@
 </div>
 
 
+
+
+
+
 <script>
-
-    function setFormAction(action, messageId = '', chatId = '') {
-        // Retrieve chatId dynamically if not provided
-        chatId = chatId || document.querySelector('input[name="chat_id"]').value;
-
-        // Update hidden fields
-        document.getElementById('action').value = action;
-        document.getElementById('message_id').value = messageId;
-        document.getElementById('chat_id').value = chatId;
-
-        // Map actions to URLs
-        const actionsMap = {
-            reply: `/chat/message-reply/${messageId}/`,
-            update: `/chat/message/${messageId}/update/`,
-            delete: `/chat/message/${messageId}/delete/`,
-            create: `/chat/message/create/`
-        };
-
-        // Set the form's action attribute
-        document.getElementById('messageForm').action = actionsMap[action] || actionsMap.create;
-    }
 
     $(document).ready(function () {
         let mentionedUsers = new Set();
@@ -194,12 +185,10 @@
 
         function initializeMentionedUsers() {
             mentionedUsers.clear();
-            mentionedAll = false;
-            console.log("Mentioned users initialized:", Array.from(mentionedUsers));
+            mentionedAll = false;            
         }
 
-        function updateMentionedUsers(messageText) {
-            console.log("updateMentionedUsers called");
+        function updateMentionedUsers(messageText) {            
             const mentionedRegex = /@(\w+)/g;
             let match;
             mentionedUsers.clear();
@@ -214,14 +203,11 @@
                 }
             }
 
-            mentionedAll = mentionedUsers.has('all');
-            console.log("Updated mentioned users:", Array.from(mentionedUsers));
-            const mentions = $('#mentions').val();
-            console.log("Mentions value:", mentions);
+            mentionedAll = mentionedUsers.has('all');            
+            const mentions = $('#mentions').val();            
 
             $('#mentions').val(Array.from(mentionedUsers).join(','));
-
-            console.log("Mentions before submitting:", $('#mentions').val());
+            
         }
 
         function createMentionItem(mention) {
@@ -244,12 +230,9 @@
         function displayMentionList(searchQuery) {
             const mentionSuggestions = $('#mention-suggestions').empty();
             const chatId = $('#chat_id').val();
-            const chatType = $('#chat_type').val();
+            const chatType = $('#chat_type').val();            
 
-            console.log(`Chat Type: ${chatType}`);
-
-            if (chatType != '2') {
-                console.log("Not a group chat, hiding mentions.");
+            if (chatType != '2') {                
                 $('#mentionModal').hide();
                 return;
             }
@@ -260,8 +243,7 @@
                 url: `/message-mention/${chatId}/`,
                 type: 'GET',
                 data: { search: searchQuery, exclude: excludeUsers, mentionedAll },
-                success: function (res) {
-                    console.log("Mention suggestions response:", res);
+                success: function (res) {                    
 
                     if (!mentionedUsers.has('all')) {
                         mentionSuggestions.append(createMentionItem({
@@ -272,8 +254,7 @@
                         }));
                     }
 
-                    const filteredResults = res.filter(mention => mention.member_id !== 'all');
-                    console.log("Filtered results:", filteredResults);
+                    const filteredResults = res.filter(mention => mention.member_id !== 'all');                    
 
                     if (filteredResults.length > 0 || !mentionedUsers.has('all')) {
                         filteredResults.forEach(mention => {
@@ -361,38 +342,7 @@
             // Update the hidden field with the latest mentions
             $('#mentions').val(Array.from(mentionedUsers).join(','));
         });
-
-        $('#message-form').submit(function (event) {
-            event.preventDefault();
-
-            // Ensure mentions field has the latest data
-            $('#mentions').val(Array.from(mentionedUsers).join(','));
-
-            // Log to ensure the value is correct
-            console.log("Mentions before submitting:", $('#mentions').val());
-
-            const messageText = $('#message-input').val();
-            const mentions = $('#mentions').val();  // This now includes the mentions selected
-            const chatId = $('#chat_id').val();
-
-            $.ajax({
-                url: '/chat/message/create',
-                type: 'POST',
-                data: {
-                    message: messageText,
-                    mentions: mentions,  // Send the updated mentions data to the backend
-                    chat_id: chatId,
-                    csrfmiddlewaretoken: $('input[name="csrfmiddlewaretoken"]').val(),
-                    media_files: $('#file-input')[0].files
-                },
-                success: function (response) {
-                    console.log('Message sent:', response);
-                },
-                error: function (xhr, status, error) {
-                    console.error("Error sending message:", error);
-                }
-            });
-        });
+       
     });
 
     // Handle file button click
@@ -501,16 +451,6 @@
         // After file selection, focus back to the message input
         document.getElementById('message-input').focus();
     });
-
-    function toggleOptions(messageId) {
-        const popup = document.getElementById('options-' + messageId);
-        popup.style.display = popup.style.display === 'none' ? 'block' : 'none';
-    }
-
-    function toggleReactionPopup(messageId) {
-        const popup = document.getElementById('reaction-popup-' + messageId);
-        popup.style.display = popup.style.display === 'none' ? 'flex' : 'none';
-    }
   
  
     class ReactionManager {
@@ -682,55 +622,11 @@
     });
 
 
-    function editMessage(messageId, content) {
-        const messageInput = document.querySelector('input[name="message"]');
-        messageInput.value = content;
-        messageInput.focus();
-        setFormAction('update', messageId);
-    }
-
-    function deleteMessage(messageId) {
-        setFormAction('delete', messageId);  // Dynamically set the form action to delete the message
-        document.getElementById('messageForm').submit();  // Submit the form
-    }
-
-    function replyToMessage(messageId, username, content) {
-        const messageInput = document.querySelector('input[name="message"]');
-        document.getElementById('reply-preview').style.display = 'block';
-        document.querySelector('.reply-username').textContent = username;
-        document.querySelector('.reply-text').textContent = content;
-
-        messageInput.focus();
-        setFormAction('reply', messageId);
-    }
-
-    function cancelReply() {
-        document.getElementById('reply-preview').style.display = 'none';
-        setFormAction('create');
-    }
-
-    document.addEventListener('click', function (event) {
-        if (!event.target.closest('.options-popup') && !event.target.closest('.bi-three-dots-vertical')) {
-            document.querySelectorAll('.options-popup').forEach(popup => popup.style.display = 'none');
-        }
-    });
-
     // Function to scroll the chat body to the bottom
-    function scrollToBottom() {
+    document.addEventListener('DOMContentLoaded', function () {
         const chatBody = document.querySelector('.chat-body');
         chatBody.scrollTop = chatBody.scrollHeight;
-    }
-
-    // Scroll to the bottom on page load
-    document.addEventListener('DOMContentLoaded', function () {
-        scrollToBottom();
     });
-
-    // Scroll to the bottom when a new message is added
-    const chatBody = document.querySelector('.chat-body');
-    const observer = new MutationObserver(scrollToBottom);
-
-    observer.observe(chatBody, { childList: true });
 
     //Toast notification implementation
     $(document).ready(function() {
@@ -756,25 +652,7 @@
             messageInput.focus(); // Set focus back to the input field
         }
     });
-
-    // Handle Enter key in the input field to prevent empty submission
-    document.getElementById('message-input').addEventListener('keydown', function (event) {
-        if (event.key === 'Enter') {
-            const messageInput = document.getElementById('message-input');
-            const message = messageInput.value.trim(); // Trim whitespace to check if it's empty
-
-            if (!message) {
-                event.preventDefault(); // Prevent form submission
-                
-                messageInput.focus(); // Set focus back to the input field
-            } else {
-                // Let the form handle the submission naturally
-                event.preventDefault(); // Prevent default Enter behavior
-                document.getElementById('messageForm').submit(); // Standard form submission
-            }
-        }
-    });
-
+  
     //Show the scroll-to-bottom button based on scroll
     document.addEventListener("DOMContentLoaded", function () {
         const chatBody = document.querySelector('.chat-body');
@@ -817,14 +695,12 @@
         const messages = document.querySelectorAll(".message");
         const timestampContainer = document.getElementById("timestamp-scrollbar");
 
-        chatBody.addEventListener("scroll", function () {
-            console.log("Scroll event triggered.");
+        chatBody.addEventListener("scroll", function () {            
             updateScrollIndicator();
         });
 
     function updateScrollIndicator() {
         const scrollPosition = chatBody.scrollTop + (chatBody.offsetHeight / 2); // Center of the chat body
-        console.log("Current scroll position (center of viewport):", scrollPosition);
 
         let closestMessage = null;
         let closestDistance = Infinity;
@@ -833,9 +709,7 @@
         messages.forEach((message, index) => {
             const messageTop = message.offsetTop;
             const messageBottom = messageTop + message.offsetHeight;
-            const distance = Math.abs(scrollPosition - (messageTop + messageBottom) / 2);
-
-            console.log(`Message ${index + 1}: Top = ${messageTop}, Bottom = ${messageBottom}, Distance = ${distance}`);
+            const distance = Math.abs(scrollPosition - (messageTop + messageBottom) / 2);            
 
             if (distance < closestDistance) {
                 closestDistance = distance;
@@ -843,8 +717,7 @@
             }
         });
 
-        if (closestMessage) {
-            console.log("Closest message identified:", closestMessage);
+        if (closestMessage) {            
 
             // Find the nearest .message-timestamp element *above* the closest message
             let groupTimestamp = null;
@@ -859,14 +732,10 @@
             }
 
             if (groupTimestamp) {
-                console.log("Group timestamp found:", groupTimestamp.innerText);
                 showTimestampIndicator(groupTimestamp.innerText, closestMessage);
-            } else {
-                console.log("No group timestamp found for the closest message.");
+            } else {                
             }
-        } else {
-            console.log("No closest message identified.");
-        }
+        } 
     }
         
         function showTimestampIndicator(timestampText, closestMessage) {
@@ -892,90 +761,417 @@
 
     });
 
+    document.addEventListener('click', function (event) {
+        if (!event.target.closest('.options-popup') && !event.target.closest('.bi-three-dots-vertical')) {
+            document.querySelectorAll('.options-popup').forEach(popup => popup.style.display = 'none');
+        }
+    });
+
 </script>
 
-<script src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script>
+
+
 <script>
-// Connect to the Socket.IO server
-const socket = io("http://localhost:8000");
 
-// Event when connected to the server
-socket.on("connect", () => {
-    console.log("Connected to the server");
+// WebSocket connection and initialization
+var chatId = $('#chat_id').val();  // Get chat_id dynamically
+var socket = new WebSocket('ws://' + window.location.host + '/ws/chat/' + chatId + '/');
+var currentUser = "{{ user.first_name }}"; // Django context variable for current user's name
+
+// When WebSocket connection is established
+socket.onopen = function(e) {
+    console.log('WebSocket connection established.');
+};
+
+// Handle sending of message (when user submits or presses enter)
+document.getElementById("messageForm").addEventListener("submit", function (event) {
+    event.preventDefault();
+    if (editingMessageId) {
+        saveEditedMessage(); // Save the edited message if editing is in progress
+    } else {
+        sendMessage(); // Otherwise, send a new message
+    }
 });
 
-
-// Handle incoming messages
-socket.on("response", (data) => {
-    console.log("New message received:", data);
-
-    // Append message to the chat body
-    const chatBody = document.querySelector(".chat-body");
-    const messageDiv = document.createElement("div");
-    messageDiv.classList.add("received");
-
-    const messageContent = `
-        <div class="message-container">
-            <div class="message-content">
-                <span>${data.message}</span>
-            </div>
-            <div class="message-time">
-                <span>${new Date().toLocaleTimeString()}</span>
-            </div>
-        </div>
-    `;
-    messageDiv.innerHTML = messageContent;
-    chatBody.appendChild(messageDiv);
-
-    // Scroll to bottom
-    chatBody.scrollTop = chatBody.scrollHeight;
-});
-
-// Send a message
-function sendMessage() {
+// Sending message function
+async function sendMessage() {
     const input = document.getElementById("message-input");
     const message = input.value.trim();
+    const chatId = document.getElementById("chat_id").value;
+    const senderId = "{{ user.id }}"; // Django context variable
+    const senderName = "{{ user.first_name }}"; // User's name from the context
+    const mentionsInput = document.getElementById("mentions").value.trim();
 
-    if (message) {
-        // Emit the message event
-        socket.emit("message", message);
+    // Split the mentions string by comma and trim each mention
+    const mentions = mentionsInput ? mentionsInput.split(',').map(name => name.trim()) : [];
 
-        // Display the sent message in the chat
-        const chatBody = document.querySelector(".chat-body");
-        // const messageDiv = document.createElement("div");
-        messageDiv.classList.add("sent");
+    const files = document.getElementById("file-input").files;
+    const mediaFiles = [];
+    if (files.length > 0) {
+        for (const file of files) {
+            const base64File = await convertFileToBase64(file);
+            mediaFiles.push({
+                filename: file.name,
+                content: base64File.split(",")[1],
+            });
+        }
+    }
 
-        const messageContent = `
-            <div class="message-container">
-                <div class="message-content">
-                    <span>${message}</span>
-                </div>
-                <div class="message-time">
-                    <span>${new Date().toLocaleTimeString()}</span>
-                </div>
-            </div>
-        `;
-        messageDiv.innerHTML = messageContent;
-        chatBody.appendChild(messageDiv);
+    if (message || mediaFiles.length > 0) {
+        socket.send(JSON.stringify({
+            chat_id: chatId,
+            message: message,
+            sender_id: senderId,
+            mentions: mentions, // Correctly passing mentions
+            mediaFiles: mediaFiles,
+            action: 'create',
+        }));
 
-        // Clear input and scroll to bottom
         input.value = "";
-        chatBody.scrollTop = chatBody.scrollHeight;
+        document.getElementById("file-input").value = "";
+        clearFilePreviews();
+    } else {
+        alert("Please enter a message or attach a file.");
     }
 }
 
-// Attach sendMessage to the send button
-document.querySelector("button[type='submit']").addEventListener("click", (event) => {
-    event.preventDefault();
-    sendMessage();
-});
+// Listen for new messages from WebSocket
+{% comment %} socket.onmessage = function(event) {
+    console.log('Message received from WebSocket:', event.data);
+    const data = JSON.parse(event.data);
+    if (data.type === "message") {
+        appendMessageToChat(
+            data.message,
+            data.message_id,
+            new Date().toLocaleTimeString(),
+            data.user || 'Unknown',
+            data.ProfilePic ||'/static/images/avatar.jpg', // Default profile pic            
+            data.update,
+            data.reply,
+            data.media_urls || [],
+            data.user === currentUser  // Check if the message is sent by the current user
+        );
+    }
+}; {% endcomment %}
+
+    socket.onmessage = function(event) {
+        console.log('Message received from WebSocket:', event.data);
+        const data = JSON.parse(event.data);
+
+        if (!data.update) {
+            appendMessageToChat(
+                data.message,
+                data.message_id,
+                new Date().toLocaleTimeString(),
+                data.user || 'Unknown',
+                data.ProfilePic || '/static/images/avatar.jpg',                
+                data.reply,
+                data.media_urls || [],
+                data.user === currentUser // Check if the message is sent by the current user
+            );
+        } 
+        else {
+            updateMessageInChat(
+                data.message,
+                data.message_id,
+                new Date().toLocaleTimeString(),
+                data.user || 'Unknown',
+                data.ProfilePic || '/static/images/avatar.jpg',                
+                data.reply,
+                data.media_urls || [],
+            );
+        }
+        console.log(data.update);
+    };
+              
+
+// Function to append a message to the chat body
+// Function to append a message to the chat body
+function appendMessageToChat(message, messageId, messageTime, senderName, profilePic, reply, mediaUrls, isSent) {
+    console.log('Appending message:', { message, messageId, messageTime, senderName, profilePic, mediaUrls, isSent });
+    
+    const chatBody = document.querySelector(".chat-body");
+    const messageDiv = document.createElement("div");
+    messageDiv.classList.add("message", isSent ? "sent" : "received");
+    messageDiv.setAttribute("id", `message-${messageId}`); // Correct ID structure
+
+    // Prepare media preview if media URLs are present
+    let mediaPreview = "";
+    if (mediaUrls.length > 0) {
+        mediaPreview = mediaUrls
+            .map(url => `<div class="message-media"><img src="${url}" alt="media"></div>`)
+            .join(""); // Corrected to use backticks for string interpolation
+    }
+
+    // Prepare the parent message (reply) section if a reply exists
+    let replyPreview = "";
+    if (reply) {
+        replyPreview = `
+            <div class="parent-message">
+                <span>${reply.sender_name}: </span>
+                <span>${reply.text}</span>
+                ${reply.media_url ? `<span>${reply.media_url}</span>` : ""}
+            </div>
+        `;
+    }
+
+    // Construct the message content
+    const messageContent = `
+        <div class="message-content">
+            <div class="message-header">
+                <img src="${profilePic}" alt="${senderName}'s Profile Picture" class="message-profile-pic">
+                <span class="message-username">${senderName}</span>
+                ${replyPreview} <!-- Include the reply preview if it exists -->
+            </div>
+            <span class="message-text">${message}</span>
+            ${mediaPreview} <!-- Include media preview if it exists -->
+            <div class="message-footer">
+                <span class="time">${messageTime}</span>
+                <div class="message-options">
+                    <i class="bi bi-three-dots-vertical" onclick="toggleOptions('${messageId}')"></i>
+                    <i class="bi bi-emoji-smile" onclick="toggleReactionPopup('${messageId}')"></i>
+                </div>
+                <div class="options-popup" id="options-${messageId}" style="display: none;">
+                    <a href="#" onclick="editMessage('${messageId}', '${message}')">Edit</a>
+                    <a href="#" onclick="deleteMessage('${messageId}')">Delete</a>
+                    <a href="#" onclick="replyMessage('${messageId}', '${senderName}', '${message}')">Reply</a>
+                </div>
+            </div>
+        </div>
+    `;
+
+    messageDiv.innerHTML = messageContent; // Set the message content
+    chatBody.appendChild(messageDiv); // Append the message to the chat body
+    chatBody.scrollTop = chatBody.scrollHeight; // Scroll to the bottom of the chat
+
+    console.log('Message appended successfully!');
+}
+
+
+function updateMessageInChat(updatedMessage, messageId, messageTime, senderName, profilePic, reply, mediaUrls) {
+    console.log("hiiiiiiiiiiiiiiiiiiii");
+    const messageDiv = document.getElementById(`message-${messageId}`);
+    if (messageDiv) {
+        let mediaPreview = "";
+        if (mediaUrls.length > 0) {
+            mediaPreview = mediaUrls
+                .map(url => `<div class="message-media"><img src="${url}" alt="media"></div>`)
+                .join("");
+        }
+
+    // Prepare the parent message (reply) section if a reply exists
+    let replyPreview = "";
+    if (reply) {
+        replyPreview = `
+            <div class="parent-message">
+                <span>${reply.sender_name}: </span>
+                <span>${reply.text}</span>
+                ${reply.media_url ? `<span>${reply.media_url}</span>` : ""}
+            </div>
+        `;
+    }
+
+        // Update the message text and media
+        const messageContent = `
+         <div class="message-content">
+            <div class="message-header">
+                <img src="${profilePic}" alt="${senderName}'s Profile Picture" class="message-profile-pic">
+                <span class="message-username">${senderName}</span>
+                ${replyPreview} <!-- Include the reply preview if it exists -->
+            </div>
+            <span class="message-text">${updatedMessage}</span>
+            ${mediaPreview} <!-- Include media preview if it exists -->
+            <div class="edited-messages">
+                <span class="edited-tag">(Edited)</span>
+            </div>
+            <div class="message-footer">
+                <span class="time">${messageTime}</span>
+                <div class="message-options">
+                    <i class="bi bi-three-dots-vertical" onclick="toggleOptions('${messageId}')"></i>
+                    <i class="bi bi-emoji-smile" onclick="toggleReactionPopup('${messageId}')"></i>
+                </div>
+                <div class="options-popup" id="options-${messageId}" style="display: none;">
+                    <a href="#" onclick="editMessage('${messageId}', '${updatedMessage}')">Edit</a>
+                    <a href="#" onclick="deleteMessage('${messageId}')">Delete</a>
+                    <a href="#" onclick="replyMessage('${messageId}', '${senderName}', '${updatedMessage}')">Reply</a>
+                </div>
+            </div>
+        </div>
+    `;
+
+        // Update the innerHTML while preserving other structure
+        const contentDiv = messageDiv.querySelector(".message-content");
+        if (contentDiv) {
+            contentDiv.innerHTML = messageContent;
+        } else {
+            console.error(`Message content not found for message ID: ${messageId}`);
+        }
+    } else {
+        console.error(`Message not found for message ID: ${messageId}`);
+    }
+}
+
+// Global variable to track the message being edited
+let editingMessageId = null;
+
+// Edit message
+// Edit message
+function editMessage(messageId, content) {
+    const replyPreview = document.getElementById("edit-preview");
+    replyPreview.style.display = "block";
+    replyPreview.querySelector(".edit-text").textContent = content;
+
+    const messageInput = document.getElementById("message-input");
+    messageInput.value = content; // Pre-fill input with the current message content
+    messageInput.focus(); // Focus the input field
+    editingMessageId = messageId; // Store the message ID being edited
+}
+
+// Save the updated message
+function saveEditedMessage() {
+    if (!editingMessageId) {
+        alert("No message is being edited.");
+        return;
+    }
+
+    const messageInput = document.getElementById("message-input");
+    const updatedMessage = messageInput.value.trim();
+
+    if (!updatedMessage) {
+        alert("Message cannot be empty.");
+        return;
+    }
+
+    const chatId = document.getElementById("chat_id").value;
+
+    // Send the updated message via WebSocket
+    socket.send(JSON.stringify({
+        action: 'edit',
+        chat_id: chatId,
+        message_id: editingMessageId,
+        message: updatedMessage,
+    }));
+
+    // Reset the editing state
+    editingMessageId = null;
+    messageInput.value = ""; // Clear the input
+    const saveButton = document.getElementById("edit-preview");
+    saveButton.style.display = "none"; // Hide the save button
+}
+
+// Cancel edit
+function cancelEdit() {
+    editingMessageId = null;
+    const editMessageInput = document.getElementById("message-input");
+    editMessageInput.value = ""; // Clear the input
+    const editPreview = document.getElementById("edit-preview");
+    editPreview.style.display = "none"; // Hide the edit preview
+}
+
+
+// Delete message
+function deleteMessage(messageId) {
+    const confirmation = confirm("Are you sure you want to delete this message?");
+    if (confirmation) {
+        socket.send(JSON.stringify({
+            action: 'delete',
+            message_id: messageId
+        }));
+        document.getElementById(`message-${messageId}`).remove();  // Remove message from the UI
+    }
+}
+
+// Reply to a message
+function replyMessage(messageId, senderName, content) {
+    const replyPreview = document.getElementById("reply-preview");
+    replyPreview.style.display = "block";
+    replyPreview.querySelector(".reply-username").textContent = senderName;
+    replyPreview.querySelector(".reply-text").textContent = content;
+    const messageInput = document.getElementById("message-input");
+    if (messageInput.value) {
+        socket.send(JSON.stringify({
+            action: 'reply',
+            message_id: messageId,
+            message: messageInput.value
+        }));
+    }
+    messageInput.focus();
+    
+}
+
+    function cancelReply() {
+        document.getElementById('reply-preview').style.display = 'none';
+        
+    }
+
+// Convert file to base64
+function convertFileToBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+}
+
+// Clear file previews
+function clearFilePreviews() {
+    const previewsContainer = document.getElementById("file-previews");
+    previewsContainer.innerHTML = "";
+}
+
+// Toggle options menu
+function toggleOptions(messageId) {
+    const optionsPopup = document.getElementById(`options-${messageId}`);
+    if (optionsPopup) {
+        optionsPopup.style.display = optionsPopup.style.display === "none" ? "block" : "none";
+    }
+}
+
+// Toggle reaction popup
+function toggleReactionPopup(messageId) {
+    const reactionPopup = document.getElementById(`reaction-popup-${messageId}`);
+    if (reactionPopup) {
+        reactionPopup.style.display = reactionPopup.style.display === "none" ? "block" : "none";
+    }
+}
 </script>
+
+
+
 
 
 
 
 
 <style>
+
+    .edit-preview {
+    display: none;
+}
+
+.edit-preview .edit-message-bar {
+    background-color:#533b79;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+.edit-preview .message-input {
+    display: flex;
+    align-items: center;
+}
+
+.edit-preview .message-input span {
+    flex-grow: 1;
+}
+
+.edit-preview .message-input button {
+    margin-left: 10px;
+}
+
+
     #msg-ul{
         background-color:#ffffff;
         color:black;
