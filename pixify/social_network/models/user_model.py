@@ -63,6 +63,10 @@ class User(AbstractUser):
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
 
+    # for web_cam_verification
+    verification_image = models.ImageField(upload_to='verification_images/', null=True, blank=True)
+    is_verified = models.BooleanField(default=False)
+
     class Meta:
         db_table = 'users'
     
