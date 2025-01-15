@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
+from ..constants import ChatDeleteType
 
 class Message(models.Model):
     text=models.CharField(max_length=200, blank=True, null=True)
@@ -15,6 +16,11 @@ class Message(models.Model):
     reply_for_everyone = models.BooleanField(db_default=True, blank=True)
     mentions = models.ManyToManyField(
         'User', through='MessageMention', through_fields=('message','user'), related_name='fk_mentions_messages_users'
+    )
+    delete_type = models.IntegerField(
+        choices=[(type.value, type.name) for type in ChatDeleteType],
+        blank=True,
+        null=True,
     )
     is_active = models.BooleanField(db_default=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True, blank=True)

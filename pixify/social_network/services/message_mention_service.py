@@ -10,6 +10,7 @@ def create_message_mentions(message, user, auth_user):
         # If the mention already exists, update it
         mention.is_active = True  # Or other fields if needed
         mention.created_by = auth_user
+        mention.updated_by = auth_user
         mention.save()
     else:
         # If the mention doesn't exist, create a new one
@@ -33,7 +34,7 @@ def delete_message_mentions(message, user, users_to_remove):
 
 
 def list_messages_mention_Api(chat, user, search_query, exclude_ids, mentioned_all):
-    print_log(f"Search Query: {search_query}, Exclude IDs: {exclude_ids}, Mentioned All: {mentioned_all}")
+    
 
     if mentioned_all:
         return []
