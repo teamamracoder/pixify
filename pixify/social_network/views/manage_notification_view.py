@@ -75,7 +75,7 @@ class ManageNotificationUpdateView(View):
 
     @catch_error
     def post(self, request, notification_id):
-        user=request.users
+        user=request.user
         notification = get_object_or_404(Notification, id=notification_id)
         form = ManageNotificationUpdateForm(request.POST)
         if form.is_valid():
