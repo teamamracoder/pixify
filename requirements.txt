@@ -4,7 +4,6 @@ django-environ==0.11.2
 channels
 python-socketio
 django-cors-headers
-daphne
 python-engineio==4.3.1
 cmake==3.31.4
 wheel==0.45.0
