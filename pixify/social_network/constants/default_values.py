@@ -68,3 +68,7 @@ class Reactions:
     KISS = '<i class="fa-solid fa-face-kiss-beam" style="color: #FFD43B;"></i>'
     HEARTBROKE = '<i class="fa-solid fa-heart-crack" style="color: #d40202;"></i>'
     FAKESMILE= '<i class="fa-solid fa-face-grin-beam-sweat" style="color: #FFD43B;"></i>'
+
+class ChatDeleteType(Enum):
+    For_Me = 1
+    For_Everyone = 2

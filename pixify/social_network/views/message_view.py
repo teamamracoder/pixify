@@ -22,9 +22,25 @@ class MessageListView(View):
         reactions = message_reaction_service.show_reactions()
         messages = message_service.list_messages_by_chat_id(chat_id, user.id)
 
-        # Check if each message has been seen by all members
+        # Check if each message is editable (within the last 10 minutes)
         for message in messages:
+            message.is_editable = message_service.is_editable(message)
+        # Check if each message has been seen by all members        
             message.seen_by_all = chat_service.is_message_seen_by_all(message)
+        # Apply the timestamp formatting function to each message        
+            message.formatted_timestamp = message_service.format_timestamp(message.created_at)
+
+        # Group the messages by their formatted timestamp
+        grouped_messages = defaultdict(list)                
+
+        for message in messages:            
+            grouped_messages[message.formatted_timestamp].append(message)
+
+        # Convert defaultdict to a list of tuples to make it easier to iterate in the template
+        grouped_messages_list = [(date, sorted(messages, key=lambda x: x.created_at)) if date == 'Today' else (date, messages) for date, messages in grouped_messages.items()]
+        
+        # Sort grouped messages based on the custom sort key
+        grouped_messages_list = sorted(grouped_messages_list, key=lambda x: message_service.sort_key(x)[0])   
 
         latest_message = message_service.get_latest_message(chat.id)
         seen_by_all = False
@@ -66,6 +82,7 @@ class MessageListView(View):
         ),
             data={ 
             'chat': chat_info,
+            'grouped_messages':grouped_messages_list,
             'messages': messages,
             'user': user,
             'reactions': reactions
