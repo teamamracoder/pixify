@@ -36,7 +36,7 @@
             <span>{{ date_group.0 }}</span> <!-- Display the formatted date or "Today" -->
         </div>
 
-        {% for message in data.messages %}
+        {% for message in date_group.1 %}
             <div class="message {% if message.sender_id.id == user.id %}sent{% else %}received{% endif %}">
             <div id="message-{{ message.id}}">
                 <div class="message-content">
@@ -106,8 +106,9 @@
                     {% endif %}
                 {% endif %}
                 </div>
-            </div>            
+            </div>
         {% endfor %}
+    {% endfor %}
     </div>
 
     <div class="chat-footer">
@@ -123,7 +124,7 @@
             </div>
         </div>
 
-        <div class="edit-preview" id="edit-preview">
+        <div class="edit-preview" id="edit-preview" style="display: none;">
             <div class="edit-message-bar">
                 <span>Edit message</span>
                 <span class="edit-text"></span>
@@ -131,12 +132,8 @@
             </div>
             <div class="message-input">
                 <span></span>
-                
-                
             </div>
         </div>
-
-
 
         <form id="messageForm" enctype="multipart/form-data">
             {% csrf_token %}
@@ -170,10 +167,6 @@
         </div>
     </div>
 </div>
-
-
-
-
 
 
 <script>
