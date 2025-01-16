@@ -1,4 +1,5 @@
-{% extends "enduser/base.html" %} {% block title %}Pixify-Verification{% endblock %}
+{% extends "enduser/base.html" %}
+{% block title %}Pixify-Verification{% endblock %}
 {% block content %} {% load static %}
 <div class="verifycontainer">
     <h1 id="verify_header">Verification</h1>
@@ -18,8 +19,89 @@
         <span id="leftArrow" class="arrow"></span>
     </button>
     <div id="result"></div>
-    
+    <div id="loading" style="display: none;">
+        <div class="spinner"></div>
+    </div>
 </div>
+
+<style>
+    /* Spinner styles */
+    .spinner {
+        margin: 20px auto;
+        width: 40px;
+        height: 40px;
+        border: 4px solid rgba(0, 0, 0, 0.1);
+        border-top: 4px solid #3498db;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+</style>
+
+<script>
+    const video = document.getElementById('webcam');
+    const canvas = document.getElementById('snapshot');
+    const context = canvas.getContext('2d');
+    const resultDiv = document.getElementById('result');
+    const loadingDiv = document.getElementById('loading');
+
+    // Access webcam
+    navigator.mediaDevices.getUserMedia({ video: true })
+        .then((stream) => {
+            video.srcObject = stream;
+        })
+        .catch((err) => console.error('Webcam not accessible:', err));
+
+    // Capture image
+    document.getElementById('capture').addEventListener('click', () => {
+        // Show loading spinner
+        loadingDiv.style.display = 'block';
+        resultDiv.textContent = ''; // Clear previous results
+
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const imageData = canvas.toDataURL('image/png');
+
+        // Send to server
+        fetch('/profile/verification/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.cookie.split('csrftoken=')[1]
+            },
+            body: JSON.stringify({ image: imageData })
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Hide loading spinner
+            loadingDiv.style.display = 'none';
+
+            if (data.success) {
+                resultDiv.innerHTML = `<p id="verify_msg">${data.message}</p>`;
+            } else {
+                resultDiv.textContent = data.message;
+            }
+        })
+        .catch(err => {
+            // Hide loading spinner
+            loadingDiv.style.display = 'none';
+            console.error('Error during verification:', err);
+        });
+    });
+</script>
+
+
+
+
 
 <!-- Styling for webcam and result display -->
 <style>
@@ -269,47 +351,6 @@
     }
 </style>
 
-
-<script>
-    const video = document.getElementById('webcam');
-    const canvas = document.getElementById('snapshot');
-    const context = canvas.getContext('2d');
-    const resultDiv = document.getElementById('result');
-
-    // Access webcam
-    navigator.mediaDevices.getUserMedia({ video: true })
-        .then((stream) => {
-            video.srcObject = stream;
-        })
-        .catch((err) => console.error('Webcam not accessible:', err));
-
-    // Capture image
-    document.getElementById('capture').addEventListener('click', () => {
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        context.drawImage(video, 0, 0, canvas.width, canvas.height);
-        const imageData = canvas.toDataURL('image/png');
-
-        // Send to server
-        fetch('/profile/verification/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': document.cookie.split('csrftoken=')[1]
-            },
-            body: JSON.stringify({ image: imageData })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                resultDiv.innerHTML = `<p id="verify_msg">${data.message}</p>`;
-            } else {
-                resultDiv.textContent = data.message;
-            }
-        })
-        .catch(err => console.error('Error during verification:', err));
-    });
-</script>
 
 
 <!-- <style>

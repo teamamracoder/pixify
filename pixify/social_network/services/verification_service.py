@@ -17,46 +17,69 @@ def save_user_image(image_data, user_id):
         except User.DoesNotExist:
             return {'success': False, 'message': 'User not found.'}
 
-        # If user doesn't have a verification image, save the new image
+        # Load the new image
+        new_image = face_recognition.load_image_file(image_file)
+        new_face_encodings = face_recognition.face_encodings(new_image)
+
+        # Check if a face is detected in the new image
+        if not new_face_encodings:
+            return {'success': False, 'message': 'No face detected in the uploaded image.'}
+
+        # Handle cases where the user doesn't have a verification image
         if not user.verification_image:
+            # Retrieve all users with verification images (excluding the current user)
+            users_with_images = User.objects.exclude(verification_image__isnull=True).exclude(id=user.id)
+
+            # Load and encode all verification images
+            all_face_encodings = []
+            for other_user in users_with_images:
+                try:
+                    existing_image_path = other_user.verification_image.path
+                    existing_image = face_recognition.load_image_file(existing_image_path)
+                    encodings = face_recognition.face_encodings(existing_image)
+                    if encodings:
+                        all_face_encodings.append(encodings[0])  # Append the first encoding
+                except Exception as e:
+                    print(f"Error processing image for user {other_user.id}: {e}")  # Log the error for debugging
+
+            # Check if the new face matches any existing faces in the database
+            match = any(face_recognition.compare_faces(all_face_encodings, new_face_encodings[0]))
+            if match:
+                return {'success': False, 'message': 'Face already exists in the database.'}
+
+            # If no match, save the new verification image for the user
             user.verification_image = image_file
             user.is_verified = False
             user.save()
             return {
-                'success': True, 
-                'message': 'Image saved for future verification.', 
+                'success': True,
+                'message': 'Image saved for future verification.',
                 'is_verified': user.is_verified,
-                'image_url': user.verification_image.url  # Return image URL
+                'image_url': user.verification_image.url,
             }
 
+        # If the user already has a verification image
         else:
-            # Compare new image with the existing image
             try:
                 existing_image_path = user.verification_image.path
                 existing_image = face_recognition.load_image_file(existing_image_path)
-
-                # Load the new image
-                new_image = face_recognition.load_image_file(image_file)
-
-                # Encode the faces in both images
                 existing_face_encodings = face_recognition.face_encodings(existing_image)
-                new_face_encodings = face_recognition.face_encodings(new_image)
 
-                # If either image has no faces detected, return an error
-                if not existing_face_encodings or not new_face_encodings:
-                    return {'success': False, 'message': 'Could not detect faces in one or both images.'}
+                # If no faces are detected in the existing verification image, return an error
+                if not existing_face_encodings:
+                    return {'success': False, 'message': 'No face detected in the existing verification image.'}
 
-                # Compare faces
+                # Compare the new face encoding with the existing verification image
                 match = face_recognition.compare_faces([existing_face_encodings[0]], new_face_encodings[0])
 
                 if match[0]:
                     user.is_verified = True
                     user.save()
                     return {
-                        'success': True, 
-                        'message': 'User verified successfully!', 
+                        'success': True,
+                        'message': 'User verified successfully!',
                         'is_verified': user.is_verified,
-                        'image_url': user.verification_image.url  # Return image URL
+                        'image_url': user.verification_image.url,
                     }
                 else:
                     return {'success': False, 'message': 'Face does not match the existing image.', 'is_verified': user.is_verified}
@@ -66,5 +89,3 @@ def save_user_image(image_data, user_id):
 
     except Exception as e:
         return {'success': False, 'message': f"An unexpected error occurred: {str(e)}"}
-
-
