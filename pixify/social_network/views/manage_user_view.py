@@ -210,3 +210,5 @@ class ChangeMyThemeView(View):
         services.user_service.change_theme(user, ui_mode=theme)
         return JsonResponse(success_response('Theme changed to {theme} mode', {'theme': theme}))
 
+
+
