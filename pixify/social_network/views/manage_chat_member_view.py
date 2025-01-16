@@ -1,6 +1,7 @@
 
 # Manage_Chat_Member
 #======================================================================
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views import View
 from django.core.paginator import Paginator 
@@ -66,7 +67,12 @@ class ManageMemberChatListView(View):
             'page_obj': page_obj,
         })
     
-
-
+class ManageToggleChatMemberActiveView(View):
+    def post(self, request, member_id):
+        print(member_id)
+        chat_mebmer = services.manage_chat_member_service.manage_get_chat_member(member_id)
+        chat_mebmer.is_active = not chat_mebmer.is_active  # Toggle active status
+        chat_mebmer.save()
+        return JsonResponse({'is_active': chat_mebmer.is_active})
 
    
