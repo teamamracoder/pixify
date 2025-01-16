@@ -104,14 +104,17 @@ class ManageChatDetailView(View):
     def get(self, request, chat_id):
         choices_type = [{type.value: type.name} for type in ChatType]
         chat = services.manage_chat_service.manage_get_chat(chat_id)
-        chat_member= services.manage_chat_service.manage_get_member(chat_id)
-        print(chat_member)
-        return render(
-            request,
-            'adminuser/chat/detail.html',
-            {'chat': chat, 'chat_member': chat_member, "choices_type": choices_type}
-        )  
 
+#         chat_member= services.manage_chat_service.manage_get_member(chat_id)
+#         print(chat_member)
+#         return render(
+#             request,
+#             'adminuser/chat/detail.html',
+#             {'chat': chat, 'chat_member': chat_member, "choices_type": choices_type}
+#         )  
+
+        chat_members=services.manage_chat_service.manage_get_member(chat_id)
+        return render(request, 'adminuser/chat/detail.html',{'chat':chat,'chat_members':chat_members, "choices_type":choices_type }) 
         
 
 class ManageToggleChatActiveView(View):
@@ -120,5 +123,7 @@ class ManageToggleChatActiveView(View):
         chat.is_active = not chat.is_active  # Toggle active status
         chat.save()
         return JsonResponse({'is_active': chat.is_active})
+    
+
 
 
