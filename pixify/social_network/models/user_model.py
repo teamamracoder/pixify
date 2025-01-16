@@ -4,6 +4,9 @@ from social_network.constants.default_values import Role
 from ..constants import Gender, RelationShipStatus
 from django.contrib.auth.models import AbstractUser
 
+
+
+
 class User(AbstractUser):
     first_name = models.CharField(max_length=50)
     middle_name = models.CharField(max_length=50, blank=True, null=True)
@@ -19,10 +22,9 @@ class User(AbstractUser):
         blank=True
     )
     address = models.CharField(blank=True, null=True, max_length=100)
-    hobbies = ArrayField(models.CharField(max_length=50,blank=True, null=True), null=True, blank=True)
+    hobbies = ArrayField(models.CharField(max_length=50,blank=True, null=True), null=True, blank=True) 
     bio = models.CharField(max_length=100, null=True, blank=True)
-    profile_photo_url = models.URLField(max_length=200, null=True, blank=True)
-    cover_photo_url = models.URLField(max_length=200, null=True, blank=True)
+
     dob = models.DateField(blank=True, null=True)
     gender = models.IntegerField(
         choices=[(gender.value, gender.name) for gender in Gender],
@@ -35,6 +37,11 @@ class User(AbstractUser):
         null=True
     )
     country = models.CharField(max_length=40, blank=True, db_default='INDIA')
+    # new badhan
+    phone = models.CharField(max_length=15,null=True,blank=True)      
+    profile_photo_url = models.ImageField(upload_to='profile_pictures/', blank=True, null=True)  # Use ImageField
+
+    updated_by = models.ForeignKey('self', null=True, blank=True, on_delete=models.SET_NULL)
     # timezone 
     is_active = models.BooleanField(db_default=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True, blank=True)
@@ -61,3 +68,4 @@ class User(AbstractUser):
     
     def __str__(self):
          return f"ID: {self.id}, Created at: {self.created_at}, Active: {self.is_active}"
+

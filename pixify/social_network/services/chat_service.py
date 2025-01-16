@@ -2,7 +2,8 @@ from ..models import Chat, User, ChatMember,Follower
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 from django.db.models import Max
-
+# badhan
+from datetime import date
 
 def list_chats_by_user(user):
     user_chats = Chat.objects.filter(members=user).annotate(
@@ -68,3 +69,25 @@ def list_followers_api(request, user):
     response_data = { 'followers': list(followers), 'followings': list(followings) }
     return response_data
 
+def list_followers_birthday(user):  
+    try:
+        today = date.today()
+
+        # Filter followings who have birthdays today and exclude the user themselves
+        followings = Follower.objects.filter(
+            follower=user,  # Only the people the user follows
+            is_active=True,
+            user_id__dob__month=today.month,
+            user_id__dob__day=today.day, 
+
+        ).exclude(user_id=user).values(  # Exclude the user's own profile
+            'user_id',
+            'user_id__first_name',
+            'user_id__last_name',
+            'user_id__profile_photo_url',
+            'user_id__dob'
+        )
+    except Exception:
+        followings = []
+
+    return {'followings': list(followings)}

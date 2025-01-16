@@ -1,107 +1,94 @@
 {% extends "enduser/base.html" %}
 
-{% block title %}Pixify-Notification{% endblock %}
+{% block title %}Pixify-Update User{% endblock %} 
 
-{% block content %}
-
-
-
-<div class="px-3 py-3 mt-3 users"style="background-color: #1f0447e3;box-shadow: 0 4px 8px rgba(151, 95, 236, 0.5);font-family: serif;border-radius: 7px;">
-    <div class="pt-1 pb-3 px-2 mb-2 fw-semibold">
-        <div class="p-2 card-header">
-            <div class="input-group">
-               <h3>Today's birthdays</h3>
-            </div>
-        </div>
-        <div class="card-body contacts_body " >
-            <ul class="request">
-
-                <li>
-                <div class="d-flex bd-highlight">
-                    <div class="img_cont me-3 d-flex justify-content-center align-items-center">
-                        <img src="https://static.turbosquid.com/Preview/001292/481/WV/_D.jpg"
-                             class="rounded-circle user_img"
-                             style="height:50px;width: 50px;">
-                    </div>
-                    <div class="user_info flex-grow-1" style="margin-left: 0px">
-                        <div class="d-flex justify-content-between flex-wrap pt-1 ps-2">
-                            <span>Priya</span>
-                            <span style="font-size:15px;">22 years old</span>
-                        </div>
-                        <div id="send-btn" class="w-100 mt-2">
-                            <div class="p-2 card-header" style="width:100%;">
-                                <div class="input-group">
-                                    <input type="text" placeholder="Happy Birthday" class="form-control search-inp" style="height:40px;">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text search_btn">
-                                            <i class="bi bi-emoji-smile" style="font-size:19px;"></i>
-                                        </span>
-                                    </div>
-                                    <i class="bi bi-symmetry-horizontal text-info ms-2" style="font-size:27px;"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-               </li>
-                <hr>
-                <li>
-                    <div class="d-flex bd-highlight">
-                        <div class="img_cont me-3 d-flex justify-content-center align-items-center">
-                            <img src="https://static.turbosquid.com/Preview/001292/481/WV/_D.jpg"
-                                 class="rounded-circle user_img"
-                                 style="height:50px;width: 50px;">
-                        </div>
-                        <div class="user_info flex-grow-1" style="margin-left: 0px">
-                            <div class="d-flex justify-content-between flex-wrap pt-1 ps-2">
-                                <span>Priya</span>
-                                <span style="font-size:15px;">22 years old</span>
-                            </div>
-                            <div id="send-btn" class="w-100 mt-2">
-                                <div class="p-2 card-header" style="width:100%;">
-                                    <div class="input-group">
-                                        <input type="text" placeholder="Happy Birthday" class="form-control search-inp" style="height:40px;">
-                                        <div class="input-group-prepend">
-                                            <span class="input-group-text search_btn">
-                                                <i class="bi bi-emoji-smile" style="font-size:19px;"></i>
-                                            </span>
-                                        </div>
-                                        <i class="bi bi-symmetry-horizontal text-info ms-2" style="font-size:27px;"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
-                </li>
-              <hr>
-            </ul>
-       </div>
-   </div>
-</div>
-
-<style>
-   .input-group::placeholder {
-        color: white;
-        opacity: 1;
-      }
-
-
-
-</style>
-
-
-
-
-
-    {% endblock %}
-
-
-
-
-
-
+ {% block content %}
+ <div class="px-3 py-3 mt-3 users" style="background-color: #1f0447e3; box-shadow: 0 4px 8px rgba(151, 95, 236, 0.5); font-family: serif; border-radius: 7px;">
+     <div class="pt-1 pb-3 px-2 mb-2 fw-semibold">
+         <div class="p-2 card-header">
+             <div class="input-group">
+               
+             </div>
+         </div>
+         <div class="card-body contacts_body">            
+             {% if users %}
+             <ul class="request">
+                 <h3>Today's birthdays</h3> 
+                 {% for user in users %}
+                 
+                 <li>
+                     <div class="d-flex bd-highlight">
+                         <div class="img_cont me-3 d-flex justify-content-center align-items-center">
+                             <img src="{{ user.user_id__profile_photo_url|default:'https://static.turbosquid.com/Preview/001292/481/WV/_D.jpg' }}" class="rounded-circle user_img" style="height:50px;width: 50px;">
+                         </div>
+                         <div class="user_info flex-grow-1" style="margin-left: 0px">
+                             <div class="d-flex justify-content-between flex-wrap pt-1 ps-2">
+                                 <span>{{ user.user_id__first_name }}</span>
+                                 <span class="user_age" data-dob="{{ user.user_id__dob }}"></span> 
+                             </div>
+                             <div id="send-btn" class="w-100 mt-2">
+                                 <div class="p-2 card-header" style="width:100%;">
+                                     <div class="input-group">
+                                         <input type="text" placeholder="Happy Birthday" class="form-control search-inp" style="height:40px;">
+                                         <div class="input-group-prepend">
+                                             <span class="input-group-text search_btn">
+                                                 <i class="bi bi-emoji-smile" style="font-size:19px;"></i>
+                                             </span>
+                                         </div>
+                                         <i class="bi bi-symmetry-horizontal text-info ms-2" style="font-size:27px;"></i>
+                                     </div>
+                                 </div>
+                             </div>
+                         </div>
+                     </div>
+                 </li>
+                 <hr>
+                 {% endfor %}
+             </ul>
+             {% endif %}
+         </div>
+     </div>
+ </div>
+ 
+ <style>
+    .input-group::placeholder {
+         color: white;
+         opacity: 1;
+       }
+ 
+ </style>
+ 
+ <script>
+     // this functions helps to convert dob into age for better understanding
+ function calculateAge(dob) {
+     const birthDate = new Date(dob);
+     const today = new Date();
+     let age = today.getFullYear() - birthDate.getFullYear();
+     const monthDifference = today.getMonth() - birthDate.getMonth();
+     if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthDate.getDate())) {
+         age--;
+     }
+     return age;
+ }
+ 
+ // Function to display age in the DOM
+ function displayAges() {
+     // Select all elements that have the DOB data
+     const dobElements = document.querySelectorAll('.user_age');
+     dobElements.forEach(element => {
+         const dob = element.getAttribute('data-dob');
+         const age = calculateAge(dob);
+         element.textContent = `${age} years old`;
+     });
+ }
+ 
+ // Run the displayAges function when the document is ready
+ document.addEventListener('DOMContentLoaded', displayAges);
+ 
+ </script>
+ 
+ {% endblock %}
+ 
 
 
 
