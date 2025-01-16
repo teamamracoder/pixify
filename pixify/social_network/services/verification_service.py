@@ -89,3 +89,7 @@ def save_user_image(image_data, user_id):
 
     except Exception as e:
         return {'success': False, 'message': f"An unexpected error occurred: {str(e)}"}
+    
+def user(user_id):
+    user_details=User.objects.filter(id=user_id).values('verification_image').first()
+    return user_details    

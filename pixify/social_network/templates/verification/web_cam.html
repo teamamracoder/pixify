@@ -7,6 +7,19 @@
         <video id="webcam" autoplay></video>
         <canvas id="snapshot" style="display: none;"></canvas>
     </div>
+    {% if user_details.verification_image %}
+    <button id="capture">
+        V E R I F Y
+        <div id="clip">
+            <div id="leftTop" class="corner"></div>
+            <div id="rightBottom" class="corner"></div>
+            <div id="rightTop" class="corner"></div>
+            <div id="leftBottom" class="corner"></div>
+        </div>
+        <span id="rightArrow" class="arrow"></span>
+        <span id="leftArrow" class="arrow"></span>
+    </button>
+    {% else %}
     <button id="capture">
         C A P T U R E
         <div id="clip">
@@ -18,33 +31,14 @@
         <span id="rightArrow" class="arrow"></span>
         <span id="leftArrow" class="arrow"></span>
     </button>
+    {% endif %}
     <div id="result"></div>
     <div id="loading" style="display: none;">
         <div class="spinner"></div>
     </div>
 </div>
 
-<style>
-    /* Spinner styles */
-    .spinner {
-        margin: 20px auto;
-        width: 40px;
-        height: 40px;
-        border: 4px solid rgba(0, 0, 0, 0.1);
-        border-top: 4px solid #3498db;
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-    }
 
-    @keyframes spin {
-        0% {
-            transform: rotate(0deg);
-        }
-        100% {
-            transform: rotate(360deg);
-        }
-    }
-</style>
 
 <script>
     const video = document.getElementById('webcam');
@@ -97,10 +91,31 @@
             console.error('Error during verification:', err);
         });
     });
+    
 </script>
 
 
+<style>
+    /* Spinner styles */
+    .spinner {
+        margin: 20px auto;
+        width: 40px;
+        height: 40px;
+        border: 4px solid rgba(0, 0, 0, 0.1);
+        border-top: 4px solid #3498db;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
 
+    @keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+</style>
 
 
 <!-- Styling for webcam and result display -->
