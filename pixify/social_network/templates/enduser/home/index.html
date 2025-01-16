@@ -28,8 +28,21 @@
                    </div>
                    </div>
                    </div>
+                   {% if story_dict.storys %} 
+                    {% for story in story_dict.storys %}
+                    <div class="story">
+                    <!-- {% for media in story.media_url %} -->
+                    <img src="{% static story.media_url.0 %}" alt="">
+                    <!-- {%endfor%} -->
+                    <div class="author">hello</div>
+                    
+                  <div class="dp">
+              <img src="" alt="">
 
-
+                    </div>
+                </div>
+             {% endfor %}
+            {% endif %}
            </div>
 
            <div class="next-btn ">
@@ -38,38 +51,116 @@
                </svg>
            </div>
        </div>
-   </div>
+   </div> 
+<!-- story-upload section -->
+
+<div class="stories-full-view-upload">
+         
+    <div class="extra-fetu overflow-auto">
+        <div class="all-upload-det"> 
+        <h3 style="color: black; margin-top:12%;margin-left: 7%; font-size: 26px;">Your story</h3>
+        <div class="your-story-up-dt">
+          <div class="user-dp" style="display: flex;">
+            <div id="dp">
+                <img src="static\images\priya.jpg" alt="">
+            </div>
+            <div class="author" style="color: black;  font-size: 24px; margin-top:16%; margin-left: 52px;"><h5>Sribash Sarkar</h5></div>
+        </div>
+        <div class="menu-fet">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 5.25h16.5m-16.5 4.5h16.5m-16.5 4.5h16.5m-16.5 4.5h16.5" />
+              </svg>                  
+        </div>
+        <div class="setting-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12a7.5 7.5 0 0 0 15 0m-15 0a7.5 7.5 0 1 1 15 0m-15 0H3m16.5 0H21m-1.5 0H12m-8.457 3.077 1.41-.513m14.095-5.13 1.41-.513M5.106 17.785l1.15-.964m11.49-9.642 1.149-.964M7.501 19.795l.75-1.3m7.5-12.99.75-1.3m-6.063 16.658.26-1.477m2.605-14.772.26-1.477m0 17.726-.26-1.477M10.698 4.614l-.26-1.477M16.5 19.794l-.75-1.299M7.5 4.205 12 12m6.894 5.785-1.149-.964M6.256 7.178l-1.15-.964m15.352 8.864-1.41-.513M4.954 9.435l-1.41-.514M12.002 12l-3.75 6.495" />
+              </svg>                  
+        </div>
+        <div class="close-btn-u">
+           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6" style="cursor: pointer;">
+               <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+             </svg> 
+       </div>
+    </div>
+    <div class="hr" style="height: 2px; width: 100%; color: rgb(85, 83, 83);background-color: black;margin-top: 40px;"></div>
+</div> 
+    </div>
+    <div class="content-upload"> 
+        <form action="story/create/" method="post" enctype="multipart/form-data" style="display: flex;">
+            {% csrf_token %}
+        <div class="story-upload">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+              </svg>
+              <h5 style="position: absolute; top: 56%;margin-left: 20%;"  type="text">create a Text story</h5>  
+         <div class="input"></div>
+    </div> 
+    <div class="story-uploaded">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+        </svg>
+        <h5 style="position: absolute; top: 56%; margin-left: 20%;">Create a photo story</h5>
+        <div class="text"></div>
+    </div> 
+    <input type="file" id="fileInput" name="story-input" accept="image/*,video/*" class="d-none">
+
+    <div id="previewSection" style="display: none; text-align: center;">
+        <div id="preview"></div>
+        <button id="editBtn">Edit</button>
+        <button type="submit" id="uploadBtn" style="margin: 10px;color: #292828;">Upload</button>
+        <button id="addTextBtn" style="margin: 10px; color: black;">Add to Text</button>
+        </form>
+    </div>      
+    </div> 
+</div>
+<!--  -->
+
+
+
    <!-- stories-full-view -->
 
-   <div class="stories-full-view ">
-       <div class="close-btn">
-           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-               <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
-             </svg>
+   <div class="container-fluid stories-full-view" id="story-view">
+    <div class="close-btn position-absolute" id="close-story">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+    </div>
 
-       </div>
-       <div class="content">
-           <div class="previous-btn">
-               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                   <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
-                 </svg>
-           </div>
-           <div class="story">
-            <img src="static\images\p1.jpg" alt="">
-            <div class="author">Sribash Sarkar</div>
-            <div id="dp">
-                <img src="static\images\p1.jpg" alt="">
+    <div class="content mx-auto d-flex align-items-center justify-content-between">
+        <!-- Previous Button -->
+        <div class="previous-btn text-white" id="prev-story">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+            </svg>
+        </div>
+
+        <!-- Story Content -->
+        <div class="story position-relative">
+            <img src="static/images/p1.jpg" alt="Story Image" class="img-fluid rounded" id="story-img">
+            <div class="author position-absolute text-white fw-bold">Sribash Sarkar</div>
+            <div id="dp" class="position-absolute">
+                <img src="static/images/p1.jpg" alt="Profile Picture" class="rounded-circle border border-primary">
             </div>
-           <div class="time-line"></div>
+            <div class="time-line position-absolute bg-primary"></div>
+        </div>
 
-       </div>
-           <div class="next-btn">
-               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                   <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
-               </svg>
-           </div>
-       </div>
-   </div>
+        <!-- Next Button -->
+        <div class="next-btn text-white" id="next-story">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+            </svg>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+<!-- File input and Upload button -->
+
+
+
 
 
 
