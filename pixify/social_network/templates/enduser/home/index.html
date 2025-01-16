@@ -6,6 +6,81 @@
 {% block content %}
 {%load static %}
 {% load humanize %} 
+
+<script>
+    $(document).ready(function() {
+        $('#postForm').on('submit', function(e) {
+            e.preventDefault(); // Prevent default form submission
+            const FirstPostId = $('#postid').val();
+            let formData = new FormData(this); // Create FormData object
+
+            $.ajax({
+                url: "{% url 'userpost_create' %}", 
+                type: "POST",
+                
+                data: formData,
+                processData: false, 
+                contentType: false,
+                postid:FirstPostId,
+             
+                success: function(response) {
+                    if (response.success) {
+                    //   window.location.href = response.redirect_url;
+
+                      
+                    } else {
+                        alert("Error: " + response.message);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    alert("AJAX error: " + error);
+                }
+            });
+        });
+    });
+</script> 
+
+{% comment %} 
+<script>
+    $(document).ready(function () {
+       
+        $('#load-more').click(function () {
+            const FirstPostId = $(this).closest('.post-box').find('.firstPostId').val();
+            console.log("possttt",FirstPostId)
+            $.ajax({
+                url: '{% url "Userposts_list" %}', 
+                method: 'GET',
+               
+                data: {
+                    post_id: FirstPostId,
+                    'X-Requested-With': 'XMLHttpRequest',
+                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                  },
+             
+                  console.log(data)
+                success: function (response) {
+                    const postid= FirstPostId
+                    document.getElementById("postid").value = postid;
+
+
+                    if (response.posts && response.posts.length > 0) {
+                        response.posts.forEach(post => {
+                            $('#post-container').append(
+                                `<div class="post-item"><p>${post}</p></div>`
+                            );
+                        });
+                    } else {
+                        alert('No more posts to load.');
+                    }
+                },
+                error: function () {
+                    alert('Error loading posts. Please try again.');
+                }
+            });
+        });
+    });
+</script> {% endcomment %}
+
 <div class="px-3 py-3 mt-3" id="homepage">
     <!-- story short view -->
    <div class="stories-container ">
@@ -105,12 +180,16 @@
   </div>
   </div>
   </div>
+
+
+  
 <!--Post Modal-->
-  <div class="modal fade" id="addPhotosVideosModal" tabindex="-1" aria-labelledby="addPhotosVideosModalLabel"
+<div class="modal fade" id="addPhotosVideosModal" tabindex="-1" aria-labelledby="addPhotosVideosModalLabel"
   aria-hidden="true" >
   <div class="modal-dialog">
       <div class="modal-content">
-        <form action="posts/create/" method="post" enctype="multipart/form-data">
+       
+        <form  id="postForm" enctype="multipart/form-data">
             {% csrf_token %}
           <div class="modal-header">
             <h5 class="modal-title mx-auto" id="addPhotosVideosModalLabel">Create Post</h5>
@@ -140,6 +219,7 @@
                   </label>
 
                 <div class="con">
+                    
                 </div>
             </div> 
 
@@ -161,18 +241,133 @@
             </div>
           </div>
           <div class="justify-content-center mx-auto mb-3">
-              <button type="submit" class="btn text-dark  mx-auto b_btn px-3 d-flex" style="background-color:white;">Post</button>
+              <button type="submit" id="postForm'" id="load-more" class="btn text-dark  mx-auto b_btn px-3 d-flex" style="background-color:white;">Post</button>
           </div>
         </form>
       </div>
   </div>
 </div>
-</div>
+</div> 
+
+<div class="py-3 mt-2 mb-5" id="homePagePostsection">
+   
+    {% if post_dict.posts %}
+    
+        {% for post in post_dict.posts %}
+           
+         
+     <div class="container post-center pb-3 mb-3">
+        
+        <div class="post-box">
+    
+            <input type="hidden" class="firstPostId" name="firstPostId" value="{{post.id}}">
+            <input type="hidden" class="firstUserId" name="firstUserId" value="{{post.posted_by_id}}">
+            
+    
+        <div class="post-top" style="height: 45px;">
+            <a href="">
+                <img src="{% static 'images/IMG_20240915_213320.jpg' %}" alt="avatar" class="rounded-circle me-1 " style="width: 35px; object-fit: cover; height: 35px; " >
+            </a>
+            
+            <div class="d-flex "style="flex-direction: column;" >
+             <h6 class="u-name"> {{ post.posted_by.first_name }} {{ post.posted_by.last_name }}
+                 <span style="font-size:14px;color:#e9e6e6c7;">Upload his profile picture</span>  </h6>
+            
+             <span style="font-size:11px;margin-left: 15px;position: relative;bottom: 14px;" class="py-1">{{ post.created_at|timesince }} ago <i class="bi bi-globe-americas p-1" style="font-size:10px"></i></span>
+             
+            </div>
+        </div>
+    
+        <div class="post-des-img">
+            <p class="px-3 pt-2" style="font-size:15px; margin: 0; margin-bottom: 5px;padding-bottom:13px;">{{ post.title }}</p>
+    
+            {% if post.media_url|length == 1 %}
+                <img src="{% static post.media_url.0 %}" class="img-fluid" alt="Responsive image">
+            {% elif post.media_url|length > 1 %}
+                <div id="carouselExampleIndicators{{ post.id }}" class="carousel slide">
+                    <div class="carousel-indicators">
+                        {% for media in post.media_url %}
+                            <button type="button" data-bs-target="#carouselExampleIndicators{{ post.id }}" data-bs-slide-to="{{ forloop.counter0 }}" class="{% if forloop.first %}active{% endif %}" aria-current="{% if forloop.first %}true{% endif %}" aria-label="Slide {{ forloop.counter }}"></button>
+                        {% endfor %}
+                    </div>
+    
+                    <div class="carousel-inner">
+                        {% for media in post.media_url %}
+                            <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                                <img src="{% static media %}" class="d-block" height="350" width="100%" alt="Slide {{ forloop.counter }}">
+                            </div>
+                        {% endfor %}
+                    </div>
+    
+                    <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators{{ post.id }}" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Previous</span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators{{ post.id }}" data-bs-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Next</span>
+                    </button>
+                </div>
+            {% endif %}
+        </div>
+    
+        <div>
+            <div class="d-flex align-items-center px-2 ">
+                <i class="bi bi-hand-thumbs-up pe-1" style="font-size:12px"></i> <i class="bi bi-heart" style="font-size:12px"></i>
+                <span style="font-size:14px;color:#e9e6e6c7;" class="px-2"> Rima Das, Sribash Sarkar and <span>9</span> others</span>
+                <span style="font-size:14px;color:#e9e6e6c7;" class="ms-auto pe-2">{{ post_dict.count_commnet }} comments</span>
+            </div>
+        </div>
+    
+        <div class="post-react-det">
+            <div class="post-react">
+                <i class="fa-regular fa-heart"></i>
+                <span data-toggle="modal" class="load-comments"><i class="fa-regular fa-comment"></i></span>  
+                <i class="fa-solid fa-share-nodes" data-bs-toggle="modal" data-bs-target="#shareModal"></i>
+            </div>
+        </div>
+        </div>
+    </div>   
+    
+    {% endfor %}
+    {% endif %}
+   
+{% comment %} 
+<script>
+    $(document).ready(function () {
+        $('#load-more').click(function () {
+            $.ajax({
+                url: '{% url "Userposts_list" %}', // The current URL (or specify a different endpoint if necessary)
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+                success: function (response) {
+                    // Assuming `response.posts` contains the new posts
+                    if (response.posts && response.posts.length > 0) {
+                        response.posts.forEach(post => {
+                            $('#post-container').append(
+                                `<div class="post-item"><p>${post}</p></div>`
+                            );
+                        });
+                    } else {
+                        alert('No more posts to load.');
+                    }
+                },
+                error: function () {
+                    alert('Error loading posts. Please try again.');
+                }
+            });
+        });
+    });
+</script>  {% endcomment %}
+
+{% comment %} post section {% endcomment %}
+    
+    
 
 
-
-
-
+{% comment %} 
 
 <div class="py-3 mt-2 mb-5" id="homePagePostsection">
    
@@ -189,6 +384,8 @@
     <div class="post-box">
 
         <input type="hidden" class="firstPostId" name="firstPostId" value="{{post.id}}">
+        <input type="hidden" class="firstUserId" name="firstUserId" value="{{post.posted_by_id}}">
+        
 
     <div class="post-top" style="height: 45px;">
         <a href="">
@@ -207,10 +404,13 @@
 
     <div class="post-des-img">
         <p class="px-3 pt-2" style="font-size:15px; margin: 0; margin-bottom: 5px;padding-bottom:13px;" >{{ post.title }}</p>
+  
+
         {% for media in post.media_url %}
         
         <img src="{% static media %}" class="img-fluid" alt="Responsive image">
         {% endfor %}
+      
     </div>
     
     <div>
@@ -234,7 +434,7 @@
 
 {% endfor %}
 {% endif %}  
-
+  {% endcomment %}
 
 
 
@@ -537,57 +737,35 @@
 
 
 {% comment %} comment modal by priya {% endcomment %}
-<div  class="modal fade" id="commentModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+<div  class="modal fade custom-modal" id="commentModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
     
-    <div class="modal-dialog modal-dialog-centered modal-lg col-md-6" role="document" >
-        
+    <div class="modal-dialog modal-dialog-centered "role="document" >
+  
         <div class="modal-content d-flex comment-mod" >
-            
+
+
+
+
      <div style="display: flex; " class="comment-div">
         <div class="col-md-6 ">
             
-            <div class="post-top d-flex py-2" style="height: 45px;">
-                <a href="" class="mx-1">
-                    <img src="{% static 'images/IMG_20240915_213320.jpg' %}" alt="avatar" class="rounded-circle me-2 " style="width: 35px; object-fit: cover; height: 35px; " >
-                </a>
-                
-                <div class="d-flex "style="flex-direction: column;" >
-                 <h6 class="u-name mx-1"style="font-size:14px"> Priya Mitra </h6>
-                 <span style="font-size:11px;margin-left:10px;position: relative;bottom: 10px;" class="py-1">2h <i class="bi bi-globe-americas p-1" style="font-size:10px"></i></span>
-                </div>
+            <div class="post-top d-flex py-2" style="height: 45px;" id="proffile">
+             
+
             </div>
 
 
 
-            <div class="post-center pb-3 " style="margin-left: 0px;">
+            <div class="post-center pb-3 " style="margin-left: 0px;" id="photo_com">
                 <p class="px-3 pt-2" style="font-size:15px; margin: 0; margin-bottom: 5px;" >wow cool</p>
         
-                <div class="post-box pb-2" id="photo_com">
-{% comment %}         
-        <div class="post-des-img">
-                        <img src="{% static 'images/priya.jpg' %}" class="img-fluid" alt="Responsive image">
-                    </div>
-                    <div class="">
-                        <div>
-                            <div class="d-flex align-items-center px-2 ">
-                                <i class="bi bi-hand-thumbs-up pe-1"style="font-size:12px"></i> <i class="bi bi-heart  "style="font-size:12px"></i>
-                                <span style="font-size:12px;color:#e9e6e6c7;" class="px-2"> Rima Das, Sribash Sarkar and <span>9</span> others</span>
-                                <span style="font-size:12px;color:#e9e6e6c7;" class="ms-auto pe-2">5 comments</span>
-                            </div>
-                        </div>
-                    </div>  {% endcomment %}
+                
+                    <div class="post-box pb-2" >
 
-
+                    
                 </div>
             </div>
         </div>
-
-
-
-
-
-
-
 
 
   <div class="" style="display:flex;flex-direction: column; "> 
@@ -595,7 +773,7 @@
     <div class="comment-section " >
         
         <div style="height:50px;"> </div>
-        <div class="comment-box p-1 com "id="comments-container"  style="  height:500px; overflow-y: scroll;margin-left:20px;">
+        <div class="comment-box p-1 com "id="comments-container"  style="  height:300px; overflow-y: scroll;margin-left:20px;">
       
             <div class="pt-2 pe-2" style="height: auto;" class="comment" id="commentList"  id="autorefresh" id="commentsDiv">
                
@@ -603,13 +781,16 @@
 
 
             </div>
-       
 
-        
     </div>
 
 
+
+
+    
+
     <input type="hidden"  id="postidd" style="color:black;">
+    <input type="hidden"  id="useridd" style="color:black;">
 
    <form  id="commentForm" method="post" class="mt-3">
     {% csrf_token %}
@@ -663,8 +844,10 @@
     $(document).ready(function () {
         $('.load-comments').click(function () {
             const FirstPostId = $(this).closest('.post-box').find('.firstPostId').val();
+            const FirstUserId = $(this).closest('.post-box').find('.firstUserId').val();
             console.log("closest  .... ",$(this).closest('.post-box'))
             console.log("get comment",FirstPostId)
+            console.log("get user id",FirstUserId)
 
 
       
@@ -675,6 +858,7 @@
                 dataType: 'json',
                 data: {
                     post_id: FirstPostId,
+                    user_id: FirstUserId,
                     csrfmiddlewaretoken: '{{ csrf_token }}',
                   },
                 success: function (data) {
@@ -682,18 +866,44 @@
                     
 
                      const postid= FirstPostId
+                     const userid=FirstUserId
                      document.getElementById("postidd").value = postid;
+                     document.getElementById("useridd").value = userid;
                     const commentList = $('#commentList');
                     const photo_com = $('#photo_com');
+                    const com_profile=$('#proffile')
                     
                     commentList.empty(); // Clear previous comments
-                   
- const postItem = `
-                    <div class="post-des-img">
+
+
+data.user_details.forEach(com_del => { 
+const com_prof=` <a href="" class="mx-1">
+                    <img src="{% static 'images/IMG_20240915_213320.jpg' %}" alt="avatar" class="rounded-circle me-2 " style="width: 35px; object-fit: cover; height: 35px; " >
+                </a>
+                
+                <div class="d-flex "style="flex-direction: column;" >
+                 <h6 class="u-name mx-1"style="font-size:14px">${com_del.first_name} ${com_del.last_name} </h6>
+                 <span style="font-size:11px;margin-left:5px;position: relative;bottom: 10px;" class="py-1">${new Date(com_del.created_at).toLocaleString([],  { weekday: 'long' })} ${new Date(com_del.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}<i class="bi bi-globe-americas p-1" style="font-size:10px"></i></span>
+                </div>`;
+com_profile.html(com_prof);
+    });
                     
-                     ${data.posts[0].media_url.map(post => `
-            <img src="static${post}" class="img-fluid" alt="Responsive image">
-        `).join('')}
+
+
+
+ const postItem = `
+  
+                    <div class="post-des-img">
+                     
+                     <p class="px-3 pt-2" style="font-size:15px; margin: 0; margin-bottom: 5px;" >gsgs</p>
+                    
+
+                    <div class="post-box pb-2" >
+                    ${data.posts[0].media_url.map(post => `
+                     <img src="static${post}" class="img-fluid" alt="Responsive image">
+                                                                                        `).join('')}
+                   
+                   </div>
                     </div>
                     <div class="">
                         <div>
@@ -705,16 +915,16 @@
                         </div>
                     </div>`
                     photo_com.html(postItem);
+
+
+
                     if (data.comments.length > 0) {
-
-
                         data.comments.forEach(comment => {
-                            
                             const commentItem = `
                                 
-                           
-                           <div class="d-flex py-1">
 
+                           <div class="d-flex py-1">
+                     
                     <img src="{% static 'images/green.png'%}" alt="User" class="rounded-circle"
                         style="width:35px; height:35px;">
                     <div class="" class="d-flex" style="flex-direction: column;">
@@ -812,14 +1022,17 @@
       const commentText = $('#commentText').val();
    
       const FirstPostId = $('#postidd').val();
+      const FirstUsertId = $('#useridd').val();
       
       console.log("for post comment",FirstPostId);
+      console.log("for post comment",FirstUsertId);
       $.ajax({
         type: 'POST',
         url: '{% url "comment" %}',
       
         data: {
           post_id: FirstPostId,
+          /*user_id:FirstUsertId,*/
           comment_text: commentText,
           csrfmiddlewaretoken: '{{ csrf_token }}',
         },
@@ -865,6 +1078,8 @@ const postItem = `
 
           <img src="{% static 'images/green.png'%}" alt="User" class="rounded-circle"
               style="width:35px; height:35px;">
+
+
           <div class="" class="d-flex" style="flex-direction: column;">
                 <div class="comment-text mb-0 ps-2 py-1 rounded px-3"
                    style="background-color:#311e4ee3;width: 100%;">
@@ -940,8 +1155,7 @@ const postItem = `
               commentList.append('<li class="list-group-item">No comments available.</li>');
           }
 
-         // $('#commentModal').modal('show');
-          // Optionally, refresh comments or append new comment
+         
         },
         error: function (xhr) {
          
@@ -950,12 +1164,51 @@ const postItem = `
     });
   });
 </script>   
+{% comment %} 
+<script>
+    $(document).ready(function() {
+        $('#postForm').on('submit', function(e) {
+            e.preventDefault(); // Prevent default form submission
 
+            let formData = new FormData(this); // Create FormData object
+
+            $.ajax({
+                url: "{% url 'userpost_create' %}", // Replace with the actual URL
+                type: "POST",
+                data: formData,
+                processData: false, // Prevent jQuery from processing the data
+                contentType: false, // Prevent jQuery from setting content type
+                success: function(response) {
+                    if (response.success) {
+                     
+                        // Optionally redirect or update UI
+                    } else {
+                        alert("Error: " + response.message);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    alert("AJAX error: " + error);
+                }
+            });
+        });
+    });
+</script>  {% endcomment %}
 {% comment %} input box comment {% endcomment %}
 
-
-
-
+<style>
+   
+        .custom-modal .modal-dialog {
+            max-width: 1000px; 
+           
+        }
+     
+        .modal-image {
+            object-fit: cover;
+            width: 100%;
+           
+        }
+      
+</style>
  {% endblock %}
 
 
