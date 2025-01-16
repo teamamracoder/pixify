@@ -114,6 +114,7 @@ class ManageChatDetailView(View):
 #         )  
 
         chat_members=services.manage_chat_service.manage_get_member(chat_id)
+        print(chat_members)
         return render(request, 'adminuser/chat/detail.html',{'chat':chat,'chat_members':chat_members, "choices_type":choices_type }) 
         
 
