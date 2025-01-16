@@ -125,7 +125,11 @@ urlpatterns = [
     # message reply
     path('chat/message-reply/<int:message_id>/', views.MessageReplyCreateView.as_view(), name='message_reply'),
 
-    # path('posts/create/', views.UserPostCreatView.as_view()),
+ #for enduser story
+    path('story/create/', views.UserStoryCreatView.as_view(),name='userstory_create'),
+    # path('', views.UserStoryListView.as_view(), name='Userstory_list'),
+
+
 ]
 
 

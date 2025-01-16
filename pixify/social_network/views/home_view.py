@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.views import View
 
+from social_network import services
 from social_network.constants.default_values import Role
 from social_network.decorators.exception_decorators import catch_error
 
@@ -16,10 +17,19 @@ class HomeView(View):
     def get(self, request):
         message = request.session.pop("message", "")
         message_type = request.session.pop("message_type", "")
+        storys = services.story_service.storylist_storys()
+        story_dict={
+                  'storys':storys,
+                  'name':'sribash',
+                #   'count_commnet' :services.comment_service.get_count_comment()
+                  
+                 
+  
+                }
+        context = success_response(message=message, message_type=message_type)
+        context.update({'story_dict': story_dict}) 
         return render(
             request,
             "enduser/home/index.html",
-            success_response(
-                message=message, message_type=message_type
-            ),
+           context
         )
