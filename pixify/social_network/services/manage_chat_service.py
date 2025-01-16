@@ -11,6 +11,13 @@ def manage_list_chats(sort_by='title'):
 def manage_create_chats(title,type,created_by,chat_cover):
   return Chat.objects.create(title=title,type=type,created_by=created_by,chat_cover=chat_cover)
 
+
+def manage_get_member(chat_id): 
+    chat_members = ChatMember.objects.filter(chat_id=chat_id)
+    member_ids = [member.member_id for member in chat_members]
+    chat_members = User.objects.filter(id__in=member_ids)  # Get all users with IDs in member_ids
+    return chat_members
+
 def manage_get_member(chat_id):   
     # First, get all members for the specific chat_id
    chat_members = ChatMember.objects.filter(chat_id=chat_id)
