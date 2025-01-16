@@ -9,6 +9,7 @@ from django.http import JsonResponse
 
 
 
+
 class ManageUserListView(View):
     def get(self, request):
         # Fetch the search query from the URL parameters
@@ -147,6 +148,5 @@ class ManageUserProfileView(View):
     def get(self, request):
         # user = services.user_service.get_user()
         return render(request, 'adminuser/user/user_profile.html')
-    
-
+       
 
