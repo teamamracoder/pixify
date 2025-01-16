@@ -5,7 +5,7 @@ from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from ..decorators.exception_decorators import catch_error
-from ..services.verification_service import save_user_image
+from ..services import verification_service
 import json
 
 
@@ -13,10 +13,19 @@ import json
 class UserVerificationView(View):
     @catch_error
     def get(self, request):
-        return render(request, 'verification/web_cam.html')
+        user=request.user
+        user_details=verification_service.user(user.id)
+        print(user_details)
+        return render(request, 'verification/web_cam.html', {
+            'user': user,
+            'user_details':user_details
+              # Pass the user object to the template
+        })
 
     @catch_error
     def post(self, request):
+    
+
         try:
             # Parse JSON data
             data = json.loads(request.body)
@@ -27,7 +36,7 @@ class UserVerificationView(View):
                 return JsonResponse({'success': False, 'message': 'No image provided.'})
 
             # Save user image and perform verification
-            result = save_user_image(image_data, user_id)
+            result = verification_service.save_user_image(image_data, user_id)
 
             # Return the response
             return JsonResponse({
