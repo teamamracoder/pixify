@@ -1,4 +1,5 @@
-from ..models import Post
+
+from ..models import Post,Comment
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
 
@@ -45,20 +46,33 @@ def manage_list_posts_filtered(search_query,sort_by='posted_by'):
 
 # priya
 def user_post(post_Title,media_urls,user_id):
-    return Post.objects.create(title=post_Title,media_url=media_urls,created_by_id=user_id,posted_by_id=user_id)
+          return Post.objects.create(title=post_Title,media_url=media_urls,created_by_id=user_id,posted_by_id=user_id)
 
 # priya
 def Postlist_posts():
     return Post.objects.all().order_by('-created_at')
 
 
-# def get_post(post_id):
-#      return get_object_or_404(Post, id=post_id)
+def get_post(post_id):
+     return get_object_or_404(Post, id=post_id)
 
 
 
 
 
+def admin_list_posts_filtered(search_query, sort_by='posted_by'):
+    if search_query:
+        # Use Q objects to filter by first_name, last_name, or email
+        return Post.objects.filter(
+            Q(posted_by__icontains=search_query) |
+            Q(title__icontains=search_query) |
+            Q(description__icontains=search_query)
+        ).order_by(sort_by)
+    return Post.objects.all().order_by(sort_by)
 
+
+def get_comment_count_by_post(post_id):
+    comment_count = Comment.objects.filter(post_id=post_id, reply_for__isnull=True, is_active=True).count()
+    return comment_count
 
 # comment

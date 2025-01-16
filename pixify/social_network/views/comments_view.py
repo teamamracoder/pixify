@@ -41,13 +41,15 @@ class CommentsCreateView(View):
         return render(request, 'enduser/home/index.html')
     
     def post(self,request):  
-         post_id = request.POST.get('post_id')    
+         post_id = request.POST.get('post_id') 
          user_id = request.user.id
+      
+         
          commentstext=request.POST['comment_text']    
-         services.comment_service.user_comments_create(commentstext,user_id,post_id)
-        #  return redirect('comments_list')
+         services.comment_service.user_comments_create(commentstext,post_id,user_id)
+
          post_del=list(services.comment_service.get_post(post_id).values())
-         print("post details",post_del)
+
          comment_list = services.comment_service.comment_list(post_id)
          return JsonResponse({ "status": "success", "comments":list(comment_list),"posts":list(post_del)})
            
@@ -58,37 +60,14 @@ class CommentsListView(View):
      
     def get(self, request):
          post_id = request.GET.get('post_id') 
+         user_id = request.GET.get('user_id')
+         
+         user_details=list(services.comment_service.get_user(user_id).values())
+         
+         
+   
          post_del=list(services.comment_service.get_post(post_id).values())
-         print("post details",post_del)
+      
          comment_list = services.comment_service.comment_list(post_id)
-         return JsonResponse({ "status": "success", "comments":list(comment_list),"posts":list(post_del)})
+         return JsonResponse({ "status": "success", "comments":list(comment_list),"posts":list(post_del),"user_details":list(user_details)})
 
-
-
-# class CommentsListView(View):
-     
-#     def get(self, request):
-#          post_id = request.GET.get('post_id') 
-#          comment_list={
-#          'post_del':services.comment_service.get_post(post_id),
-#          'comment' : services.comment_service.comment_list(post_id)
-#          }
-
-#          return JsonResponse({ "status": "success", "comments":list(comment_list)})
-
-# class CommentsListView(View):
-     
-#     def get(self, request):
-#          post_id = request.GET.get('post_id') 
-#          post_del=services.comment_service.get_post(post_id)
-#          comment=services.comment_service.comment_list(post_id)
-#          print(comment)
-#          print(post_del)
-
-#          comment_list={
-#          'post_del':[post_del],
-#          'comment' : [comment]
-#          }
-#          print(comment_list)
-#          return JsonResponse({ "status": "success",'comments':list(comment_list)})
-                
