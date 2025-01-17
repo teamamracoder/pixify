@@ -1,6 +1,7 @@
 from ..models import Post
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
+from ..constants import PostType
 
 def manage_list_posts():
     return Post.objects.all()
@@ -19,7 +20,7 @@ def manage_delete_post(post):
 
 
 # new added by sujit
-def manage_list_posts(sort_by = 'title'): 
+def manage_list_posts(sort_by = 'title'):
     return Post.objects.all().order_by(sort_by)
 
 def manage_create_post(**kwargs):
@@ -39,7 +40,7 @@ def manage_list_posts_filtered(search_query,sort_by='posted_by'):
             Q(title__icontains=search_query) |
             Q(description__icontains=search_query)
         ).order_by(sort_by)
-    return Post.objects.all().order_by(sort_by)    
+    return Post.objects.all().order_by(sort_by)
 
 
 
@@ -49,13 +50,12 @@ def user_story(media_urls,user_id):
 
 # priya
 def storylist_storys():
-    return Post.objects.all().order_by('-created_at')
+    return Post.objects.filter(type=PostType.STATUS.value).order_by('-created_at')
 
 
 def get_post(post_id):
     return get_object_or_404(Post, id=post_id)
 
 
-
-
-# comment
+def uploadStory(media_urls,user_id):
+    return Post.objects.create(media_url=media_urls,created_by_id=user_id,posted_by_id=user_id,type=PostType.STATUS.value)
