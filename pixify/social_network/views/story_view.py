@@ -17,14 +17,16 @@ from django.utils.timezone import now
 
 # create story for enduser
 class UserStoryCreatView(View):
-    def get(self, request):
-        return render(request, 'enduser/home/index.html')
+    # def get(self, request):
+    #     return render(request, 'enduser/home/index.html')
 
     def post(self, request):
         user_id = 1
         # story_Title = request.POST['story-text']
         # story_Title = request.POST['story-text']
         storyFiles = request.FILES.getlist('story-input')
+        print("storyFiles",storyFiles)
+
         storyFile = []
         for file in storyFiles:
             storyFile.append(file.name)
