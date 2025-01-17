@@ -879,7 +879,8 @@ socket.onmessage = function (event) {
       data.reply_username,
       data.reply_userPic,
       data.media_urls || [],
-      data.user === currentUser
+      data.user === currentUser,
+      data.seen_by_all
     );
   } else if (data.deleted === true && data.message_id) {
     const messageId = data.message_id;
@@ -902,8 +903,6 @@ socket.onmessage = function (event) {
   }
 };
 
-
-    
 
 // Function to append a message to the chat body
 function appendMessageToChat(message, messageId, messageTime, senderName, profilePic, reply, replyText, reply_username, reply_userPic, mediaUrls, isSent) {
@@ -962,8 +961,11 @@ function appendMessageToChat(message, messageId, messageTime, senderName, profil
                 </div>
         </div>
 
-               
-        
+            <div class="seen-status">
+                ${senderName == currentUser ? `
+                    <i class="bi bi-check2"></i>
+                 `: ''}
+            </div>               
 
     `;
 
@@ -976,7 +978,7 @@ function appendMessageToChat(message, messageId, messageTime, senderName, profil
 
 
 // Function to update the message in the chat
-function updateMessageInChat(updatedMessage, messageId, messageTime, senderName, profilePic, reply, replyText, reply_username, reply_userPic, mediaUrls,isSent) {
+function updateMessageInChat(updatedMessage, messageId, messageTime, senderName, profilePic, reply, replyText, reply_username, reply_userPic, mediaUrls,isSent,seen_by_all) {
     const messageDiv = document.getElementById(`message-${messageId}`);
     if (messageDiv) {
         let mediaPreview = "";
@@ -1027,6 +1029,13 @@ function updateMessageInChat(updatedMessage, messageId, messageTime, senderName,
             </div>
         `;
 
+        /*  <div class="seen-status">
+                ${senderName == currentUser ? `
+                    ${seen_by_all ? '<i class="bi bi-check2-all"></i>' : '<i class="bi bi-check2"></i>'}
+                ` : ''}
+            </div> 
+        */
+        
 // Only update the message content, not the entire message structure
         const contentDiv = messageDiv.querySelector(".message-content");
         if (contentDiv) {
@@ -1058,8 +1067,6 @@ function updateMessageInChat(updatedMessage, messageId, messageTime, senderName,
         console.error(`Message not found for message ID: ${messageId}`);
     }
 }
-
-
 
 // Global variable to track the message being edited
 let editingMessageId = null;
@@ -1094,7 +1101,6 @@ function editMessage(messageId) {
     // Store the message ID being edited
     editingMessageId = messageId;
 }
-
 
     // Save the updated message
     function saveEditedMessage() {
@@ -1133,14 +1139,14 @@ function editMessage(messageId) {
         saveButton.style.display = "none"; // Hide the save button
     }
 
-// Cancel edit
-function cancelEdit() {
-    editingMessageId = null;
-    const editMessageInput = document.getElementById("message-input");
-    editMessageInput.value = ""; // Clear the input
-    const editPreview = document.getElementById("edit-preview");
-    editPreview.style.display = "none"; // Hide the edit preview
-}
+    // Cancel edit
+    function cancelEdit() {
+        editingMessageId = null;
+        const editMessageInput = document.getElementById("message-input");
+        editMessageInput.value = ""; // Clear the input
+        const editPreview = document.getElementById("edit-preview");
+        editPreview.style.display = "none"; // Hide the edit preview
+    }
 
     let ReplyMessageId = null;
     // Reply to a message
@@ -1154,7 +1160,7 @@ function cancelEdit() {
         ReplyMessageId = messageId;        
     }
 
-        // Save the updated message
+    // Save the updated message
     function saveReplyMessage() {
         if (!ReplyMessageId) {
             alert("No message is being replied.");
@@ -1201,90 +1207,92 @@ function cancelEdit() {
         
     }
 
-// Convert file to base64
-function convertFileToBase64(file) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-    });
-}
-
-// Clear file previews
-function clearFilePreviews() {
-    const previewsContainer = document.getElementById("file-previews");
-    previewsContainer.innerHTML = "";
-}
-
-// Toggle options menu
-function toggleOptions(messageId) {
-    const optionsPopup = document.getElementById(`options-${messageId}`);
-    if (optionsPopup) {
-        optionsPopup.style.display = optionsPopup.style.display === "none" ? "block" : "none";
+    // Convert file to base64
+    function convertFileToBase64(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+        });
     }
-}
 
-// Toggle reaction popup
-function toggleReactionPopup(messageId) {
-    console.log("message ID:",messageId);
-    const reactionPopup = document.getElementById(`reaction-popup-${messageId}`);
-    if (reactionPopup) {
-        reactionPopup.style.display = reactionPopup.style.display === "none" ? "block" : "none";
+    // Clear file previews
+    function clearFilePreviews() {
+        const previewsContainer = document.getElementById("file-previews");
+        previewsContainer.innerHTML = "";
     }
-}
 
-// Get the modal
-var modal = document.getElementById("deleteModal");
-
-function openDeleteModal(messageId) {
-  modal.style.display = "block";
-  modal.setAttribute('data-message-id', messageId);
-}
-
-function closeModal() {
-  modal.style.display = "none";
-}
-
-function deleteMessage(option) {
-  var messageId = modal.getAttribute('data-message-id');
-
-  if (messageId) {
-    if (option === 1) {
-      console.log("Delete for me: " + messageId);
-
-      socket.send(
-        JSON.stringify({
-          action: 'delete',
-          message_id: messageId,
-          sender_id: senderId,
-          del_type: 1,
-        })
-      );
-
-    } else if (option === 2) {
-      console.log("Delete for everyone: " + messageId);
-
-      socket.send(
-        JSON.stringify({
-          action: 'delete',
-          message_id: messageId,
-          sender_id: senderId,
-          del_type: 2,
-        })
-      );      
-     
+    // Toggle options menu
+    function toggleOptions(messageId) {
+        const optionsPopup = document.getElementById(`options-${messageId}`);
+        if (optionsPopup) {
+            optionsPopup.style.display = optionsPopup.style.display === "none" ? "block" : "none";
+        }
     }
-    closeModal();
-  } 
-}
 
-// Close modal when clicking outside it
-window.onclick = function (event) {
-  if (event.target === modal) {
-    closeModal();
-  }
-};
+    // Toggle reaction popup
+    function toggleReactionPopup(messageId) {
+        console.log("message ID:",messageId);
+        const reactionPopup = document.getElementById(`reaction-popup-${messageId}`);
+        if (reactionPopup) {
+            reactionPopup.style.display = reactionPopup.style.display === "none" ? "block" : "none";
+        }
+    }
+
+    // Get the modal
+    var modal = document.getElementById("deleteModal");
+
+    function openDeleteModal(messageId) {
+    modal.style.display = "block";
+    modal.setAttribute('data-message-id', messageId);
+    }
+
+    function closeModal() {
+    modal.style.display = "none";
+    }
+
+    function deleteMessage(option) {
+    var messageId = modal.getAttribute('data-message-id');
+
+    if (messageId) {
+        if (option === 1) {
+        console.log("Delete for me: " + messageId);
+
+        socket.send(
+            JSON.stringify({
+            action: 'delete',
+            message_id: messageId,
+            sender_id: senderId,
+            del_type: 1,
+            })
+        );
+
+        } else if (option === 2) {
+        console.log("Delete for everyone: " + messageId);
+
+        socket.send(
+            JSON.stringify({
+            action: 'delete',
+            message_id: messageId,
+            sender_id: senderId,
+            del_type: 2,
+            })
+        );      
+        
+        }
+        closeModal();
+    } 
+    }
+
+    // Close modal when clicking outside it
+    window.onclick = function (event) {
+    if (event.target === modal) {
+        closeModal();
+    }
+    };
+
+
 
 
 </script>

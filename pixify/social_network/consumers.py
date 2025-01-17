@@ -1,7 +1,7 @@
 from channels.generic.websocket import AsyncWebsocketConsumer
 import json
 from .models import Message, Chat, ChatMember,User
-from .services import message_service, message_mention_service, user_service,message_read_status_service
+from .services import message_service, message_mention_service, user_service,message_read_status_service,chat_service
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from asgiref.sync import sync_to_async
@@ -49,6 +49,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
             await self.reply_message(message_id, text_data_json, user)
         elif action == 'delete':
             await self.delete_message(message_id, user_id, del_type)
+        elif action == 'mark_as_read':
+            await self.mark_message_as_read(message_id, user)
 
     async def create_message(self, text_data_json, user):        
         text = text_data_json.get('message', '')
@@ -201,7 +203,16 @@ class ChatConsumer(AsyncWebsocketConsumer):
         # Notify the WebSocket group that the message was deleted
         await self.send_message_to_group(message, deleted=True)
 
-    async def send_message_to_group(self, message, deleted=False, message_new=False):
+    async def mark_message_as_read(self, message_id, user):
+        await sync_to_async (message_read_status_service.create_message_read_status)(message_id, user)
+        seen_all = await sync_to_async(chat_service.is_message_seen_by_all)(message_id)
+
+        if seen_all:                
+            await self.send_message_to_group(message_id,seen_by_all=True)
+        else:
+            await self.send_message_to_group(message_id,seen_by_all=False)                        
+
+    async def send_message_to_group(self, message, deleted=False, message_new=False,seen_by_all=False):
         sender = await sync_to_async(User.objects.get)(id=message.sender_id_id)
 
         updated = bool(message.updated_by_id)
@@ -241,6 +252,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             'del_type': message.delete_type,
             'del_by': message.deleted_by,
             'message_new': message_new,
+            'seen_by_all':seen_by_all
         }
 
         await self.channel_layer.group_send(
@@ -274,5 +286,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
             'deleted': message['deleted'],
             'del_type': message['del_type'],
             'del_by': message['del_by'],
-            'message_new': message['message_new'] 
+            'message_new': message['message_new'],
+            'seen_by_all':message['seen_by_all']
         }))
