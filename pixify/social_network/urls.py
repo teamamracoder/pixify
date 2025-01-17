@@ -28,7 +28,7 @@ urlpatterns = [
     path('admin/notifications/create/', views.ManageNotificationCreateView.as_view(), name='manage_notification_create'),
     path('admin/notifications/<int:notification_id>/detail/', views.ManageNotificationDetailView.as_view(), name='manage_notification_detail'),
     path('admin/notifications/<int:notification_id>/update/', views.ManageNotificationUpdateView.as_view(), name='manage_notification_update'),
- 
+
     # admin message
     path('admin/messages/', views.ManageMessageListView.as_view(), name='manage_message_list'),
     path('admin/messages/create/', views.ManageMessageCreateView.as_view(), name='manage_message_create'),
@@ -40,7 +40,7 @@ urlpatterns = [
     path('admin/posts/create/', views.ManagePostCreateView.as_view(), name='manage_post_create'),
     path('admin/posts/<int:post_id>/details', views.ManagePostDetailView.as_view(), name='manage_post_detail'),
     path('admin/posts/<int:post_id>/update/', views.ManagePostUpdateView.as_view(), name='manage_post_update'),
-    
+
 
 
     #chat
@@ -51,7 +51,7 @@ urlpatterns = [
     path('chat/<int:chat_id>/delete', views.ChatDeleteView.as_view(), name='chat_delete'),
     path('chat/<int:chat_id>/create-members', views.ChatMemeberCreateView.as_view(), name='create_members'),
     path('chat/<int:chat_id>/delete-members', views.ChatMemeberDeleteView.as_view(), name='delete_members'),
-    
+
     # manage-chat
     path('admin/chat/', views.ManageChatListView.as_view(), name='manage_chat_list'),
     path('admin/chat/create/', views.ManageChatCreateView.as_view(), name='manage_chat_create'),
@@ -68,8 +68,8 @@ urlpatterns = [
     path('admin/comments/toggle-active/<int:comment_id>/', views.ManageToggleCommentActiveView.as_view(), name='manage_toggle_comment_active'),
 
 
-        
-    
+
+
 
 
     # notification
@@ -100,7 +100,7 @@ urlpatterns = [
     path('chat/message/create', views.MessageCreateView.as_view(), name='message_create'),
     path('chat/message/<int:message_id>/update/', views.MessageUpdateView.as_view(), name='message_update'),
     path('chat/message/<int:message_id>/delete/', views.MessageDeleteView.as_view(), name='message_delete'),
-    
+
     # auth
     path('request-otp/', views.RequestOTPView.as_view(), name='request_otp'),
     path('verify-otp/', views.VerifyOTPView.as_view(), name='verify_otp'),
@@ -121,13 +121,14 @@ urlpatterns = [
 
     # message mention list api
     path('message-mention/<int:chat_id>', views.MessageMentionListViewApi.as_view(), name='message_mention'),
-    
+
     # message reply
     path('chat/message-reply/<int:message_id>/', views.MessageReplyCreateView.as_view(), name='message_reply'),
 
  #for enduser story
     path('story/create/', views.UserStoryCreatView.as_view(),name='userstory_create'),
     # path('', views.UserStoryListView.as_view(), name='Userstory_list'),
+    path('uploadStory/', views.UploadStoryView.as_view(),name='uploadStory'),
 
 
 ]
