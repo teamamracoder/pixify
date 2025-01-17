@@ -49,13 +49,11 @@ def save_user_image(image_data, user_id):
 
             # If no match, save the new verification image for the user
             user.verification_image = image_file
-            user.is_verified = False
+            user.is_verified = True
             user.save()
             return {
-                'success': True,
-                'message': 'Image saved for future verification.',
-                'is_verified': user.is_verified,
-                'image_url': user.verification_image.url,
+                'success': True, 
+                'message': 'Verified successfully.',  # Return image URL
             }
 
         # If the user already has a verification image
@@ -76,10 +74,9 @@ def save_user_image(image_data, user_id):
                     user.is_verified = True
                     user.save()
                     return {
-                        'success': True,
-                        'message': 'User verified successfully!',
-                        'is_verified': user.is_verified,
-                        'image_url': user.verification_image.url,
+                        'success': True, 
+                        'message': 'Already Verified!', 
+                                               
                     }
                 else:
                     return {'success': False, 'message': 'Face does not match the existing image.', 'is_verified': user.is_verified}
