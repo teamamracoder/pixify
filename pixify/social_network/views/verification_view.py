@@ -7,11 +7,16 @@ from django.utils.decorators import method_decorator
 from ..decorators.exception_decorators import catch_error
 from ..services.verification_service import save_user_image
 import json
+from social_network.constants.default_values import Role
+from ..decorators import auth_required, role_required
+
 
 
 @method_decorator(csrf_exempt, name='dispatch')
 class UserVerificationView(View):
     @catch_error
+    @auth_required
+    @role_required(Role.ADMIN.value, Role.END_USER.value)
     def get(self, request):
         return render(request, 'verification/web_cam.html')
 
