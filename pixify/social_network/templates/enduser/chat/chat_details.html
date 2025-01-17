@@ -5,7 +5,7 @@
 {% block content %}
 {% load static %}
 
-<d<div class="group-chat-container">
+<div class="group-chat-container">
   <div class="header">
     <!-- Group Name with Edit Button -->
     <h1 class="group-name">
@@ -59,19 +59,7 @@
       {% endfor %}
 
       {% for member in data.chat.members %}
-      {% if member.id == data.chat.created_by and member.id != data.user %}
-        <li>
-          <div class="member-title">
-            <img src="{{ member.profile }}" class="profile-pic">
-            {{ member.first_name }}
-          </div>
-          {% if member.id == data.chat.created_by %}<span class="role">Group admin</span>{% endif %}
-        </li>
-      {% endif %}
-    {% endfor %}
-      
-      {% for member in data.chat.members %}
-        {% if member.id != data.user and  member.id != data.chat.created_by %}
+        {% if member.id == data.chat.created_by and member.id != data.user %}
           <li>
             <div class="member-title">
               <img src="{{ member.profile }}" class="profile-pic">
@@ -82,18 +70,52 @@
         {% endif %}
       {% endfor %}
       
+      {% for member in data.chat.members %}
+        {% if member.id != data.user and  member.id != data.chat.created_by %}
+          <li>
+            <div class="member-title">
+              <img src="{{ member.profile }}" class="profile-pic">
+              {{ member.first_name }}
+            </div>
+            {% if member.id == data.chat.created_by %}<span class="role">Group admin</span>{% endif %}     
+            
+            {% if data.user == data.chat.created_by %}
+              <div class="member-actions">
+                {% if member.id != data.chat.created_by %}              
+                  <button class="remove-btn" onclick="removeMember('{{ member.id }}')">Remove</button>
+                {% endif %}
+              </div>
+            {% endif %}
+          </li>
+        {% endif %}
+      {% endfor %}
+      
       {% if data.chat.members|length == 0 %}
         <li>No members in this chat.</li>
       {% endif %}
     </ul>   
-    <button class="add-member-btn" onclick="openAddMemberModal()">
-      <i class="bi bi-person-fill-add"></i>
-    </button>
+    {% if data.user == data.chat.created_by %}
+      <button class="add-member-btn" onclick="openAddMemberModal()"><i class="bi bi-person-fill-add"></i></button>
+    {% endif %}
   </div>
-
+</div>
 
   <!-- Modal for Adding Member -->
-  
+<div id="parchat-addMemberModal" class="parchat-modal">
+  <div class="parchat-modal-content">
+    <span class="parchat-modal-close">&times;</span>
+    <h2>Add New Member</h2>
+    <input type="text" id="parchat-searchin" class="parchat-form-control" placeholder="Search Name" aria-label="Search Name">
+    
+    <!-- Scrollable grid of profiles -->
+    <div id="parchat-profile-list" class="parchat-profile-list">
+      <!-- Profiles will be dynamically added here -->
+    </div>
+    
+    <button onclick="addMember()">Add</button>
+  </div>
+</div>
+
 
 <script>
   // Modals
@@ -102,14 +124,70 @@
   const editGroupDescriptionModal = document.getElementById("editGroupDescriptionModal");
   const editGroupPhotoModal = document.getElementById("editGroupPhotoModal");
 
-  // Modal Actions
-  function openAddMemberModal() {
-    addMemberModal.style.display = "flex";
-  }
 
-  function closeAddMemberModal() {
-    addMemberModal.style.display = "none";
-  }
+  $(document).ready(function () {
+    let selectedItems = []; // Array to store selected item IDs
+    let holdTimer;
+    let holdTriggered = false;
+    let redirectEnabled = true; // Flag to determine if redirection is enabled
+
+    var chatId = "{{ data.chat.id }}"; // Ensure chatId is safely handled as a string
+
+    console.log('Initial selectedItems:', selectedItems);
+
+    // Function to fetch followers and followings based on the search query
+    function fetchFollowersAndFollowings(searchQuery = '') {
+        $.ajax({
+            url: `/chat/${chatId}/members/api?search=${searchQuery}`,
+            type: 'GET',
+            success: function (res) {
+                var combinedHtml = '';
+                const fallbackImage = '/static/images/avatar.jpg';
+
+                // Render followers
+                res.members.forEach(function (member) {
+                    const profileImage = member.user_id__profile_photo_url || fallbackImage;
+                    combinedHtml += `
+                        <div class="parchat-selection-body" id="user-${member.user_id}" data-user-id="${member.user_id}">
+                            <img src="${profileImage}" alt="${member.user_id__first_name}'s profile photo" class="parchat-profile-photo">
+                            <input type="checkbox" class="parchat-checkbox" id="checkbox-${member.user_id}" onchange="checkSelection(${member.user_id})" onclick="event.stopPropagation();">
+                            <div class="parchat-profile-text">${member.user_id__first_name} ${member.user_id__last_name}</div>
+                        </div>
+                    `;
+                });
+
+                // Update profiles in the DOM
+                $("#parchat-profile-list").html(combinedHtml);
+            },
+            error: function (xhr, status, error) {
+                console.error('AJAX Error:', error);
+                console.error('Response:', xhr.responseText);
+            },
+        });
+    }  
+
+    // Function to open the add member modal
+    window.openAddMemberModal = function () {
+        $('#parchat-addMemberModal').show(); // Show the modal
+        $('#parchat-searchin').val(''); // Clear the search field
+        fetchFollowersAndFollowings(); // Reload followers and followings without any search
+    };
+
+    // Function to close the add member modal
+    $('#parchat-addMemberModal .parchat-modal-close').click(function () {
+        $('#parchat-addMemberModal').hide(); // Hide the modal
+    });
+
+    // Event listener for dynamic search
+    $('#parchat-searchin').on('input', function () {
+        const searchQuery = $(this).val();
+        fetchFollowersAndFollowings(searchQuery); // Fetch followers and followings based on the search query
+    });
+
+    // Fetch all followers and followings on page load
+    fetchFollowersAndFollowings();
+});
+
 
   function openEditGroupNameModal() {
     editGroupNameModal.style.display = "flex";
@@ -134,20 +212,6 @@
   function closeEditGroupPhotoModal() {
     editGroupPhotoModal.style.display = "none";
   }
-
-  // Add Member Function
-  function addMember() {
-    const memberName = document.getElementById("new-member-name").value;
-    if (memberName.trim()) {
-      const li = document.createElement("li");
-      li.textContent = memberName;
-      document.getElementById("member-list").appendChild(li);
-      document.getElementById("member-count").textContent = parseInt(document.getElementById("member-count").textContent) + 1;
-      document.getElementById("new-member-name").value = "";
-      closeAddMemberModal();
-    }
-  }
-
   // Edit Group Name
   function editGroupName() {
     openEditGroupNameModal();
@@ -191,6 +255,98 @@
   }
 </script>
 <style>
+
+
+
+/* General modal styling */
+.parchat-modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1000; /* Sit on top */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgba(0, 0, 0, 0.5); /* Black with opacity */
+}
+
+/* Modal content box */
+.parchat-modal-content {
+  background-color: #fff;
+  margin: 10% auto; /* Centered */
+  padding: 15px;
+  border-radius: 8px;
+  width: 40%;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Close button */
+.parchat-modal-close {
+  color: #aaa;
+  float: right;
+  font-size: 24px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.parchat-modal-close:hover,
+.parchat-modal-close:focus {
+  color: #000;
+}
+
+/* Search input styling */
+#parchat-searchin {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+/* Scrollable grid container */
+.parchat-profile-list {
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+  padding: 8px;
+  border-radius: 4px;
+  margin-bottom: 10px;
+}
+
+/* Profile photo styling */
+.parchat-profile-photo {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 10px;
+}
+
+/* Add button styling */
+button {
+  background-color: #4CAF50; /* Green */
+  color: white;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+button:hover {
+  background-color: #45a049;
+}
+
+/* Fade-in animation */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+
+
   .member-title{
     color:rgb(1, 8, 13);
   }

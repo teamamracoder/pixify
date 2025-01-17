@@ -213,25 +213,13 @@ $(document).ready(function () {
                 const fallbackImage = '/static/images/avatar.jpg';
 
                 // Render followers
-                res.followers.forEach(function (follower) {
-                    const profileImage = follower.user_id__profile_photo_url || fallbackImage;
+                  res.members.forEach(function (member) {
+                    const profileImage = member.user_id__profile_photo_url || fallbackImage;
                     combinedHtml += `
-                        <div class="parchat-selection-body" id="user-${follower.user_id}" data-user-id="${follower.user_id}">
-                            <img src="${profileImage}" alt="${follower.user_id__first_name}'s profile photo" class="parchat-profile-photo">
-                            <input type="checkbox" class="parchat-checkbox" id="checkbox-${follower.user_id}" onchange="checkSelection(${follower.user_id})" onclick="event.stopPropagation();">
-                            <div class="parchat-profile-text">${follower.user_id__first_name} ${follower.user_id__last_name}</div>
-                        </div>
-                    `;
-                });
-
-                // Render followings
-                res.followings.forEach(function (following) {
-                    const profileImage = following.user_id__profile_photo_url || fallbackImage;
-                    combinedHtml += `
-                        <div class="parchat-selection-body" id="user-${following.user_id}" data-user-id="${following.user_id}">
-                            <img src="${profileImage}" alt="${following.user_id__first_name}'s profile photo" class="parchat-profile-photo">
-                            <input type="checkbox" class="parchat-checkbox" id="checkbox-${following.user_id}" onchange="checkSelection(${following.user_id})" onclick="event.stopPropagation();">
-                            <div class="parchat-profile-text">${following.user_id__first_name} ${following.user_id__last_name}</div>
+                        <div class="parchat-selection-body" id="user-${member.user_id}" data-user-id="${member.user_id}">
+                            <img src="${profileImage}" alt="${member.user_id__first_name}'s profile photo" class="parchat-profile-photo">
+                            <input type="checkbox" class="parchat-checkbox" id="checkbox-${member.user_id}" onchange="checkSelection(${member.user_id})" onclick="event.stopPropagation();">
+                            <div class="parchat-profile-text">${member.user_id__first_name} ${member.user_id__last_name}</div>
                         </div>
                     `;
                 });
