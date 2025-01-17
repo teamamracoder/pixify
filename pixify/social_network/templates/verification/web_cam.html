@@ -84,7 +84,10 @@
             loadingDiv.style.display = 'none';
 
             if (data.success) {
-                resultDiv.innerHTML = `<p id="verify_msg">${data.message}</p>`;
+                resultDiv.innerHTML = `<p>${data.message}</p>`;
+                setTimeout(() => {
+                        window.location.href = '/profile/';
+                    }, 2000);
             } else {
                 resultDiv.textContent = data.message;
             }
