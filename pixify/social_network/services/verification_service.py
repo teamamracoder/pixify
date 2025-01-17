@@ -20,13 +20,11 @@ def save_user_image(image_data, user_id):
         # If user doesn't have a verification image, save the new image
         if not user.verification_image:
             user.verification_image = image_file
-            user.is_verified = False
+            user.is_verified = True
             user.save()
             return {
                 'success': True, 
-                'message': 'Image saved for future verification.', 
-                'is_verified': user.is_verified,
-                'image_url': user.verification_image.url  # Return image URL
+                'message': 'Verified successfully.',  # Return image URL
             }
 
         else:
@@ -54,7 +52,7 @@ def save_user_image(image_data, user_id):
                     user.save()
                     return {
                         'success': True, 
-                        'message': 'User verified successfully!', 
+                        'message': 'Already Verified!', 
                         'is_verified': user.is_verified,
                         'image_url': user.verification_image.url  # Return image URL
                     }
