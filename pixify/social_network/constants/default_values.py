@@ -36,7 +36,8 @@ class RelationShipStatus(Enum):
     SINGLE = 1
     MARRIED = 2
     DIVORCED = 3
-    COMMITTED = 4
+    WIDOWED = 4
+    OTHER = 5
     
 class MasterType(Enum):
     REACTION = 1

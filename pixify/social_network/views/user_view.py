@@ -18,6 +18,7 @@ from django.http import JsonResponse
 from ..forms import ManageUserCreateForm
 
 
+
 class ManageUserListView(View):
     @catch_error
     def get(self, request):
@@ -112,6 +113,5 @@ class ManageToggleUserActiveView(View):
 class ManageUserProfileView(View):
     def get(self, request):
         return render(request, 'adminuser/user/user_profile.html')
-    
-
+       
 

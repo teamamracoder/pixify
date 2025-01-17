@@ -3,42 +3,88 @@
 {% block title %}Pixify-ContactUs{% endblock %}
 
 {% block content %}
-
-
-
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
 <div class="mx-0">
-    <div class="mt-3 p-3 text-center" style="background-color: #1f0447e3;border: 1px solid #827b7b70; font-family: serif; border-radius: 7px;">
-      <div class="location text-center">
-        <div class="row justify-content-center">
-          <div class="col-md-6">
-            <div class="upp mb-3">
-               <span class="pb-1 border-bottom border-2 border-warning border-border fw-semibold fs-3 px-2">Contact Us</span>
-           </div>
-            <p><strong>Coochbehar Behar</strong></p>
-            <p>West Bengal, WA 987654-3210</p>
-            <p>Phone: +91 7876543210</p>
-            <p>Support: <a href="#">Support@gmail.com</a></p>
-            <p>Marketing: <a href="#">Marketing@gmail.com</a></p>
-          </div>
+    <div class="mt-3 p-3 text-center" style="background-color: #1f0447e3; border: 1px solid #827b7b70; font-family: serif; border-radius: 7px;">
+        <div class="location text-center">
+            <div class="row justify-content-center">
+                <div class="col-md-6">
+                    <div class="upp mb-3">
+                        <span class="pb-1 border-bottom border-2 border-warning fw-semibold fs-3 px-2">Contact Us</span>
+                    </div>
+                </div>
+            </div>
+            <div class="row justify-content-center mt-4">
+                <div class="col-md-8">
+                    <h2>Location</h2>
+                </div>
+            </div>
+            <div class="find">
+                <iframe
+                    src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d228857.14497695016!2d89.4466307!3d26.3299676!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2sin!4v1731266191493!5m2!1sen!2sin"
+                    width="100%" height="200" style="border:0; border-radius: 5px;" allowfullscreen="" loading="lazy"
+                    referrerpolicy="no-referrer-when-downgrade"></iframe>
+            </div>
         </div>
 
-        <div class="row justify-content-center mt-4">
-          <div class="col-md-8">
-            <h2>Location</h2>
-          </div>
+        <div class="container py-3">
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <div class="d-flex align-items-start mb-3">
+                        <i class="bi bi-geo-alt-fill text-danger fs-4 me-3"></i>
+                        <div>
+                            <h5 class="mb-1 me-5">Location:</h5>
+                            <p class="address mb-0">Local Pvt, IIf C, Royal Palace Coochbehar</p>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-start mb-3">
+                        <i class="bi bi-envelope-fill text-danger fs-4 me-3"></i>
+                        <div>
+                            <h5 class="mb-1">Email:</h5>
+                            <p class="mb-0">badhan@ghjkjgfdg.in</p>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-start mb-3">
+                        <i class="bi bi-telephone-fill text-danger fs-4 me-3"></i>
+                        <div>
+                            <h5 class="mb-1">Call:</h5>
+                            <p class="mb-0">(033) 46011413, +91 707488881</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <form>
+                        <div class="mb-3">
+                            <input type="text" class="form-control" placeholder="Full Name">
+                        </div>
+                        <div class="mb-3">
+                            <input type="email" class="form-control" placeholder="E-mail Id">
+                        </div>
+                        <div class="mb-3">
+                            <input type="text" class="form-control" placeholder="Subject">
+                        </div>
+                        <div class="mb-3">
+                            <textarea class="form-control" placeholder="Message" rows="4"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-danger w-100">
+                            <a href="#" style="text-decoration:none; color:white;">Send Message</a>
+                        </button>
+                    </form>
+                </div>
+            </div>
         </div>
 
-        <div class="find">
-          <iframe
-            src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d228857.14497695016!2d89.4466307!3d26.3299676!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2sin!4v1731266191493!5m2!1sen!2sin"
-            width="100%" height="200" style="border:0; border-radius: 5px;" allowfullscreen="" loading="lazy"
-            referrerpolicy="no-referrer-when-downgrade"></iframe>
-        </div>
-      </div>
+        <!-- Bootstrap Icons CDN -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.js"></script>
+        <!-- Bootstrap JS (optional) -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+
     </div>
-  </div>
-
-
-
+</div>
 
 {% endblock %}
+
+
+
+ 
