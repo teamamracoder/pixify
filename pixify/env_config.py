@@ -3,7 +3,7 @@ import environ
 # Initialize environment
 env = environ.Env(
     # DEBUG
-    DEBUG=(bool, False),
+    DEBUG=(bool, True),
 
     # SECRET KEY
     SECRET_KEY=(str, ''),
