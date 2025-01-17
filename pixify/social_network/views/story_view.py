@@ -39,7 +39,7 @@ class UserStoryCreatView(View):
             media_urls.append(f"{settings.MEDIA_URL}{file.name}")
 
 
-        services.story_service.user_story(media_urls,user_id)
+        services.story_service.uploadStory(media_urls,user_id)
         return redirect('home')
         #return render(request, 'enduser/home/index.html')
 
