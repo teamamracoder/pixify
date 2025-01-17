@@ -1,5 +1,5 @@
 from ..models import MessageReaction,MasterList,Message
-from ..constants import MasterType
+from ..constants import MasterType,MessageDeleteType
 
 
 def get_active_message_reactions(message_id):
@@ -83,9 +83,13 @@ def latest_reaction(chat, user):
     
     # Get the latest reaction for the chat
     latest_reaction = MessageReaction.objects.filter(
-        message_id__chat_id=chat,
-        is_active=True
-    ).order_by('-updated_at', '-created_at')
+            message_id__chat_id=chat,
+            is_active=True,
+            ).exclude(
+                message_id__delete_type=MessageDeleteType.DELETED_FOR_EVERYONE.value,
+                message_id__deleted_by__contains=[user.id]
+            ).order_by('-updated_at', '-created_at')
+
     
     if latest_reaction.exists():
         reaction_instance = latest_reaction.first()

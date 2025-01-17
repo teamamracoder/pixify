@@ -1,4 +1,4 @@
-from ..constants import ChatType
+from ..constants import ChatType,MessageDeleteType
 from ..models import Chat, User, ChatMember,Follower,Message,MessageReadStatus
 from django.shortcuts import get_object_or_404
 from django.db.models import Max,Q,Subquery,OuterRef,F
@@ -9,43 +9,65 @@ from social_network.utils.common_utils import print_log
 def list_chats_by_user(user):
     user_chats = Chat.objects.filter(
         members=user,
-        is_active=True
+        is_active=True,
     ).annotate(
         latest_message_timestamp=Coalesce(
-            Max('fk_chat_messages_chats_id__send_at', filter=Q(is_active=True)),
+            Max(
+                'fk_chat_messages_chats_id__send_at',
+                filter=Q(
+                    # Exclude messages that are deleted for everyone or deleted by the user
+                    ~Q(fk_chat_messages_chats_id__delete_type=MessageDeleteType.DELETED_FOR_EVERYONE.value) &
+                    ~Q(fk_chat_messages_chats_id__deleted_by__contains=[user.id])
+                )
+            ),
             F('created_at')
         )
     ).annotate(
         latest_message=Subquery(
             Message.objects.filter(
-                chat_id=OuterRef('pk'),
-                is_active=True
-            ).order_by('-send_at') 
+                Q(chat_id=OuterRef('pk')),  # Keyword argument
+                Q(is_active=True),          # Keyword argument
+            # Exclude deleted messages
+                ~Q(delete_type=MessageDeleteType.DELETED_FOR_EVERYONE.value),  # Keyword argument
+                ~Q(deleted_by__contains=[user.id])  # Keyword argument
+            ).order_by('-send_at')
             .values('text')[:1]
         )
-        ).annotate(
+    ).annotate(
         latest_message_sender_id=Subquery(
             Message.objects.filter(
-                chat_id=OuterRef('pk'),
-                is_active=True
+                Q(chat_id=OuterRef('pk')),
+                Q(is_active=True),
+                # Exclude deleted messages
+                ~Q(delete_type=MessageDeleteType.DELETED_FOR_EVERYONE.value) &
+                ~Q(deleted_by__contains=[user.id])
             ).order_by('-send_at')
             .values('sender_id')[:1]
         )
     ).order_by('-latest_message_timestamp')
+
+    # Filter out chats with no visible messages or only deleted ones
     user_chats = user_chats.filter(
         Q(latest_message__isnull=False) | Q(type=ChatType.GROUP.value)
     )
+
     chat_data = []
     for chat in user_chats:
-        latest_message = Message.objects.filter(chat_id=chat.id).last() 
-        seen_by_all = False  
+        # Retrieve the last message, ensuring it is not deleted by the user or marked as deleted
+        latest_message = Message.objects.filter(chat_id=chat.id, is_active=True).exclude(
+            delete_type=MessageDeleteType.DELETED_FOR_EVERYONE.value,
+            deleted_by__contains=[user.id]
+        ).last()
+
+        seen_by_all = False
         if latest_message:
             seen_by_all = is_message_seen_by_all(latest_message)
-        
+
         chat_data.append({
             'chat': chat,
             'seen_by_all': seen_by_all,
         })
+    
     return chat_data
 
 def is_message_seen_by_all(message):
