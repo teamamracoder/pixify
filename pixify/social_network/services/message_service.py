@@ -2,10 +2,14 @@ from ..models import Message,MessageReadStatus
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from datetime import datetime, timedelta
+from django.db.models import Q
+from ..constants import MessageDeleteType
 
+def list_messages_by_chat_id(chat_id,user_id):
+    messages = Message.objects.filter(chat_id=chat_id).exclude(
+        Q(delete_type=MessageDeleteType.DELETED_FOR_EVERYONE.value) | Q(deleted_by__contains=[user_id])
+    )
 
-def list_messages_by_chat_id(chat_id,user_id):  
-    messages = Message.objects.filter(chat_id=chat_id, is_active=True)
     for message in messages:
         if not MessageReadStatus.objects.filter(message_id=message, read_by_id=user_id).exists():
             MessageReadStatus.objects.create(
@@ -34,9 +38,9 @@ def update_message(message, text, media_url,user):
     message.save()
     return message
 
-def delete_message(message,user):
-        message.is_active=False
-        message.updated_by=user
+def delete_message(message,user,type):
+        message.delete_type=type
+        message.deleted_by.append(user)
         message.save()
 
 def reply_message(user, text, media_urls, sender_id, chat_id, reply_for_message):

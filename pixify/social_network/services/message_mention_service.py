@@ -64,4 +64,4 @@ def list_messages_mention_Api(chat, user, search_query, exclude_ids, mentioned_a
     return mention_list
 
 def get_message_mentions(message):
-    return MessageMention.objects.filter(message=message)
+    return MessageMention.objects.filter(message=message,is_active=True)

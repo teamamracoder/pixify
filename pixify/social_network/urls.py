@@ -114,6 +114,9 @@ urlpatterns = [
     #flolowers api
     path('chat/followers/api', views.FollowerListViewApi.as_view(), name='followers_api'),
 
+    #chat member api
+    path('chat/<int:chat_id>/members/api', views.MemberListViewApi.as_view(), name='member_api'),
+
      # message reaction
     path('message-reactions/<int:message_id>/', views.MessageReactionsListView.as_view(), name='message_reaction'),
     path('message-reaction/create/', views.MessageReactionCreateView.as_view(), name='message_reaction_create'),
