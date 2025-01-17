@@ -11,7 +11,7 @@ class EnduserprofileView(View):
         return render(request, 'enduser/profile/index.html')
 class UserprofileView(View):
     def get(self, request):
-        return render(request, 'enduser/profile/userprofile.html')  
+        return render(request, 'enduser/profile/userprofile.html')
 
 # Work By Badhan
 class EnduserprofileUpdateView(View):
@@ -28,13 +28,13 @@ class EnduserprofileUpdateView(View):
         email = request.POST.get('email')
         phone = request.POST.get('phone')
         gender = request.POST.get('gender')
-        address = request.POST.get('address') 
+        address = request.POST.get('address')
         dob = request.POST.get('dob')
-        country = request.POST.get('country') 
+        country = request.POST.get('country')
         bio= request.POST.get('bio')
         if request.method == 'POST':
          hobbies = request.POST.get('hobbies', '')
-         hobbies_list = [hobby.strip() for hobby in hobbies.split(',')] if hobbies else []        
+         hobbies_list = [hobby.strip() for hobby in hobbies.split(',')] if hobbies else []
          hobbies = hobbies_list
         # Convert gender value to integer
         gender_mapping = {'Male': Gender.MALE.value, 'Female': Gender.FEMALE.value, 'Other': Gender.OTHER.value}
@@ -42,19 +42,19 @@ class EnduserprofileUpdateView(View):
         # convert relationship into integer
         relationship_status = request.POST.get('relationship_status')
         relationship_status_mapping = {
-            'Single': RelationShipStatus.SINGLE.value,         
-            'Married': RelationShipStatus.MARRIED.value,         
-            'Divorced': RelationShipStatus.DIVORCED.value,         
-            'Widowed': RelationShipStatus.WIDOWED.value,         
-            'Other': RelationShipStatus.OTHER.value,         
+            'Single': RelationShipStatus.SINGLE.value,
+            'Married': RelationShipStatus.MARRIED.value,
+            'Divorced': RelationShipStatus.DIVORCED.value,
+            'Widowed': RelationShipStatus.WIDOWED.value,
+            'Other': RelationShipStatus.OTHER.value,
         }
         relationship_status = relationship_status_mapping.get(relationship_status, None)
-        profile_picture = request.FILES.get('profile_picture') 
- 
+        profile_picture = request.FILES.get('profile_picture')
+
 
         user_service.update_user(user_id, first_name, last_name, email, phone, gender,address,dob,country,bio,hobbies,relationship_status, profile_picture)
 
-        return render(request, 'enduser/profile/index.html', {'user_details': user_details, 'errors': "An error occurred"}) 
+        return render(request, 'enduser/profile/index.html', {'user_details': user_details, 'errors': "An error occurred"})
 
 
 # End by Badhan
@@ -64,8 +64,8 @@ def edit_information(request):
     if request.method == "POST":
         form = UserProfileForm(request.POST)
         if form.is_valid():
-            form.save() 
-            return redirect('success')  
+            form.save()
+            return redirect('success')
     else:
         form = UserProfileForm()
     return render(request, 'edit_information.html', {'form': form})
