@@ -127,13 +127,27 @@ const updateFullview = () => {
 
 }
 
+// nextBtn.addEventListener("click", () => {
+//     storiesContent.scrollLeft += 300;
+// });
+
 nextBtn.addEventListener("click", () => {
-    storiesContent.scrollLeft += 300;
-});
-previousBtn.addEventListener("click", () => {
-    storiesContent.scrollLeft -= 300;
+    storiesContent.scrollTo({
+        left: storiesContent.scrollLeft + 300,
+        behavior: 'smooth'
+    });
 });
 
+// previousBtn.addEventListener("click", () => {
+//     storiesContent.scrollLeft -= 300;
+// });
+
+previousBtn.addEventListener("click", () => {
+    storiesContent.scrollTo({
+        left: storiesContent.scrollLeft - 300,
+        behavior: 'smooth'
+    });
+});
 storiesContent.addEventListener("scroll", () => {
     if (storiesContent.scrollLeft <= 24) {
         previousBtn.classList.remove("actived");
