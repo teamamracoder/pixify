@@ -193,10 +193,10 @@ if (file) {
     preview.innerHTML = file.type.startsWith("image")
         ? `<img src="${fileURL}" style="max-width: 100%; max-height: 60vh; border-radius: 16px;">`
         : `<video src="${fileURL}" controls style="max-width: 100%; max-height: 60vh; border-radius: 16px;"></video>`;
-    
+
     // Hide the upload sections
     storyUpload.style.display = "none";
-    storyUploaded.style.display = "none";  
+    storyUploaded.style.display = "none";
     // Show the preview section
     previewSection.style.display = "block";
 }
@@ -289,7 +289,7 @@ const storiesFullViewUpload = document.querySelector(".stories-full-view-uploadd
 // Add click event listener to the close button
 closeBtnn.addEventListener("click", () => {
 storiesFullViewUpload.style.display = "none"; // Hide the full view upload container
-}); 
+});
 
 
 // Select the image elements and the full view upload container
@@ -297,21 +297,21 @@ const storyImages = document.querySelectorAll(".card-img-top");
 const storiesFullViewUploadd = document.querySelector(".stories-full-view-uploadd");
 
 // Add click event listeners to all images with the 'card-img-top' class
-storyImages.forEach((image) => {
-image.addEventListener("click", () => {
-console.log("cli")
-// Show the full view upload container
-storiesFullViewUploadd.style.display = "block";
-});
-});
+// storyImages.forEach((image) => {
+// image.addEventListener("click", () => {
+// console.log("cli")
+
+// storiesFullViewUploadd.style.display = "block";
+// });
+// });
 
 
 
-// 
+//
 
 const storiess = [
     {
-       
+
     }
 ];  // Array to store story image URLs           1
 let currentStoryIndex = 0;
@@ -372,7 +372,7 @@ function updateTimelinea(index) {
 }
 
 
-// 
+//
 
 // start to multiple story store
    // Array to hold the story images
