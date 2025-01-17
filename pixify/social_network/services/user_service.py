@@ -18,7 +18,7 @@ def update_user(user_id,first_name,last_name,email,phone,gender,address,dob,coun
     user.first_name = first_name
     user.last_name = last_name
     user.email = email
-    user.phone = phone
+    #user.phone = phone
     user.gender = gender
     user.address = address
     user.dob = dob
@@ -26,8 +26,8 @@ def update_user(user_id,first_name,last_name,email,phone,gender,address,dob,coun
     user.bio=bio
     user.hobbies=hobbies
     user.relationship_status=relationship_status
-    if profile_picture:
-        user.profile_photo_url = profile_picture
+    #if profile_picture:
+     #   user.profile_photo_url = profile_picture
     user.updated_by = user
     user.save()
     return user
