@@ -843,7 +843,7 @@
             document.getElementById("file-input").value = "";
             clearFilePreviews();
         } else {
-            alert("Please enter a message or attach a file.");
+            console.log("Please enter a message or attach a file.");
         }
     }
 
@@ -1105,7 +1105,7 @@ function editMessage(messageId) {
     // Save the updated message
     function saveEditedMessage() {
         if (!editingMessageId) {
-            alert("No message is being edited.");
+            console.log("No message is being edited.");
             return;
         }
 
@@ -1113,7 +1113,7 @@ function editMessage(messageId) {
         const updatedMessage = messageInput.value.trim();
 
         if (!updatedMessage) {
-            alert("Message cannot be empty.");
+            console.log("Message cannot be empty.");
             return;
         }
 
@@ -1163,7 +1163,7 @@ function editMessage(messageId) {
     // Save the updated message
     function saveReplyMessage() {
         if (!ReplyMessageId) {
-            alert("No message is being replied.");
+            console.log("No message is being replied.");
             return;
         }
 
@@ -1171,7 +1171,7 @@ function editMessage(messageId) {
         const ReplyMessage = messageInput.value.trim();
 
         if (!ReplyMessage) {
-            alert("Message cannot be empty.");
+            console.log("Message cannot be empty.");
             return;
         }
 

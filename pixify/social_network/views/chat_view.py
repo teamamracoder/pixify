@@ -13,6 +13,8 @@ from social_network.packages.response import success_response
 from social_network.constants.default_values import ResponseMessageType
 from social_network.constants.success_messages import SuccessMessage
 from social_network.constants.error_messages import ErrorMessage
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
 
 class ChatListView(View):
     @catch_error
@@ -175,7 +177,7 @@ class ChatCreateView(View):
             chat = chat_service.create_chat(user, title, chat_cover, chat_type)
             members.append(user.id)
             for member in members:
-                chat_member_service.create_chat_member(chat.id, member, user)
+                chat_member_service.add_chat_member(chat.id, member, user)
 
             # return JsonResponse({'chat_id': chat.id})
             return JsonResponse({
@@ -209,16 +211,30 @@ class ChatUpdateView(View):
     @catch_error
     @auth_required
     @role_required(Role.ADMIN.value, Role.END_USER.value)
-    def get(self, request,chat_id):        
-        return render(request, 'enduser/chat/chats.html',{'chat':chat_id})   
-     
-    def post(self,request,chat_id):
-        user=request.user
-        chat  = chat_service.get_chat_by_id(chat_id)
-        title = request.POST['titel','']        
-        chat_cover = request.POST.get('chat_cover', '')                
-        chat_service.update_chat(chat, title, chat_cover, user)                  
-        return redirect('chat/')
+    def post(self, request, chat_id):
+        try:
+            user = request.user
+            chat = chat_service.get_chat_by_id(chat_id)
+
+            # Parse JSON data from the request body
+            if 'application/json' in request.content_type:
+                data = json.loads(request.body)
+                title = data.get('title', None)  # Safely get the title
+                if title:
+                    chat_service.update_chat_title(chat, title, user)
+
+            # Handle file upload separately
+            if 'multipart/form-data' in request.content_type:
+                chat_cover = request.FILES.get('chat_cover', None)
+                if chat_cover:
+                    file_name = default_storage.save(chat_cover.name, ContentFile(chat_cover.read()))
+                    media_url = default_storage.url(file_name)
+                    chat_service.update_chat_cover(chat, media_url, user)
+
+            return JsonResponse({"success": True, "message": "Chat updated successfully."}, status=200)
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)}, status=400)
+
 
 class ChatDeleteView(View):  
     @catch_error
@@ -226,8 +242,8 @@ class ChatDeleteView(View):
     @role_required(Role.ADMIN.value, Role.END_USER.value)
     def post(self, request, chat_id):
         chat = chat_service.get_chat_by_id(chat_id)
-        chat_service.delete_chat(chat)
-        return redirect('chat_list')
+        chat_service.delete_chat(chat_id)
+        return JsonResponse({"success": True})
 
 class ChatListViewApi(View):
     def get(self, request):
