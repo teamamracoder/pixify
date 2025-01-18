@@ -36,9 +36,12 @@
     </button>
 </div>
     {% endif %}
-    <div id="result"></div>
+    <div id="msgspinner">
+    <div id="result">
+    </div>
     <div id="loading" style="display: none;">
         <div class="spinner"></div>
+    </div>
     </div>
 </div>
 
@@ -85,6 +88,9 @@
 
             if (data.success) {
                 resultDiv.innerHTML = `<p>${data.message}</p>`;
+                const spinner = document.createElement('div');
+                spinner.className = 'spinner'; // Add a class for styling the spinner
+                resultDiv.appendChild(spinner);
                 setTimeout(() => {
                         window.location.href = '/profile/';
                     }, 2000);
@@ -103,6 +109,7 @@
 
 
 <style>
+    
     /* Spinner styles */
     .spinner {
         margin: 20px auto;
@@ -127,6 +134,11 @@
 
 <!-- Styling for webcam and result display -->
 <style>
+    #msgspinner{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
     #verify_header{
         display: flex;
         align-items: center;
