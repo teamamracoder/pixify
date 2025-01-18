@@ -34,12 +34,15 @@
                     <!-- {% for media in story.media_url %} -->
                     <img src="{% static story.media_url.0 %}" alt="">
                     <!-- {%endfor%} -->
-                    <div class="author">hello</div>
+                     <div>
+                        <div class="dp">
+                            <img src="" alt="">
+                         </div>
+                         <span class="author">hello</span>
 
-                  <div class="dp">
-              <img src="" alt="">
+                     </div>
 
-                    </div>
+
                 </div>
              {% endfor %}
             {% endif %}
@@ -51,7 +54,7 @@
                </svg>
            </div>
        </div>
-   </div> 
+   </div>
    <!-- stories-full-view -->
 
    <div class="container-fluid stories-full-view" id="story-view">
@@ -86,7 +89,7 @@
             </svg>
         </div>
     </div>
-</div> 
+</div>
 
 <!--Post Section-->
  <div class="pt-1 pb-3 px-2 mb-2 fw-semibold mt-4" style="border: 1px solid black;border-radius: 3px;">
