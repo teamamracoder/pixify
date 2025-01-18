@@ -8,10 +8,8 @@
 
 
 
-<div id="notification-container">
-    <!-- Notifications will be dynamically appended here -->
- 
-<!-- <button id="load-more" style="display: none; color: darkblue;">Load Older Notifications</button> -->
+<div id="notification-container" style="margin-top: 18px;">
+
 
 <script>
     let page = 1;
@@ -87,10 +85,6 @@
         $("#notification-container").prepend(notificationHTML); // Add new notifications at the top
     }
 
-    // $("#load-more").on("click", function () {
-    //     page++;
-    //     loadNotifications();
-    // });
 </script>
 </div>
 

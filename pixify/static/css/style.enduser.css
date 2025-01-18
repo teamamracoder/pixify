@@ -459,9 +459,9 @@ i {
 
 
  .fcontainer {
-    max-width: 600px;
+    /* max-width: 600px; */
     margin: 0 auto;
-    padding: 20px;
+    padding: 20px 0px;
 }
 
 .user-list {
