@@ -1100,7 +1100,7 @@ textarea::placeholder {
 
 .post-center .post-box .post-des-img img {
     background-color: #1f0447fb;
-    height: 60%;
+    height: 100%;
     width: 100%;
     padding: 0 10px 10px 10px;
 }

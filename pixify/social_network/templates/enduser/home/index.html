@@ -295,7 +295,7 @@
             <p class="px-3 pt-2" style="font-size:15px; margin: 0; margin-bottom: 5px;padding-bottom:13px;">{{ post.title }}</p>
 
             {% if post.media_url|length == 1 %}
-            <div style="height:400px;">
+            <div style="height:450px;">
                 <img src="{% static post.media_url.0 %}" class="img-fluid" alt="Responsive image"style="height:100%;width:100%;object-fit:cover;">
             </div>
             {% elif post.media_url|length > 1 %}
@@ -308,7 +308,7 @@
 
                     <div class="carousel-inner">
                         {% for media in post.media_url %}
-                            <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                            <div class="carousel-item {% if forloop.first %}active{% endif %}" style="height:450px"">
                                 <img src="{% static media %}" class="d-block" height="350" width="100%" alt="Slide {{ forloop.counter }}">
                             </div>
                         {% endfor %}
@@ -725,7 +725,7 @@
     <div class="comment-section " >
 
         <div style="height:50px;"> </div>
-        <div class="comment-box p-1 com "id="comments-container"  style="height:400px; overflow-y: scroll;margin-left:20px;">
+        <div class="comment-box p-1 com "id="comments-container"  style="height:500px; overflow-y: scroll;margin-left:20px;">
 
             <div class="pt-2 pe-2" style="height: auto;" class="comment" id="commentList"  id="autorefresh" id="commentsDiv">
 
@@ -747,27 +747,6 @@
    <form  id="commentForm" method="post" class="mt-3">
     {% csrf_token %}
 
-    <div id="CommentsectionTextarea" class="container-fluid py-2">
-        <div class="input-group ms-2">
-            <!-- Left icons -->
-            <div class="input-group-prepend d-flex gap-2 align-items-center pe-2">
-                <i class="bi bi-emoji-smile text-light fs-6"></i>
-            </div>
-
-            <!-- Input field -->
-            <input class="form-control" id="commentText" name="comment_text" placeholder="Write a comment..."
-                   style="border-radius: 15px; background-color: #27236e; color:white;">
-
-            <!-- Right button -->
-            <div class="input-group-append d-flex gap-3 align-items-center ps-2">
-                <button id="createcomment" type="submit" class="btn btn-transparent text-info p-0" >
-
-                    <img src="{% static 'images/send-message.png' %}" alt="" style="height:23px;">
-                </button>
-            </div>
-
-        </div>
-    </div> {% endcomment %}
     <div id="CommentsectionTextarea" class="container-fluid py-2 com_sent" style="position: absolute; bottom: 0; ">
         <div class="input-group ms-2">
             <!-- Left icons -->
@@ -899,9 +878,9 @@ com_profile.html(com_prof);
                      <p class="px-3 pt-2" style="font-size:15px; margin: 0; margin-bottom: 5px;" >gsgs</p>
 
 
-                    <div class="post-box pb-2" >
+                    <div class="post-box pb-2 px-2" >
                     ${data.posts[0].media_url.map(post => `
-                                <div style="height:400px;">
+                                <div style="height:500px;">
 
 
                      <img src="static${post}" class="img-fluid" alt="Responsive image"style="height:100%;width:100%;object-fit:cover;">
