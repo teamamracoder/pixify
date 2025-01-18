@@ -1,4 +1,7 @@
 from django.db import models
+# badhan
+# from social_network.models import Follower
+
 
 class Follower(models.Model):
     user_id = models.ForeignKey('User', on_delete=models.CASCADE, related_name='fk_user_followers_users_id')
@@ -12,10 +15,11 @@ class Follower(models.Model):
     
     class Meta:
         db_table = 'followers'
-        constraints = [
-            models.UniqueConstraint(fields=['follower', 'following'], name='follow_pair'),
-            models.CheckConstraint(check=~models.Q(follower=models.F('following')), name='follower_not_equal_to_following')
+        constraints = [                       
+            models.CheckConstraint(check=~models.Q(user_id=models.F('following')),name='user_id_not_equal_to_following'),
+            models.CheckConstraint(check=~models.Q(user_id=models.F('follower')), name='user_id_not_equal_to_follower'),
         ]
 
     def __str__(self):
          return f"ID: {self.id}, Created at: {self.created_at}, Active: {self.is_active}"
+    
