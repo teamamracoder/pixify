@@ -65,12 +65,16 @@ def create_chat(user,title,chat_cover,type):
     chat = Chat.objects.create(title=title,chat_cover=chat_cover,type=type,created_by=user)
     return chat
 
-def update_chat(chat, title, chat_cover,user):
+def update_chat_title(chat, title, user):
     chat.title = title
-    chat.chat_cover = chat_cover
-    chat.updated_by=user
+    chat.updated_by = user
     chat.save()
-    return chat
+
+def update_chat_cover(chat, cover_url, user):
+    chat.chat_cover = cover_url
+    chat.updated_by = user
+    chat.save()
+
 
 def delete_chat(chat_id):
     chat = get_object_or_404(Chat, id=chat_id)
