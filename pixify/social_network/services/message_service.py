@@ -56,7 +56,8 @@ def reply_message(user, text, media_urls, sender_id, chat_id, reply_for_message)
 def unread_count(chat,user):    
     unread_count = Message.objects.filter(
         chat_id=chat,
-        is_active=True
+        is_active=True,
+        delete_type=MessageDeleteType.NOT_DELETED.value
         ).exclude(
         fk_message_msg_status_messages_id__read_by=user
     ).count()  
