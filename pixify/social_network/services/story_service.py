@@ -1,6 +1,7 @@
-from ..models import Post
+from django.forms import IntegerField
+from ..models import Post,Follower
 from django.shortcuts import get_object_or_404
-from django.db.models import Q
+from django.db.models import Q, Case, When, IntegerField,Max
 from ..constants import PostType
 
 def manage_list_posts():
@@ -50,7 +51,22 @@ def user_story(media_urls,user_id):
 
 # priya
 def storylist_storys():
-    return Post.objects.filter(type=PostType.STATUS.value).order_by('-created_at')
+    following_ids = Follower.objects.filter(user_id_id=1).values_list('following_id', flat=True)
+    print(following_ids)
+    return Post.objects.filter(
+    Q(type=PostType.STATUS.value) &
+    (Q(posted_by_id=1) | Q(posted_by_id__in=following_ids))
+    ).order_by(
+        'posted_by_id',
+        Case(
+            When(posted_by_id=1, then=0),
+            default=1,
+            output_field=IntegerField()
+        ),
+        '-created_at'
+    ).distinct('posted_by_id')
+
+
 
 
 def get_post(post_id):

@@ -1227,6 +1227,9 @@ textarea::placeholder {
     /* font-weight: bold; */
     color: #975fec;
     /* background: linear-gradient(transparent, #222 130%); */
+    height: fit-content;
+    text-align: start;
+    padding-left: 10px;
 }
 .story .dp {
     /* display: flex; */
