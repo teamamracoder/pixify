@@ -6,49 +6,93 @@
 
 {%load static %}
 
-<div class="px-3 py-3 mt-3 users" id="notificationPage">
-    <div class="pt-1 pb-0 px-2 mb-0 fw-semibold">
-        <div class="container notification-list">
-            <!-- <div class="notification-item-active d-flex align-items-start mb-3">
-                <img src="{% static 'images/logo.png'%}" alt="Profile Picture" class="profile-pic">
-                <div class="ps-2">
-                    <p class="notification-text mb-1">
-                        <strong> </strong>
-                    </p>
-                    <small class="time-text ps-2" data-time="6">6m ago</small>
-                </div>
-            </div> -->
-            {% load humanize %} <!-- Load humanize library -->
 
-            {% for notify in notification_list %}
-            {% if notify.is_read %}
+
+<div id="notification-container">
+    <!-- Notifications will be dynamically appended here -->
+ 
+<!-- <button id="load-more" style="display: none; color: darkblue;">Load Older Notifications</button> -->
+
+<script>
+    let page = 1;
+    let lastMouseMove = Date.now();
+
+    $(document).ready(function () {
+        loadNotifications();
+
+        // Refresh notifications when there is mouse movement
+        $(document).on("mousemove", function () {
+            const now = Date.now();
+            if (now - lastMouseMove > 5000) { // 5 seconds debounce
+                lastMouseMove = now;
+                refreshNotifications();
+            }
+        });
+    });
+
+    function loadNotifications() {
+        $.ajax({
+            url: "{% url 'notification-view' %}",
+            type: "GET",
+            data: { page: page },
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            success: function (data) {
+                if (data.notifications.length > 0) {
+                    data.notifications.forEach(notification => {
+                        appendNotification(notification);
+                    });
+                }
+                $("#load-more").toggle(data.has_more);
+            }
+        });
+    }
+
+    function refreshNotifications() {
+        page = 1; // Reset to first page
+        $.ajax({
+            url: "{% url 'notification-view' %}",
+            type: "GET",
+            data: { page: page },
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            success: function (data) {
+                $("#notification-container").empty(); // Clear existing notifications
+                if (data.notifications.length > 0) {
+                    data.notifications.forEach(notification => {
+                        appendNotification(notification);
+                    });
+                }
+                $("#load-more").toggle(data.has_more);
+            }
+        });
+    }
+
+    function appendNotification(notification) {
+        const notificationHTML = notification.is_read
+            ? `
             <div class="notification-item d-flex align-items-start mb-3">
                 <img src="https://cdn-icons-png.flaticon.com/128/6997/6997662.png" alt="Profile Picture" class="profile-pic">
                 <div class="ps-2">
-                    <p class="notification-text mb-1">
-                        {{ notify.text }}
-                    </p>
-
-                    <small class="time-text ps-2">{{ notify.created_at|timesince }} ago</small>
-                
+                    <p class="notification-text mb-1">${notification.text}</p>
+                    <small class="time-text ps-2">${notification.created_at} ago</small>
                 </div>
-            </div>
-            {% else %}
+            </div>`
+            : `
             <div class="notification-item-active d-flex align-items-start mb-3">
                 <img src="https://cdn-icons-png.flaticon.com/128/16683/16683419.png" alt="Profile Picture" class="profile-pic">
                 <div class="ps-2">
-                    <p class="notification-text mb-1">
-                        {{ notify.text }}
-                    </p>
-                    <small class="time-text ps-2">{{ notify.created_at|timesince }} ago</small>
+                    <p class="notification-text mb-1">${notification.text}</p>
+                    <small class="time-text ps-2">${notification.created_at} ago</small>
                 </div>
-            </div>
-            {% endif %}
-            {% endfor %}
+            </div>`;
+        $("#notification-container").prepend(notificationHTML); // Add new notifications at the top
+    }
 
-           
-        </div>
-    </div>
+    // $("#load-more").on("click", function () {
+    //     page++;
+    //     loadNotifications();
+    // });
+</script>
 </div>
+
 
 {% endblock %}
