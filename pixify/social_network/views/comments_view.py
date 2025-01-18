@@ -43,6 +43,7 @@ class CommentsCreateView(View):
     def post(self,request):  
          post_id = request.POST.get('post_id') 
          user_id = request.user.id
+         user_details=list(services.comment_service.get_user(user_id).values())
       
          
          commentstext=request.POST['comment_text']    
@@ -51,7 +52,7 @@ class CommentsCreateView(View):
          post_del=list(services.comment_service.get_post(post_id).values())
 
          comment_list = services.comment_service.comment_list(post_id)
-         return JsonResponse({ "status": "success", "comments":list(comment_list),"posts":list(post_del)})
+         return JsonResponse({ "status": "success", "comments":list(comment_list),"posts":list(post_del),"user_details":list(user_details)})
            
    
 
