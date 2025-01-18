@@ -198,12 +198,14 @@ class UserPostDetail(View):
 
 class UserPostListView(View):
     def get(self, request):
+        
        
-        posts = list(services.post_service.Postlist_posts().values())
+        posts = services.post_service.Postlist_posts()
+       
         post_dict = {
             'posts': posts,
             'name': 'priya',
-             'count_commnet' :services.comment_service.get_count_comment(59)
+             'count_commnet' :services.comment_service.get_count_comment(post_ids)
         }
         print("postss",posts)
         # Check if the request is an AJAX request
