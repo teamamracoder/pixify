@@ -259,8 +259,15 @@ $(document).ready(function () {
     function editChatdetGroupName() {
         const modal = document.getElementById('chatdet-editGroupNameModal');
         modal.style.display = 'block'; // Show the modal
+
+        const groupTitleElement = document.getElementById("group-name-text"); // Fetch the group name text element 
+        const inputElement = document.getElementById('chatdet-newGroupNameInput'); // Fetch the input element 
+
+        inputElement.value = groupTitleElement.textContent; // Pre-fill input with the current group name
+        
         document.getElementById('chatdet-newGroupNameInput').focus(); // Focus on the input field
     }
+
 
     // Function to close the modal
     function closeChatdetModal() {
