@@ -80,7 +80,7 @@
                         <a href="#" onclick="editMessage('{{ message.id }}')">Edit</a>
                         {% endif %}
                     {% endif %}
-                    <a href="#" onclick="replyMessage('{{ message.id }}', '{{ message.sender_id.first_name }}', '{{ message.text|escapejs }}')">Reply</a>
+                    <a href="#" onclick="replyMessage('{{ message.id }}', '{{ message.sender_id.first_name }}')">Reply</a>
                     <a href="#" class="delete-link" onclick="openDeleteModal('{{ message.id }}')">Delete</a>
                 </div>
 
@@ -954,7 +954,7 @@ function appendMessageToChat(message, messageId, messageTime, senderName, profil
                         <div class="options-popup" id="options-${ messageId }" style="display: none;">
 
                             ${isSent ? `<a href="#" onclick="editMessage('${messageId}')">Edit</a>` : ""}
-                            <a href="#" onclick="replyMessage('${messageId}', '${senderName}', '${message}')">Reply</a>
+                            <a href="#" onclick="replyMessage('${messageId}', '${senderName}')">Reply</a>
                             <a href="#" onclick="openDeleteModal('${messageId}')">Delete</a>   
 
                         </div>                                    
@@ -1022,7 +1022,7 @@ function updateMessageInChat(updatedMessage, messageId, messageTime, senderName,
                     </div>
                     <div class="options-popup" id="options-${messageId}" style="display: none;">
                         ${isSent ? `<a href="#" onclick="editMessage('${messageId}')">Edit</a>` : ""}                                          
-                        <a href="#" onclick="replyMessage('${messageId}', '${senderName}', '${updatedMessage}')">Reply</a>
+                        <a href="#" onclick="replyMessage('${messageId}', '${senderName}')">Reply</a>
                         <a href="#" onclick="openDeleteModal('${messageId}')">Delete</a>                        
                     </div>
                 </div>
@@ -1150,11 +1150,14 @@ function editMessage(messageId) {
 
     let ReplyMessageId = null;
     // Reply to a message
-    function replyMessage(messageId, senderName, content) {
-        const replyPreview = document.getElementById("reply-preview");
+    function replyMessage(messageId, senderName) {
+        const messageDiv = document.getElementById(`message-${messageId}`);
+        const replyPreview = document.getElementById("reply-preview");        
+        const messageTextElement = messageDiv.querySelector(".message-text");
+
         replyPreview.style.display = "block";
         replyPreview.querySelector(".reply-username").textContent = senderName;
-        replyPreview.querySelector(".reply-text").textContent = content;
+        replyPreview.querySelector(".reply-text").textContent = messageTextElement.textContent;
         const messageInput = document.getElementById("message-input");
         messageInput.focus();
         ReplyMessageId = messageId;        
