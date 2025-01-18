@@ -92,65 +92,79 @@
            </div>
            <div class="stories">
 
-            <div class="mx-1 bg- rounded story" type="button" style="width: 6rem; height: 180px;background-color: #bf16e0e3 " >
+                    <div class="mx-1 bg- rounded story" onclick="uploadStory()" type="button" style="width: 6rem; height: 180px;background-color: #bf16e0e3 " >
+                       <img src="static\images\p1.jpg" alt="story post" class="card-img-top" style="min-height: 105px; object-fit: cover;">
+                        <div class="d-flex align-items-center justify-content-center position-relative" style="min-height: 65px; background: relative;">
+                            <p class="mb-0 text-center fs-7 fw-bold" style="color: white; position: relative;">Create story</p>
+                            <div class="position-absolute top-0 start-50 translate-middle plus-btn">
+                              <i class="fas fa-plus-circle fs-3 text-primary bg-white p-1 rounded-circle" >
+                               </i>
+                            </div>
+                        </div>
+                    </div>
 
-             <img src="static\images\p1.jpg" alt="story post" class="card-img-top" style="min-height: 105px; object-fit: cover;">
-                   <div class="d-flex align-items-center justify-content-center position-relative" style="min-height: 65px; background: relative;">
-                <p class="mb-0 text-center fs-7 fw-bold" style="color: white; position: relative;">Create story</p>
-                <div class="position-absolute top-0 start-50 translate-middle plus-btn">
-                <i class="fas fa-plus-circle fs-3 text-primary bg-white p-1 rounded-circle">
-                </i>
-                </div>
-                </div>
-                </div>
+                   {% if story_dict.storys %}
+                    {% for story in story_dict.storys %}
+                    <div class="story">
+                    <!-- {% for media in story.media_url %} -->
+                    <img src="{% static story.media_url.0 %}" alt="">
+                    <!-- {%endfor%} -->
+                     <div>
+                        <div class="dp">
+                            <img src="" alt="">
+                         </div>
+                         <span class="author">hello</span>
+
+                     </div>
 
 
+                </div>
+             {% endfor %}
+            {% endif %}
            </div>
 
-        <div class="next-btn ">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
-            </svg>
-        </div>
-    </div>
-</div>
-
-
-
-<!-- stories-full-view -->
-
-<div class="stories-full-view ">
-    <div class="close-btn">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
-          </svg>
-
-       </div>
-       <div class="content">
-           <div class="previous-btn">
-               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                   <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
-                 </svg>
-           </div>
-           <div class="story">
-            <img src="static\images\p1.jpg" alt="">
-            <div class="author">Sribash Sarkar</div>
-            <div id="dp">
-                <img src="static\images\p1.jpg" alt="">
-            </div>
-           <div class="time-line"></div>
-
-       </div>
-           <div class="next-btn">
+           <div class="next-btn actived">
                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
                    <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
                </svg>
            </div>
        </div>
    </div>
+   <!-- stories-full-view -->
 
+   <div class="container-fluid stories-full-view" id="story-view">
+    <div class="close-btn position-absolute" id="close-story">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+    </div>
 
+    <div class="content mx-auto d-flex align-items-center justify-content-between">
+        <!-- Previous Button -->
+        <div class="previous-btn text-white" id="prev-story">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+            </svg>
+        </div>
 
+        <!-- Story Content -->
+        <div class="story position-relative">
+            <img src="" alt="Story Image" class="img-fluid rounded" id="story-img">
+            <div class="author position-absolute text-white fw-bold">Sribash Sarkar</div>
+            <div id="dp" class="position-absolute">
+                <img src="" alt="Profile Picture" class="rounded-circle border border-primary">
+            </div>
+            <div class="time-line position-absolute bg-primary"></div>
+        </div>
+
+        <!-- Next Button -->
+        <div class="next-btn text-white" id="next-story">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+            </svg>
+        </div>
+    </div>
+</div>
 
 <!--Post Section-->
 
@@ -219,11 +233,9 @@
                   </label>
 
                 <div class="con">
-
                 </div>
+
             </div>
-
-
             <div class="pt-1 pb-3 px-2 mb-2 fw-semibold text-dark rounded" >
                 <div class=" d-flex justify-content-between rounded p-2" style="border:1px solid black;align-items:center;background-color:white;" >
 
@@ -833,6 +845,11 @@
 
 
  <script src="{% static 'js/sribash.js' %}"></script>
+<script>
+  function uploadStory(){
+    console.log("Clicked");
+    window.location.href="/uploadStory"
+  }
 
 
 

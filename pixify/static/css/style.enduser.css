@@ -1166,7 +1166,8 @@ textarea::placeholder {
 
 
 .stories-container {
-    max-width: 600px;
+    width: 100%;
+    /* max-width: 700px; */
     margin: 25px auto;
     position: relative;
 }
@@ -1212,7 +1213,6 @@ textarea::placeholder {
 .stories-full-view .next-btn {
     right: 8px;
 }
-
 .stories-container .story {
     height: 180px;
     width: 120px;
@@ -1221,7 +1221,13 @@ textarea::placeholder {
     overflow: hidden;
     position: relative;
     cursor: pointer;
+    /* transition: transform 5s ease; */
 }
+/* .stories-container{
+    transition-duration: 2s;
+  transition-timing-function: linear;
+  transition-delay: 1s;
+} */
 
 .stories-container .story img {
     width: 100%;
@@ -1237,158 +1243,38 @@ textarea::placeholder {
 
 .stories-container .content {
     overflow-x: scroll;
+    width:100% ;
 }
 
 .stories-container .content::-webkit-scrollbar {
     display: none;
-    scrollbar-width: none;
+    /* scrollbar-width: none; */
 }
 
 .stories-container .author {
     position: absolute;
     bottom: 0;
-    left: 0;
+    left: 30%;
     right: 0;
     padding: 3px;
-    font-size: 16px;
-    font-family: "Roboto", sans-serif;
-    font-weight: bold;
-    color: black;
-    background: linear-gradient(transparent, #222 130%);
+    font-size: 12px;
+    margin-top: -6px;
+    /* font-family: "Roboto", sans-serif; */
+    /* font-weight: bold; */
+    color: #975fec;
+    /* background: linear-gradient(transparent, #222 130%); */
+    height: fit-content;
+    text-align: start;
+    padding-left: 10px;
 }
-
-.plus-btn {
-    margin-top: -50px;
-}
-
-.stories-full-view {
-    position: fixed;
-    margin-top: 58px;
-    inset: 0;
-    z-index: 5;
-    background: rgba(0, 0, 0, 0.9);
-    place-items: center;
-    display: none;
-}
-
-.stories-full-view.actived {
-    display: block !important;
-}
-
-.stories-full-view .close-btn {
-    position: absolute;
-    left: 95%;
-    width: 45px;
-    background-color: #444;
-    color: #fff;
-    border-radius: 50%;
-    padding: 10px;
-    display: flex;
-    cursor: pointer;
-    font-size: 18px;
-}
-
-.stories-full-view .story {
-    height: 100%;
-    text-align: center;
-}
-
-.stories-full-view .story .user-profile {
-    position: relative;
-    bottom: 240px;
-    margin-left: 10px;
-
-
-}
-
-.stories-full-view .story .user-profile img {
-    width: 38px;
-    height: 38px;
-    border-radius: 50%;
-    border: 4px solid #45abff;
-
-}
-
-.stories-full-view .content {
-    height: 85vh;
-    width: 100%;
-    max-width: 700px;
-    position: relative;
-    padding-top: 38px;
-    scroll-behavior: smooth;
-}
-
-.stories-full-view .story img {
-    height: 100%;
-    aspect-ratio: 10/16;
-    object-fit: cover;
-    border-radius: 16px;
-}
-
-.stories-full-view .author {
-    position: absolute;
-    top: 58px;
-    left: 50%;
-    color:#2f066de3;
-    transform: translateX(-50%);
-    font-family: "Roboto" sans-serif;
-    font-size: 18px;
-}
-
-.stories-full-view .story #dp {
-    margin-left: 34%;
-    top: -63%;
-}
-
-.stories-full-view .story .time-line {
-    height: 2px;
-    width: 40%;
-    top: 9%;
-    left: 27.5%;
-    background: #2f066de3;
-    border-radius: 50%;
-    position: absolute;
-    animation: timeline 10s linear forwards;
-
-}
-
-@keyframes timeline {
-    0% {
-        width: 0;
-    }
-
-    100% {
-        width: 45%;
-    }
-}
-
-.story #dp {
-    position: relative;
-    margin-top: -170px;
-    margin-left: 8px;
-    border: 3px solid #4f0cb4e3;
-    height: 40px;
-    width: 40px;
-    border-radius: 50%;
-    overflow: hidden;
-    background: relative;
-}
-
-.story #dp img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center;
-
-}
-
 .story .dp {
+    /* display: flex; */
     position: relative;
     margin-top: -170px;
-    margin-left: 8px;
-    border: 3px solid #ff2bbf;
-    height: 40px;
-    width: 40px;
+    margin-left: 4px;
+    border: 3px solid #975fec;
+    height: 33px;
+    width: 33px;
     border-radius: 50%;
     overflow: hidden;
     background: relative;
@@ -1402,6 +1288,143 @@ textarea::placeholder {
 
 }
 
+
+.plus-btn {
+    margin-top: -50px;
+}
+
+
+/* Story View Container */
+.stories-full-view {
+    position: fixed;
+    inset: 0;
+    display: none;
+    place-items: center;
+    z-index: 1050;
+    background: rgba(0, 0, 0, 0.9);
+}
+
+.stories-full-view.actived {
+    display: grid !important;
+}
+
+
+
+/* Close Button Styling */
+.close-btn {
+    top: 20px;
+    right: 20px;
+    width: 40px;
+    height: 40px;
+    background-color: #444;
+    color: #fff;
+    border-radius: 50%;
+    padding: 5px;
+    cursor: pointer;
+}
+
+/* Navigation Buttons (Previous & Next) */
+.previous-btn {
+    cursor: pointer;
+    height: 40px;
+    width: 50px;
+    padding: 5px;
+    font-size: 28px;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 50%;
+    /* right: 40%; */
+    margin-left: 5%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.next-btn{
+    height: 40px;
+    width: 60px;
+    cursor: pointer;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 50%;
+    margin-right: 5%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.previous-btn:hover, .next-btn:hover {
+    background: rgba(255, 255, 255, 0.5);
+}
+
+/* Story Content */
+.story {
+    width: 100%;
+    max-width: 55vh;
+    height: 80vh;
+    position: relative;
+    overflow: hidden;
+    text-align: center;
+    border-radius: 8px;
+}
+
+.story img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 8px;
+}
+#story-img{
+    border-radius: 50px;
+}
+/* Profile Picture */
+#dp {
+    top: 8px;
+    left: 40px;
+    width: 50px;
+    height: 50px;
+    border: 3px solid #975fec;
+    border-radius: 50%;
+    overflow: hidden;
+}
+
+#dp img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Author Name */
+.author {
+    top: 15px;
+    left: 100px;
+    color: #fff;
+    font-size: 16px;
+    font-style: normal;
+}
+
+/* Time-line Progress Bar */
+.time-line {
+    top: 5px;
+    left: 0;
+    width: 100%;
+    height: 5px;
+    display: flex;
+    border-radius: 5px;
+    overflow: hidden;
+    z-index: 5;
+}
+
+.time-line-segment {
+    flex: 1;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.3);
+    margin-right: 2px;
+    transition: background 0.3s ease;
+}
+
+.time-line-segment.active {
+    background: #fff;
+}
 
 /* story css end */
 

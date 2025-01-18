@@ -42,6 +42,10 @@ def delete_user(user):
 def get_user_by_email(email):
     return User.objects.filter(email=email).first()
 
+def change_theme(user, ui_mode):
+    user.ui_mode = ui_mode
+    user.save()
+    return user
 def get_user_details(user_id):
     return get_object_or_404(User, id=user_id)
 

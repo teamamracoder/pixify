@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>pixify/story/create</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #b8b6b6;
+    }
+    .navbar {
+      padding: 0.5rem 1rem;
+    }
+
+    .navbar .btn {
+      font-size: 1.2rem;
+    }
+
+    .col-md-3 {
+      background-color: #fff;
+      padding: 2rem 1rem;
+    }
+
+    .col-md-3 img {
+      border-radius: 50%;
+    }
+
+    .card {
+      border-radius: 10px;
+      cursor: pointer;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .card .icon {
+      background: #fff;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 50px;
+      height: 50px;
+      margin: 0 auto 1rem;
+    }
+
+    .uploaded-content img, .uploaded-content video {
+      max-width: 100%;
+      max-height: 100%;
+      border-radius: 10px;
+    }
+
+    .uploaded-content, .text-content {
+      display: none;
+      text-align: center;
+    }
+
+    .text-content input {
+      width: 100%;
+      max-width: 258px;
+      height: 55vh;
+      border: none;
+      border-radius: 10px;
+      padding: 1rem;
+      font-size: 1.2rem;
+      background: linear-gradient(to bottom, #FF9A9E, #FECFEF);
+    }
+
+    .text-content button {
+      margin-top: 1rem;
+    }
+
+    @media (max-width: 768px) {
+      .col-md-3 {
+        display: none;
+      }
+    }
+
+    .user-upload-story {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+  overflow-x: auto;
+  padding: 1rem 0;
+}
+
+.user-story-item {
+  width: 70px;
+  height: 70px;
+  border: 2px solid #1877f2;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.user-story-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+  </style>
+</head>
+<body>
+   
+    <nav class="navbar navbar-light  px-3" style=" background-color: rgb(26, 26, 54);">
+    <!-- <button class="btn btn-outline-secondary" id="close-btn">&times;</button> -->
+    <a class="navbar-brand mx-3" href="#">
+      <img src="/static/images/logo.png" alt="Logo" width="30" height="30">
+    </a>
+    <div class="d-flex align-items-center ms-auto">
+      <button class="btn btn-light me-2" >
+        <i class="fa-solid fa-bars"></i>
+      </button>
+      <button class="btn btn-light me-2 position-relative">
+        <i class="fa-regular fa-bell"></i>
+      </button>
+      <img src="/static/images/sribashsarkar.jpg" alt="Profile" class="rounded-circle" width="30" height="30">
+    </div>
+  </nav>
+  <form action="/story/create/" method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+  <div class="container-fluid">
+    
+    <div class="row"style="background-color:rgba(61, 61, 107, 0.863); ">
+      <div class="col-md-3" style="height: 90vh;background-color: rgb(61, 61, 107); " >
+        <div class="d-flex justify-content-between mb-1">
+          <h5 style="color: #fff;">Your Story</h5>
+              <button class="btn btn-light p-2" >
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+        </div>
+           <div class="d-flex align-items-center">
+              <img src="/static/images/sribashsarkar.jpg" alt="Profile" class="rounded-circle me-3" width="50" height="50">
+              <span style="color: #fff;">Ram Sarkar</span>
+            </div>
+            </div>
+      
+      <div class="col-md-9 d-flex align-items-center justify-content-center">
+        <div class="row g-3 text-center">
+          <div class="col-12 col-sm-6">
+            <div class="card p-4 pic-upload" id="picUpload" style="height: 50vh; justify-content: center; background: linear-gradient(to bottom, #8EC5FC, #E0C3FC);">
+              <div class="icon">
+                <i class="fa-solid fa-image"></i>
+              </div>
+              <h6>Create a photo story</h6>
+            </div>
+          </div>
+          <div class="col-12 col-sm-6 story-uploaded">
+            <div class="card p-4 text-upload" id="textUpload" style="height: 50vh; background: linear-gradient(to bottom, #FF9A9E, #FECFEF); align-items: center; justify-content: center;">
+              <div class="icon">
+                <i class="fa-solid fa-font"></i>
+              </div>
+              <h6>Create a text story</h6>
+            </div>
+          </div>
+        </div>
+
+        <!-- Uploaded Content -->
+        <div class="uploaded-content" id="uploadedContent">
+          <h6>Uploaded Content</h6>
+          <div id="preview"></div>
+          <button class="btn btn-primary mt-3" type="submit">Upload Again</button>
+        </div>
+
+        <!-- Text Input Box -->
+        <div class="text-content" id="textContent" >
+          <input type="text" placeholder="Write your story here...">
+          <button class="btn btn-primary mt-3" id="submitText">Upload Text</button>
+        </div>
+
+        {% comment %} <input type="file" id="fileInput" name="StoryFile" accept="image/*,video/*" style="display: none;"> {% endcomment %}
+        <input type="file" id="fileInput" name="story-input" accept="image/*,video/*" style="display: none;">
+      </div>
+    
+    </div>
+  </div>
+</form>
+  <script>
+    const picUpload = document.getElementById("picUpload");
+    const textUpload = document.getElementById("textUpload");
+    const fileInput = document.getElementById("fileInput");
+    const uploadedContent = document.getElementById("uploadedContent");
+    const textContent = document.getElementById("textContent");
+    const preview = document.getElementById("preview");
+    const reset = document.getElementById("reset");
+    const submitText = document.getElementById("submitText");
+
+    picUpload.addEventListener("click", () => {
+      fileInput.click();
+    });
+
+    fileInput.addEventListener("change", (event) => {
+      const file = event.target.files[0];
+      if (file) {
+        const fileURL = URL.createObjectURL(file);
+        const element = file.type.startsWith("image")
+          ? `<img src="${fileURL}" alt="Uploaded Image">`
+          : `<video controls src="${fileURL}"></video>`;
+
+        preview.innerHTML = element;
+        uploadedContent.style.display = "block";
+        picUpload.style.display = "none";
+        textUpload.style.display = "none";
+      }
+    });
+
+    textUpload.addEventListener("click", () => {
+      picUpload.style.display = "none";
+      textUpload.style.display = "none";
+      textContent.style.display = "block";
+    });
+
+    reset.addEventListener("click", () => {
+      uploadedContent.style.display = "none";
+      textContent.style.display = "none";
+      picUpload.style.display = "block";
+      textUpload.style.display = "block";
+      fileInput.value = "";
+      preview.innerHTML = "";
+    });
+
+    submitText.addEventListener("click", () => {
+      alert("Text uploaded successfully!");
+      textContent.style.display = "none";
+      picUpload.style.display = "block";
+      textUpload.style.display = "block";
+    });
+
+
+    // 
+    // 
+    fileInput.addEventListener("change", (event) => {
+  const file = event.target.files[0];
+  if (file) {
+    const fileURL = URL.createObjectURL(file);
+    const element = file.type.startsWith("image")
+      ? `<img src="${fileURL}" alt="Uploaded Image" class="story-thumbnail">`
+      : `<video controls src="${fileURL}" class="story-thumbnail"></video>`;
+
+    preview.innerHTML = element;
+
+    // Display the image in .user-upload-story
+    const userStoryElement = document.createElement("div");
+    userStoryElement.classList.add("user-story-item");
+    userStoryElement.innerHTML = `<img src="${fileURL}" alt="User Story">`;
+    document.querySelector(".user-upload-story").appendChild(userStoryElement);
+
+    uploadedContent.style.display = "block";
+    picUpload.style.display = "none";
+    textUpload.style.display = "none";
+  }
+});
+
+  </script>
+</body>
+</html>

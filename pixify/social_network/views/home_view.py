@@ -1,8 +1,9 @@
 from django.shortcuts import get_object_or_404, render
 from django.views import View
 
-from .. models.post_model import Post
 from social_network import services
+from .. models.post_model import Post
+
 from social_network.constants.default_values import Role
 from social_network.decorators.exception_decorators import catch_error
 
@@ -23,21 +24,32 @@ class HomeView(View):
 
         post_id = request.GET.get('post_id')
 
-       
+
         comment_list = services.comment_service.comment_list(post_id)
         post_dict={
                   'posts':posts,
-                  
+
                   'name':'priya',
                   'comment_list':comment_list,
                   'count_commnet' :services.comment_service.get_count_comment(59)
-                 
-                 
+
+
                 }
-       
+
         context = success_response(message=message, message_type=message_type)
         context.update({'post_dict': post_dict})  # Merge with the posts data
+        storys = services.story_service.storylist_storys()
+        story_dict={
+                  'storys':storys,
+                  'name':'sribash',
+                #   'count_commnet' :services.comment_service.get_count_comment()
+
+
+
+                }
+        context2 = success_response(message=message, message_type=message_type)
+        context2.update({'story_dict': story_dict})
 
         return render(request, "enduser/home/index.html", context)
-      
-    
+
+

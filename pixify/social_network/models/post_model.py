@@ -55,3 +55,6 @@ class Post(models.Model):
 
     def __str__(self):
         return f"ID: {self.id}, Created at: {self.created_at}, Active: {self.is_active}"
+    
+
+    
