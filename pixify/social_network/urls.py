@@ -73,7 +73,7 @@ urlpatterns = [
 
 
     # notification
-    path('notification/', views.NotificationView.as_view(), name='notification'),
+    path('notification/', views.NotificationView.as_view(), name='notification-view'), 
 
     # profile
     path('profile/', views.EnduserprofileView.as_view(), name='userprofile'),
