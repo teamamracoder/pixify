@@ -239,11 +239,13 @@
             </div>
         </div>
     
-        <div class="post-des-img">
+        <div class="post-des-img" >
             <p class="px-3 pt-2" style="font-size:15px; margin: 0; margin-bottom: 5px;padding-bottom:13px;">{{ post.title }}</p>
     
             {% if post.media_url|length == 1 %}
-                <img src="{% static post.media_url.0 %}" class="img-fluid" alt="Responsive image">
+            <div style="height:400px;">
+                <img src="{% static post.media_url.0 %}" class="img-fluid" alt="Responsive image"style="height:100%;width:100%;object-fit:cover;">
+            </div>
             {% elif post.media_url|length > 1 %}
                 <div id="carouselExampleIndicators{{ post.id }}" class="carousel slide">
                     <div class="carousel-indicators">
@@ -560,20 +562,22 @@
 <div  class="modal fade custom-modal" id="commentModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
     
     <div class="modal-dialog modal-dialog-centered "role="document" >
-  
+        
         <div class="modal-content d-flex comment-mod" >
 
-
+           <span class="modal-header p-0">
+             <button type="button" class="btn-close " data-bs-dismiss="modal" aria-label="Close" style="color:white;right:5px;top:5px;position:relative;"></button>
+            </span>  
 
 
      <div style="display: flex; " class="comment-div">
         <div class="col-md-6 ">
-            
-            <div class="post-top d-flex py-2" style="height: 45px;" id="proffile">
-             
+          
 
-            </div>
-
+            <div class="post-top d-flex  px-1 pb-2" style="height: 45px;" id="proffile" >
+               
+        
+           </div>
 
 
             <div class="post-center pb-3 " style="margin-left: 0px;" id="photo_com">
@@ -581,7 +585,7 @@
         
                 
                     <div class="post-box pb-2" >
-
+                        
                     
                 </div>
             </div>
@@ -589,11 +593,11 @@
 
 
   <div class="" style="display:flex;flex-direction: column; justify-content:space-arround; "> 
-   
+    
     <div class="comment-section " >
-        
+     
         <div style="height:50px;"> </div>
-        <div class="comment-box p-1 com "id="comments-container"  style="  height:300px; overflow-y: scroll;margin-left:20px;">
+        <div class="comment-box p-1 com "id="comments-container"  style="  height:400px; overflow-y: scroll;margin-left:20px;">
       
             <div class="pt-2 pe-2" style="height: auto;" class="comment" id="commentList"  id="autorefresh" id="commentsDiv">
                
@@ -737,14 +741,18 @@
 
 
 data.user_details.forEach(com_del => { 
-const com_prof=` <a href="" class="mx-1">
+const com_prof=`  
+
+         
+<a href="" class="mx-1">
                     <img src="{% static 'images/IMG_20240915_213320.jpg' %}" alt="avatar" class="rounded-circle me-2 " style="width: 35px; object-fit: cover; height: 35px; " >
                 </a>
                 
                 <div class="d-flex "style="flex-direction: column;" >
-                 <h6 class="u-name mx-1"style="font-size:14px">${com_del.first_name} ${com_del.last_name} </h6>
+                 <h6 class="u-name mx-1"style="font-size:14px">${com_del.first_name} ${com_del.last_name} </h6> 
                  <span style="font-size:11px;margin-left:5px;position: relative;bottom: 10px;" class="py-1">${new Date(com_del.created_at).toLocaleString([],  { weekday: 'long' })} ${new Date(com_del.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}<i class="bi bi-globe-americas p-1" style="font-size:10px"></i></span>
-                </div>`;
+              
+                 </div>    `;
 com_profile.html(com_prof);
     });
                     
@@ -764,8 +772,11 @@ com_profile.html(com_prof);
 
                     <div class="post-box pb-2" >
                     ${data.posts[0].media_url.map(post => `
-                     <img src="static${post}" class="img-fluid" alt="Responsive image">
-                                                                                        `).join('')}
+                                <div style="height:400px;">
+                
+         
+                     <img src="static${post}" class="img-fluid" alt="Responsive image"style="height:100%;width:100%;object-fit:cover;">
+                            </div>                                                              `).join('')}
                    
                    </div>
                     </div>
@@ -876,24 +887,7 @@ com_profile.html(com_prof);
           const photo_com = $('#photo_com');
           
           commentList.empty(); // Clear previous comments
-         
-const postItem = `
-          <div class="post-des-img">
-          
-           ${data.posts[0].media_url.map(post => `
-  <img src="static${post}" class="img-fluid" alt="Responsive image">
-`).join('')}
-          </div>
-          <div class="">
-              <div>
-                  <div class="d-flex align-items-center px-2 ">
-                      <i class="bi bi-hand-thumbs-up pe-1"style="font-size:12px"></i> <i class="bi bi-heart  "style="font-size:12px"></i>
-                      <span style="font-size:12px;color:#e9e6e6c7;" class="px-2"> Rima Das, Sribash Sarkar and <span>9</span> others</span>
-                      <span style="font-size:12px;color:#e9e6e6c7;" class="ms-auto pe-2">5 comments</span>
-                  </div>
-              </div>
-          </div>`
-          photo_com.html(postItem);
+       
           if (data.comments.length > 0) {
 
 
