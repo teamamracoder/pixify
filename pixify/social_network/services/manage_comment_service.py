@@ -1,4 +1,4 @@
-from tokenize import Comment
+from ..models import Comment
 from ..packages.get_data import GetData
 from .. import models
 from django.shortcuts import get_object_or_404
@@ -24,20 +24,6 @@ def manage_list_comments_filtered(post_id):
 def manage_list_comments():
     return models.Comment.objects.all()
 
-
-
-
-
 def manage_get_comment(comment_id):
     return get_object_or_404(models.Comment, id=comment_id)
-
-# def get_count_comment(post_id):
-#     return Comment.objects.filter(post_id_id=post_id).count()
-# def get_comment_count_by_post(post_id):
-#     comment_count = Comment.objects.filter(post_id=post_id, reply_for__isnull=True, is_active=True).count()
-#     return comment_count
-
-
-
-def get_comment(comment_id):
-    return get_object_or_404(Comment, id=comment_id)
+ 

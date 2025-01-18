@@ -1,10 +1,22 @@
 from django import forms
+# from .models import EndUserProfile 
+from ..models import User 
+
+
 from django.core.validators import (
     MinLengthValidator,
     MaxLengthValidator,
     EmailValidator,
 )
 
+
+# badhan
+
+# from .models import User
+# from django.core.validators import RegexValidator
+# 
+
+# end
 
 class ReqOtpForm(forms.Form):
     email = forms.EmailField(
@@ -65,3 +77,13 @@ class RegisterForm(forms.Form):
         ],
         widget=forms.TextInput(attrs={"class": "form-control form-control-lg col-5","placeholder":"Last Name"}),
     )
+
+
+
+
+
+
+
+
+
+
