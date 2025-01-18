@@ -95,18 +95,6 @@ class ChatListView(View):
                 'latest_message_sender_name':sender_name['sender_name']
             })
             
-
-        follow_data = []
-        for follower in followers:
-            follow_data.append({
-                'title': f"{follower.following.first_name} {follower.following.last_name}",
-                'photo': follower.following.profile_photo_url,
-            })
-        for following in followings:
-            follow_data.append({
-                'title': f"{following.follower.first_name} {following.follower.last_name}",
-                'photo': following.follower.profile_photo_url,
-            })
         return render(
             request,
             'enduser/chat/chats.html',
@@ -115,7 +103,6 @@ class ChatListView(View):
                 message_type=request.session.pop("message_type", ResponseMessageType.INFO.value),
                 data={
                     'chats': chat_data,
-                    'follow': follow_data
                 }
             )
         )
