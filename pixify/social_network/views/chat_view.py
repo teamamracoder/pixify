@@ -161,8 +161,7 @@ class ChatCreateView(View):
                 )                
 
             chat = chat_service.create_chat(user, None, None, ChatType.PERSONAL.value)
-            chat_member_service.create_chat_member(chat.id, user.id, user)
-            chat_member_service.create_chat_member(chat.id, member, user)
+            chat_member_service.add_chat_member(chat.id, user.id, user)            
 
             return JsonResponse({
                 'chat_id': chat.id,
