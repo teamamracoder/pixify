@@ -108,7 +108,7 @@
   </style>
 </head>
 <body>
-   
+
     <nav class="navbar navbar-light  px-3" style=" background-color: rgb(26, 26, 54);">
     <!-- <button class="btn btn-outline-secondary" id="close-btn">&times;</button> -->
     <a class="navbar-brand mx-3" href="#">
@@ -127,12 +127,12 @@
   <form action="/story/create/" method="post" enctype="multipart/form-data">
     {% csrf_token %}
   <div class="container-fluid">
-    
+
     <div class="row"style="background-color:rgba(61, 61, 107, 0.863); ">
       <div class="col-md-3" style="height: 90vh;background-color: rgb(61, 61, 107); " >
         <div class="d-flex justify-content-between mb-1">
           <h5 style="color: #fff;">Your Story</h5>
-              <button class="btn btn-light p-2" >
+              <button class="btn btn-light p-2" id="redirectButton">
                 <i class="fa-solid fa-xmark"></i>
               </button>
         </div>
@@ -141,7 +141,7 @@
               <span style="color: #fff;">Ram Sarkar</span>
             </div>
             </div>
-      
+
       <div class="col-md-9 d-flex align-items-center justify-content-center">
         <div class="row g-3 text-center">
           <div class="col-12 col-sm-6">
@@ -178,10 +178,17 @@
         {% comment %} <input type="file" id="fileInput" name="StoryFile" accept="image/*,video/*" style="display: none;"> {% endcomment %}
         <input type="file" id="fileInput" name="story-input" accept="image/*,video/*" style="display: none;">
       </div>
-    
+
     </div>
   </div>
 </form>
+<script>
+  document.getElementById('redirectButton').addEventListener('click', function (event) {
+    event.preventDefault();
+
+    window.location.href = "/";
+  });
+</script>
   <script>
     const picUpload = document.getElementById("picUpload");
     const textUpload = document.getElementById("textUpload");
@@ -234,8 +241,8 @@
     });
 
 
-    // 
-    // 
+    //
+    //
     fileInput.addEventListener("change", (event) => {
   const file = event.target.files[0];
   if (file) {
