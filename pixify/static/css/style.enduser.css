@@ -23,7 +23,7 @@ nav {
 .topnav {
 
     height: 35px;
-   
+
 
 }
 
@@ -32,7 +32,8 @@ nav {
 }
 
 #navbarNav ul {
-    gap: 40px;
+    /* gap: 40px; */
+    gap: 55px;
     justify-content: center;
     align-items: center;
     position: fixed;
@@ -569,25 +570,25 @@ i {
     }
   html {
       scroll-behavior: smooth;
-      
+
     }
 /* comment modal reponsiv by priya */
     @media (max-width: 768px) {
     .comment-div {
         flex-direction: column;
-     
+
             }
-            
+
         }
         @media (max-width: 480px) {
             .comment-div {
                 flex-direction: column;
-               
-            } 
-             
-                
+
+            }
+
+
         }
- 
+
 /* side bar */
 
 
@@ -1493,7 +1494,7 @@ textarea::placeholder {
 /* End CSS for  Left Side Bar by Shribash*/
 
 /*Subhasis*/
-@media (max-width: 575px) {
+ @media (max-width: 575px) {
     .left-sidebar,.right-sidebar,.center-bodycontent {
         padding-left: 0rem !important;
         padding-right: 0rem !important;
@@ -1568,7 +1569,7 @@ textarea::placeholder {
   }
   @media (max-width: 992px) {
     #navbarNav ul{
-        gap:35px;
+        gap:25px;
     }
   }
   @media (max-width: 768px) {
@@ -1579,6 +1580,26 @@ textarea::placeholder {
     .center-bodycontent{
         padding-left: 0px !important;
         padding-right: 0px !important;
+        width: 100% !important;
+    }
+    #navbar{
+        display: none;
+    }
+    #SmallScreenNav{
+        display: block;
+    }
+    #mainContainer{
+        margin-top: 101px !important;
+    }
+
+    #uploadPostSection{
+        padding-bottom: 1px !important;
+    }
+
+  }
+  @media (max-width: 1000px) {
+    #FeelingActivity{
+        display: none !important;
     }
 
   }
@@ -1620,8 +1641,37 @@ textarea::placeholder {
     #searchbarInputMiddle{
         margin-right: 0px !important;
     }
-}
+  }
+  @media (max-width: 440px) {
+    #SmallScreenNavItem{
+        padding-left: 15px !important;
+        padding-right: 15px !important;
+    }
+    #SmallScreenNavDiv{
+        padding-left: 0px;
+        padding-right: 0px;
+    }
+  }
+  @media (min-width: 768px) {
+    #navbar{
+        display: block;
+    }
+    #SmallScreenNav{
+        display: none;
+    }
+    #mainContainer{
+        margin-top: 60px !important;
+    }
+  }
 
+
+#SmallScreenNavItem .nav-link{
+    font-size: 19px;
+}
+#uploadPostSection{
+    border: 1px solid black;
+    border-radius: 3px;
+}
 .center-bodycontent {
     height: 100%;
     overflow-y: scroll;
@@ -1642,7 +1692,7 @@ textarea::placeholder {
 
 #mainContainer{
     min-height: 600px;
-    margin-top: 60px !important;
+    margin-top: 60px;
     height: 100vh;
     display: flex;
     flex-direction: column;
@@ -1716,7 +1766,8 @@ textarea::placeholder {
     top: 100%;
     right: 0;
     width: 250px;
-    background-color: #1f0447e3;
+    /* background-color: #1f0447e3; */
+    background-color: #220B46;
     box-shadow: 0 4px 8px rgba(151, 95, 236, 0.5);
     font-family: serif;border-radius: 7px;
 
