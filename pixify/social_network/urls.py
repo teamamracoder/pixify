@@ -18,6 +18,8 @@ urlpatterns = [
     path('admin/users/<int:user_id>/update/', views.ManageUserUpdateView.as_view(), name='user_update'),
     path('admin/users/<int:user_id>/delete/', views.ManageUserDeleteView.as_view(), name='user_delete'),
 
+    path('change-my-theme/', views.ChangeMyThemeView.as_view(), name='change_my_theme'),
+
 
 
     #manage-notification
@@ -122,8 +124,6 @@ urlpatterns = [
     # message reply
     path('chat/message-reply/<int:message_id>/', views.MessageReplyCreateView.as_view(), name='message_reply'),
 
-
-
     #for enduser post
     path('posts/create/', views.UserPostCreatView.as_view(),name='userpost_create'),
     path('', views.UserPostListView.as_view(), name='Userposts_list'),
@@ -135,7 +135,11 @@ urlpatterns = [
     path('comments/getComment/',views.CommentsListView.as_view(), name='comments_list'),
     # path('<int:post_id>/',views.UserPostDetail.as_view(),name="Userdetail" ),
 
-
+    #for enduser story
+    path('story/create/', views.UserStoryCreatView.as_view(),name='userstory_create'),
+    # path('', views.UserStoryListView.as_view(), name='Userstory_list'),
+    path('uploadStory/', views.UploadStoryView.as_view(),name='uploadStory'),
 
 ]
+
 

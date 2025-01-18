@@ -13,7 +13,7 @@ from ..decorators.exception_decorators import catch_error
 
 from .. import services
 from ..constants import Gender, RelationShipStatus, Role
-from django.core.paginator import Paginator   
+from django.core.paginator import Paginator
 from django.http import JsonResponse
 from ..forms import ManageUserCreateForm
 
@@ -44,7 +44,7 @@ class ManageUserListView(View):
             request,
             'adminuser/user/list.html',
             success_response("User data fetched successfully", data)
-        ) 
+        )
 
 
 class ManageUserCreateView(View):
@@ -67,7 +67,7 @@ class ManageUserDetailView(View):
     def get(self, request, user_id):
         user = services.manage_user_service.manage_get_user(user_id)
         return render(request, 'adminuser/user/detail.html', {'user': user})
-    
+
 class ManageUserUpdateView(View):
     @catch_error
     def get(self, request, user_id):
@@ -102,7 +102,7 @@ class ManageUserDeleteView(View):
         user = services.manage_user_service.manage_get_user(user_id)
         services.user_service.delete_user(user)
         return redirect('user_list')
-    
+
 class ManageToggleUserActiveView(View):
     def post(self, request, user_id):
         user = services.manage_user_service.manage_get_user(user_id)
@@ -113,5 +113,11 @@ class ManageToggleUserActiveView(View):
 class ManageUserProfileView(View):
     def get(self, request):
         return render(request, 'adminuser/user/user_profile.html')
-       
+
+class ChangeMyThemeView(View):
+    def post(self, request):
+        theme = request.POST.get('theme')
+        user = services.user_service.get_user(request.user.id)
+        services.user_service.change_theme(user, ui_mode=theme)
+        return JsonResponse(success_response('Theme changed to {theme} mode', {'theme': theme}))
 
