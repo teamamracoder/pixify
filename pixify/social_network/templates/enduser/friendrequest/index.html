@@ -7,7 +7,8 @@
 {% block content %}
 
 {% load static %}
-<div class="px-3 py-3 mt-3" style="background-color: #1f0447e3; font-family: serif;border-radius: 7px;" >
+
+<div class="px-3 py-3 mt-3" style="background-color: #1f0447e3; box-shadow: 0 4px 8px rgba(151, 95, 236, 0.5);font-family: serif;border-radius: 7px;" >
 
 
 
@@ -24,64 +25,65 @@
                 </div>
             </div>
     </div>
-
-    <div class="card-body contacts_body " >
-
-            <ul class="request">
-                <li>
-                    <div class="d-flex bd-highlight">
-                        <div class="img_cont">
-                            <img src="{% static 'images/logo1.jpg' %}" class="rounded-circle user_img" >
-                            <span class="online_icon"></span>
-                        </div>
-                        <div class="user_info">
-                            <span>Priya Mitra</span>
-                            <p>Priya is online</p>
-                            <div id="req-btn">
-                            {% comment %} <button type="button" class="btn bg-info">Confirm</button>
-                            <button type="button" class="btn btn-secondary">Delete</button> {% endcomment %}
-                            <div class="col-auto col-sm-auto d-flex" style="gap:10px">
-                                <button type="button" class="prof-btn btn btn-primary px-4" style="font-size:14px ;">Confirm</button>
-                                <button type="button" class="btn btn-primary prof-btn px-4" style="font-size:14px;">Delete</button>
-                            </div>
-                           </div>
-                        </div>
-                    </div>
-                </li>
-                <li>
-                    <div class="d-flex bd-highlight">
-                        <div class="img_cont">
-                            <img src="{% static 'images/logo1.jpg' %}" class="rounded-circle user_img" >
-                            <span class="online_icon"></span>
-                        </div>
-                        <div class="user_info">
-                            <span>Subhasis Barman</span>
-                            <p>Priya is online</p>
-                            <div id="req-btn">
-                            {% comment %} <button type="button" class="btn bg-info">Confirm</button>
-                            <button type="button" class="btn btn-secondary">Delete</button> {% endcomment %}
-                            <div class="col-auto col-sm-auto d-flex" style="gap:10px">
-                                <button type="button" class="prof-btn btn btn-primary px-4" style="font-size:14px ;">Confirm</button>
-                                <button type="button" class="btn btn-primary prof-btn px-4" style="font-size:14px;">Delete</button>
-                            </div>
-                           </div>
-                        </div>
-                    </div>
-                </li>
-
-
-
-
-
-            </ul>
-
-       </div>
-
-
-   </div>
-
-
 </div>
+
+<div class="fcontainer">
+    <div class="user-list">
+        <div class="user-card">
+            <img src="https://cdn-icons-png.flaticon.com/128/201/201634.png" alt="User">
+            <div class="user-info">
+                <h4>Rima Das</h4>
+                <p>Followed by priya</p>
+            </div>
+            <button class="follow-btn">Follow</button>
+        </div>
+        <div class="user-card">
+            <img src=https://cdn-icons-png.flaticon.com/128/3284/3284735.png alt="User">
+            <div class="user-info">
+                <h4>Subhasis Barman</h4>
+                <p>Followed by rima and + 33 more</p>
+            </div>
+            <button class="follow-btn">Follow</button>
+        </div>
+        <div class="user-card">
+            <img src=https://cdn-icons-png.flaticon.com/128/18484/18484446.png alt="User">
+            <div class="user-info">
+                <h4>balaram Sarkar</h4>
+                <p>Followed by rima and + 33 more</p>
+            </div>
+            <button class="follow-btn">Follow</button>
+        </div>
+        <div class="user-card">
+            <img src="https://cdn-icons-png.flaticon.com/128/201/201634.png"alt="User">
+            <div class="user-info">
+                <h4>Priya Mitra</h4>
+                <p>Followed by rima and + 33 more</p>
+            </div>
+            <button class="follow-btn">Follow</button>
+        </div>
+        <div class="user-card">
+            <img src=https://cdn-icons-png.flaticon.com/128/18484/18484446.png alt="User">
+            <div class="user-info">
+                <h4>Badhan Sarkar</h4>
+                <p>Followed by rima and + 33 more</p>
+            </div>
+            <button class="follow-btn">Follow</button>
+        </div>
+    </div>
+</div>
+</div>
+<script>document.addEventListener("DOMContentLoaded", () => {
+    const followButtons = document.querySelectorAll(".follow-btn");
+
+    followButtons.forEach(button => {
+        button.addEventListener("click", () => {
+            window.open("followed.html", "_blank");
+        });
+    });
+});
+</script>
+
+<script src="script.js"></script>
 
 
 

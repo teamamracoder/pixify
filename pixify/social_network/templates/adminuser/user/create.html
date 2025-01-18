@@ -12,78 +12,156 @@
                     <h2 class="text-info">Create User</h2>
                 </div>
                 <div class="card-body">
-                    <form method="post">
+                    <form method="post" id="user_form">
                         {% csrf_token %}
+                        {{ data.user_form.as_p }}
                         <div class="row">
                             <div class="form-group col-md-4 col-lg-4 col-sm-12 mb-3">
-                                <label for="firstName">FirstName</label>
-                                <input type="text" class="form-control" name="first_name" id="first_name" placeholder="Enter your first name">
+                                {{ form.first_name.label }}<span class="text-danger">*</span>
+                                {{ form.first_name }}
+                                {% if form.first_name.errors %}
+                                    <div class="text-danger">{{ form.first_name.errors }}</div>
+                                {% endif %}
                             </div>
                             <div class="form-group col-md-4 col-lg-4 col-sm-12 mb-3">
-                                <label for="middleName">MiddleName</label>
-                                <input type="text" class="form-control" name="middle_name" id="middle_name" placeholder="Enter your middle name">
+                                {{ form.middle_name.label }}
+                                {{ form.middle_name }}
+                                {% if form.middle_name.errors %}
+                                    <div class="text-danger">{{ form.middle_name.errors }}</div>
+                                {% endif %}
                             </div>
                             <div class="form-group col-md-4 col-lg-4 col-sm-12 mb-3">
-                                <label for="lastName">LastName</label>
-                                <input type="text" class="form-control" name="last_name" id="last_name" placeholder="Enter your last name">
+                                {{ form.last_name.label }}<span class="text-danger">*</span>
+                                {{ form.last_name }}
+                                {% if form.last_name.errors %}
+                                    <div class="text-danger">{{ form.last_name.errors }}</div>
+                                {% endif %}
                             </div>
                         </div>
-
+                    
                         <div class="row">
-                            <div class="form-group col-md-6 col-lg-6 col-sm-12 mb-3">
-                                <label for="email">Email</label>
-                                <input type="email" class="form-control" name="email" id="email" placeholder="abc123@gmail.com">
+                            <div class="form-group col-md-4 col-lg-4 col-sm-12 mb-3">
+                                {{ form.email.label }}<span class="text-danger">*</span>
+                                {{ form.email }}
+                                {% if form.email.errors %}
+                                    <div class="text-danger">{{ form.email.errors }}</div>
+                                {% endif %}
                             </div>
-                            <div class="form-group col-md-6 col-lg-6 col-sm-12 mb-3">
-                                <label for="hobbies">Hobbies</label>
-                                <input type="text" class="form-control" id="hobbies" name="hobbies" placeholder="Enter hobbies (comma-separated)">
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-4">
-                                <label for="gender" class="form-label">Gender</label>
+                            
+                            <div class="form-group col-md-4 col-lg-4 col-sm-12 mb-3">
+                                {{ form.gender.label }}
                                 <select id="gender" name="gender" class="form-select">
+                                    <!-- Default "None" option -->
+                                    <option value="" selected>Select Gender</option>
                                     {% for gender in choices_gender %}
                                         {% for name, value in gender.items %}
-                                            <option value="{{ name }}">{{ value }}</option>
+                                            <option value="{{ name }}" {% if user.gender == name %}selected{% endif %}>{{ value }}</option>
                                         {% endfor %}
                                     {% endfor %}
                                 </select>
                             </div>
-            
-                            <div class="col-md-4">
-                                <label for="gender" class="form-label">Relationship Status</label>
+
+                            <div class="form-group col-md-4 col-lg-4 col-sm-12 mb-3">
+                                {{ form.relationship_status.label }}
                                 <select id="relationship_status" name="relationship_status" class="form-select">
-                                    {% for choices_relationship in choices_relationship_status %}
+                                    <!-- Default "None" option -->
+                                    <option value="" selected>Select Status</option>
+                                    {% for choices_relationship in choices_relationship %}
                                         {% for name, value in choices_relationship.items %}
-                                            <option value="{{ value }}">{{ name }}</option>
+                                            <option value="{{ name }}" {% if user.relationship_status == name %}selected{% endif %}>{{ value }}</option>
                                         {% endfor %}
                                     {% endfor %}
                                 </select>
                             </div>
-            
-                            
                         </div>
                         <div class="row">
-                            <div class="form-group col-md-6 col-lg-6 col-sm-12 mb-3">
-                                <label for="dob">D.O.B</label>
-                                <input type="date" name="dob" class="form-control" id="dob">
+                            <div class="form-group col-md-4 col-lg-4 col-sm-12 mb-3">
+                                {{ form.hobbies.label }}
+                                {{ form.hobbies }}
+                                {% if form.hobbies.errors %}
+                                    <div class="text-danger">{{ form.hobbies.errors }}</div>
+                                {% endif %}
                             </div>
-                            <div class="form-group col-md-6 col-lg-6 col-sm-12 mb-3">
-                                <label for="address">Address</label>
-                                <textarea type="text" name="address" class="form-control" id="address" placeholder="Enter Address"></textarea>
+                            
+
+                            <div class="form-group col-md-4 col-lg-4 col-sm-12 mb-3">
+                                {{ form.dob.label }}
+                                {{ form.dob }}
+                                {% if form.dob.errors %}
+                                    <div class="text-danger">{{ form.dob.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="form-group col-md-4 col-lg-4 col-sm-12 mb-3">
+                                {{ form.address.label }}
+                                {{ form.address }}
+                                {% if form.address.errors %}
+                                    <div class="text-danger">{{ form.address.errors }}</div>
+                                {% endif %}
                             </div>
                         </div>
+                    
                         <div class="text-start">
                             <a href="{% url 'user_list' %}" class="btn btn-sm btn-outline-secondary">Back</a>
                             <button type="submit" class="btn btn-sm btn-primary">Save</button>
                         </div>
-                    </form>
+                    </form>    
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+
+<script>
+    $(document).ready(function () {
+        $("#user_form").validate({
+            rules: {
+                first_name: {
+                    required: true,
+                    minlength: 2,
+                    maxlength: 50
+                },
+                last_name: {
+                    required: true,
+                    minlength: 2,
+                    maxlength: 150
+                },
+                email: {
+                    required: true,
+                    maxlength: 150
+                },
+            },
+            messages: {
+                first_name: {
+                    required: "Please enter firstname.",
+                    minlength: "Firstname must be at least 2 characters.",
+                    maxlength: "Firstname cannot exceed 50 characters."
+                },
+                last_name: {
+                    required: "Please enter lastname.",
+                    minlength: "Lastname must be at least 2 characters.",
+                    maxlength: "Lastname cannot exceed 150 characters."
+                },
+                email: {
+                    required: "Please enter email.",
+                    maxlength: "Email cannot exceed 150 characters."
+                },
+            },
+            errorPlacement: function (error, element) {
+                error.addClass('error');  // Add 'error' class to style the error message
+                error.insertAfter(element); // Place the error message after the input field
+            }
+        });
+    });
+</script>
+
+<style>
+    .error {
+        color: red;
+        font-size: 0.875rem; /* Optional: Adjust font size */
+        font-weight: normal;
+    }
+</style>
+
 
 {% endblock %}

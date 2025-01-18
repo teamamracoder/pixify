@@ -54,26 +54,32 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
-    const userImage = document.getElementById("userImage");
-    const userDropdown = document.getElementById("userDropdown");
+    const userImages = document.querySelectorAll(".userImage");
+    const userDropdowns = document.querySelectorAll(".userDropdown");
 
-    if (userImage && userDropdown) {
-        userImage.addEventListener("click", function (event) {
-            event.stopPropagation();
-            if (userDropdown.style.display === "none" || userDropdown.style.display === "") {
-                userDropdown.style.display = "block";
-            } else {
-                userDropdown.style.display = "none";
-            }
-        });
+    if (userImages.length > 0 && userDropdowns.length > 0) {
+        userImages.forEach((userImage, index) => {
+            const userDropdown = userDropdowns[index];
 
-        document.addEventListener("click", function (event) {
-            if (!userImage.contains(event.target) && !userDropdown.contains(event.target)) {
-                userDropdown.style.display = "none";
+            if (userDropdown) {
+                userImage.addEventListener("click", function (event) {
+                    console.log("Working");
+                    event.stopPropagation();
+
+                    if (userDropdown.style.display === "none" || userDropdown.style.display === "") {
+                        userDropdown.style.display = "block";
+                    } else {
+                        userDropdown.style.display = "none";
+                    }
+                });
+                document.addEventListener("click", function (event) {
+                    if (!userImage.contains(event.target) && !userDropdown.contains(event.target)) {
+                        userDropdown.style.display = "none";
+                    }
+                });
             }
         });
     }
-
 
 });
 
@@ -279,3 +285,7 @@ document.addEventListener('DOMContentLoaded', function () {
     })
 });
 //For Tooltip--Priya End
+
+
+
+//create post for priya

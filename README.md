@@ -8,7 +8,7 @@
 
 ## Step 1: Clone Repository and Switch to new Branch
 
-    > git clone https://token@github.com/teamamracoder/pixify.git
+    > git clone https://token@github.com/teamamracoder/pixify.git 
     > cd pixify
     > git checkout -b writeYourNewBanchName
     > code .
@@ -61,3 +61,9 @@
 ## Step 7: Run the server
 
     > python manage.py runserver
+
+## Step 8: 
+    - If got this error - "ModuleNotFoundError: No module named 'user_agents'"
+        -step 8.1: install 
+            > pip install pyyaml ua-parser user-agents
+
