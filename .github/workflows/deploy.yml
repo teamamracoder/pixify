@@ -1,0 +1,47 @@
+name: Django CI/CD
+
+on:
+  push:
+    branches:
+      - dev
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.12.7
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Deploy to DigitalOcean
+      env:
+        USER: root
+        HOST: 139.59.88.36
+        PROJECT_PATH: /var/www/pixify
+      run: |
+        # Write the private key to a temporary file
+        echo "${{ secrets.MYKEY }}" > private_key
+        chmod 600 private_key
+
+        # SSH to the server and execute commands
+        ssh -i private_key -o StrictHostKeyChecking=no $USER@$HOST <<EOF
+        cd $PROJECT_PATH
+        git pull
+        source venv/bin/activate
+        pip install -r requirements.txt
+        python manage.py migrate
+        sudo systemctl restart nginx
+        EOF
+
+        # Clean up the private key
+        rm private_key
