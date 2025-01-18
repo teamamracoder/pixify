@@ -114,7 +114,7 @@ class ManagePostDeleteView(View):
         services.post_service.delete_post(post)
         return redirect('post_list')
 
-class AdminTogglePostActiveView(View):
+class ManageTogglePostActiveView(View):
     def post(self, request, post_id):
         post = services.post_service.get_post(post_id)
         post.is_active = not post.is_active  # Toggle active status
