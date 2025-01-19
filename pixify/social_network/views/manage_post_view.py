@@ -82,7 +82,7 @@ class ManagePostDetailView(View):
         }
         return render(request, 'adminuser/post/detail.html', {'post_dic':post_dic,'comment_count':comment_count})
 
-class AdminPostUpdateView(View):
+class ManagePostUpdateView(View):
     def get(self, request, post_id):
         post = services.post_service.get_post(post_id)
         return render(request, 'adminuser/post/update.html', {'post': post})

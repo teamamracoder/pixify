@@ -1,18 +1,18 @@
-# from datetime import datetime
-# from pyexpat.errors import messages
-# from django.http import HttpResponseBadRequest
-# from django.shortcuts import get_object_or_404, render, redirect
-# from django.views import View
+from datetime import datetime
+from pyexpat.errors import messages
+from django.http import HttpResponseBadRequest
+from django.shortcuts import get_object_or_404, render, redirect
+from django.views import View
 
-# from social_network.utils.common_utils import print_log
-# from social_network.constants.default_values import SortingOrder
-# from social_network.decorators.exception_decorators import catch_error
-# from social_network.packages.response import success_response
+from social_network.utils.common_utils import print_log
+from social_network.constants.default_values import SortingOrder
+from social_network.decorators.exception_decorators import catch_error
+from social_network.packages.response import success_response
 
-# from ..forms.manage_user_forms import ManageUserUpdateForm
-# from ..models.user_model import User
+from ..forms.manage_user_forms import ManageUserUpdateForm
+from ..models.user_model import User
 
-# from ..decorators.exception_decorators import catch_error
+from ..decorators.exception_decorators import catch_error
 
 from .. import services
 from ..constants import Gender, RelationShipStatus, Role
@@ -45,65 +45,65 @@ from ..forms import ManageUserCreateForm
 #         data["choices_gender"] = [{gender.value: gender.name} for gender in Gender]
 
         # return
-        return render(
-            request,
-            'adminuser/user/list.html',
-            success_response("User data fetched successfully", data)
-        )
+        # return render(
+        #     request,
+        #     'adminuser/user/list.html',
+        #     success_response("User data fetched successfully", data)
+        # )
 
 
-class ManageUserCreateView(View):
-    @catch_error
-    def get(self, request):
-        form = ManageUserCreateForm()
-        return render(request, 'adminuser/user/create.html', {"form": form})
-
+# class ManageUserCreateView(View):
 #     @catch_error
-#     def post(self, request):
-#         user = request.user
-#         form = ManageUserCreateForm(request.POST)
-#         if form.is_valid():
-#             # Get the cleaned data from the form
-#             user_data = {
-#                 'first_name': form.cleaned_data['first_name'],
-#                 'middle_name': form.cleaned_data['middle_name'],
-#                 'last_name': form.cleaned_data['last_name'],
-#                 'email': form.cleaned_data['email'],
-#                 'gender': form.cleaned_data['gender'],
-#                 'address': form.cleaned_data['address'],
-#                 'relationship_status': form.cleaned_data['relationship_status'],
-#                 'hobbies': form.cleaned_data['hobbies'],
-#                 'roles': [2],  # Set the default role
-#                 'created_by': user
-#             }
+#     def get(self, request):
+#         form = ManageUserCreateForm()
+#         return render(request, 'adminuser/user/create.html', {"form": form})
 
-#             # Get the 'dob' field
-#             dob = form.cleaned_data.get('dob')
-#             if not dob or dob == '':
-#                 # Set a default dob value if empty
-#                 dob = datetime(2000, 1, 1)  # Default Date: 2000-01-01
+# #     @catch_error
+# #     def post(self, request):
+# #         user = request.user
+# #         form = ManageUserCreateForm(request.POST)
+# #         if form.is_valid():
+# #             # Get the cleaned data from the form
+# #             user_data = {
+# #                 'first_name': form.cleaned_data['first_name'],
+# #                 'middle_name': form.cleaned_data['middle_name'],
+# #                 'last_name': form.cleaned_data['last_name'],
+# #                 'email': form.cleaned_data['email'],
+# #                 'gender': form.cleaned_data['gender'],
+# #                 'address': form.cleaned_data['address'],
+# #                 'relationship_status': form.cleaned_data['relationship_status'],
+# #                 'hobbies': form.cleaned_data['hobbies'],
+# #                 'roles': [2],  # Set the default role
+# #                 'created_by': user
+# #             }
 
-#             user_data['dob'] = dob
+# #             # Get the 'dob' field
+# #             dob = form.cleaned_data.get('dob')
+# #             if not dob or dob == '':
+# #                 # Set a default dob value if empty
+# #                 dob = datetime(2000, 1, 1)  # Default Date: 2000-01-01
 
-#             # Check if dob is invalid (e.g., '0000-00-00')
-#             if dob.year == 0 and dob.month == 0 and dob.day == 0:
-#                 dob = datetime(2000, 1, 1)  # Set to a valid default date
+# #             user_data['dob'] = dob
 
-#             # Pass the user data to the service function to create the user
-#             services.manage_user_service.manage_create_user(**user_data)
+# #             # Check if dob is invalid (e.g., '0000-00-00')
+# #             if dob.year == 0 and dob.month == 0 and dob.day == 0:
+# #                 dob = datetime(2000, 1, 1)  # Set to a valid default date
 
-#             # Redirect to the user list after successful creation
-#             return redirect('user_list')
+# #             # Pass the user data to the service function to create the user
+# #             services.manage_user_service.manage_create_user(**user_data)
 
-#         # If form is invalid, render the form with errors
-#         return render(request, 'adminuser/user/create.html', success_response(
-#                 message=messages),
-#                 {"form": form})
+# #             # Redirect to the user list after successful creation
+# #             return redirect('user_list')
 
-class ManageUserDetailView(View):
-    def get(self, request, user_id):
-        user = services.manage_user_service.manage_get_user(user_id)
-        return render(request, 'adminuser/user/detail.html', {'user': user})
+# #         # If form is invalid, render the form with errors
+# #         return render(request, 'adminuser/user/create.html', success_response(
+# #                 message=messages),
+# #                 {"form": form})
+
+# class ManageUserDetailView(View):
+#     def get(self, request, user_id):
+#         user = services.manage_user_service.manage_get_user(user_id)
+#         return render(request, 'adminuser/user/detail.html', {'user': user})
 
 class ManageUserUpdateView(View):
     @catch_error
