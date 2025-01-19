@@ -1,111 +1,233 @@
-{% extends "enduser/base.html" %} {% block title %}Short{% endblock %}
-{% block content %} {% load static %}
+{% extends "enduser/base.html" %}
+{% block title %}Short{% endblock %}
+{% block content %}
+{% load static %}
 
-  <div class="short-content">
-    <div class="video-box">
-      <!-- Reels header inside the video box -->
-      <div class="reels-header">Shorts</div>
-      
-      <p>Video Content</p>
+<div class="short-content">
+    <div class="video-box" id="videoBox"> <!-- Added ID for the video box -->
+        <!-- Reels header inside the video box -->
+        <div class="reels-header">Shorts</div>
+        
+        <video id="myVideo" autoplay>
+           <source src="/static/media/12621639_1080_1920_30fps.mp4" type="video/mp4"> 
+        </video>
 
-      <!-- Right icons -->
-      <div class="right-icons">
-        <div>
-          <span class="icon">❤️</span>
-          <span>619K</span>
+        <!-- Username and Description -->
+        <div class="video-info">
+            <div class="username">Username</div>
+            <div class="description">This is the description of the video. It can be up to a few lines long. If it's too long, it should break and stay inside the box.</div>
         </div>
-        <div>
-          <span class="icon">💬</span>
-          <span>2,851</span>
+
+        <!-- Right icons -->
+        <div class="right-icons">
+            <div>
+                <i id="heartIcon" class="bi bi-heart" style="font-size: 24px;"></i>
+                <span>619K</span>
+            </div>
+            <div>
+                <span class="chat-icon"><i class="bi bi-chat"></i></span>
+                <span>2,851</span>
+            </div>
+            <div>
+                <span class="icon"><i class="bi bi-send"></i></span>
+            </div>
+            <div>
+                <span class="icon">⋮</span> <!-- Three dots icon -->
+            </div>
         </div>
-        <div>
-          <span class="icon">🔗</span>
-        </div>
-        <div>
-          <span class="icon">⋮</span> <!-- Three dots icon -->
-        </div>
-      </div>
     </div>
-  </div>
+</div>
+
+<script>
+
+  document.addEventListener('DOMContentLoaded', function() {
+  const heartIcon = document.getElementById('heartIcon');
+  const videoBox = document.getElementById('videoBox');
+  const videoElement = document.getElementById('myVideo');  // The video element
+  
+  let holdTimer;  // Variable to store the setTimeout reference
+
+  // Toggle heart icon on single click
+  if (heartIcon) {
+    heartIcon.addEventListener('click', function() {
+      // Toggle between filled and unfilled heart
+      if (heartIcon.classList.contains('bi-heart')) {
+        heartIcon.classList.remove('bi-heart');
+        heartIcon.classList.add('bi-heart-fill');
+        heartIcon.style.color = 'red';  // Set the color to red when filled
+      } else {
+        heartIcon.classList.remove('bi-heart-fill');
+        heartIcon.classList.add('bi-heart');
+        heartIcon.style.color = '';  // Reset the color to default (unfilled heart)
+      }
+    });
+  }
+
+  // Fill the heart icon and change color when clicking anywhere on the video box
+  if (videoBox) {
+    videoBox.addEventListener('dblclick', function() {
+      heartIcon.classList.remove('bi-heart');
+      heartIcon.classList.add('bi-heart-fill');
+      heartIcon.style.color = 'red';  // Fill the heart and set it red
+    });
+    
+    // Start the timer when mouse button is pressed down
+    videoBox.addEventListener('mousedown', function() {
+      holdTimer = setTimeout(function() {
+        if (videoElement) {
+          videoElement.pause();  // Pause the video after holding for 3 seconds
+        }
+      }, 500);  // Set timer for 3 seconds
+    });
+
+    // Clear the timer and resume the video if mouse is released before 3 seconds
+    videoBox.addEventListener('mouseup', function() {
+      clearTimeout(holdTimer);  // Clear the timer if the user releases before 3 seconds
+      if (videoElement) {
+        videoElement.play();  // Resume video if the mouse is released
+      }
+    });
+
+    // In case the mouse leaves the video box while holding down
+    videoBox.addEventListener('mouseleave', function() {
+      clearTimeout(holdTimer);  // Clear the timer if mouse leaves
+      if (videoElement) {
+        videoElement.play();  // Resume video if mouse leaves the box
+      }
+    });
+  }
+});
+
+ 
+</script>
 
 <style>
+  .bi-heart-fill { color: red; }
 
+  .chat-icon {
+    transform: scaleX(-1);
+    right: 20px; 
+    bottom: 20px; 
+    font-size: 24px; 
+    cursor: pointer; 
+    z-index: 1000;
+  }
 
-    .short-content {
-      flex: 1;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      margin-top: 35px;
-    
-    }
+  .short-content {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 35px;    
+    height: 100vh;
+  }      
 
-    .video-box {
-      width: 350px; /* Increased width of the video box */
-      height: 600px; /* Increased height of the video box */
-      background-color: #a2b9ff; /* Placeholder color */
-      position: relative; /* To allow positioning of elements inside */
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      color: #fff;
-      font-size: 18px;
-      border-radius: 12px; /* Rounded corners */
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Add a shadow for depth */
-    }
+  .video-box {
+    width: 350px; /* Increased width of the video box */
+    height: 600px; /* Increased height of the video box */
+    background-color: #a2b9ff; /* Placeholder color */
+    position: relative; /* To allow positioning of elements inside */
+    display: flex;
+    flex-direction: column; /* Layout as column */
+    justify-content: flex-start; /* Allow space for description and icons */
+    color: #fff;
+    font-size: 18px;
+    border-radius: 12px; /* Rounded corners */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Add a shadow for depth */
+  }
 
-    .reels-header {
-      position: absolute;
-      top: 16px; /* Distance from top of the video box */
-      left: 16px; /* Distance from left of the video box */
-      font-size: 20px;
-      font-weight: bold;
-      color: #fff;
-      
-      
-      padding: 8px 12px;
-      border-radius: 8px; /* Rounded corners for header */
-    }
+  .video-box video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Adjusts the video to cover the box without stretching */
+    border-radius: 12px; /* Ensure the video fits the rounded corners */
+  }
 
-    .right-icons {
-      position: absolute;
-      right: 16px; /* Align icons to the right */
-      bottom: 16px; /* Place icons near the bottom */
-      display: flex;
-      flex-direction: column;
-      gap: 24px; /* Space between icons */
-      font-size: 14px;
-      text-align: center;
-      color: #fff;
-    }
+  .reels-header {
+    position: absolute;
+    top: 16px; /* Distance from top of the video box */
+    left: 16px; /* Distance from left of the video box */
+    font-size: 20px;
+    font-weight: bold;
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 8px; /* Rounded corners for header */
+  }
 
-    .right-icons div {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      font-size: 14px;
-    }
+  .video-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    position: absolute;
+    bottom: 15px; /* Ensure there's space for the icons */
+    left: 16px;
+    right: 16px; /* Ensure text fits properly inside the box */
+    color: #fff;
+    font-size: 16px;
+    max-height: 100px; /* Allow description to take space but not overflow */
+    overflow: hidden;
+    word-wrap: break-word; /* Word breaks to avoid overflow */
+    overflow-wrap: break-word;
+  }
 
-    .right-icons span.icon {
-      font-size: 24px; /* Icon size */
-    }
+  .username {
+    font-weight: bold;
+    font-size: 18px;
+    white-space: nowrap; /* Prevent username from breaking */
+    overflow: hidden; /* Hide overflowing text */
+    text-overflow: ellipsis; /* Add ellipsis if the text overflows */
+  }
 
-    .bottom-nav {
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
-      background-color: #000; /* Black background for nav */
-      padding: 10px 0;
-      position: fixed;
-      bottom: 0;
-      width: 100%;
-    }
+  .description {
+    width: 88%;
+    font-size: 14px;
+    margin-top: 5px;
+    line-height: 1.4;
+    word-break: break-word; /* This is more reliable than word-wrap */
+    overflow-wrap: break-word; /* Ensures that long words break correctly */
+    flex-grow: 1; /* Allow the description to grow if necessary */
+    white-space: normal; /* Ensure text can wrap normally */
+  }
 
-    .bottom-nav a {
-      color: #fff;
-      text-decoration: none;
-      font-size: 14px;
-      text-align: center;
-    }
-  </style>
+  .right-icons {
+    position: absolute;
+    right: 16px;
+    bottom: 16px; /* Keeps icons near the bottom */
+    display: flex;
+    flex-direction: column;
+    gap: 16px; /* Reduced gap between icons */
+    font-size: 14px;
+    text-align: center;
+    color: #fff;
+  }
+
+  .right-icons div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 14px;
+  }
+
+  .right-icons span.icon {
+    font-size: 24px; /* Icon size */
+  }
+
+  .bottom-nav {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    background-color: #000; /* Black background for nav */
+    padding: 10px 0;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+  }
+
+  .bottom-nav a {
+    color: #fff;
+    text-decoration: none;
+    font-size: 14px;
+    text-align: center;
+  }
+</style>
 {% endblock %}
