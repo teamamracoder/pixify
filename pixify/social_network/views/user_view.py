@@ -14,11 +14,12 @@
 
 # from ..decorators.exception_decorators import catch_error
 
-# from .. import services
-# from ..constants import Gender, RelationShipStatus, Role
-# from django.core.paginator import Paginator   
-# from django.http import JsonResponse
-# from ..forms import ManageUserCreateForm
+from .. import services
+from ..constants import Gender, RelationShipStatus, Role
+from django.core.paginator import Paginator
+from django.http import JsonResponse
+from ..forms import ManageUserCreateForm
+
 
 # from user_agents import parse
 
@@ -43,19 +44,19 @@
 #         # add more data
 #         data["choices_gender"] = [{gender.value: gender.name} for gender in Gender]
 
-#         # return
-#         return render(
-#             request,
-#             'adminuser/user/list.html',
-#             success_response("User data fetched successfully", data)
-#         ) 
-# class ManageUserCreateView(View):
-#     @catch_error
-#     def get(self, request):
-#         form = ManageUserCreateForm()
-#         choices_gender = [{type.value: type.name} for type in Gender]
-#         choices_relationship = [{type.value: type.name} for type in RelationShipStatus]
-#         return render(request, 'adminuser/user/create.html', {"form": form,"choices_gender":choices_gender,"choices_relationship":choices_relationship})
+        # return
+        return render(
+            request,
+            'adminuser/user/list.html',
+            success_response("User data fetched successfully", data)
+        )
+
+
+class ManageUserCreateView(View):
+    @catch_error
+    def get(self, request):
+        form = ManageUserCreateForm()
+        return render(request, 'adminuser/user/create.html', {"form": form})
 
 #     @catch_error
 #     def post(self, request):
@@ -99,53 +100,22 @@
 #                 message=messages),
 #                 {"form": form})
 
-# class ManageUserDetailView(View):
-#     def get(self, request, user_id):
-#         user = User.objects.get(id=user_id)
-#         user_agent = request.META.get('HTTP_USER_AGENT', '')
-#         parsed_user_agent = parse(user_agent)
+class ManageUserDetailView(View):
+    def get(self, request, user_id):
+        user = services.manage_user_service.manage_get_user(user_id)
+        return render(request, 'adminuser/user/detail.html', {'user': user})
 
-#         # Extract browser info
-#         browser = parsed_user_agent.browser.family
-#         os = parsed_user_agent.os.family
-#         device = parsed_user_agent.device.family
-
-#         # Add this information to the context
-#         context = {
-#             'user': user,
-#             'browser': browser,
-#             'os': os,
-#             'device': device,
-#         }
-#         user = services.manage_user_service.manage_get_user(user_id)
-#         return render(request, 'adminuser/user/detail.html', {'user': user, 'context':context})
-    
-# class ManageUserUpdateView(View):
-#     @catch_error
-#     def get(self, request, user_id):
-#         choices_gender = [{gender.value: gender.name} for gender in Gender]
-#         choices_relationship_status = [{relationship_status.value: relationship_status.name} for relationship_status in RelationShipStatus]
-#         user = get_object_or_404(User, id=user_id)
-
-#         # Pre-populate form with existing user data
-#         form = ManageUserUpdateForm(initial={
-#             'first_name': user.first_name,
-#             'middle_name': user.middle_name,
-#             'last_name': user.last_name,
-#             'email': user.email,
-#             'gender': user.gender,
-#             'address': user.address,
-#             'relationship_status': user.relationship_status,
-#             'hobbies': user.hobbies,
-#             'dob': user.dob
-#         })
-
-#         return render(request, 'adminuser/user/update.html', {
-#             'form': form,
-#             'user': user,
-#             'choices_gender': choices_gender,
-#             'choices_relationship_status': choices_relationship_status
-#         })
+class ManageUserUpdateView(View):
+    @catch_error
+    def get(self, request, user_id):
+        user = get_object_or_404(User, id=user_id)  # Assuming you have a User model
+        form = ManageUserUpdateForm(initial={
+            'first_name': user.first_name,
+            'middle_name': user.middle_name,
+            'last_name': user.last_name,
+            'email': user.email
+        })
+        return render(request, 'adminuser/user/update.html', {"form": form, "user_id": user.id})
 
 #     @catch_error
 #     def post(self, request, user_id):
@@ -195,26 +165,26 @@
 #         user = services.manage_user_service.manage_get_user(user_id)
 #         return render(request, 'adminuser/user/delete.html', {'user': user})
 
-#     def post(self, request, user_id):
-#         user = services.manage_user_service.manage_get_user(user_id)
-#         services.user_service.delete_user(user)
-#         return redirect('user_list')
-    
-# class ManageToggleUserActiveView(View):
-#     def post(self, request, user_id):
-#         user = services.manage_user_service.manage_get_user(user_id)
-#         user.is_active = not user.is_active  # Toggle active status
-#         user.save()
-#         return JsonResponse({'is_active': user.is_active})
+    def post(self, request, user_id):
+        user = services.manage_user_service.manage_get_user(user_id)
+        services.user_service.delete_user(user)
+        return redirect('user_list')
 
-# class ManageUserProfileView(View):
-#     def get(self, request):
-#         return render(request, 'adminuser/user/user_profile.html')
-    
-# class ChangeMyThemeView(View):
-#     def post(self, request):
-#         theme = request.POST.get('theme')
-#         user = services.user_service.get_user(request.user.id)
-#         services.user_service.change_theme(user, ui_mode=theme)
-#         return JsonResponse(success_response('Theme changed to {theme} mode', {'theme': theme}))
+class ManageToggleUserActiveView(View):
+    def post(self, request, user_id):
+        user = services.manage_user_service.manage_get_user(user_id)
+        user.is_active = not user.is_active  # Toggle active status
+        user.save()
+        return JsonResponse({'is_active': user.is_active})
+
+class ManageUserProfileView(View):
+    def get(self, request):
+        return render(request, 'adminuser/user/user_profile.html')
+
+class ChangeMyThemeView(View):
+    def post(self, request):
+        theme = request.POST.get('theme')
+        user = services.user_service.get_user(request.user.id)
+        services.user_service.change_theme(user, ui_mode=theme)
+        return JsonResponse(success_response('Theme changed to {theme} mode', {'theme': theme}))
 

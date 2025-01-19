@@ -16,7 +16,7 @@
             <h2 class="text-center mb-4">Posts</h2>
             <div class="d-flex justify-content-between mb-3">
                 <div>
-                    <button class="btn btn-primary btn-sm"><a href="{% url 'manage_post_create' %}" class="text-white text-decoration-none">Add Post</a></button>
+                    <button class="btn btn-primary btn-sm"><a href="{% url 'manage_post_create' %}" class="text-white text-decoration-none"></a>Add Post</button>
                 </div>
                 <form method="get" action="{% url 'manage_post_list' %}">
                     <div class="input-group" style="max-width: 300px;">
@@ -26,6 +26,7 @@
                     </div>
                 </form>
             </div>
+            
             <div class="table-responsive">
                 <table class="table table-bordered">
                     <thead class="table-info text-white"> 
@@ -53,8 +54,9 @@
                             </td>
                             <td>{{ post.title }}</td>
                             <td>
-                                {{ post.description }}
+                                {{ post.id }}
                             </td>
+                            
                                 <td>
                                     <button class="btn btn-sm toggle-status" data-post-id="{{ post.id }}">
                                         {% if post.is_active %}
@@ -64,6 +66,8 @@
                                         {% endif %}
                                     </button>
                                 </td>
+                                
+                            
                         </tr>
                         {% endfor %}
                     </tbody>
