@@ -1,4 +1,7 @@
 from django.db import models
+# badhan
+# from social_network.models import Follower
+
 
 class Follower(models.Model):
     user_id = models.ForeignKey('User', on_delete=models.CASCADE, related_name='fk_user_followers_users_id')
@@ -19,3 +22,4 @@ class Follower(models.Model):
 
     def __str__(self):
          return f"ID: {self.id}, Created at: {self.created_at}, Active: {self.is_active}"
+    

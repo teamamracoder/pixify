@@ -22,6 +22,7 @@ INSTALLED_APPS = [
     'social_network',
     'corsheaders',  # For handling CORS
     'channels',
+    'django.contrib.humanize',
 ]
 
 AUTHENTICATION_BACKENDS = [
