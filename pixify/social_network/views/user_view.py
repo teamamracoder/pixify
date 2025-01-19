@@ -1,18 +1,18 @@
-# from datetime import datetime
-# from pyexpat.errors import messages
-# from django.http import HttpResponseBadRequest
-# from django.shortcuts import get_object_or_404, render, redirect
-# from django.views import View
+from datetime import datetime
+from pyexpat.errors import messages
+from django.http import HttpResponseBadRequest
+from django.shortcuts import get_object_or_404, render, redirect
+from django.views import View
 
-# from social_network.utils.common_utils import print_log
-# from social_network.constants.default_values import SortingOrder
-# from social_network.decorators.exception_decorators import catch_error
-# from social_network.packages.response import success_response
+from social_network.utils.common_utils import print_log
+from social_network.constants.default_values import SortingOrder
+from social_network.decorators.exception_decorators import catch_error
+from social_network.packages.response import success_response
 
-# from ..forms.manage_user_forms import ManageUserUpdateForm
-# from ..models.user_model import User
+from ..forms.manage_user_forms import ManageUserUpdateForm
+from ..models.user_model import User
 
-# from ..decorators.exception_decorators import catch_error
+from ..decorators.exception_decorators import catch_error
 
 from .. import services
 from ..constants import Gender, RelationShipStatus, Role
@@ -45,11 +45,11 @@ from ..forms import ManageUserCreateForm
 #         data["choices_gender"] = [{gender.value: gender.name} for gender in Gender]
 
         # return
-        return render(
-            request,
-            'adminuser/user/list.html',
-            success_response("User data fetched successfully", data)
-        )
+        # return render(
+        #     request,
+        #     'adminuser/user/list.html',
+        #     success_response("User data fetched successfully", data)
+        # )
 
 
 class ManageUserCreateView(View):
