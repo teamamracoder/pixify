@@ -165,6 +165,9 @@ urlpatterns = [
     # path('', views.UserStoryListView.as_view(), name='Userstory_list'),
     path('uploadStory/', views.UploadStoryView.as_view(),name='uploadStory'),
 
+    #short
+    path('short', views.ShortListView.as_view(),name='short'),
+
 ]
 
 

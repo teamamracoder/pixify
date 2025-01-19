@@ -1,0 +1,111 @@
+{% extends "enduser/base.html" %} {% block title %}Short{% endblock %}
+{% block content %} {% load static %}
+
+  <div class="short-content">
+    <div class="video-box">
+      <!-- Reels header inside the video box -->
+      <div class="reels-header">Shorts</div>
+      
+      <p>Video Content</p>
+
+      <!-- Right icons -->
+      <div class="right-icons">
+        <div>
+          <span class="icon">❤️</span>
+          <span>619K</span>
+        </div>
+        <div>
+          <span class="icon">💬</span>
+          <span>2,851</span>
+        </div>
+        <div>
+          <span class="icon">🔗</span>
+        </div>
+        <div>
+          <span class="icon">⋮</span> <!-- Three dots icon -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+<style>
+
+
+    .short-content {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-top: 35px;
+    
+    }
+
+    .video-box {
+      width: 350px; /* Increased width of the video box */
+      height: 600px; /* Increased height of the video box */
+      background-color: #a2b9ff; /* Placeholder color */
+      position: relative; /* To allow positioning of elements inside */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #fff;
+      font-size: 18px;
+      border-radius: 12px; /* Rounded corners */
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Add a shadow for depth */
+    }
+
+    .reels-header {
+      position: absolute;
+      top: 16px; /* Distance from top of the video box */
+      left: 16px; /* Distance from left of the video box */
+      font-size: 20px;
+      font-weight: bold;
+      color: #fff;
+      
+      
+      padding: 8px 12px;
+      border-radius: 8px; /* Rounded corners for header */
+    }
+
+    .right-icons {
+      position: absolute;
+      right: 16px; /* Align icons to the right */
+      bottom: 16px; /* Place icons near the bottom */
+      display: flex;
+      flex-direction: column;
+      gap: 24px; /* Space between icons */
+      font-size: 14px;
+      text-align: center;
+      color: #fff;
+    }
+
+    .right-icons div {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-size: 14px;
+    }
+
+    .right-icons span.icon {
+      font-size: 24px; /* Icon size */
+    }
+
+    .bottom-nav {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      background-color: #000; /* Black background for nav */
+      padding: 10px 0;
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+    }
+
+    .bottom-nav a {
+      color: #fff;
+      text-decoration: none;
+      font-size: 14px;
+      text-align: center;
+    }
+  </style>
+{% endblock %}
