@@ -37,9 +37,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
         user = self.scope['user']
 
         # Debug logs
-        print(f"Received action: {action}, message_id: {message_id}, chat_id: {chat_id}, user: {user}")
+        # print(f"Received action: {action}, message_id: {message_id}, chat_id: {chat_id}, user: {user}")
 
-        print(text_data_json)
+        # print(text_data_json)
 
         if action == 'create':
             await self.create_message(text_data_json, user)
@@ -84,7 +84,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 if user_obj:
                     mention_ids.append(user_obj.id)
 
-        print('Mentioned IDs:', mention_ids)
+        # print('Mentioned IDs:', mention_ids)
         for mentioned_user in mention_ids:
             mentioned_user_instance = await sync_to_async(user_service.get_user)(mentioned_user)
             await sync_to_async(message_mention_service.create_message_mentions)(message, mentioned_user_instance, user)
@@ -127,15 +127,15 @@ class ChatConsumer(AsyncWebsocketConsumer):
         current_mentions = await sync_to_async(message_mention_service.get_message_mentions)(message)
         current_mention_ids = set(await sync_to_async(lambda: list(current_mentions.values_list('user_id', flat=True)))())
         
-        print(current_mention_ids)
+        # print(current_mention_ids)
 
         # Calculate added and removed mentions
         new_mention_ids = set(mention_ids)
         removed_mentions = current_mention_ids - new_mention_ids
         added_mentions = new_mention_ids - current_mention_ids
         
-        print(added_mentions)
-        print(removed_mentions)
+        # print(added_mentions)
+        # print(removed_mentions)
 
         # Process removed mentions
         for mentioned_user in removed_mentions:
@@ -186,7 +186,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 if user_obj:
                     mention_ids.append(user_obj.id)
 
-        print('Mentioned IDs:', mention_ids)
+        # print('Mentioned IDs:', mention_ids)
         for mentioned_user in mention_ids:
             mentioned_user_instance = await sync_to_async(user_service.get_user)(mentioned_user)
             await sync_to_async(message_mention_service.create_message_mentions)(reply_message, mentioned_user_instance, user)
@@ -268,7 +268,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         message = event['message']
 
         # Debug log
-        print(f"Chat message event: {message}")
+        # print(f"Chat message event: {message}")
 
         await self.send(text_data=json.dumps({
             'type': 'message',
