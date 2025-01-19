@@ -16,7 +16,7 @@ urlpatterns = [
     path('admin/users/create/', views.ManageUserCreateView.as_view(), name='user_create'),
     path('admin/users/<int:user_id>/', views.ManageUserDetailView.as_view(), name='user_detail'),
     path('admin/users/<int:user_id>/update/', views.ManageUserUpdateView.as_view(), name='user_update'),
-    path('admin/users/<int:user_id>/delete/', views.ManageUserDeleteView.as_view(), name='user_delete'),
+    # path('admin/users/<int:user_id>/delete/', views.ManageUserDeleteView.as_view(), name='user_delete'),
 
     path('change-my-theme/', views.ChangeMyThemeView.as_view(), name='change_my_theme'),
 
@@ -42,7 +42,7 @@ urlpatterns = [
     path('admin/posts/<int:post_id>/update/', views.AdminPostUpdateView.as_view(), name='manage_post_update'),
 
     path('admin/posts/', views.ManagePostListView.as_view(), name='manage_post_list'),
-    path('admin/posts/toggle-active/<int:post_id>/', views.ManageTogglePostActiveView.as_view(), name='toggle_post_active'),
+    # path('admin/posts/toggle-active/<int:post_id>/', views.ManageTogglePostActiveView.as_view(), name='toggle_post_active'),
 
     path('admin/posts/create/', views.ManagePostCreateView.as_view(), name='manage_post_create'),
     path('admin/posts/', views.ManagePostListView.as_view(), name='manage_post_list'),
@@ -145,9 +145,9 @@ urlpatterns = [
 
     # path('posts/create/', views.UserPostCreatView.as_view()),
 
-    path('profile/verification/', views.UserVerificationView.as_view(),name=('Profile_verification')),
+    # path('profile/verification/', views.UserVerificationView.as_view(),name=('Profile_verification')),
 
-]
+
 
     #for enduser post
     path('posts/create/', views.UserPostCreatView.as_view(),name='userpost_create'),

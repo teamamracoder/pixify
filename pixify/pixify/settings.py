@@ -21,7 +21,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'social_network',
     'corsheaders',  # For handling CORS
-    'channels',,
+    'channels',
     'django.contrib.humanize',
 ]
 

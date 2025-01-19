@@ -22,9 +22,9 @@ class MemberListViewApi(View):
         user = request.user 
         chat_id = chat_id
         chat_member = chat_member_service.get_chat_members(chat_id)
-        print(chat_member)
+        # print(chat_member)
         member_data = follower_service.members_list_api(request, user,chat_member) 
-        print(member_data)
+        # print(member_data)
         return JsonResponse(member_data, safe=False)
 
     
