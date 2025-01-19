@@ -15,9 +15,9 @@ class Follower(models.Model):
     
     class Meta:
         db_table = 'followers'
-        constraints = [
-            models.UniqueConstraint(fields=['follower', 'following'], name='follow_pair'),
-            models.CheckConstraint(check=~models.Q(follower=models.F('following')), name='follower_not_equal_to_following')
+        constraints = [                       
+            models.CheckConstraint(check=~models.Q(user_id=models.F('following')),name='user_id_not_equal_to_following'),
+            models.CheckConstraint(check=~models.Q(user_id=models.F('follower')), name='user_id_not_equal_to_follower'),
         ]
 
     def __str__(self):
