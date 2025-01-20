@@ -864,7 +864,9 @@ socket.onmessage = function (event) {
       data.reply_username,
       data.reply_userPic,
       data.media_urls || [],
-      data.user === currentUser
+      data.user === currentUser,
+      data.reactions || [],
+
     );
   } else if (data.update) {
     // Handle message update
@@ -880,7 +882,9 @@ socket.onmessage = function (event) {
       data.reply_userPic,
       data.media_urls || [],
       data.user === currentUser,
-      data.seen_by_all
+      data.seen_by_all,
+      data.reactions || [],
+
     );
   } else if (data.deleted === true && data.message_id) {
     const messageId = data.message_id;
@@ -902,10 +906,21 @@ socket.onmessage = function (event) {
     }
   }
 };
+function generateReactionPopupContent(reactions, messageId) {
+    if (!reactions || reactions.length === 0) return "";
+    return reactions
+        .map(reaction => `
+            <span onclick="reactionManager.addReaction(${messageId}, ${reaction.id})">
+                ${reaction.value||escapejs}
+            </span>
+        `)
+        .join("");
+}
+
 
 
 // Function to append a message to the chat body
-function appendMessageToChat(message, messageId, messageTime, senderName, profilePic, reply, replyText, reply_username, reply_userPic, mediaUrls, isSent) {
+function appendMessageToChat(message, messageId, messageTime, senderName, profilePic, reply, replyText, reply_username, reply_userPic, mediaUrls, isSent,reactions) {
     console.log('Appending message:', { message, messageId, messageTime, senderName, profilePic, mediaUrls, isSent });
     
     const chatBody = document.querySelector(".chat-body");
@@ -932,7 +947,7 @@ function appendMessageToChat(message, messageId, messageTime, senderName, profil
             </div>
         `;
     }
-
+    const reactionPopupContent = generateReactionPopupContent(reactions, messageId);
     // Construct the message content
     const messageContent = `
         <div class="message-content">
@@ -957,7 +972,13 @@ function appendMessageToChat(message, messageId, messageTime, senderName, profil
                             <a href="#" onclick="replyMessage('${messageId}', '${senderName}', '${message}')">Reply</a>
                             <a href="#" onclick="openDeleteModal('${messageId}')">Delete</a>   
 
-                        </div>                                    
+                        </div> 
+                        <div class="reaction-container" id="reaction-container-${messageId}">
+                            <div class="reaction-popup" id="reaction-popup-${messageId}" style="display: none;">
+                                ${reactionPopupContent} 
+                            </div>
+                            <div class="reaction-display" id="reaction-display-${messageId}"></div>
+                        </div> 
                 </div>
         </div>
 
@@ -978,7 +999,7 @@ function appendMessageToChat(message, messageId, messageTime, senderName, profil
 
 
 // Function to update the message in the chat
-function updateMessageInChat(updatedMessage, messageId, messageTime, senderName, profilePic, reply, replyText, reply_username, reply_userPic, mediaUrls,isSent,seen_by_all) {
+function updateMessageInChat(updatedMessage, messageId, messageTime, senderName, profilePic, reply, replyText, reply_username, reply_userPic, mediaUrls,isSent,seen_by_all,reactions) {
     const messageDiv = document.getElementById(`message-${messageId}`);
     if (messageDiv) {
         let mediaPreview = "";
@@ -999,7 +1020,8 @@ function updateMessageInChat(updatedMessage, messageId, messageTime, senderName,
                 </div>
             `;
         }
-
+        
+        const reactionPopupContent = generateReactionPopupContent(reactions, messageId);   
         // Update the message text and media
         const messageContent = `
             <div class="message-content">
@@ -1025,6 +1047,12 @@ function updateMessageInChat(updatedMessage, messageId, messageTime, senderName,
                         <a href="#" onclick="replyMessage('${messageId}', '${senderName}', '${updatedMessage}')">Reply</a>
                         <a href="#" onclick="openDeleteModal('${messageId}')">Delete</a>                        
                     </div>
+                    <div class="reaction-container" id="reaction-container-${messageId}">
+                            <div class="reaction-popup" id="reaction-popup-${messageId}" style="display: none;">
+                                ${reactionPopupContent} 
+                            </div>
+                            <div class="reaction-display" id="reaction-display-${messageId}"></div>
+                        </div> 
                 </div>
             </div>
         `;
