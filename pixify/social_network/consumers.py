@@ -1,7 +1,7 @@
 from channels.generic.websocket import AsyncWebsocketConsumer
 import json
 from .models import Message, Chat, ChatMember,User
-from .services import message_service, message_mention_service, user_service,message_read_status_service,chat_service
+from .services import message_service, message_mention_service, user_service,message_read_status_service,chat_service,message_reaction_service
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from asgiref.sync import sync_to_async
@@ -235,7 +235,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
          # Convert datetime to string using a format for h:m AM/PM
         message_time_str = message.created_at.strftime('%I:%M %p')  # 12-hour format with AM/PM    
-        
+        reactions = await self.fetch_reactions()
         message_data = {
             'message_id': message.id,
             'message': message.text,
@@ -252,7 +252,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
             'del_type': message.delete_type,
             'del_by': message.deleted_by,
             'message_new': message_new,
-            'seen_by_all':seen_by_all
+            'seen_by_all':seen_by_all,
+            'reactions':reactions,
+
         }
 
         await self.channel_layer.group_send(
@@ -287,5 +289,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
             'del_type': message['del_type'],
             'del_by': message['del_by'],
             'message_new': message['message_new'],
-            'seen_by_all':message['seen_by_all']
+            'seen_by_all':message['seen_by_all'],
+            'reactions': message['reactions'],
+
         }))
+
+    async def fetch_reactions(self):
+        reactions = await sync_to_async(message_reaction_service.show_reactions)()
+        return reactions
+
