@@ -15,6 +15,16 @@
                 <img src="{{ chat.chat_cover|default:'\static\images\avatar.jpg' }}" alt="Profile Picture" class="profile-pic">
                 <span class="username P-msg_chat-title">{{ chat.title }}</span>
             {% endif %}
+            <div class="call-container">
+                <button id="call-button" class="call-button">Call</button>
+            </div>
+            
+            <!-- Options Menu -->
+            <div id="call-options-menu" class="call-options-menu">
+                <button id="voice-call-option" class="call-option-button">Voice Call</button>
+                <button id="video-call-option" class="call-option-button">Video Call</button>
+            </div>
+            
         </div>
     </div>
     <div class="chat-body">
@@ -400,6 +410,33 @@ const observer = new MutationObserver(scrollToBottom);
 
 observer.observe(chatBody, { childList: true });
 
+    // Get the elements
+    const callButton = document.getElementById("call-button");
+    const callOptionsMenu = document.getElementById("call-options-menu");
+
+    // Initially hide the options menu
+    callOptionsMenu.style.display = "none";
+
+    // Toggle options menu visibility when the "Call" button is clicked
+    callButton.onclick = function() {
+        if (callOptionsMenu.style.display === "none") {
+            callOptionsMenu.style.display = "block"; // Show options
+        } else {
+            callOptionsMenu.style.display = "none"; // Hide options
+        }
+    };
+
+    // Handle Voice Call and Video Call selection
+    document.getElementById("voice-call-option").onclick = function() {
+        alert("Voice Call Started");
+        callOptionsMenu.style.display = "none"; // Hide options
+    };
+
+    document.getElementById("video-call-option").onclick = function() {
+        alert("Video Call Started");
+        callOptionsMenu.style.display = "none"; // Hide options
+    };
+
 </script>
 
 
@@ -733,6 +770,55 @@ observer.observe(chatBody, { childList: true });
         align-items: center;
         font-weight: bold;
     }
+
+    /* Container for the "Call" button */
+.call-container {
+    text-align: center;
+    margin-top: 20px;
+}
+
+/* Styling for the Call button */
+.call-button {
+    padding: 1px 5px;
+    background-color:rgb(142, 60, 190); /* Green background */
+    color: white;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    top: 50px;      /* 50px from the top of the container */
+    right: 100px;
+}
+
+.call-button:hover {
+    background-color:rgb(116, 69, 160);
+}
+
+/* Options menu container (hidden by default) */
+.call-options-menu {
+    display: none;  /* Hidden initially */
+    margin-top: 10px;
+    text-align: center;
+}
+
+/* Styling for each option button (Voice Call and Video Call) */
+.call-option-button {
+    padding: 10px 15px;
+    background-color: #007bff; /* Blue background */
+    color: white;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.call-option-button:hover {
+    background-color: #0056b3;
+}
+
     /*end A*/
     
     /*Start Partha*/

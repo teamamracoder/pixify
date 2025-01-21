@@ -1,0 +1,359 @@
+{% extends "enduser/base.html" %} {% block title %}video-call{% endblock %}
+{% block content %} {% load static %}
+
+    <div class="video-call-container">
+        <!-- Local video display (user's webcam) -->
+        <div class="video-display local" id="local-video-container">
+            <video id="local-video" autoplay muted></video>
+        </div>
+
+        <!-- Remote video display (other person's webcam) -->
+
+        <!-- Add member button -->
+        <button id="add-member-btn" class="control-btn add-member-btn">
+            <i class="fas fa-user-plus"></i> Add Member
+        </button>
+
+        <!-- Call Controls -->
+        <div class="controls">
+            <button id="mute-btn" class="control-btn mute-btn">
+                <i class="fas fa-microphone-slash"></i> Mute
+            </button>
+            <button id="camera-btn" class="control-btn camera-btn">
+                <i class="fas fa-video-slash"></i> Camera Off
+            </button>
+            <button id="hangup-btn" class="control-btn hangup">
+                <i class="fas fa-phone-slash"></i> Hang Up
+            </button>
+        </div>
+    </div>
+
+    <script>const muteButton = document.getElementById("mute-btn");
+        const cameraButton = document.getElementById("camera-btn");
+        const hangupButton = document.getElementById("hangup-btn");
+        const addMemberButton = document.getElementById("add-member-btn");
+        const localVideo = document.getElementById("local-video");
+        const localVideoContainer = document.getElementById("local-video-container");
+        const remoteVideoContainer = document.getElementById("remote-video-container");
+        
+        let localStream;
+        let isMuted = false;
+        let isCameraOff = false;
+        
+        // Set up the local video stream (user's camera)
+        navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+            .then(stream => {
+                localStream = stream;
+                localVideo.srcObject = localStream;
+            })
+            .catch(err => {
+                console.error("Error accessing media devices: ", err);
+            });
+        
+        // Mute/Unmute microphone
+        muteButton.addEventListener("click", () => {
+            const audioTrack = localStream.getAudioTracks()[0];
+            isMuted = !isMuted;
+            audioTrack.enabled = !isMuted;
+            updateMuteButton(audioTrack.enabled);
+        });
+        
+        // Toggle Camera on/off
+        cameraButton.addEventListener("click", () => {
+            const videoTrack = localStream.getVideoTracks()[0];
+            isCameraOff = !isCameraOff;
+            videoTrack.enabled = !isCameraOff;
+            updateCameraButton(videoTrack.enabled);
+        });
+        
+        // Hang up the call
+        hangupButton.addEventListener("click", () => {
+            localStream.getTracks().forEach(track => track.stop());
+            window.location.reload(); // Refresh the page to reset the state
+        });
+        
+        // Add member (simulating)
+        //addMemberButton.addEventListener("click", () => {
+            //const newRemoteVideo = document.createElement("div");
+            //newRemoteVideo.classList.add("video-display", "remote");
+            //const newVideoElement = document.createElement("video");
+            //newRemoteVideo.appendChild(newVideoElement);
+           // remoteVideoContainer.appendChild(newRemoteVideo);
+        //});
+        
+        // Update button text based on the current state
+        function updateMuteButton(isAudioEnabled) {
+            if (isAudioEnabled) {
+                muteButton.innerHTML = '<i class="fas fa-microphone"></i> Unmute';
+            } else {
+                muteButton.innerHTML = '<i class="fas fa-microphone-slash"></i> Mute';
+            }
+        }
+        
+        function updateCameraButton(isVideoEnabled) {
+            if (isVideoEnabled) {
+                cameraButton.innerHTML = '<i class="fas fa-video"></i> Camera On';
+            } else {
+                cameraButton.innerHTML = '<i class="fas fa-video-slash"></i> Camera Off';
+            }
+        }
+        
+        // Make the local video draggable
+        let isDragging = false;
+        let offsetX = 0;
+        let offsetY = 0;
+        
+        localVideoContainer.addEventListener("mousedown", (e) => {
+            isDragging = true;
+            offsetX = e.clientX - localVideoContainer.offsetLeft;
+            offsetY = e.clientY - localVideoContainer.offsetTop;
+            document.addEventListener("mousemove", onMouseMove);
+            document.addEventListener("mouseup", onMouseUp);
+        });
+        
+        function onMouseMove(e) {
+            if (isDragging) {
+                localVideoContainer.style.left = `${e.clientX - offsetX}px`;
+                localVideoContainer.style.top = `${e.clientY - offsetY}px`;
+            }
+        }
+        
+        function onMouseUp() {
+            isDragging = false;
+            document.removeEventListener("mousemove", onMouseMove);
+            document.removeEventListener("mouseup", onMouseUp);
+        }
+        </script>
+        <style>
+            
+            body {
+                font-family: 'Helvetica Neue', Arial, sans-serif;
+                background-color: #212121; /* Dark background */
+                color: #f1f1f1;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100vh;
+                margin: 0;
+            }
+            
+            /* Video Call Container */
+            .video-call-container {
+                position: relative;
+                width: 100%;
+                max-width: 1200px;
+                height: 80%;
+                background-color: #1e1e1e; /* Dark background */
+                border-radius: 15px;
+                box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+                display: flex;
+                flex-direction: column;
+                overflow: hidden;
+            }
+            
+            /* Remote Video Display */
+            .remote-video-container {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: space-around;
+                padding: 20px;
+            }
+            
+            .video-display.remote {
+                width: 45%;
+                height: 45%;
+                background: #333;
+                border-radius: 12px;
+                margin: 10px;
+                box-shadow: 0 0 15px rgba(0, 0, 0, 0.4);
+            }
+            
+            /* Local Video Display (Floating Window) */
+            .video-display.local {
+                position: absolute;
+                top: 20px;
+                right: 20px;
+                width: 25%;
+                height: 25%;
+                background: #000;
+                border-radius: 12px;
+                border: 4px solid #fff;
+                z-index: 10;
+                box-shadow: 0 0 15px rgba(0, 0, 0, 0.4);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                cursor: move;
+            }
+            
+            /* Video Elements */
+            video {
+                width: 100%;
+                height: 100%;
+                border-radius: 12px;
+                object-fit: cover;
+            }
+            
+            /* Control Panel */
+            .controls {
+                position: absolute;
+                bottom: 30px;
+                left: 50%;
+                transform: translateX(-50%);
+                display: flex;
+                justify-content: space-between;
+                width: 350px;
+                z-index: 20;
+                padding: 10px;
+            }
+            
+            /* Button Styling */
+            .control-btn {
+                background-color: #007bff;
+                color: #fff;
+                font-size: 16px;
+                padding: 12px 24px;
+                border: none;
+                border-radius: 30px;
+                cursor: pointer;
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+                transition: background-color 0.3s, transform 0.2s, box-shadow 0.2s;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: 500;
+            }
+            
+            /* Button Hover Effects */
+            .control-btn:hover {
+                background-color: #0056b3;
+                transform: translateY(-2px);
+                box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+            }
+            
+            /* Active Button State */
+            .control-btn:active {
+                transform: translateY(1px);
+                box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+            }
+            
+            /* Hang Up Button */
+            .hangup {
+                background-color: #dc3545;
+            }
+            
+            .hangup:hover {
+                background-color: #c82333;
+            }
+            
+            /* Mute Button */
+            .mute-btn {
+                background-color: #28a745;
+            }
+            
+            .mute-btn:hover {
+                background-color: #218838;
+            }
+            
+            /* Camera Toggle Button */
+            .camera-btn {
+                background-color: #ffc107;
+            }
+            
+            .camera-btn:hover {
+                background-color: #e0a800;
+            }
+            
+            /* Add Member Button */
+            .add-member-btn {
+                position: absolute;
+                bottom: 55px;
+                right: 10px;
+                background-color: #17a2b8;
+                display: flex;
+                align-items: center;
+                padding: 15px 25px;
+                border-radius: 30px;
+                cursor: pointer;
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+                font-size: 16px;
+            }
+            
+            .add-member-btn:hover {
+                background-color: #138496;
+            }
+            
+            /* Button Icon Styling */
+            .control-btn i, .add-member-btn i {
+                margin-right: 8px;
+                font-size: 18px;
+            }
+            
+            /* Movable Local Video (on hover) */
+            .video-display.local:hover {
+                width: 28%;
+                height: 28%;
+                top: 15px;
+                right: 15px;
+            }
+            
+            /* Responsive Design */
+            @media screen and (max-width: 1024px) {
+                .video-call-container {
+                    height: 85%;
+                }
+            
+                .video-display.local {
+                    width: 30%;
+                    height: 30%;
+                    top: 15px;
+                    right: 15px;
+                }
+            
+                .controls {
+                    bottom: 40px;
+                    width: 280px;
+                }
+            }
+            
+            @media screen and (max-width: 768px) {
+                .video-call-container {
+                    width: 90%;
+                    height: 80%;
+                }
+            
+                .video-display.local {
+                    width: 35%;
+                    height: 35%;
+                    top: 10px;
+                    right: 10px;
+                }
+            
+                .controls {
+                    bottom: 30px;
+                    width: 240px;
+                }
+            }
+            
+            @media screen and (max-width: 480px) {
+                .video-call-container {
+                    width: 100%;
+                    height: 100%;
+                }
+            
+                .video-display.local {
+                    width: 40%;
+                    height: 40%;
+                }
+            
+                .controls {
+                    bottom: 20px;
+                    width: 200px;
+                }
+            
+                .control-btn {
+                    font-size: 14px;
+                    padding: 10px 20px;
+                }
+            }
+        </style>
