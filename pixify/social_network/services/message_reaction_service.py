@@ -1,5 +1,7 @@
 from ..models import MessageReaction,MasterList,Message
 from ..constants import MasterType,MessageDeleteType
+from django.shortcuts import get_object_or_404
+
 
 
 def get_active_message_reactions(message_id):
@@ -20,22 +22,26 @@ def get_reaction_by_name(reaction_id):
     return MasterList.objects.filter(id=reaction_id).first()
 
 def create_or_update_message_reaction(message_id, user, reaction):
+    # Get the MasterList instance for the reaction
+    reaction_instance = get_object_or_404(MasterList, id=reaction)
+
     # Create or update the MessageReaction instance
-    reaction_instance, created = MessageReaction.objects.update_or_create(
+    reaction_record, created = MessageReaction.objects.update_or_create(
         message_id_id=message_id,
         reacted_by=user,
         defaults={
-            'reaction_id': reaction,
+            'reaction_id': reaction_instance,  # Pass the MasterList instance here
             'created_by': user,
-            'is_active': True
+            'is_active': True,
         }
     )
 
     # If not created (i.e., updated), explicitly update the `updated_at` field
     if not created:
-        reaction_instance.save(update_fields=['updated_at'])
+        reaction_record.save(update_fields=['updated_at'])
 
-    return reaction_instance, created
+    return reaction_record, created
+
 
 def get_active_reaction(message_id, user):
     return MessageReaction.objects.filter(
@@ -117,6 +123,12 @@ def latest_reaction(chat, user):
             })
     return latest_reaction_message
 
+def message_reactions(chat_id):
+    # Get reactions for the given chat_id, including related reaction data
+    reactions = MessageReaction.objects.filter(message_id__chat_id=chat_id).select_related('reaction_id').values('message_id', 'reaction_id', 'reaction_id__value')
+    print(reactions)
+   
+    return list(reactions)
 
 
 

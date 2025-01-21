@@ -35,6 +35,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
         user_id =text_data_json.get('sender_id')
         del_type = text_data_json.get('del_type')
         user = self.scope['user']
+        reaction_id=text_data_json.get('reaction_id')
+        print(reaction_id)
 
         # Debug logs
         # print(f"Received action: {action}, message_id: {message_id}, chat_id: {chat_id}, user: {user}")
@@ -51,6 +53,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
             await self.delete_message(message_id, user_id, del_type)
         elif action == 'mark_as_read':
             await self.mark_message_as_read(message_id, user)
+        elif action == 'add_reaction':
+            await self.add_reaction(message_id,user,reaction_id)
+
+    async def add_reaction(self,message_id,user,reaction_id):
+        await sync_to_async(message_reaction_service.create_or_update_message_reaction)(message_id,user,reaction_id)
 
     async def create_message(self, text_data_json, user):        
         text = text_data_json.get('message', '')
@@ -235,7 +242,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
          # Convert datetime to string using a format for h:m AM/PM
         message_time_str = message.created_at.strftime('%I:%M %p')  # 12-hour format with AM/PM    
-        reactions = await self.fetch_reactions()
+        reactions = await self.fetch_reactions() #fetch emoji from masterlist table  
+        msg_reactions = await self.message_reactions(self.chat_id)
         message_data = {
             'message_id': message.id,
             'message': message.text,
@@ -253,9 +261,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
             'del_by': message.deleted_by,
             'message_new': message_new,
             'seen_by_all':seen_by_all,
-            'reactions':reactions,
-
-        }
+            'reactions':reactions, 
+            'msg_reactions':msg_reactions,
+            }
 
         await self.channel_layer.group_send(
             self.chat_group_name,
@@ -291,10 +299,17 @@ class ChatConsumer(AsyncWebsocketConsumer):
             'message_new': message['message_new'],
             'seen_by_all':message['seen_by_all'],
             'reactions': message['reactions'],
-
+            'msg_reactions': message['msg_reactions'],
         }))
 
     async def fetch_reactions(self):
         reactions = await sync_to_async(message_reaction_service.show_reactions)()
         return reactions
+    
+    async def message_reactions(self,chat_id):
+        msg_reactions = await sync_to_async(message_reaction_service.message_reactions)(chat_id)
+        return msg_reactions
 
+
+   
+   
