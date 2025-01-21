@@ -1,0 +1,190 @@
+{% extends "enduser/base.html" %} {% block title %}call_ring{% endblock %}
+{% block content %} {% load static %}
+
+<div class="container">
+    <h1>Incoming Call</h1>
+    <div class="call-box">
+        <!-- Display the call status -->
+        <div id="call-status" class="call-status">Ringing...</div>
+        
+        <!-- Call options -->
+        <div id="call-controls" class="call-controls">
+            <button id="accept-call" class="call-button" onclick="acceptCall()">Accept Call</button>
+            <button id="hangup-call" class="call-button" onclick="hangUpCall()" disabled>Hang Up</button>
+        </div>
+
+        <!-- Caller Tune / Ringing sound -->
+        <audio id="ringtone" loop>
+            <source src="ringtone.mp3" type="audio/mp3">
+        </audio>
+
+        <audio id="call-ongoing" loop>
+            <source src="callongoing.mp3" type="audio/mp3">
+        </audio>
+    </div>
+</div>
+
+<script>// Get HTML elements
+    const acceptButton = document.getElementById("accept-call");
+    const hangupButton = document.getElementById("hangup-call");
+    const callStatus = document.getElementById("call-status");
+    const ringtone = document.getElementById("ringtone");
+    const callOngoing = document.getElementById("call-ongoing");
+    
+    // 40 seconds timer limit
+    let callTimeout;
+    
+    // Simulate the incoming call (ringing)
+    function startRinging() {
+        ringtone.play();
+        callStatus.textContent = "Ringing...";
+        acceptButton.disabled = false;
+        hangupButton.disabled = false;
+    
+        // Set a timeout for 40 seconds to automatically end the call if not accepted
+        callTimeout = setTimeout(endCall, 40000); // 40,000 ms = 40 seconds
+    }
+    
+    // Simulate call acceptance
+    function acceptCall() {
+        // Stop ringtone and play ongoing call sound
+        ringtone.pause();
+        callOngoing.play();
+        
+        // Update call status
+        callStatus.textContent = "Call Accepted!";
+        callStatus.classList.add('accepted');
+    
+        // Disable accept button and enable hangup button
+        acceptButton.disabled = true;
+        hangupButton.disabled = false;
+    
+        // Clear the timeout since the call was accepted
+        clearTimeout(callTimeout);
+    }
+    
+    // Simulate hangup
+    function hangUpCall() {
+        // Stop ongoing call sound
+        callOngoing.pause();
+        callStatus.textContent = "Call Ended";
+        callStatus.classList.remove('accepted');
+    
+        // Disable both buttons after hangup
+        acceptButton.disabled = true;
+        hangupButton.disabled = true;
+    
+        // Clear the timeout just in case
+        clearTimeout(callTimeout);
+    }
+    
+    // Automatically end the call if not accepted within 40 seconds
+    function endCall() {
+        callStatus.textContent = "Call Ended (Missed)";
+        callStatus.classList.remove('accepted');
+        ringtone.pause();
+        
+        // Disable both buttons
+        acceptButton.disabled = true;
+        hangupButton.disabled = true;
+    }
+    
+    // Start the simulation of an incoming call after 1 second
+    setTimeout(startRinging, 1000);
+    </script>
+<style>/* Basic Reset */
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+    
+    /* Body and Overall Container */
+    body {
+        font-family: 'Arial', sans-serif;
+        background-color: #f4f6f9; /* Light grey background */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+    }
+    
+    /* Centering the Call Box */
+    .container {
+        background-color: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        width: 350px;
+        padding: 25px;
+        text-align: center;
+    }
+    
+    /* Call Box Header */
+    h1 {
+        font-size: 26px;
+        margin-bottom: 20px;
+        color: #333;
+    }
+    
+    /* Call Status */
+    .call-status {
+        font-size: 18px;
+        margin: 20px 0;
+        color: #666;
+        font-weight: 500;
+    }
+    
+    /* Buttons Container */
+    .call-controls {
+        display: flex;
+        justify-content: space-between;
+        gap: 15px;
+    }
+    
+    /* Button Styles */
+    .call-button {
+        padding: 12px 25px;
+        font-size: 16px;
+        border: none;
+        border-radius: 50px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        width: 48%; /* Ensures both buttons are of equal width */
+    }
+    
+    .call-button:disabled {
+        background-color: #d3d3d3;
+        cursor: not-allowed;
+    }
+    
+    .call-button:hover {
+        transform: translateY(-3px);
+    }
+    
+    /* Accept Call Button */
+    .call-button.accept {
+        background-color: #34d399; /* Green for accepting */
+        color: white;
+    }
+    
+    .call-button.accept:hover {
+        background-color: #2db88f;
+    }
+    
+    /* Hangup Call Button */
+    .call-button.hangup {
+        background-color: #ef4444; /* Red for hangup */
+        color: white;
+    }
+    
+    .call-button.hangup:hover {
+        background-color: #dc2626;
+    }
+    
+    /* Call Ringing and Ongoing Sounds */
+    audio {
+        display: none; /* Hide audio player */
+    }
+    </style>
+    {% endblock %}
