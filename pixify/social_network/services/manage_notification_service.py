@@ -26,13 +26,24 @@ def manage_update_notification(notification, text,receiver_id,media_url, is_read
     notification.save()
     return notification
 
+from django.db.models import Q
+from . import models
 
-def manage_list_notifications_filtered(search_query, sort_by='text'):
+def manage_list_notifications_filtered(search_query=None, sort_by='text'):
     if search_query:
-        # Use Q objects to filter by first_name, last_name, or email
+        # Use Q objects to filter by text, media_url, or is_read
         return models.Notification.objects.filter(
             Q(text__icontains=search_query) | 
             Q(media_url__icontains=search_query) |
             Q(is_read__icontains=search_query)
         ).order_by(sort_by)
     return models.Notification.objects.all().order_by(sort_by)
+
+def unread_notifications_count(user_id):
+    """
+    Count the number of unread notifications for a specific user.
+    """
+    return models.Notification.objects.filter(receiver_id=user_id, is_read=False, is_active=True).count()
+
+
+

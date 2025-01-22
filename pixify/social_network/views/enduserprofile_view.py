@@ -4,14 +4,82 @@ from django.views import View
 from ..services import user_service
 from ..constants import Gender
 from ..constants import RelationShipStatus
-
+from ..services import chat_service
+from django.http import JsonResponse
+from ..services import manage_notification_service 
 
 class EnduserprofileView(View):
     def get(self, request):
-        return render(request, 'enduser/profile/index.html')
-class UserprofileView(View):
-    def get(self, request):
-        return render(request, 'enduser/profile/userprofile.html')  
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            # AJAX request to load more profiles
+            user = request.user
+            offset = int(request.GET.get('offset', 0))
+            limit = int(request.GET.get('limit', 5))
+            data = chat_service.list_followings(user, offset, limit)
+            return JsonResponse({'followings': list(data['followings'])}, safe=False)
+        else:
+            # Initial page load
+            user = request.user
+            data = chat_service.list_followings(user, 0, 5)  
+            user_details=user_service.get_user_details(user.id)# Load first 5 profiles
+            friends=user_service.friends_count(user.id)
+            user_data = []
+            for detail in user_details:
+                dob=detail.dob
+                age=user_service.calculate_age(dob)
+                user_data.append({
+                    'first_name': detail.first_name,
+                    'last_name': detail.last_name,
+                    'profile_photo':detail.profile_photo_url,
+                    'age':age,
+                    'status':detail.is_active,
+                    'friends':friends,
+                })
+            return render(
+                request,
+                'enduser/profile/index.html',
+                {'followings': data['followings'], 'user_data': user_data}
+            )
+        
+from django.shortcuts import render
+from ..services import manage_notification_service 
+
+def unread_notifications(request):
+    """
+    Display a page with a list of unread notifications for the logged-in user.
+    """
+    user_id = request.user.id  # Assuming the user is authenticated
+    unread_notifications = manage_notification_service.manage_list_notifications_filtered().filter(
+        receiver_id=user_id, is_read=False, is_active=True
+    )
+    unread_count = manage_notification_service.unread_notifications_count(user_id)
+    
+    print(f"Unread count: {unread_count}")  # Debug statement to check unread count
+    
+    return render(request, 'enduser/profile/editprofile.html', {
+        'unread_notifications': unread_notifications,
+        'unread_count': unread_count,
+    })
+
+
+# from django.shortcuts import render
+# from django.views import View
+# from ..services import user_service
+
+# class UserProfileUpdateView(View):
+#     def get(self, request):
+#         # Fetch user profile data from the service
+#         user = request.user
+#         profile_data = user_service.get_user_profile(user)
+
+#         # Pass the data to the template
+#         return render(request, 'enduser/profile/index.html', {'profile': profile_data})  working 20/01/2025
+
+    
+  
+# class UserprofileView(View): no need
+#     def get(self, request):
+#         return render(request, 'enduser/profile/userprofile.html')  
 
 # Work By Badhan
 class EnduserprofileUpdateView(View):
@@ -69,3 +137,9 @@ def edit_information(request):
     else:
         form = UserProfileForm()
     return render(request, 'edit_information.html', {'form': form})
+
+
+
+
+
+
