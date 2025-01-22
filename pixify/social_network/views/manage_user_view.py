@@ -119,7 +119,13 @@ class ManageUserDetailView(View):
             'device': device,
         }
         user = services.manage_user_service.manage_get_user(user_id)
-        return render(request, 'adminuser/user/detail.html', {'user': user, 'context':context})
+        all_post_count = services.manage_user_service.get_all_posts_by_user(user_id)
+        all_follower_count = services.manage_user_service.get_all_followers_by_user(user_id)
+        activity ={
+            'posts':all_post_count,
+            'followers':all_follower_count
+        }
+        return render(request, 'adminuser/user/detail.html', {'user': user, 'context':context,'activity':activity})
     
 class ManageUserUpdateView(View):
     @catch_error
