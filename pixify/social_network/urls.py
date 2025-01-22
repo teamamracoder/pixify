@@ -165,6 +165,8 @@ urlpatterns = [
     # path('', views.UserStoryListView.as_view(), name='Userstory_list'),
     path('uploadStory/', views.UploadStoryView.as_view(),name='uploadStory'),
 
+    path('call/<str:call_id>', views.CallView.as_view(),name='call_page'),
+
 ]
 
 

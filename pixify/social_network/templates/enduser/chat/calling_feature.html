@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pixify Calling</title>
+    <!-- Font Awesome CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="zoom-container">
+        <!-- Slider Section -->
+        <div class="slider-container">
+            <div class="slider" id="slider">
+                <img src="http://celebrityinsider.org/wp-content/uploads/2019/04/tom-cruise.jpg" alt="Participant 1">
+                <img src="http://celebrityinsider.org/wp-content/uploads/2019/04/tom-cruise.jpg" alt="Participant 2">
+                <img src="http://celebrityinsider.org/wp-content/uploads/2019/04/tom-cruise.jpg" alt="Participant 3">
+            </div>
+            <div class="slider-counter" id="participant-count">3 Participants</div>
+        </div>
+        
+        <!-- Video Section -->
+        <div class="video-area">
+            <div id="single_person">
+                <img src="https://i1.wp.com/www.bulletproofaction.com/wp-content/uploads/2015/09/john-wick.jpg" alt="Participant">
+            </div>
+        </div>
+        
+        <!-- Footer Controls -->
+        <div class="footer">
+            <div class="controls">
+                <button id="mute-btn">
+                    <i class="fas fa-microphone"></i> Mute
+                </button>
+                <button id="video-btn">
+                    <i class="fas fa-video"></i> Start Video
+                </button>
+                <button id="participants-btn">
+                    <i class="fas fa-users"></i> Participants
+                </button>
+                <button id="chat-btn">
+                    <i class="fas fa-comment"></i> Chat
+                </button>
+            </div>
+            <button class="leave-btn">Leave</button>
+        </div>
+        
+        <!-- Modals -->
+        <div id="participants-modal" class="modal">
+            <div class="modal-content">
+                <h2>Participants</h2>
+                <p>List of participants will appear here.</p>
+                <button onclick="toggleModal('participants-modal')">Close</button>
+            </div>
+        </div>
+        
+        <div id="chat-modal" class="modal">
+            <div class="modal-content">
+                <h2>Chat</h2>
+                <p>Chat messages will appear here.</p>
+                <button onclick="toggleModal('chat-modal')">Close</button>
+            </div>
+        </div>
+        
+
+
+        <script>
+            let socket;
+            const callId = "{{ call_id }}"; // Pass the call_id from the template
+        
+            function startWebSocket() {
+                const wsUrl = `ws://${window.location.host}/ws/call/${callId}/`; // Use the dynamic call ID
+                socket = new WebSocket(wsUrl);
+        
+                socket.onopen = () => console.log("WebSocket connection established.");
+        
+                socket.onmessage = (event) => {
+                    const data = JSON.parse(event.data);
+                    console.log("Received:", data);
+        
+                    if (data.action === "notification") {
+                        // Show a modal for the participant to join
+                        showJoinModal(data.message);
+                    } else if (data.action === "message") {
+                        // Handle chat messages
+                        document.getElementById("chat").innerHTML += `<p>${data.message}</p>`;
+                    }
+                };
+        
+                socket.onclose = () => console.log("WebSocket connection closed.");
+                socket.onerror = (error) => console.error("WebSocket error:", error);
+            }
+        
+            function sendMessage(message) {
+                if (socket && socket.readyState === WebSocket.OPEN) {
+                    socket.send(JSON.stringify({ action: "message", message }));
+                }
+            }
+        
+            function showJoinModal(message) {
+                const modal = document.getElementById('participants-modal');
+                const messageContainer = modal.querySelector('p');
+                messageContainer.innerText = message;
+                modal.style.display = 'block'; // Show the modal
+            }
+        
+            // Start WebSocket on page load
+            window.onload = startWebSocket;
+        </script>
+        
+    <!-- JavaScript -->
+    <script>
+        // Mute/Unmute button
+        const muteButton = document.getElementById('mute-btn');
+        muteButton.addEventListener('click', () => {
+            const icon = muteButton.querySelector('i');
+
+            if (icon.classList.contains('fa-microphone')) {
+                icon.classList.replace('fa-microphone', 'fa-microphone-slash');
+                muteButton.innerHTML = '<i class="fas fa-microphone-slash"></i> Unmute'; // Update text and icon together
+            } else {
+                icon.classList.replace('fa-microphone-slash', 'fa-microphone');
+                muteButton.innerHTML = '<i class="fas fa-microphone"></i> Mute'; // Update text and icon together
+            }
+        });
+
+        // Start/Stop Video button
+        const videoButton = document.getElementById('video-btn');
+        videoButton.addEventListener('click', () => {
+            const icon = videoButton.querySelector('i');
+
+            if (icon.classList.contains('fa-video')) {
+                icon.classList.replace('fa-video', 'fa-video-slash');
+                videoButton.innerHTML = '<i class="fas fa-video-slash"></i> Start Video'; // Update text and icon together
+            } else {
+                icon.classList.replace('fa-video-slash', 'fa-video');
+                videoButton.innerHTML = '<i class="fas fa-video"></i> Stop Video'; // Update text and icon together
+            }
+        });
+
+        // Modal toggle
+        function toggleModal(modalId) {
+            const modal = document.getElementById(modalId);
+            modal.classList.toggle('active');
+        }
+
+        // Button listeners for modals
+        document.getElementById('participants-btn').addEventListener('click', () => {
+            toggleModal('participants-modal');
+        });
+
+        document.getElementById('chat-btn').addEventListener('click', () => {
+            toggleModal('chat-modal');
+        });
+    </script>
+
+    <!-- CSS -->
+    <style>
+ body {
+        font-family: Arial, sans-serif;
+        background-color: #000;
+        color: #fff;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        /* height: 100vh; */
+        margin: 0;
+    }
+
+    .zoom-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-between;
+        height: 90%;
+        width: 90%;
+        max-width: 1200px;
+    }
+
+    /* Slider Section */
+    .slider-container {
+    width: 120%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #121212;
+    padding: 3px;
+    border-radius: 8px;
+}
+
+    .slider {
+        display: flex;
+        align-items: center;
+        overflow: hidden;
+        width: 90%;
+    }
+
+    .slider img {
+        object-fit: cover;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        margin-right: 10px;
+        flex-shrink: 0;
+    }
+
+    .slider p {
+        color: #fff;
+        margin-left: 10px;
+        font-size: 14px;
+    }
+
+    .slider-counter {
+        background: #333;
+        padding: 5px 10px;
+        border-radius: 5px;
+        font-size: 12px;
+    }
+
+    /* Video Section */
+    .video-area {
+    margin-top: 6px;
+    margin-bottom: 3px;
+    height: 594px;
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #121212;
+    width: 120%;
+    /* border-radius: 0; */
+    /* margin: 20px 0; */
+}
+
+    .video-area img {
+        object-fit: cover;
+        width: 220px;
+        height: 220px;
+        border-radius: 50%;
+    }
+
+    /* Footer Buttons */
+    .footer {
+        width: 120%;
+        background-color: #1a1a1a;
+        padding: 6px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-radius: 8px;
+    }
+
+    .footer .controls {
+        display: flex;
+        gap: 15px;
+    }
+
+    .footer .controls button {
+        background: #333;
+        border: none;
+        color: #fff;
+        padding: 10px 15px;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background 0.3s;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .footer .controls button:hover {
+        background: #555;
+    }
+
+    .footer .leave-btn {
+        background: red;
+        padding: 10px 20px;
+        color: white;
+        font-weight: bold;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    }
+
+    .modal.active {
+        display: flex;
+    }
+
+    .modal-content {
+        background: #222;
+        padding: 20px;
+        border-radius: 8px;
+        color: white;
+        text-align: center;
+    }
+
+    .modal-content h2 {
+        margin-bottom: 10px;
+    }
+
+    .modal-content button {
+        margin-top: 20px;
+        padding: 10px 20px;
+        border: none;
+        background: #555;
+        color: white;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    #single_person {
+    height: 220px;
+    width: 220px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 6px solid transparent; /* Set border to transparent initially */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); /* Optional shadow for depth */
+    animation: rgbBorder 3s linear infinite;
+}
+
+@keyframes rgbBorder {
+    0% {
+        border-color: rgba(255, 0, 0, 0.8); /* Soft Red */
+        box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
+    }
+    25% {
+        border-color: rgba(255, 255, 0, 0.8); /* Soft Yellow */
+        box-shadow: 0 0 20px rgba(255, 255, 0, 0.5);
+    }
+    50% {
+        border-color: rgba(0, 255, 0, 0.8); /* Soft Green */
+        box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+    }
+    75% {
+        border-color: rgba(0, 255, 255, 0.8); /* Soft Cyan */
+        box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+    }
+    100% {
+        border-color: rgba(0, 0, 255, 0.8); /* Soft Blue */
+        box-shadow: 0 0 20px rgba(0, 0, 255, 0.5);
+    }
+}
+
+
+
+
+ /* Responsive Design */
+ 
+ @media (max-width: 1024px) {
+            .slider-container {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+
+            .footer {
+                flex-direction: column;
+                align-items: center;
+                gap: 10px;
+            }
+
+            .footer .controls {
+                gap: 10px;
+            }
+
+            .video-area img {
+                width: 150px;
+                height: 150px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .slider img {
+                width: 40px;
+                height: 40px;
+            }
+
+            .video-area img {
+                width: 120px;
+                height: 120px;
+            }
+
+            .footer .controls button {
+                padding: 8px 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .slider img {
+                width: 30px;
+                height: 30px;
+            }
+
+            .video-area img {
+                width: 100px;
+                height: 100px;
+            }
+
+            .footer .controls button {
+                font-size: 12px;
+                padding: 6px 8px;
+            }
+
+            .leave-btn {
+                font-size: 14px;
+                padding: 8px 12px;
+            }
+        }
+    </style>
+
+
+</body>
+</html>
