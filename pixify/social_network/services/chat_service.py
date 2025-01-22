@@ -2,7 +2,6 @@ from ..models import Chat, User, ChatMember,Follower
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 from django.db.models import Max
-# badhan
 from datetime import date
 
 def list_chats_by_user(user):
@@ -91,3 +90,22 @@ def list_followers_birthday(user):
         followings = []
 
     return {'followings': list(followings)}
+
+
+
+def list_followings(user, offset=0, limit=5):  
+    try:
+        followings = Follower.objects.filter(
+            follower=user,
+            is_active=True
+        ).exclude(user_id=user).values(
+            'user_id',
+            'user_id__first_name',
+            'user_id__last_name',
+            'user_id__profile_photo_url'
+        )[offset:offset + limit]
+    except Exception:
+        followings = []
+
+    return {'followings': followings}
+

@@ -59,7 +59,7 @@ urlpatterns = [
 
     # profile
     path('profile/', views.EnduserprofileView.as_view(), name='userprofile'),
-    path('editprofile/<int:user_id>/', views.EnduserprofileUpdateView.as_view(),name='enduser_edit_profile'),
+    path('editprofile/<int:user_id>/', views.EnduserprofileUpdateView.as_view(),name='enduser_edit_profile'), 
 
     # aboutus
     path('aboutus/', views.AboutUsView.as_view(), name='aboutus'),
@@ -75,7 +75,7 @@ urlpatterns = [
 
     path('birthday/', views.BirthdayView.as_view(), name='birthday'),
 
-    path('userprofile/', views.UserprofileView.as_view(), name='userprofile'),
+    # path('userprofile/', views.UserprofileView.as_view(), name='userprofile'),
 
     # message
     path('message/', views.MessageListView.as_view(), name='message'),

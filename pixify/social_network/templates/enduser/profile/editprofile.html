@@ -42,11 +42,11 @@
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label for="email" class="form-label"><i class="bi bi-envelope"></i> Email</label>
-                    <input type="email" class="form-control" id="email" name="email" value="{{user_details.email}}">
+                    <input type="email" class="form-control" id="email" name="email" value="{{user_details.email|default:''}}">
                 </div>
                 <div class="col-md-6 mb-3">
                     <label for="phone" class="form-label"><i class="bi bi-telephone-fill"></i> Phone</label>
-                    <input type="text" class="form-control" id="phone" name="phone" value="{{user_details.phone}}">
+                    <input type="text" class="form-control" id="phone" name="phone" value="{{ user_details.phone|default:'' }}">
                 </div>
             </div>
 
@@ -61,14 +61,14 @@
                 </div>
                 <div class="col-md-6 mb-3">
                     <label for="country" class="form-label" value=""><i class="bi bi-flag"></i> Country</label>
-                    <input type="text" class="form-control" id="country" name="country" value="{{user_details.country}}">
+                    <input type="text" class="form-control" id="country" name="country"value="{{ user_details.country|default:'' }}">
                 </div>
             </div>
 
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label for="address" class="form-label"value="">Address</label>
-                    <input type="text" class="form-control" id="address" name="address" value="{{user_details.address}}">
+                    <input type="text" class="form-control" id="address" name="address" value="{{ user_details.address|default:'' }}">
                 </div>
                 <div class="col-md-6 mb-3">
                     <label for="relationship_status" class="form-label" value="{{user_details.relationship_status}}"> Relationship</label>
@@ -89,7 +89,7 @@
                 </div>
                 <div class="col-md-6 mb-3">
                     <label for="hobbies" class="form-label" value=""><i class="bi bi-person-plus"></i> Hobbies</label>
-                    <input type="text" class="form-control" id="hobbies" name="hobbies" value="{{ user_details.hobbies|join:', ' }}" placeholder="">
+                    <input type="text" class="form-control" id="hobbies" name="hobbies" value="{{ user_details.hobbies|join:', '|default:'' }}" placeholder="">
 
                 </div>
             </div>
@@ -97,7 +97,8 @@
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label for="bio" class="form-label" value="">Bio</label>
-                    <textarea class="form-control" id="bio" name="bio" rows="2">{{ user_details.bio }}</textarea>
+                    {% comment %} <textarea class="form-control" id="bio" name="bio" rows="2">{{ user_details.bio|default:'' }}</textarea> {% endcomment %}
+                    <textarea class="form-control" id="bio" name="bio" rows="2">{% if user_details.bio %}{{ user_details.bio }}{% endif %}</textarea>
                 </div>
             </div>
             <div class="d-flex justify-content-center gap-3">
@@ -129,4 +130,6 @@
 
 
 
-{%endblock%}
+{% endblock %}
+
+
