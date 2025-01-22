@@ -1956,3 +1956,41 @@ textarea::placeholder {
 }
 
 /*End Subhasis*/
+.hover-container {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+  }
+  
+  .reaction-container {
+  
+    transition: transform 0.2s;
+  }
+  
+  .reaction-container:hover {
+    transform: scale(1.1);
+  }
+  .emoji-reactions span{
+font-size: 30px;
+  }
+  .emoji-reactions {
+    position: absolute;
+    bottom: 100%;
+       margin-left: 100px;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 10px;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s;
+  }
+  
+  .hover-container:hover .emoji-reactions {
+    opacity: 1;
+    visibility: visible;
+  }

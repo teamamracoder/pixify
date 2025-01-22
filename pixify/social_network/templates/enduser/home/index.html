@@ -10,9 +10,10 @@
 <script>
     $(document).ready(function() {
         $('#postForm').on('submit', function(e) {
-            e.preventDefault(); // Prevent default form submission
+            e.preventDefault(); 
             const FirstPostId = $('#postid').val();
-            let formData = new FormData(this); // Create FormData object
+           
+            let formData = new FormData(this); 
 
             $.ajax({
                 url: "{% url 'userpost_create' %}",
@@ -40,7 +41,9 @@
         });
     });
 </script>
+{% comment %} <head>
 
+</head> {% endcomment %}
 
 <div class="px-3 py-3 mt-3" id="homepage">
     <!-- story short view -->
@@ -269,7 +272,7 @@
 
                     <div class="carousel-inner">
                         {% for media in post.media_url %}
-                            <div class="carousel-item {% if forloop.first %}active{% endif %}" style="height:450px"">
+                            <div class="carousel-item {% if forloop.first %}active{% endif %}" style="height:450px">
                                 <img src="{% static media %}" class="d-block" height="350" width="100%" alt="Slide {{ forloop.counter }}">
                             </div>
                         {% endfor %}
@@ -297,7 +300,24 @@
 
         <div class="post-react-det">
             <div class="post-react">
-                <i class="fa-regular fa-heart"></i>
+                
+               <div  class="hover-container">
+
+              
+                <div class="reaction-container">
+                    
+                    <i class="fa-regular fa-heart" >
+
+                    </i>
+                </div>
+                <div class="emoji-reactions">
+                    <span onclick="reactToPost( 1)">😮</span>
+                    <span onclick="reactToPost( 1)">👍</span>
+                    <span onclick="reactToPost( 1)">❤️</span>
+                    <span onclick="reactToPost( 1)">😂</span>
+                </div>
+                <p id="feedback"></p>
+             </div>
                 <span data-toggle="modal" class="load-comments"><i class="fa-regular fa-comment"></i></span>
                 <i class="fa-solid fa-share-nodes" data-bs-toggle="modal" data-bs-target="#shareModal"></i>
             </div>
@@ -307,6 +327,50 @@
 
     {% endfor %}
     {% endif %}
+<script>
+
+        function reactToPost(postId, reactionId, reactionValue) {
+            const csrfToken = '{{ csrf_token }}'; // Ensure this is passed in a Django template
+           
+            const data = {
+                postId: postId,
+                reactionId: reactionId,
+                reactionValue: reactionValue,
+            };
+            console.log(data)
+            // Send an AJAX POST request
+            fetch('/post_reaction/create/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken, // Add CSRF token for security
+                },
+                body: JSON.stringify(data),
+            })
+            console.log("body  ",body)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        document.getElementById('feedback').innerText = data.message;
+                    } else {
+                        document.getElementById('feedback').innerText = 'Error: ' + data.message;
+                    }
+                })
+                .catch(error => {
+                    document.getElementById('feedback').innerText = 'An error occurred: ' + error.message;
+                });
+        }
+        document.querySelectorAll('.emoji-reactions span').forEach((span, index) => {
+            span.addEventListener('click', function () {
+                const postId = document.querySelector('.firstPostId').value; // Get the postId
+                const reactionId = index + 1; // Assuming each reaction is uniquely identified by its index
+                const reactionValue = this.textContent; // The emoji itself as a value
+                reactToPost(postId, reactionId, reactionValue); // Call the function
+            });
+        });
+    </script>
+    
+            
 
 <div class="container post-center mb-3">
     <div class="post-box">
@@ -659,7 +723,6 @@
 
 
 
-
  <script>
     $(document).ready(function () {
         $('.load-comments').click(function () {
@@ -780,7 +843,7 @@ com_profile.html(com_prof);
 
 
 
-                    {% comment %} inner commnets show hhbe {% endcomment %}
+                 
 
 
 
@@ -806,7 +869,7 @@ com_profile.html(com_prof);
           });
         });
     });
-
+ 
 
 
 {% comment %} input box comment {% endcomment %}
@@ -875,7 +938,7 @@ com_profile.html(com_prof);
 
 
 
-                    {% comment %} inner commnets show hhbe {% endcomment %}
+                
 
 
 
@@ -908,7 +971,7 @@ com_profile.html(com_prof);
         .custom-modal .modal-dialog {
           max-width: 1000px;
 
-            {% comment %} max-height:400px; {% endcomment %}
+         
 
         }
 
@@ -918,7 +981,29 @@ com_profile.html(com_prof);
 
         }
 
-</style>
+</style> 
+{% comment %} <script>
+    const postId = "{{ post_id }}"; // Replace with your actual post ID
+    console.log(postId)
+    const socket = new WebSocket(`ws://${window.location.host}/ws/comments/${postId}/`);
+
+    socket.onmessage = function(event) {
+        const data = JSON.parse(event.data);
+        const commentList = document.getElementById('comment-list');
+        const newComment = document.createElement('li');
+        newComment.textContent = `${data.user}: ${data.comment}`;
+        commentList.appendChild(newComment);
+    };
+
+    document.getElementById('comment-form').onsubmit = function(event) {
+        event.preventDefault();
+        const commentInput = document.getElementById('comment-input');
+        const comment = commentInput.value;
+        socket.send(JSON.stringify({ 'comment': comment }));
+        commentInput.value = '';
+    };
+</script> {% endcomment %}
+
  {% endblock %}
 
 
