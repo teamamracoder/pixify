@@ -1,6 +1,6 @@
 from channels.generic.websocket import AsyncWebsocketConsumer
 import json
-from .models import Message, Chat, ChatMember,User
+from .models import Message, Chat, ChatMember,User,Post,Comment
 from .services import message_service, message_mention_service, user_service,message_read_status_service,chat_service
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
@@ -288,4 +288,49 @@ class ChatConsumer(AsyncWebsocketConsumer):
             'del_by': message['del_by'],
             'message_new': message['message_new'],
             'seen_by_all':message['seen_by_all']
+        }))
+
+
+#comment consumers
+
+class CommentConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
+        self.room_name = self.scope['url_route']['kwargs']['post_id']
+        self.room_group_name = f"comments_{self.room_name}"
+
+        # Join room group
+        await self.channel_layer.group_add(
+            self.room_group_name,
+            self.channel_name
+        )
+
+        await self.accept()
+
+    async def disconnect(self, close_code):
+        # Leave room group
+        await self.channel_layer.group_discard(
+            self.room_group_name,
+            self.channel_name
+        )
+
+    async def receive(self, text_data):
+        data = json.loads(text_data)
+        comment = data['comment']
+        user = self.scope['user'].username
+
+        # Broadcast comment to the group
+        await self.channel_layer.group_send(
+            self.room_group_name,
+            {
+                'type': 'send_comment',
+                'comment': comment,
+                'user': user,
+            }
+        )
+
+    async def send_comment(self, event):
+        # Send message to WebSocket
+        await self.send(text_data=json.dumps({
+            'comment': event['comment'],
+            'user': event['user'],
         }))
