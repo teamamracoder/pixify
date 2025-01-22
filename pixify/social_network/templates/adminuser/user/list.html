@@ -38,16 +38,16 @@
                     <thead class="table-info text-white">
                         <tr>
                             <th>
-                                <a
+                                <a class="text-decoration-none text-white"
                                     href="?sort_by=first_name&sort_order={% if data.applied_options.sort.order == 'asc' %}desc{% else %}asc{% endif %}">Full
                                     Name</a>
                             </th>
                             <th>
-                                <a
+                                <a class="text-decoration-none text-white"
                                     href="?sort_by=email&sort_order={% if data.applied_options.sort.order == 'asc' %}desc{% else %}asc{% endif %}">Email</a>
                             </th>
                             <th>
-                                <a
+                                <a class="text-decoration-none text-white"
                                     href="?sort_by=gender&sort_order={% if data.applied_options.sort.order == 'asc' %}desc{% else %}asc{% endif %}">Gender</a>
                             </th>
                             <th>
@@ -62,19 +62,21 @@
                             <td>
                                 <a class="text-decoration-none text-primary hover-bg"
                                     href="{% url 'user_detail' user.id %}">
-                                    {{ user.first_name }} {{ user.middle_name }} {{ user.last_name }}
+                                    {{ user.first_name }} {% if user.middle_name %}{{ user.middle_name }} {% endif %}{{ user.last_name }}
                                 </a>
                             </td>
                             <td>{{ user.email }}</td>
                             <td>
                                 {% for gender in data.choices_gender %}
                                     {% for name, value in gender.items %}
+                                        <!-- Check if the gender matches user.gender and display it -->
                                         {% if name == user.gender %}
                                             {{ value }}
                                         {% endif %}
                                     {% endfor %}
                                 {% endfor %}
                             </td>
+                            
                             <td>
                                 <button class="btn btn-sm toggle-status" data-user-id="{{ user.id }}">
                                     {% if user.is_active %}

@@ -1,6 +1,6 @@
 from social_network.constants.default_values import SortingOrder
 from social_network.packages.get_data import GetData
-from ..models import User
+from ..models import User,Post,Follower
 from django.shortcuts import get_object_or_404
 from django.db.models import Q   
 
@@ -16,13 +16,14 @@ def manage_create_user(**kwargs):
         first_name=kwargs['first_name'],
         middle_name=kwargs['middle_name'],
         last_name=kwargs['last_name'],
-        dob=kwargs['dob'],
         email=kwargs['email'],
+        dob=kwargs['dob'],
         address=kwargs['address'],
         gender=kwargs['gender'],
         relationship_status=kwargs['relationship_status'],
         hobbies=kwargs['hobbies'],
-        roles=kwargs['roles']    
+        roles=kwargs['roles'],
+        created_by=kwargs['created_by'] 
     )
     return user
 
@@ -45,11 +46,14 @@ def manage_list_users_filtered(search_query, sorting_order, sort_by, page_number
         GetData(User)
         .search(search_query,"first_name","last_name", "email")
         .sort(sort_by, sorting_order)
-        .paginate(limit=3, page=page_number)
+        .paginate(limit=10, page=page_number)
         .execute()
     )
     # return data
     return data
 
+def get_all_posts_by_user(user_id):
+    return Post.objects.filter(posted_by=user_id).count()
 
-
+def get_all_followers_by_user(user_id):
+    return Follower.objects.filter(follower=user_id).count()

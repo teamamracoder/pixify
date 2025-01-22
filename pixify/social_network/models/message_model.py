@@ -1,8 +1,14 @@
 from django.db import models
+from django.contrib.postgres.fields import ArrayField
+from ..constants import MessageDeleteType
 
 class Message(models.Model):
     text=models.CharField(max_length=200, blank=True, null=True)
-    media_url= models.CharField(max_length=200, blank=True, null=True)
+    media_url = ArrayField(
+        models.URLField(max_length=200, blank=True, null=True),
+        blank=True,
+        null=True
+    )
     sender_id = models.ForeignKey('User', on_delete=models.CASCADE, related_name='fk_sender_messages_users_id')
     chat_id= models.ForeignKey('Chat', on_delete=models.CASCADE, related_name='fk_chat_messages_chats_id')
     reply_for_message_id=models.ForeignKey('Message', on_delete=models.CASCADE, blank=True, null=True, related_name='fk_reply_messages_messages_id')
@@ -10,6 +16,17 @@ class Message(models.Model):
     reply_for_everyone = models.BooleanField(db_default=True, blank=True)
     mentions = models.ManyToManyField(
         'User', through='MessageMention', through_fields=('message','user'), related_name='fk_mentions_messages_users'
+    )
+    delete_type = models.IntegerField(
+        choices=[(type.value, type.name) for type in MessageDeleteType],
+        blank=True,
+        null=True,
+        db_default=MessageDeleteType.NOT_DELETED.value
+    )
+    deleted_by = ArrayField(
+        models.IntegerField(),  # Store user IDs as integers
+        blank=True,
+        default=list
     )
     is_active = models.BooleanField(db_default=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True, blank=True)

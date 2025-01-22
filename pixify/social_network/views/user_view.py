@@ -1,140 +1,175 @@
+from datetime import datetime
+from pyexpat.errors import messages
 from django.http import HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, render, redirect
 from django.views import View
 
+from social_network.utils.common_utils import print_log
 from social_network.constants.default_values import SortingOrder
 from social_network.decorators.exception_decorators import catch_error
 from social_network.packages.response import success_response
 
+from ..forms.manage_user_forms import ManageUserUpdateForm
+from ..models.user_model import User
+
+from ..decorators.exception_decorators import catch_error
+
 from .. import services
 from ..constants import Gender, RelationShipStatus, Role
-from django.core.paginator import Paginator   
+from django.core.paginator import Paginator
 from django.http import JsonResponse
+from ..forms import ManageUserCreateForm
 
 
+# from user_agents import parse
 
-class ManageUserListView(View):
-    @catch_error
-    def get(self, request):
-        # Fetch the search query from the URL parameters
-        search_query = request.GET.get('search', '')
-        sort_by = request.GET.get('sort_by', "created_at")
-        sort_order = request.GET.get('sort_order', SortingOrder.DESC.value)
-        page_number = request.GET.get('page', 1)
 
-        # get data
-        data = services.manage_user_service.manage_list_users_filtered(
-            search_query=search_query,
-            sort_by=sort_by,
-            sorting_order=sort_order,
-            page_number=page_number
-        )
+# class ManageUserListView(View):
+#     @catch_error
+#     def get(self, request):
+#         # Fetch the search query from the URL parameters
+#         search_query = request.GET.get('search', '')
+#         sort_by = request.GET.get('sort_by', "created_at")
+#         sort_order = request.GET.get('sort_order', SortingOrder.DESC.value)
+#         page_number = request.GET.get('page', 1)
 
-        # add more data
-        data["choices_gender"] = [{gender.value: gender.name} for gender in Gender]
+#         # get data
+#         data = services.manage_user_service.manage_list_users_filtered(
+#             search_query=search_query,
+#             sort_by=sort_by,
+#             sorting_order=sort_order,
+#             page_number=page_number
+#         )
+
+#         # add more data
+#         data["choices_gender"] = [{gender.value: gender.name} for gender in Gender]
 
         # return
-        return render(
-            request,
-            'adminuser/user/list.html',
-            success_response("User data fetched successfully", data)
-        ) 
+        # return render(
+        #     request,
+        #     'adminuser/user/list.html',
+        #     success_response("User data fetched successfully", data)
+        # )
 
 
-class ManageUserCreateView(View):
-    def get(self, request):
-        choices_gender = [{gender.value: gender.name} for gender in Gender]
-        choices_relationship_status = [{status.name: status.value} for status in RelationShipStatus]
-        return render(request, 'adminuser/user/create.html',{"choices_gender":choices_gender,"choices_relationship_status":choices_relationship_status})
+# class ManageUserCreateView(View):
+#     @catch_error
+#     def get(self, request):
+#         form = ManageUserCreateForm()
+#         return render(request, 'adminuser/user/create.html', {"form": form})
 
-    def post(self, request):
-        user_data = {
-                    'first_name' : request.POST['first_name'],
-                    'middle_name' : request.POST['middle_name'],
-                    'last_name' : request.POST['last_name'],
-                    'email' : request.POST['email'],
-                    'address' : request.POST['address'],
-                    'dob' : request.POST['dob'],
-                    'gender' : request.POST['gender'],
-                    'relationship_status' : request.POST['relationship_status'],
-                    'hobbies' : request.POST.getlist('hobbies'),
-                    'roles': [1]
-                }
-        services.manage_user_service.manage_create_user(**user_data)
-        return redirect('user_list')
+# #     @catch_error
+# #     def post(self, request):
+# #         user = request.user
+# #         form = ManageUserCreateForm(request.POST)
+# #         if form.is_valid():
+# #             # Get the cleaned data from the form
+# #             user_data = {
+# #                 'first_name': form.cleaned_data['first_name'],
+# #                 'middle_name': form.cleaned_data['middle_name'],
+# #                 'last_name': form.cleaned_data['last_name'],
+# #                 'email': form.cleaned_data['email'],
+# #                 'gender': form.cleaned_data['gender'],
+# #                 'address': form.cleaned_data['address'],
+# #                 'relationship_status': form.cleaned_data['relationship_status'],
+# #                 'hobbies': form.cleaned_data['hobbies'],
+# #                 'roles': [2],  # Set the default role
+# #                 'created_by': user
+# #             }
 
+# #             # Get the 'dob' field
+# #             dob = form.cleaned_data.get('dob')
+# #             if not dob or dob == '':
+# #                 # Set a default dob value if empty
+# #                 dob = datetime(2000, 1, 1)  # Default Date: 2000-01-01
 
-class ManageUserDetailView(View):
-    def get(self, request, user_id):
-        user = services.manage_user_service.manage_get_user(user_id)
-        return render(request, 'adminuser/user/detail.html', {'user': user})
+# #             user_data['dob'] = dob
+
+# #             # Check if dob is invalid (e.g., '0000-00-00')
+# #             if dob.year == 0 and dob.month == 0 and dob.day == 0:
+# #                 dob = datetime(2000, 1, 1)  # Set to a valid default date
+
+# #             # Pass the user data to the service function to create the user
+# #             services.manage_user_service.manage_create_user(**user_data)
+
+# #             # Redirect to the user list after successful creation
+# #             return redirect('user_list')
+
+# #         # If form is invalid, render the form with errors
+# #         return render(request, 'adminuser/user/create.html', success_response(
+# #                 message=messages),
+# #                 {"form": form})
+
+# class ManageUserDetailView(View):
+#     def get(self, request, user_id):
+#         user = services.manage_user_service.manage_get_user(user_id)
+#         return render(request, 'adminuser/user/detail.html', {'user': user})
 
 class ManageUserUpdateView(View):
+    @catch_error
     def get(self, request, user_id):
-        choices_gender = [{gender.value: gender.name} for gender in Gender]
-        choices_relationship_status = [{status.name: status.value} for status in RelationShipStatus]
-        user = services.manage_user_service.manage_get_user(user_id)
-        return render(request, 'adminuser/user/update.html', {'user': user,"choices_gender":choices_gender,"choices_relationship_status":choices_relationship_status})
+        user = get_object_or_404(User, id=user_id)  # Assuming you have a User model
+        form = ManageUserUpdateForm(initial={
+            'first_name': user.first_name,
+            'middle_name': user.middle_name,
+            'last_name': user.last_name,
+            'email': user.email
+        })
+        return render(request, 'adminuser/user/update.html', {"form": form, "user_id": user.id})
+
+#     @catch_error
+#     def post(self, request, user_id):
+#         choices_gender = [{gender.value: gender.name} for gender in Gender]
+#         choices_relationship_status = [{relationship_status.value: relationship_status.name} for relationship_status in RelationShipStatus]
+#         login_user = request.user
+#         user = get_object_or_404(User, id=user_id)
+
+#         form = ManageUserUpdateForm(request.POST)
+
+#         if form.is_valid():
+#             user.first_name = form.cleaned_data['first_name']
+#             user.middle_name = form.cleaned_data.get('middle_name', '')  # Default to empty string if None
+#             user.last_name = form.cleaned_data['last_name']
+
+#             # Only update email if it has changed
+#             new_email = form.cleaned_data['email']
+#             if new_email != user.email:  # If email is different from the current one
+#                 user.email = new_email
     
-    def post(self, request, user_id):
-        user = services.manage_user_service.manage_get_user(user_id)
+#             user.gender = form.cleaned_data['gender']
+#             user.address = form.cleaned_data['address']
+#             user.hobbies = form.cleaned_data['hobbies']
+#             user.relationship_status = form.cleaned_data['relationship_status']
+            
+#             dob = form.cleaned_data.get('dob')
+#             if dob:
+#                 user.dob = dob
+#             else:
+#                 user.dob = None  # Set default value (None) for blank D.O.B.
 
-        # Gather all form data into a dictionary
-        user_data = {
-            'first_name': request.POST.get('first_name'),
-            'middle_name': request.POST.get('middle_name'),
-            'last_name': request.POST.get('last_name'),
-            'email': request.POST.get('email'),
-            'hobbies': request.POST.getlist('hobbies'),
-            'address': request.POST.get('address'),
-            'dob': request.POST.get('dob'),
-            'gender': request.POST.get('gender'),
-            'relationship_status': request.POST.get('relationship_status'),
-        }
+#             user.updated_by = login_user
+#             user.save()  # Save the updated user instance
 
-        # Validate required fields
-        required_fields = ['first_name', 'last_name', 'email', 'dob', 'gender', 'address', 'relationship_status']
-        for field in required_fields:
-            if not user_data.get(field):
-                return HttpResponseBadRequest(f"Missing required field: {field}")
+#             return redirect('user_list')  # Redirect to the list page after successful save
 
-        # try:
-        #     user_data['dob'] = datetime.fromisoformat(user_data['dob']) 
-        # except ValueError:
-        #     return HttpResponseBadRequest("Invalid date format for date of birth. Expected format: YYYY-MM-DD")
+#         # Render form with errors if invalid
+#         return render(request, 'adminuser/user/update.html', {
+#             'form': form,
+#             'user_id': user.id,
+#             'choices_gender': choices_gender,
+#             'choices_relationship_status': choices_relationship_status
+#         })
 
-        # Update the user with the provided data
-        services.manage_user_service.manage_update_user(
-            user, 
-            **user_data  # Pass the dictionary as keyword arguments
-        )
-        return redirect('user_detail', user_id=user.id)
-
-
-    # def post(self, request, user_id):
-    #     user = services.user_service.get_user(user_id)
-    #     first_name = request.POST['first_name']
-    #     middle_name = request.POST['middle_name']
-    #     last_name = request.POST['last_name']
-    #     email = request.POST['email']
-    #     hobbies=request.POST.getlist('hobbies')
-    #     address=request.POST['address']
-    #     dob=request.POST['dob']
-    #     gender=request.POST['gender']
-    #     relationship_status=request.POST['relationship_status']
-    #     services.user_service.update_user(user, first_name,middle_name, last_name, email,hobbies,address,dob,gender,relationship_status)
-    #     return redirect('user_detail', user_id=user.id)
-
-class ManageUserDeleteView(View):
-    def get(self, request, user_id):
-        user = services.manage_user_service.manage_get_user(user_id)
-        return render(request, 'adminuser/user/delete.html', {'user': user})
+# class ManageUserDeleteView(View):
+#     def get(self, request, user_id):
+#         user = services.manage_user_service.manage_get_user(user_id)
+#         return render(request, 'adminuser/user/delete.html', {'user': user})
 
     def post(self, request, user_id):
         user = services.manage_user_service.manage_get_user(user_id)
         services.user_service.delete_user(user)
         return redirect('user_list')
-    
+
 class ManageToggleUserActiveView(View):
     def post(self, request, user_id):
         user = services.manage_user_service.manage_get_user(user_id)
@@ -144,8 +179,12 @@ class ManageToggleUserActiveView(View):
 
 class ManageUserProfileView(View):
     def get(self, request):
-        # user = services.user_service.get_user()
         return render(request, 'adminuser/user/user_profile.html')
-    
 
+class ChangeMyThemeView(View):
+    def post(self, request):
+        theme = request.POST.get('theme')
+        user = services.user_service.get_user(request.user.id)
+        services.user_service.change_theme(user, ui_mode=theme)
+        return JsonResponse(success_response('Theme changed to {theme} mode', {'theme': theme}))
 
