@@ -4,108 +4,143 @@
 
 {% block content %}
 <style>
-        .hover-bg:hover {
+    .hover-bg:hover {
         background-color: rgba(240, 242, 245, 0.1);
         color:aqua; 
     }
+    .current {
+        font-weight: bold;
+    }
 </style>
 
-<div class="container-fluid my-5">
+<div class="container mt-5">
     <div class="row justify-content-center">
-        <div class="col-12 col-md-12 col-lg-12">
-            <div class="">
-                <div class="card-header text-center">
-                    <h2 class="">Chat List</h2>
-                </div>
-                <div class="d-flex justify-content-between mb-3">
-                    <button class="btn btn-primary btn-sm"><a href="{% url 'manage_chat_create' %}" class="text-white text-decoration-none">Add Chat</a></button>
-                   
-                    <form method="get" action="{% url 'manage_chat_list' %}">
-                        <div class="input-group" style="max-width: 300px;">
-                            <input type="text" class="form-control border-secondary" placeholder="Search" aria-label="Search" name="search" value="{{ search_query }}">
-                            <button class="btn btn-outline-secondary">Search</button>
-                        </div>
-                    </form>
-                </div>
-                            
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead class="table-info text-white"> 
-                                <tr>
-                                    <th>
-                                        <a href="?sort_by=title&sort_order={% if sort_order == 'asc' %}desc{% else %}asc{% endif %}">Title</a>
-                                    </th>
-                                    <th>
-                                        <a href="?sort_by=type&sort_order={% if sort_order == 'asc' %}desc{% else %}asc{% endif %}">Type
+        <div class="col">
+            <h2 class="text-center mb-4">Chat List</h2>
 
-                                        </th>                                 
-                                    <th>
-                                        <a href="?sort_by=chat_cover&sort_order={% if sort_order == 'asc' %}desc{% else %}asc{% endif %}">Chat_Cover</a>
-                                    </th>
-                                    <th>Status</th>                            
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for chat in chats %}
-                                <tr>
-                                    <td>                                       
-                                        <a class="text-decoration-none text-primary hover-bg" href="{% url 'manage_chat_detail' chat.id %}">
-                                            {{ chat.title }} 
-                                        </a>                                       
-                                    </td>
-                                    <td>
-                                        {% for type in choices_type %}
-                                        {% for name, value in type.items %}
-                                            <!-- Check if the gender matches user.gender and display it -->
-                                            {% if name == chat.type %}
-                                                {{ value }}
-                                            {% endif %}
-                                        {% endfor %}
-                                    {% endfor %}
+            <div class="d-flex justify-content-between mb-3">
+                <button class="btn btn-primary btn-sm"><a href="{% url 'manage_chat_create' %}"
+                        class="text-white text-decoration-none">Add Chat</a>
+                </button>
 
-                                    </td>
-                                    
-                                    <td>{{ chat.chat_cover }}</td>
-                                    <td>
-                                        <button class="btn btn-sm toggle-status" data-chat-id="{{ chat.id }}">
-                                            {% if chat.is_active %}
-                                                <i class="bi bi-toggle-on text-success"></i> Active
-                                            {% else %}
-                                                <i class="bi bi-toggle-off text-danger"></i> Inactive
-                                            {% endif %}
-                                        </button>
-                                    </td>
-                                    
-                                    
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-
-                        <div class="pagination">
-                            <span class="step-links">
-                                {% if chats.has_previous %}
-                                    <a href="?page=1&search={{ search_query }}&sort_by={{ sort_by }}&sort_order={{ sort_order }}">First</a>
-                                    <a href="?page={{ chats.previous_page_number }}&search={{ search_query }}&sort_by={{ sort_by }}&sort_order={{ sort_order }}">Previous</a>
-                                {% endif %}
-                        
-                                <span class="current">
-                                    Page {{ chats.number }} of {{ chats.paginator.num_pages }}.
-                                </span>
-                        
-                                {% if chats.has_next %}
-                                    <a href="?page={{ chats.next_page_number }}&search={{ search_query }}&sort_by={{ sort_by }}&sort_order={{ sort_order }}">Next</a>
-                                    <a href="?page={{ chats.paginator.num_pages }}&search={{ search_query }}&sort_by={{ sort_by }}&sort_order={{ sort_order }}">Last</a>
-                                {% endif %}
-                            </span>
-                        </div>
-
+                <form method="get" action="{% url 'manage_chat_list' %}">
+                    <div class="input-group" style="max-width: 300px;">
+                        <input type="text" class="form-control border-secondary" placeholder="Search"
+                            aria-label="Search" name="search" value="{{ data.applied_options.search.text }}">
+                        <button class="btn btn-outline-secondary">Search</button>
                     </div>
+                </form>
+            </div>                            
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead class="table-info text-white"> 
+                            <tr>
+                                <th>
+                                    <a href="?sort_by=title&sort_order={% if data.applied_options.sort.order == 'asc' %}desc{% else %}asc{% endif %}">Title</a>
+                                </th>
+                                <th>
+                                    <a href="?sort_by=type&sort_order={% if data.applied_options.sort.order == 'asc' %}desc{% else %}asc{% endif %}">Type
+                                    </th>                                 
+                                <th>
+                                    <a href="?sort_by=chat_cover&sort_order={% if data.applied_options.sort.order == 'asc' %}desc{% else %}asc{% endif %}">Chat_Cover</a>
+                                </th>
+                                <th>Status</th>                            
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for chat in data.data %}
+                            <tr>
+                                <td>                                       
+                                    <a class="text-decoration-none text-primary hover-bg" href="{% url 'manage_chat_detail' chat.id %}">
+                                        {{ chat.title }} 
+                                    </a>                                       
+                                </td>
+                                <td>
+                                    {% for type in data.choices_type %}
+                                    {% for name, value in type.items %}
+                                        <!-- Check if the gender matches user.gender and display it -->
+                                        {% if name == chat.type %}
+                                            {{ value }}
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endfor %}
+                                </td>
+                                
+                                <td>{{ chat.chat_cover }}</td>
+                                <td>
+                                    <button class="btn btn-sm toggle-status" data-chat-id="{{ chat.id }}">
+                                        {% if chat.is_active %}
+                                            <i class="bi bi-toggle-on text-success"></i> Active
+                                        {% else %}
+                                            <i class="bi bi-toggle-off text-danger"></i> Inactive
+                                        {% endif %}
+                                    </button>
+                                </td>
+                                
+                                
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    <div class="container">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="current mr-auto">
+                                <span class="text-info me-3">Total {{ data.pagination.total }} chats</span>
+                                Page {{ data.pagination.current_page }} of {{ data.pagination.total_page }}.
+                            </div>
+    
+                            <div class="step-links ml-auto">
+                                <nav aria-label="Page navigation example">
+                                    <ul class="pagination">
+                                        {% if data.pagination.prev_page %}
+                                        <li class="page-item">
+                                            <a class="page-link"
+                                                href="?page=1&search={{ data.applied_options.search.text }}&sort_by={{ data.applied_options.sort.field }}&sort_order={{ data.applied_options.sort.order }}"
+                                                aria-label="Previous">
+                                                <span aria-hidden="true">&laquo;</span>
+                                            </a>
+                                        </li>
+                                        <li class="page-item">
+                                            <a class="page-link"
+                                                href="?page={{ data.pagination.prev_page }}&search={{ data.applied_options.search.text }}&sort_by={{ data.applied_options.sort.field }}&sort_order={{ data.applied_options.sort.order }}">{{ data.pagination.prev_page }}
+                                            </a>
+                                        </li>
+                                        {% endif %}
+    
+                                        <li class="page-item">
+                                            <a class="page-link active" href="#">
+                                                {{ data.pagination.current_page }}
+                                            </a>
+                                        </li>
+    
+                                        {% if data.pagination.next_page %}
+    
+                                        <li class="page-item">
+                                            <a class="page-link"
+                                                href="?page={{ data.pagination.next_page }}&search={{ data.applied_options.search.text }}&sort_by={{ data.applied_options.sort.field }}&sort_order={{ data.applied_options.sort.order }}">
+                                                {{ data.pagination.next_page }}
+                                            </a>
+                                        </li>
+    
+                                        <li class="page-item">
+                                            <a class="page-link"
+                                                href="?page={{ data.pagination.total_page }}&search={{ data.applied_options.search.text }}&sort_by={{ data.applied_options.sort.field }}&sort_order={{ data.applied_options.sort.order }}"
+                                                aria-label="Next">
+                                                <span aria-hidden="true">&raquo;</span>
+                                            </a>
+                                        </li>
+                                        {% endif %}
+                                    </ul>
+                                </nav>
+                            </div>
                         </div>
-                    
+                    </div>
                 </div>
+                        
+                    
             </div>
-        </div>       
+        </div>
+    </div>       
 </div>
 
 

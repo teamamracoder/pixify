@@ -1,0 +1,53 @@
+{% extends "../base.html" %}
+
+{% block title %}Create Post{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid my-5">
+    <div class="row justify-content-center ">
+        <div class="col-12 col-md-12 col-lg-12 ">
+            <div class="card shadow ">
+                <div class="card-header text-center">
+                    <h2 class="text-info">Update Specific User Post</h2>
+                </div>
+                <div class="spaci p-3 ">
+                    <classds="card-body">
+                        <form method="post">
+                            {% csrf_token %}
+                            <div class="row">
+                                <div class="form-group col-md-4 col-lg-4 col-sm-12 mb-3">
+                                    {{ form.created_by.label_tag }}
+                                    {{ form.created_by }}
+                                    {% if form.created_by.errors %}
+                                    <div class="text-danger">{{ form.post_id.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="form-group col-md-4 col-lg-4 col-sm-12 mb-3">
+                                    {{ form.post_id.label_tag }}
+                                    {{ form.post_id }}
+                                    {% if form.post_id.errors %}
+                                    <div class="text-danger">{{ form.post_id.errors }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="form-group col-md-4 col-lg-4 col-sm-12 mb-3">
+                                    {{ form.specific_user_id.label_tag }}
+                                    {{ form.specific_user_id }}
+                                    {% if form.specific_user_id.errors %}
+                                    <div class="text-danger">{{ form.specific_user_id.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="text-start">
+                                <a href="{% url 'manage_post_specific_user_list' %}" class="btn btn-sm btn-outline-secondary">Back</a>
+                                <button type="submit" class="btn btn-sm btn-primary">Save</button>
+                            </div>
+                        </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

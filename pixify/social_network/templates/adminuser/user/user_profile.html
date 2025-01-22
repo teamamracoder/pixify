@@ -14,7 +14,7 @@
     }
 </style>
 
-<div class="container shadow h-75 profile-main-div py-4">
+<div class="container shadow h-75 profile-main-div py-4 mt-5">
     <div class="row">
       <!-- Profile Picture and Basic Information -->
       <div class="col-md-4 text-center mb-4 mb-md-0">
@@ -28,47 +28,44 @@
   
       <!-- Profile Form -->
       <div class="col-md-8">
-        <div class="text-center text-info mb-4">Profile Page</div>
+        <div class=" text-info mb-4 fs-4">Profile Page</div>
         <form>
           <!-- First Name and Last Name -->
           <div class="row">
-            <div class="col-md-6 mb-3">
+            <div class="col-md-4 mb-3">
               <label for="firstName" class="form-label text-secondary">First Name</label>
-              <input type="text" class="form-control" id="firstName" placeholder="Rajat">
+              <input type="text" class="form-control" id="firstName" placeholder="First Name">
             </div>
-            <div class="col-md-6 mb-3">
+            <div class="col-md-4 mb-3">
+              <label for="middleName" class="form-label text-secondary">Middle Name</label>
+              <input type="text" class="form-control" id="middleName" placeholder="Middle Name">
+            </div>
+            <div class="col-md-4 mb-3">
               <label for="lastName" class="form-label text-secondary">Last Name</label>
-              <input type="text" class="form-control" id="lastName" placeholder="Nancy">
+              <input type="text" class="form-control" id="lastName" placeholder="Last Name">
             </div>
           </div>
   
           <!-- Email and Phone -->
           <div class="row">
-            <div class="col-md-6 mb-3">
+            <div class="col-md-4 mb-3">
               <label for="email" class="form-label text-secondary">Email</label>
-              <input type="email" class="form-control" id="email" placeholder="example@mail.com">
+              <input type="email" class="form-control" id="email" placeholder="email">
             </div>
-            <div class="col-md-6 mb-3">
+            <div class="col-md-4 mb-3">
               <label for="phone" class="form-label text-secondary">Phone</label>
-              <input type="text" class="form-control" id="phone" placeholder="123-456-7890">
+              <input type="text" class="form-control" id="phone" placeholder="Phone">
             </div>
-          </div>
-  
-          <!-- Address and Nation -->
-          <div class="row">
-            <div class="col-md-6 mb-3">
-              <label for="address" class="form-label text-secondary">Address</label>
-              <input type="text" class="form-control" id="address" placeholder="123 Street Name">
-            </div>
-            <div class="col-md-6 mb-3">
-              <label for="nation" class="form-label text-secondary">Nation</label>
-              <input type="text" class="form-control" id="nation" placeholder="Country">
+
+            <div class="col-md-4 mb-3">
+              <label for="hobbies" class="form-label text-secondary">Hobbies</label>
+              <input type="text" class="form-control" id="hobbies" placeholder="Hobbies">
             </div>
           </div>
   
           <!-- Gender and Language -->
           <div class="row">
-            <div class="col-md-6 mb-3">
+            <div class="col-md-4 mb-3">
               <label for="gender" class="form-label text-secondary">Gender</label>
               <select class="form-select form-control" id="gender">
                 <option>Male</option>
@@ -76,67 +73,33 @@
                 <option>Other</option>
               </select>
             </div>
-            <div class="col-md-6 mb-3">
-              <label for="language" class="form-label text-secondary">Language</label>
-              <select class="form-select form-control" id="language">
-                <option>English</option>
-                <option>Spanish</option>
-                <option>French</option>
-                <option>German</option>
-                <option>Hindi</option>
-                <option>Bengali</option>
-                <option>Nepali</option>
-                <option>Russian</option>
-                <option>Chinese</option>
-                <option>Dutch</option>
-                <option>Gujarati</option>
-                <option>Marathi</option>
-              </select>
+              <div class="col-md-4 mb-3">
+              <label for="bio" class="form-label text-secondary">Bio</label>
+              <input type="text" class="form-control" id="bio" placeholder="Bio">
             </div>
-          </div>
-  
-          <!-- Date of Birth -->
-          <div class="row">
-            <div class="col-md-6 mb-3">
+            <div class="col-md-4 mb-3">
               <label for="dob" class="form-label text-secondary">Date of Birth</label>
               <input type="date" class="form-control" id="dob">
             </div>
           </div>
   
-          <!-- Social Media Links -->
           <div class="row">
             <div class="col-md-6 mb-3">
-              <label for="twitter" class="form-label text-secondary">Twitter</label>
-              <input type="text" class="form-control" id="twitter" placeholder="twitter.com/username">
+              <label for="relationshipstatus" class="form-label text-secondary">Relationship Status</label>
+              <select class="form-select form-control" id="relationshipstatus">
+                <option>Married</option>
+                <option>Single</option>
+                <option>Commited</option>
+              </select>
             </div>
             <div class="col-md-6 mb-3">
-              <label for="linkedin" class="form-label text-secondary">LinkedIn</label>
-              <input type="text" class="form-control" id="linkedin" placeholder="linkedin.com/in/username">
+              <label for="country" class="form-label text-secondary">Country</label>
+              <input type="text" class="form-control" id="country" placeholder="Country">
             </div>
+            
           </div>
   
-          <div class="row">
-            <div class="col-md-6 mb-3">
-              <label for="facebook" class="form-label text-secondary">Facebook</label>
-              <input type="text" class="form-control" id="facebook" placeholder="facebook.com/username">
-            </div>
-            <div class="col-md-6 mb-3">
-              <label for="google" class="form-label text-secondary">Google</label>
-              <input type="text" class="form-control" id="google" placeholder="google.com/username">
-            </div>
-          </div>
-  
-          <!-- Slogan -->
-          <div class="form-group mb-3">
-            <label for="slogan" class="form-label text-secondary">Slogan</label>
-            <input type="text" class="form-control" id="slogan" placeholder="Land acquisition Specialist">
-          </div>
-  
-          <!-- Save and Cancel Buttons -->
-          <div class="text-right mt-4">
-            <button type="button" class="btn btn-outline-secondary mr-2">Cancel</button>
-            <button type="submit" class="btn btn-primary">Save</button>
-          </div>
+        
         </form>
       </div>
     </div>
