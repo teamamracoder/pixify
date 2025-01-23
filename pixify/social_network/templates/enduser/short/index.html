@@ -3,231 +3,674 @@
 {% block content %}
 {% load static %}
 
-<div class="short-content">
-    <div class="video-box" id="videoBox"> <!-- Added ID for the video box -->
-        <!-- Reels header inside the video box -->
-        <div class="reels-header">Shorts</div>
-        
-        <video id="myVideo" autoplay>
-           <source src="/static/media/12621639_1080_1920_30fps.mp4" type="video/mp4"> 
-        </video>
+<div class="short-content" id="shortContent">
+    {% for video in shorts %}
+    <div class="video-wrapper" id="video{{ video.id }}" data-post-id="{{ video.id }}">
+        <div class="video-box {% if forloop.first %}active{% else %}hidden{% endif %}" id="videoBox{{ forloop.counter }}">
+            <div class="reels-header">Shorts</div>
 
-        <!-- Username and Description -->
-        <div class="video-info">
-            <div class="username">Username</div>
-            <div class="description">This is the description of the video. It can be up to a few lines long. If it's too long, it should break and stay inside the box.</div>
+            {% if video.media_url|length >= 1 %}
+            <video id="myVideo{{ forloop.counter }}" autoplay loop>
+                <source src="{% static video.media_url.0 %}" type="video/mp4">
+            </video>
+            {% else %}
+            <p>No video available.</p>
+            {% endif %}
+
+            <div class="video-info">
+                <div class="username">{{ video.posted_by.first_name }}</div>
+                <div class="description">{{ video.description }}</div>
+            </div>
         </div>
 
-        <!-- Right icons -->
+        <!-- Right-side icons -->
         <div class="right-icons">
             <div>
-                <i id="heartIcon" class="bi bi-heart" style="font-size: 24px;"></i>
-                <span>619K</span>
+                <i id="heartIcon{{ forloop.counter }}" 
+                            class="bi {% if video.user_reacted %}bi-heart-fill{% else %}bi-heart{% endif %}"></i>
+                 <div class="reaction-count">{{ video.reaction_count }}</div>
             </div>
             <div>
-                <span class="chat-icon"><i class="bi bi-chat"></i></span>
-                <span>2,851</span>
+                <span class="chat-icon" style="font-size: 24px;"><i class="bi bi-chat"></i></span>
+                <span>{{ video.comments_count }}</span>
             </div>
             <div>
                 <span class="icon"><i class="bi bi-send"></i></span>
             </div>
             <div>
-                <span class="icon">⋮</span> <!-- Three dots icon -->
+                <span class="icon">⋮</span>
             </div>
+        </div>
+
+        <!-- Navigation buttons -->
+        <div class="navigation-buttons">
+            <button class="nav-button prev-button" data-index="{{ forloop.counter0 }}"><i class="bi bi-arrow-up-circle"></i></button>
+            <button class="nav-button next-button" data-index="{{ forloop.counter0 }}"><i class="bi bi-arrow-down-circle"></i></button>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Comment Modal -->
+<div id="shortCommentModal" class="short-modal short-hidden">
+    <div class="short-modal-content">
+        <div class="short-modal-header">
+            <h4>Comments</h4>
+            <button id="shortCloseModalButton" class="short-close-button">&times;</button>
+        </div>
+        <div class="short-modal-body">
+            <ul id="shortCommentList">
+                <!-- Comments will be dynamically loaded here -->
+                <li>Sample comment 1</li>
+                <li>Sample comment 2</li>
+            </ul>
+        </div>
+        <div class="short-modal-footer">
+            <input type="text" id="shortCommentInput" placeholder="Write a comment..." />
+            <button id="shortPostCommentButton" class="short-post-button">Post</button>
         </div>
     </div>
 </div>
 
 <script>
 
-  document.addEventListener('DOMContentLoaded', function() {
-  const heartIcon = document.getElementById('heartIcon');
-  const videoBox = document.getElementById('videoBox');
-  const videoElement = document.getElementById('myVideo');  // The video element
-  
-  let holdTimer;  // Variable to store the setTimeout reference
+document.addEventListener('DOMContentLoaded', () => {
+    // Handle initial like reactions (for liking)
+    const handleReaction = (iconElement, isDelete = false) => {
+        const postId = iconElement.closest('.video-wrapper').dataset.postId;
+        const url = isDelete 
+            ? `/short/${postId}/reaction/delete` 
+            : `/short/${postId}/reaction/create`;
 
-  // Toggle heart icon on single click
-  if (heartIcon) {
-    heartIcon.addEventListener('click', function() {
-      // Toggle between filled and unfilled heart
-      if (heartIcon.classList.contains('bi-heart')) {
-        heartIcon.classList.remove('bi-heart');
-        heartIcon.classList.add('bi-heart-fill');
-        heartIcon.style.color = 'red';  // Set the color to red when filled
-      } else {
-        heartIcon.classList.remove('bi-heart-fill');
-        heartIcon.classList.add('bi-heart');
-        heartIcon.style.color = '';  // Reset the color to default (unfilled heart)
-      }
-    });
-  }
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken'), // Ensure CSRF token is handled
+            },
+            body: JSON.stringify({ post_id: postId }),
+        })
+        .then((response) => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then((data) => {
+            if (data.success) {
+                console.log('Reaction updated:', data);
 
-  // Fill the heart icon and change color when clicking anywhere on the video box
-  if (videoBox) {
-    videoBox.addEventListener('dblclick', function() {
-      heartIcon.classList.remove('bi-heart');
-      heartIcon.classList.add('bi-heart-fill');
-      heartIcon.style.color = 'red';  // Fill the heart and set it red
-    });
-    
-    // Start the timer when mouse button is pressed down
-    videoBox.addEventListener('mousedown', function() {
-      holdTimer = setTimeout(function() {
-        if (videoElement) {
-          videoElement.pause();  // Pause the video after holding for 3 seconds
+                // Update the reaction count
+                const likeCountSpan = iconElement.closest('.right-icons').querySelector('.reaction-count');
+                if (likeCountSpan) {
+                    likeCountSpan.textContent = data.reaction_count;
+                }
+
+                // Toggle the heart icon class
+                if (isDelete) {
+                    iconElement.classList.remove('bi-heart-fill');
+                    iconElement.classList.add('bi-heart');
+                } else {
+                    iconElement.classList.remove('bi-heart');
+                    iconElement.classList.add('bi-heart-fill');
+                }
+
+                // Rebind event listeners after state change
+                bindHeartIconListeners();
+            } else {
+                console.error('Failed to update reaction:', data);
+            }
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+        });
+    };
+
+    const bindHeartIconListeners = () => {
+        document.querySelectorAll('.bi-heart').forEach((heartIcon) => {
+            // Remove existing event listeners to avoid duplicates
+            heartIcon.removeEventListener('click', heartClickListener);
+            heartIcon.removeEventListener('touchstart', heartTouchListener);
+
+            heartIcon.addEventListener('click', heartClickListener);
+            heartIcon.addEventListener('touchstart', heartTouchListener);
+        });
+    };
+
+    const heartClickListener = function () {
+        const isLiked = this.classList.contains('bi-heart-fill');
+        if (isLiked) {
+            handleReaction(this, true); // If the icon is filled, delete the reaction
+        } else {
+            handleReaction(this, false); // If the icon is not filled, create the reaction
         }
-      }, 500);  // Set timer for 3 seconds
-    });
+    };
 
-    // Clear the timer and resume the video if mouse is released before 3 seconds
-    videoBox.addEventListener('mouseup', function() {
-      clearTimeout(holdTimer);  // Clear the timer if the user releases before 3 seconds
-      if (videoElement) {
-        videoElement.play();  // Resume video if the mouse is released
-      }
-    });
+    const heartTouchListener = function () {
+        const currentTime = new Date().getTime();
+        const tapGap = currentTime - lastTap;
 
-    // In case the mouse leaves the video box while holding down
-    videoBox.addEventListener('mouseleave', function() {
-      clearTimeout(holdTimer);  // Clear the timer if mouse leaves
-      if (videoElement) {
-        videoElement.play();  // Resume video if mouse leaves the box
-      }
+        if (tapGap < 300 && tapGap > 0) {
+            // Double tap detected (to like or toggle)
+            const isLiked = this.classList.contains('bi-heart-fill');
+            if (isLiked) {
+                handleReaction(this, true); // Delete reaction
+            } else {
+                handleReaction(this, false); // Create reaction
+            }
+        }
+
+        lastTap = currentTime;
+    };
+
+    // Bind listeners on page load
+    bindHeartIconListeners();
+
+    // Handle initial state of liked reactions (for already liked posts)
+    document.querySelectorAll('.bi-heart-fill').forEach((heartIcon) => {
+        // Already liked reactions should correctly delete first if clicked again
+        heartIcon.addEventListener('click', function () {
+            // Only delete if the icon is currently filled
+            if (this.classList.contains('bi-heart-fill')) {
+                handleReaction(this, true); // Set isDelete to true for delete
+            }
+        });
     });
-  }
 });
 
- 
+// Helper function to get CSRF token
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === `${name}=`) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+
+
+    document.addEventListener("DOMContentLoaded", function () {
+    const videoWrappers = document.querySelectorAll(".video-wrapper");
+    let currentIndex = 0;
+
+    // Scroll to a specific video
+    function scrollToVideo(index) {
+        if (index >= 0 && index < videoWrappers.length) {
+            const targetVideo = videoWrappers[index];
+            targetVideo.scrollIntoView({ behavior: "smooth", block: "center" });
+            updateActiveVideo(index);
+            currentIndex = index;
+            updateButtonVisibility();
+        }
+    }
+
+    // Update the active video
+    function updateActiveVideo(index) {
+        videoWrappers.forEach((wrapper, i) => {
+            const videoBox = wrapper.querySelector(".video-box");
+            const video = videoBox.querySelector("video");
+            if (i === index) {
+                videoBox.classList.add("active");
+                videoBox.classList.remove("hidden");
+                if (video) {
+                    video.currentTime = 0;
+                    video.play();
+                }
+            } else {
+                videoBox.classList.remove("active");
+                videoBox.classList.add("hidden");
+                video.pause();
+            }
+        });
+    }
+
+    // Update button visibility
+    function updateButtonVisibility() {
+        videoWrappers.forEach((wrapper, index) => {
+            const prevButton = wrapper.querySelector(".prev-button");
+            const nextButton = wrapper.querySelector(".next-button");
+
+            if (index === currentIndex) {
+                if (currentIndex === 0) {
+                    prevButton.style.display = "none";
+                    nextButton.style.display = "block";
+                } else if (currentIndex === videoWrappers.length - 1) {
+                    prevButton.style.display = "block";
+                    nextButton.style.display = "none";
+                } else {
+                    prevButton.style.display = "block";
+                    nextButton.style.display = "block";
+                }
+            }
+        });
+    }
+
+    // Navigation button event handlers
+    videoWrappers.forEach((wrapper, index) => {
+        const prevButton = wrapper.querySelector(".prev-button");
+        const nextButton = wrapper.querySelector(".next-button");
+
+        prevButton.addEventListener("click", () => {
+            const newIndex = currentIndex > 0 ? currentIndex - 1 : currentIndex;
+            scrollToVideo(newIndex);
+        });
+
+        nextButton.addEventListener("click", () => {
+            const newIndex = currentIndex < videoWrappers.length - 1 ? currentIndex + 1 : currentIndex;
+            scrollToVideo(newIndex);
+        });
+    });
+
+    // Intersection Observer for manual scrolling
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+                const index = Array.from(videoWrappers).indexOf(entry.target);
+                if (index !== currentIndex) {
+                    updateActiveVideo(index);
+                    currentIndex = index;
+                    updateButtonVisibility();
+                }
+            }
+        });
+    }, { threshold: 0.5 });
+
+    videoWrappers.forEach((wrapper) => {
+        observer.observe(wrapper);
+    });
+
+    // Initialize the first video
+    scrollToVideo(currentIndex);
+    updateButtonVisibility();
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  const videoElements = document.querySelectorAll('video');
+
+  videoElements.forEach(video => {
+    let timeoutId = null;
+    let isPaused = false;
+
+    video.addEventListener('mousedown', () => {
+      timeoutId = setTimeout(() => {
+        video.pause();
+        isPaused = true;
+      }, 500);
+    });
+
+    video.addEventListener('mouseup', () => {
+      if (isPaused) {
+        video.play();
+      }
+      clearTimeout(timeoutId);
+      isPaused = false;
+    });
+
+    video.addEventListener('mouseleave', () => {
+      if (isPaused) {
+        video.play();
+      }
+      clearTimeout(timeoutId);
+      isPaused = false;
+    });
+  });
+});
+
+
+document.addEventListener("DOMContentLoaded", function () {
+    const commentModal = document.getElementById("shortCommentModal");
+    const closeModalButton = document.getElementById("shortCloseModalButton");
+    const commentInput = document.getElementById("shortCommentInput");
+    const commentList = document.getElementById("shortCommentList");
+    const postCommentButton = document.getElementById("shortPostCommentButton");
+
+    // Delegate click event to comment icons
+    document.addEventListener("click", (event) => {
+        if (event.target.closest(".chat-icon")) {
+            commentModal.style.display = "flex"; // Open the modal
+        }
+    });
+
+    // Close the comment modal
+    closeModalButton.addEventListener("click", () => {
+        commentModal.style.display = "none"; // Close the modal
+    });
+
+    // Post a new comment
+    postCommentButton.addEventListener("click", () => {
+        const newComment = commentInput.value.trim();
+        if (newComment) {
+            const commentItem = document.createElement("li");
+            commentItem.textContent = newComment;
+            commentList.appendChild(commentItem);
+            commentInput.value = ""; // Clear the input
+        }
+    });
+
+    // Close the comment modal if clicked outside
+    window.addEventListener("click", (event) => {
+        if (!commentModal.contains(event.target) && !event.target.closest(".chat-icon")) {
+            commentModal.style.display = "none"; // Close the modal
+        }
+    });
+});
+
+
 </script>
 
+
 <style>
-  .bi-heart-fill { color: red; }
 
-  .chat-icon {
-    transform: scaleX(-1);
-    right: 20px; 
-    bottom: 20px; 
-    font-size: 24px; 
-    cursor: pointer; 
+    .reaction-count {
+    font-size: 22px; /* Adjust size if needed */    
+    color: #fff; /* Choose a color that fits your theme */
+}
+
+    .bi-heart-fill {
+    color: red;
+    font-size: 24px;
+}
+
+.bi-heart {
+    color: fff;
+    font-size: 24px;
+}
+
+.bi-heart:hover {
+    color: white;
+    font-size: 28px;
+}
+
+/* Comment Modal */
+.short-modal {
+    right:7%;
+    display: none; /* Hidden by default */
+    left: 35%;    
+    position: fixed;
+    top: 27%;
+    width: 30%;
+    height: 100%;    
     z-index: 1000;
-  }
+    justify-content: center;
+    align-items: center;
+    
+}
 
-  .short-content {
-    flex: 1;
+/* Modal content */
+.short-modal-content {
+    background: white;
+    border-radius: 8px;
+    width: 80%;
+    max-width: 600px;
+    max-height: 80%;
+    overflow-y: auto;
+    padding: 16px;
+}
+
+/* Modal Header */
+.short-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.short-close-button {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #333;
+}
+
+/* Modal Body */
+.short-modal-body {
+    margin-top: 16px;
+    padding: 8px 0;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+/* Comment List */
+#shortCommentList {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+/* Single Comment Item */
+#shortCommentList li {
+    padding: 8px 12px;
+    border-bottom: 1px solid #ddd;
+    font-size: 14px;
+    color: #333;
+}
+
+/* Modal Footer */
+.short-modal-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 16px;
+    padding: 8px;
+    border-top: 1px solid #ddd;
+}
+
+.short-modal-footer input {
+    flex-grow: 1;
+    padding: 8px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.short-modal-footer button {
+    background: #007bff;
+    color: white;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.short-modal-footer button:hover {
+    opacity: 0.9;
+}
+
+/* Sliding Comment Section */
+.short-comment-section {
+    position: fixed;
+    bottom: -100%;
+    left: 0;
+    width: 100%;
+    height: 50%;
+    background: white;
+    box-shadow: 0 -4px 8px rgba(0, 0, 0, 0.2);
+    border-radius: 12px 12px 0 0;
+    transition: bottom 0.3s ease-in-out;
+    z-index: 1000;
+}
+
+.short-comment-section.visible {
+    bottom: 0;
+}
+
+.short-comment-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    background: #f1f1f1;
+    border-bottom: 1px solid #ccc;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.short-comment-body {
+    flex-grow: 1;
+    padding: 16px;
+    overflow-y: auto;
+}
+
+.short-comment-footer {
+    display: flex;
+    padding: 16px;
+    border-top: 1px solid #ccc;
+}
+
+.short-comment-footer input {
+    flex-grow: 1;
+    padding: 8px;
+    margin-right: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.short-comment-footer button {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.short-comment-footer button:hover {
+    opacity: 0.9;
+}
+
+.short-close-button {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #333;
+}
+
+/* Style for comment input box */
+.short-comment-footer input:focus {
+    outline: none;
+    border-color: #007bff;
+}
+
+/* Comment icon style (optional) */
+.chat-icon {
+    cursor: pointer;
+    font-size: 24px;
+    color: #333;
+}
+
+.chat-icon:hover {
+    color: #007bff;
+}
+
+
+/* Scrollable container */
+.short-content {
+    overflow-y: auto;
+    scroll-snap-type: y mandatory;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Each video wrapper */
+.video-wrapper {    
+    scroll-snap-align: start;
+    margin-bottom:5%;
+    height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-top: 35px;    
-    height: 100vh;
-  }      
+    position: relative;
+    flex-direction: column;
+}
 
-  .video-box {
-    width: 350px; /* Increased width of the video box */
-    height: 600px; /* Increased height of the video box */
-    background-color: #a2b9ff; /* Placeholder color */
-    position: relative; /* To allow positioning of elements inside */
+/* Video box styling */
+.video-box {
+    width: 60%;
+    height: 90vh;
+    background-color: #000;
+    border-radius: 12px;
+    overflow: hidden;
     display: flex;
-    flex-direction: column; /* Layout as column */
-    justify-content: flex-start; /* Allow space for description and icons */
-    color: #fff;
-    font-size: 18px;
-    border-radius: 12px; /* Rounded corners */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Add a shadow for depth */
-  }
+    flex-direction: column;
+    justify-content: flex-start;
+    position: relative;
+}
 
-  .video-box video {
+.video-box video {
     width: 100%;
     height: 100%;
-    object-fit: cover; /* Adjusts the video to cover the box without stretching */
-    border-radius: 12px; /* Ensure the video fits the rounded corners */
-  }
+    object-fit: scale-down;
+    border-radius: 12px;
+}
 
-  .reels-header {
+/* Right-side icons */
+.right-icons {
     position: absolute;
-    top: 16px; /* Distance from top of the video box */
-    left: 16px; /* Distance from left of the video box */
+    right: 7%;
+    bottom: 16px;
+    display: flex;
+    flex-direction: column;    
+    font-size: 14px;
+    text-align: center;
+    color: #fff;
+}
+
+/* Navigation buttons */
+.navigation-buttons {
+    position: absolute;
+    top: 50%; /* Vertically center */
+    right: 5%; /* Horizontally center */
+    transform: translate(-50%, -50%);
+    display: flex;
+    gap: 16px;
+    flex-direction: column; /* Vertical alignment */
+}
+
+.nav-button {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 32px;
+    cursor: pointer;
+    transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.nav-button:hover {
+    transform: scale(1.2);
+    color: #007bff;
+}
+
+.reels-header {
+    position: absolute;
+    top: 16px;
+    left: 16px;
     font-size: 20px;
     font-weight: bold;
     color: #fff;
     padding: 8px 12px;
-    border-radius: 8px; /* Rounded corners for header */
-  }
+    border-radius: 8px;
+}
 
-  .video-info {
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
+.video-info {
     position: absolute;
-    bottom: 15px; /* Ensure there's space for the icons */
+    bottom: 15px;
     left: 16px;
-    right: 16px; /* Ensure text fits properly inside the box */
     color: #fff;
     font-size: 16px;
-    max-height: 100px; /* Allow description to take space but not overflow */
-    overflow: hidden;
-    word-wrap: break-word; /* Word breaks to avoid overflow */
-    overflow-wrap: break-word;
-  }
-
-  .username {
-    font-weight: bold;
-    font-size: 18px;
-    white-space: nowrap; /* Prevent username from breaking */
-    overflow: hidden; /* Hide overflowing text */
-    text-overflow: ellipsis; /* Add ellipsis if the text overflows */
-  }
-
-  .description {
-    width: 88%;
-    font-size: 14px;
-    margin-top: 5px;
-    line-height: 1.4;
-    word-break: break-word; /* This is more reliable than word-wrap */
-    overflow-wrap: break-word; /* Ensures that long words break correctly */
-    flex-grow: 1; /* Allow the description to grow if necessary */
-    white-space: normal; /* Ensure text can wrap normally */
-  }
-
-  .right-icons {
-    position: absolute;
-    right: 16px;
-    bottom: 16px; /* Keeps icons near the bottom */
-    display: flex;
-    flex-direction: column;
-    gap: 16px; /* Reduced gap between icons */
-    font-size: 14px;
-    text-align: center;
-    color: #fff;
-  }
-
-  .right-icons div {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    font-size: 14px;
-  }
-
-  .right-icons span.icon {
-    font-size: 24px; /* Icon size */
-  }
-
-  .bottom-nav {
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    background-color: #000; /* Black background for nav */
-    padding: 10px 0;
-    position: fixed;
-    bottom: 0;
-    width: 100%;
-  }
-
-  .bottom-nav a {
-    color: #fff;
-    text-decoration: none;
-    font-size: 14px;
-    text-align: center;
-  }
+    word-wrap: break-word;
+    max-width: calc(100% - 32px);
+}
 </style>
 {% endblock %}
