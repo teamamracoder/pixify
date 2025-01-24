@@ -312,4 +312,53 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
 
    
-   
+
+
+class CallConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
+        self.room_group_name = "call"
+        await self.channel_layer.group_add(
+            self.room_group_name,
+            self.channel_name
+        )
+        await self.accept()
+
+        await self.channel_layer.group_send(
+            self.room_group_name,
+            {
+                "type": "send_sdp_signal",
+                "peer": "SERVER",
+                "action": "new-peer",
+                "message": {"receiver_channel_name": self.channel_name},
+            }
+        )
+
+    async def disconnect(self, close_code):
+        await self.channel_layer.group_send(
+            self.room_group_name,
+            {
+                "type": "send_sdp_signal",
+                "peer": "SERVER",
+                "action": "peer-disconnected",
+                "message": {"disconnected_peer": self.channel_name},
+            }
+        )
+        await self.channel_layer.group_discard(
+            self.room_group_name,
+            self.channel_name
+        )
+
+    async def receive(self, text_data):
+        data = json.loads(text_data)
+        await self.channel_layer.group_send(
+            self.room_group_name,
+            {
+                "type": "send_sdp_signal",
+                "peer": data["peer"],
+                "action": data["action"],
+                "message": data["message"],
+            }
+        )
+
+    async def send_sdp_signal(self, event):
+        await self.send(text_data=json.dumps(event))
