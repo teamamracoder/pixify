@@ -78,51 +78,26 @@ class UserPostDetail(View):
 
 
 
-class UserPostListView(View):
-    @catch_error
-    @auth_required
-    @role_required(Role.ADMIN.value, Role.END_USER.value)
-    def get(self, request):
-        posts = services.post_service.Postlist_posts()
-        user_id = request.user.id
-        post_dict = {
-            'posts': posts,
-            'user_id': user_id,
-            'name': 'priya',
-            'count_comment': services.comment_service.get_count_comment(163)
-        }
+# class UserPostListView(View):
+#     @catch_error
+#     @auth_required
+#     @role_required(Role.ADMIN.value, Role.END_USER.value)
+#     def get(self, request):
         
-        # Check if the request is an AJAX request
-        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-            return JsonResponse(post_dict, safe=False)  # JSON response for AJAX requests
-        
-        # Render the page with the initial HTML
-        return render(request, 'enduser/home/index.html', {'post_dict': post_dict})
+#         posts = services.post_service.Postlist_posts()
+#         print(posts)
+#         user_id = request.user.id
+#         post_dict = {
+#             'posts': posts,
+#             'user_id': user_id,
+#             'name': 'priya',
+#             'count_comment': services.comment_service.get_count_comment(163)
+#         }
+#         print(post_dict)
+#         if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+#             return JsonResponse(post_dict, safe=False)  # JSON response for AJAX requests
+#         return render(request, 'enduser/home/index.html', {'post_dict': post_dict})
 
-
-# def create_reaction(request):
-#     if request.method == 'POST':
-#         try:
-#             data = json.loads(request.body)
-#             post_id = data.get('postId')
-#             reaction_id = data.get('reactionId')
-#             reaction_value = data.get('reactionValue')
-#             user = request.user
-
-#             # Get the existing reaction
-#             reaction = PostReaction.objects.get(post_id=post_id, created_by=user)
-
-#             # Update the reaction
-#             reaction.reaction_id = reaction_id
-#             reaction.reaction_value = reaction_value
-#             reaction.save()
-
-#             return JsonResponse({'status': 'success', 'message': 'Reaction updated successfully!'})
-#         except PostReaction.DoesNotExist:
-#             return JsonResponse({'status': 'error', 'message': 'Reaction not found'}, status=404)
-#         except json.JSONDecodeError:
-#             return JsonResponse({'status': 'error', 'message': 'Invalid JSON format'}, status=400)
-#     return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
 
 @csrf_exempt  # Temporarily disable CSRF protection for testing
 def create_reaction(request):
@@ -157,12 +132,10 @@ class UserPostEditView(View):
          if not post_id or not post_title:
             return JsonResponse({'success': False, 'message': 'Missing post_id or postTitle'})
 
-         post_update = services.post_service.update_post(user, post_id, post_title)
-         print("post id is",post_update)
-         return JsonResponse({'success': True})
+         services.post_service.update_post(user, post_id, post_title)
+         
+         return JsonResponse({'success': True, 'message': 'Title updated successfully.' })
 
-
-        
 
         
     

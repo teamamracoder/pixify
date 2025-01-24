@@ -137,7 +137,7 @@ urlpatterns = [
 
     #for enduser post priya
     path('posts/create/', views.UserPostCreatView.as_view(),name='userpost_create'),
-    path('', views.UserPostListView.as_view(), name='Userposts_list'),
+    # path('', views.UserPostListView.as_view(), name='Userposts_list'),
     path('post/update/',views.UserPostEditView.as_view(),name='UserPostEdit'),
     
    # post reaction priya
