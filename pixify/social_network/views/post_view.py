@@ -144,18 +144,23 @@ class UserPostEditView(View):
     @auth_required
     @role_required(Role.ADMIN.value, Role.END_USER.value)
     def get(self,request):
-         post_id = request.GET.get('post_id') 
-         print("post id is",post_id)
+         post_id = request.GET.get('post_id')
          post_detail =list(services.post_service.get_post(post_id).values())
-         return JsonResponse({'success': True, 'message': 'Title updated successfully.','post_detail':list(post_detail)})
-
+         return JsonResponse({'success': True, 'message': 'Title updated successfully.','post_detail':list(post_detail) })
 
     def post(self, request):
-        user_id = request.user.id
-        post_id = request.POST.get('post_id') 
-        post_Title = request.POST.get('postTitle')
-        post_update = services.post_service.update_post(user_id,post_id,post_Title)
-        return JsonResponse({'success': True, 'message': 'Title updated successfully.','post_update':post_update})
+         user = request.user
+         post_id = request.POST.get('post_id')
+         post_title = request.POST.get('postTitle')
+         print("post id is",post_id, "post titile",post_title)
+
+         if not post_id or not post_title:
+            return JsonResponse({'success': False, 'message': 'Missing post_id or postTitle'})
+
+         post_update = services.post_service.update_post(user, post_id, post_title)
+         print("post id is",post_update)
+         return JsonResponse({'success': True})
+
 
         
 

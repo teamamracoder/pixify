@@ -81,7 +81,7 @@ def get_post(post_id):
 # update post
 def update_post(user_id,post_id,post_titile):
     post = Post.objects.get(id=post_id)
-    post.titile = post_titile
+    post.title = post_titile
     post.updated_by=user_id
     post.save()
     return post
