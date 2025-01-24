@@ -577,7 +577,7 @@ i {
     right: 5px;
     cursor: pointer;
     font-size: 25px;
-    color: fff;
+    color: white;
 }
 
 .con .images span:hover {
@@ -1980,7 +1980,7 @@ font-size: 30px;
     transform: translateX(-50%);
     display: flex;
     gap: 10px;
-    background-color: white;
+    background-color: #220B46;
     border: 1px solid #ddd;
     border-radius: 8px;
     padding: 10px;
@@ -1993,4 +1993,5 @@ font-size: 30px;
   .hover-container:hover .emoji-reactions {
     opacity: 1;
     visibility: visible;
+
   }

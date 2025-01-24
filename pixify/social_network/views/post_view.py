@@ -51,7 +51,6 @@ class UserPostCreatView(View):
     @auth_required
     @role_required(Role.ADMIN.value, Role.END_USER.value)
     def post(self, request):
-        # try:
             user_id =request.user.id
             print(user_id)
             post_Title = request.POST.get('postTitle')
@@ -65,13 +64,9 @@ class UserPostCreatView(View):
                         destination.write(chunk)
                 media_urls.append(f"{settings.MEDIA_URL}{file.name}")
 
-            # Call the service to save post data
             services.post_service.user_post(post_Title, media_urls, user_id)
-            # return JsonResponse({ "status": True, })
-
             return JsonResponse({'success': True, 'redirect_url': reverse('home')})
-        # except Exception as e:
-           # return JsonResponse({'success': False, 'message': str(e)})
+     
 
 class UserPostDetail(View):
     def get(self, request, post_id):
@@ -82,41 +77,28 @@ class UserPostDetail(View):
          return render(request, 'enduser/home/index.html', {'comment_dic':comment_dic})
 
 
+
 class UserPostListView(View):
+    @catch_error
+    @auth_required
+    @role_required(Role.ADMIN.value, Role.END_USER.value)
     def get(self, request):
         posts = services.post_service.Postlist_posts()
+        user_id = request.user.id
         post_dict = {
             'posts': posts,
+            'user_id': user_id,
             'name': 'priya',
-             'count_commnet' :services.comment_service.get_count_comment(post_ids)
+            'count_comment': services.comment_service.get_count_comment(163)
         }
-        print("postss",posts)
+        
         # Check if the request is an AJAX request
         if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-            return JsonResponse(post_dict)
+            return JsonResponse(post_dict, safe=False)  # JSON response for AJAX requests
+        
+        # Render the page with the initial HTML
         return render(request, 'enduser/home/index.html', {'post_dict': post_dict})
-    
 
-# class UserPostReactionCreateView(View):
-#     @catch_error
-#     @auth_required
-#     @role_required(Role.ADMIN.value, Role.END_USER.value)
-#     def post(self, request):
-#         try:
-#             data = json.loads(request.body)
-#             post_id = data.get('post_id')
-#             reaction_type = data.get('reaction_type')
-#             user = request.user
-           
-           
-#             reaction = post_reaction_service.post_reaction(reaction_id)
-#             if not reaction:
-#                 return JsonResponse({'success': False, 'error': 'Invalid reaction'}, status=400)
-#             post_reaction_service.create_post_reaction(post_id, user, reaction)
-#             new_count = post_reaction_service.get_reaction_count(post_id, reaction)
-#             return JsonResponse({'success': True, 'new_count': new_count}, status=200)
-#         except Exception as e:
-#             return JsonResponse({'success': False, 'error': str(e)}, status=400)
 
 # def create_reaction(request):
 #     if request.method == 'POST':
@@ -126,51 +108,59 @@ class UserPostListView(View):
 #             reaction_id = data.get('reactionId')
 #             reaction_value = data.get('reactionValue')
 #             user = request.user
-#             print(user)
-#             print(reaction_id)
-#             print(post_id )
-#             print(reaction_value)
 
-#             if not post_id or not reaction_id or not reaction_value:
-#                 return JsonResponse({'status': 'error', 'message': 'Missing required fields'}, status=400)
+#             # Get the existing reaction
+#             reaction = PostReaction.objects.get(post_id=post_id, created_by=user)
 
-#             # Save reaction to the database (example logic)
-#             PostReaction.objects.create(post_id_id=post_id,created_by=user )
-#             # post_reaction_service.create_post_reaction(post_id , user, reaction_id)
-#             return JsonResponse({'status': 'success', 'message': 'Reaction added successfully!'})
+#             # Update the reaction
+#             reaction.reaction_id = reaction_id
+#             reaction.reaction_value = reaction_value
+#             reaction.save()
+
+#             return JsonResponse({'status': 'success', 'message': 'Reaction updated successfully!'})
+#         except PostReaction.DoesNotExist:
+#             return JsonResponse({'status': 'error', 'message': 'Reaction not found'}, status=404)
 #         except json.JSONDecodeError:
 #             return JsonResponse({'status': 'error', 'message': 'Invalid JSON format'}, status=400)
-
 #     return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
 
+@csrf_exempt  # Temporarily disable CSRF protection for testing
 def create_reaction(request):
-    if request.method == 'POST':
+    if request.method == 'PUT':
         try:
             data = json.loads(request.body)
             post_id = data.get('postId')
             reaction_id = data.get('reactionId')
             reaction_value = data.get('reactionValue')
-            user = request.user
-
-            # Debugging logs (optional, remove in production)
-            print("User:", user)
-            print("Reaction ID:", reaction_id)
-            print("Post ID:", post_id)
-            print("Reaction Value:", reaction_value)
-
-            if not post_id or not reaction_id or not reaction_value:
-                return JsonResponse({'status': 'error', 'message': 'Missing required fields'}, status=400)
-
-            # Save reaction to the database
-            PostReaction.objects.create(
-                post_id_id=post_id,
-                created_by=user,
-                reacted_by=user,  # Ensure this field is provided    
-            )
-
+            # Perform logic to handle the reaction
             return JsonResponse({'status': 'success', 'message': 'Reaction added successfully!'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)})
+    return JsonResponse({'status': 'error', 'message': 'Invalid HTTP method'}, status=405)
 
-        except json.JSONDecodeError:
-            return JsonResponse({'status': 'error', 'message': 'Invalid JSON format'}, status=400)
 
-    return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
+class UserPostEditView(View):
+    @catch_error
+    @auth_required
+    @role_required(Role.ADMIN.value, Role.END_USER.value)
+    def get(self,request):
+         post_id = request.GET.get('post_id') 
+         print("post id is",post_id)
+         post_detail =list(services.post_service.get_post(post_id).values())
+         return JsonResponse({'success': True, 'message': 'Title updated successfully.','post_detail':list(post_detail)})
+
+
+    def post(self, request):
+        user_id = request.user.id
+        post_id = request.POST.get('post_id') 
+        post_Title = request.POST.get('postTitle')
+        post_update = services.post_service.update_post(user_id,post_id,post_Title)
+        return JsonResponse({'success': True, 'message': 'Title updated successfully.','post_update':post_update})
+
+        
+
+        
+    
+
+    
+

@@ -53,8 +53,8 @@ def Postlist_posts():
     return Post.objects.all().order_by('-created_at')
 
 
-def get_post(post_id):
-     return get_object_or_404(Post, id=post_id)
+# def get_post(post_id):
+#      return get_object_or_404(Post, id=post_id)
 
 
 
@@ -74,5 +74,16 @@ def admin_list_posts_filtered(search_query, sort_by='posted_by'):
 def get_comment_count_by_post(post_id):
     comment_count = Comment.objects.filter(post_id=post_id, reply_for__isnull=True, is_active=True).count()
     return comment_count
+
+
+def get_post(post_id):
+    return Post.objects.filter(id=post_id)
+# update post
+def update_post(user_id,post_id,post_titile):
+    post = Post.objects.get(id=post_id)
+    post.titile = post_titile
+    post.updated_by=user_id
+    post.save()
+    return post
 
 # comment
