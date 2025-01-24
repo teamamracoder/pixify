@@ -51,12 +51,13 @@ class HomeView(View):
     def get(self, request):
         message = request.session.pop("message", "")
         message_type = request.session.pop("message_type", "")
-
-        # Fetch posts
+        post=[]
         posts = services.post_service.Postlist_posts()
+        for i in posts:
+           post+=[i]    
+    
         post_id = request.GET.get('post_id')
         comment_list = services.comment_service.comment_list(post_id)
-
         post_dict = {
             'posts': posts,
             #'name': 'priya',

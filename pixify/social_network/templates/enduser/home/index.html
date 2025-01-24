@@ -29,6 +29,7 @@
 
                     $('#addPhotosVideosModal').modal('hide');
                     $('#postForm')[0].reset();
+                    location.reload();
 
                     } else {
                         alert("Error: " + response.message);
@@ -317,7 +318,7 @@
                 <span data-toggle="modal" class="load-comments"><i class="fa-regular fa-comment"></i></span>
                 <i class="fa-solid fa-share-nodes" data-bs-toggle="modal" data-bs-target="#shareModal"></i>
                 
-                {% comment %} data-bs-target="#editpostModal" {% endcomment %}
+               
                 {% if post.posted_by_id  %}
                 <span data-bs-toggle="modal" class="editmodal"><i class="fa-solid fa-pen post-pe-icon" ></i></span>
             <i class="fa-solid fa-trash post-pe-icon"></i>
@@ -447,6 +448,8 @@ document.querySelectorAll('.emoji-reactions span').forEach((span, index) => {
                      document.getElementById("p_user").value = userid;
                      const Post_photo = $('#updatepost');
                    
+
+                     
             data.post_detail.forEach(post => {
                      const photo = `
            
@@ -459,6 +462,30 @@ document.querySelectorAll('.emoji-reactions span').forEach((span, index) => {
                      
         
                      ${
+                        // Check if there's more than one image
+                        post.media_url.length > 1
+                        ?
+                        // If more than one image, make it a carousel
+                        `
+                            <div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="carousel">
+                                <div class="carousel-inner">
+                                    ${post.media_url.map((photo, index) => `
+                                        <div class="carousel-item ${index === 0 ? 'active' : ''}">
+                                            <img src="static${photo}" class="d-block w-100" alt="Responsive image" style="height: 200px; object-fit: cover;">
+                                        </div>
+                                    `).join('')}
+                                </div>
+                                <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
+                                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                    <span class="visually-hidden">Previous</span>
+                                </button>
+                                <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
+                                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                    <span class="visually-hidden">Next</span>
+                                </button>
+                            </div>
+                        `
+                        :
                        post.media_url.map(photo => `
               <div  class=" editpic  rounded" style="width: 100%; outline:none;border:none">
                         <img src="static${photo}"  class="rounded">
@@ -490,26 +517,50 @@ document.querySelectorAll('.emoji-reactions span').forEach((span, index) => {
 
               </div>
             </div>
-            <div class="justify-content-center mx-auto mb-3">
+            <div class="justify-content-center mx-auto mb-3"style="display: flex;">
                 <button type="submit" id="updatePostBtn" class="btn text-dark mx-auto b_btn px-5" style="background-color:white" >Post</button>
             </div>
+        
                   `;
                   
                   Post_photo.html(photo);
                      });
-
-
-
                     $('#editpostModal').modal('show');
-
 
 
                     $('#updatePostBtn').click(function () {
                         const updatedTitle = $('#editTitle').val();
                         console.log(updatedTitle)
                         $.ajax({
-                            url: 'post/update/',
+                            
                             type: 'POST',
+                            url: '/post/update/',
+                            dataType: 'json',
+                            data: {
+                                post_id: postid,
+                                postTitle: updatedTitle,
+                                csrfmiddlewaretoken: '{{ csrf_token }}',
+                                
+                            },
+                            success: function (response) {
+                               
+                           
+                            },
+                            error: function (xhr, status, error) {
+                                console.error('Error updating title:', error);
+                            }
+                        });
+                    });
+                    /*$('#updatePostBtn').click(function (event) {
+                        // Prevent the default button or form behavior
+                        event.preventDefault();
+                    
+                        const updatedTitle = $('#editTitle').val();
+                        console.log(updatedTitle);
+                    
+                        $.ajax({
+                            type: 'POST',
+                            url: '/post/update/',
                             dataType: 'json',
                             data: {
                                 post_id: postid,
@@ -517,34 +568,33 @@ document.querySelectorAll('.emoji-reactions span').forEach((span, index) => {
                                 csrfmiddlewaretoken: '{{ csrf_token }}',
                             },
                             success: function (response) {
-                                alert(response.message);
+                                console.log('Title updated successfully:', response);
                                 $('#editpostModal').modal('hide');
-                              
                                 
+
+
                             },
                             error: function (xhr, status, error) {
                                 console.error('Error updating title:', error);
                             }
                         });
-                    });
-
-
-
-
-
+                    });*/
+                    
+                
                 },
                 
                 error: function (xhr, status, error) {
                     console.error('Error updating post:', error);
                 }
             });
+
+
         });
     });
+
+
     // Add event listener for the update button
-    
-
-
-
+   
 </script>  
 
 <!--Edit Modal -->
@@ -553,7 +603,7 @@ document.querySelectorAll('.emoji-reactions span').forEach((span, index) => {
         <input type="hidden"  id="p_id" style="color:black;">
         <input type="hidden"  id="p_user" style="color:black;">
 
-        <form   id="editForm" method="post" class="mt-3">
+        <form  id="editForm"  class="mt-3">
             {% csrf_token %}
            
 
@@ -570,42 +620,10 @@ document.querySelectorAll('.emoji-reactions span').forEach((span, index) => {
                     <span class="fw-bold text-light">Priya Mitra is with Rima Das, Sribash Sarkar, Badhan <br>and 16 others <button class="text-white px-2 rounded " style="outline:none;border:none;background: transparent;"><i class="bi bi-people-fill px-1"></i>Friends(+)<i class="bi bi-caret-down-fill"></i></button> </span>
                 </div>
                 <div class="mb-3  " id="updatepost">
-                    {% comment %}
-                    <textarea class="form-control text-light " placeholder="caption..." rows="2"
-                         style="outline:none;border:none;resize: none; background-color: #27236e" ></textarea>
-                </div>
-
-                <div class="mb-3 ">
-
-                      <div  class=" editpic  rounded" style="width: 100%; outline:none;border:none">
-                    <img src="{% static 'images/p5.jpg' %}" alt="" class=" rounded">  
-                         <span style="font-size:40px;">&times</span>
-
-                      </div>
-
-                  <div class="con">
-                  </div>
-              </div>
-              <div class="pt-1 pb-1 px-2 mb-1  fw-semibold text-dark rounded align-items-center" >
-                <div class=" d-flex justify-content-between rounded p-2" style="border:1px solid black;align-items:center;box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;background-color:white;" >
-
-                    <span class="">Add to your post</span>
-
-                    <div class="gap-3 d-flex md-icon ">
-                    <i class="bi bi-images text-success" ></i>
-                    <i class="bi bi-tag text-primary"></i>
-                    <i class="bi bi-emoji-smile text-warning"></i>
-                    <i class="bi bi-geo-alt-fill text-danger"></i>
-                    <i class="bi bi-filetype-gif text-info"></i>
-                </div>
-                  </div>
-
-              </div>
-            </div>
-            <div class="justify-content-center mx-auto mb-3">
-                <button type="button" class="btn text-dark mx-auto b_btn px-5" style="background-color:white" >Post</button>
-            </div> {% endcomment %}
-        </div>
+                   
+               </div>
+               </div>
+               </div>
         </form>
     </div>
     </div>
@@ -911,7 +929,8 @@ com_profile.html(com_prof);
     });
 
 
-
+  //  com_name.html(comname);
+//});
 
 const postItem = `
     <div class="post-des-img">
@@ -1045,13 +1064,15 @@ photo_com.html(postItem);
 
         data: {
           post_id: FirstPostId,
-          /*user_id:FirstUsertId,*/
           comment_text: commentText,
           csrfmiddlewaretoken: '{{ csrf_token }}',
         },
         headers: { "X-CSRFToken": "{{ csrf_token }}" },
         success: function (data) {
             console.log("response",data)
+
+            // Refresh the comments section
+
 
           $('#commentText').val(''); // Clear textarea
           const commentList = $('#commentList');
@@ -1121,24 +1142,15 @@ photo_com.html(postItem);
 </script>
 <style>
 
-
-        .custom-modal .modal-dialog {
-          max-width: 1000px;
-
-         
-
-        }
-
-        .modal-image {
-            object-fit: cover;
-            width: 100%;
-
-        }
+.custom-modal .modal-dialog {
+     max-width: 1000px;
+}
+.modal-image {
+ object-fit: cover;
+width: 100%;
+}
 
 </style> 
-
-
-
  {% endblock %}
 
 
