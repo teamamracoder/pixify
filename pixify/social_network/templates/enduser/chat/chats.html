@@ -114,7 +114,7 @@
                         {% if chat.latest_reaction_time == '' or chat.latest_message_time >= chat.latest_reaction_time %}
                             <p class="chat-message chat_title">{{ chat.latest_message }}</p>
                         {% else %}
-                            <p class="chat-message chat_title">{{ chat.latest_reaction_message_reacted_by }} : Reacted {{ chat.latest_reaction|safe }} on "{{ chat.latest_message }}"</p>
+                            <p class="chat-message chat_title"> Reacted {{ chat.latest_reaction|safe }} on "{{ chat.latest_message }}"</p>
                         {% endif %}
                     {% else %}
                         <p class="chat-message chat_title">No messages yet</p>

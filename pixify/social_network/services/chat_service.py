@@ -110,7 +110,7 @@ def get_chat_by_id(chat_id):
 def get_recipient_for_personal(chat_id,user):
     # check this
     try:
-        chat_member = ChatMember.objects.exclude(member_id=user.id).get(chat_id=chat_id)
+        chat_member = ChatMember.objects.exclude(member_id=user.id).get(chat_id=chat_id,is_active=True)
         if chat_member:
             member = chat_member.member_id 
             return member
@@ -119,13 +119,13 @@ def get_recipient_for_personal(chat_id,user):
         return False
     
 def count_members(chat_id ):
-    members=ChatMember.objects.filter(chat_id=chat_id)
+    members=ChatMember.objects.filter(chat_id=chat_id,is_active=True)
     return members
 
 
 
 def get_recipients_for_group(chat_id,user):
-        chat_members = ChatMember.objects.filter(chat_id=chat_id)
+        chat_members = ChatMember.objects.filter(chat_id=chat_id,is_active=True)
         first_names = [
         'You' if chat_member.member_id == user else chat_member.member_id.first_name 
         for chat_member in chat_members

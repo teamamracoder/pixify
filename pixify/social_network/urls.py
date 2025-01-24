@@ -164,6 +164,7 @@ urlpatterns = [
     path('story/create/', views.UserStoryCreatView.as_view(),name='userstory_create'),
     # path('', views.UserStoryListView.as_view(), name='Userstory_list'),
     path('uploadStory/', views.UploadStoryView.as_view(),name='uploadStory'),
+    path('call/', views.CallView.as_view(),name='call_view'),
 
 ]
 
