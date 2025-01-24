@@ -449,19 +449,8 @@ document.querySelectorAll('.emoji-reactions span').forEach((span, index) => {
                    
             data.post_detail.forEach(post => {
                      const photo = `
-             <div class="modal-header" >
-                <h5 class="modal-title mx-auto" id="editpostModalLabel">Edit Post</h5>
-                <button type="button" class="btn-close ml-5" data-bs-dismiss="modal" aria-label="Close" style="margin-left:0px;"></button>
-            </div>
-            <div class="modal-body">
-                <div class="d-flex align-items-center mb-3" style="margin-top:10px;" >
-                   <img src="{% static 'images/avatar.jpg' %}" alt="User Avatar"
-                        class="user-avatar me-2"> 
-                    <span class="fw-bold text-light">Priya Mitra is with Rima Das, Sribash Sarkar, Badhan <br>and 16 others <button class="text-white px-2 rounded " style="outline:none;border:none;background: transparent;"><i class="bi bi-people-fill px-1"></i>Friends(+)<i class="bi bi-caret-down-fill"></i></button> </span>
-                </div>
-                
-                <div class="mb-3  ">
-                    <textarea class="form-control text-light " placeholder="caption..." rows="2"
+           
+                    <textarea class="form-control text-light " placeholder="caption..." rows="2" id="editTitle"
                          style="outline:none;border:none;resize: none; background-color: #27236e"  >${post.title}</textarea>
                 </div>
 
@@ -469,7 +458,7 @@ document.querySelectorAll('.emoji-reactions span').forEach((span, index) => {
 
                      
         
-              ${
+                     ${
                        post.media_url.map(photo => `
               <div  class=" editpic  rounded" style="width: 100%; outline:none;border:none">
                         <img src="static${photo}"  class="rounded">
@@ -502,7 +491,7 @@ document.querySelectorAll('.emoji-reactions span').forEach((span, index) => {
               </div>
             </div>
             <div class="justify-content-center mx-auto mb-3">
-                <button type="submit" class="btn text-dark mx-auto b_btn px-5" style="background-color:white" >Post</button>
+                <button type="submit" id="updatePostBtn" class="btn text-dark mx-auto b_btn px-5" style="background-color:white" >Post</button>
             </div>
                   `;
                   
@@ -512,14 +501,50 @@ document.querySelectorAll('.emoji-reactions span').forEach((span, index) => {
 
 
                     $('#editpostModal').modal('show');
+
+
+
+                    $('#updatePostBtn').click(function () {
+                        const updatedTitle = $('#editTitle').val();
+                        console.log(updatedTitle)
+                        $.ajax({
+                            url: 'post/update/',
+                            type: 'POST',
+                            dataType: 'json',
+                            data: {
+                                post_id: postid,
+                                postTitle: updatedTitle,
+                                csrfmiddlewaretoken: '{{ csrf_token }}',
+                            },
+                            success: function (response) {
+                                alert(response.message);
+                                $('#editpostModal').modal('hide');
+                              
+                                
+                            },
+                            error: function (xhr, status, error) {
+                                console.error('Error updating title:', error);
+                            }
+                        });
+                    });
+
+
+
+
+
                 },
+                
                 error: function (xhr, status, error) {
                     console.error('Error updating post:', error);
                 }
             });
         });
     });
-   
+    // Add event listener for the update button
+    
+
+
+
 </script>  
 
 <!--Edit Modal -->
@@ -533,8 +558,8 @@ document.querySelectorAll('.emoji-reactions span').forEach((span, index) => {
            
 
 
-        <div class="modal-content   " style="background-color:#2f066de3;" id="updatepost">
-            {% comment %} <div class="modal-header" >
+        <div class="modal-content   " style="background-color:#2f066de3;" >
+             <div class="modal-header" >
                 <h5 class="modal-title mx-auto" id="editpostModalLabel">Edit Post</h5>
                 <button type="button" class="btn-close ml-5" data-bs-dismiss="modal" aria-label="Close" style="margin-left:0px;"></button>
             </div>
@@ -544,7 +569,8 @@ document.querySelectorAll('.emoji-reactions span').forEach((span, index) => {
                         class="user-avatar me-2"> 
                     <span class="fw-bold text-light">Priya Mitra is with Rima Das, Sribash Sarkar, Badhan <br>and 16 others <button class="text-white px-2 rounded " style="outline:none;border:none;background: transparent;"><i class="bi bi-people-fill px-1"></i>Friends(+)<i class="bi bi-caret-down-fill"></i></button> </span>
                 </div>
-                <div class="mb-3  ">
+                <div class="mb-3  " id="updatepost">
+                    {% comment %}
                     <textarea class="form-control text-light " placeholder="caption..." rows="2"
                          style="outline:none;border:none;resize: none; background-color: #27236e" ></textarea>
                 </div>
