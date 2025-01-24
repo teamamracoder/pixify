@@ -228,12 +228,9 @@
 
     
 
-    {% if post_dict.posts %}
-
-        {% for post in post_dict.posts %}
 
 
-     <div class="container post-center pb-3 mb-3">
+     <div class="container post-center pb-3 mb-3"  id="postsContainer">
 
         <div class="post-box">
 
@@ -247,54 +244,33 @@
             </a>
 
             <div class="d-flex "style="flex-direction: column;" >
-             <h6 class="u-name"> {{ post.posted_by.first_name }} {{ post.posted_by.last_name }}
+             <h6 class="u-name"> priya
                  <span style="font-size:14px;color:#e9e6e6c7;">Upload his profile picture</span>  </h6>
 
-             <span style="font-size:11px;margin-left: 15px;position: relative;bottom: 14px;" class="py-1">{{ post.created_at|timesince }} ago <i class="bi bi-globe-americas p-1" style="font-size:10px"></i></span>
+             <span style="font-size:11px;margin-left: 15px;position: relative;bottom: 14px;" class="py-1">5 ago <i class="bi bi-globe-americas p-1" style="font-size:10px"></i></span>
 
             </div>
         </div>
 
-        <div class="post-des-img" class="post_title">
-            <p class="px-3 pt-2" id="title" style="font-size:15px; margin: 0; margin-bottom: 5px;padding-bottom:13px;">{{ post.title }}</p>
+        <div class="post-des-img">
+            <p class="px-3 pt-2" style="font-size:15px; margin: 0; margin-bottom: 5px;padding-bottom:13px;">Nice</p>
 
-            {% if post.media_url|length == 1 %}
+      
             <div style="height:450px;">
-                <img src="{% static post.media_url.0 %}" class="img-fluid" alt="Responsive image"style="height:100%;width:100%;object-fit:cover;">
+                <img src={% static 'images/avatar.jpg' %} class="img-fluid" alt="Responsive image"style="height:100%;width:100%;object-fit:cover;">
             </div>
-            {% elif post.media_url|length > 1 %}
-                <div id="carouselExampleIndicators{{ post.id }}" class="carousel slide">
-                    <div class="carousel-indicators">
-                        {% for media in post.media_url %}
-                            <button type="button" data-bs-target="#carouselExampleIndicators{{ post.id }}" data-bs-slide-to="{{ forloop.counter0 }}" class="{% if forloop.first %}active{% endif %}" aria-current="{% if forloop.first %}true{% endif %}" aria-label="Slide {{ forloop.counter }}"></button>
-                        {% endfor %}
-                    </div>
-
-                    <div class="carousel-inner">
-                        {% for media in post.media_url %}
-                            <div class="carousel-item {% if forloop.first %}active{% endif %}" style="height:450px">
-                                <img src="{% static media %}" class="d-block" height="350" width="100%" alt="Slide {{ forloop.counter }}">
-                            </div>
-                        {% endfor %}
-                    </div>
-
-                    <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators{{ post.id }}" data-bs-slide="prev">
-                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                        <span class="visually-hidden">Previous</span>
-                    </button>
-                    <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators{{ post.id }}" data-bs-slide="next">
-                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                        <span class="visually-hidden">Next</span>
-                    </button>
+         
+                
+             </div>
+                    
                 </div>
-            {% endif %}
-        </div>
+          <div>
 
         <div>
             <div class="d-flex align-items-center px-2 " >
                 <i class="bi bi-hand-thumbs-up pe-1" style="font-size:12px"></i> <i class="bi bi-heart" style="font-size:12px"></i>
                 <span style="font-size:14px;color:#e9e6e6c7;" class="px-2"  id="reaction-count"> Rima Das, Sribash Sarkar and <span id="total-reaction-count" >7</span> others</span>
-                <span style="font-size:14px;color:#e9e6e6c7;" class="ms-auto pe-2">{{ post_dict.count_commnet }} comments</span>
+                <span style="font-size:14px;color:#e9e6e6c7;" class="ms-auto pe-2">comments</span>
             </div>
         </div>
 
@@ -317,19 +293,85 @@
                 <span data-toggle="modal" class="load-comments"><i class="fa-regular fa-comment"></i></span>
                 <i class="fa-solid fa-share-nodes" data-bs-toggle="modal" data-bs-target="#shareModal"></i>
                 
-                {% comment %} data-bs-target="#editpostModal" {% endcomment %}
-                {% if post.posted_by_id  %}
-                <span data-bs-toggle="modal" class="editmodal"><i class="fa-solid fa-pen post-pe-icon" ></i></span>
+             
+         
+            <i class="fa-solid fa-pen post-pe-icon" data-bs-toggle="modal" data-bs-target="#editpostModal"></i>
             <i class="fa-solid fa-trash post-pe-icon"></i>
-            {% endif %}
+          
            
             </div>
         </div>
         </div>
     </div>
+   
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const postsContainer = document.getElementById('postsContainer');
+    
+        // Function to fetch posts
+        async function fetchPosts() {
+            try {
+                const response = await fetch('{% url 'Userposts_list' %}', {
+                    method: 'GET',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest', // Indicate this is an AJAX request
+                    },
+                });
+    
+                if (!response.ok) {
+                    throw new Error(`Error: ${response.statusText}`);
+                }
+    
+                const data = await response.json();
+                updatePosts(data.posts); // Call function to update the DOM
+            } catch (error) {
+                console.error('Error fetching posts:', error);
+            }
+        }
+    
+        // Function to update posts in the DOM
+        function updatePosts(posts) {
+            postsContainer.innerHTML = ''; // Clear existing posts
+            posts.forEach((post) => {
+                const postHTML = `
+                    <div class="post-box">
+                        <div class="post-top" style="height: 45px;">
+                            <a href="">
+                                <img src="/static/images/IMG_20240915_213320.jpg" alt="avatar" class="rounded-circle me-1" style="width: 35px; object-fit: cover; height: 35px;">
+                            </a>
+                            <div class="d-flex" style="flex-direction: column;">
+                                <h6 class="u-name">${post.name}
+                                    <span style="font-size:14px;color:#e9e6e6c7;">uploaded a post</span>
+                                </h6>
+                                <span style="font-size:11px;margin-left: 15px;position: relative;bottom: 14px;" class="py-1">${post.timestamp} <i class="bi bi-globe-americas p-1" style="font-size:10px"></i></span>
+                            </div>
+                        </div>
+                        <div class="post-des-img">
+                            <p class="px-3 pt-2" style="font-size:15px; margin: 0; margin-bottom: 5px;padding-bottom:13px;">${post.content}</p>
+                            <div style="height:450px;">
+                                <img src="${post.image_url}" class="img-fluid" alt="Post Image" style="height:100%;width:100%;object-fit:cover;">
+                            </div>
+                        </div>
+                    </div>
+                `;
+                postsContainer.insertAdjacentHTML('beforeend', postHTML);
+            });
+        }
+    
+        // Initial fetch
+        fetchPosts();
+    
+        // Example: Optionally refetch on some event (e.g., button click)
+        // document.getElementById('refreshButton').addEventListener('click', fetchPosts);
+    });
+    
+</script>
+       
+        
+    </script>
 
-    {% endfor %}
-    {% endif %} 
+    
+
 <script>
 
 
@@ -420,139 +462,29 @@ document.querySelectorAll('.emoji-reactions span').forEach((span, index) => {
 </div>
 
 
-
-<script>
-
-
-    $(document).ready(function () {
-        $('.editmodal').click(function () {
-            const FirstPostId = $(this).closest('.post-box').find('.firstPostId').val();
-            const FirstUserId = $(this).closest('.post-box').find('.firstUserId').val();
-            console.log(FirstPostId)
-  
-            $.ajax({
-                url: 'post/update/',
-                type: 'GET',
-                dataType: 'json',
-                data: {
-                    post_id: FirstPostId,
-                    user_id: FirstUserId,
-                    csrfmiddlewaretoken: '{{ csrf_token }}',
-                  },
-                success: function (data) {
-                    console.log("data post",data.post_detail[0].media_url)
-                     const postid= FirstPostId
-                     const userid=FirstUserId
-                     document.getElementById("p_id").value = postid;
-                     document.getElementById("p_user").value = userid;
-                     const Post_photo = $('#updatepost');
-                   
-            data.post_detail.forEach(post => {
-                     const photo = `
-             <div class="modal-header" >
-                <h5 class="modal-title mx-auto" id="editpostModalLabel">Edit Post</h5>
-                <button type="button" class="btn-close ml-5" data-bs-dismiss="modal" aria-label="Close" style="margin-left:0px;"></button>
-            </div>
-            <div class="modal-body">
-                <div class="d-flex align-items-center mb-3" style="margin-top:10px;" >
-                   <img src="{% static 'images/avatar.jpg' %}" alt="User Avatar"
-                        class="user-avatar me-2"> 
-                    <span class="fw-bold text-light">Priya Mitra is with Rima Das, Sribash Sarkar, Badhan <br>and 16 others <button class="text-white px-2 rounded " style="outline:none;border:none;background: transparent;"><i class="bi bi-people-fill px-1"></i>Friends(+)<i class="bi bi-caret-down-fill"></i></button> </span>
-                </div>
-                
-                <div class="mb-3  ">
-                    <textarea class="form-control text-light " placeholder="caption..." rows="2"
-                         style="outline:none;border:none;resize: none; background-color: #27236e"  >${post.title}</textarea>
-                </div>
-
-                <div class="mb-3 ">
-
-                     
-        
-              ${
-                       post.media_url.map(photo => `
-              <div  class=" editpic  rounded" style="width: 100%; outline:none;border:none">
-                        <img src="static${photo}"  class="rounded">
-                    <span style="font-size:40px;">&times</span>
-
-                      </div>
-                `).join('')
-}
-
-                        
-
-                  <div class="con">
-              
-                  </div>
-              </div>
-              <div class="pt-1 pb-1 px-2 mb-1  fw-semibold text-dark rounded align-items-center" >
-                <div class=" d-flex justify-content-between rounded p-2" style="border:1px solid black;align-items:center;box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;background-color:white;" >
-
-                    <span class="">Add to your post</span>
-
-                    <div class="gap-3 d-flex md-icon ">
-                    <i class="bi bi-images text-success" ></i>
-                    <i class="bi bi-tag text-primary"></i>
-                    <i class="bi bi-emoji-smile text-warning"></i>
-                    <i class="bi bi-geo-alt-fill text-danger"></i>
-                    <i class="bi bi-filetype-gif text-info"></i>
-                </div>
-                  </div>
-
-              </div>
-            </div>
-            <div class="justify-content-center mx-auto mb-3">
-                <button type="submit" class="btn text-dark mx-auto b_btn px-5" style="background-color:white" >Post</button>
-            </div>
-                  `;
-                  
-                  Post_photo.html(photo);
-                     });
-
-
-
-                    $('#editpostModal').modal('show');
-                },
-                error: function (xhr, status, error) {
-                    console.error('Error updating post:', error);
-                }
-            });
-        });
-    });
-   
-</script>  
-
 <!--Edit Modal -->
 <div class="modal fade" id="editpostModal" tabindex="-1" aria-labelledby="editpostModalLabel" aria-hidden="true" >
     <div class="modal-dialog">
-        <input type="hidden"  id="p_id" style="color:black;">
-        <input type="hidden"  id="p_user" style="color:black;">
-
-        <form   id="editForm" method="post" class="mt-3">
-            {% csrf_token %}
-           
-
-
-        <div class="modal-content   " style="background-color:#2f066de3;" id="updatepost">
-            {% comment %} <div class="modal-header" >
+        <div class="modal-content   " style="background-color:#2f066de3;" >
+            <div class="modal-header" >
                 <h5 class="modal-title mx-auto" id="editpostModalLabel">Edit Post</h5>
                 <button type="button" class="btn-close ml-5" data-bs-dismiss="modal" aria-label="Close" style="margin-left:0px;"></button>
             </div>
             <div class="modal-body">
-                <div class="d-flex align-items-center mb-3" style="margin-top:10px;" >
-                   <img src="{% static 'images/avatar.jpg' %}" alt="User Avatar"
-                        class="user-avatar me-2"> 
+                <div class="d-flex align-items-center mb-3" style="margin-top:10px;">
+                    <img src="{% static 'images/avatar.jpg' %}" alt="User Avatar"
+                        class="user-avatar me-2">
                     <span class="fw-bold text-light">Priya Mitra is with Rima Das, Sribash Sarkar, Badhan <br>and 16 others <button class="text-white px-2 rounded " style="outline:none;border:none;background: transparent;"><i class="bi bi-people-fill px-1"></i>Friends(+)<i class="bi bi-caret-down-fill"></i></button> </span>
                 </div>
                 <div class="mb-3  ">
-                    <textarea class="form-control text-light " placeholder="caption..." rows="2"
-                         style="outline:none;border:none;resize: none; background-color: #27236e" ></textarea>
+                    <textarea class="form-control text-dark " placeholder="caption..." rows="2"
+                         style="outline:none;border:none;resize: none; background-color: #27236e"></textarea>
                 </div>
 
                 <div class="mb-3 ">
 
                       <div  class=" editpic  rounded" style="width: 100%; outline:none;border:none">
-                    <img src="{% static 'images/p5.jpg' %}" alt="" class=" rounded">  
+                         <img src="{% static 'images/p5.jpg' %}" alt="" class=" rounded">
                          <span style="font-size:40px;">&times</span>
 
                       </div>
@@ -578,9 +510,8 @@ document.querySelectorAll('.emoji-reactions span').forEach((span, index) => {
             </div>
             <div class="justify-content-center mx-auto mb-3">
                 <button type="button" class="btn text-dark mx-auto b_btn px-5" style="background-color:white" >Post</button>
-            </div> {% endcomment %}
+            </div>
         </div>
-        </form>
     </div>
     </div>
 
@@ -831,6 +762,16 @@ document.querySelectorAll('.emoji-reactions span').forEach((span, index) => {
 </style>
 
  <script src="{% static 'js/sribash.js' %}"></script>
+<script>
+  function uploadStory(){
+    console.log("Clicked");
+    window.location.href="/uploadStory"
+  }
+
+</script>
+
+
+
 
  <script>
     $(document).ready(function () {
@@ -885,7 +826,8 @@ com_profile.html(com_prof);
     });
 
 
-
+  //  com_name.html(comname);
+//});
 
 const postItem = `
     <div class="post-des-img">
@@ -1027,6 +969,9 @@ photo_com.html(postItem);
         success: function (data) {
             console.log("response",data)
 
+            // Refresh the comments section
+
+
           $('#commentText').val(''); // Clear textarea
           const commentList = $('#commentList');
           const photo_com = $('#photo_com');
@@ -1110,8 +1055,6 @@ photo_com.html(postItem);
         }
 
 </style> 
-
-
 
  {% endblock %}
 

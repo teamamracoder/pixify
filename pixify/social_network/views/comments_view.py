@@ -64,9 +64,7 @@ class CommentsListView(View):
          user_id = request.GET.get('user_id')
          
          user_details=list(services.comment_service.get_user(user_id).values())
-         
-         
-   
+        
          post_del=list(services.comment_service.get_post(post_id).values())
       
          comment_list = services.comment_service.comment_list(post_id)

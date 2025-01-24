@@ -138,11 +138,11 @@ urlpatterns = [
     #for enduser post priya
     path('posts/create/', views.UserPostCreatView.as_view(),name='userpost_create'),
     path('', views.UserPostListView.as_view(), name='Userposts_list'),
+    path('post/update/',views.UserPostEditView.as_view(),name='UserPostEdit'),
+    
    # post reaction priya
-  
-    #path('post_reaction/create/', views.UserPostReactionCreateView.as_view(),name='post_reaction'),
-    #path('add-reaction/', views.add_reaction, name='add-reaction'),
     path('post_reaction/create/', views.create_reaction, name='create_reaction'),
+   
 
     #comment priya
     path('comments/',  views.CommentsCreateView.as_view(), name='comment'),

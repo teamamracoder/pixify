@@ -61,7 +61,7 @@ class HomeView(View):
             'posts': posts,
             #'name': 'priya',
             'comment_list': comment_list,
-            'count_comment': services.comment_service.get_count_comment(59),
+            'count_comment': services.comment_service.get_count_comment(163),
         }
 
         # Fetch stories
