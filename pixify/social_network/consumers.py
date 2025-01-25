@@ -291,31 +291,3 @@ class ChatConsumer(AsyncWebsocketConsumer):
         }))
 
 
-
-class CallConsumer(AsyncWebsocketConsumer):
-    async def connect(self):
-        call_id = self.scope['url_route']['kwargs']['call_id']
-        self.room_group_name = f'call_{call_id}'
-
-        await self.channel_layer.group_add(
-            self.room_group_name,
-            self.channel_name
-        )
-
-        # Notify all members that a new user is joining
-        await self.channel_layer.group_send(
-            self.room_group_name,
-            {
-                'type': 'notification',
-                'message': f'User {self.scope["user"]} is joining the call.'
-            }
-        )
-
-    # Handle WebSocket message
-    async def notification(self, event):
-        message = event['message']
-        await self.send(text_data=json.dumps({
-            'action': 'notification',
-            'message': message
-        }))
-
