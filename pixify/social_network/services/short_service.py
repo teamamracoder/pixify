@@ -25,6 +25,72 @@ def short_reaction(post, user):
 def reaction_count(short):
     return PostReaction.objects.filter(post_id=short, is_active=True).count()
 
+def short_comments(short):
+    # Fetch active comments for the given post ID
+    comments = Comment.objects.filter(post_id=short, is_active=True).values(
+        'id',
+        'comment',
+        'comment_by__first_name',
+        'comment_by__last_name',
+        'comment_by__profile_photo_url',
+    )
+
+    for comment in comments:
+        # Calculate like count for the parent comment
+        comment['like_count'] = CommentReaction.objects.filter(
+            comment_id=comment['id'], is_active=True
+        ).count()
+
+        # Fetch and process replies for the current comment
+        replies = Comment.objects.filter(reply_for_id=comment['id'], is_active=True).values(
+            'id',
+            'comment',
+            'comment_by__first_name',
+            'comment_by__last_name',
+            'comment_by__profile_photo_url',
+        )
+
+        # Add like_count to each reply
+        for reply in replies:
+            reply['like_count'] = CommentReaction.objects.filter(
+                comment_id=reply['id'], is_active=True
+            ).count()
+
+        # Attach replies to the parent comment
+        comment['replies'] = list(replies)
+
+    return comments
+
+def get_short_comment(comment_id):
+    return Comment.objects.filter(id=comment_id, is_active=True)
+
+def short_comment(text, post, user):
+    return Comment.objects.create(
+        comment_by=user,
+        Comment=text,
+        post_id=post,        
+        created_by=user,
+    )
+
+def short_comment_reply(text, post, comment, user):
+    return Comment.objects.create(
+        Comment=text,
+        post_id = post,
+        reply_for = comment,
+        comment_by = user,
+        created_by= user,
+    )
+
+def short_comment_delete(comment_id, user):
+    comment = Comment.objects.filter(id=comment_id, is_active=True)
+
+    comment.is_active=False
+    comment.updated_by=user
+    comment.save()
+            
+def comment_count(short):
+    return Comment.objects.filter(post_id=short, is_active=True).count()
+
 def user_has_reacted(short, user):
     return PostReaction.objects.filter(post_id=short, reacted_by=user, is_active=True).exists()
 
@@ -42,7 +108,4 @@ def format_count(count):
     elif count >= 1_000:  # Thousands
         return f"{count / 1_000:.2f}k".rstrip('0').rstrip('.')
     return str(count)  # Less than 1,000: Show the full number
-
-
-
 

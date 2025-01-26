@@ -12,13 +12,19 @@
             {% if video.media_url|length >= 1 %}
             <video id="myVideo{{ forloop.counter }}" autoplay loop>
                 <source src="{% static video.media_url.0 %}" type="video/mp4">
+                <p>Your browser does not support the video tag.</p>
             </video>
             {% else %}
             <p>No video available.</p>
             {% endif %}
 
             <div class="video-info">
-                <div class="username">{{ video.posted_by.first_name }}</div>
+                <div class="user-info">
+                    <img src="{{ video.posted_by.profile_photo_url|default:'/static/images/avatar.jpg' }}" 
+                         alt="{{ video.posted_by.first_name }}'s Profile Picture" 
+                         class="short-profile-pic">
+                    <div class="username">{{ video.posted_by.first_name }} {{ video.posted_by.last_name }} </div>
+                </div>
                 <div class="description">{{ video.description }}</div>
             </div>
         </div>
@@ -27,55 +33,69 @@
         <div class="right-icons">
             <div>
                 <i id="heartIcon{{ forloop.counter }}" 
-                            class="bi {% if video.user_reacted %}bi-heart-fill{% else %}bi-heart{% endif %}"></i>
-                 <div class="reaction-count">{{ video.reaction_count }}</div>
+                   class="bi {% if video.user_reacted %}bi-heart-fill{% else %}bi-heart{% endif %}" 
+                   aria-label="Like"></i>
+                <div class="reaction-count">{{ video.reaction_count }}</div>
             </div>
             <div>
-                <span class="chat-icon" style="font-size: 24px;"><i class="bi bi-chat"></i></span>
-                <span>{{ video.comments_count }}</span>
+                <span class="chat-icon" style="font-size: 24px;" aria-label="Comments" data-video-id="{{ video.id }}">
+                    <i class="bi bi-chat"></i>
+                </span>
+                <div class="reaction-count">{{ video.comments_count }}</div>
             </div>
             <div>
-                <span class="icon"><i class="bi bi-send"></i></span>
+                <span class="icon" aria-label="Send">
+                    <i class="bi bi-send"></i>
+                </span>
             </div>
             <div>
-                <span class="icon">⋮</span>
+                <span class="icon" aria-label="More options">⋮</span>
             </div>
         </div>
 
         <!-- Navigation buttons -->
         <div class="navigation-buttons">
-            <button class="nav-button prev-button" data-index="{{ forloop.counter0 }}"><i class="bi bi-arrow-up-circle"></i></button>
-            <button class="nav-button next-button" data-index="{{ forloop.counter0 }}"><i class="bi bi-arrow-down-circle"></i></button>
+            <button class="nav-button prev-button" data-index="{{ forloop.counter0 }}" aria-label="Previous Video">
+                <i class="bi bi-arrow-up-circle"></i>
+            </button>
+            <button class="nav-button next-button" data-index="{{ forloop.counter0 }}" aria-label="Next Video">
+                <i class="bi bi-arrow-down-circle"></i>
+            </button>
         </div>
     </div>
-    {% endfor %}
+
+<!-- Modal for Comments -->
+<div class="short-modal" id="shortCommentsModal" tabindex="-1" aria-hidden="true">
+    <div class="short-modal-dialog">
+        <div class="modal-content">
+            <div class="short-modal-header">
+                <h5 class="modal-title">Comments</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="short-modal-body">
+                <div id="shortCommentsList" class="short-comments-list">
+                    <!-- Comments will be dynamically loaded here -->
+                </div>
+                <div class="short-comment-input">
+                    <input type="text" id="shortCommentInput" placeholder="Add a comment...">
+                    <button id="shortSubmitComment" class="btn btn-primary">Post</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
-<!-- Comment Modal -->
-<div id="shortCommentModal" class="short-modal short-hidden">
-    <div class="short-modal-content">
-        <div class="short-modal-header">
-            <h4>Comments</h4>
-            <button id="shortCloseModalButton" class="short-close-button">&times;</button>
-        </div>
-        <div class="short-modal-body">
-            <ul id="shortCommentList">
-                <!-- Comments will be dynamically loaded here -->
-                <li>Sample comment 1</li>
-                <li>Sample comment 2</li>
-            </ul>
-        </div>
-        <div class="short-modal-footer">
-            <input type="text" id="shortCommentInput" placeholder="Write a comment..." />
-            <button id="shortPostCommentButton" class="short-post-button">Post</button>
-        </div>
-    </div>
+
+
+    {% endfor %}
 </div>
 
 <script>
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Handle initial like reactions (for liking)
+    // Handle reactions (like/dislike)
     const handleReaction = (iconElement, isDelete = false) => {
         const postId = iconElement.closest('.video-wrapper').dataset.postId;
         const url = isDelete 
@@ -114,9 +134,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     iconElement.classList.remove('bi-heart');
                     iconElement.classList.add('bi-heart-fill');
                 }
-
-                // Rebind event listeners after state change
-                bindHeartIconListeners();
             } else {
                 console.error('Failed to update reaction:', data);
             }
@@ -126,56 +143,44 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    const bindHeartIconListeners = () => {
-        document.querySelectorAll('.bi-heart').forEach((heartIcon) => {
-            // Remove existing event listeners to avoid duplicates
-            heartIcon.removeEventListener('click', heartClickListener);
-            heartIcon.removeEventListener('touchstart', heartTouchListener);
+    // Add double-tap functionality to video screen
+    let lastTap = 0;
+    const bindVideoDoubleTapListeners = () => {
+        document.querySelectorAll('video').forEach((videoElement) => {
+            videoElement.addEventListener('click', function () {
+                const currentTime = new Date().getTime();
+                const tapGap = currentTime - lastTap;
 
-            heartIcon.addEventListener('click', heartClickListener);
-            heartIcon.addEventListener('touchstart', heartTouchListener);
+                if (tapGap < 300 && tapGap > 0) {
+                    // Double-tap detected
+                    const heartIcon = this.closest('.video-wrapper').querySelector('.bi-heart');
+                    if (heartIcon && !heartIcon.classList.contains('bi-heart-fill')) {
+                        handleReaction(heartIcon, false); // Like on double-tap
+                    }
+                }
+
+                lastTap = currentTime;
+            });
         });
     };
 
-    const heartClickListener = function () {
-        const isLiked = this.classList.contains('bi-heart-fill');
-        if (isLiked) {
-            handleReaction(this, true); // If the icon is filled, delete the reaction
-        } else {
-            handleReaction(this, false); // If the icon is not filled, create the reaction
-        }
-    };
-
-    const heartTouchListener = function () {
-        const currentTime = new Date().getTime();
-        const tapGap = currentTime - lastTap;
-
-        if (tapGap < 300 && tapGap > 0) {
-            // Double tap detected (to like or toggle)
-            const isLiked = this.classList.contains('bi-heart-fill');
-            if (isLiked) {
-                handleReaction(this, true); // Delete reaction
-            } else {
-                handleReaction(this, false); // Create reaction
-            }
-        }
-
-        lastTap = currentTime;
+    // Bind heart icon listeners for like/dislike
+    const bindHeartIconListeners = () => {
+        document.querySelectorAll('.bi-heart, .bi-heart-fill').forEach((heartIcon) => {
+            heartIcon.addEventListener('click', function () {
+                const isLiked = this.classList.contains('bi-heart-fill');
+                if (isLiked) {
+                    handleReaction(this, true); // Dislike
+                } else {
+                    handleReaction(this, false); // Like
+                }
+            });
+        });
     };
 
     // Bind listeners on page load
+    bindVideoDoubleTapListeners();
     bindHeartIconListeners();
-
-    // Handle initial state of liked reactions (for already liked posts)
-    document.querySelectorAll('.bi-heart-fill').forEach((heartIcon) => {
-        // Already liked reactions should correctly delete first if clicked again
-        heartIcon.addEventListener('click', function () {
-            // Only delete if the icon is currently filled
-            if (this.classList.contains('bi-heart-fill')) {
-                handleReaction(this, true); // Set isDelete to true for delete
-            }
-        });
-    });
 });
 
 // Helper function to get CSRF token
@@ -323,42 +328,189 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
+// Open the comments modal and fetch comments with nested replies
+function openShortCommentsModal(postId) {
+    const modal = document.getElementById('shortCommentsModal');
+    const commentsList = document.getElementById('shortCommentsList');
 
-document.addEventListener("DOMContentLoaded", function () {
-    const commentModal = document.getElementById("shortCommentModal");
-    const closeModalButton = document.getElementById("shortCloseModalButton");
-    const commentInput = document.getElementById("shortCommentInput");
-    const commentList = document.getElementById("shortCommentList");
-    const postCommentButton = document.getElementById("shortPostCommentButton");
+    // Reset comments list and show the modal
+    commentsList.innerHTML = '';
+    modal.style.display = 'flex';
+    setTimeout(() => modal.classList.add('show'), 10);
 
-    // Delegate click event to comment icons
-    document.addEventListener("click", (event) => {
-        if (event.target.closest(".chat-icon")) {
-            commentModal.style.display = "flex"; // Open the modal
-        }
+    // Fetch comments and nested replies for the specific post
+    fetch(`/short/${postId}/comments/`)
+        .then(response => response.json())
+        .then(data => {
+            data.comments.forEach(comment => {
+                // Create parent comment
+                const commentItem = document.createElement('div');
+                commentItem.classList.add('short-comment-item');
+                commentItem.innerHTML = `
+                    <img src="${comment.comment_by__profile_photo_url || '/static/images/avatar.jpg'}" alt="${comment.comment_by__first_name}'s Profile Picture">
+                    <div class="short-comment-content">
+                        <span class="short-username">${comment.comment_by__first_name} ${comment.comment_by__last_name}</span>
+                        <span class="short-comment-text">${comment.comment}</span>
+                        <div class="short-comment-actions">
+                            <button class="btn-like" data-comment-id="${comment.id}">
+                                <i class="bi bi-heart"></i> <span class="like-count">${comment.like_count || 0}</span>
+                            </button>
+                            <button class="btn-reply" data-comment-id="${comment.id}">Reply</button>
+                        </div>
+                    </div>
+                    <div class="reply-list"></div>
+                `;
+                commentsList.appendChild(commentItem);
+
+                // Render replies (limit to three initially)
+                if (comment.replies && comment.replies.length > 0) {
+                    const replyList = commentItem.querySelector('.reply-list');
+                    const repliesToShow = comment.replies.slice(0, 3); // Show first three replies
+                    const hasMoreReplies = comment.replies.length > 3;
+
+                    repliesToShow.forEach(reply => {
+                        const replyItem = document.createElement('div');
+                        replyItem.classList.add('short-comment-item', 'reply'); // Add 'reply' class for indentation
+                        replyItem.innerHTML = `
+                            <img src="${reply.comment_by__profile_photo_url || '/static/images/avatar.jpg'}" alt="${reply.comment_by__first_name}'s Profile Picture">
+                            <div class="short-comment-content">
+                                <span class="short-username">${reply.comment_by__first_name} ${reply.comment_by__last_name}</span>
+                                <span class="short-comment-text">${reply.comment}</span>
+                                <div class="short-comment-actions">
+                                    <button class="btn-like" data-comment-id="${reply.id}">
+                                        <i class="bi bi-heart"></i> <span class="like-count">${reply.like_count || 0}</span>
+                                    </button>
+                                    <button class="btn-reply" data-comment-id="${reply.id}">Reply</button>
+                                </div>
+                            </div>
+                        `;
+                        replyList.appendChild(replyItem);
+                    });
+
+                    // Add "Tap to see more" if more replies are available
+                    if (hasMoreReplies) {
+                        const seeMoreButton = document.createElement('button');
+                        seeMoreButton.classList.add('btn-see-more');
+                        seeMoreButton.textContent = 'Tap to see more';
+                        replyList.appendChild(seeMoreButton);
+
+                        // Show all replies when the "Tap to see more" button is clicked
+                        seeMoreButton.addEventListener('click', () => {
+                            const remainingReplies = comment.replies.slice(3); // Get remaining replies
+                            remainingReplies.forEach(reply => {
+                                const replyItem = document.createElement('div');
+                                replyItem.classList.add('short-comment-item', 'reply');
+                                replyItem.innerHTML = `
+                                    <img src="${reply.comment_by__profile_photo_url || '/static/images/avatar.jpg'}" alt="${reply.comment_by__first_name}'s Profile Picture">
+                                    <div class="short-comment-content">
+                                        <span class="short-username">${reply.comment_by__first_name} ${reply.comment_by__last_name}</span>
+                                        <span class="short-comment-text">${reply.comment}</span>
+                                        <div class="short-comment-actions">
+                                            <button class="btn-like" data-comment-id="${reply.id}">
+                                                <i class="bi bi-heart"></i> <span class="like-count">${reply.like_count || 0}</span>
+                                            </button>
+                                            <button class="btn-reply" data-comment-id="${reply.id}">Reply</button>
+                                        </div>
+                                    </div>
+                                `;
+                                replyList.insertBefore(replyItem, seeMoreButton);
+                            });
+
+                            // Remove the "Tap to see more" button
+                            seeMoreButton.remove();
+                        });
+                    }
+                }
+            });
+
+            // Add listeners for dynamically loaded like and reply buttons
+            addShortCommentListeners();
+        })
+        .catch(error => console.error('Error fetching comments:', error));
+}
+
+// Add listeners for Like and Reply buttons
+function addShortCommentListeners() {
+    // Like button functionality
+    document.querySelectorAll('.btn-like').forEach(button => {
+        button.addEventListener('click', function () {
+            const commentId = this.dataset.commentId;
+            const likeCountSpan = this.querySelector('.like-count');
+
+            fetch(`/comment/${commentId}/reaction/`, { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        likeCountSpan.textContent = data.like_count;
+                        this.classList.toggle('liked', data.user_liked);
+                    }
+                })
+                .catch(error => console.error('Error liking comment:', error));
+        });
     });
 
-    // Close the comment modal
-    closeModalButton.addEventListener("click", () => {
-        commentModal.style.display = "none"; // Close the modal
-    });
+    // Reply button functionality
+    document.querySelectorAll('.btn-reply').forEach(button => {
+        button.addEventListener('click', function () {
+            const commentId = this.dataset.commentId;
+            const parentComment = this.closest('.short-comment-item');
 
-    // Post a new comment
-    postCommentButton.addEventListener("click", () => {
-        const newComment = commentInput.value.trim();
-        if (newComment) {
-            const commentItem = document.createElement("li");
-            commentItem.textContent = newComment;
-            commentList.appendChild(commentItem);
-            commentInput.value = ""; // Clear the input
-        }
-    });
+            let replyInput = parentComment.querySelector('.reply-input');
+            if (!replyInput) {
+                replyInput = document.createElement('div');
+                replyInput.classList.add('reply-input');
+                replyInput.innerHTML = `
+                    <input type="text" placeholder="Write a reply..." data-reply-to="${commentId}">
+                    <button class="btn-reply-submit" data-reply-to="${commentId}">Post</button>
+                `;
+                parentComment.appendChild(replyInput);
 
-    // Close the comment modal if clicked outside
-    window.addEventListener("click", (event) => {
-        if (!commentModal.contains(event.target) && !event.target.closest(".chat-icon")) {
-            commentModal.style.display = "none"; // Close the modal
-        }
+                // Add listener for reply submission
+                replyInput.querySelector('.btn-reply-submit').addEventListener('click', function () {
+                    const replyToId = this.dataset.replyTo;
+                    const replyText = replyInput.querySelector('input').value;
+
+                    fetch(`/comment/${replyToId}/reply/`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ text: replyText }),
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                const replyList = parentComment.querySelector('.reply-list');
+                                const replyItem = document.createElement('div');
+                                replyItem.classList.add('short-comment-item', 'reply');
+                                replyItem.innerHTML = `
+                                    <img src="${data.reply_by.profile_photo_url || '/static/images/avatar.jpg'}" alt="${data.reply_by.first_name}'s Profile Picture">
+                                    <div class="short-comment-content">
+                                        <span class="short-username">${data.reply_by.first_name} ${data.reply_by.last_name}</span>
+                                        <span class="short-comment-text">${data.text}</span>
+                                        <div class="short-comment-actions">
+                                            <button class="btn-like" data-comment-id="${data.reply_id}">
+                                                <i class="bi bi-heart"></i> <span class="like-count">0</span>
+                                            </button>
+                                            <button class="btn-reply" data-comment-id="${data.reply_id}">Reply</button>
+                                        </div>
+                                    </div>
+                                `;
+                                replyList.appendChild(replyItem);
+                                replyInput.querySelector('input').value = '';
+                                addShortCommentListeners(); // Reinitialize listeners for new elements
+                            }
+                        })
+                        .catch(error => console.error('Error posting reply:', error));
+                });
+            }
+        });
+    });
+}
+
+// Open the comments modal when clicking the chat icon
+document.querySelectorAll('.chat-icon').forEach(button => {
+    button.addEventListener('click', function () {
+        const postId = button.dataset.videoId; // Get the associated video ID
+        openShortCommentsModal(postId);       // Load and display comments for this video
     });
 });
 
@@ -368,213 +520,117 @@ document.addEventListener("DOMContentLoaded", function () {
 
 <style>
 
-    .reaction-count {
-    font-size: 22px; /* Adjust size if needed */    
-    color: #fff; /* Choose a color that fits your theme */
+    .short-comment-item.reply {
+    margin-left: 20px;
+    border-left: 2px solid #ddd;
+    padding-left: 10px;
 }
 
-    .bi-heart-fill {
-    color: red;
-    font-size: 24px;
+.reply-input {
+    margin-top: 10px;
+    display: flex;
+    gap: 5px;
+}
+.reply-input input {
+    flex: 1;
+    padding: 5px;
+}
+.reply-input button {
+    padding: 5px 10px;
 }
 
-.bi-heart {
-    color: fff;
-    font-size: 24px;
-}
 
-.bi-heart:hover {
-    color: white;
-    font-size: 28px;
-}
-
-/* Comment Modal */
+    /* Initial state of the modal, off-screen (bottom) */
 .short-modal {
-    right:7%;
-    display: none; /* Hidden by default */
-    left: 35%;    
+    display: none; 
     position: fixed;
-    top: 27%;
-    width: 30%;
-    height: 100%;    
-    z-index: 1000;
-    justify-content: center;
-    align-items: center;
-    
+    bottom: -100%;
+    right: 38%;
+    width: 100%;
+    height: 35%;    
+    z-index: 9999;
+    justify-content: flex-end;
+    transition: bottom 0.3s ease-in-out; /* Smooth transition for sliding */
 }
 
-/* Modal content */
-.short-modal-content {
-    background: white;
-    border-radius: 8px;
-    width: 80%;
-    max-width: 600px;
-    max-height: 80%;
-    overflow-y: auto;
-    padding: 16px;
+.short-modal.show {
+    bottom: 0; /* Move the modal to the visible area */
 }
 
-/* Modal Header */
+.short-modal-dialog {    
+    width: 24%;
+    margin: 0;
+    transition: transform 0.3s ease-in-out;
+}
+
 .short-modal-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 18px;
-    font-weight: bold;
 }
 
-.short-close-button {
-    background: none;
-    border: none;
-    font-size: 24px;
-    cursor: pointer;
-    color: #333;
-}
-
-/* Modal Body */
 .short-modal-body {
-    margin-top: 16px;
-    padding: 8px 0;
-    max-height: 300px;
+    padding: 15px;
+    max-height: 400px;
     overflow-y: auto;
 }
 
-/* Comment List */
-#shortCommentList {
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
+.short-comments-list {
+    margin-bottom: 20px;
 }
 
-/* Single Comment Item */
-#shortCommentList li {
-    padding: 8px 12px;
-    border-bottom: 1px solid #ddd;
-    font-size: 14px;
-    color: #333;
-}
-
-/* Modal Footer */
-.short-modal-footer {
+.short-comment-item {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 16px;
-    padding: 8px;
-    border-top: 1px solid #ddd;
+    margin-bottom: 15px;
 }
 
-.short-modal-footer input {
-    flex-grow: 1;
-    padding: 8px;
-    font-size: 14px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+.short-comment-item img {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    margin-right: 10px;
 }
 
-.short-modal-footer button {
-    background: #007bff;
-    color: white;
-    padding: 8px 12px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
-}
-
-.short-modal-footer button:hover {
-    opacity: 0.9;
-}
-
-/* Sliding Comment Section */
-.short-comment-section {
-    position: fixed;
-    bottom: -100%;
-    left: 0;
-    width: 100%;
-    height: 50%;
-    background: white;
-    box-shadow: 0 -4px 8px rgba(0, 0, 0, 0.2);
-    border-radius: 12px 12px 0 0;
-    transition: bottom 0.3s ease-in-out;
-    z-index: 1000;
-}
-
-.short-comment-section.visible {
-    bottom: 0;
-}
-
-.short-comment-header {
+.short-comment-item .short-comment-content {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 16px;
-    background: #f1f1f1;
-    border-bottom: 1px solid #ccc;
-    font-size: 18px;
+    flex-direction: column;
+}
+
+.short-comment-item .short-comment-content .short-username {
     font-weight: bold;
 }
 
-.short-comment-body {
-    flex-grow: 1;
-    padding: 16px;
-    overflow-y: auto;
+.short-comment-item .short-comment-content .short-comment-text {
+    margin-top: 5px;
+    font-size: 14px;
 }
 
-.short-comment-footer {
+.short-comment-input {
     display: flex;
-    padding: 16px;
-    border-top: 1px solid #ccc;
+    align-items: center;
 }
 
-.short-comment-footer input {
+.short-comment-input input {
     flex-grow: 1;
     padding: 8px;
-    margin-right: 8px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+    border: none;
+    border-radius: 25px;
+    background-color: #f0f0f0;
+    margin-right: 10px;
 }
 
-.short-comment-footer button {
-    background: #007bff;
+.short-comment-input button {
+    padding: 8px 12px;
+    border-radius: 25px;
+    background-color: #3b5998;
     color: white;
     border: none;
-    padding: 8px 12px;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-.short-comment-footer button:hover {
-    opacity: 0.9;
-}
-
-.short-close-button {
-    background: none;
-    border: none;
-    font-size: 24px;
-    cursor: pointer;
-    color: #333;
-}
-
-/* Style for comment input box */
-.short-comment-footer input:focus {
-    outline: none;
-    border-color: #007bff;
-}
-
-/* Comment icon style (optional) */
-.chat-icon {
-    cursor: pointer;
-    font-size: 24px;
-    color: #333;
-}
-
-.chat-icon:hover {
-    color: #007bff;
 }
 
 
-/* Scrollable container */
+/* Scrollable Container */
+
+/* Container for all video wrappers, enabling vertical scroll */
 .short-content {
     overflow-y: auto;
     scroll-snap-type: y mandatory;
@@ -583,10 +639,12 @@ document.addEventListener("DOMContentLoaded", function () {
     flex-direction: column;
 }
 
-/* Each video wrapper */
-.video-wrapper {    
+/* Each Video Wrapper */
+
+/* Wrapper for each individual video with snap alignment */
+.video-wrapper {
     scroll-snap-align: start;
-    margin-bottom:5%;
+    margin-bottom: 5%;
     height: 100vh;
     display: flex;
     justify-content: center;
@@ -595,7 +653,9 @@ document.addEventListener("DOMContentLoaded", function () {
     flex-direction: column;
 }
 
-/* Video box styling */
+/* Video Box Styling */
+
+/* Styling for the video container */
 .video-box {
     width: 60%;
     height: 90vh;
@@ -608,6 +668,7 @@ document.addEventListener("DOMContentLoaded", function () {
     position: relative;
 }
 
+/* Video element styling */
 .video-box video {
     width: 100%;
     height: 100%;
@@ -615,43 +676,69 @@ document.addEventListener("DOMContentLoaded", function () {
     border-radius: 12px;
 }
 
-/* Right-side icons */
+/* Right-side Icons */
+
+/* Container for right-side reaction icons */
 .right-icons {
     position: absolute;
     right: 7%;
     bottom: 16px;
     display: flex;
-    flex-direction: column;    
+    flex-direction: column;
     font-size: 14px;
     text-align: center;
     color: #fff;
 }
 
-/* Navigation buttons */
-.navigation-buttons {
-    position: absolute;
-    top: 50%; /* Vertically center */
-    right: 5%; /* Horizontally center */
-    transform: translate(-50%, -50%);
-    display: flex;
-    gap: 16px;
-    flex-direction: column; /* Vertical alignment */
+/* Heart icon when liked */
+.bi-heart-fill {
+    color: red;
+    font-size: 24px;
 }
 
-.nav-button {
-    background: none;
-    border: none;
+/* Heart icon when not liked */
+.bi-heart {
     color: #fff;
-    font-size: 32px;
-    cursor: pointer;
-    transition: transform 0.2s ease, color 0.2s ease;
+    font-size: 24px;
 }
 
-.nav-button:hover {
-    transform: scale(1.2);
-    color: #007bff;
+/* Hover effect for heart icon */
+.bi-heart:hover {
+    color: white;
+    font-size: 28px;
 }
 
+/* User Info */
+
+/* Container for user information */
+.user-info {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+/* Styling for profile picture */
+.short-profile-pic {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+/* Styling for username */
+.username {
+    font-weight: bold;
+    font-size: 1.1em;
+}
+
+/* Styling for video description */
+.description {
+    font-size: 1em;
+}
+
+/* Reels Header */
+
+/* Styling for the header of each reel */
 .reels-header {
     position: absolute;
     top: 16px;
@@ -663,6 +750,9 @@ document.addEventListener("DOMContentLoaded", function () {
     border-radius: 8px;
 }
 
+/* Video Info */
+
+/* Container for video information */
 .video-info {
     position: absolute;
     bottom: 15px;
@@ -672,5 +762,60 @@ document.addEventListener("DOMContentLoaded", function () {
     word-wrap: break-word;
     max-width: calc(100% - 32px);
 }
+
+/* Navigation Buttons */
+
+/* Container for navigation buttons */
+.navigation-buttons {
+    position: absolute;
+    top: 50%;
+    right: 5%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    gap: 16px;
+    flex-direction: column;
+}
+
+/* Styling for individual navigation buttons */
+.nav-button {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 32px;
+    cursor: pointer;
+    transition: transform 0.2s ease, color 0.2s ease;
+}
+
+/* Hover effect for navigation buttons */
+.nav-button:hover {
+    transform: scale(1.2);
+    color: #007bff;
+}
+
+/* Comment Modal */
+
+
+
+
+/* Chat icon styling */
+
+.chat-icon {
+    cursor: pointer;
+    font-size: 24px;
+    color: #333;
+}
+
+.chat-icon:hover {
+    color: #007bff;
+}
+
+/* Reaction count styling */
+.reaction-count {
+    font-size: 22px;
+    color: #fff;
+}
+
+
+
 </style>
 {% endblock %}
