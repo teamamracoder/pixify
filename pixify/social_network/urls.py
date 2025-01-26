@@ -167,8 +167,14 @@ urlpatterns = [
 
     #short
     path('short', views.ShortListView.as_view(),name='short'),
-    path('short/<int:post_id>/reaction/create', views.ShortReactionView.as_view(),name='short_reaction_create'),
+    path('short/<int:post_id>/reaction/create', views.ShortReactionCreateView.as_view(),name='short_reaction_create'),
     path('short/<int:post_id>/reaction/delete', views.ShortReactionDeleteView.as_view(),name='short_reaction_delete'),
+    path('short/<int:post_id>/comments/', views.ShortCommentListView.as_view(),name='short_comments'),
+    path('short/<int:post_id>/comments/create', views.ShortCommentCreateView.as_view(),name='short_comment_create'),
+    path('short/<int:comment_id>/comments/delete', views.ShortCommentDeleteView.as_view(),name='short_comment_delete'),
+    path('short/<int:comment_id>/comment/reply/', views.ShortCommentReplyView.as_view(),name='short_comments_reply'),
+    path('short/<int:comment_id>/comment/reaction/', views.ShortCommentReactionView.as_view(),name='short_comments_reacction'),
+    path('short/<int:comment_id>/comment/reaction/delete/', views.ShortCommentReactionDeleteView.as_view(),name='short_comments_reacction_delete'),
 
 ]
 
