@@ -3,6 +3,7 @@ from django.shortcuts import render, redirect
 from ..services import short_service
 import random
 from django.http import JsonResponse
+import json
 
 class ShortListView(View):
     def get(self, request):
@@ -47,35 +48,81 @@ class ShortReactionDeleteView(View):
 
 
 class ShortCommentListView(View):
-    def get(self, request, post_id): 
-       comments = short_service.short_comments(post_id)  
-             
+    def get(self, request, post_id):
+       user=request.user
+       comments = short_service.short_comments(post_id, user)
+
        return JsonResponse({"comments": list(comments)}, safe=False)
 
 class ShortCommentCreateView(View):
     def post(self, request, post_id):
         user = request.user
         post = short_service.get_short(post_id)
-        text = request.get('text')
+                
+        data = json.loads(request.body)
+        text = data.get('text')  # Extract text from parsed JSON        
 
-        comment = short_service.comment_creat(text, post, user)
+        # Create the comment (assume likes are set to 0 by default)
+        comment = short_service.short_comment_create(text, post, user)
+
+        # Return the comment data in the response with like_count = 0 initially
+        return JsonResponse({
+            'success': True,
+            'comment': {
+                'id': comment.id,
+                'comment': comment.comment,
+                'comment_by__first_name': comment.comment_by.first_name,
+                'comment_by__last_name': comment.comment_by.last_name,
+                'comment_by__profile_photo_url': comment.comment_by.profile_photo_url or None,  # Handle null cases
+                'like_count': 0,  # Initialize like_count as 0
+                'replies': []  # Empty replies for new comments
+            }
+        })
+
+class ShortCommentReplyView(View):
+    def post(self, request, comment_id):
+        user = request.user
+        data = json.loads(request.body)
+        text = data.get('text')  # Extract text from parsed JSON
+        
+        comment = short_service.get_short_comment(comment_id)
+
+        # Create the reply (initial like_count is set to 0)
+        reply = short_service.short_comment_reply(text, comment.post_id, comment, user)
+
+        # Return the reply data with like_count = 0 initially
+        return JsonResponse({
+            'success': True,
+            'reply': {
+                'id': reply.id,
+                'comment': reply.comment,
+                'comment_by__first_name': reply.comment_by.first_name,
+                'comment_by__last_name': reply.comment_by.last_name,
+                'comment_by__profile_photo_url': reply.comment_by.profile_photo_url or None,  # Handle null cases
+                'like_count': 0,  # Initialize like_count as 0
+                'replies': []  # Replies to a reply are not supported
+            }
+        })
+
 
 class ShortCommentDeleteView(View):
     def post(self, request, comment_id):
         user=request.user
         short_service.short_comment_delete(comment_id, user)
-
-class ShortCommentReplyView(View):
-    def post(self, request, comment_id):
-        user=request.user
-        text=request.get('text')
-        comment=short_service.get_short_comment(comment_id)
-        short_service.short_comment_reply(text, comment.post_id, comment_id, user)
         
-class ShortCommentReactionView(View):    
+class ShortCommentReactionView(View):
     def post(self, request, comment_id):
-        pass
+        user = request.user
+        comment = short_service.get_short_comment(comment_id)
 
-class ShortCommentReactionDeleteView(View):
-    def post(self, request, comment_id):
-        pass
+        # Toggle the like status
+        user_liked = short_service.toggle_like(comment, user)
+
+        comment.likes=short_service.comment_reaction_count(comment)
+
+        return JsonResponse({
+            'success': True,
+            'like_count': comment.likes,  # Count only active likes
+            'user_liked': user_liked  # Whether the user liked the comment
+        })
+

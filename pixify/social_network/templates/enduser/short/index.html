@@ -64,6 +64,8 @@
         </div>
     </div>
 
+
+    
 <!-- Modal for Comments -->
 <div class="short-modal" id="shortCommentsModal" tabindex="-1" aria-hidden="true">
     <div class="short-modal-dialog">
@@ -77,11 +79,7 @@
             <div class="short-modal-body">
                 <div id="shortCommentsList" class="short-comments-list">
                     <!-- Comments will be dynamically loaded here -->
-                </div>
-                <div class="short-comment-input">
-                    <input type="text" id="shortCommentInput" placeholder="Add a comment...">
-                    <button id="shortSubmitComment" class="btn btn-primary">Post</button>
-                </div>
+                </div>                
             </div>
         </div>
     </div>
@@ -99,7 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const handleReaction = (iconElement, isDelete = false) => {
         const postId = iconElement.closest('.video-wrapper').dataset.postId;
         const url = isDelete 
-            ? `/short/${postId}/reaction/delete` 
+            ? `/short/reaction/${postId}/delete` 
             : `/short/${postId}/reaction/create`;
 
         fetch(url, {
@@ -328,183 +326,242 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
-// Open the comments modal and fetch comments with nested replies
+
+
+
+
+
+// Utility function to get CSRF token
+function getCSRFToken() {
+    const cookies = document.cookie.split(';');
+    for (let cookie of cookies) {
+        const [name, value] = cookie.trim().split('=');
+        if (name === 'csrftoken') return decodeURIComponent(value);
+    }
+    return null;
+}
+
+// Open the comments modal and fetch comments with replies
 function openShortCommentsModal(postId) {
     const modal = document.getElementById('shortCommentsModal');
     const commentsList = document.getElementById('shortCommentsList');
+    let replyingToCommentId = null; // Track if replying to a specific comment
 
     // Reset comments list and show the modal
-    commentsList.innerHTML = '';
+    commentsList.innerHTML = ''; // Clear previous comments
     modal.style.display = 'flex';
     setTimeout(() => modal.classList.add('show'), 10);
 
-    // Fetch comments and nested replies for the specific post
+    // Fetch comments with replies for the specific post
     fetch(`/short/${postId}/comments/`)
         .then(response => response.json())
         .then(data => {
-            data.comments.forEach(comment => {
-                // Create parent comment
-                const commentItem = document.createElement('div');
-                commentItem.classList.add('short-comment-item');
-                commentItem.innerHTML = `
-                    <img src="${comment.comment_by__profile_photo_url || '/static/images/avatar.jpg'}" alt="${comment.comment_by__first_name}'s Profile Picture">
-                    <div class="short-comment-content">
-                        <span class="short-username">${comment.comment_by__first_name} ${comment.comment_by__last_name}</span>
-                        <span class="short-comment-text">${comment.comment}</span>
-                        <div class="short-comment-actions">
-                            <button class="btn-like" data-comment-id="${comment.id}">
-                                <i class="bi bi-heart"></i> <span class="like-count">${comment.like_count || 0}</span>
-                            </button>
-                            <button class="btn-reply" data-comment-id="${comment.id}">Reply</button>
-                        </div>
-                    </div>
-                    <div class="reply-list"></div>
-                `;
-                commentsList.appendChild(commentItem);
+            if (data.comments && data.comments.length > 0) {
+                // Render top-level comments only
+                const topLevelComments = data.comments.filter(comment => !comment.parent_comment_id);
+                topLevelComments.forEach(comment => {
+                    renderComment(comment, commentsList);
+                });
+            } else {
+                // Show a message if no comments are available
+                commentsList.innerHTML = '<p class="no-comments">No comments yet. Be the first to comment!</p>';
+            }
 
-                // Render replies (limit to three initially)
-                if (comment.replies && comment.replies.length > 0) {
-                    const replyList = commentItem.querySelector('.reply-list');
-                    const repliesToShow = comment.replies.slice(0, 3); // Show first three replies
-                    const hasMoreReplies = comment.replies.length > 3;
+            // Create the comment input field
+            const commentInputContainer = document.createElement('div');
+            commentInputContainer.classList.add('short-comment-input');
+            commentInputContainer.innerHTML = `
+                <input type="text" id="shortCommentInput" placeholder="Add a comment...">
+                <button id="shortSubmitComment" class="btn btn-primary">Post</button>
+            `;
+            commentsList.appendChild(commentInputContainer);
 
-                    repliesToShow.forEach(reply => {
-                        const replyItem = document.createElement('div');
-                        replyItem.classList.add('short-comment-item', 'reply'); // Add 'reply' class for indentation
-                        replyItem.innerHTML = `
-                            <img src="${reply.comment_by__profile_photo_url || '/static/images/avatar.jpg'}" alt="${reply.comment_by__first_name}'s Profile Picture">
-                            <div class="short-comment-content">
-                                <span class="short-username">${reply.comment_by__first_name} ${reply.comment_by__last_name}</span>
-                                <span class="short-comment-text">${reply.comment}</span>
-                                <div class="short-comment-actions">
-                                    <button class="btn-like" data-comment-id="${reply.id}">
-                                        <i class="bi bi-heart"></i> <span class="like-count">${reply.like_count || 0}</span>
-                                    </button>
-                                    <button class="btn-reply" data-comment-id="${reply.id}">Reply</button>
-                                </div>
-                            </div>
-                        `;
-                        replyList.appendChild(replyItem);
+            const submitButton = document.getElementById('shortSubmitComment');
+            const commentInput = document.getElementById('shortCommentInput');
+
+            // Handle post button click
+            submitButton.addEventListener('click', function () {
+                handleCommentSubmit(postId, commentInput, commentsList, replyingToCommentId, () => {
+                    replyingToCommentId = null;
+                    commentInput.placeholder = 'Add a comment...'; // Reset placeholder
+                });
+            });
+
+            // Add Enter key functionality
+            commentInput.addEventListener('keydown', function (event) {
+                if (event.key === 'Enter') {
+                    handleCommentSubmit(postId, commentInput, commentsList, replyingToCommentId, () => {
+                        replyingToCommentId = null;
+                        commentInput.placeholder = 'Add a comment...';
                     });
-
-                    // Add "Tap to see more" if more replies are available
-                    if (hasMoreReplies) {
-                        const seeMoreButton = document.createElement('button');
-                        seeMoreButton.classList.add('btn-see-more');
-                        seeMoreButton.textContent = 'Tap to see more';
-                        replyList.appendChild(seeMoreButton);
-
-                        // Show all replies when the "Tap to see more" button is clicked
-                        seeMoreButton.addEventListener('click', () => {
-                            const remainingReplies = comment.replies.slice(3); // Get remaining replies
-                            remainingReplies.forEach(reply => {
-                                const replyItem = document.createElement('div');
-                                replyItem.classList.add('short-comment-item', 'reply');
-                                replyItem.innerHTML = `
-                                    <img src="${reply.comment_by__profile_photo_url || '/static/images/avatar.jpg'}" alt="${reply.comment_by__first_name}'s Profile Picture">
-                                    <div class="short-comment-content">
-                                        <span class="short-username">${reply.comment_by__first_name} ${reply.comment_by__last_name}</span>
-                                        <span class="short-comment-text">${reply.comment}</span>
-                                        <div class="short-comment-actions">
-                                            <button class="btn-like" data-comment-id="${reply.id}">
-                                                <i class="bi bi-heart"></i> <span class="like-count">${reply.like_count || 0}</span>
-                                            </button>
-                                            <button class="btn-reply" data-comment-id="${reply.id}">Reply</button>
-                                        </div>
-                                    </div>
-                                `;
-                                replyList.insertBefore(replyItem, seeMoreButton);
-                            });
-
-                            // Remove the "Tap to see more" button
-                            seeMoreButton.remove();
-                        });
-                    }
                 }
             });
 
-            // Add listeners for dynamically loaded like and reply buttons
-            addShortCommentListeners();
+            // Add listeners for dynamically loaded buttons
+            addShortCommentListeners((commentId) => {
+                // Handle reply button click
+                replyingToCommentId = commentId; // Set the parent comment ID for the reply
+                commentInput.placeholder = 'Reply to this comment...'; // Update placeholder
+                commentInput.focus(); // Focus on the input box
+            });
         })
-        .catch(error => console.error('Error fetching comments:', error));
+        .catch(error => {
+            console.error('Error fetching comments:', error);
+            commentsList.innerHTML = '<p class="error-message">Failed to load comments. Please try again later.</p>';
+        });
 }
 
-// Add listeners for Like and Reply buttons
-function addShortCommentListeners() {
-    // Like button functionality
+// Handle submitting a new comment or reply
+function handleCommentSubmit(postId, commentInput, commentsList, replyingToCommentId, callback) {
+    const commentText = commentInput.value.trim();
+
+    // Ensure the comment text is not empty
+    if (commentText === '') {
+        alert("Please enter a comment!");
+        return; // Do not submit if empty
+    }
+
+    // Prepare the URL and data for the request
+    const url = replyingToCommentId 
+        ? `/short/comment/${replyingToCommentId}/reply/` 
+        : `/short/${postId}/comment/create/`;
+
+    const bodyData = { text: commentText };
+
+    // Send the new comment or reply to the backend
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCSRFToken(), // Include CSRF token
+        },
+        body: JSON.stringify(bodyData),
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data && data.success) {
+                if (replyingToCommentId) {
+                    // Render reply in the correct comment's reply list
+                    const parentComment = commentsList.querySelector(`[data-comment-id="${replyingToCommentId}"]`);
+                    const replyList = parentComment.querySelector('.reply-list');
+                    renderComment(data.reply, replyList, false, true);
+                } else {
+                    // Render a new comment
+                    renderComment(data.comment, commentsList, true);
+                }
+                commentInput.value = ''; // Clear the input field
+                callback(); // Perform any additional actions (e.g., reset reply mode)
+            } else {
+                console.error('Error:', data.message || 'Unknown error');
+            }
+        })
+        .catch(error => {
+            console.error('Error posting comment:', error);
+        });
+}
+
+// Render a single comment with replies
+function renderComment(comment, commentsList, prepend = false, isReply = false) {
+    const profilePhotoUrl = comment.comment_by__profile_photo_url || '/static/images/avatar.jpg';
+    const firstName = comment.comment_by__first_name || 'Anonymous';
+    const lastName = comment.comment_by__last_name || '';
+
+    const commentItem = document.createElement('div');
+    commentItem.classList.add('short-comment-item');
+    if (isReply) commentItem.classList.add('short-reply-item'); // Add class for styling replies
+    commentItem.setAttribute('data-comment-id', comment.id);
+
+    // Determine if the comment is liked by the user
+    const likedClass = comment.user_liked ? 'liked' : '';
+    const iconClass = comment.user_liked ? 'bi-heart-fill' : 'bi-heart'; // Heart icon class
+
+    commentItem.innerHTML = `
+        <img src="${profilePhotoUrl}" alt="${firstName}'s Profile Picture">
+        <div class="short-comment-content">
+            <span class="short-username">${firstName} ${lastName}</span>
+            <span class="short-comment-text">${comment.comment}</span>
+            <div class="short-comment-actions">
+                <button class="btn-like ${likedClass}" data-comment-id="${comment.id}">
+                    <i class="bi ${iconClass}"></i>
+                    <span class="like-count">${comment.like_count || 0}</span>
+                </button>
+                <button class="btn-reply" data-comment-id="${comment.id}">Reply</button>
+            </div>
+        </div>
+        ${isReply ? '' : '<div class="reply-list"></div>'}
+    `;
+
+    if (!isReply && comment.replies && comment.replies.length > 0) {
+        const replyList = commentItem.querySelector('.reply-list');
+        comment.replies.forEach(reply => renderComment(reply, replyList, false, true));
+    }
+
+    if (prepend) {
+        commentsList.insertBefore(commentItem, commentsList.firstChild);
+    } else {
+        commentsList.appendChild(commentItem);
+    }
+}
+
+// Add listeners for Like, Reply, and Delete buttons
+function addShortCommentListeners(onReplyClick) {
     document.querySelectorAll('.btn-like').forEach(button => {
         button.addEventListener('click', function () {
             const commentId = this.dataset.commentId;
             const likeCountSpan = this.querySelector('.like-count');
 
-            fetch(`/comment/${commentId}/reaction/`, { method: 'POST' })
+            fetch(`/short/comment/${commentId}/reaction/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCSRFToken(), // Include CSRF token
+                },
+            })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        likeCountSpan.textContent = data.like_count;
-                        this.classList.toggle('liked', data.user_liked);
+                        likeCountSpan.textContent = data.like_count;  // Update like count
+                        this.classList.toggle('liked', data.user_liked);  // Toggle like button state
+                        const icon = this.querySelector('i');
+                        if (data.user_liked) {
+                            icon.classList.replace('bi-heart', 'bi-heart-fill'); // Heart icon filled
+                        } else {
+                            icon.classList.replace('bi-heart-fill', 'bi-heart'); // Heart icon unfilled
+                        }
                     }
                 })
                 .catch(error => console.error('Error liking comment:', error));
         });
     });
 
-    // Reply button functionality
     document.querySelectorAll('.btn-reply').forEach(button => {
         button.addEventListener('click', function () {
             const commentId = this.dataset.commentId;
-            const parentComment = this.closest('.short-comment-item');
-
-            let replyInput = parentComment.querySelector('.reply-input');
-            if (!replyInput) {
-                replyInput = document.createElement('div');
-                replyInput.classList.add('reply-input');
-                replyInput.innerHTML = `
-                    <input type="text" placeholder="Write a reply..." data-reply-to="${commentId}">
-                    <button class="btn-reply-submit" data-reply-to="${commentId}">Post</button>
-                `;
-                parentComment.appendChild(replyInput);
-
-                // Add listener for reply submission
-                replyInput.querySelector('.btn-reply-submit').addEventListener('click', function () {
-                    const replyToId = this.dataset.replyTo;
-                    const replyText = replyInput.querySelector('input').value;
-
-                    fetch(`/comment/${replyToId}/reply/`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ text: replyText }),
-                    })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                const replyList = parentComment.querySelector('.reply-list');
-                                const replyItem = document.createElement('div');
-                                replyItem.classList.add('short-comment-item', 'reply');
-                                replyItem.innerHTML = `
-                                    <img src="${data.reply_by.profile_photo_url || '/static/images/avatar.jpg'}" alt="${data.reply_by.first_name}'s Profile Picture">
-                                    <div class="short-comment-content">
-                                        <span class="short-username">${data.reply_by.first_name} ${data.reply_by.last_name}</span>
-                                        <span class="short-comment-text">${data.text}</span>
-                                        <div class="short-comment-actions">
-                                            <button class="btn-like" data-comment-id="${data.reply_id}">
-                                                <i class="bi bi-heart"></i> <span class="like-count">0</span>
-                                            </button>
-                                            <button class="btn-reply" data-comment-id="${data.reply_id}">Reply</button>
-                                        </div>
-                                    </div>
-                                `;
-                                replyList.appendChild(replyItem);
-                                replyInput.querySelector('input').value = '';
-                                addShortCommentListeners(); // Reinitialize listeners for new elements
-                            }
-                        })
-                        .catch(error => console.error('Error posting reply:', error));
-                });
-            }
+            if (onReplyClick) onReplyClick(commentId); // Trigger the reply click callback
         });
     });
 }
+
+// Close the comments modal
+function closeShortCommentsModal() {
+    const modal = document.getElementById('shortCommentsModal');
+    modal.classList.remove('show');
+    setTimeout(() => (modal.style.display = 'none'), 300); // Allow for animation
+}
+
+document.querySelector('.short-modal .close').addEventListener('click', closeShortCommentsModal);
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // Open the comments modal when clicking the chat icon
 document.querySelectorAll('.chat-icon').forEach(button => {
@@ -519,6 +576,106 @@ document.querySelectorAll('.chat-icon').forEach(button => {
 
 
 <style>
+
+/* Basic styles for the like button */
+.btn-like {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 24px;
+    display: flex;
+    align-items: center;
+    color: #666;
+    transition: color 0.3s ease;
+}
+
+/* Normal state */
+.btn-like .bi {
+    font-size: 24px;
+    color: #666; /* Default grey color */
+}
+
+/* When liked */
+.btn-like.liked .bi {
+    color: red !important ; /* Heart icon is red when liked */
+}
+
+/* Hover state */
+.btn-like:hover .bi {
+    color: pink; /* Pink color when hovered */
+}
+
+/* Like count styling */
+.like-count {
+    font-size: 16px;
+    margin-left: 8px;
+    color: #fff;
+}
+
+
+    /* Basic styles for the like button */
+.btn-like {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 24px;
+    display: flex;
+    align-items: center;
+    color: #666;
+    transition: color 0.3s ease;
+}
+
+/* Normal state */
+.btn-like .bi {
+    font-size: 24px;
+    color: #666; /* Default grey color */
+}
+
+/* When liked */
+.btn-like.liked .bi {
+    color: red !important ; /* Fire icon is orange when liked */
+}
+
+/* Hover state */
+.btn-like:hover .bi {
+    color: orange; /* Red color when hovered */
+}
+
+/* Like count styling */
+.like-count {
+    font-size: 16px;
+    margin-left: 8px;
+    color: #fff;
+}
+
+
+
+    .short-comment-actions{
+        display:flex;
+    }
+    
+    .btn-reply{            
+        margin-bottom: 8px;    
+        font-size: 18px;
+        padding-left: 10px;
+        border: none;
+        background: none;
+        color: #d8abff;           
+
+    }
+    .btn-like{
+        border: none;
+        background: none;
+        color: red;    
+        font-size: 12px;
+    }
+
+    .short-reply-item {
+        margin-left: 20px;
+        padding-left: 10px;
+        border-left: 2px solid #ddd;
+        margin-top: 43px;
+    }
 
     .short-comment-item.reply {
     margin-left: 20px;
@@ -554,7 +711,7 @@ document.querySelectorAll('.chat-icon').forEach(button => {
 }
 
 .short-modal.show {
-    bottom: 0; /* Move the modal to the visible area */
+    bottom: 30%; /* Move the modal to the visible area */
 }
 
 .short-modal-dialog {    
@@ -615,7 +772,8 @@ document.querySelectorAll('.chat-icon').forEach(button => {
     padding: 8px;
     border: none;
     border-radius: 25px;
-    background-color: #f0f0f0;
+    background-color: #ce9ff5;
+    color:black;
     margin-right: 10px;
 }
 
