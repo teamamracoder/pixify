@@ -93,11 +93,23 @@ def short_comment_reply(text, post, comment, user):
     )
 
 def short_comment_delete(comment_id, user):
-    comment = Comment.objects.filter(id=comment_id, is_active=True)
+    # Retrieve the comment object
+    comment = Comment.objects.get(id=comment_id, is_active=True)
 
-    comment.is_active=False
-    comment.updated_by=user
+    # Retrieve all replies associated with this comment
+    replies = Comment.objects.filter(reply_for=comment, is_active=True)
+
+    # Mark the comment as inactive
+    comment.is_active = False
+    comment.updated_by = user
     comment.save()
+
+    # Mark all replies as inactive
+    for reply in replies:
+        reply.is_active = False
+        reply.updated_by = user
+        reply.save()       
+
             
 def comment_count(short):
     return Comment.objects.filter(post_id=short, is_active=True).count()

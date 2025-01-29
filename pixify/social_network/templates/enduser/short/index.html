@@ -328,9 +328,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-
-
-
 // Utility function to get CSRF token
 function getCSRFToken() {
     const cookies = document.cookie.split(';');
@@ -449,8 +446,18 @@ function handleCommentSubmit(postId, commentInput, commentsList, replyingToComme
                     // Render a new comment
                     renderComment(data.comment, commentsList, true);
                 }
-                commentInput.value = ''; // Clear the input field
-                callback(); // Perform any additional actions (e.g., reset reply mode)
+
+                // Update the comment count dynamically for both comments and replies
+                const commentIcon = document.querySelector(`.chat-icon[data-video-id="${postId}"]`);
+                const countElement = commentIcon.nextElementSibling;
+                if (countElement) {
+                    let currentCount = parseInt(countElement.textContent, 10) || 0;
+                    countElement.textContent = currentCount + 1; // Increment the count
+                }
+
+                // Clear the input field and reset reply mode
+                commentInput.value = '';
+                callback(); 
             } else {
                 console.error('Error:', data.message || 'Unknown error');
             }
@@ -459,6 +466,7 @@ function handleCommentSubmit(postId, commentInput, commentsList, replyingToComme
             console.error('Error posting comment:', error);
         });
 }
+
 
 // Render a single comment with replies
 function renderComment(comment, commentsList, prepend = false, isReply = false) {
@@ -486,11 +494,40 @@ function renderComment(comment, commentsList, prepend = false, isReply = false) 
                     <span class="like-count">${comment.like_count || 0}</span>
                 </button>
                 <button class="btn-reply" data-comment-id="${comment.id}">Reply</button>
+                <button class="btn-delete" data-comment-id="${comment.id}" style="display: none;">Delete</button> <!-- Hidden delete button -->
             </div>
         </div>
         ${isReply ? '' : '<div class="reply-list"></div>'}
     `;
 
+    // Handle long press to show delete button on the entire comment item
+    let pressTimer;
+    const longPressDelay = 500; // 500ms press time
+
+    const handlePressStart = () => {
+        pressTimer = setTimeout(function() {
+            const deleteButton = commentItem.querySelector('.btn-delete');
+            deleteButton.style.display = 'inline'; // Show delete button after 500ms
+        }, longPressDelay);
+    };
+
+    const handlePressEnd = () => {
+        clearTimeout(pressTimer); // Clear timeout if touch ends early or mouse click ends
+    };
+
+    commentItem.addEventListener('touchstart', handlePressStart);
+    commentItem.addEventListener('mousedown', handlePressStart); // Added for desktop mouse events
+    commentItem.addEventListener('touchend', handlePressEnd);
+    commentItem.addEventListener('mouseup', handlePressEnd); // Added for desktop mouse events
+
+    // Handle delete button click for the comment (both top-level and reply)
+    const deleteButton = commentItem.querySelector('.btn-delete');
+    deleteButton.addEventListener('click', function() {
+        const commentId = commentItem.getAttribute('data-comment-id');
+        deleteComment(commentId, commentsList, isReply); // Call delete function
+    });
+
+    // Handle rendering of replies
     if (!isReply && comment.replies && comment.replies.length > 0) {
         const replyList = commentItem.querySelector('.reply-list');
         comment.replies.forEach(reply => renderComment(reply, replyList, false, true));
@@ -501,6 +538,41 @@ function renderComment(comment, commentsList, prepend = false, isReply = false) 
     } else {
         commentsList.appendChild(commentItem);
     }
+}
+
+// Handle comment deletion (both top-level and reply)
+function deleteComment(commentId, commentsList, isReply = false) {
+    if (!confirm("Are you sure you want to delete this comment?")) {
+        return;
+    }
+
+    fetch(`/short/comment/${commentId}/delete/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCSRFToken(),
+        },
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Remove the deleted comment from the DOM
+                if (isReply) {
+                    // If it's a reply, find its parent comment's reply list and remove the reply
+                    const replyItem = commentsList.querySelector(`[data-comment-id="${commentId}"]`);
+                    replyItem.remove();
+                } else {
+                    // If it's a top-level comment, simply remove it from the comments list
+                    const commentItem = commentsList.querySelector(`[data-comment-id="${commentId}"]`);
+                    commentItem.remove();
+                }
+            } else {
+                alert('Error deleting comment');
+            }
+        })
+        .catch(error => {
+            console.error('Error deleting comment:', error);
+        });
 }
 
 // Add listeners for Like, Reply, and Delete buttons
@@ -561,8 +633,6 @@ document.querySelector('.short-modal .close').addEventListener('click', closeSho
 
 
 
-
-
 // Open the comments modal when clicking the chat icon
 document.querySelectorAll('.chat-icon').forEach(button => {
     button.addEventListener('click', function () {
@@ -576,79 +646,47 @@ document.querySelectorAll('.chat-icon').forEach(button => {
 
 
 <style>
-
-/* Basic styles for the like button */
-.btn-like {
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 24px;
-    display: flex;
-    align-items: center;
-    color: #666;
-    transition: color 0.3s ease;
-}
-
-/* Normal state */
-.btn-like .bi {
-    font-size: 24px;
-    color: #666; /* Default grey color */
-}
-
-/* When liked */
-.btn-like.liked .bi {
-    color: red !important ; /* Heart icon is red when liked */
-}
-
-/* Hover state */
-.btn-like:hover .bi {
-    color: pink; /* Pink color when hovered */
-}
-
-/* Like count styling */
-.like-count {
-    font-size: 16px;
-    margin-left: 8px;
-    color: #fff;
+/* When a comment is being pressed, show the delete button */
+.short-comment-item.show-delete .btn-delete {
+    display: block; /* Show the delete button when the class is added */
+    color:black;
 }
 
 
     /* Basic styles for the like button */
-.btn-like {
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 24px;
-    display: flex;
-    align-items: center;
-    color: #666;
-    transition: color 0.3s ease;
-}
+    .btn-like {
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 24px;
+        display: flex;
+        align-items: center;
+        color: #666;
+        transition: color 0.3s ease;
+    }
 
-/* Normal state */
-.btn-like .bi {
-    font-size: 24px;
-    color: #666; /* Default grey color */
-}
+    /* Normal state */
+    .btn-like .bi {
+        font-size: 24px;
+        color: #666; /* Default grey color */
+    }
 
-/* When liked */
-.btn-like.liked .bi {
-    color: red !important ; /* Fire icon is orange when liked */
-}
+    /* When liked */
+    .btn-like.liked .bi {
+        color: red !important ; /* Heart icon is red when liked */
+    }
 
-/* Hover state */
-.btn-like:hover .bi {
-    color: orange; /* Red color when hovered */
-}
+    /* Hover state */
+    .btn-like:hover .bi {
+        color: pink; /* Pink color when hovered */
+    }
 
-/* Like count styling */
-.like-count {
-    font-size: 16px;
-    margin-left: 8px;
-    color: #fff;
-}
-
-
+    /* Like count styling */
+    .like-count {
+        font-size: 16px;
+        margin-left: 8px;
+        color: #fff;
+    }
 
     .short-comment-actions{
         display:flex;
