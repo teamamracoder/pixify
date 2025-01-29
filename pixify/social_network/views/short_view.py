@@ -104,11 +104,16 @@ class ShortCommentReplyView(View):
             }
         })
 
-
 class ShortCommentDeleteView(View):
     def post(self, request, comment_id):
-        user=request.user
-        short_service.short_comment_delete(comment_id, user)
+        user = request.user
+        try:
+            short_service.short_comment_delete(comment_id, user)
+            return JsonResponse({'success': True})       
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)}, status=500)
+
+ 
         
 class ShortCommentReactionView(View):
     def post(self, request, comment_id):
