@@ -32,7 +32,8 @@ def update_user(user_id,first_name,last_name,email,phone,gender,address,dob,coun
     user.save()
     return user
 
-
+def filter_user(user_id):
+    return User.objects.filter(id=user_id)
 
   # End by Badhan
 

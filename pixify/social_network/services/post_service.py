@@ -18,6 +18,8 @@ def manage_update_post(post, title, description):
 def manage_delete_post(post):
     post.delete()
 
+def delete_post(post):
+    post.delete()
 
 # new added by sujit
 def manage_list_posts(sort_by = 'title'): 
@@ -78,6 +80,9 @@ def get_comment_count_by_post(post_id):
 
 def get_post(post_id):
     return Post.objects.filter(id=post_id)
+
+
+
 # update post
 def update_post(user_id,post_id,post_titile):
     post = Post.objects.get(id=post_id)
