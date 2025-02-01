@@ -2,7 +2,7 @@ import json
 import os
 from django.utils.functional import SimpleLazyObject
 from django.views.decorators.csrf import csrf_exempt
-from django.shortcuts import render, redirect
+from django.shortcuts import get_object_or_404, render, redirect
 from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import render, redirect
 from django.views import View
@@ -99,19 +99,28 @@ class UserPostDetail(View):
 #         return render(request, 'enduser/home/index.html', {'post_dict': post_dict})
 
 
-@csrf_exempt  # Temporarily disable CSRF protection for testing
-def create_reaction(request):
-    if request.method == 'PUT':
-        try:
-            data = json.loads(request.body)
-            post_id = data.get('postId')
-            reaction_id = data.get('reactionId')
-            reaction_value = data.get('reactionValue')
-            # Perform logic to handle the reaction
-            return JsonResponse({'status': 'success', 'message': 'Reaction added successfully!'})
-        except Exception as e:
-            return JsonResponse({'status': 'error', 'message': str(e)})
-    return JsonResponse({'status': 'error', 'message': 'Invalid HTTP method'}, status=405)
+
+class UpdatePostReactionView(View):
+    def post(self, request, *args, **kwargs):
+        post_id = request.POST.get('post_id')
+        reaction_id = request.POST.get('reaction_id')
+        user_id = request.user.id  # Assuming the user is logged in
+
+        # Get the post and check for the existing reaction
+        post = Post.objects.get(id=post_id)
+        reaction =services.post_reaction_service.post_reaction(reaction_id)
+        
+
+        # If no reaction exists, create one
+        if not reaction:
+            # post_react=services.post_reaction_service.create_post_reaction(post_id,user_id)
+            post_react=services.post_reaction_service.create_or_update_message_reaction(post_id,user_id)
+
+        # Count the new reaction
+        new_reaction_count = PostReaction.objects.filter(post_id_id=post_id, is_active=True).count()
+
+        return JsonResponse({'new_reaction_count': new_reaction_count})
+
 
 
 class UserPostEditView(View):
@@ -120,8 +129,10 @@ class UserPostEditView(View):
     @role_required(Role.ADMIN.value, Role.END_USER.value)
     def get(self,request):
          post_id = request.GET.get('post_id')
+         user_id = request.GET.get('user_id')
+         User_del=list(services.user_service.filter_user(user_id).values())
          post_detail =list(services.post_service.get_post(post_id).values())
-         return JsonResponse({'success': True, 'message': 'Title updated successfully.','post_detail':list(post_detail) })
+         return JsonResponse({'success': True, 'message': 'Title updated successfully.','post_detail':list(post_detail),'User_del':list(User_del) })
 
     def post(self, request):
          user = request.user
@@ -142,3 +153,28 @@ class UserPostEditView(View):
 
     
 
+# class UserPostDeleteView(View):
+#     def get(self,request):
+#         post_id = request.POST.get('post_id')
+#         post = services.post_service.get_post(post_id)
+#         return render(request, 'enduser/home/index.html', {'post': post})
+
+
+#     def post(self, request):
+#         post_id = request.POST.get('post_id')
+#         post = services.post_service.get_post(post_id)
+#         services.post_service.delete_post(post)
+#         return redirect('post_list')
+
+class UserPostDeleteView(View):
+    def post(self, request):
+        post_id = request.POST.get('post_id')
+        if not post_id:
+            return JsonResponse({'error': 'Post ID is required'}, status=400)
+
+        post = services.post_service.get_post(post_id)
+        if not post:
+            return JsonResponse({'error': 'Post not found'}, status=404)
+
+        services.post_service.delete_post(post)
+        return JsonResponse({'message': 'Post deleted successfully'}, status=200)
