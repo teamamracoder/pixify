@@ -108,7 +108,8 @@ class UpdatePostReactionView(View):
 
         # Get the post and check for the existing reaction
         post = Post.objects.get(id=post_id)
-        reaction =services.post_reaction_service.post_reaction(reaction_id)
+        reaction =services.post_reaction_service.post_reactionby_name(reaction_id)
+        print("reaction name",reaction)
         
 
         # If no reaction exists, create one
@@ -118,6 +119,7 @@ class UpdatePostReactionView(View):
 
         # Count the new reaction
         new_reaction_count = PostReaction.objects.filter(post_id_id=post_id, is_active=True).count()
+        print(new_reaction_count)
 
         return JsonResponse({'new_reaction_count': new_reaction_count})
 

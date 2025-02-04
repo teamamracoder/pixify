@@ -1,7 +1,7 @@
 from ..models import PostReaction,Post,User
 
 
-def post_reaction(reaction_id):
+def post_reactionby_name(reaction_id):
     return PostReaction.objects.filter(id=reaction_id).first()
 
 def create_post_reaction(post_id,user_id):
