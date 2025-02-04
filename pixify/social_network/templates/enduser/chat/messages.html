@@ -23,7 +23,7 @@
                     <span class="username G-msg_chat-title">{{ data.chat.title }}</span>
                 </a>
             {% else %}
-                <img src="{{ data.chat.chat_cover|default:'\static\images\avatar.jpg' }}" alt="Profile Picture" class="profile-pic">
+                <img src="{{ data.chat.chat_cover|default:'\static\images\avatar.jpg' }}" alt="Profile Picture" class="profile-pic"onclick="window.location.href='{% url 'userprofile' %}';">
                 <span class="username P-msg_chat-title">{{ data.chat.title }}</span>
             {% endif %}
         </div>

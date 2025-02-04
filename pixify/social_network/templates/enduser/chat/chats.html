@@ -63,7 +63,7 @@
     <!-- Peoples -->
     {% for chat in data.chats %}
     <div style="border: 1px solid black; border-radius: 3px" class="m-2">
-        <div class="chat-item">
+       <div class="chat-item" onclick="window.location.href='{% url 'message' chat_id=chat.id %}';">
             <!-- Image Section -->
             <div class="image-div">
                 {% if chat.is_group %}
