@@ -1995,3 +1995,50 @@ font-size: 30px;
     visibility: visible;
 
   }
+
+
+  
+
+    .modal-content {
+        border-radius: 12px;
+        border: none;
+        background: #fff;
+    }
+
+    .modal-header {
+        border-bottom: none;
+    }
+
+    .modal-body p {
+        font-size: 1.1rem;
+    }
+
+    .modal-footer {
+        border-top: none;
+    }
+
+    .btn {
+        border-radius: 8px;
+        transition: 0.3s ease-in-out;
+    }
+
+    .btn-secondary:hover {
+        background-color: #6c757d;
+        color: white;
+    }
+
+    .btn-danger:hover {
+        background-color: #dc3545;
+        color: white;
+    }
+
+    .close {
+        font-size: 1.5rem;
+        background: none;
+        border: none;
+        outline: none;
+    }
+
+    .close:hover {
+        color: #ff4d4d;
+    }

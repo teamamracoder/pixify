@@ -44,8 +44,6 @@ class CommentsCreateView(View):
          post_id = request.POST.get('post_id') 
          user_id = request.user.id
          user_details=list(services.comment_service.get_user(user_id).values())
-      
-         
          commentstext=request.POST['comment_text']    
          services.comment_service.user_comments_create(commentstext,post_id,user_id)
 
@@ -57,16 +55,43 @@ class CommentsCreateView(View):
    
 
 
-class CommentsListView(View):
+# class CommentsListView(View):
      
-    def get(self, request):
-         post_id = request.GET.get('post_id') 
-         user_id = request.GET.get('user_id')
-         
-         user_details=list(services.comment_service.get_user(user_id).values())
-        
-         post_del=list(services.comment_service.get_post(post_id).values())
+#     def get(self, request):
+#          post_id = request.GET.get('post_id') 
+#          user_id = request.GET.get('user_id')
+#          user_details=list(services.comment_service.get_user(user_id).values())
+#          post_del=list(services.comment_service.get_post(post_id).values())
       
-         comment_list = services.comment_service.comment_list(post_id)
-         return JsonResponse({ "status": "success", "comments":list(comment_list),"posts":list(post_del),"user_details":list(user_details)})
+#          comment_list = services.comment_service.comment_list(post_id)
 
+         
+#          return JsonResponse({ "status": "success", "comments":list(comment_list),"posts":list(post_del),"user_details":list(user_details)})
+class CommentsListView(View):
+    def get(self, request):
+        post_id = request.GET.get('post_id') 
+        user_id = request.GET.get('user_id')
+
+        user_details = list(services.comment_service.get_user(user_id).values())
+        post_del = list(services.comment_service.get_post(post_id).values())
+
+        comment_list = services.comment_service.comment_list(post_id)
+
+        # Debugging: Print the comment_list to check structure
+        print("Raw comment list:", comment_list)
+
+        # Ensure `comment_by` contains necessary fields
+        for comment in comment_list:
+            print("Comment Data Before Processing:", comment)  # Debugging
+            if 'comment_by' in comment and isinstance(comment['comment_by'], dict):
+                comment['comment_by_first_name'] = comment['comment_by'].get('first_name', 'Unknown')
+                comment['comment_by_last_name'] = comment['comment_by'].get('last_name', 'Unknown')
+            else:
+                print("Comment_by is missing or not a dictionary:", comment)
+
+        return JsonResponse({
+            "status": "success",
+            "comments": list(comment_list),  # Already a list of dictionaries
+            "posts": list(post_del),
+            "user_details": list(user_details)
+        })

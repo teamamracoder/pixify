@@ -17,10 +17,13 @@ def get_count_comment(postid):
     return Comment.objects.filter(post_id_id=postid).count()
 
 
+# def comment_list(post_id):
+#     return models.Comment.objects.filter(post_id=post_id).order_by('created_at').values()
+
 def comment_list(post_id):
-    return models.Comment.objects.filter(post_id=post_id).order_by('created_at').values()
-
-
+    comments = Comment.objects.filter(post_id=post_id).select_related('comment_by')
+    return list(comments.values('id', 'comment', 'created_at', 
+                                'comment_by__first_name', 'comment_by__last_name'))
 
 def comments_filtered(post_id):
     return  Comment.objects.filter(post_id_id=post_id)
@@ -33,4 +36,5 @@ def get_post(post_id):
 def get_user(user_id):
     return User.objects.filter(id=user_id)
 
-
+def get_comment_by(comment_by_id):
+    return User.objects.filter(id=comment_by_id)
