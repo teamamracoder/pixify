@@ -51,6 +51,7 @@ class ShortCommentListView(View):
     def get(self, request, post_id):
        user=request.user
        comments = short_service.short_comments(post_id, user)
+       print(comments)
 
        return JsonResponse({"comments": list(comments)}, safe=False)
 
@@ -68,12 +69,13 @@ class ShortCommentCreateView(View):
         # Return the comment data in the response with like_count = 0 initially
         return JsonResponse({
             'success': True,
-            'comment': {
+            'comment': {                
                 'id': comment.id,
                 'comment': comment.comment,
                 'comment_by__first_name': comment.comment_by.first_name,
                 'comment_by__last_name': comment.comment_by.last_name,
                 'comment_by__profile_photo_url': comment.comment_by.profile_photo_url or None,  # Handle null cases
+                'created_at': 'Just now', #predefine string
                 'like_count': 0,  # Initialize like_count as 0
                 'replies': []  # Empty replies for new comments
             }
@@ -99,6 +101,8 @@ class ShortCommentReplyView(View):
                 'comment_by__first_name': reply.comment_by.first_name,
                 'comment_by__last_name': reply.comment_by.last_name,
                 'comment_by__profile_photo_url': reply.comment_by.profile_photo_url or None,  # Handle null cases
+                'reply_to':comment.comment_by.first_name,
+                'created_at': 'Just now', #predefine string
                 'like_count': 0,  # Initialize like_count as 0
                 'replies': []  # Replies to a reply are not supported
             }

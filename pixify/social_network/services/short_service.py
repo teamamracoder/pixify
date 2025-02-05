@@ -1,5 +1,6 @@
 from ..models import User, Post, PostReaction, Comment, CommentReaction
 from ..constants import PostType,PostContentType
+from django.utils import timezone
 
 def get_short(short_id):
     return Post.objects.get(id=short_id, is_active=True)
@@ -26,50 +27,92 @@ def reaction_count(short):
     return PostReaction.objects.filter(post_id=short, is_active=True).count()
 
 
+def format_relative_time(timestamp):
+    print("Original timestamp:", timestamp)
+
+    now = timezone.now()
+    print("Current time:", now)
+
+    print(f"Timestamp type: {type(timestamp)}, value: {timestamp}")
+    print(f"Now type: {type(now)}, value: {now}")
+
+    # Ensure both 'timestamp' and 'now' are timezone-aware
+    if timezone.is_naive(timestamp):
+        timestamp = timezone.make_aware(timestamp, timezone.get_current_timezone())
+    else:
+        timestamp = timestamp.astimezone(timezone.get_current_timezone())
+
+    if timezone.is_naive(now):
+        now = timezone.make_aware(now, timezone.get_current_timezone())
+
+    # Now, both `timestamp` and `now` should be timezone-aware
+    diff_seconds = (now - timestamp).total_seconds()
+    print(diff_seconds)
+
+    if diff_seconds < 60:
+        return "Just now"
+    elif diff_seconds < 3600:
+        return f"{int(diff_seconds // 60)}m ago"
+    elif diff_seconds < 86400:
+        return f"{int(diff_seconds // 3600)}h ago"
+    elif diff_seconds < 604800:
+        return f"{int(diff_seconds // 86400)}d ago"
+    elif diff_seconds < 2592000:
+        return f"{int(diff_seconds // 604800)}w ago"
+    elif diff_seconds < 31536000:
+        return f"{int(diff_seconds // 2592000)}m ago"
+    else:
+        return f"{int(diff_seconds // 31536000)}y ago"
+
+
+def get_comment_replies(parent_comment_id, user):
+    replies = Comment.objects.filter(reply_for_id=parent_comment_id, is_active=True).values(
+        'id',
+        'comment',
+        'comment_by__first_name',
+        'comment_by__last_name',
+        'comment_by__profile_photo_url',
+        'created_at',
+    )
+
+    for reply in replies:
+        reply['like_count'] = CommentReaction.objects.filter(comment_id=reply['id'], is_active=True).count()
+
+        like_obj_reply = CommentReaction.objects.filter(comment_id=reply['id'], reacted_by=user, is_active=True).first()
+        reply['user_liked'] = True if like_obj_reply else False
+
+        # Format the timestamp
+        reply['created_at'] = format_relative_time(reply['created_at'])
+
+        # Fetch nested replies
+        reply['replies'] = get_comment_replies(reply['id'], user)
+
+    return list(replies)
+
+
 def short_comments(short, user):
-    # Fetch only top-level comments for the given post ID
     comments = Comment.objects.filter(post_id=short, reply_for_id=None, is_active=True).values(
         'id',
         'comment',
         'comment_by__first_name',
         'comment_by__last_name',
         'comment_by__profile_photo_url',
+        'created_at',
     )
 
     for comment in comments:
-        # Calculate like count for the top-level comment
-        comment['like_count'] = CommentReaction.objects.filter(
-            comment_id=comment['id'], is_active=True
-        ).count()
+        comment['like_count'] = CommentReaction.objects.filter(comment_id=comment['id'], is_active=True).count()
 
-        # Check if the user has liked the comment
         like_obj = CommentReaction.objects.filter(comment_id=comment['id'], reacted_by=user, is_active=True).first()
         comment['user_liked'] = True if like_obj else False
 
-        # Fetch and process replies for the current comment
-        replies = Comment.objects.filter(reply_for_id=comment['id'], is_active=True).values(
-            'id',
-            'comment',
-            'comment_by__first_name',
-            'comment_by__last_name',
-            'comment_by__profile_photo_url',
-        )
+        # Format the timestamp
+        comment['created_at'] = format_relative_time(comment['created_at'])
 
-        # Add like_count to each reply and check if the user liked the reply
-        for reply in replies:
-            reply['like_count'] = CommentReaction.objects.filter(
-                comment_id=reply['id'], is_active=True
-            ).count()
-
-            # Check if the user has liked the reply
-            like_obj_reply = CommentReaction.objects.filter(comment_id=reply['id'], reacted_by=user, is_active=True).first()
-            reply['user_liked'] = True if like_obj_reply else False
-
-        # Attach replies to the parent comment
-        comment['replies'] = list(replies)
+        # Fetch nested replies
+        comment['replies'] = get_comment_replies(comment['id'], user)
 
     return comments
-
 
 
 def get_short_comment(comment_id):

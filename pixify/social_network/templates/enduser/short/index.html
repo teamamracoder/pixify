@@ -328,7 +328,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-// Utility function to get CSRF token
 function getCSRFToken() {
     const cookies = document.cookie.split(';');
     for (let cookie of cookies) {
@@ -338,33 +337,29 @@ function getCSRFToken() {
     return null;
 }
 
-// Open the comments modal and fetch comments with replies
+let replyingToCommentId = null; 
+
 function openShortCommentsModal(postId) {
     const modal = document.getElementById('shortCommentsModal');
     const commentsList = document.getElementById('shortCommentsList');
-    let replyingToCommentId = null; // Track if replying to a specific comment
 
-    // Reset comments list and show the modal
-    commentsList.innerHTML = ''; // Clear previous comments
+    commentsList.innerHTML = '';
     modal.style.display = 'flex';
     setTimeout(() => modal.classList.add('show'), 10);
-
-    // Fetch comments with replies for the specific post
+    
     fetch(`/short/${postId}/comments/`)
         .then(response => response.json())
         .then(data => {
             if (data.comments && data.comments.length > 0) {
-                // Render top-level comments only
                 const topLevelComments = data.comments.filter(comment => !comment.parent_comment_id);
                 topLevelComments.forEach(comment => {
                     renderComment(comment, commentsList);
+                    
                 });
             } else {
-                // Show a message if no comments are available
                 commentsList.innerHTML = '<p class="no-comments">No comments yet. Be the first to comment!</p>';
             }
-
-            // Create the comment input field
+            
             const commentInputContainer = document.createElement('div');
             commentInputContainer.classList.add('short-comment-input');
             commentInputContainer.innerHTML = `
@@ -376,30 +371,34 @@ function openShortCommentsModal(postId) {
             const submitButton = document.getElementById('shortSubmitComment');
             const commentInput = document.getElementById('shortCommentInput');
 
-            // Handle post button click
-            submitButton.addEventListener('click', function () {
-                handleCommentSubmit(postId, commentInput, commentsList, replyingToCommentId, () => {
-                    replyingToCommentId = null;
-                    commentInput.placeholder = 'Add a comment...'; // Reset placeholder
-                });
-            });
+            submitButton.addEventListener('click', function () {                
+                console.log("reply-id1:", replyingToCommentId); 
 
-            // Add Enter key functionality
-            commentInput.addEventListener('keydown', function (event) {
-                if (event.key === 'Enter') {
+                if (replyingToCommentId) {
                     handleCommentSubmit(postId, commentInput, commentsList, replyingToCommentId, () => {
                         replyingToCommentId = null;
+                        commentInput.placeholder = 'Add a comment...';
+                    });
+                } else {
+                    handleCommentSubmit(postId, commentInput, commentsList, null, () => {
                         commentInput.placeholder = 'Add a comment...';
                     });
                 }
             });
 
-            // Add listeners for dynamically loaded buttons
-            addShortCommentListeners((commentId) => {
-                // Handle reply button click
-                replyingToCommentId = commentId; // Set the parent comment ID for the reply
-                commentInput.placeholder = 'Reply to this comment...'; // Update placeholder
-                commentInput.focus(); // Focus on the input box
+            commentInput.addEventListener('keydown', function (event) {
+                if (event.key === 'Enter') {
+                    if (replyingToCommentId) {
+                        handleCommentSubmit(postId, commentInput, commentsList, replyingToCommentId, () => {
+                            replyingToCommentId = null; 
+                            commentInput.placeholder = 'Add a comment...';
+                        });
+                    } else {
+                        handleCommentSubmit(postId, commentInput, commentsList, null, () => {
+                            commentInput.placeholder = 'Add a comment...';
+                        });
+                    }
+                }
             });
         })
         .catch(error => {
@@ -408,136 +407,215 @@ function openShortCommentsModal(postId) {
         });
 }
 
-// Handle submitting a new comment or reply
 function handleCommentSubmit(postId, commentInput, commentsList, replyingToCommentId, callback) {
     const commentText = commentInput.value.trim();
-
-    // Ensure the comment text is not empty
-    if (commentText === '') {
+    if (!commentText) {
         alert("Please enter a comment!");
-        return; // Do not submit if empty
+        return;
     }
 
-    // Prepare the URL and data for the request
     const url = replyingToCommentId 
         ? `/short/comment/${replyingToCommentId}/reply/` 
         : `/short/${postId}/comment/create/`;
 
-    const bodyData = { text: commentText };
-
-    // Send the new comment or reply to the backend
     fetch(url, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'X-CSRFToken': getCSRFToken(), // Include CSRF token
+            'X-CSRFToken': getCSRFToken(),
         },
-        body: JSON.stringify(bodyData),
+        body: JSON.stringify({ text: commentText }),
     })
-        .then(response => response.json())
-        .then(data => {
-            if (data && data.success) {
-                if (replyingToCommentId) {
-                    // Render reply in the correct comment's reply list
-                    const parentComment = commentsList.querySelector(`[data-comment-id="${replyingToCommentId}"]`);
-                    const replyList = parentComment.querySelector('.reply-list');
-                    renderComment(data.reply, replyList, false, true);
-                } else {
-                    // Render a new comment
-                    renderComment(data.comment, commentsList, true);
-                }
-
-                // Update the comment count dynamically for both comments and replies
-                const commentIcon = document.querySelector(`.chat-icon[data-video-id="${postId}"]`);
-                const countElement = commentIcon.nextElementSibling;
-                if (countElement) {
-                    let currentCount = parseInt(countElement.textContent, 10) || 0;
-                    countElement.textContent = currentCount + 1; // Increment the count
-                }
-
-                // Clear the input field and reset reply mode
-                commentInput.value = '';
-                callback(); 
-            } else {
-                console.error('Error:', data.message || 'Unknown error');
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {            
+            const noCommentsMessage = commentsList.querySelector('.no-comments');
+            if (noCommentsMessage) {
+                noCommentsMessage.remove();
             }
-        })
-        .catch(error => {
-            console.error('Error posting comment:', error);
-        });
+
+            if (replyingToCommentId) {                
+                const parentComment = commentsList.querySelector(`[data-comment-id="${replyingToCommentId}"]`);
+                const replyList = parentComment.querySelector('.reply-list');
+                renderComment(data.reply, replyList, false, true);
+            } else {                            
+                renderComment(data.comment, commentsList, true);
+            }
+            
+            const commentIcon = document.querySelector(`.chat-icon[data-video-id="${postId}"]`);
+            const countElement = commentIcon?.nextElementSibling;
+            if (countElement) {
+                countElement.textContent = (parseInt(countElement.textContent, 10) || 0) + 1;
+            }
+
+            commentInput.value = '';
+            callback();
+        } else {
+            console.error('Error:', data.message || 'Unknown error');
+        }
+    })
+    .catch(error => {
+        console.error('Error posting comment:', error);
+    });
 }
 
-
-// Render a single comment with replies
 function renderComment(comment, commentsList, prepend = false, isReply = false) {
     const profilePhotoUrl = comment.comment_by__profile_photo_url || '/static/images/avatar.jpg';
     const firstName = comment.comment_by__first_name || 'Anonymous';
     const lastName = comment.comment_by__last_name || '';
+    const createdAt = comment.created_at || '';
 
+    // Create the main comment container
     const commentItem = document.createElement('div');
     commentItem.classList.add('short-comment-item');
-    if (isReply) commentItem.classList.add('short-reply-item'); // Add class for styling replies
+    if (isReply) {
+        commentItem.classList.add('short-reply-item');
+    }
     commentItem.setAttribute('data-comment-id', comment.id);
 
-    // Determine if the comment is liked by the user
     const likedClass = comment.user_liked ? 'liked' : '';
-    const iconClass = comment.user_liked ? 'bi-heart-fill' : 'bi-heart'; // Heart icon class
+    const iconClass = comment.user_liked ? 'bi-heart-fill' : 'bi-heart';
 
-    commentItem.innerHTML = `
-        <img src="${profilePhotoUrl}" alt="${firstName}'s Profile Picture">
+    // Build the core comment content
+    commentItem.innerHTML = `        
         <div class="short-comment-content">
-            <span class="short-username">${firstName} ${lastName}</span>
-            <span class="short-comment-text">${comment.comment}</span>
-            <div class="short-comment-actions">
-                <button class="btn-like ${likedClass}" data-comment-id="${comment.id}">
-                    <i class="bi ${iconClass}"></i>
-                    <span class="like-count">${comment.like_count || 0}</span>
-                </button>
-                <button class="btn-reply" data-comment-id="${comment.id}">Reply</button>
-                <button class="btn-delete" data-comment-id="${comment.id}" style="display: none;">Delete</button> <!-- Hidden delete button -->
+        <div class="user-info">
+            <img src="${profilePhotoUrl}" alt="${firstName}'s Profile Picture">
+                <span class="short-username">${firstName} ${lastName}</span>
+                <span class="short-created-at">${createdAt}</span>
+        </div>                
+                <span class="short-comment-text">${comment.comment}</span>                
+                <div class="short-comment-actions">
+                    <button class="btn-like ${likedClass}" data-comment-id="${comment.id}">
+                        <i class="bi ${iconClass}"></i>
+                        <span class="like-count">${comment.like_count || 0}</span>
+                    </button>
+                    <button class="btn-reply" data-comment-id="${comment.id}">Reply</button>
+                    <button class="btn-delete" data-comment-id="${comment.id}" style="display: none;">Delete</button>
+                </div>
             </div>
-        </div>
-        ${isReply ? '' : '<div class="reply-list"></div>'}
     `;
 
-    // Handle long press to show delete button on the entire comment item
+    // Add long-press logic for delete button
     let pressTimer;
-    const longPressDelay = 500; // 500ms press time
+    const longPressDelay = 500;
 
     const handlePressStart = () => {
-        pressTimer = setTimeout(function() {
+        pressTimer = setTimeout(() => {
             const deleteButton = commentItem.querySelector('.btn-delete');
-            deleteButton.style.display = 'inline'; // Show delete button after 500ms
+            deleteButton.style.display = 'inline';
         }, longPressDelay);
     };
 
-    const handlePressEnd = () => {
-        clearTimeout(pressTimer); // Clear timeout if touch ends early or mouse click ends
-    };
+    const handlePressEnd = () => clearTimeout(pressTimer);
 
     commentItem.addEventListener('touchstart', handlePressStart);
-    commentItem.addEventListener('mousedown', handlePressStart); // Added for desktop mouse events
+    commentItem.addEventListener('mousedown', handlePressStart);
     commentItem.addEventListener('touchend', handlePressEnd);
-    commentItem.addEventListener('mouseup', handlePressEnd); // Added for desktop mouse events
+    commentItem.addEventListener('mouseup', handlePressEnd);
 
-    // Handle delete button click for the comment (both top-level and reply)
     const deleteButton = commentItem.querySelector('.btn-delete');
     deleteButton.addEventListener('click', function() {
         const commentId = commentItem.getAttribute('data-comment-id');
-        deleteComment(commentId, commentsList, isReply); // Call delete function
+        deleteComment(commentId, commentsList, isReply);
     });
 
-    // Handle rendering of replies
+    const replyButton = commentItem.querySelector('.btn-reply');
+    replyButton.addEventListener('click', function () {
+        const commentId = this.dataset.commentId;
+        replyToComment(commentId, firstName, commentItem);
+    });
+
+    // If this is a top-level comment (not a reply) and it has replies,
+    // add a reply list container and the "Tap to Show more" button.
     if (!isReply && comment.replies && comment.replies.length > 0) {
-        const replyList = commentItem.querySelector('.reply-list');
-        comment.replies.forEach(reply => renderComment(reply, replyList, false, true));
+        // Create a container for the replies
+        const replyList = document.createElement('div');
+        replyList.classList.add('reply-list');
+        replyList.style.display = 'none'; // Initially hidden
+        commentItem.appendChild(replyList);
+
+        // Create the show/hide replies button
+        const showRepliesButton = document.createElement('button');
+        showRepliesButton.classList.add('show-replies-btn');
+        showRepliesButton.textContent = '~ Show Replies';
+        commentItem.appendChild(showRepliesButton);
+
+        showRepliesButton.addEventListener('click', function () {
+            if (replyList.style.display === 'none') {
+                replyList.style.display = 'block';
+                this.textContent = '~ Hide Replies';
+            } else {
+                replyList.style.display = 'none';
+                this.textContent = '~ Show Replies';
+            }
+        });
+
+        // Render the replies inside the replyList container
+        comment.replies.forEach(reply => {
+            renderComment(reply, replyList, false, true);
+        });
+    }
+    // For reply comments that themselves have nested replies, render them inline
+    else if (isReply && comment.replies && comment.replies.length > 0) {
+        comment.replies.forEach(reply => {
+            renderComment(reply, commentsList, false, true);
+        });
     }
 
+    // Append the comment to the given list
     if (prepend) {
         commentsList.insertBefore(commentItem, commentsList.firstChild);
     } else {
         commentsList.appendChild(commentItem);
     }
+}
+
+
+
+// Function to handle reply input
+function replyToComment(commentId, parentUsername, commentItem) {
+    console.log(`Replying to comment ID: ${commentId}`); // Debug: Check if the function is triggered    
+    const commentInput = document.getElementById('shortCommentInput');
+    const commentInputContainer = commentInput.parentElement;
+
+    // If a reply is already being made to another comment, cancel it
+    if (replyingToCommentId && replyingToCommentId !== commentId) {
+        // Clear the existing reply
+        const existingButtonContainer = commentInputContainer.querySelector('.btn-cancel-reply');
+        if (existingButtonContainer) {
+            existingButtonContainer.remove(); // Remove the previous cancel button
+        }
+
+        commentInput.value = ''; // Clear the input field
+        commentInput.placeholder = 'Add a comment...'; // Reset the placeholder
+    }
+
+    // Create the Cancel Reply button if it doesn't exist
+    if (!commentInputContainer.querySelector('.btn-cancel-reply')) {
+        const cancelReplyButton = document.createElement('button');
+        cancelReplyButton.textContent = 'Cancel';
+        cancelReplyButton.classList.add('btn-cancel-reply');
+
+        // Append the Cancel Reply button to the comment input container
+        commentInputContainer.appendChild(cancelReplyButton);
+
+        // Handle cancel reply
+        cancelReplyButton.addEventListener('click', function () {
+        commentInput.value = ''; // Clear the input field
+        commentInput.placeholder = 'Add a comment...'; // Reset the placeholder
+        cancelReplyButton.remove(); // Remove the cancel reply button
+        replyingToCommentId = null; // Reset the global reply tracker
+    });
+    }
+
+    // Set the input value with the @username for replying
+    commentInput.value = `@${parentUsername} `;
+    commentInput.focus();
+
+    // Update the global variable to track the reply being posted
+    replyingToCommentId = commentId;
+    commentInput.placeholder = `Replying to @${parentUsername}...`;
 }
 
 // Handle comment deletion (both top-level and reply)
@@ -622,17 +700,6 @@ function closeShortCommentsModal() {
 
 document.querySelector('.short-modal .close').addEventListener('click', closeShortCommentsModal);
 
-
-
-
-
-
-
-
-
-
-
-
 // Open the comments modal when clicking the chat icon
 document.querySelectorAll('.chat-icon').forEach(button => {
     button.addEventListener('click', function () {
@@ -646,6 +713,46 @@ document.querySelectorAll('.chat-icon').forEach(button => {
 
 
 <style>
+
+.short-comment-content .user-info {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+    .close{        
+        background-color: transparent; /* Background color */
+        border: none; /* No border */
+        cursor: pointer; /* Pointer cursor on hover */        
+        font-size: 35px; /* Font size */
+        padding: 0; /* No padding */
+        margin-right: 10px; /* No margin */
+    }
+
+    .short-created-at{
+        margin-left: 10px;
+    }
+
+.bi.bi-send {
+    font-size: 24px;
+}
+
+
+    .btn-cancel-reply{
+        color:black;
+    }
+
+    .show-replies-btn{        
+        color: #fff; /* Text color */
+        background-color: transparent; /* Background color */
+        border: none; /* No border */
+        cursor: pointer; /* Pointer cursor on hover */        
+        font-size: 14px; /* Font size */
+        padding: 0; /* No padding */
+        margin: 0; /* No margin */
+
+    }
+
 /* When a comment is being pressed, show the delete button */
 .short-comment-item.show-delete .btn-delete {
     display: block; /* Show the delete button when the class is added */
@@ -667,7 +774,7 @@ document.querySelectorAll('.chat-icon').forEach(button => {
 
     /* Normal state */
     .btn-like .bi {
-        font-size: 24px;
+        font-size: 20px;
         color: #666; /* Default grey color */
     }
 
@@ -678,23 +785,26 @@ document.querySelectorAll('.chat-icon').forEach(button => {
 
     /* Hover state */
     .btn-like:hover .bi {
+        font-size: 24px;
         color: pink; /* Pink color when hovered */
     }
 
     /* Like count styling */
     .like-count {
-        font-size: 16px;
-        margin-left: 8px;
+        font-size: 10px;
+        margin-top: 15px;
+        margin-left: 4px;
         color: #fff;
     }
 
     .short-comment-actions{
+        margin-left: 25px;
         display:flex;
     }
     
     .btn-reply{            
         margin-bottom: 8px;    
-        font-size: 18px;
+        font-size: 15px;
         padding-left: 10px;
         border: none;
         background: none;
@@ -710,9 +820,8 @@ document.querySelectorAll('.chat-icon').forEach(button => {
 
     .short-reply-item {
         margin-left: 20px;
-        padding-left: 10px;
-        border-left: 2px solid #ddd;
-        margin-top: 43px;
+        padding-left: 10px;        
+        margin-top: 10px;
     }
 
     .short-comment-item.reply {
@@ -777,6 +886,7 @@ document.querySelectorAll('.chat-icon').forEach(button => {
 .short-comment-item {
     display: flex;
     margin-bottom: 15px;
+    flex-direction: column;
 }
 
 .short-comment-item img {
@@ -795,11 +905,16 @@ document.querySelectorAll('.chat-icon').forEach(button => {
     font-weight: bold;
 }
 
-.short-comment-item .short-comment-content .short-comment-text {
+.short-comment-item .short-comment-content  {
     margin-top: 5px;
     font-size: 14px;
 }
 
+.short-comment-text{
+    margin-bottom: 5px;
+    margin-left: 45px;
+    font-size: 15px;
+}
 .short-comment-input {
     display: flex;
     align-items: center;
@@ -818,7 +933,7 @@ document.querySelectorAll('.chat-icon').forEach(button => {
 .short-comment-input button {
     padding: 8px 12px;
     border-radius: 25px;
-    background-color: #3b5998;
+    background-color: #b19dff;
     color: white;
     border: none;
 }
@@ -877,7 +992,7 @@ document.querySelectorAll('.chat-icon').forEach(button => {
 /* Container for right-side reaction icons */
 .right-icons {
     position: absolute;
-    right: 7%;
+    right: 9%;
     bottom: 16px;
     display: flex;
     flex-direction: column;
@@ -1007,7 +1122,7 @@ document.querySelectorAll('.chat-icon').forEach(button => {
 
 /* Reaction count styling */
 .reaction-count {
-    font-size: 22px;
+    font-size: 15px;
     color: #fff;
 }
 
