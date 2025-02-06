@@ -23,7 +23,7 @@ def get_count_comment(postid):
 def comment_list(post_id):
     comments = Comment.objects.filter(post_id=post_id).select_related('comment_by')
     return list(comments.values('id', 'comment', 'created_at', 
-                                'comment_by__first_name', 'comment_by__last_name'))
+                                'comment_by__first_name', 'comment_by__last_name','reply_for_id'))
 
 def comments_filtered(post_id):
     return  Comment.objects.filter(post_id_id=post_id)

@@ -147,6 +147,10 @@ urlpatterns = [
     #comment priya
     path('comments/',  views.CommentsCreateView.as_view(), name='comment'),
     path('comments/getComment/',views.CommentsListView.as_view(), name='comments_list'),
+    path('post/reactions/', views.GetPostReactionsView.as_view(), name='get_post_reactions'),
+    path('post/comment/', views.GetPostCommentView.as_view(), name='get_comment_reactions'),
+    
+
    
   
  

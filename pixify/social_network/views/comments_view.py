@@ -111,6 +111,7 @@ class CommentsListView(View):
         user_details = list(services.comment_service.get_user(user_id).values())
         post_del = list(services.comment_service.get_post(post_id).values())
         comment_list = services.comment_service.comment_list(post_id)
+        print(comment_list)
         comment_count =services.comment_service.comment_count(post_id)
         print("comment__count",comment_count)
         for comment in comment_list:
@@ -133,6 +134,58 @@ class CommentsListView(View):
 
 
 
+class GetPostCommentView(View):
+    def get(self, request, *args, **kwargs):
+        post_id = request.GET.get('post_id')
+        user_id = request.user.id
+        total_count = Comment.objects.filter(post_id_id=post_id, is_active=True).count()
+
+        return JsonResponse({
+            'total_count': total_count,
+
+        })
+
+
+
+# class CommentReplyView(View):
+#     def post(self, request):  
+#         post_id = request.POST.get('post_id')
+#         comment_id = request.POST.get('reply_for')  # Can be empty for top-level comments
+#         user_id = request.user.id
+#         reply_text = request.POST.get('reply_text')
+
+#         print("Received Data - post_id:", post_id)
+#         print("Received Data - reply_for (Comment ID if reply):", comment_id or "No Reply")
+#         print("Received Data - reply_text:", reply_text)
+
+#         if not reply_text or not post_id:
+#             return JsonResponse({"status": "error", "message": "Invalid data"}, status=400)
+
+#         try:
+#            # user_details = list(comment_service.get_user(user_id).values())
+
+#             if comment_id:  
+#                 # If reply_for is present, it's a reply to a comment
+#                 services.comment_service.user_reply_create(reply_text, post_id, user_id, comment_id)
+#                 reply_list = comment_service.reply_list(comment_id)  # Fetch replies for the comment
+#             else:
+#                 # If reply_for is empty, it's a top-level comment
+               
+#                 services.comment_service.user_comments_create(reply_text,post_id,user_id)
+#                 reply_list = []  # No replies for top-level comments
+
+#             #post_details = list(comment_service.get_post(post_id).values())
+
+#             return JsonResponse({
+#                 "status": "success",
+#                 "replies": list(reply_list),
+#                 #"posts": list(post_details),
+#                 #"user_details":list(user_details)
+#             })
+#         except Exception as e:
+#             return JsonResponse({"status": "error", "message": str(e)}, status=500)
+
+
 
 
 
@@ -146,33 +199,26 @@ class CommentReplyView(View):
         print("Received Data - post_id:", post_id)
         print("Received Data - reply_for (Comment ID if reply):", comment_id or "No Reply")
         print("Received Data - reply_text:", reply_text)
-
+        comment_list = services.comment_service.comment_list(post_id)
         if not reply_text or not post_id:
             return JsonResponse({"status": "error", "message": "Invalid data"}, status=400)
-
         try:
-            user_details = list(comment_service.get_user(user_id).values())
-
+          
             if comment_id:  
-                # If reply_for is present, it's a reply to a comment
                 services.comment_service.user_reply_create(reply_text, post_id, user_id, comment_id)
-                reply_list = comment_service.reply_list(comment_id)  # Fetch replies for the comment
+                reply_list = list(comment_service.reply_list(comment_id).values()  )
+           
             else:
-                # If reply_for is empty, it's a top-level comment
-               
                 services.comment_service.user_comments_create(reply_text,post_id,user_id)
-                reply_list = []  # No replies for top-level comments
-
-            post_details = list(comment_service.get_post(post_id).values())
-
+                reply_list = [] 
             return JsonResponse({
                 "status": "success",
                 "replies": list(reply_list),
-                "posts": list(post_details),
-                "user_details": user_details
+                "comments":list(comment_list)
             })
         except Exception as e:
             return JsonResponse({"status": "error", "message": str(e)}, status=500)
+
 
 
 
