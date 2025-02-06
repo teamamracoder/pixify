@@ -294,11 +294,8 @@
         <div>
             <div class="d-flex align-items-center px-2 " >
                 <i class="bi bi-hand-thumbs-up pe-1" style="font-size:12px"></i> <i class="bi bi-heart" style="font-size:12px"></i>
-                {% comment %} <span style="font-size:14px;color:#e9e6e6c7;" class="px-2"  id="reaction-count"> Rima Das, Sribash Sarkar and <span id="total-reaction-count" >7</span> others</span> {% endcomment %}
-                <span style="font-size:14px;color:#e9e6e6c7;" class="px-2" id="reaction-count"> 
-                    Rima Das, Sribash Sarkar and <span id="total-reaction-count"></span> others
-                </span>
-                <span style="font-size:14px;color:#e9e6e6c7;" class="ms-auto pe-2"><span id="total-comment-count"></span> comments</span>
+                <span style="font-size:14px;color:#e9e6e6c7;" class="px-2"  id="reaction-count"> Rima Das, Sribash Sarkar and <span id="total-reaction-count" >7</span> others</span>
+                <span style="font-size:14px;color:#e9e6e6c7;" class="ms-auto pe-2">{{ post_dict.count_commnet }} comments</span>
             </div>
         </div>
 
@@ -314,9 +311,10 @@
                         <span class="emoji" data-reaction-id="3"style="font-size:25px;cursor: pointer;">😊</span>
                         <span class="emoji" data-reaction-id="4"style="font-size:25px;cursor: pointer;">😡</span>
                     </div>
-           
+                    <input type="hidden" class="firstPostId" value="123"> <!-- Hidden input to store post ID -->
                 </div>
-               
+                {% comment %} <span  class="post_reaction" style="font-size:20px;cursor: pointer;"  >👍</span>
+                {% endcomment %}
                     
                 <span data-toggle="modal" class="load-comments"><i class="fa-regular fa-comment"></i></span>
                 <i class="fa-solid fa-share-nodes" data-bs-toggle="modal" data-bs-target="#shareModal"></i>
@@ -337,6 +335,35 @@
 
     
       <script>
+{% comment %} 
+ $(document).ready(function() {
+            // When a reaction button is clicked
+            
+            $('.post_reaction').click(function (){
+                const FirstPostId = $(this).closest('.post-box').find('.firstPostId').val();
+                var reactionId = $(this).data('reaction-id');
+                console.log(FirstPostId)
+                console.log(reactionId)
+                
+                $.ajax({
+                    url: "{% url 'update_post_reaction' %}",  // Updated URL name
+                    type: "POST",
+                    data: {
+                        'post_id': FirstPostId,
+                        'reaction_id': reactionId,
+                        'csrfmiddlewaretoken': '{{ csrf_token }}'
+                    },
+                    success: function(response) {
+                        // Update the reaction count dynamically
+                        $('#reaction-count-' + postId + '-' + reactionId).text(response.new_reaction_count);
+                    },
+                    error: function() {
+                        alert('Error updating reaction');
+                    }
+                });
+            });
+        }); 
+       {% endcomment %}
 
        $(document).ready(function () {
         // When the post_reaction is clicked, show the popover
@@ -368,10 +395,7 @@
                     'csrfmiddlewaretoken': '{{ csrf_token }}'
                 },
                 success: function (response) {
-                    console.log("Reaction updated successfully!",response);
-                  
-                    postContainer.closest('.post-box').find("#total-reaction-count").text(response.new_reaction_count);
-
+                    console.log("Reaction updated successfully!");
                 },
                 error: function () {
                     alert('Error updating reaction');
@@ -386,8 +410,6 @@
             }
         });
     });
-
-
     
       </script>
 
@@ -951,8 +973,6 @@ const photo = `
                   },
                 success: function (data) {
                     console.log(data)
-                    console.log(data.comment_count)
-                    $(this).closest('.post-box').find("#total-comment-count").text(data.comment_count);
 
 
                      const postid= FirstPostId
@@ -1082,7 +1102,7 @@ photo_com.html(postItem);
                     }
 
                     $('#commentModal').modal('show');
-                 }.bind(this),
+                 },
                 error: function (xhr, status, error) {
                     console.error('Error loading comments:', error);
                 }
@@ -1181,8 +1201,8 @@ photo_com.html(postItem);
       });
     });
   }); 
- {% endcomment %}
 
+ {% endcomment %}
 
 
 
@@ -1240,7 +1260,7 @@ console.log(commentId)
 });
 
 
-
+{% comment %} 
 
 $(document).ready(function () {
     $('#commentForm').on('submit', function (e) {
@@ -1329,10 +1349,10 @@ $(document).ready(function () {
       });
     });
   }); 
+  {% endcomment %}
 
 
 
-{% comment %} 
 
 
  $(document).ready(function () {
@@ -1341,6 +1361,8 @@ $(document).ready(function () {
         const commentElementName = $(this).closest('.comment_by').find('#com_by_name'); 
         const replyForId = commentElement.val();
         const replyForName = commentElementName.val();
+   
+
         
         $('#replyForId').val(replyForId); 
         $('#replyForName').val(replyForName);
@@ -1367,85 +1389,86 @@ $(document).ready(function () {
         const FirstPostId = $('#postidd').val();
         let replyForId = $('#replyForId').val(); 
 
+        if (!commentText) {
+            alert("Comment cannot be empty!");
+            return;
+        }
+
+        console.log("Submitting reply for comment ID:", replyForId || "No Reply (New Comment)");
+
         $.ajax({
             type: 'POST',
             url: '{% url "reply_comment" %}',  
             data: {
                 post_id: FirstPostId,
                 reply_text: commentText,
-                reply_for: replyForId,
+                comment_text: commentText,  
                 csrfmiddlewaretoken: '{{ csrf_token }}',
             },
-            headers: { "X-CSRFToken": "{{ csrf_token }}" },
             success: function (data) {
                 console.log("Comment submitted:", data);
+                console.log("dada",data)
+          
+                $('#commentText').val(''); // Clear textarea
+                const commentList = $('#commentList');
+                commentList.empty(); 
+      
+                
+                    data.comments.forEach(comment => {
+      
+                        const commentItem = `
+                    <div class="d-flex py-1">
+      
+                          <img src="{% static 'images/green.png'%}" alt="User" class="rounded-circle"
+                              style="width:35px; height:35px;">
+                          <div class="" class="d-flex" style="flex-direction: column;">
+                                <div class="comment-text mb-0 ps-2 py-1 rounded px-3"
+                                   style="background-color:#311e4ee3;width: 300px;">
+      
+                                  <span class="d-block fw-bold" >${comment.comment_by__first_name} ${comment.comment_by__last_name}</span>
+                                    <li class="list-group-item">
+                                      <span style="font-size:13px">${comment.comment}</span>
+      
+      
+                                      </li>
+                              </div>
+      
+      
+                              <div class="d-flex p-1" style="gap:20px; margin-left: 17px;">
+                                  <span style="font-size:11px;cursor:pointer;">${new Date(comment.created_at).toLocaleString([],  { weekday: 'long' })} ${new Date(comment.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                  <span style="font-size:11px;cursor:pointer;">Like</span>
+                                  <input type="hidden" id="replyForId" name="reply_for" >
+                                  <input type="hidden" id="replyForName" name="reply_for_name" >
+                                  
+      
+                                  <span style="font-size:11px;  cursor: pointer;" class="com-reply">Reply</span>
+                              </div>
+      
+                           <span class="view-comment" style="cursor: pointer; font-size:14px;margin-left:12px;" 
+            data-comment-id="${comment.id}">
+          View Reply 
+      </span>
+       </div>
+            </div>
+      
+                        `;
+      
+      
+                        commentList.append(commentItem);
+                    });
                
 
-    
-              $('#commentText').val(''); // Clear textarea
-              const commentList = $('#commentList');
-              const photo_com = $('#photo_com');
-    
-              if (data.comments.length > 0) {
-    
-    
-                  data.comments.forEach(comment => {
-    
-                      const commentItem = `
-                  <div class="d-flex py-1">
-    
-                        <img src="{% static 'images/green.png'%}" alt="User" class="rounded-circle"
-                            style="width:35px; height:35px;">
-                        <div class="" class="d-flex" style="flex-direction: column;">
-                              <div class="comment-text mb-0 ps-2 py-1 rounded px-3"
-                                 style="background-color:#311e4ee3;width: 300px;">
-    
-                                <span class="d-block fw-bold" >${comment.comment_by__first_name} ${comment.comment_by__last_name}</span>
-                                  <li class="list-group-item">
-                                    <span style="font-size:13px">${comment.comment}</span>
-    
-    
-                                    </li>
-                            </div>
-    
-    
-                            <div class="d-flex p-1" style="gap:20px; margin-left: 17px;">
-                                <span style="font-size:11px;cursor:pointer;">${new Date(comment.created_at).toLocaleString([],  { weekday: 'long' })} ${new Date(comment.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                                <span style="font-size:11px;cursor:pointer;">Like</span>
-                                <input type="hidden" id="replyForId" name="reply_for" >
-                                <input type="hidden" id="replyForName" name="reply_for_name" >
-                                
-    
-                                <span style="font-size:11px;  cursor: pointer;" class="com-reply">Reply</span>
-                            </div>
-    
-                         <span class="view-comment" style="cursor: pointer; font-size:14px;margin-left:12px;" 
-          data-comment-id="${comment.id}">
-        View Reply 
-    </span>
-     </div>
-          </div>
-    
-                      `;
-    
-    
-                      commentList.append(commentItem);
-                  });
-              } else {
-                  commentList.append('<li class="list-group-item">No comments available.</li>');
-              }
 
-
-
-                
-               // loadComments(FirstPostId);
+                //loadComments(FirstPostId);
             },
             error: function (xhr) {
                 console.error("Error submitting comment:", xhr);
             },
         });
     });
-}); {% endcomment %}
+});  
+
+
 
 </script>
 <style>
