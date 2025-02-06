@@ -1,3 +1,4 @@
+from itertools import count
 import json
 import os
 from django.utils.functional import SimpleLazyObject
@@ -154,6 +155,27 @@ class UpdatePostReactionView(View):
         return JsonResponse({'new_reaction_count': new_reaction_count})
 
 
+class GetPostReactionsView(View):
+    def get(self, request, *args, **kwargs):
+        post_id = request.GET.get('post_id')
+        user_id = request.user.id
+
+        try:
+            post = Post.objects.get(id=post_id)
+        except Post.DoesNotExist:
+            return JsonResponse({'error': 'Post not found'}, status=404)
+
+        # Get total reaction count
+        total_count = PostReaction.objects.filter(post_id_id=post, is_active=True).count()
+
+        # Get the current user's reaction (if any)
+        #user_reaction = PostReaction.objects.filter(post_id_id=post, reacted_by_id=user_id, is_active=True).first()
+        #print("user name",user_reaction)
+
+        return JsonResponse({
+            'total_count': total_count,
+
+        })
 
 
 
