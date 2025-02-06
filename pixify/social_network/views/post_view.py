@@ -100,28 +100,60 @@ class UserPostDetail(View):
 
 
 
+# class UpdatePostReactionView(View):
+#     def post(self, request, *args, **kwargs):
+#         post_id = request.POST.get('post_id')
+#         reaction_id = request.POST.get('reaction_id')
+#         print("reaction_id",reaction_id)
+#         user_id = request.user.id
+
+#         post = Post.objects.get(id=post_id)
+#         reaction =services.post_reaction_service.post_reactionby_name(post_id)
+#         print("reaction",reaction)
+        
+
+#         # If no reaction exists, create one
+#         if not reaction:
+#             post_react=services.post_reaction_service.create_post_reaction(post_id,user_id)
+#             #post_react=services.post_reaction_service.create_or_update_message_reaction(post_id,user_id)
+
+#         # Count the new reaction
+#         new_reaction_count = PostReaction.objects.filter(post_id_id=post_id, is_active=True).count()
+
+#         return JsonResponse({'new_reaction_count': new_reaction_count})
 class UpdatePostReactionView(View):
+    @catch_error
+    @auth_required
+    @role_required(Role.ADMIN.value, Role.END_USER.value)
     def post(self, request, *args, **kwargs):
         post_id = request.POST.get('post_id')
         reaction_id = request.POST.get('reaction_id')
-        user_id = request.user.id  # Assuming the user is logged in
+        user_id = request.user.id
+        print("user id ",user_id)
 
-        # Get the post and check for the existing reaction
-        post = Post.objects.get(id=post_id)
-        reaction =services.post_reaction_service.post_reactionby_name(reaction_id)
-        print("reaction name",reaction)
-        
+        try:
+            post = Post.objects.get(id=post_id)
+        except Post.DoesNotExist:
+            return JsonResponse({'error': 'Post not found'}, status=404)
 
-        # If no reaction exists, create one
-        if not reaction:
-            # post_react=services.post_reaction_service.create_post_reaction(post_id,user_id)
-            post_react=services.post_reaction_service.create_or_update_message_reaction(post_id,user_id)
+        # Check if the user has already reacted to the post
+        existing_reaction = PostReaction.objects.filter(post_id_id=post, reacted_by_id=user_id,
+                                          created_by_id= user_id,is_active= True).first()
 
+        if existing_reaction:
+            # If the user already reacted, update the reaction type
+            existing_reaction.reaction_id = reaction_id
+            existing_reaction.save()
+        else:
+            # If no reaction exists, create a new one
+            #PostReaction.objects.create(post_id_id=post, reacted_by_id=user_id,created_by_id= user_id,is_active= True )
+           services.post_reaction_service.create_post_reaction(post_id,user_id)
         # Count the new reaction
-        new_reaction_count = PostReaction.objects.filter(post_id_id=post_id, is_active=True).count()
-        print(new_reaction_count)
+        new_reaction_count = PostReaction.objects.filter(post_id_id=post, is_active=True).count()
 
         return JsonResponse({'new_reaction_count': new_reaction_count})
+
+
 
 
 
@@ -154,19 +186,6 @@ class UserPostEditView(View):
     
 
     
-
-# class UserPostDeleteView(View):
-#     def get(self,request):
-#         post_id = request.POST.get('post_id')
-#         post = services.post_service.get_post(post_id)
-#         return render(request, 'enduser/home/index.html', {'post': post})
-
-
-#     def post(self, request):
-#         post_id = request.POST.get('post_id')
-#         post = services.post_service.get_post(post_id)
-#         services.post_service.delete_post(post)
-#         return redirect('post_list')
 
 class UserPostDeleteView(View):
     def post(self, request):

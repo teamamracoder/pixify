@@ -141,11 +141,13 @@ urlpatterns = [
     path('post/reaction/update/', views.UpdatePostReactionView.as_view(), name='update_post_reaction'),
     # path('post_reaction/create/', views.create_reaction, name='create_reaction'),
     path('post/delete/',views.UserPostDeleteView.as_view(),name='UserPostDelete'),
-   
-
+    path('comments/reply/',views.CommentReplyView.as_view(), name='reply_comment'),
+    # path('post/comment/reply/', views.CommentReplyView.as_view(), name='UserPostCommentReply'),
+    path('comments/getReplies/', views.GetRepliesView.as_view(), name="get_replies"),
     #comment priya
     path('comments/',  views.CommentsCreateView.as_view(), name='comment'),
     path('comments/getComment/',views.CommentsListView.as_view(), name='comments_list'),
+   
   
  
     #for enduser story

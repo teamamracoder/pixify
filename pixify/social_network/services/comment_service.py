@@ -38,3 +38,16 @@ def get_user(user_id):
 
 def get_comment_by(comment_by_id):
     return User.objects.filter(id=comment_by_id)
+
+
+
+def user_reply_create(reply_text, post_id, user_id, comment_id):
+    return Comment.objects.create(comment=reply_text,created_by_id=user_id,comment_by_id=user_id,post_id_id=post_id,reply_for_id=comment_id)
+
+
+def reply_list(comment_id):
+     return Comment.objects.filter(reply_for_id=comment_id)
+
+
+def comment_count(post_id):
+     return Comment.objects.filter(post_id_id=post_id, is_active=True).count()
