@@ -28,13 +28,7 @@ def reaction_count(short):
 
 
 def format_relative_time(timestamp):
-    print("Original timestamp:", timestamp)
-
     now = timezone.now()
-    print("Current time:", now)
-
-    print(f"Timestamp type: {type(timestamp)}, value: {timestamp}")
-    print(f"Now type: {type(now)}, value: {now}")
 
     # Ensure both 'timestamp' and 'now' are timezone-aware
     if timezone.is_naive(timestamp):
@@ -47,7 +41,6 @@ def format_relative_time(timestamp):
 
     # Now, both `timestamp` and `now` should be timezone-aware
     diff_seconds = (now - timestamp).total_seconds()
-    print(diff_seconds)
 
     if diff_seconds < 60:
         return "Just now"
@@ -66,53 +59,48 @@ def format_relative_time(timestamp):
 
 
 def get_comment_replies(parent_comment_id, user):
-    replies = Comment.objects.filter(reply_for_id=parent_comment_id, is_active=True).values(
-        'id',
-        'comment',
-        'comment_by__first_name',
-        'comment_by__last_name',
-        'comment_by__profile_photo_url',
-        'created_at',
-    )
+    # Order replies chronologically (oldest first)
+    replies = Comment.objects.filter(reply_for_id=parent_comment_id, is_active=True).order_by('created_at')
 
+    result = []
     for reply in replies:
-        reply['like_count'] = CommentReaction.objects.filter(comment_id=reply['id'], is_active=True).count()
+        reply_dict = {
+            'id': reply.id,
+            'comment': reply.comment,
+            'comment_by__first_name': reply.comment_by.first_name,
+            'comment_by__last_name': reply.comment_by.last_name,
+            'comment_by__profile_photo_url': reply.comment_by.profile_photo_url,
+            'created_at': format_relative_time(reply.created_at),
+            'like_count': CommentReaction.objects.filter(comment_id=reply.id, is_active=True).count(),
+            'user_liked': CommentReaction.objects.filter(comment_id=reply.id, reacted_by=user, is_active=True).exists(),
+            'replies': get_comment_replies(reply.id, user),
+            'can_delete': Comment.objects.filter(id=reply.id, comment_by=user).exists()
+        }
+        result.append(reply_dict)
 
-        like_obj_reply = CommentReaction.objects.filter(comment_id=reply['id'], reacted_by=user, is_active=True).first()
-        reply['user_liked'] = True if like_obj_reply else False
-
-        # Format the timestamp
-        reply['created_at'] = format_relative_time(reply['created_at'])
-
-        # Fetch nested replies
-        reply['replies'] = get_comment_replies(reply['id'], user)
-
-    return list(replies)
+    return result
 
 
 def short_comments(short, user):
-    comments = Comment.objects.filter(post_id=short, reply_for_id=None, is_active=True).values(
-        'id',
-        'comment',
-        'comment_by__first_name',
-        'comment_by__last_name',
-        'comment_by__profile_photo_url',
-        'created_at',
-    )
+    comments = Comment.objects.filter(post_id=short, reply_for_id=None, is_active=True).order_by('-created_at')
 
+    result = []
     for comment in comments:
-        comment['like_count'] = CommentReaction.objects.filter(comment_id=comment['id'], is_active=True).count()
+        comment_dict = {
+            'id': comment.id,
+            'comment': comment.comment,
+            'comment_by__first_name': comment.comment_by.first_name,
+            'comment_by__last_name': comment.comment_by.last_name,
+            'comment_by__profile_photo_url': comment.comment_by.profile_photo_url,
+            'created_at': format_relative_time(comment.created_at),
+            'like_count': CommentReaction.objects.filter(comment_id=comment.id, is_active=True).count(),
+            'user_liked': CommentReaction.objects.filter(comment_id=comment.id, reacted_by=user, is_active=True).exists(),
+            'replies': get_comment_replies(comment.id, user),
+            'can_delete': Comment.objects.filter(id=comment.id, comment_by=user).exists()
+        }
+        result.append(comment_dict)
 
-        like_obj = CommentReaction.objects.filter(comment_id=comment['id'], reacted_by=user, is_active=True).first()
-        comment['user_liked'] = True if like_obj else False
-
-        # Format the timestamp
-        comment['created_at'] = format_relative_time(comment['created_at'])
-
-        # Fetch nested replies
-        comment['replies'] = get_comment_replies(comment['id'], user)
-
-    return comments
+    return result
 
 
 def get_short_comment(comment_id):
@@ -135,23 +123,26 @@ def short_comment_reply(text, post, comment, user):
         created_by= user,
     )
 
-def short_comment_delete(comment_id, user):
-    # Retrieve the comment object
-    comment = Comment.objects.get(id=comment_id, is_active=True)
 
+def delete_comment_and_replies(comment, user):
     # Retrieve all replies associated with this comment
     replies = Comment.objects.filter(reply_for=comment, is_active=True)
 
+    # Mark all replies as inactive
+    for reply in replies:
+        delete_comment_and_replies(reply, user)
+    
     # Mark the comment as inactive
     comment.is_active = False
     comment.updated_by = user
     comment.save()
 
-    # Mark all replies as inactive
-    for reply in replies:
-        reply.is_active = False
-        reply.updated_by = user
-        reply.save()       
+def short_comment_delete(comment_id, user):
+    # Retrieve the comment object
+    comment = Comment.objects.get(id=comment_id, is_active=True)
+    
+    # Delete the comment and its replies
+    delete_comment_and_replies(comment, user)
 
             
 def comment_count(short):
@@ -194,3 +185,4 @@ def toggle_like(comment, user):
 
 def comment_reaction_count(comment):
     return CommentReaction.objects.filter(comment_id = comment, is_active = True).count()
+

@@ -51,7 +51,7 @@ class ShortCommentListView(View):
     def get(self, request, post_id):
        user=request.user
        comments = short_service.short_comments(post_id, user)
-       print(comments)
+       print(comments)       
 
        return JsonResponse({"comments": list(comments)}, safe=False)
 
@@ -66,6 +66,8 @@ class ShortCommentCreateView(View):
         # Create the comment (assume likes are set to 0 by default)
         comment = short_service.short_comment_create(text, post, user)
 
+        can_delete = comment.comment_by == user        
+
         # Return the comment data in the response with like_count = 0 initially
         return JsonResponse({
             'success': True,
@@ -76,6 +78,7 @@ class ShortCommentCreateView(View):
                 'comment_by__last_name': comment.comment_by.last_name,
                 'comment_by__profile_photo_url': comment.comment_by.profile_photo_url or None,  # Handle null cases
                 'created_at': 'Just now', #predefine string
+                'can_delete':can_delete,
                 'like_count': 0,  # Initialize like_count as 0
                 'replies': []  # Empty replies for new comments
             }
@@ -92,6 +95,8 @@ class ShortCommentReplyView(View):
         # Create the reply (initial like_count is set to 0)
         reply = short_service.short_comment_reply(text, comment.post_id, comment, user)
 
+        can_delete = reply.comment_by == user  # Only allow deletion if it's the current user's reply
+
         # Return the reply data with like_count = 0 initially
         return JsonResponse({
             'success': True,
@@ -102,6 +107,7 @@ class ShortCommentReplyView(View):
                 'comment_by__last_name': reply.comment_by.last_name,
                 'comment_by__profile_photo_url': reply.comment_by.profile_photo_url or None,  # Handle null cases
                 'reply_to':comment.comment_by.first_name,
+                'can_delete':can_delete,
                 'created_at': 'Just now', #predefine string
                 'like_count': 0,  # Initialize like_count as 0
                 'replies': []  # Replies to a reply are not supported
