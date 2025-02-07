@@ -4,14 +4,14 @@
 
 {% block content %}
 <style>
-        .hover-bg:hover {
+    .hover-bg:hover {
         background-color: rgba(240, 242, 245, 0.1);
-        color:aqua; 
-    }
-        .current {
-        font-weight: bold; 
+        color: aqua;
     }
 
+    .current {
+        font-weight: bold;
+    }
 </style>
 
 <div class="container mt-5">
@@ -20,64 +20,73 @@
             <h2 class="text-center mb-4">Users</h2>
 
             <div class="d-flex justify-content-between mb-3">
-                <button class="btn btn-primary btn-sm"><a href="{% url 'user_create' %}" class="text-white text-decoration-none">Add User</a></button>
-               
+                <button class="btn btn-primary btn-sm"><a href="{% url 'user_create' %}"
+                        class="text-white text-decoration-none">Add User</a></button>
+
                 <form method="get" action="{% url 'user_list' %}">
                     <div class="input-group" style="max-width: 300px;">
-                        <input type="text" class="form-control border-secondary" placeholder="Search" aria-label="Search" name="search" value="{{ search_query }}">
+                        <input type="text" class="form-control border-secondary" placeholder="Search"
+                            aria-label="Search" name="search" value="{{ data.applied_options.search.text }}">
                         <button class="btn btn-outline-secondary">Search</button>
                     </div>
                 </form>
             </div>
 
             <div class="table-responsive">
-                <table class="table table-hover">
+                <table class="table table-bordered">
                     <!-- new aaded by sujit -->
-                    <thead class="table-info text-white"> 
+                    <thead class="table-info text-white">
                         <tr>
                             <th>
-                                <a href="?sort_by=first_name&sort_order={% if sort_order == 'asc' %}desc{% else %}asc{% endif %}">Full Name</a>
+                                <a class="text-decoration-none text-white"
+                                    href="?sort_by=first_name&sort_order={% if data.applied_options.sort.order == 'asc' %}desc{% else %}asc{% endif %}">Full
+                                    Name</a>
                             </th>
                             <th>
-                                <a href="?sort_by=email&sort_order={% if sort_order == 'asc' %}desc{% else %}asc{% endif %}">Email</a>
+                                <a class="text-decoration-none text-white"
+                                    href="?sort_by=email&sort_order={% if data.applied_options.sort.order == 'asc' %}desc{% else %}asc{% endif %}">Email</a>
                             </th>
                             <th>
-                                <a href="?sort_by=gender&sort_order={% if sort_order == 'asc' %}desc{% else %}asc{% endif %}">Gender</a>
+                                <a class="text-decoration-none text-white"
+                                    href="?sort_by=gender&sort_order={% if data.applied_options.sort.order == 'asc' %}desc{% else %}asc{% endif %}">Gender</a>
                             </th>
                             <th>
                                 Status
                             </th>
                         </tr>
                     </thead>
-                    
+
                     <tbody>
-                        {% for user in users %}
+                        {% for user in data.data %}
                         <tr>
                             <td>
-                                <a class="text-decoration-none text-primary hover-bg" href="{% url 'user_detail' user.id %}">
-                                    {{ user.first_name }} {{ user.middle_name }} {{ user.last_name }}
+                                <a class="text-decoration-none text-primary hover-bg"
+                                    href="{% url 'user_detail' user.id %}">
+                                    {{ user.first_name }} {% if user.middle_name %}{{ user.middle_name }} {% endif %}{{ user.last_name }}
                                 </a>
                             </td>
                             <td>{{ user.email }}</td>
                             <td>
-                                {% for gender in choices_gender %}
+                                {% for gender in data.choices_gender %}
                                     {% for name, value in gender.items %}
+                                        <!-- Check if the gender matches user.gender and display it -->
                                         {% if name == user.gender %}
                                             {{ value }}
                                         {% endif %}
                                     {% endfor %}
                                 {% endfor %}
                             </td>
+                            
                             <td>
                                 <button class="btn btn-sm toggle-status" data-user-id="{{ user.id }}">
                                     {% if user.is_active %}
-                                        <i class="bi bi-toggle-on text-success"></i> Active
+                                    <i class="bi bi-toggle-on text-success"></i> Active
                                     {% else %}
-                                        <i class="bi bi-toggle-off text-danger"></i> Inactive
+                                    <i class="bi bi-toggle-off text-danger"></i> Inactive
                                     {% endif %}
                                 </button>
                             </td>
-                            
+
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -87,25 +96,59 @@
                 <!-- new added by sujit -->
                 <div class="container">
                     <div class="d-flex justify-content-between align-items-center">
-                        <div class="step-links">
-                            {% if users.has_previous %}
-                                <a  href="?page=1&search={{ search_query }}&sort_by={{ sort_by }}&sort_order={{ sort_order }}" class="btn btn-link">First</a>
-                        <a href="?page={{ users.previous_page_number }}&search={{ search_query }}&sort_by={{ sort_by }}&sort_order={{ sort_order }}" class="btn btn-link">Previous</a>
-                            {% endif %}
-                            
-                            {% if users.has_next %}
-                        <a href="?page={{ users.next_page_number }}&search={{ search_query }}&sort_by={{ sort_by }}&sort_order={{ sort_order }}" class="btn btn-link">Next</a>
-                        <a href="?page={{ users.paginator.num_pages }}&search={{ search_query }}&sort_by={{ sort_by }}&sort_order={{ sort_order }}" class="btn btn-link">Last</a>
-                            {% endif %}
+                        <div class="current mr-auto">
+                            <span class="text-info me-3">Total {{ data.pagination.total }} users</span>
+                            Page {{ data.pagination.current_page }} of {{ data.pagination.total_page }}.
                         </div>
-                        
-                        <div class="current ml-auto">
-                            Page {{ users.number }} of {{ users.paginator.num_pages }}.
+
+                        <div class="step-links ml-auto">
+                            <nav aria-label="Page navigation example">
+                                <ul class="pagination">
+                                    {% if data.pagination.prev_page %}
+                                    <li class="page-item">
+                                        <a class="page-link"
+                                            href="?page=1&search={{ data.applied_options.search.text }}&sort_by={{ data.applied_options.sort.field }}&sort_order={{ data.applied_options.sort.order }}"
+                                            aria-label="Previous">
+                                            <span aria-hidden="true">&laquo;</span>
+                                        </a>
+                                    </li>
+                                    <li class="page-item">
+                                        <a class="page-link"
+                                            href="?page={{ data.pagination.prev_page }}&search={{ data.applied_options.search.text }}&sort_by={{ data.applied_options.sort.field }}&sort_order={{ data.applied_options.sort.order }}">{{ data.pagination.prev_page }}
+                                        </a>
+                                    </li>
+                                    {% endif %}
+
+                                    <li class="page-item">
+                                        <a class="page-link active" href="#">
+                                            {{ data.pagination.current_page }}
+                                        </a>
+                                    </li>
+
+                                    {% if data.pagination.next_page %}
+
+                                    <li class="page-item">
+                                        <a class="page-link"
+                                            href="?page={{ data.pagination.next_page }}&search={{ data.applied_options.search.text }}&sort_by={{ data.applied_options.sort.field }}&sort_order={{ data.applied_options.sort.order }}">
+                                            {{ data.pagination.next_page }}
+                                        </a>
+                                    </li>
+
+                                    <li class="page-item">
+                                        <a class="page-link"
+                                            href="?page={{ data.pagination.total_page }}&search={{ data.applied_options.search.text }}&sort_by={{ data.applied_options.sort.field }}&sort_order={{ data.applied_options.sort.order }}"
+                                            aria-label="Next">
+                                            <span aria-hidden="true">&raquo;</span>
+                                        </a>
+                                    </li>
+                                    {% endif %}
+                                </ul>
+                            </nav>
                         </div>
                     </div>
                 </div>
-                
-                
+
+
             </div>
         </div>
     </div>
@@ -114,8 +157,8 @@
 
 
 <script>
-    $(document).ready(function() {
-        $('.toggle-status').click(function() {
+    $(document).ready(function () {
+        $('.toggle-status').click(function () {
             const userId = $(this).data('user-id');
             const button = $(this);
 
@@ -125,7 +168,7 @@
                 headers: {
                     'X-CSRFToken': '{{ csrf_token }}'  // Include CSRF token for security
                 },
-                success: function(response) {
+                success: function (response) {
                     // Update the button's text and icon based on the new status
                     if (response.is_active) {
                         button.html('<i class="bi bi-toggle-on text-success"></i> Active');
@@ -133,7 +176,7 @@
                         button.html('<i class="bi bi-toggle-off text-danger"></i> Inactive');
                     }
                 },
-                error: function(xhr) {
+                error: function (xhr) {
                     alert('Error updating status: ' + xhr.responseText);
                 }
             });
@@ -144,7 +187,3 @@
 
 
 {% endblock %}
-
-
-
-

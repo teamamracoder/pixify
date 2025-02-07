@@ -1,15 +1,40 @@
 import os
+
 from django.shortcuts import render, redirect
 from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import render, redirect
 from django.views import View
+from django.urls import reverse # type: ignore
+
 
 from pixify import settings
 from .. import services
-from ..models import User
+from ..models import User,Comment,Post
 from django.core.paginator import Paginator
 
 
+
+from datetime import datetime, timedelta, timezone
+from django.utils.timezone import now
+
+
+def time_ago(dt):
+    now = datetime.now(timezone.utc)
+    diff = now - dt
+
+    seconds = diff.total_seconds()
+    if seconds < 60:
+        return "just now"
+    elif seconds < 3600:
+        return f"{int(seconds // 60)} minutes ago"
+    elif seconds < 86400:
+        return f"{int(seconds // 3600)} hours ago"
+    elif seconds < 604800:
+        return f"{int(seconds // 86400)} days ago"
+    else:
+        return f"{int(seconds // 604800)} weeks ago"
+    
+    
 class AdminPostListView(View):
     def get(self, request):
         # Fetch the search query from the URL parameters
@@ -23,7 +48,7 @@ class AdminPostListView(View):
         if sort_order == 'desc':
             sort_by = '-' + sort_by
 
-        print(f"Search Query: {search_query}")
+       
         # Get filtered and sorted users based on search
         posts = services.post_service.admin_list_posts_filtered(search_query, sort_by)
 
@@ -50,15 +75,7 @@ class AdminPostCreateView(View):
         post_data = {
                     'posted_by': User.objects.get(id=request.POST['posted_by']),
                     'created_by': User.objects.get(id=request.POST['posted_by'])
-                    # 'type': request.POST['type'],
-                    # 'content_type': request.POST['content_type'],
-                    # 'media_url': request.POST.get('media_url', ''),
-                    # 'title': request.POST['title'],
-                    # 'description': request.POST['description'],
-                    # 'accessability': request.POST['accessability'],
-                    # 'members': request.POST.getlist('members'),
-                    # 'treat_as': request.POST['treat_as'],
-                    # 'is_active': request.POST.get('is_active', 'on') == 'on'
+                   
                 }
         services.post_service.create_post(**post_data)
         # return redirect(request,'adminuser/post/create.html')
@@ -99,31 +116,16 @@ class AdminTogglePostActiveView(View):
         post.save()
         return JsonResponse({'is_active': post.is_active})
 
-class UserPostCreatView(View):
-    def post(self, request):
-        user_id = 1;
-        post_Title = request.POST['postTitle']
-        postFiles = request.FILES.getlist('postFiles')
-        postFile = []
-        for file in postFiles:
-            postFile.append(file.name)
-        media_urls=[]
-        for file in postFiles:
-            file_path=os.path.join(settings.MEDIA_ROOT,file.name)
-            with open(file_path,'wb+') as destination:
-                for chunk in file.chunks():
-                    destination.write(chunk)
-            media_urls.append(f"{settings.MEDIA_URL}{file.name}")
 
 
-        services.post_service.user_post(post_Title,media_urls,user_id)
-        return redirect('home')
 
-# class UserPostCreateView(View):
+# # create post for enduser 
+# class UserPostCreatView(View):
 #     def get(self, request):
 #         return render(request, 'enduser/home/index.html')
 
 #     def post(self, request):
+#         user_id = 1;
 #         post_Title = request.POST['postTitle']
 #         postFiles = request.FILES.getlist('postFiles')
 #         postFile = []
@@ -138,5 +140,77 @@ class UserPostCreatView(View):
 #             media_urls.append(f"{settings.MEDIA_URL}{file.name}")
 
 
-#         services.post_service.user_post(post_Title, media_urls)
-#         return redirect('home')
+#         services.post_service.user_post(post_Title,media_urls,user_id)
+#         return redirect('Userposts_list')
+        
+# use ajax post create
+class UserPostCreatView(View):
+    def get(self, request):
+        return render(request, 'enduser/home/index.html')
+    def post(self, request):
+        try:
+            user_id = 1
+            post_Title = request.POST.get('postTitle')
+            postFiles = request.FILES.getlist('postFiles')
+            media_urls = []
+
+            for file in postFiles:
+                file_path = os.path.join(settings.MEDIA_ROOT, file.name)
+                with open(file_path, 'wb+') as destination:
+                    for chunk in file.chunks():
+                        destination.write(chunk)
+                media_urls.append(f"{settings.MEDIA_URL}{file.name}")
+
+            # Call the service to save post data
+            services.post_service.user_post(post_Title, media_urls, user_id)
+            # return JsonResponse({ "status": True, })
+
+            return JsonResponse({'success': True, 'redirect_url': reverse('home')})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)})
+
+
+# # display post for enduser create by priya
+# class UserPostListView(View):
+#     def get(self, request):
+        
+#         posts = services.post_service.Postlist_posts()
+        
+        
+#         post_dict={
+#                   'posts':posts,
+#                   'name':'priya',
+#                   'count_commnet' :services.comment_service.get_count_comment(59)
+#                 }
+        
+#         return render(request, 'enduser/home/index.html', {'post_dict': post_dict})
+
+    
+
+class UserPostDetail(View):
+    def get(self, request, post_id):
+         comment_dic= {
+         'post' : services.post_service.get_post(post_id),
+         'comment': services.comment_service.comments_filtered(post_id)
+                   }
+         return render(request, 'enduser/home/index.html', {'comment_dic':comment_dic})
+
+
+class UserPostListView(View):
+    def get(self, request):
+        
+       
+        posts = services.post_service.Postlist_posts()
+       
+        post_dict = {
+            'posts': posts,
+            'name': 'priya',
+             'count_commnet' :services.comment_service.get_count_comment(post_ids)
+        }
+        print("postss",posts)
+        # Check if the request is an AJAX request
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+      
+            return JsonResponse(post_dict)
+
+        return render(request, 'enduser/home/index.html', {'post_dict': post_dict})

@@ -1,5 +1,4 @@
 
-
 {% comment %} {% extends "enduser/base.html" %} {% endcomment %}
 
 {% comment %} {% block title %}Pixify-Update User{% endblock %} {% endcomment %}
@@ -11,18 +10,18 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/bootstrap.enduser.css' %}">
-
+    
 <div class="d-flex justify-content-center align-items-center vh-100">
     <div id="editInterface" class="card shadow-lg p-4 mx-auto" style="max-width: 95%; width: 1000px; margin: auto; background-color: #1f0447e3; color: white;">
         <h2 class="text-center">Update User</h2>
 
-        {% comment %} Form section with Profile Picture {% endcomment %}
+      
         <form method="POST" enctype="multipart/form-data" class="mt-4" action="">
             {% csrf_token %}
             
             <div class="text-center mb-4">
                 <div class="position-relative d-inline-block mt-3">
-                    <img id="profilePic"  src="{% static user_details.profile_photo_url  %}" alt="Profile" class="rounded-circle" style="width: 125px; height: 125px;">
+                    <img id="profilePic" src="{% static user_details.profile_photo_url %}" alt="Profile" class="rounded-circle" style="width: 125px; height: 125px;">
                     <button type="button" class="btn btn-primary position-absolute bottom-0 end-0 rounded-circle" onclick="selectImage()">+</button>
                     <input type="file" id="imageInput" name="profile_picture" accept="image/*" style="display: none;" onchange="setImage(event)">
                 </div>
@@ -35,14 +34,14 @@
                 </div>
                 <div class="col-md-6 mb-3">
                     <label for="lastName" class="form-label"><i class="bi bi-person"></i> Last Name</label>
-                    <input type="text" class="form-control" id="lastName" name="last_name" value="{{ user_details.last_name}}">
+                    <input type="text" class="form-control" id="lastName" name="last_name" value="{{ user_details.last_name }}">
                 </div>
             </div>
 
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label for="email" class="form-label"><i class="bi bi-envelope"></i> Email</label>
-                    <input type="email" class="form-control" id="email" name="email" value="{{user_details.email|default:''}}">
+                    <input type="email" class="form-control" id="email" name="email" value="{{ user_details.email|default:'' }}">
                 </div>
                 <div class="col-md-6 mb-3">
                     <label for="phone" class="form-label"><i class="bi bi-telephone-fill"></i> Phone</label>
@@ -52,7 +51,7 @@
 
             <div class="row">
                 <div class="col-md-6 mb-3">
-                    <label for="gender" class="form-label" value="{{user_details.gender}}"><i class="bi bi-gender-ambiguous"></i> Gender</label>
+                    <label for="gender" class="form-label"><i class="bi bi-gender-ambiguous"></i> Gender</label>
                     <select class="form-select form-control" id="gender" name="gender">
                         <option value="Male" {% if user_details.gender == 1 %}selected{% endif %}>Male</option>
                         <option value="Female" {% if user_details.gender == 2 %}selected{% endif %}>Female</option>
@@ -60,22 +59,22 @@
                     </select>
                 </div>
                 <div class="col-md-6 mb-3">
-                    <label for="country" class="form-label" value=""><i class="bi bi-flag"></i> Country</label>
-                    <input type="text" class="form-control" id="country" name="country"value="{{ user_details.country|default:'' }}">
+                    <label for="country" class="form-label"><i class="bi bi-flag"></i> Country</label>
+                    <input type="text" class="form-control" id="country" name="country" value="{{ user_details.country|default:'' }}">
                 </div>
             </div>
 
             <div class="row">
                 <div class="col-md-6 mb-3">
-                    <label for="address" class="form-label"value="">Address</label>
+                    <label for="address" class="form-label">Address</label>
                     <input type="text" class="form-control" id="address" name="address" value="{{ user_details.address|default:'' }}">
                 </div>
                 <div class="col-md-6 mb-3">
-                    <label for="relationship_status" class="form-label" value="{{user_details.relationship_status}}"> Relationship</label>
+                    <label for="relationship_status" class="form-label">Relationship</label>
                     <select class="form-select form-control" id="relationship_status" name="relationship_status">
                         <option value="Single" {% if user_details.relationship_status == 1 %}selected{% endif %}>Single</option>
                         <option value="Married" {% if user_details.relationship_status == 2 %}selected{% endif %}>Married</option>
-                        <option value="Divorced" {% if user_detailsreuser_details.relationship_statusr == 3 %}selected{% endif %}>Divorced</option>
+                        <option value="Divorced" {% if user_details.relationship_status == 3 %}selected{% endif %}>Divorced</option>
                         <option value="Widowed" {% if user_details.relationship_status == 4 %}selected{% endif %}>Widowed</option>
                         <option value="Other" {% if user_details.relationship_status == 5 %}selected{% endif %}>Other</option>
                     </select>
@@ -84,52 +83,58 @@
 
             <div class="row">
                 <div class="col-md-6 mb-3">
-                    <label for="dob" class="form-label" value="">Date of Birth</label>
+                    <label for="dob" class="form-label">Date of Birth</label>
                     <input type="date" class="form-control" id="dob" name="dob" value="{{ user_details.dob|date:'Y-m-d' }}">
                 </div>
                 <div class="col-md-6 mb-3">
-                    <label for="hobbies" class="form-label" value=""><i class="bi bi-person-plus"></i> Hobbies</label>
+                    <label for="hobbies" class="form-label"><i class="bi bi-person-plus"></i> Hobbies</label>
                     <input type="text" class="form-control" id="hobbies" name="hobbies" value="{{ user_details.hobbies|join:', '|default:'' }}" placeholder="">
-
                 </div>
             </div>
 
             <div class="row">
                 <div class="col-md-6 mb-3">
-                    <label for="bio" class="form-label" value="">Bio</label>
-                    {% comment %} <textarea class="form-control" id="bio" name="bio" rows="2">{{ user_details.bio|default:'' }}</textarea> {% endcomment %}
-                    <textarea class="form-control" id="bio" name="bio" rows="2">{% if user_details.bio %}{{ user_details.bio }}{% endif %}</textarea>
+                    <label for="bio" class="form-label">Bio</label>
+                    <textarea class="form-control" id="bio" name="bio" rows="2">{{ user_details.bio|default:'' }}</textarea>
                 </div>
             </div>
+            
             <div class="d-flex justify-content-center gap-3">
                 <button type="submit" class="btn btn-primary w-25">Submit</button>
                 <a href="javascript:history.back()" class="btn btn-secondary w-25">Cancel</a>
             </div>
-
         </form>
     </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        function selectImage() {
-            document.getElementById("imageInput").click();
-        }
-
-        function setImage(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                    document.getElementById("profilePic").src = e.target.result;
-                };
-                reader.readAsDataURL(file);
-            }
-        }
-    </script>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    function selectImage() {
+        document.getElementById("imageInput").click();
+    }
+
+    function setImage(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                document.getElementById("profilePic").src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+</script>
+
 
 
 
 {% endblock %}
+
+
+
+
+
+
+
 
 

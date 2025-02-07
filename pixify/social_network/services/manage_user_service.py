@@ -1,4 +1,6 @@
-from ..models import User
+from social_network.constants.default_values import SortingOrder
+from social_network.packages.get_data import GetData
+from ..models import User,Post,Follower
 from django.shortcuts import get_object_or_404
 from django.db.models import Q   
 
@@ -14,13 +16,14 @@ def manage_create_user(**kwargs):
         first_name=kwargs['first_name'],
         middle_name=kwargs['middle_name'],
         last_name=kwargs['last_name'],
-        dob=kwargs['dob'],
         email=kwargs['email'],
+        dob=kwargs['dob'],
         address=kwargs['address'],
         gender=kwargs['gender'],
         relationship_status=kwargs['relationship_status'],
         hobbies=kwargs['hobbies'],
-        roles=kwargs['roles']    
+        roles=kwargs['roles'],
+        created_by=kwargs['created_by'] 
     )
     return user
 
@@ -37,15 +40,20 @@ def manage_update_user(user, first_name,middle_name,last_name, email,dob,gender,
     user.save()
     return user
 
-def manage_list_users_filtered(search_query, sort_by='first_name'):
-    if search_query:
-        # Use Q objects to filter by first_name, last_name, or email
-        return User.objects.filter(
-            Q(first_name__icontains=search_query) | 
-            Q(last_name__icontains=search_query) |
-            Q(email__icontains=search_query)
-        ).order_by(sort_by)
-    return User.objects.all().order_by(sort_by)
+def manage_list_users_filtered(search_query, sorting_order, sort_by, page_number):
+    # get data
+    data = (
+        GetData(User)
+        .search(search_query,"first_name","last_name", "email")
+        .sort(sort_by, sorting_order)
+        .paginate(limit=10, page=page_number)
+        .execute()
+    )
+    # return data
+    return data
 
+def get_all_posts_by_user(user_id):
+    return Post.objects.filter(posted_by=user_id).count()
 
-
+def get_all_followers_by_user(user_id):
+    return Follower.objects.filter(follower=user_id).count()
