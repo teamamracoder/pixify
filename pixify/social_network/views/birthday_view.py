@@ -15,19 +15,19 @@
 
 #         # Combine followers and followings into one list
 #         combined_list = data['followings']
-       
+
 
 #         # Sort the combined list by month and day
 #         combined_list = sorted(combined_list, key=lambda x: get_month_day(x.get('user_id__dob')))
-        
+
 #         # Pass the combined list to the template
 #         return render(request, 'enduser/birthday/index.html', {'users': combined_list})
-# # data['followers'] 
+# # data['followers']
 
 #-------------------------------------------use---------------------------------
 from django.shortcuts import render
 from django.views import View
-from datetime import date  
+from datetime import date
 from ..services import chat_service
 
 class BirthdayView(View):

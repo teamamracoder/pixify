@@ -1,99 +1,126 @@
+
 {% extends "../base.html" %}
 
-{% block title %}Post List{% endblock %}
+{% block title %}Update Post{% endblock %}
 
 {% block content %}
+
 <div class="container-fluid my-5">
+
     <div class="row justify-content-center">
         <div class="col-12 col-md-12 col-lg-12">
-            <div class="card shadow">
+            <div class="card shadow-sm">
                 <div class="card-header text-center">
                     <h2 class="text-info">Update Post</h2>
                 </div>
-                <div class="card-body p-3">
-                    <form method="post">
+                <div class="card-body">
+                    <form method="post" id="post_form">
                         {% csrf_token %}
-                        <div class="row">
-                            <div class="form-group col-md-4 col-lg-4 col-sm-12 mb-3">
-                                <label for="title">Title:</label>
-                                <input type="text" name="title" value="{{ post.title }}" class="form-control" required>
+                        {{ data.post_form.as_p }}
+                         <div class="row">
+                                <div class="form-group col-md-6 col-lg-6 col-sm-12 mb-3">
+                                    {{ form.posted_by.label_tag }}<span class="text-danger">*</span>
+                                    {{ form.posted_by }}
+                                    {% if form.posted_by.errors %}
+                                    <div class="text-danger">{{ form.posted_by.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="form-group col-md-6 col-lg-6 col-sm-12 mb-3">
+                                    {{ form.type.label_tag }}
+                                    {{ form.type }}
+                                    {% if form.type.errors %}
+                                    <div class="text-danger">{{ form.type.errors }}</div>
+                                    {% endif %}
+                                </div>
                             </div>
-                            <div class="form-group col-md-4 col-lg-4 col-sm-12 mb-3">
-                                <label for="description">Type:</label>
-                                <input type="text" name="description" value="{{ post.type }}" class="form-control" required>
+                            <div class="row">
+                                <div class="form-group col-md-6 col-lg-6 col-sm-12 mb-3">
+                                    {{ form.content_type.label_tag }}
+                                    {{ form.content_type }}
+                                    {% if form.content_type.errors %}
+                                    <div class="text-danger">{{ form.content_type.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="form-group col-md-6 col-lg-6 col-sm-12 mb-3">
+                                    {{ form.title.label_tag }}<span class="text-danger">*</span>
+                                    {{ form.title }}
+                                    {% if form.title.errors %}
+                                    <div class="text-danger">{{ form.title.errors }}</div>
+                                    {% endif %}
+                                </div>
                             </div>
-                            <div class="form-group col-md-4 col-lg-4 col-sm-12 mb-3">
-                                <label for="posted_by">Posted By:</label>
-                                <input type="text" name="posted_by" value="{{ post.posted_by_id }}" class="form-control" required>
+                            <div class="row">
+                                <div class="form-group col-md-6 col-lg-6 col-sm-12 mb-3">
+                                    {{ form.accessability.label_tag }}
+                                    {{ form.accessability }}
+                                    {% if form.accessability.errors %}
+                                    <div class="text-danger">{{ form.accessability.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="form-group col-md-6 col-lg-6 col-sm-12 mb-3">
+                                    {{ form.treat_as.label_tag }}
+                                    {{ form.treat_as }}
+                                    {% if form.treat_as.errors %}
+                                    <div class="text-danger">{{ form.treat_as.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="form-group col-md-12 col-lg-12 col-sm-12 mb-3">
+                                    {{ form.description.label_tag }}<span class="text-danger">*</span>
+                                    {{ form.description }}
+                                    {% if form.description.errors %}
+                                    <div class="text-danger">{{ form.description.errors }}</div>
+                                    {% endif %}
+                                </div>
                             </div>
-                        </div>
-                        
-                        <div class="row">
-                            <!-- <div class="form-group col-md-4 col-lg-4 col-sm-12 mb-3">
-                                <label for="type">Type</label>
-                                <input type="text" name="type" value="{{ post.type }}" class="form-control" required>
-                            </div> -->
-                            <div class="form-group col-md-4 col-lg-4 col-sm-12 mb-3">
-                                <label for="content_type">Content Type</label>
-                                <input type="text" name="content_type" value="{{ post.content_type }}" class="form-control" required>
-                            </div>
-                        </div>
-                        
-                        <div class="row">
-                            <div class="form-group col-md-6 col-lg-6 col-sm-12 mb-3">
-                                <label for="media_url">Media URL</label>
-                                <input type="url" name="media_url" value="{{ post.media_url }}" class="form-control" id="media_url">
-                            </div>
-                            <div class="form-group col-md-6 col-lg-6 col-sm-12 mb-3">
-                                <label for="title">Title</label>
-                                <input type="text" name="title" value="{{ post.title }}" class="form-control" id="title" required>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="form-group col-md-6 col-lg-6 col-sm-12 mb-3">
-                                <label for="description">Description</label>
-                                <textarea name="description" class="form-control" id="description" rows="4" required>{{ post.description }}</textarea>
-                            </div>
-                            <div class="form-group col-md-6 col-lg-6 col-sm-12 mb-3">
-                                <label for="accessability">Accessibility</label>
-                                <select name="accessability" class="form-control" id="accessability" required>
-                                    <option value="1" {% if post.accessability == 1 %}selected{% endif %}>Public</option>
-                                    <option value="2" {% if post.accessability == 2 %}selected{% endif %}>Private</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="form-group col-md-6 col-lg-6 col-sm-12 mb-3">
-                                <label for="members">Members</label>
-                                <select name="members" class="form-control" id="members" multiple>
-                                    <option value="1" {% if '1' in post.member %}selected{% endif %}>Member 1</option>
-                                    <option value="2" {% if '2' in post.member %}selected{% endif %}>Member 2</option>
-                                </select>
-                            </div>
-                            <div class="form-group col-md-6 col-lg-6 col-sm-12 mb-3">
-                                <label for="treat_as">Treat As</label>
-                                <select name="treat_as" class="form-control" id="treat_as" required>
-                                    <option value="1" {% if post.treat_as == 1 %}selected{% endif %}>Include</option>
-                                    <option value="2" {% if post.treat_as == 2 %}selected{% endif %}>Exclude</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="form-group form-check">
-                            <input type="checkbox" name="is_active" class="form-check-input" id="is_active" {% if post.is_active %}checked{% endif %}>
-                            <label class="form-check-label" for="is_active">Is Active</label>
-                        </div>
-
+                        <!-- Repeat for other fields -->
                         <div class="text-start">
-                            <a href="{% url 'post_list' %}" class="btn btn-sm btn-outline-secondary">Back</a>
+                            <a href="{% url 'manage_post_list' %}" class="btn btn-sm btn-outline-secondary">Back</a>
                             <button type="submit" class="btn btn-sm btn-primary">Save</button>
                         </div>
                     </form>
+                    
                 </div>
             </div>
-        </div>
+        </div>       
     </div>
 </div>
+
+
+<script>
+    $(document).ready(function () {
+        $("#post_form").validate({
+            rules: {
+                title: {
+                    required: true,
+                    minlength: 5,
+                    maxlength: 50
+                },
+                description: {
+                    required: true,
+                    minlength: 5,
+                    maxlength: 150
+                },
+            },
+            messages: {
+                title: {
+                    required: "Please enter title.",
+                    minlength: "title must be at least 5 characters.",
+                    maxlength: "title cannot exceed 50 characters."
+                },
+                description: {
+                    required: "Please enter description.",
+                    minlength: "description must be at least 5 characters.",
+                    maxlength: "description cannot exceed 150 characters."
+                },
+            }                   
+        });
+    });
+</script>
+<style>
+    .error {
+        color: red;
+        font-size: 0.875rem; /* Optional: Adjust font size */
+        font-weight: normal;
+    }
+</style>
 {% endblock %}

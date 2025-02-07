@@ -34,3 +34,4 @@ def role_required(*roles):
         )
 
     return decorator
+
