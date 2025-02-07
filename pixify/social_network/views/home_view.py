@@ -20,6 +20,7 @@ class HomeView(View):
         message_type = request.session.pop("message_type", "")
 
         posts =services.post_service.Postlist_posts()
+        user_id=request.user.id
 
         post_id = request.GET.get('post_id')
 
@@ -27,10 +28,10 @@ class HomeView(View):
         comment_list = services.comment_service.comment_list(post_id)
         post_dict={
                   'posts':posts,
-                  
+                  'user_id':user_id,
                   'name':'priya',
                   'comment_list':comment_list,
-                  'count_commnet' :services.comment_service.get_count_comment(59)
+
                  
                  
                 }
