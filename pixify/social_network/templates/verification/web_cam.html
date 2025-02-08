@@ -1,0 +1,453 @@
+{% comment %} {% extends "enduser/base.html" %}
+{% block title %}Pixify-Verification{% endblock %}
+{% block content %} {% load static %}
+<div class="verifycontainer">
+    <h1 id="verify_header">Verification</h1>
+    <div class="webcam-container">
+        <video id="webcam" autoplay></video>
+        <canvas id="snapshot" style="display: none;"></canvas>
+    </div>
+    {% if user_details.verification_image %}
+    <div id="verify_btn">
+    <button id="capture">
+        V E R I F Y
+        <div id="clip">
+            <div id="leftTop" class="corner"></div>
+            <div id="rightBottom" class="corner"></div>
+            <div id="rightTop" class="corner"></div>
+            <div id="leftBottom" class="corner"></div>
+        </div>
+        <span id="rightArrow" class="arrow"></span>
+        <span id="leftArrow" class="arrow"></span>
+    </button>
+    </div>
+    {% else %}
+    <div id="verify_btn">
+    <button id="capture">
+        C A P T U R E
+        <div id="clip">
+            <div id="leftTop" class="corner"></div>
+            <div id="rightBottom" class="corner"></div>
+            <div id="rightTop" class="corner"></div>
+            <div id="leftBottom" class="corner"></div>
+        </div>
+        <span id="rightArrow" class="arrow"></span>
+        <span id="leftArrow" class="arrow"></span>
+    </button>
+</div>
+    {% endif %}
+    <div id="msgspinner">
+    <div id="result">
+    </div>
+    <div id="loading" style="display: none;">
+        <div class="spinner"></div>
+    </div>
+    </div>
+</div>
+
+
+
+<script>
+    const video = document.getElementById('webcam');
+    const canvas = document.getElementById('snapshot');
+    const context = canvas.getContext('2d');
+    const resultDiv = document.getElementById('result');
+    const loadingDiv = document.getElementById('loading');
+
+    // Access webcam
+    navigator.mediaDevices.getUserMedia({ video: true })
+        .then((stream) => {
+            video.srcObject = stream;
+        })
+        .catch((err) => console.error('Webcam not accessible:', err));
+
+    // Capture image
+    document.getElementById('capture').addEventListener('click', () => {
+        // Show loading spinner
+        loadingDiv.style.display = 'block';
+        resultDiv.textContent = ''; // Clear previous results
+
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const imageData = canvas.toDataURL('image/png');
+
+        // Send to server
+        fetch('/profile/verification/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.cookie.split('csrftoken=')[1]
+            },
+            body: JSON.stringify({ image: imageData })
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Hide loading spinner
+            loadingDiv.style.display = 'none';
+
+            if (data.success) {
+                resultDiv.innerHTML = `<p>${data.message}</p>`;
+                const spinner = document.createElement('div');
+                spinner.className = 'spinner'; // Add a class for styling the spinner
+                resultDiv.appendChild(spinner);
+                setTimeout(() => {
+                        window.location.href = '/profile/';
+                    }, 2000);
+            } else {
+                resultDiv.textContent = data.message;
+            }
+        })
+        .catch(err => {
+            // Hide loading spinner
+            loadingDiv.style.display = 'none';
+            console.error('Error during verification:', err);
+        });
+    });
+    
+</script>
+
+
+<style>
+    
+    /* Spinner styles */
+    .spinner {
+        margin: 20px auto;
+        width: 40px;
+        height: 40px;
+        border: 4px solid rgba(0, 0, 0, 0.1);
+        border-top: 4px solid #3498db;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+</style>
+
+
+<!-- Styling for webcam and result display -->
+<style>
+    #msgspinner{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    #verify_header{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding-top: 20px;
+    }
+    .verifycontainer {
+    margin-top: 16px;
+    background-color: rgba(31, 4, 71, 0.89);
+    box-shadow: rgba(151, 95, 236, 0.5) 0px 4px 8px;
+    font-family: serif;
+    border-radius: 7px;
+    position: relative;
+    height: calc(-112px + 100vh);
+
+    }
+
+    .webcam-container {
+    position: relative;
+    width: 300px;
+    height: 300px;
+    background-color: #7b6d6d; /* Background color for the container */
+    margin: 50px auto 20px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 4px solid transparent; /* Set border to transparent initially */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); /* Optional shadow for depth */
+    animation: rgbBorder 3s linear infinite;
+}
+
+@keyframes rgbBorder {
+    0% {
+        border-color: rgba(255, 0, 0, 0.8); /* Soft Red */
+        box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
+    }
+    25% {
+        border-color: rgba(255, 255, 0, 0.8); /* Soft Yellow */
+        box-shadow: 0 0 20px rgba(255, 255, 0, 0.5);
+    }
+    50% {
+        border-color: rgba(0, 255, 0, 0.8); /* Soft Green */
+        box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+    }
+    75% {
+        border-color: rgba(0, 255, 255, 0.8); /* Soft Cyan */
+        box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+    }
+    100% {
+        border-color: rgba(0, 0, 255, 0.8); /* Soft Blue */
+        box-shadow: 0 0 20px rgba(0, 0, 255, 0.5);
+    }
+}
+
+
+
+    #webcam {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    #verify_btn{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    }
+
+    #capture {
+    position: relative;
+    width: 11em;
+    height: 4em;
+    outline: none;
+    transition: 0.1s;
+    background-color: transparent;
+    border: none;
+    font-size: 13px;
+    font-weight: bold;
+    color: #ddebf0;
+    }
+
+    #clip {
+    --color: #2761c3;
+    position: absolute;
+    top: 0;
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+    border: 5px double var(--color);
+    box-shadow: inset 0px 0px 15px #195480;
+    -webkit-clip-path: polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%);
+    }
+
+    .arrow {
+    position: absolute;
+    transition: 0.2s;
+    background-color: #2761c3;
+    top: 35%;
+    width: 11%;
+    height: 30%;
+    }
+
+    #leftArrow {
+    left: -13.5%;
+    -webkit-clip-path: polygon(100% 0, 100% 100%, 0 50%);
+    }
+
+    #rightArrow {
+    -webkit-clip-path: polygon(100% 49%, 0 0, 0 100%);
+    left: 102%;
+    }
+
+    button:hover #rightArrow {
+    /* background-color: #27c39f; */
+    left: -15%;
+    animation: 0.6s ease-in-out both infinite alternate rightArrow8;
+    }
+
+    button:hover #leftArrow {
+    /* background-color: #27c39f; */
+    left: 103%;
+    animation: 0.6s ease-in-out both infinite alternate leftArrow8;
+    }
+
+    .corner {
+    position: absolute;
+    width: 4em;
+    height: 4em;
+    background-color: #2761c3;
+    box-shadow: inset 1px 1px 8px #2781c3;
+    transform: scale(1) rotate(45deg);
+    transition: 0.2s;
+    }
+
+    #rightTop {
+    top: -1.98em;
+    left: 91%;
+    }
+
+    #leftTop {
+    top: -1.96em;
+    left: -3.0em;
+    }
+
+    #leftBottom {
+    top: 2.10em;
+    left: -2.15em;
+    }
+
+    #rightBottom {
+    top: 45%;
+    left: 88%;
+    }
+
+    button:hover #leftTop {
+    animation: 0.1s ease-in-out 0.05s both changeColor8,
+    0.2s linear 0.4s both lightEffect8;
+    }
+
+    button:hover #rightTop {
+    animation: 0.1s ease-in-out 0.15s both changeColor8,
+    0.2s linear 0.4s both lightEffect8;
+    }
+
+    button:hover #rightBottom {
+    animation: 0.1s ease-in-out 0.25s both changeColor8,
+    0.2s linear 0.4s both lightEffect8;
+    }
+
+    button:hover #leftBottom {
+    animation: 0.1s ease-in-out 0.35s both changeColor8,
+    0.2s linear 0.4s both lightEffect8;
+    }
+
+    button:hover .corner {
+    transform: scale(1.25) rotate(45deg);
+    }
+
+    button:hover #clip {
+    animation: 0.2s ease-in-out 0.55s both greenLight8;
+    /* --color: #27c39f; */
+    }
+
+    @keyframes changeColor8 {
+    from {
+        background-color: #2781c3;
+    }
+
+    to {
+        /* background-color: #27c39f; */
+    }
+    }
+
+    @keyframes lightEffect8 {
+    from {
+        /* box-shadow: 1px 1px 5px #27c39f; */
+    }
+
+    to {
+        /* box-shadow: 0 0 2px #27c39f; */
+    }
+    }
+
+
+    @keyframes leftArrow8 {
+    from {
+        transform: translate(0px);
+    }
+
+    to {
+        transform: translateX(10px);
+    }
+    }
+
+    @keyframes rightArrow8 {
+    from {
+        transform: translate(0px);
+    }
+
+    to {
+        transform: translateX(-10px);
+    }
+    }
+
+
+
+    #result {
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    font-size: 18px;
+    font-weight: bold;
+    margin-top: 20px;
+    overflow:hidden;
+    }
+
+    #result img {
+        width: 300px;
+        margin-top: 15px;
+        border: 2px solid #ccc;
+        border-radius: 8px;
+    }
+
+    #verify_msg {
+        font-size: 18px;
+        font-weight: bold;
+    }
+</style>
+
+
+
+<!-- <style>
+.container {
+    text-align: center;
+    background-color: white;
+    padding: 40px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    width: 80%;
+    max-width: 600px;
+}
+
+h1 {
+    color: #333;
+    font-size: 2em;
+    margin-bottom: 20px;
+}
+
+video {
+    width: 100%;
+    max-width: 500px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+#capture {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 1.2em;
+    cursor: pointer;
+    border-radius: 5px;
+    margin-top: 20px;
+}
+
+#capture:hover {
+    background-color: #45a049;
+}
+
+#snapshot {
+    display: none;
+}
+
+#result {
+    margin-top: 30px;
+}
+
+#result p {
+    font-size: 1.2em;
+    color: #333;
+}
+
+#result img {
+    margin-top: 20px;
+    border-radius: 8px;
+    max-width: 100%;
+    max-height: 300px;
+}
+</style> -->
+
+{% endblock %} {% endcomment %}
