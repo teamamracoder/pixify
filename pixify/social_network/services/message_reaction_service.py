@@ -22,25 +22,22 @@ def get_reaction_by_name(reaction_id):
     return MasterList.objects.filter(id=reaction_id).first()
 
 def create_or_update_message_reaction(message_id, user, reaction):
-    # Get the MasterList instance for the reaction
-    reaction_instance = get_object_or_404(MasterList, id=reaction)
-
     # Create or update the MessageReaction instance
-    reaction_record, created = MessageReaction.objects.update_or_create(
+    reaction_instance, created = MessageReaction.objects.update_or_create(
         message_id_id=message_id,
         reacted_by=user,
         defaults={
-            'reaction_id': reaction_instance,  # Pass the MasterList instance here
+            'reaction_id': reaction,
             'created_by': user,
-            'is_active': True,
+            'is_active': True
         }
     )
 
     # If not created (i.e., updated), explicitly update the `updated_at` field
     if not created:
-        reaction_record.save(update_fields=['updated_at'])
+        reaction_instance.save(update_fields=['updated_at'])
 
-    return reaction_record, created
+    return reaction_instance, created
 
 
 def get_active_reaction(message_id, user):
