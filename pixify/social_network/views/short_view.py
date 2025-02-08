@@ -50,8 +50,7 @@ class ShortReactionDeleteView(View):
 class ShortCommentListView(View):
     def get(self, request, post_id):
        user=request.user
-       comments = short_service.short_comments(post_id, user)
-       print(comments)       
+       comments = short_service.short_comments(post_id, user)       
 
        return JsonResponse({"comments": list(comments)}, safe=False)
 
