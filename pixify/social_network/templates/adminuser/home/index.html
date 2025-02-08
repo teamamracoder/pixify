@@ -4,6 +4,244 @@
 
 {% block content %}
 
-<h1 class="text-center mt-5">Welcome to Pixify Admin</h1>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<h1 class="text-center mt-5">Dashboard</h1>
+
+
+<!-- ajax call for dropdown -->
+<select name="dropdown" id="dropdown">
+    <option value="7">7 Days</option>
+    <option value="30">30 Days</option>
+    <option value="90">90 Days</option>
+    <option value="180">180 Days</option>
+    <option value="365">1 Year</option>
+</select>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        let currentDate = new Date().toISOString(); // Get current date in ISO format
+        let days = null; // Initially null to fetch all data from the beginning
+
+        // Initial API call when the page loads (without filtering)
+        get_admin_chart_data(currentDate, days);
+
+        // Dropdown change event
+        $("#dropdown").change(function() {
+            let days = $(this).val(); // Get selected value from dropdown
+            let currentDate = new Date().toISOString(); // Get current date
+            get_admin_chart_data(currentDate, days); // Fetch data based on selected days
+        });
+
+        // Function to fetch data via AJAX
+        function get_admin_chart_data(currentDate, days) {
+            $.ajax({
+                url: "/get-users/",
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify({ days: days, current_date: currentDate }),
+                headers: { "X-CSRFToken": getCSRFToken() }, // Ensure CSRF token is included
+                success: function(response) {   
+                    console.log("User Count:", response.all_data.user_count);
+                    console.log("Post Count:", response.all_data.post_count);
+                    console.log("Admin Count:", response.all_data.admin_count);
+
+                    // Update HTML elements with received data
+                    $("#countTotalUser").text(response.all_data.user_count);
+                    $("#countTotalAdmin").text(response.all_data.admin_count);
+                    $("#countTotalPost").text(response.all_data.post_count);
+                },
+                error: function(error) {
+                    console.log("Error:", error);
+                }
+            });
+        }
+
+        // Function to get CSRF token from cookies
+        function getCSRFToken() {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                let cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    let cookie = cookies[i].trim();
+                    if (cookie.startsWith("csrftoken=")) {
+                        cookieValue = cookie.substring("csrftoken=".length, cookie.length);
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    });
+</script>
+
+
+
+<div class="container py-5">
+    <div class="row g-3 justify-content-center">
+
+        <div class="col-md-4 justify-content-center">
+            <div class="card shadow posts" style="background-color: #d4edda;">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <h5 class="card-title text-dark">Users</h5>
+                    <span class="fs-2 text-secondary"><i class="bi bi-person-circle"></i></span>
+                </div>
+                <div class="card-footer d-flex justify-content-between bg-white text-dark">
+                    <span id="countTotalUser"></span>
+                    <span class="fs-4">&gt;</span>
+                </div>
+            </div>
+        </div>
+        
+
+        <div class="col-md-4 justify-content-center" >
+            <div class="card shadow orders"  style="background-color: #cce5ff;">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <h5 class="card-title text-dark">Admins</h5>
+                    <span class="fs-2 text-secondary"><i class="bi bi-person"></i></span>
+                </div>
+                <div class="card-footer d-flex justify-content-between bg-white text-dark">
+                    <span id="countTotalAdmin"></span>
+                    <span class="fs-4">&gt;</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 justify-content-center ">
+            <div class="card shadow products" style="background-color: #fff3cd;">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <h5 class="card-title text-dark">Posts</h5>
+                    <span class="fs-2 text-secondary"><i class="bi bi-image-fill"></i></span>
+                </div>
+                <div class="card-footer d-flex justify-content-between bg-white text-dark background-color-#cce5ff">
+                    <span id="countTotalPost"></span>
+                    <span class="fs-4">&gt;</span>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Chart Section -->
+    
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Chart.js Dashboard</title>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+        <style>
+            .chart-container {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 400px; /* Ensures all charts have the same height */
+            }
+            .chart-container1 {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 400px; /* Ensures all charts have the same height */
+            }
+            canvas {
+                max-width: 100%; /* Ensures responsiveness */
+                max-height: 120%;
+            }
+        </style>
+    </head>
+    <body>
+    
+    <div class="container g-5" >
+        <div class="row" >
+            <!-- Bar Chart -->
+            <div class="col-md-4 chart-container1">
+                <canvas id="barChart"  style="height: 1000px;"></canvas>
+            </div>
+    
+            <!-- Pie Chart -->
+            <div class="col-md-4 chart-container">
+                <canvas id="pieChart"></canvas>
+            </div>
+    
+            <!-- Radar Chart -->
+            <div class="col-md-4 chart-container">
+                <canvas id="radarChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+
+
+
+    <script>
+    // Bar Chart
+        new Chart(document.getElementById('barChart').getContext('2d'), {
+    type: 'bar',
+    data: {
+        labels: ['Users'], 
+        datasets: [
+            { label: '2020', data: [100, 100, 100], backgroundColor: 'blue' },
+            { label: '2021', data: [10, 10, 5], backgroundColor: 'orange' },
+            { label: '2022', data: [30, 10, 77], backgroundColor: 'gray' },
+            { label: '2023', data: [10, 10, 8], backgroundColor: 'green' },
+            { label: '2024', data: [10, 10, 8], backgroundColor: 'red' },
+            { label: '2023', data: [10, 10, 8], backgroundColor: 'brown' },
+            
+
+        ]
+    },
+    options: {
+        scales: {
+            y: {
+                beginAtZero: true,
+                min: 0,
+                max: 100 , // Set max to 40
+                ticks: {
+                    stepSize: 10 // Scale increments by 10 (0, 10, 20, 30, 40)
+                }
+            }
+        }
+    }
+});
+
+
+    
+        // Pie Chart
+        new Chart(document.getElementById('pieChart').getContext('2d'), {
+            type: 'pie',
+            data: {
+                labels: ['Admins'],
+                datasets: [
+                    { data: [10, 20, 30], backgroundColor: ['blue', 'orange', 'gray'] }
+                ]
+            }
+        });
+    
+        // Radar Chart
+        new Chart(document.getElementById('radarChart').getContext('2d'), {
+            type: 'radar',
+            data: {
+                labels: ['Metric A', 'Metric B', 'Metric C', 'Metric D', 'Metric E', 'Metric F'],
+                datasets: [
+                    { label: '2020', data: [1, 2, 3, 4, 5, 6], backgroundColor: 'rgba(0, 0, 255, 0.2)', borderColor: 'blue' },
+                    { label: '2021', data: [7, 3, 5, 4, 5, 3], backgroundColor: 'rgba(255, 165, 0, 0.2)', borderColor: 'orange' },
+                    { label: '2022', data: [9, 4, 7, 3, 5, 6], backgroundColor: 'rgba(128, 128, 128, 0.2)', borderColor: 'gray' }
+                ]
+            },
+            options: {
+                scales: { r: { beginAtZero: true } }
+            }
+        });
+    </script>
+    
+    </body>
+    </html>
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
 
 {% endblock %}

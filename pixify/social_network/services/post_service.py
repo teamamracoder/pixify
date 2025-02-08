@@ -55,7 +55,7 @@ def manage_list_posts_filtered(search_query, sorting_order, sort_by, page_number
     # get data
     data = (
         GetData(Post)
-        .search(search_query,"posted_by","description", "title")
+        .search(search_query,"title","description")
         .sort(sort_by, sorting_order)
         .paginate(limit=10, page=page_number)
         .execute()

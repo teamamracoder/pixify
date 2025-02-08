@@ -19,10 +19,11 @@
             <h2 class="text-center mb-4">Chat List</h2>
 
             <div class="d-flex justify-content-between mb-3">
-                <button class="btn btn-primary btn-sm"><a href="{% url 'manage_chat_create' %}"
+                <div>
+                <!-- <button class="btn btn-primary btn-sm"><a href="{% url 'manage_chat_create' %}"
                         class="text-white text-decoration-none">Add Chat</a>
-                </button>
-
+                </button> -->
+               </div>
                 <form method="get" action="{% url 'manage_chat_list' %}">
                     <div class="input-group" style="max-width: 300px;">
                         <input type="text" class="form-control border-secondary" placeholder="Search"

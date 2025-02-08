@@ -50,7 +50,6 @@ class ManagePostListView(View):
        
         # Fetch the search query from the URL parameters
         search_query = request.GET.get('search', '')
-        search_query = request.GET.get('search', '')
         sort_by = request.GET.get('sort_by', 'posted_by')
         sort_order = request.GET.get('sort_order', SortingOrder.DESC.value)
         page_number = request.GET.get('page', 1)

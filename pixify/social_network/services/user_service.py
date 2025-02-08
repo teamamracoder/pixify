@@ -49,3 +49,4 @@ def change_theme(user, ui_mode):
 def get_user_details(user_id):
     return get_object_or_404(User, id=user_id)
 
+

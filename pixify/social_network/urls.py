@@ -3,10 +3,17 @@ from . import views
 
 urlpatterns = [
     # home
-    path('admin/', views.AdminHomeView.as_view(), name='home'),
+    path('admin/', views.ManageAdminHomeView.as_view(), name='admin_home'),
+    path('get-users/', views.ManageAdminHomeView.as_view(), name='get_filtered_users'),
 
     # home
     path('', views.HomeView.as_view(), name='home'),
+
+  
+#   manage-dashboard
+# ManageAdminView.as_view() is a class-based view that renders the admin dashboard.
+  # path('admin/notifications/', views.ManageNotificationListView.as_view(), name='manage_notification_listAAAA'),
+
 
 
     # manage-user
