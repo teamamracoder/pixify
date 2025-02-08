@@ -87,9 +87,9 @@
                 <div class="reaction-container" id="reaction-container-{{ message.id }}">
                     <div class="reaction-popup" id="reaction-popup-{{ message.id }}" style="display: none;">
                         {% for reaction in data.reactions %}
-                        <div class="reaction-list" reaction_id="{{ reaction.id }}" message_id="{{ message.id}}">
-                            {{ reaction.value|safe}}
-                        </div>
+                        <span onclick="reactionManager.addReaction('{{ message.id }}', '{{ reaction.id }}', '{{ reaction.value|escapejs }}')">
+                            {{ reaction.value|safe }}
+                        </span>
                                                             
                         {% endfor %}
                     </div>
@@ -184,6 +184,7 @@
 
 
 <script>
+
 
     $(document).ready(function () {
         let mentionedUsers = new Set();
@@ -1185,6 +1186,177 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 });
+
+
+
+class ReactionManager {
+    constructor() {
+        this.reactionContainers = {};
+    }
+
+    init(messageId) {
+        const container = document.getElementById(`reaction-container-${messageId}`);
+        if (!container) {
+            console.error(`Reaction container not found for messageId: ${messageId}`);
+            return;
+        }
+        this.reactionContainers[messageId] = container;
+        this.loadReactions(messageId);
+    }
+
+    addReaction(messageId, reactionId, reactionValue) {
+        const popup = document.getElementById(`reaction-popup-${messageId}`);
+        const data = {
+            message_id: messageId,
+            reaction_id: reactionId,
+            reaction_value: reactionValue,
+        };
+
+        fetch('/message-reaction/create/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}',
+            },
+            body: JSON.stringify(data),
+        })
+            .then((response) => response.json())
+            .then((responseData) => {
+                if (responseData.success) {
+                    if (popup) popup.style.display = 'none'; // Automatically hide popup
+                    this.loadReactions(messageId); // Reload reactions dynamically
+                } else {
+                    console.error('Failed to add reaction:', responseData.error);
+                }
+            })
+            .catch((error) => {
+                console.error('Error while adding reaction:', error);
+            });
+    }
+
+    loadReactions(messageId) {
+        const display = document.getElementById(`reaction-display-${messageId}`);
+        if (!display) {
+            console.error(`Reaction display not found for messageId: ${messageId}`);
+            return;
+        }
+    
+        fetch(`/message-reactions/${messageId}/`)
+            .then((response) => response.json())
+            .then((data) => {
+                display.innerHTML = '';
+    
+                const uniqueReactions = new Map();
+                data.reactions.forEach((reaction) => {
+                    const { reaction: reactionType, reaction_count: count } = reaction;
+                    uniqueReactions.set(reactionType, count);
+                });
+    
+                uniqueReactions.forEach((count, reactionType) => {
+                    const reactionElement = document.createElement('span');
+                    reactionElement.innerHTML = `${reactionType} ${count}`;
+                    reactionElement.style.marginRight = '10px';
+                    reactionElement.style.cursor = 'pointer';
+    
+                    reactionElement.addEventListener('click', () => this.deleteReaction(messageId));
+    
+                    // Handle long press event to show reaction details modal
+                    let pressTimer;
+                    reactionElement.addEventListener('mousedown', (e) => {
+                        e.preventDefault(); // Prevent other interactions
+                        pressTimer = setTimeout(() => this.showReactionDetailsModal(messageId, reactionType), 500);
+                    });
+                    reactionElement.addEventListener('mouseup', () => clearTimeout(pressTimer));
+                    reactionElement.addEventListener('mouseleave', () => clearTimeout(pressTimer));
+    
+                    display.appendChild(reactionElement);
+                });
+            })
+            .catch((error) => {
+                console.error('Error while loading reactions:', error);
+            });
+    }
+    
+    showReactionDetailsModal(messageId, reactionType) {
+        // Fetch the details for the selected reaction
+        fetch(`/reaction-details/${messageId}/${reactionType}/`)
+            .then(response => response.json())
+            .then(data => {
+                const modal = document.createElement('div');
+                modal.classList.add('message-modal'); // Use the updated class name for modal
+                modal.innerHTML = `
+                    <div class="message-modal-content" id="msg-ul"> <!-- Use the updated content class -->
+                        <span class="close-btn">&times;</span>
+                            All (${data.reaction_count})<hr>
+                        <ul id="msg-ul">
+                            <div style="display:flex;">
+                                ${data.users.map(user => `
+                                <p>
+                                    <div class="image-div">
+                                        <img src ="${user.photo}"style= "height:25px;width:25px; border-radius:50%">
+                                    </div>
+                                    <div class="content-div"  id="msg-ul" style="display:flex">
+                                        ${user.name}
+                                    </div>
+                                    <div class="badge-div">
+                                        ${user.reaction}
+                                    </div>
+                                </p>`).join('')}
+                            </div>     
+                        </ul>
+                    </div>`;
+                document.body.appendChild(modal);
+    
+                // Close the modal when the user clicks on the close button
+                modal.querySelector('.close-btn').addEventListener('click', () => {
+                    document.body.removeChild(modal);
+                });
+    
+                // Display the modal
+                modal.style.display = 'block';
+            })
+            .catch(error => {
+                console.error('Error while fetching reaction details:', error);
+            });
+    }
+    
+    
+    
+    deleteReaction(messageId) {
+        const data = { message_id: messageId };
+
+        fetch('/message-reaction/delete/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}',
+            },
+            body: JSON.stringify(data),
+        })
+            .then((response) => response.json())
+            .then((responseData) => {
+                if (responseData.success) {
+                    this.loadReactions(messageId); // Reload reactions dynamically
+                } else {
+                    console.error('Failed to delete reaction:', responseData.error);
+                }
+            })
+            .catch((error) => {
+                console.error('Error while deleting reaction:', error);
+            });
+    }
+}
+
+const reactionManager = new ReactionManager();
+document.addEventListener('DOMContentLoaded', () => {
+    const messageIds = [...document.querySelectorAll('.reaction-container')].map(container =>
+        container.id.split('-')[2]
+    );
+    messageIds.forEach((messageId) => {
+        reactionManager.init(messageId);
+    });
+});
+
 
 </script>
 
