@@ -166,6 +166,16 @@ urlpatterns = [
     path('uploadStory/', views.UploadStoryView.as_view(),name='uploadStory'),
     path('call/', views.CallView.as_view(),name='call_view'),
 
+    #short
+    path('short', views.ShortListView.as_view(),name='short'),
+    path('short/<int:post_id>/reaction/create', views.ShortReactionCreateView.as_view(),name='short_reaction_create'),
+    path('short/reaction/<int:post_id>/delete', views.ShortReactionDeleteView.as_view(),name='short_reaction_delete'),
+    path('short/<int:post_id>/comments/', views.ShortCommentListView.as_view(),name='short_comments'),
+    path('short/<int:post_id>/comment/create/', views.ShortCommentCreateView.as_view(),name='short_comment_create'),
+    path('short/comment/<int:comment_id>/delete/', views.ShortCommentDeleteView.as_view(),name='short_comment_delete'),
+    path('short/comment/<int:comment_id>/reply/', views.ShortCommentReplyView.as_view(),name='short_comment_reply'),
+    path('short/comment/<int:comment_id>/reaction/', views.ShortCommentReactionView.as_view(),name='short_comment_reaction'),    
+
 ]
 
 
