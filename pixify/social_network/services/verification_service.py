@@ -26,7 +26,7 @@
 #             return {'success': False, 'message': 'No face detected in the uploaded image.'}
 
 #         # Handle cases where the user doesn't have a verification image
-#         if not user.verification_image:
+#         if not user.:
 #             # Retrieve all users with verification images (excluding the current user)
 #             users_with_images = User.objects.exclude(verification_image__isnull=True).exclude(id=user.id)
 
