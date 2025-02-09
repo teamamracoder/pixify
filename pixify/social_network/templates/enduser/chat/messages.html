@@ -23,7 +23,7 @@
                     <span class="username G-msg_chat-title">{{ data.chat.title }}</span>
                 </a>
             {% else %}
-                <img src="{{ data.chat.chat_cover|default:'\static\images\avatar.jpg' }}" alt="Profile Picture" class="profile-pic">
+                <img src="{{ data.chat.chat_cover|default:'\static\images\avatar.jpg' }}" alt="Profile Picture" class="profile-pic"onclick="window.location.href='{% url 'userprofile' %}';">
                 <span class="username P-msg_chat-title">{{ data.chat.title }}</span>
             {% endif %}
         </div>
@@ -93,7 +93,7 @@
                         <a href="#" onclick="editMessage('{{ message.id }}')">Edit</a>
                         {% endif %}
                     {% endif %}
-                    <a href="#" onclick="replyMessage('{{ message.id }}', '{{ message.sender_id.first_name }}', '{{ message.text|escapejs }}')">Reply</a>
+                    <a href="#" onclick="replyMessage('{{ message.id }}', '{{ message.sender_id.first_name }}')">Reply</a>
                     <a href="#" class="delete-link" onclick="openDeleteModal('{{ message.id }}')">Delete</a>
                 </div>
 
@@ -103,6 +103,7 @@
                         <span onclick="reactionManager.addReaction('{{ message.id }}', '{{ reaction.id }}', '{{ reaction.value|escapejs }}')">
                             {{ reaction.value|safe }}
                         </span>
+                                                            
                         {% endfor %}
                     </div>
                     <div class="reaction-display" id="reaction-display-{{ message.id }}"></div>
@@ -196,6 +197,7 @@
 
 
 <script>
+
 
     $(document).ready(function () {
         let mentionedUsers = new Set();
@@ -473,176 +475,6 @@
         // After file selection, focus back to the message input
         document.getElementById('message-input').focus();
     });
-  
- 
-    class ReactionManager {
-        constructor() {
-            this.reactionContainers = {};
-        }
-    
-        init(messageId) {
-            const container = document.getElementById(`reaction-container-${messageId}`);
-            if (!container) {
-                console.error(`Reaction container not found for messageId: ${messageId}`);
-                return;
-            }
-            this.reactionContainers[messageId] = container;
-            this.loadReactions(messageId);
-        }
-    
-        addReaction(messageId, reactionId, reactionValue) {
-            const popup = document.getElementById(`reaction-popup-${messageId}`);
-            const data = {
-                message_id: messageId,
-                reaction_id: reactionId,
-                reaction_value: reactionValue,
-            };
-    
-            fetch('/message-reaction/create/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': '{{ csrf_token }}',
-                },
-                body: JSON.stringify(data),
-            })
-                .then((response) => response.json())
-                .then((responseData) => {
-                    if (responseData.success) {
-                        if (popup) popup.style.display = 'none'; // Automatically hide popup
-                        this.loadReactions(messageId); // Reload reactions dynamically
-                    } else {
-                        console.error('Failed to add reaction:', responseData.error);
-                    }
-                })
-                .catch((error) => {
-                    console.error('Error while adding reaction:', error);
-                });
-        }
-    
-        loadReactions(messageId) {
-            const display = document.getElementById(`reaction-display-${messageId}`);
-            if (!display) {
-                console.error(`Reaction display not found for messageId: ${messageId}`);
-                return;
-            }
-        
-            fetch(`/message-reactions/${messageId}/`)
-                .then((response) => response.json())
-                .then((data) => {
-                    display.innerHTML = '';
-        
-                    const uniqueReactions = new Map();
-                    data.reactions.forEach((reaction) => {
-                        const { reaction: reactionType, reaction_count: count } = reaction;
-                        uniqueReactions.set(reactionType, count);
-                    });
-        
-                    uniqueReactions.forEach((count, reactionType) => {
-                        const reactionElement = document.createElement('span');
-                        reactionElement.innerHTML = `${reactionType} ${count}`;
-                        reactionElement.style.marginRight = '10px';
-                        reactionElement.style.cursor = 'pointer';
-        
-                        reactionElement.addEventListener('click', () => this.deleteReaction(messageId));
-        
-                        // Handle long press event to show reaction details modal
-                        let pressTimer;
-                        reactionElement.addEventListener('mousedown', (e) => {
-                            e.preventDefault(); // Prevent other interactions
-                            pressTimer = setTimeout(() => this.showReactionDetailsModal(messageId, reactionType), 500);
-                        });
-                        reactionElement.addEventListener('mouseup', () => clearTimeout(pressTimer));
-                        reactionElement.addEventListener('mouseleave', () => clearTimeout(pressTimer));
-        
-                        display.appendChild(reactionElement);
-                    });
-                })
-                .catch((error) => {
-                    console.error('Error while loading reactions:', error);
-                });
-        }
-        
-        showReactionDetailsModal(messageId, reactionType) {
-            // Fetch the details for the selected reaction
-            fetch(`/reaction-details/${messageId}/${reactionType}/`)
-                .then(response => response.json())
-                .then(data => {
-                    const modal = document.createElement('div');
-                    modal.classList.add('message-modal'); // Use the updated class name for modal
-                    modal.innerHTML = `
-                        <div class="message-modal-content" id="msg-ul"> <!-- Use the updated content class -->
-                            <span class="close-btn">&times;</span>
-                                All (${data.reaction_count})<hr>
-                            <ul id="msg-ul">
-                                <div style="display:flex;">
-                                    ${data.users.map(user => `
-                                    <p>
-                                        <div class="image-div">
-                                            <img src ="${user.photo}"style= "height:25px;width:25px; border-radius:50%">
-                                        </div>
-                                        <div class="content-div"  id="msg-ul" style="display:flex">
-                                            ${user.name}
-                                        </div>
-                                        <div class="badge-div">
-                                            ${user.reaction}
-                                        </div>
-                                    </p>`).join('')}
-                                </div>     
-                            </ul>
-                        </div>`;
-                    document.body.appendChild(modal);
-        
-                    // Close the modal when the user clicks on the close button
-                    modal.querySelector('.close-btn').addEventListener('click', () => {
-                        document.body.removeChild(modal);
-                    });
-        
-                    // Display the modal
-                    modal.style.display = 'block';
-                })
-                .catch(error => {
-                    console.error('Error while fetching reaction details:', error);
-                });
-        }
-        
-        
-        
-        deleteReaction(messageId) {
-            const data = { message_id: messageId };
-    
-            fetch('/message-reaction/delete/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': '{{ csrf_token }}',
-                },
-                body: JSON.stringify(data),
-            })
-                .then((response) => response.json())
-                .then((responseData) => {
-                    if (responseData.success) {
-                        this.loadReactions(messageId); // Reload reactions dynamically
-                    } else {
-                        console.error('Failed to delete reaction:', responseData.error);
-                    }
-                })
-                .catch((error) => {
-                    console.error('Error while deleting reaction:', error);
-                });
-        }
-    }
-    
-    const reactionManager = new ReactionManager();
-    document.addEventListener('DOMContentLoaded', () => {
-        const messageIds = [...document.querySelectorAll('.reaction-container')].map(container =>
-            container.id.split('-')[2]
-        );
-        messageIds.forEach((messageId) => {
-            reactionManager.init(messageId);
-        });
-    });
-
 
     // Function to scroll the chat body to the bottom
     document.addEventListener('DOMContentLoaded', function () {
@@ -877,7 +709,9 @@ socket.onmessage = function (event) {
       data.reply_username,
       data.reply_userPic,
       data.media_urls || [],
-      data.user === currentUser
+      data.user === currentUser,
+      data.reactions || [],
+
     );
   } else if (data.update) {
     // Handle message update
@@ -893,7 +727,9 @@ socket.onmessage = function (event) {
       data.reply_userPic,
       data.media_urls || [],
       data.user === currentUser,
-      data.seen_by_all
+      data.seen_by_all,
+      data.reactions || [],
+
     );
   } else if (data.deleted === true && data.message_id) {
     const messageId = data.message_id;
@@ -913,12 +749,30 @@ socket.onmessage = function (event) {
       // "Delete for everyone" - Remove from DOM entirely        
       messageElement.remove();
     }
-  }
+} else if (data.react) {
+    console.log("nooooooooooooooooooooooooooooooooo");
+
+    const messageId = data.message_id;
+    const reactionId = data.reaction_val;
+    const reactionDisplay = document.getElementById(`reaction-display-${messageId}`);
+    
+    // Clear previous reactions
+    reactionDisplay.innerHTML = "";
+    
+    // Add the single reaction
+    const reactionElement = document.createElement("div");
+    reactionElement.classList.add("reaction");
+    reactionElement.innerHTML = `
+        <span>${reactionId}</span>
+    `;
+    reactionDisplay.appendChild(reactionElement);
+}
+
+
 };
 
-
 // Function to append a message to the chat body
-function appendMessageToChat(message, messageId, messageTime, senderName, profilePic, reply, replyText, reply_username, reply_userPic, mediaUrls, isSent) {
+function appendMessageToChat(message, messageId, messageTime, senderName, profilePic, reply, replyText, reply_username, reply_userPic, mediaUrls, isSent,reactions) {
     console.log('Appending message:', { message, messageId, messageTime, senderName, profilePic, mediaUrls, isSent });
     
     const chatBody = document.querySelector(".chat-body");
@@ -945,7 +799,7 @@ function appendMessageToChat(message, messageId, messageTime, senderName, profil
             </div>
         `;
     }
-
+    const reactionPopupContent = generateReactionPopupContent(reactions, messageId);
     // Construct the message content
     const messageContent = `
         <div class="message-content">
@@ -967,10 +821,16 @@ function appendMessageToChat(message, messageId, messageTime, senderName, profil
                         <div class="options-popup" id="options-${ messageId }" style="display: none;">
 
                             ${isSent ? `<a href="#" onclick="editMessage('${messageId}')">Edit</a>` : ""}
-                            <a href="#" onclick="replyMessage('${messageId}', '${senderName}', '${message}')">Reply</a>
+                            <a href="#" onclick="replyMessage('${messageId}', '${senderName}')">Reply</a>
                             <a href="#" onclick="openDeleteModal('${messageId}')">Delete</a>   
 
-                        </div>                                    
+                        </div> 
+                        <div class="reaction-container" id="reaction-container-${messageId}">
+                            <div class="reaction-popup" id="reaction-popup-${messageId}" style="display: none;">
+                                ${reactionPopupContent} 
+                            </div>
+                            <div class="reaction-display" id="reaction-display-${messageId}"></div>
+                        </div> 
                 </div>
         </div>
 
@@ -991,7 +851,7 @@ function appendMessageToChat(message, messageId, messageTime, senderName, profil
 
 
 // Function to update the message in the chat
-function updateMessageInChat(updatedMessage, messageId, messageTime, senderName, profilePic, reply, replyText, reply_username, reply_userPic, mediaUrls,isSent,seen_by_all) {
+function updateMessageInChat(updatedMessage, messageId, messageTime, senderName, profilePic, reply, replyText, reply_username, reply_userPic, mediaUrls,isSent,seen_by_all,reactions) {
     const messageDiv = document.getElementById(`message-${messageId}`);
     if (messageDiv) {
         let mediaPreview = "";
@@ -1012,7 +872,8 @@ function updateMessageInChat(updatedMessage, messageId, messageTime, senderName,
                 </div>
             `;
         }
-
+        
+        const reactionPopupContent = generateReactionPopupContent(reactions, messageId);   
         // Update the message text and media
         const messageContent = `
             <div class="message-content">
@@ -1035,9 +896,15 @@ function updateMessageInChat(updatedMessage, messageId, messageTime, senderName,
                     </div>
                     <div class="options-popup" id="options-${messageId}" style="display: none;">
                         ${isSent ? `<a href="#" onclick="editMessage('${messageId}')">Edit</a>` : ""}                                          
-                        <a href="#" onclick="replyMessage('${messageId}', '${senderName}', '${updatedMessage}')">Reply</a>
+                        <a href="#" onclick="replyMessage('${messageId}', '${senderName}')">Reply</a>
                         <a href="#" onclick="openDeleteModal('${messageId}')">Delete</a>                        
                     </div>
+                    <div class="reaction-container" id="reaction-container-${messageId}">
+                            <div class="reaction-popup" id="reaction-popup-${messageId}" style="display: none;">
+                                ${reactionPopupContent} 
+                            </div>
+                            <div class="reaction-display" id="reaction-display-${messageId}"></div>
+                        </div> 
                 </div>
             </div>
         `;
@@ -1163,11 +1030,14 @@ function editMessage(messageId) {
 
     let ReplyMessageId = null;
     // Reply to a message
-    function replyMessage(messageId, senderName, content) {
-        const replyPreview = document.getElementById("reply-preview");
+    function replyMessage(messageId, senderName) {
+        const messageDiv = document.getElementById(`message-${messageId}`);
+        const replyPreview = document.getElementById("reply-preview");        
+        const messageTextElement = messageDiv.querySelector(".message-text");
+
         replyPreview.style.display = "block";
         replyPreview.querySelector(".reply-username").textContent = senderName;
-        replyPreview.querySelector(".reply-text").textContent = content;
+        replyPreview.querySelector(".reply-text").textContent = messageTextElement.textContent;
         const messageInput = document.getElementById("message-input");
         messageInput.focus();
         ReplyMessageId = messageId;        
@@ -1305,7 +1175,183 @@ function editMessage(messageId) {
     }
     };
 
+    // Function to generate the reaction popup content
+function generateReactionPopupContent(reactions, messageId) {
+    if (!reactions || reactions.length === 0) return "";
+    return reactions
+        .map(reaction => `
+            <div class="reaction-list" 
+                 reaction_id="${reaction.id}" 
+                 message_id="${messageId}">
+                ${reaction.value}  <!-- Make sure this outputs the correct HTML or icon -->
+            </div>
+        `)
+        .join("");
+}
 
+// Add event listener for reactions (using event delegation)
+{% comment %} document.addEventListener('DOMContentLoaded', () => {
+    // Delegate the click event to the document or a parent container
+    document.addEventListener('click', function(event) {
+        // Check if the clicked element is a reaction list item
+        const reactionElement = event.target.closest('.reaction-list');
+        if (!reactionElement) return; // If it's not a reaction, exit
+
+        const reactionId = reactionElement.getAttribute('reaction_id');
+        const messageId = reactionElement.getAttribute('message_id');
+
+        if (!reactionId || !messageId) {
+            console.error('Reaction ID or Message ID is missing.');
+            return;
+        }
+
+        // Prepare the data to send
+       
+    });
+}); {% endcomment %}
+
+
+
+class ReactionManager {
+    constructor() {
+        this.reactionContainers = {};
+    }
+
+    init(messageId) {
+        const container = document.getElementById(`reaction-container-${messageId}`);
+        if (!container) {
+            console.error(`Reaction container not found for messageId: ${messageId}`);
+            return;
+        }
+        this.reactionContainers[messageId] = container;
+        this.loadReactions(messageId);
+    }
+
+    addReaction(messageId, reactionId, reactionValue) {
+
+        console.log("hiibvsbkbsiubzd bvhjbk");
+
+         const data = {
+            action: 'add_reaction',
+            message_id: messageId,
+            reaction_id: reactionId,
+        };
+
+        // Send the data to the backend via WebSocket
+        if (socket && socket.readyState === WebSocket.OPEN) {
+            socket.send(JSON.stringify(data));
+            console.log('Reaction data sent:', data);
+        } else {
+            console.error('WebSocket is not connected.');
+        }
+
+    }
+
+    loadReactions(messageId) {
+        const display = document.getElementById(`reaction-display-${messageId}`);
+        if (!display) {
+            console.error(`Reaction display not found for messageId: ${messageId}`);
+            return;
+        }
+    
+        fetch(`/message-reactions/${messageId}/`)
+            .then((response) => response.json())
+            .then((data) => {
+                display.innerHTML = '';
+    
+                const uniqueReactions = new Map();
+                data.reactions.forEach((reaction) => {
+                    const { reaction: reactionType, reaction_count: count } = reaction;
+                    uniqueReactions.set(reactionType, count);
+                });
+    
+                uniqueReactions.forEach((count, reactionType) => {
+                    const reactionElement = document.createElement('span');
+                    reactionElement.innerHTML = `${reactionType} ${count}`;
+                    reactionElement.style.marginRight = '10px';
+                    reactionElement.style.cursor = 'pointer';
+    
+                    reactionElement.addEventListener('click', () => this.deleteReaction(messageId));
+    
+                    // Handle long press event to show reaction details modal
+                    let pressTimer;
+                    reactionElement.addEventListener('mousedown', (e) => {
+                        e.preventDefault(); // Prevent other interactions
+                        pressTimer = setTimeout(() => this.showReactionDetailsModal(messageId, reactionType), 500);
+                    });
+                    reactionElement.addEventListener('mouseup', () => clearTimeout(pressTimer));
+                    reactionElement.addEventListener('mouseleave', () => clearTimeout(pressTimer));
+    
+                    display.appendChild(reactionElement);
+                });
+            })
+            .catch((error) => {
+                console.error('Error while loading reactions:', error);
+            });
+    }
+    
+    showReactionDetailsModal(messageId, reactionType) {
+        // Fetch the details for the selected reaction
+        fetch(`/reaction-details/${messageId}/${reactionType}/`)
+            .then(response => response.json())
+            .then(data => {
+                const modal = document.createElement('div');
+                modal.classList.add('message-modal'); // Use the updated class name for modal
+                modal.innerHTML = `
+                    <div class="message-modal-content" id="msg-ul"> <!-- Use the updated content class -->
+                        <span class="close-btn">&times;</span>
+                            All (${data.reaction_count})<hr>
+                        <ul id="msg-ul">
+                            <div style="display:flex;">
+                                ${data.users.map(user => `
+                                <p>
+                                    <div class="image-div">
+                                        <img src ="${user.photo}"style= "height:25px;width:25px; border-radius:50%">
+                                    </div>
+                                    <div class="content-div"  id="msg-ul" style="display:flex">
+                                        ${user.name}
+                                    </div>
+                                    <div class="badge-div">
+                                        ${user.reaction}
+                                    </div>
+                                </p>`).join('')}
+                            </div>     
+                        </ul>
+                    </div>`;
+                document.body.appendChild(modal);
+    
+                // Close the modal when the user clicks on the close button
+                modal.querySelector('.close-btn').addEventListener('click', () => {
+                    document.body.removeChild(modal);
+                });
+    
+                // Display the modal
+                modal.style.display = 'block';
+            })
+            .catch(error => {
+                console.error('Error while fetching reaction details:', error);
+            });
+    }
+    
+    
+    
+    deleteReaction(messageId) {
+        const data = { message_id: messageId };
+
+        console.log("frsykydrkhg");
+
+    }
+}
+
+const reactionManager = new ReactionManager();
+document.addEventListener('DOMContentLoaded', () => {
+    const messageIds = [...document.querySelectorAll('.reaction-container')].map(container =>
+        container.id.split('-')[2]
+    );
+    messageIds.forEach((messageId) => {
+        reactionManager.init(messageId);
+    });
+});
 
 
 </script>

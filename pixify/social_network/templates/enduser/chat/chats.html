@@ -8,8 +8,8 @@
         <div class="p-3 fnd-pic" style="justify-content: space-between; display: flex">
             <h2 class="mobile-hide">Chats</h2>
             <div class="input-wrapper">
-                <button data-toggle="modal" data-target="#example" class="border-0 bg-transparent">
-                    <i class="bi bi-search" style="font-size:30px" ></i>
+                <button type="button" class="border-0 bg-transparent" data-bs-toggle="modal" data-bs-target="#example" onclick="focusSearchBar()">
+                    <i class="bi bi-search" style="font-size: 30px;"></i>
                 </button>
             </div>
             <!-- Modal -->
@@ -63,7 +63,7 @@
     <!-- Peoples -->
     {% for chat in data.chats %}
     <div style="border: 1px solid black; border-radius: 3px" class="m-2">
-        <div class="chat-item">
+       <div class="chat-item" onclick="window.location.href='{% url 'message' chat_id=chat.id %}';">
             <!-- Image Section -->
             <div class="image-div">
                 {% if chat.is_group %}
@@ -114,7 +114,7 @@
                         {% if chat.latest_reaction_time == '' or chat.latest_message_time >= chat.latest_reaction_time %}
                             <p class="chat-message chat_title">{{ chat.latest_message }}</p>
                         {% else %}
-                            <p class="chat-message chat_title">{{ chat.latest_reaction_message_reacted_by }} : Reacted {{ chat.latest_reaction|safe }} on "{{ chat.latest_message }}"</p>
+                            <p class="chat-message chat_title"> Reacted {{ chat.latest_reaction|safe }} on "{{ chat.latest_message }}"</p>
                         {% endif %}
                     {% else %}
                         <p class="chat-message chat_title">No messages yet</p>
@@ -195,6 +195,11 @@
 </div>
 
 <script>
+function focusSearchBar() {
+    setTimeout(function() {
+        document.getElementById('search_chats').focus();
+    }, 500); // Adjust delay if needed
+}
 $(document).ready(function () {
     let selectedItems = []; // Array to store selected item IDs
     let holdTimer;
