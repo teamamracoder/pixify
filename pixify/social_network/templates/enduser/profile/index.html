@@ -4,6 +4,8 @@
 {% load static %}
 {% block content %}
 
+
+
 <div class="px-3 py-3 mt-3  users"
         style="background-color: #1f0447e3;border: 1px solid #827b7b70;font-family: serif;border-radius: 7px;">
         <div class="row loginuserprofile mx-2 pt-1 pb-3 px-2 mb-2 fw-semibold "
@@ -28,9 +30,14 @@
                 </ul>
 
                 <div class="col-auto col-sm-auto d-flex" style="gap:10px">
-                    <button type="button" class="prof-btn btn btn-primary" style="font-size:14px ;">EDIT</button>
-                    <button type="button" class="btn btn-primary prof-btn" style="font-size:14px;">CHANGE PASSWORD</button>
-                </div>
+                  {% comment %} Rework by Badhan {% endcomment %}
+                  <button type="button" class="prof-btn btn btn-primary" style="font-size:14px;">
+                      <a href="{% url 'enduser_edit_profile' user.id %}" style="text-decoration:none; color:White;">EDIT</a>
+                  </button>
+                  {% comment %} Push by Badhan Sarkar {% endcomment %}
+                  <button type="button" class="btn btn-primary prof-btn" data-bs-toggle="modal" data-bs-target="#changePasswordModal" style="font-size:14px;">CHANGE PASSWORD</button>
+              </div>
+              
             </div>
         </div>
         <div id="item-2">
@@ -225,16 +232,12 @@
              </div>
 
           </div>
+</div>
 
-
-
-
-
-
-    </div>
 <style>
+
     .galary .col{
     padding-right:0;
     }
-</style>
+      </style>
 {% endblock %}

@@ -16,7 +16,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: 3.10
+        python-version: 3.12.7
 
     - name: Install dependencies
       run: |
@@ -25,17 +25,23 @@ jobs:
 
     - name: Deploy to DigitalOcean
       env:
-        HOST: ${{ secrets.HOST }}
-        USER: ${{ secrets.USER }}
-        PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+        USER: root
+        HOST: 139.59.88.36
         PROJECT_PATH: /var/www/pixify
       run: |
-        ssh -i "${{ secrets.PRIVATE_KEY }}" -o StrictHostKeyChecking=no $USER@$HOST << 'EOF'
+        # Write the private key to a temporary file
+        echo "${{ secrets.MYKEY }}" > private_key
+        chmod 600 private_key
+
+        # SSH to the server and execute commands
+        ssh -i private_key -o StrictHostKeyChecking=no $USER@$HOST <<EOF
         cd $PROJECT_PATH
         git pull
         source venv/bin/activate
         pip install -r requirements.txt
         python manage.py migrate
-        python manage.py collectstatic --noinput
         sudo systemctl restart nginx
         EOF
+
+        # Clean up the private key
+        rm private_key
