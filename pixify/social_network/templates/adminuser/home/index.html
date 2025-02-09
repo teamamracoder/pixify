@@ -37,7 +37,7 @@
         // Function to fetch data via AJAX
         function get_admin_chart_data(currentDate, days) {
             $.ajax({
-                url: "/admin/dashboard/",
+                url: "/admin-dashboard/",
                 type: "POST",
                 contentType: "application/json",
                 data: JSON.stringify({ days: days, current_date: currentDate }),
@@ -93,7 +93,8 @@
                 </div>
             </div>
         </div>
-    
+        
+
         <div class="col-md-4 justify-content-center" >
             <div class="card shadow orders"  style="background-color: #cce5ff;">
                 <div class="card-body d-flex justify-content-between align-items-center">
@@ -174,6 +175,9 @@
         </div>
     </div>
 
+
+
+
     <script>
     // Bar Chart
         new Chart(document.getElementById('barChart').getContext('2d'), {
@@ -187,6 +191,8 @@
             { label: '2023', data: [10, 10, 8], backgroundColor: 'green' },
             { label: '2024', data: [10, 10, 8], backgroundColor: 'red' },
             { label: '2023', data: [10, 10, 8], backgroundColor: 'brown' },
+            
+
         ]
     },
     options: {
