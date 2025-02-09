@@ -1,7 +1,7 @@
 from ..models import Post,User,Comment
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
-from ..models import User
+from ..models import User,CommentReaction
 from .. import models
 
 
@@ -51,3 +51,9 @@ def reply_list(comment_id):
 
 def comment_count(post_id):
      return Comment.objects.filter(post_id_id=post_id, is_active=True).count()
+
+def create_reaction(comment_id,user_id):
+        created = CommentReaction.objects.create(comment_id_id=comment_id, reacted_by_id=user_id,
+                                              created_by_id=user_id, is_active=True)
+
+        return created

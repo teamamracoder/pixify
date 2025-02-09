@@ -149,6 +149,8 @@ urlpatterns = [
     path('comments/getComment/',views.CommentsListView.as_view(), name='comments_list'),
     path('post/reactions/', views.GetPostReactionsView.as_view(), name='get_post_reactions'),
     path('post/comment/', views.GetPostCommentView.as_view(), name='get_comment_reactions'),
+    path("delete-comment/", views.DeleteCommentView.as_view(), name="delete-comment"),
+    path('toggle-like/', views.ToggleLikeView.as_view(), name='toggle-like'),
     
 
    
