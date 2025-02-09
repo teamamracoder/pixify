@@ -12,7 +12,7 @@ from .. import services
 import os
 from django.http import HttpResponseBadRequest, JsonResponse
 from pixify import settings
-from ..models import User,Comment
+from ..models import User,Comment,CommentReaction
 from django.core.paginator import Paginator
 
 
@@ -220,11 +220,38 @@ class CommentReplyView(View):
             return JsonResponse({"status": "error", "message": str(e)}, status=500)
 
 
+class DeleteCommentView(View):
+    def post(self, request, *args, **kwargs):
+        comment_id = request.POST.get("comment_id")
+        try:
+            comment = Comment.objects.get(id=comment_id)
+            comment.delete()
+            return JsonResponse({"success": True})
+        except Comment.DoesNotExist:
+            return JsonResponse({"success": False, "error": "Comment not found."})
+
+        return JsonResponse({"success": False, "error": "Invalid request."})
 
 
 
+class ToggleLikeView(View):
+    def post(self, request, *args, **kwargs):
+        comment_id = request.POST.get("comment_id")
+        comment = Comment.objects.get(id=comment_id)
+        user_id=request.user.id
+        print("com",comment)
 
+        created =services.comment_service.create_reaction(comment_id,user_id)
 
+        # if not created:
+        #     reaction.delete()  # Remove like if it already exists (toggle behavior)
+        #     liked = False
+        # else:
+        #     liked = True
+
+         #like_count = CommentReaction.comment_id_id.count()  # Count total likes
+        #, "like_count": like_count
+        return JsonResponse({"success": True})
 
 
 

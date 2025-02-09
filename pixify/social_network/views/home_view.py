@@ -51,6 +51,8 @@ class HomeView(View):
     def get(self, request):
         message = request.session.pop("message", "")
         message_type = request.session.pop("message_type", "")
+        userid=request.user.id
+        print()
 
         posts = services.post_service.Postlist_posts()
         print("post ssgajgak...",posts)
@@ -59,7 +61,7 @@ class HomeView(View):
         post_dict = {
             'posts': posts,
             'comment_list': comment_list,
-            'count_comment': services.comment_service.get_count_comment(163),
+            
         }
 
         # Fetch stories
@@ -74,6 +76,7 @@ class HomeView(View):
         context.update({
             'post_dict': post_dict,
             'story_dict': story_dict,
+            'userid':userid,
         })
 
         return render(request, "enduser/home/index.html", context)
