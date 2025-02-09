@@ -2,7 +2,6 @@
 {% block title %}Short{% endblock %}
 {% block content %}
 {% load static %}
-
 <div class="short-content" id="shortContent">
     {% for video in shorts %}
     <div class="video-wrapper" id="video{{ video.id }}" data-post-id="{{ video.id }}">
@@ -63,47 +62,40 @@
             </button>
         </div>
     </div>
+    {% endfor %}
+</div>
 
-
-    
-<!-- Modal for Comments -->
-<div class="short-modal" id="shortCommentsModal" tabindex="-1" aria-hidden="true">
-    <div class="short-modal-dialog">
-        <div class="modal-content">
-            <div class="short-modal-header">
-                <h5 class="modal-title">Comments</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="short-modal-body">
-                <div id="shortCommentsList" class="short-comments-list">
-                    <!-- Comments will be dynamically loaded here -->
-                </div>                
+<!-- Modal for Comments and Delete Confirmation -->
+<div>
+    <!-- Modal for Comments -->
+    <div class="short-modal" id="shortCommentsModal" tabindex="-1" aria-hidden="true">
+        <div class="short-modal-dialog">
+            <div class="short-modal-content">
+                <div class="short-modal-header">
+                    <h5 class="modal-title">Comments</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="short-modal-body">
+                    <div id="shortCommentsList" class="short-comments-list">
+                        <!-- Comments will be dynamically loaded here -->
+                    </div>                
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-
-<!-- Delete Confirmation Modal -->
-<div id="deleteModal" class="short-delete-modal" style="display: none;">
-  <div class="short-delete-modal-content">
-    Are you sure you want to delete this comment?
-    <div class="button-container">
-      <button id="btnDeleteConfirm" class="btn btn-danger">Delete</button>
-    
-      <button id="btnDeleteCancel" class="btn btn-secondary">Cancel</button>
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="short-delete-modal" style="display: none;">
+        <div class="short-delete-modal-content">
+            Are you sure you want to delete this comment?
+            <div class="button-container">
+                <button id="btnDeleteConfirm" class="btn btn-danger">Delete</button>
+                <button id="btnDeleteCancel" class="btn btn-secondary">Cancel</button>
+            </div>
+        </div>
     </div>
-  </div>
-</div>
-
-
-
-
-
-
-    {% endfor %}
 </div>
 
 <script>
@@ -814,6 +806,48 @@ document.querySelectorAll('.chat-icon').forEach(button => {
 
 <style>
 
+    /* Media query for small screens */
+@media (max-width: 576px) {
+  .short-modal-dialog {
+    width: 95%;
+  }
+
+  .short-modal-header,
+  .short-modal-body {
+    padding: 5px;
+  }
+}
+
+/* Media query for medium screens */
+@media (min-width: 577px) and (max-width: 768px) {
+  .short-modal-dialog {
+    width: 90%;
+  }
+
+  .short-modal-header,
+  .short-modal-body {
+    padding: 8px;
+  }
+}
+
+/* Media query for large screens */
+@media (min-width: 769px) {
+  .short-modal-dialog {
+    width: 70%;
+  }
+
+  .short-modal-header,
+  .short-modal-body {
+    {% comment %} padding: 12px; {% endcomment %}
+  }
+}
+
+
+.modal-title{
+    font-size:24px;
+    padding-left:15px
+}
+
 /* Delete Modal Styles */
 .short-delete-modal {
     display: none; /* Hidden by default */
@@ -875,7 +909,7 @@ document.querySelectorAll('.chat-icon').forEach(button => {
 .short-comment-content .user-info {
     display: flex;
     align-items: center;
-    margin-bottom: 5px;
+    margin-bottom: 0;    
 }
 
     .close{        
@@ -888,6 +922,7 @@ document.querySelectorAll('.chat-icon').forEach(button => {
     }
 
     .short-created-at{
+        font-size: 10px;
         margin-left: 10px;
     }
 
@@ -908,6 +943,7 @@ document.querySelectorAll('.chat-icon').forEach(button => {
         font-size: 14px; /* Font size */
         padding: 0; /* No padding */
         margin: 0; /* No margin */
+        margin-top: -10px !important;
 
     }
 
@@ -1043,7 +1079,7 @@ document.querySelectorAll('.chat-icon').forEach(button => {
 
 .short-comment-item {
     display: flex;
-    margin-bottom: 15px;
+    margin-bottom: 5px;
     flex-direction: column;
 }
 
@@ -1063,12 +1099,9 @@ document.querySelectorAll('.chat-icon').forEach(button => {
     font-weight: bold;
 }
 
-.short-comment-item .short-comment-content  {
-    margin-top: 5px;
-    font-size: 14px;
-}
 
 .short-comment-text{
+    overflow-wrap: break-word;
     margin-bottom: 5px;
     margin-left: 45px;
     font-size: 15px;
@@ -1083,7 +1116,7 @@ document.querySelectorAll('.chat-icon').forEach(button => {
     padding: 8px;
     border: none;
     border-radius: 25px;
-    background-color: #ce9ff5;
+    background-color: #3d3d6b;
     color:black;
     margin-right: 10px;
 }
@@ -1096,6 +1129,14 @@ document.querySelectorAll('.chat-icon').forEach(button => {
     border: none;
 }
 
+.short-modal-content{
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(151, 95, 236, 0.5);
+    color: black;
+    /* background-color: #1f0447e3; */
+    background-color: #2f066de3;
+    /* border: 1px solid #ddd; */
+}
 
 /* Scrollable Container */
 
@@ -1106,6 +1147,27 @@ document.querySelectorAll('.chat-icon').forEach(button => {
     height: 100vh;
     display: flex;
     flex-direction: column;
+}
+
+.short-com{
+    
+
+}
+
+@media (max-width:768px){
+    .video-box{
+        margin-top: 15px;
+        height: 80vh !important;
+        width: 38% !important;
+}
+.right-icons {    
+    right: 222px !important;
+}
+
+.navigation-buttons {
+    display:none !important;
+}
+
 }
 
 /* Each Video Wrapper */
@@ -1127,7 +1189,7 @@ document.querySelectorAll('.chat-icon').forEach(button => {
 /* Styling for the video container */
 .video-box {
     width: 60%;
-    height: 90vh;
+    height: 98vh;
     background-color: #000;
     border-radius: 12px;
     overflow: hidden;

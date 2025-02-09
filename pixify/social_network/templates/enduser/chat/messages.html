@@ -736,7 +736,26 @@ socket.onmessage = function (event) {
       // "Delete for everyone" - Remove from DOM entirely        
       messageElement.remove();
     }
-  }
+} else if (data.react) {
+    console.log("nooooooooooooooooooooooooooooooooo");
+
+    const messageId = data.message_id;
+    const reactionId = data.reaction_val;
+    const reactionDisplay = document.getElementById(`reaction-display-${messageId}`);
+    
+    // Clear previous reactions
+    reactionDisplay.innerHTML = "";
+    
+    // Add the single reaction
+    const reactionElement = document.createElement("div");
+    reactionElement.classList.add("reaction");
+    reactionElement.innerHTML = `
+        <span>${reactionId}</span>
+    `;
+    reactionDisplay.appendChild(reactionElement);
+}
+
+
 };
 
 // Function to append a message to the chat body
@@ -1158,7 +1177,7 @@ function generateReactionPopupContent(reactions, messageId) {
 }
 
 // Add event listener for reactions (using event delegation)
-document.addEventListener('DOMContentLoaded', () => {
+{% comment %} document.addEventListener('DOMContentLoaded', () => {
     // Delegate the click event to the document or a parent container
     document.addEventListener('click', function(event) {
         // Check if the clicked element is a reaction list item
@@ -1174,21 +1193,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Prepare the data to send
-        const data = {
-            action: 'add_reaction',
-            message_id: messageId,
-            reaction_id: reactionId,
-        };
-
-        // Send the data to the backend via WebSocket
-        if (socket && socket.readyState === WebSocket.OPEN) {
-            socket.send(JSON.stringify(data));
-            console.log('Reaction data sent:', data);
-        } else {
-            console.error('WebSocket is not connected.');
-        }
+       
     });
-});
+}); {% endcomment %}
 
 
 
@@ -1208,33 +1215,23 @@ class ReactionManager {
     }
 
     addReaction(messageId, reactionId, reactionValue) {
-        const popup = document.getElementById(`reaction-popup-${messageId}`);
-        const data = {
+
+        console.log("hiibvsbkbsiubzd bvhjbk");
+
+         const data = {
+            action: 'add_reaction',
             message_id: messageId,
             reaction_id: reactionId,
-            reaction_value: reactionValue,
         };
 
-        fetch('/message-reaction/create/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': '{{ csrf_token }}',
-            },
-            body: JSON.stringify(data),
-        })
-            .then((response) => response.json())
-            .then((responseData) => {
-                if (responseData.success) {
-                    if (popup) popup.style.display = 'none'; // Automatically hide popup
-                    this.loadReactions(messageId); // Reload reactions dynamically
-                } else {
-                    console.error('Failed to add reaction:', responseData.error);
-                }
-            })
-            .catch((error) => {
-                console.error('Error while adding reaction:', error);
-            });
+        // Send the data to the backend via WebSocket
+        if (socket && socket.readyState === WebSocket.OPEN) {
+            socket.send(JSON.stringify(data));
+            console.log('Reaction data sent:', data);
+        } else {
+            console.error('WebSocket is not connected.');
+        }
+
     }
 
     loadReactions(messageId) {
@@ -1328,25 +1325,8 @@ class ReactionManager {
     deleteReaction(messageId) {
         const data = { message_id: messageId };
 
-        fetch('/message-reaction/delete/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': '{{ csrf_token }}',
-            },
-            body: JSON.stringify(data),
-        })
-            .then((response) => response.json())
-            .then((responseData) => {
-                if (responseData.success) {
-                    this.loadReactions(messageId); // Reload reactions dynamically
-                } else {
-                    console.error('Failed to delete reaction:', responseData.error);
-                }
-            })
-            .catch((error) => {
-                console.error('Error while deleting reaction:', error);
-            });
+        console.log("frsykydrkhg");
+
     }
 }
 

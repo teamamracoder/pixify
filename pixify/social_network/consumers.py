@@ -41,7 +41,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         # Debug logs
         # print(f"Received action: {action}, message_id: {message_id}, chat_id: {chat_id}, user: {user}")
 
-        # print(text_data_json)
+        print(f"The Received Data: {text_data_json}")
 
         if action == 'create':
             await self.create_message(text_data_json, user)
@@ -56,8 +56,16 @@ class ChatConsumer(AsyncWebsocketConsumer):
         elif action == 'add_reaction':
             await self.add_reaction(message_id,user,reaction_id)
 
-    async def add_reaction(self,message_id,user,reaction_id):
-        await sync_to_async(message_reaction_service.create_or_update_message_reaction)(message_id,user,reaction_id)
+    async def add_reaction(self, message_id, user, reaction_id):
+        reaction_instance = await sync_to_async(
+            message_reaction_service.create_or_update_message_reaction
+        )(message_id, user, reaction_id)
+        
+        # Send reaction details using the instance
+        await self.send_reaction_details(reaction_instance)
+
+
+
 
     async def create_message(self, text_data_json, user):        
         text = text_data_json.get('message', '')
@@ -219,7 +227,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         else:
             await self.send_message_to_group(message_id,seen_by_all=False)                        
 
-    async def send_message_to_group(self, message, deleted=False, message_new=False,seen_by_all=False):
+    async def send_message_to_group(self, message, deleted=False, message_new=False, seen_by_all=False):
         sender = await sync_to_async(User.objects.get)(id=message.sender_id_id)
 
         updated = bool(message.updated_by_id)
@@ -240,10 +248,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
             except Message.DoesNotExist:
                 pass
 
-         # Convert datetime to string using a format for h:m AM/PM
+        # Convert datetime to string using a format for h:m AM/PM
         message_time_str = message.created_at.strftime('%I:%M %p')  # 12-hour format with AM/PM    
-        reactions = await self.fetch_reactions() #fetch emoji from masterlist table  
-        msg_reactions = await self.message_reactions(self.chat_id)
+        reactions = await self.fetch_reactions()  # fetch emoji from masterlist table          
         message_data = {
             'message_id': message.id,
             'message': message.text,
@@ -260,10 +267,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
             'del_type': message.delete_type,
             'del_by': message.deleted_by,
             'message_new': message_new,
-            'seen_by_all':seen_by_all,
-            'reactions':reactions, 
-            'msg_reactions':msg_reactions,
-            }
+            'seen_by_all': seen_by_all,
+            'reactions': reactions,
+        }
 
         await self.channel_layer.group_send(
             self.chat_group_name,
@@ -273,41 +279,84 @@ class ChatConsumer(AsyncWebsocketConsumer):
             }
         )
 
+         
+    async def send_reaction_details(self, reaction_instance):        
+        print(f"the reaction: {reaction_instance}")
+        
+        # Extract the actual user id from the lazy user object
+        user_id = reaction_instance.reacted_by.id  
+        sender = await sync_to_async(User.objects.get)(id=user_id)
+
+        react = bool(reaction_instance.reaction_id)
+        deleted=not reaction_instance.is_active
+        reaction_val=await sync_to_async (message_reaction_service.message_reaction)(reaction_instance.message_id)
+
+        reaction_data = {
+            'react':react,
+            # Use the underlying '_id' attribute to avoid lazy evaluation
+            'message_id': reaction_instance.message_id_id,
+            # Similarly, if reaction_id is a ForeignKey, use its underlying value.
+            'reaction_id': reaction_instance.reaction_id_id,
+            'reaction_val': reaction_val,
+            'user': sender.first_name,
+            'user_pic': sender.profile_photo_url, 
+            'deleted':deleted,
+        }
+
+        await self.channel_layer.group_send(
+            self.chat_group_name,
+            {
+                'type': 'chat_message',
+                'reaction': reaction_data,
+            }
+        )
+
+
 
     async def chat_message(self, event):
-        message = event['message']
+    # Check if the event contains a reaction
+        if 'reaction' in event:
+            reaction = event['reaction']
+            await self.send(text_data=json.dumps({
+                'type': 'reaction',
+                'react': reaction['react'],
+                'message_id': reaction['message_id'],
+                'reaction_id': reaction['reaction_id'],
+                'reaction_val':reaction['reaction_val'],
+                'user': reaction['user'],
+                'ProfilePic': reaction['user_pic'],
+                'deleted':reaction['deleted'],
+            }))
+        else:
+            message = event['message']
+            await self.send(text_data=json.dumps({
+                'type': 'message',
+                'message': message['message'],
+                'messageTime': message['messageTime'],
+                'update': message['update'],
+                'reply': message['reply'],
+                'replyText': message['replyText'],
+                'reply_username': message['reply_username'],
+                'reply_userPic': message['reply_userPic'],
+                'user': message['user'],
+                'ProfilePic': message['user_pic'],
+                'message_id': message['message_id'],
+                'media_urls': message['media_urls'],
+                'deleted': message['deleted'],
+                'del_type': message['del_type'],
+                'del_by': message['del_by'],
+                'message_new': message['message_new'],
+                'seen_by_all': message['seen_by_all'],
+                'reactions': message['reactions'],
+            }))
 
-        # Debug log
-        # print(f"Chat message event: {message}")
-
-        await self.send(text_data=json.dumps({
-            'type': 'message',
-            'message': message['message'],
-            'messageTime': message['messageTime'],
-            'update':message['update'],
-            'reply':message['reply'],
-            'replyText':message['replyText'],
-            'reply_username':message['reply_username'],
-            'reply_userPic':message['reply_userPic'],
-            'user': message['user'],            
-            'ProfilePic': message['user_pic'],
-            'message_id': message['message_id'],
-            'media_urls': message['media_urls'],
-            'deleted': message['deleted'],
-            'del_type': message['del_type'],
-            'del_by': message['del_by'],
-            'message_new': message['message_new'],
-            'seen_by_all':message['seen_by_all'],
-            'reactions': message['reactions'],
-            'msg_reactions': message['msg_reactions'],
-        }))
 
     async def fetch_reactions(self):
         reactions = await sync_to_async(message_reaction_service.show_reactions)()
         return reactions
     
-    async def message_reactions(self,chat_id):
-        msg_reactions = await sync_to_async(message_reaction_service.message_reactions)(chat_id)
+    async def message_reactions(self,message_id):
+        msg_reactions = await sync_to_async(message_reaction_service.message_reaction)(message_id)
         return msg_reactions
 
 
