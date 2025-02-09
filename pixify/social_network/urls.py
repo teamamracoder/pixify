@@ -5,9 +5,6 @@ from django.urls import path
 
 
 
-
-
-
 urlpatterns = [
     # home
     path('admin/', views.AdminHomeView.as_view(), name='home'),

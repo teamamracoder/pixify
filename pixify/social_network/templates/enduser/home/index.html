@@ -403,49 +403,81 @@
 
 
 {% comment %} Here work by Badhan {% endcomment %}
-<div id="carouselExample" class="carousel slide" style="max-width: 540px; margin: auto;">
-  <div class="carousel-inner">
-      <div class="video-wrapper" style="display: flex; justify-content: space-around;">
-          <video width="30%" height="calc(30vw * 9 / 16)" style="object-fit: cover; margin: 5px;" controls>
-              <source src="{% static 'videos/for.mp4' %}" type="video/mp4">
-          </video>
-          <video width="30%" height="calc(30vw * 9 / 16)" style="object-fit: cover; margin: 5px;" controls>
-              <source src="{% static 'videos/food.mp4' %}" type="video/mp4">
-          </video>
-          <video width="30%" height="calc(30vw * 9 / 16)" style="object-fit: cover; margin: 5px;" controls>
-              <source src="{% static 'videos/hello.mp4' %}" type="video/mp4">
-          </video>
-          <video width="30%" height="calc(30vw * 9 / 16)" style="object-fit: cover; margin: 5px;" controls>
-              <source src="{% static 'videos/bggg.mp4' %}" type="video/mp4">
-          </video>
-          <video width="30%" height="calc(30vw * 9 / 16)" style="object-fit: cover; margin: 5px;" controls>
-              <source src="{% static 'videos/spidy.mp4' %}" type="video/mp4">
-          </video>
-          <video width="30%" height="calc(30vw * 9 / 16)" style="object-fit: cover; margin: 5px;" controls>
-              <source src="{% static 'videos/fod.mp4' %}" type="video/mp4">
-          </video>
-          <video width="30%" height="calc(30vw * 9 / 16)" style="object-fit: cover; margin: 5px;" controls>
-              <source src="{% static 'videos/tom.mp4' %}" type="video/mp4">
-          </video>
-          <video width="30%" height="calc(30vw * 9 / 16)" style="object-fit: cover; margin: 5px;" controls>
-              <source src="{% static 'videos/ele.mp4' %}" type="video/mp4">
-          </video>
-          <video width="30%" height="calc(30vw * 9 / 16)" style="object-fit: cover; margin: 5px;" controls>
-              <source src="{% static 'videos/for.mp4' %}" type="video/mp4">
-          </video>
-      </div>
+ 
+  <div id="carouselExample" class="carousel slide" style="max-width: 540px; margin: auto;">
+    <div class="carousel-inner">
+        <div class="video-wrapper">
+            <video controls><source src="{% static 'videos/for.mp4' %}" type="video/mp4"></video>
+            <video controls><source src="{% static 'videos/food.mp4' %}" type="video/mp4"></video>
+            <video controls><source src="{% static 'videos/hello.mp4' %}" type="video/mp4"></video>
+            <video controls><source src="{% static 'videos/bggg.mp4' %}" type="video/mp4"></video>
+            <video controls><source src="{% static 'videos/spidy.mp4' %}" type="video/mp4"></video>
+            <video controls><source src="{% static 'videos/fod.mp4' %}" type="video/mp4"></video>
+            <video controls><source src="{% static 'videos/tom.mp4' %}" type="video/mp4"></video>
+            <video controls><source src="{% static 'videos/ele.mp4' %}" type="video/mp4"></video>
+            <video controls><source src="{% static 'videos/for.mp4' %}" type="video/mp4"></video>
+        </div>
+    </div>
+    
+    <!-- Carousel Controls -->
+    <button class="carousel-control-prev" type="button" data-bs-target="#carouselExample" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Previous</span>
+    </button>
+    
+    <button class="carousel-control-next" type="button" data-bs-target="#carouselExample" data-bs-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Next</span>
+    </button>
   </div>
-  <button class="carousel-control-prev" type="button" data-bs-target="#carouselExample" data-bs-slide="prev">
-      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-      <span class="visually-hidden">Previous</span>
-  </button>
-  <button class="carousel-control-next" type="button" data-bs-target="#carouselExample" data-bs-slide="next">
-      <span class="carousel-control-next-icon" aria-hidden="true"></span>
-      <span class="visually-hidden">Next</span>
-  </button>
-</div>
-
-<script>
+ 
+<style>
+    /* Default styles */
+    .video-wrapper {
+        display: flex;
+        justify-content: space-around;
+        flex-wrap: wrap;
+    }
+    
+    video {
+        width: 30%;
+        height: calc(30vw * 9 / 16);
+        object-fit: cover;
+        margin: 5px;
+    }
+  
+    /* Mobile adjustments */
+    @media (max-width: 768px) {
+        .video-wrapper {
+            justify-content: center; /* Center the videos */
+        }
+  
+        video {
+            width: 48%; /* Increase video width */
+            height: auto; /* Maintain aspect ratio */
+        }
+  
+        /* Position carousel buttons inside */
+        .carousel-control-prev,
+        .carousel-control-next {
+            width: 40px;
+            height: 40px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 50%;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+  
+        .carousel-control-prev {
+            left: 5px;
+        }
+  
+        .carousel-control-next {
+            right: 5px;
+        }
+    }
+  </style>
+ <script>
   document.addEventListener('DOMContentLoaded', function () {
     const carousel = document.getElementById('carouselExample');
     const prevButton = carousel.querySelector('.carousel-control-prev');
@@ -499,8 +531,8 @@
     showVideos();
     updateButtons();
 });
+</script>  
 
-</script> 
 {% comment %} End by Badhan {% endcomment %}
 
 
@@ -512,7 +544,6 @@
                   <h5 class="modal-title mx-auto" id="shareModalLabel">Share Post</h5>
                   <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="margin-left: 0px;"></button>
                 </div>
-
                 <div class="share-container">
                     <h5><img src="https://cdn-icons-png.flaticon.com/128/6997/6997662.png" alt="Profile Picture"
                             class="profile-pic">Rima Das </h5>
