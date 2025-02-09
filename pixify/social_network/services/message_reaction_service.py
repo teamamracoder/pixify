@@ -3,7 +3,6 @@ from ..constants import MasterType,MessageDeleteType
 from django.shortcuts import get_object_or_404
 
 
-
 def get_active_message_reactions(message_id):
     reactions = MessageReaction.objects.filter(
         message_id=message_id,
@@ -22,22 +21,30 @@ def get_reaction_by_name(reaction_id):
     return MasterList.objects.filter(id=reaction_id).first()
 
 def create_or_update_message_reaction(message_id, user, reaction):
+    # Get the Master_list instance
+    react = MasterList.objects.get(id=reaction)
+
     # Create or update the MessageReaction instance
     reaction_instance, created = MessageReaction.objects.update_or_create(
         message_id_id=message_id,
         reacted_by=user,
         defaults={
-            'reaction_id': reaction,
+            'reaction_id': react,
+            'reacted_by': user,
             'created_by': user,
             'is_active': True
         }
     )
 
-    # If not created (i.e., updated), explicitly update the `updated_at` field
+    # If updated (i.e., not created), update the `updated_at` and `updated_by` fields
     if not created:
-        reaction_instance.save(update_fields=['updated_at'])
+        reaction_instance.updated_by = user
+        reaction_instance.save(update_fields=['updated_by', 'updated_at'])
 
-    return reaction_instance, created
+    # Return the reaction instance directly (it’s already fully evaluated)
+    return reaction_instance
+
+
 
 
 def get_active_reaction(message_id, user):
@@ -128,9 +135,8 @@ def message_reactions(chat_id):
     return list(reactions)
 
 
+def message_reaction(message_id):
+    reactions = MessageReaction.objects.filter(message_id=message_id).values('reaction_id__value').first()
+    print(reactions)
 
-
-
-
-
-
+    return list(reactions)
