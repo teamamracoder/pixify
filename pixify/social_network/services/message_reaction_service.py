@@ -136,7 +136,7 @@ def message_reactions(chat_id):
 
 
 def message_reaction(message_id):
-    reactions = MessageReaction.objects.filter(message_id=message_id).values('reaction_id__value').first()
+    reactions = MessageReaction.objects.filter(message_id=message_id).values('reaction_id__value')
     print(reactions)
-
+    
     return list(reactions)

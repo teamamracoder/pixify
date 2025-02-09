@@ -35,8 +35,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         user_id =text_data_json.get('sender_id')
         del_type = text_data_json.get('del_type')
         user = self.scope['user']
-        reaction_id=text_data_json.get('reaction_id')
-        print(reaction_id)
+        reaction_id=text_data_json.get('reaction_id')        
 
         # Debug logs
         # print(f"Received action: {action}, message_id: {message_id}, chat_id: {chat_id}, user: {user}")
@@ -55,6 +54,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
             await self.mark_message_as_read(message_id, user)
         elif action == 'add_reaction':
             await self.add_reaction(message_id,user,reaction_id)
+        elif action == 'del_reaction':
+            await self.delete_reaction(message_id,user)
 
     async def add_reaction(self, message_id, user, reaction_id):
         reaction_instance = await sync_to_async(
@@ -64,7 +65,15 @@ class ChatConsumer(AsyncWebsocketConsumer):
         # Send reaction details using the instance
         await self.send_reaction_details(reaction_instance)
 
-
+    async def delete_reaction(self, message_id, user):        
+        react = await sync_to_async(message_reaction_service.get_active_reaction)(message_id, user)
+        
+        await sync_to_async(message_reaction_service.deactivate_reaction)(react)
+        print(react)
+    
+        await self.send_reaction_details(react)
+        
+        
 
 
     async def create_message(self, text_data_json, user):        
@@ -284,22 +293,22 @@ class ChatConsumer(AsyncWebsocketConsumer):
         print(f"the reaction: {reaction_instance}")
         
         # Extract the actual user id from the lazy user object
-        user_id = reaction_instance.reacted_by.id  
-        sender = await sync_to_async(User.objects.get)(id=user_id)
+        # user_id = reaction_instance.reacted_by.id  
+        # sender = await sync_to_async(User.objects.get)(id=user_id)
 
-        react = bool(reaction_instance.reaction_id)
+        react = bool(reaction_instance.reaction_id_id)
         deleted=not reaction_instance.is_active
-        reaction_val=await sync_to_async (message_reaction_service.message_reaction)(reaction_instance.message_id)
+        # reaction_val=await sync_to_async (message_reaction_service.message_reaction)(reaction_instance.message_id_id)
 
         reaction_data = {
             'react':react,
             # Use the underlying '_id' attribute to avoid lazy evaluation
             'message_id': reaction_instance.message_id_id,
             # Similarly, if reaction_id is a ForeignKey, use its underlying value.
-            'reaction_id': reaction_instance.reaction_id_id,
-            'reaction_val': reaction_val,
-            'user': sender.first_name,
-            'user_pic': sender.profile_photo_url, 
+            # 'reaction_id': reaction_instance.reaction_id_id,
+            # 'reaction_val': reaction_val,
+            # 'user': sender.first_name,
+            # 'user_pic': sender.profile_photo_url, 
             'deleted':deleted,
         }
 
@@ -321,11 +330,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 'type': 'reaction',
                 'react': reaction['react'],
                 'message_id': reaction['message_id'],
-                'reaction_id': reaction['reaction_id'],
-                'reaction_val':reaction['reaction_val'],
-                'user': reaction['user'],
-                'ProfilePic': reaction['user_pic'],
-                'deleted':reaction['deleted'],
+                # 'reaction_id': reaction['reaction_id'],
+                # 'reaction_val':reaction['reaction_val'],
+                # 'user': reaction['user'],
+                # 'ProfilePic': reaction['user_pic'],
+                'rac_deleted':reaction['deleted'],
             }))
         else:
             message = event['message']
