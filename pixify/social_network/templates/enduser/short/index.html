@@ -806,41 +806,102 @@ document.querySelectorAll('.chat-icon').forEach(button => {
 
 <style>
 
-    /* Media query for small screens */
 @media (max-width: 576px) {
   .short-modal-dialog {
     width: 95%;
   }
-
   .short-modal-header,
   .short-modal-body {
     padding: 5px;
   }
+  .video-box {
+    width: 95% !important;
+    height: 70vh !important;
+  }
+  .right-icons {
+    right: 10px !important;
+    bottom: 50px !important;
+  }
+  .navigation-buttons {
+    display: none !important;
+  }
 }
 
-/* Media query for medium screens */
+/* Large Mobile Screens */
+@media (max-width: 430px) and (min-height: 800px) {
+  .video-box {
+    width: 90% !important;
+    height: 85vh !important;
+  }
+  .right-icons {
+    bottom: 70px !important;
+    right: 20px !important;
+  }
+}
+
+/* Tablets */
 @media (min-width: 577px) and (max-width: 768px) {
-  .short-modal-dialog {
-    width: 90%;
+  .video-box {
+    margin-top: 35px !important;
+    height: 82vh !important;
+    width: 90% !important;
   }
+  .right-icons {
+    bottom: 75px !important;
+    right: 20px !important;
+  }
+  .navigation-buttons {
+    display: none !important;
+  }
+}
 
-  .short-modal-header,
-  .short-modal-body {
-    padding: 8px;
+/* Mobile & Tablets (max 768px) */
+@media (max-width: 768px) {
+  .video-box {
+    margin-top: 30px !important;
+    height: 82vh !important;
+    width: 95% !important;
+  }
+  .right-icons {   
+    bottom: 65px !important; 
+    right: 18px !important;
+  }
+  .short-modal {
+    right: 44px !important;
+    width: 370% !important;
+  }
+  .navigation-buttons {
+    display: none !important;
+  }
+  .short-modal.show {
+    bottom: 95px !important;
   }
 }
 
-/* Media query for large screens */
-@media (min-width: 769px) {
-  .short-modal-dialog {
-    width: 70%;
+/* Slightly Larger Tablets (max 817px) */
+@media (max-width: 817px) {
+  .video-box {
+    margin-top: 30px !important;
+    height: 82vh !important;
+    width: 95% !important;
   }
-
-  .short-modal-header,
-  .short-modal-body {
-    {% comment %} padding: 12px; {% endcomment %}
+  .right-icons {   
+    bottom: 65px !important; 
+    right: 18px !important;
+  }
+  .navigation-buttons {
+    display: none !important;
   }
 }
+
+
+
+/* .short-modal-header,
+.short-modal-body {
+  {% comment %} padding: 12px; {% endcomment %}
+}
+} */
+
 
 
 .modal-title{
@@ -1041,18 +1102,17 @@ document.querySelectorAll('.chat-icon').forEach(button => {
     /* Initial state of the modal, off-screen (bottom) */
 .short-modal {
     display: none; 
-    position: fixed;
+    position: absolute;
     bottom: -100%;
     right: 38%;
-    width: 100%;
-    height: 35%;    
+    width: 100%;  
     z-index: 9999;
     justify-content: flex-end;
     transition: bottom 0.3s ease-in-out; /* Smooth transition for sliding */
 }
 
 .short-modal.show {
-    bottom: 30%; /* Move the modal to the visible area */
+    bottom: 12px; /* Move the modal to the visible area */
 }
 
 .short-modal-dialog {    
@@ -1074,7 +1134,7 @@ document.querySelectorAll('.chat-icon').forEach(button => {
 }
 
 .short-comments-list {
-    margin-bottom: 20px;
+    margin-bottom: 0px;
 }
 
 .short-comment-item {
@@ -1154,28 +1214,14 @@ document.querySelectorAll('.chat-icon').forEach(button => {
 
 }
 
-@media (max-width:768px){
-    .video-box{
-        margin-top: 15px;
-        height: 80vh !important;
-        width: 38% !important;
-}
-.right-icons {    
-    right: 222px !important;
-}
 
-.navigation-buttons {
-    display:none !important;
-}
-
-}
 
 /* Each Video Wrapper */
 
 /* Wrapper for each individual video with snap alignment */
 .video-wrapper {
     scroll-snap-align: start;
-    margin-bottom: 5%;
+    margin-bottom: 18%;
     height: 100vh;
     display: flex;
     justify-content: center;
@@ -1188,8 +1234,9 @@ document.querySelectorAll('.chat-icon').forEach(button => {
 
 /* Styling for the video container */
 .video-box {
-    width: 60%;
-    height: 98vh;
+margin-top: 16px;
+    width: 58%;
+    height: 88vh;
     background-color: #000;
     border-radius: 12px;
     overflow: hidden;
@@ -1203,7 +1250,7 @@ document.querySelectorAll('.chat-icon').forEach(button => {
 .video-box video {
     width: 100%;
     height: 100%;
-    object-fit: scale-down;
+    object-fit: cover;
     border-radius: 12px;
 }
 
