@@ -10,7 +10,7 @@ def create_user(first_name, last_name, email):
     return User.objects.create(first_name=first_name, last_name=last_name, email=email)
 
 def get_user(user_id):
-    return get_object_or_404(User, id=user_id)
+    return get_object_or_404(User, id=user_id, is_active = True)
 
 # Work By Badhan
 def update_user(user_id,first_name,last_name,email,phone,gender,address,dob,country,bio,hobbies,relationship_status,profile_picture):

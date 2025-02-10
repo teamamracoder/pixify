@@ -37,9 +37,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
         user = self.scope['user']
         reaction_id=text_data_json.get('reaction_id')        
 
-        # Debug logs
-        # print(f"Received action: {action}, message_id: {message_id}, chat_id: {chat_id}, user: {user}")
-
         print(f"The Received Data: {text_data_json}")
 
         if action == 'create':
@@ -51,7 +48,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         elif action == 'delete':
             await self.delete_message(message_id, user_id, del_type)
         elif action == 'mark_as_read':
-            await self.mark_message_as_read(message_id, user)
+            await self.mark_message_as_read(message_id, user_id)
         elif action == 'add_reaction':
             await self.add_reaction(message_id,user,reaction_id)
         elif action == 'del_reaction':
@@ -68,8 +65,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def delete_reaction(self, message_id, user):        
         react = await sync_to_async(message_reaction_service.get_active_reaction)(message_id, user)
         
-        await sync_to_async(message_reaction_service.deactivate_reaction)(react)
-        print(react)
+        await sync_to_async(message_reaction_service.deactivate_reaction)(react)        
     
         await self.send_reaction_details(react)
         
@@ -108,7 +104,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 if user_obj:
                     mention_ids.append(user_obj.id)
 
-        # print('Mentioned IDs:', mention_ids)
         for mentioned_user in mention_ids:
             mentioned_user_instance = await sync_to_async(user_service.get_user)(mentioned_user)
             await sync_to_async(message_mention_service.create_message_mentions)(message, mentioned_user_instance, user)
@@ -150,16 +145,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
         # Fetch current mentions and ids asynchronously
         current_mentions = await sync_to_async(message_mention_service.get_message_mentions)(message)
         current_mention_ids = set(await sync_to_async(lambda: list(current_mentions.values_list('user_id', flat=True)))())
-        
-        # print(current_mention_ids)
 
         # Calculate added and removed mentions
         new_mention_ids = set(mention_ids)
         removed_mentions = current_mention_ids - new_mention_ids
         added_mentions = new_mention_ids - current_mention_ids
-        
-        # print(added_mentions)
-        # print(removed_mentions)
 
         # Process removed mentions
         for mentioned_user in removed_mentions:
@@ -209,8 +199,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 user_obj = await sync_to_async(lambda: User.objects.filter(first_name__iexact=mention).first())()
                 if user_obj:
                     mention_ids.append(user_obj.id)
-
-        # print('Mentioned IDs:', mention_ids)
+        
         for mentioned_user in mention_ids:
             mentioned_user_instance = await sync_to_async(user_service.get_user)(mentioned_user)
             await sync_to_async(message_mention_service.create_message_mentions)(reply_message, mentioned_user_instance, user)
@@ -227,14 +216,16 @@ class ChatConsumer(AsyncWebsocketConsumer):
         # Notify the WebSocket group that the message was deleted
         await self.send_message_to_group(message, deleted=True)
 
-    async def mark_message_as_read(self, message_id, user):
-        await sync_to_async (message_read_status_service.create_message_read_status)(message_id, user)
-        seen_all = await sync_to_async(chat_service.is_message_seen_by_all)(message_id)
+    async def mark_message_as_read(self, message_id, user_id):
+        message = await sync_to_async(message_service.get_message_by_id)(message_id)
+        user= await sync_to_async(user_service.get_user)(user_id)
+        await sync_to_async (message_read_status_service.create_message_read_status)(message, user)
+        seen_all = await sync_to_async(chat_service.message_seen_status)(message)
 
         if seen_all:                
-            await self.send_message_to_group(message_id,seen_by_all=True)
+            await self.send_message_to_group(message,seen_by_all=True)
         else:
-            await self.send_message_to_group(message_id,seen_by_all=False)                        
+            await self.send_message_to_group(message,seen_by_all=False)                        
 
     async def send_message_to_group(self, message, deleted=False, message_new=False, seen_by_all=False):
         sender = await sync_to_async(User.objects.get)(id=message.sender_id_id)
@@ -289,26 +280,13 @@ class ChatConsumer(AsyncWebsocketConsumer):
         )
 
          
-    async def send_reaction_details(self, reaction_instance):        
-        print(f"the reaction: {reaction_instance}")
-        
-        # Extract the actual user id from the lazy user object
-        # user_id = reaction_instance.reacted_by.id  
-        # sender = await sync_to_async(User.objects.get)(id=user_id)
-
+    async def send_reaction_details(self, reaction_instance):
         react = bool(reaction_instance.reaction_id_id)
         deleted=not reaction_instance.is_active
-        # reaction_val=await sync_to_async (message_reaction_service.message_reaction)(reaction_instance.message_id_id)
 
         reaction_data = {
             'react':react,
-            # Use the underlying '_id' attribute to avoid lazy evaluation
             'message_id': reaction_instance.message_id_id,
-            # Similarly, if reaction_id is a ForeignKey, use its underlying value.
-            # 'reaction_id': reaction_instance.reaction_id_id,
-            # 'reaction_val': reaction_val,
-            # 'user': sender.first_name,
-            # 'user_pic': sender.profile_photo_url, 
             'deleted':deleted,
         }
 
@@ -330,10 +308,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 'type': 'reaction',
                 'react': reaction['react'],
                 'message_id': reaction['message_id'],
-                # 'reaction_id': reaction['reaction_id'],
-                # 'reaction_val':reaction['reaction_val'],
-                # 'user': reaction['user'],
-                # 'ProfilePic': reaction['user_pic'],
                 'rac_deleted':reaction['deleted'],
             }))
         else:

@@ -683,6 +683,39 @@ socket.onmessage = function (event) {
   console.log('Message received from WebSocket:', event.data);
   const data = JSON.parse(event.data);
 
+if (data.seen_by_all === false) {
+        markAsRead(data.message_id);
+    } else {
+        const messageId = data.message_id;
+        const messageElement = document.getElementById(`message-${messageId}`);
+
+        // Ensure that messageElement exists before modifying it
+        if (messageElement) {
+            const seenStatusElement = messageElement.querySelector('.seen-status i');
+            
+            // If the tick is already double, no need to change
+            if (seenStatusElement && seenStatusElement.classList.contains('bi-check2-all')) {
+                return;
+            }
+
+            // Remove the old tick (single tick)
+            if (seenStatusElement) {
+                seenStatusElement.remove();
+            }
+
+            // Append the new double tick
+            const seenStatusHtml = `
+                <div class="seen-status">
+                    ${data.user === currentUser ? `
+                        <i class="bi bi-check2-all"></i>
+                    ` : ''}
+                </div>`;
+            
+            // Append the seen status to the message element
+            messageElement.insertAdjacentHTML('beforeend', seenStatusHtml);
+        }
+    }
+
   if (data.message_new) {
     // Handle new message
     appendMessageToChat(
@@ -737,24 +770,39 @@ socket.onmessage = function (event) {
       messageElement.remove();
     }
 }else if (data.react) {
-    console.log("nooooooooooooooooooooooooooooooooo");
-
  const messageId = data.message_id;
 
      reactionManager.loadReactions(messageId);
 }else if (data.rac_deleted) {
-        console.log("pppppppppppppppppppppppppppppppppp");
-
         const messageId = data.message_id;
         reactionManager.loadReactions(messageId);
     }
 };
 
 // Function to append a message to the chat body
-function appendMessageToChat(message, messageId, messageTime, senderName, profilePic, reply, replyText, reply_username, reply_userPic, mediaUrls, isSent,reactions) {
-    console.log('Appending message:', { message, messageId, messageTime, senderName, profilePic, mediaUrls, isSent });
-    
+function appendMessageToChat(message, messageId, messageTime, senderName, profilePic, reply, replyText, reply_username, reply_userPic, mediaUrls, isSent, reactions) {
     const chatBody = document.querySelector(".chat-body");
+    const today = "Today"
+
+    // Check if today's timestamp is already present
+    const timestamps = chatBody.querySelectorAll("#message-timestamp span");
+    let todayExists = false;
+    timestamps.forEach(timestamp => {
+        if (timestamp.innerText === today) {
+            todayExists = true;
+        }
+    });
+
+    // Add today's timestamp if it doesn't exist
+    if (!todayExists) {
+        const timestampDiv = document.createElement("div");
+        timestampDiv.classList.add("message-timestamp");
+        timestampDiv.setAttribute("id", "message-timestamp"); // Added ID
+        timestampDiv.innerHTML = `<span>${today}</span>`;
+        chatBody.appendChild(timestampDiv);
+    }
+
+    // Create message div
     const messageDiv = document.createElement("div");
     messageDiv.classList.add("message", isSent ? "sent" : "received");
     messageDiv.setAttribute("id", `message-${messageId}`); // Correct ID structure
@@ -779,6 +827,7 @@ function appendMessageToChat(message, messageId, messageTime, senderName, profil
         `;
     }
     const reactionPopupContent = generateReactionPopupContent(reactions, messageId);
+
     // Construct the message content
     const messageContent = `
         <div class="message-content">
@@ -789,44 +838,36 @@ function appendMessageToChat(message, messageId, messageTime, senderName, profil
             </div>
             <span class="message-text">${message}</span>
             ${mediaPreview} <!-- Include media preview if it exists -->
-
-                <div class="message-footer">
-                        <span class="time">${ messageTime}</span>
-                        <div class="message-options">
-                            <i class="bi bi-three-dots-vertical" onclick="toggleOptions('${ messageId }')"></i>
-                            <i class="bi bi-emoji-smile" onclick="toggleReactionPopup('${ messageId }')"></i>
-                        </div>
-
-                        <div class="options-popup" id="options-${ messageId }" style="display: none;">
-
-                            ${isSent ? `<a href="#" onclick="editMessage('${messageId}')">Edit</a>` : ""}
-                            <a href="#" onclick="replyMessage('${messageId}', '${senderName}')">Reply</a>
-                            <a href="#" onclick="openDeleteModal('${messageId}')">Delete</a>   
-
-                        </div> 
-                        <div class="reaction-container" id="reaction-container-${messageId}">
-                            <div class="reaction-popup" id="reaction-popup-${messageId}" style="display: none;">
-                                ${reactionPopupContent} 
-                            </div>
-                            <div class="reaction-display" id="reaction-display-${messageId}"></div>
-                        </div> 
+            <div class="message-footer">
+                <span class="time">${messageTime}</span>
+                <div class="message-options">
+                    <i class="bi bi-three-dots-vertical" onclick="toggleOptions('${messageId}')"></i>
+                    <i class="bi bi-emoji-smile" onclick="toggleReactionPopup('${messageId}')"></i>
                 </div>
+                <div class="options-popup" id="options-${messageId}" style="display: none;">
+                    ${isSent ? `<a href="#" onclick="editMessage('${messageId}')">Edit</a>` : ""}
+                    <a href="#" onclick="replyMessage('${messageId}', '${senderName}')">Reply</a>
+                    <a href="#" onclick="openDeleteModal('${messageId}')">Delete</a>
+                </div>
+                <div class="reaction-container" id="reaction-container-${messageId}">
+                    <div class="reaction-popup" id="reaction-popup-${messageId}" style="display: none;">
+                        ${reactionPopupContent}
+                    </div>
+                    <div class="reaction-display" id="reaction-display-${messageId}"></div>
+                </div>
+            </div>
         </div>
-
-            <div class="seen-status">
-                ${senderName == currentUser ? `
-                    <i class="bi bi-check2"></i>
-                 `: ''}
-            </div>               
-
+        <div class="seen-status">
+            ${senderName == currentUser ? `<i class="bi bi-check2"></i>` : ''}
+        </div>
     `;
 
     messageDiv.innerHTML = messageContent; // Set the message content
     chatBody.appendChild(messageDiv); // Append the message to the chat body
     chatBody.scrollTop = chatBody.scrollHeight; // Scroll to the bottom of the chat
-
-    console.log('Message appended successfully!');
 }
+
+
 
 
 // Function to update the message in the chat
@@ -888,12 +929,6 @@ function updateMessageInChat(updatedMessage, messageId, messageTime, senderName,
             </div>
         `;
 
-        /*  <div class="seen-status">
-                ${senderName == currentUser ? `
-                    ${seen_by_all ? '<i class="bi bi-check2-all"></i>' : '<i class="bi bi-check2"></i>'}
-                ` : ''}
-            </div> 
-        */
         
 // Only update the message content, not the entire message structure
         const contentDiv = messageDiv.querySelector(".message-content");
@@ -964,7 +999,6 @@ function editMessage(messageId) {
     // Save the updated message
     function saveEditedMessage() {
         if (!editingMessageId) {
-            console.log("No message is being edited.");
             return;
         }
 
@@ -972,7 +1006,6 @@ function editMessage(messageId) {
         const updatedMessage = messageInput.value.trim();
 
         if (!updatedMessage) {
-            console.log("Message cannot be empty.");
             return;
         }
 
@@ -1025,7 +1058,6 @@ function editMessage(messageId) {
     // Save the updated message
     function saveReplyMessage() {
         if (!ReplyMessageId) {
-            console.log("No message is being replied.");
             return;
         }
 
@@ -1033,7 +1065,6 @@ function editMessage(messageId) {
         const ReplyMessage = messageInput.value.trim();
 
         if (!ReplyMessage) {
-            console.log("Message cannot be empty.");
             return;
         }
 
@@ -1095,7 +1126,6 @@ function editMessage(messageId) {
 
     // Toggle reaction popup
     function toggleReactionPopup(messageId) {
-        console.log("message ID:",messageId);
         const reactionPopup = document.getElementById(`reaction-popup-${messageId}`);
         if (reactionPopup) {
             reactionPopup.style.display = reactionPopup.style.display === "none" ? "block" : "none";
@@ -1186,8 +1216,6 @@ class ReactionManager {
     }
 
     addReaction(messageId, reactionId, reactionValue) {
-        console.log("hiibvsbkbsiubzd bvhjbk");
-
         const data = {
             action: 'add_reaction',
             message_id: messageId,
@@ -1198,7 +1226,6 @@ class ReactionManager {
         if (socket && socket.readyState === WebSocket.OPEN) {
             socket.send(JSON.stringify(data));
             toggleReactionPopup(messageId);
-            console.log('Reaction data sent:', data);
         } else {
             console.error('WebSocket is not connected.');
         }
@@ -1240,12 +1267,7 @@ class ReactionManager {
 
                     // Click event: only allow deletion if the current user is the one who reacted.
                     reactionElement.addEventListener('click', () => {
-                        console.log("Clicked reaction element");
-                        console.log("Reaction's reacted_by:", value.reacted_by);
-                        console.log("Current user ID:", currentUserId);
-
                         if (value.reacted_by == currentUserId) {
-                            console.log("User matched. Sending del_reaction...");
                             const delData = {
                                 action: 'del_reaction',
                                 message_id: messageId,
@@ -1254,7 +1276,6 @@ class ReactionManager {
                             // Send the deletion data to the backend via WebSocket
                             if (socket && socket.readyState === WebSocket.OPEN) {
                                 socket.send(JSON.stringify(delData));
-                                console.log('Reaction data sent:', delData);
                             } else {
                                 console.error('WebSocket is not connected.');
                             }
@@ -1330,6 +1351,60 @@ document.addEventListener('DOMContentLoaded', () => {
     messageIds.forEach((messageId) => {
         reactionManager.init(messageId);
     });
+});
+
+
+ function markAsRead(messageId) {
+    const chatId = document.getElementById("chat_id").value;
+    const senderId = "{{ user.id }}"; // Sender's ID from the context
+
+    socket.send(JSON.stringify({
+        chat_id: chatId,
+        sender_id: senderId,
+        message_id: messageId, // Including the message ID
+        action: 'mark_as_read',
+    }));
+}
+
+
+// Function to handle the markAsRead logic with retry mechanism
+function markAsReadWithRetry(messageId) {
+    const chatId = document.getElementById("chat_id").value;
+    const senderId = "{{ user.id }}"; // Sender's ID from the context
+
+    if (socket.readyState === WebSocket.OPEN) {
+        socket.send(JSON.stringify({
+            chat_id: chatId,
+            sender_id: senderId,
+            message_id: messageId,
+            action: 'mark_as_read',
+        }));
+    } else {
+        console.warn("WebSocket is not open. Retrying in 1 second...");
+        setTimeout(() => markAsReadWithRetry(messageId), 1000); // Retry after 1 second
+    }
+}
+
+// Function to continuously check and mark unread messages
+function checkAndMarkUnreadMessages() {
+    const messages = document.querySelectorAll('.message');
+    messages.forEach(message => {
+        const messageId = message.id.split('-')[1];
+        const seenStatusElement = message.querySelector('.seen-status i');
+
+        // Check if the message has a single tick (unread)
+        if (seenStatusElement && seenStatusElement.classList.contains('bi-check2') && !seenStatusElement.classList.contains('bi-check2-all')) {
+            markAsReadWithRetry(messageId);
+        }
+    });
+}
+
+// Check all messages for read status after page refresh
+window.addEventListener('load', function () {
+    checkAndMarkUnreadMessages();
+
+    // Continuously check unread messages every 5 seconds
+        setInterval(checkAndMarkUnreadMessages, 5000);
 });
 
 
