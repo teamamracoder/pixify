@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pixify Calling</title>
+
+    </head>
+<body>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+
+    <div class="call-container">
+        <header class="call-header">
+            <p id="ring_ptag">Call - Pixify</p>
+            <button class="close-btn">✖</button>
+        </header>
+        <div class="call-body">
+            <div class="profile-icon">
+               <img src="http://celebrityinsider.org/wp-content/uploads/2019/04/tom-cruise.jpg" alt="">
+            </div>
+            <p class="contact-name">Subham</p>
+            <p class="call-status">Incoming...</p>
+        </div>
+        <div class="call-footer">
+            <button class="action-button more-options">⋯</button>
+            <button class="action-button accept-call"><i class="fa-solid fa-phone" style="color: #FFD43B;"></i></button>
+            <button class="action-button end-call"><i class="fas fa-phone-slash"></i></button>
+        </div>
+    </div>
+
+    <style>
+
+    #ring_ptag{
+      color: #ffff;
+    }        
+
+.profile-icon img {
+    object-fit: cover;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    /* margin-right: 10px; */
+    flex-shrink: 0;
+}
+        /* General Styles */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    background-color: #1A0933;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+button {
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+/* Call Container */
+.call-container {
+    width: 400px;
+    height: 600px;
+    background-color: #1A0933;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.7);
+}
+
+/* Header */
+.call-header {
+    background-color: #2953cd;
+    color: #aaa;
+    padding: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 16px;
+}
+
+.close-btn {
+    background-color: transparent;
+    color: #fff;
+    font-size: 20px;
+}
+
+/* Body */
+.call-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.profile-icon {
+    background-color: #555;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 50px;
+    color: #bbb;
+    margin-bottom: 20px;
+}
+
+.contact-name {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.call-status {
+    font-size: 18px;
+    color: #aaa;
+}
+
+/* Footer */
+.call-footer {
+    background-color: #ffff;
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.action-button {
+    height: 50px;
+    width: 50px;
+    padding: 10px 15px;
+    font-size: 16px;
+    color: #ffff;
+    background-color: #444;
+    border-radius: 50%;
+    transition: background-color 0.3s;
+}
+
+.action-button.more-options {
+  
+}
+
+.action-button.accept-call {
+    
+}
+
+.action-button.end-call {
+    background-color: #f00;
+}
+
+.action-button:hover {
+    opacity: 0.8;
+}
+
+    </style>
+    <script>
+        // Wait until the DOM is fully loaded
+document.addEventListener("DOMContentLoaded", () => {
+    // Get the buttons by their class names
+    const acceptCallButton = document.querySelector(".accept-call");
+    const endCallButton = document.querySelector(".end-call");
+
+    // Add click event listener for "Accept Call" button
+    acceptCallButton.addEventListener("click", () => {
+        alert("Call Accepted! 🎉");
+        // You can add more functionality here, such as transitioning the interface to an ongoing call screen
+    });
+
+    // Add click event listener for "End Call" button
+    endCallButton.addEventListener("click", () => {
+        alert("Call Ended! 🔴");
+        // Add functionality to end the call or redirect to another screen
+    });
+});
+
+    </script>
+</body>
+</html>
