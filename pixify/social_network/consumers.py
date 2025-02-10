@@ -35,7 +35,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
         user_id =text_data_json.get('sender_id')
         del_type = text_data_json.get('del_type')
         user = self.scope['user']
-        reaction_id=text_data_json.get('reaction_id')        
+        reaction_id=text_data_json.get('reaction_id')  
+        call_id = text_data_json.get('call_id')       
 
         print(f"The Received Data: {text_data_json}")
 
@@ -65,6 +66,50 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await self.typing_status(user_id,typing=False)
     
         
+
+
+
+
+
+            
+        elif action == 'ringing':
+            await self.ringing(chat_id,call_id)
+
+
+    async def ringing(self, chat_id, call_id):
+        members = await sync_to_async(chat_service.chat_members)(chat_id)  # Returns a list of dicts
+        ringing_data = {
+            'type': 'ringing_notification',
+            'call_id': call_id,
+            'chat_id': chat_id, 
+            'members': members,  # Now JSON serializable
+        }
+        await self.channel_layer.group_send(
+            self.chat_group_name,
+            ringing_data  # No need to reconstruct, directly send ringing_data
+        )
+
+    async def ringing_notification(self, event):
+        await self.send(text_data=json.dumps({
+            'action': 'ringing',
+            'call_id': event['call_id'],
+            'chat_id': event['chat_id'], 
+            'members': event['members'],  # Now a list of JSON-serializable dicts
+        }))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     async def add_reaction(self, message_id, user, reaction_id):
         reaction_instance = await sync_to_async(
