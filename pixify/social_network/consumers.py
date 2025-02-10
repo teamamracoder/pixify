@@ -53,6 +53,18 @@ class ChatConsumer(AsyncWebsocketConsumer):
             await self.add_reaction(message_id,user,reaction_id)
         elif action == 'del_reaction':
             await self.delete_reaction(message_id,user)
+        elif action == 'typing':
+            await self.typing(user_id)
+        elif action == 'stop_typing':
+            await self.stop_typing(user_id)
+
+    async def typing(self,user_id):        
+        await self.typing_status(user_id,typing=True)
+
+    async def stop_typing(self, user_id):
+        await self.typing_status(user_id,typing=False)
+    
+        
 
     async def add_reaction(self, message_id, user, reaction_id):
         reaction_instance = await sync_to_async(
@@ -69,8 +81,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
     
         await self.send_reaction_details(react)
         
-        
-
 
     async def create_message(self, text_data_json, user):        
         text = text_data_json.get('message', '')
@@ -225,7 +235,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         if seen_all:                
             await self.send_message_to_group(message,seen_by_all=True)
         else:
-            await self.send_message_to_group(message,seen_by_all=False)                        
+            await self.send_message_to_group(message,seen_by_all=False)
 
     async def send_message_to_group(self, message, deleted=False, message_new=False, seen_by_all=False):
         sender = await sync_to_async(User.objects.get)(id=message.sender_id_id)
@@ -298,8 +308,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
             }
         )
 
-
-
     async def chat_message(self, event):
     # Check if the event contains a reaction
         if 'reaction' in event:
@@ -332,6 +340,33 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 'seen_by_all': message['seen_by_all'],
                 'reactions': message['reactions'],
             }))
+
+
+    async def typing_status(self, user, typing=False):
+        sender = await sync_to_async(User.objects.get)(id=user)
+
+        typer = {            
+            'user': sender.first_name,
+            'user_pic': sender.profile_photo_url,
+            'typing': typing,
+        }
+
+        await self.channel_layer.group_send(
+            self.chat_group_name,
+            {
+                'type': 'typing_stat',
+                'typer': typer,
+            }
+        )
+        
+    async def typing_stat(self, event):
+        typer = event['typer']
+        await self.send(text_data=json.dumps({
+            'type': 'typing',
+            'user': typer['user'],
+            'user_pic': typer['user_pic'],
+            'typing': typer['typing'],
+        }))
 
 
     async def fetch_reactions(self):

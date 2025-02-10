@@ -109,6 +109,10 @@
         </div>
         {% endfor %}
         {% endfor %}
+        
+    <div class="loader hidden"></div>
+
+
     </div>
 
     <!-- Chat Footer -->
@@ -775,7 +779,12 @@ if (data.seen_by_all === false) {
 }else if (data.rac_deleted) {
         const messageId = data.message_id;
         reactionManager.loadReactions(messageId);
-    }
+    }else if (data.typing) {
+        
+    document.querySelector('.loader').classList.remove('hidden');
+    } else {
+    document.querySelector('.loader').classList.add('hidden');
+}
 };
 
 // Function to append a message to the chat body
@@ -1409,6 +1418,41 @@ window.addEventListener('load', function () {
 });
 
 
+document.addEventListener("DOMContentLoaded", function () {
+    const messageInput = document.getElementById("message-input");
+    const chatId = document.getElementById("chat_id").value;
+    const senderId = "{{ user.id }}"; // Ensure this is dynamically populated
+    let typingTimeout;
+
+    // Ensure WebSocket is open before sending
+    function sendTypingStatus() {
+        if (socket.readyState === WebSocket.OPEN) {
+            socket.send(JSON.stringify({
+                chat_id: chatId,
+                sender_id: senderId,
+                action: 'typing',
+            }));
+        }
+    }
+
+    // Listen for input events
+    messageInput.addEventListener("input", function () {
+        clearTimeout(typingTimeout);
+        sendTypingStatus();
+
+        // Stop sending "typing" after a delay
+        typingTimeout = setTimeout(() => {
+            if (socket.readyState === WebSocket.OPEN) {
+                socket.send(JSON.stringify({
+                    chat_id: chatId,
+                    sender_id: senderId,
+                    action: 'stop_typing',
+                }));
+            }
+        }, 300); // Stop typing status after 3 seconds of inactivity
+    });
+});
+
 </script>
 
 
@@ -1419,6 +1463,28 @@ window.addEventListener('load', function () {
 
 
 <style>
+
+.loader {
+  width: 60px;
+  aspect-ratio: 2;
+  --_g: no-repeat radial-gradient(circle closest-side, #000 90%, #0000);
+  background: 
+    var(--_g) 0% 50%, 
+    var(--_g) 50% 50%, 
+    var(--_g) 100% 50%;
+  background-size: calc(100%/3) 50%;
+  animation: l3 1s infinite linear;
+}
+@keyframes l3 {
+    20% {background-position: 0% 0%, 50% 50%, 100% 50%}
+    40% {background-position: 0% 100%, 50% 0%, 100% 50%}
+    60% {background-position: 0% 50%, 50% 100%, 100% 0%}
+    80% {background-position: 0% 50%, 50% 50%, 100% 100%}
+}
+.hidden {
+    display: none;
+}
+
 
 /* The Modal (background) */
 .parmess-del-modal {
