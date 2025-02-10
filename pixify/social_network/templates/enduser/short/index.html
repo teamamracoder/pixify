@@ -826,7 +826,9 @@ document.querySelectorAll('.chat-icon').forEach(button => {
     display: none !important;
   }
 }
-@media (max-device-width: 430px) and (min-device-height: 800px) {
+
+/* Large Mobile Screens */
+@media (max-width: 430px) and (min-height: 800px) {
   .video-box {
     width: 90% !important;
     height: 85vh !important;
@@ -836,6 +838,8 @@ document.querySelectorAll('.chat-icon').forEach(button => {
     right: 20px !important;
   }
 }
+
+/* Tablets */
 @media (min-width: 577px) and (max-width: 768px) {
   .video-box {
     margin-top: 35px !important;
@@ -851,45 +855,45 @@ document.querySelectorAll('.chat-icon').forEach(button => {
   }
 }
 
-
-@media (max-width:768px){
-    .video-box{
-        margin-top: 30px !important;
-        height: 82vh !important;
-        width: 95% !important;
-}
-.right-icons {   
+/* Mobile & Tablets (max 768px) */
+@media (max-width: 768px) {
+  .video-box {
+    margin-top: 30px !important;
+    height: 82vh !important;
+    width: 95% !important;
+  }
+  .right-icons {   
     bottom: 65px !important; 
     right: 18px !important;
-}
-.short-modal{
+  }
+  .short-modal {
     right: 44px !important;
     width: 370% !important;
+  }
+  .navigation-buttons {
+    display: none !important;
+  }
+  .short-modal.show {
+    bottom: 95px !important;
+  }
 }
 
-.navigation-buttons {
-    display:none !important;
-}
-.short-modal.show {
-    bottom: 95px !important;
-}
-}
-@media (max-width:817px){
-    .video-box{
-        margin-top: 30px !important;
-        height: 82vh !important;
-        width: 95% !important;
-}
-.right-icons {   
+/* Slightly Larger Tablets (max 817px) */
+@media (max-width: 817px) {
+  .video-box {
+    margin-top: 30px !important;
+    height: 82vh !important;
+    width: 95% !important;
+  }
+  .right-icons {   
     bottom: 65px !important; 
     right: 18px !important;
+  }
+  .navigation-buttons {
+    display: none !important;
+  }
 }
 
-.navigation-buttons {
-    display:none !important;
-}
-
-}
 
 
 /* .short-modal-header,
