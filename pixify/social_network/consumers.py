@@ -58,22 +58,14 @@ class ChatConsumer(AsyncWebsocketConsumer):
             await self.typing(user_id)
         elif action == 'stop_typing':
             await self.stop_typing(user_id)
+        elif action == 'ringing':
+            await self.ringing(chat_id,call_id)
 
-    async def typing(self,user_id):        
+    async def typing(self,user_id):
         await self.typing_status(user_id,typing=True)
 
     async def stop_typing(self, user_id):
         await self.typing_status(user_id,typing=False)
-    
-        
-
-
-
-
-
-            
-        elif action == 'ringing':
-            await self.ringing(chat_id,call_id)
 
 
     async def ringing(self, chat_id, call_id):
