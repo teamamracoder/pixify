@@ -27,7 +27,20 @@
                 <span class="username P-msg_chat-title">{{ data.chat.title }}</span>
             {% endif %}
         </div>
+          <div id="call_feature" onclick="startCall()"><i class="fa-solid fa-phone"></i></div>
     </div>
+
+    <script>
+        function startCall() {
+            const callId = generateCallId(); // Generate a unique call ID
+            window.location.href = `/call/${callId}/`;  // Ensure trailing slash
+        }
+    
+        function generateCallId() {
+            return Math.random().toString(36).substr(2, 9); // Simple unique ID generator
+        }
+    </script>
+
 
     <!-- Chat Body -->
     <div class="chat-body" id="chat-body">
@@ -1463,6 +1476,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 <style>
+
+ #call_feature{
+    margin-left: 250px;
+    font-size: 20px;
+ }   
 
 .loader {
   width: 60px;
