@@ -792,12 +792,7 @@ if (data.seen_by_all === false) {
 }else if (data.rac_deleted) {
         const messageId = data.message_id;
         reactionManager.loadReactions(messageId);
-    }else if (data.typing) {
-        
-    document.querySelector('.loader').classList.remove('hidden');
-    } else {
-    document.querySelector('.loader').classList.add('hidden');
-}else if (data.action === "ringing") {
+    }else if (data.action === "ringing") {
         const callId = data.call_id;  // Extract call ID
         const members = data.members; // Extract members list
     
@@ -813,7 +808,8 @@ if (data.seen_by_all === false) {
     
                 if (allJoined) {
                     clearInterval(checkInterval);  // Stop checking once all have joined
-                    window.location.href = `/call/${callId}/`;  // Redirect to call page
+                    window.location.href = "/call/" + callId + "/";
+
                 }
             }, 500); // Check every 5 seconds
         }
