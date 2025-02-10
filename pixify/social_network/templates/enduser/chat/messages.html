@@ -541,16 +541,17 @@
         });
 
     function updateScrollIndicator() {
+        const chatBody = document.getElementById("chat-body");
+        const messages = document.querySelectorAll(".message"); // Get latest messages
         const scrollPosition = chatBody.scrollTop + (chatBody.offsetHeight / 2); // Center of the chat body
 
         let closestMessage = null;
         let closestDistance = Infinity;
 
-        // Loop through each message to find the closest one to the center of the chat body
-        messages.forEach((message, index) => {
+        messages.forEach((message) => {
             const messageTop = message.offsetTop;
             const messageBottom = messageTop + message.offsetHeight;
-            const distance = Math.abs(scrollPosition - (messageTop + messageBottom) / 2);            
+            const distance = Math.abs(scrollPosition - (messageTop + messageBottom) / 2);
 
             if (distance < closestDistance) {
                 closestDistance = distance;
@@ -558,9 +559,7 @@
             }
         });
 
-        if (closestMessage) {            
-
-            // Find the nearest .message-timestamp element *above* the closest message
+        if (closestMessage) {
             let groupTimestamp = null;
             let sibling = closestMessage.previousElementSibling;
 
@@ -574,10 +573,10 @@
 
             if (groupTimestamp) {
                 showTimestampIndicator(groupTimestamp.innerText, closestMessage);
-            } else {                
             }
-        } 
+        }
     }
+
         
         function showTimestampIndicator(timestampText, closestMessage) {
         const timestampIndicator = document.getElementById("timestamp-scrollbar");
@@ -782,7 +781,7 @@ if (data.seen_by_all === false) {
 // Function to append a message to the chat body
 function appendMessageToChat(message, messageId, messageTime, senderName, profilePic, reply, replyText, reply_username, reply_userPic, mediaUrls, isSent, reactions) {
     const chatBody = document.querySelector(".chat-body");
-    const today = "Today"
+    const today = "Today";
 
     // Check if today's timestamp is already present
     const timestamps = chatBody.querySelectorAll("#message-timestamp span");
@@ -797,7 +796,7 @@ function appendMessageToChat(message, messageId, messageTime, senderName, profil
     if (!todayExists) {
         const timestampDiv = document.createElement("div");
         timestampDiv.classList.add("message-timestamp");
-        timestampDiv.setAttribute("id", "message-timestamp"); // Added ID
+        timestampDiv.setAttribute("id", "message-timestamp");
         timestampDiv.innerHTML = `<span>${today}</span>`;
         chatBody.appendChild(timestampDiv);
     }
@@ -805,14 +804,14 @@ function appendMessageToChat(message, messageId, messageTime, senderName, profil
     // Create message div
     const messageDiv = document.createElement("div");
     messageDiv.classList.add("message", isSent ? "sent" : "received");
-    messageDiv.setAttribute("id", `message-${messageId}`); // Correct ID structure
+    messageDiv.setAttribute("id", `message-${messageId}`);
 
     // Prepare media preview if media URLs are present
     let mediaPreview = "";
     if (mediaUrls.length > 0) {
         mediaPreview = mediaUrls
             .map(url => `<div class="message-media"><img src="${url}" alt="media"></div>`)
-            .join(""); // Corrected to use backticks for string interpolation
+            .join("");
     }
 
     // Prepare the parent message (reply) section if a reply exists
@@ -834,10 +833,10 @@ function appendMessageToChat(message, messageId, messageTime, senderName, profil
             <div class="message-header">
                 <img src="${profilePic}" alt="${senderName}'s Profile Picture" class="message-profile-pic">
                 <span class="message-username">${senderName}</span>
-                ${replyPreview} <!-- Include the reply preview if it exists -->
+                ${replyPreview}
             </div>
             <span class="message-text">${message}</span>
-            ${mediaPreview} <!-- Include media preview if it exists -->
+            ${mediaPreview}
             <div class="message-footer">
                 <span class="time">${messageTime}</span>
                 <div class="message-options">
@@ -858,15 +857,17 @@ function appendMessageToChat(message, messageId, messageTime, senderName, profil
             </div>
         </div>
         <div class="seen-status">
-            ${senderName == currentUser ? `<i class="bi bi-check2"></i>` : ''}
+            ${senderName == currentUser ? `<i class="bi bi-check2"></i>` : ""}
         </div>
     `;
 
-    messageDiv.innerHTML = messageContent; // Set the message content
-    chatBody.appendChild(messageDiv); // Append the message to the chat body
-    chatBody.scrollTop = chatBody.scrollHeight; // Scroll to the bottom of the chat
-}
+    messageDiv.innerHTML = messageContent;
+    chatBody.appendChild(messageDiv);
 
+    // Scroll to the bottom and update the scroll indicator
+    chatBody.scrollTop = chatBody.scrollHeight;
+    updateScrollIndicator();  // Call this function to update timestamp in real time
+}
 
 
 
