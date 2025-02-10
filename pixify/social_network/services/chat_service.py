@@ -112,7 +112,7 @@ def get_chat_by_id(chat_id):
 def get_recipient_for_personal(chat_id,user):
     # check this
     try:
-        chat_member = ChatMember.objects.exclude(member_id=user.id).get(chat_id=chat_id)
+        chat_member = ChatMember.objects.exclude(member_id=user.id).get(chat_id=chat_id,is_active=True)
         if chat_member:
             member = chat_member.member_id 
             return member
@@ -121,13 +121,13 @@ def get_recipient_for_personal(chat_id,user):
         return False
     
 def count_members(chat_id ):
-    members=ChatMember.objects.filter(chat_id=chat_id)
+    members=ChatMember.objects.filter(chat_id=chat_id,is_active=True)
     return members
 
 
 
 def get_recipients_for_group(chat_id,user):
-        chat_members = ChatMember.objects.filter(chat_id=chat_id)
+        chat_members = ChatMember.objects.filter(chat_id=chat_id,is_active=True)
         first_names = [
         'You' if chat_member.member_id == user else chat_member.member_id.first_name 
         for chat_member in chat_members
@@ -253,6 +253,23 @@ def list_followings(user, offset=0, limit=5):
     return name
 
 
+def message_seen_status(message):
+    members_count = ChatMember.objects.filter(
+        chat_id=message.chat_id,
+        is_active=True
+    ).count()
+
+    read_by_count = MessageReadStatus.objects.filter(
+        message_id=message,
+        is_active=True  
+    ).values('read_by').distinct().count()
+    
+    if read_by_count == members_count:
+        read_status = True
+    else:
+        read_status = False
+
+    return read_status
 
 
 

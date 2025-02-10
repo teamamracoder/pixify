@@ -12,17 +12,20 @@ class MessageReactionsListView(View):
     @role_required(Role.ADMIN.value, Role.END_USER.value)
     def get(self, request, message_id):
         try:
-            reactions =message_reaction_service.get_active_message_reactions(message_id)
+            reactions = message_reaction_service.get_active_message_reactions(message_id)
             reaction_data = [
                 {
                     'reaction': reaction.reaction_id.value,
-                    'reaction_count': message_reaction_service.get_reaction_count(message_id, reaction.reaction_id)
+                    'reaction_count': message_reaction_service.get_reaction_count(message_id, reaction.reaction_id),
+                    # Convert the User object to a serializable value, e.g., its id
+                    'reacted_by': reaction.reacted_by.id,
                 }
                 for reaction in reactions
             ]
             return JsonResponse({'reactions': reaction_data}, status=200)
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=400)
+
 
 class MessageReactionCreateView(View):
     @catch_error
