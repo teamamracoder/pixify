@@ -2,6 +2,6 @@ from django.shortcuts import render
 from django.views import View
 
 class CallView(View):
-    def get(self,request):
-        context={}
-        return render(request,'enduser/chat/call.html',context=context)
+    def get(self, request, call_id): 
+        context = {'call_id': call_id}  
+        return render(request, 'enduser/chat/ringing.html', context=context)

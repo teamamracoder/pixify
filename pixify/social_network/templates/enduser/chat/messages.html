@@ -27,6 +27,7 @@
                 <span class="username P-msg_chat-title">{{ data.chat.title }}</span>
             {% endif %}
         </div>
+        <button id="sendDataButton">start call</button>    
     </div>
 
     <!-- Chat Body -->
@@ -775,7 +776,34 @@ if (data.seen_by_all === false) {
 }else if (data.rac_deleted) {
         const messageId = data.message_id;
         reactionManager.loadReactions(messageId);
+    }else if (data.action === "ringing") {
+        const callId = data.call_id;  // Extract call ID
+        const members = data.members; // Extract members list
+    
+        if (Array.isArray(members)) {  // Ensure members is a valid array
+            const checkInterval = setInterval(() => {
+                let allJoined = true;
+    
+                members.forEach(member => {
+                    if (!isUserJoined(member)) { // Check if user has joined
+                        allJoined = false;
+                    }
+                });
+    
+                if (allJoined) {
+                    clearInterval(checkInterval);  // Stop checking once all have joined
+                    window.location.href = `/call/${callId}/`;  // Redirect to call page
+                }
+            }, 500); // Check every 5 seconds
+        }
     }
+    
+    // Simulated function to check if user has joined
+    function isUserJoined(userId) {
+        // Replace this with an actual API call or WebSocket status check
+        return true;  // Change logic based on your real implementation
+    }
+    
 };
 
 // Function to append a message to the chat body
@@ -1406,6 +1434,23 @@ window.addEventListener('load', function () {
 
     // Continuously check unread messages every 5 seconds
         setInterval(checkAndMarkUnreadMessages, 5000);
+});
+
+
+function generateCallId() {
+    return 'call_' + Math.random().toString(36).substr(2, 9); // Generates a random call ID
+}
+
+// Send data when the button is clicked
+document.getElementById('sendDataButton').addEventListener('click', function() {
+    const chatId = document.getElementById("chat_id").value;
+    var callId = generateCallId();
+    // Send updated data to the server
+    socket.send(JSON.stringify({
+        action : 'ringing',
+        call_id : callId ,
+        chat_id : chatId,
+    }));
 });
 
 

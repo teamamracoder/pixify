@@ -118,9 +118,13 @@ def get_recipient_for_personal(chat_id,user):
     except Exception as e:
         return False
     
-def count_members(chat_id ):
+def members(chat_id ):
     members=ChatMember.objects.filter(chat_id=chat_id,is_active=True)
     return members
+
+def chat_members(chat_id):
+    members = ChatMember.objects.filter(chat_id=chat_id, is_active=True)
+    return list(members.values("member_id"))  # Return user IDs instead
 
 
 
