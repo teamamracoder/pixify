@@ -203,6 +203,23 @@ def latest_message_sender_name(chat_latest_message_sender_id, user_id):
     return name
 
 
+def message_seen_status(message):
+    members_count = ChatMember.objects.filter(
+        chat_id=message.chat_id,
+        is_active=True
+    ).count()
+
+    read_by_count = MessageReadStatus.objects.filter(
+        message_id=message,
+        is_active=True  
+    ).values('read_by').distinct().count()
+    
+    if read_by_count == members_count:
+        read_status = True
+    else:
+        read_status = False
+
+    return read_status
 
 
 
