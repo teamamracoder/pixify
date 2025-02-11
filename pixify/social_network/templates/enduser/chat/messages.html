@@ -1345,9 +1345,9 @@ class ReactionManager {
                 const modal = document.createElement('div');
                 modal.classList.add('message-modal'); // Use the updated class name for modal
                 modal.innerHTML = `
-                    <div class="message-modal-content" id="msg-ul">
-                        <span class="close-btn">&times;</span>
-                        All (${data.reaction_count})<hr>
+                    <div class="message-modal-content" id="msg-ul"> <!-- Use the updated content class -->
+                        <span class="close-btnn">&times;</span>
+                            All (${data.reaction_count})<hr>
                         <ul id="msg-ul">
                             <div style="display:flex;">
                                 ${data.users.map(user => `
@@ -1368,7 +1368,7 @@ class ReactionManager {
                 document.body.appendChild(modal);
 
                 // Close the modal when the user clicks on the close button
-                modal.querySelector('.close-btn').addEventListener('click', () => {
+                modal.querySelector('.close-btnn').addEventListener('click', () => {
                     document.body.removeChild(modal);
                 });
 
@@ -1510,6 +1510,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 <style>
+.badge-div {
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    font-size: 20px;
+    padding-left: 10px;
+    padding-right: 10px;
+}   
 
  #call_feature{
     margin-left: 250px;
@@ -1750,7 +1758,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     .message.sent {
         align-self: flex-end;
-        background-color:rgba(50, 251, 226, 0.3); /*shubhankar change only color*/
+        background-color:#3b82f6;; /*shubhankar change only color*/
         color: white;
     }
 
@@ -1810,7 +1818,7 @@ document.addEventListener("DOMContentLoaded", function () {
 /* start */
     .options-popup {
     position: absolute; 
-    top: 20px;         
+    top: -70px;         
     left: 50%;         
     transform: translateX(-50%); 
     z-index: 1000;    
@@ -1891,12 +1899,11 @@ document.addEventListener("DOMContentLoaded", function () {
     .message-footer {
         position: relative;
         display: flex;
-        justify-content: space-between;
         align-items: center;
-        padding: 5px 10px;
     }
     
     .bi-emoji-smile {
+        padding-right: 10px;
         font-size: 20px;
         cursor: pointer;
         color: red; /*shubhankar change only color*/
@@ -1909,7 +1916,7 @@ document.addEventListener("DOMContentLoaded", function () {
     .reaction-popup {
         display: flex;
         position: absolute;
-        bottom: -40px;
+        bottom: 0px;
         right: 0;
         background-color: #fff;
         border: 1px solid #ccc;
@@ -1931,9 +1938,8 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     
     .reaction-display {
-        margin-top: 5px;
         display: flex;
-        gap: 5px;
+        gap: 2px;
         font-size: 14px;
     }
     
@@ -2146,8 +2152,8 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     .scroll-to-bottom {
-        position: fixed;
-        top: 88%;
+        position: absolute;
+        top: 82%;
         left: 50%;
         transform: translate(-50%, -50%); /* This will center the arrow */    
         color: white;
@@ -2182,7 +2188,7 @@ document.addEventListener("DOMContentLoaded", function () {
     
     .message-modal {
         display: none;
-        position: fixed;
+        position: absolute;
         z-index: 1;
         left: 0;
         top: 0;
@@ -2194,24 +2200,25 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     
     .message-modal .message-modal-content {
-        background-color: #151212;
-        margin: 5% auto;
-        padding: 16px;
-        border: 1px solid #888;
-        margin-top: 26%;
-        margin-right: 34%;
-        max-width: 325px;
-    }
+    position: relative;
+    background-color: #151212;
+    margin: 5% auto;
+    padding: 16px;
+    border: 1px solid #888;
+    margin-top: 18%;
+    /* margin-right: 34%; */
+    max-width: 325px;
+}
     
-    .message-modal .close-btn {
+    .message-modal .close-btnn {
         color: #aaa;
         float: right;
         font-size: 28px;
         font-weight: bold;
     }
     
-    .message-modal .close-btn:hover,
-    .message-modal .close-btn:focus {
+    .message-modal .close-btnn:hover,
+    .message-modal .close-btnn:focus {
         color: black;
         text-decoration: none;
         cursor: pointer;
@@ -2261,11 +2268,15 @@ document.addEventListener("DOMContentLoaded", function () {
     .center-bodycontent {
     display: contents;
 
-    }   
+    }  
+    #call_feature {
+    margin-left: 412px;
+    font-size: 20px;
+} 
 }
 @media (max-width: 480px) {
     .chat-container {
-        height: 95vh;
+        height: 88vh;
         border-radius: 0; /* No border-radius on small screens */
     }
 
@@ -2291,6 +2302,18 @@ document.addEventListener("DOMContentLoaded", function () {
         font-size: 0.8rem;
         padding: 6px;
     }
+    #call_feature {
+    padding-top: 12px;
+
+    margin-left: 160px;
+    font-size: 20px;
+}
+.user-info {
+    padding-top: 12px;
+    display: flex
+;
+    align-items: center;
+}
 
 }
 
