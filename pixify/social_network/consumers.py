@@ -152,7 +152,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         
         for mention in mentions:
             if 'all' in mention:
-                chat_members = await sync_to_async(lambda: list(ChatMember.objects.filter(chat_id=chat.id).exclude(member_id=user).values_list('member_id', flat=True)))()
+                chat_members = await sync_to_async(lambda: list(ChatMember.objects.filter(chat_id=chat.id, is_active=True).exclude(member_id=user).values_list('member_id', flat=True)))()
                 mention_ids.extend(chat_members)
             else:
                 user_obj = await sync_to_async(lambda: User.objects.filter(first_name__iexact=mention).first())()
@@ -190,7 +190,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
         for mention in mentions:
             if 'all' in mention:
-                chat_members = await sync_to_async(lambda: list(ChatMember.objects.filter(chat_id=chat.id).exclude(member_id=user).values_list('member_id', flat=True)))()
+                chat_members = await sync_to_async(lambda: list(ChatMember.objects.filter(chat_id=chat.id, is_active=True).exclude(member_id=user).values_list('member_id', flat=True)))()
                 mention_ids.extend(chat_members)
             else:
                 user_obj = await sync_to_async(lambda: User.objects.filter(first_name__iexact=mention).first())()
@@ -248,7 +248,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         
         for mention in mentions:
             if 'all' in mention:
-                chat_members = await sync_to_async(lambda: list(ChatMember.objects.filter(chat_id=chat.id).exclude(member_id=user).values_list('member_id', flat=True)))()
+                chat_members = await sync_to_async(lambda: list(ChatMember.objects.filter(chat_id=chat.id, is_active=True).exclude(member_id=user).values_list('member_id', flat=True)))()
                 mention_ids.extend(chat_members)
             else:
                 user_obj = await sync_to_async(lambda: User.objects.filter(first_name__iexact=mention).first())()
