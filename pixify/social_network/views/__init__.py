@@ -27,3 +27,7 @@ from .manage_message_view import *
 from .verification_view import *
 from .story_view import *
 from .manage_user_view import *
+from .post_view import *
+
+
+
