@@ -55,11 +55,14 @@ class HomeView(View):
         
 
         posts = services.post_service.Postlist_posts()
+        postreaction=services.post_reaction_service.get_reaction()
+        
         post_id = request.GET.get('post_id')
         comment_list = services.comment_service.comment_list(post_id)
         post_dict = {
             'posts': posts,
             'comment_list': comment_list,
+            'postreaction':postreaction,
             
         }
 
@@ -69,13 +72,14 @@ class HomeView(View):
             'storys': storys,
             #'name': 'sribash',
         }
-
+        
         # Merge everything into a single context
         context = success_response(message=message, message_type=message_type)
         context.update({
             'post_dict': post_dict,
             'story_dict': story_dict,
             'userid':userid,
+            
         })
 
         return render(request, "enduser/home/index.html", context)
