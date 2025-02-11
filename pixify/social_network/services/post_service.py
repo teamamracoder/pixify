@@ -1,5 +1,5 @@
 
-from ..models import Post,Comment
+from ..models import Post,Comment,PostReaction
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
 
@@ -62,6 +62,7 @@ def Postlist_posts():
 
 
 
+
 def admin_list_posts_filtered(search_query, sort_by='posted_by'):
     if search_query:
         # Use Q objects to filter by first_name, last_name, or email
@@ -92,3 +93,5 @@ def update_post(user_id,post_id,post_titile):
     # return post
 
 # comment
+def reaction_name(post_id):
+   return PostReaction.objects.filter( post_id_id=post_id, is_active=True).first()
