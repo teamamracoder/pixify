@@ -8,6 +8,6 @@ class CallView(View):
             'chat_id': chat_id  # Add chat_id to the context
         }
         if page_type == 'calling':
-            return render(request, 'enduser/chat/ringing.html', context=context)
-        return render(request, 'enduser/chat/calling.html', context=context)
+            return render(request, 'enduser/chat/calling.html', context=context)
+        return render(request, 'enduser/chat/ringing.html', context=context)
 
