@@ -1,6 +1,8 @@
-from ..models import MessageReaction,MasterList,Message
+from ..models import MessageReaction, MasterList, Message, User
 from ..constants import MasterType,MessageDeleteType
 from django.shortcuts import get_object_or_404
+from django.db import models
+from django.contrib.postgres.aggregates import ArrayAgg
 
 
 def get_active_message_reactions(message_id):
@@ -140,3 +142,29 @@ def message_reaction(message_id):
     print(reactions)
     
     return list(reactions)
+
+
+
+def reaction_count_by_reaction_id(message_id):
+    results = MessageReaction.objects.filter(message_id=message_id, is_active=True)\
+        .values('reaction_id')\
+        .annotate(
+            count=models.Count('reaction_id'),
+            reacted_by=ArrayAgg('reacted_by'),
+            react_value=ArrayAgg('reaction_id__value', distinct=True)
+        )\
+        .order_by()
+
+    # Adding names and photos in a separate loop
+    for result in results:
+        reacted_by_ids = result['reacted_by']
+        result['names'] = [f"{user.first_name or ''} {user.last_name or ''}".strip() for user in User.objects.filter(id__in=reacted_by_ids)]
+        result['photos'] = [user.profile_photo_url or "/static/images/avatar.jpg" for user in User.objects.filter(id__in=reacted_by_ids)]
+
+    return results
+
+
+def get_reacted_by_by_message_id(message_id):
+    reacted_by = MessageReaction.objects.filter(message_id=message_id, is_active=True).values_list("reacted_by", flat=True)    
+    return list(reacted_by)
+
