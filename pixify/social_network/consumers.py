@@ -422,51 +422,59 @@ class ChatConsumer(AsyncWebsocketConsumer):
    
 
 
+import json
+from channels.generic.websocket import AsyncWebsocketConsumer
+
 class CallConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        self.room_group_name = "call"
-        await self.channel_layer.group_add(
-            self.room_group_name,
-            self.channel_name
-        )
+        self.chat_id = self.scope['url_route']['kwargs']['chat_id']
+        self.call_group_name = f"call_{self.chat_id}"
+
+        # Join room group
+        await self.channel_layer.group_add(self.call_group_name, self.channel_name)
         await self.accept()
 
-        await self.channel_layer.group_send(
-            self.room_group_name,
-            {
-                "type": "send_sdp_signal",
-                "peer": "SERVER",
-                "action": "new-peer",
-                "message": {"receiver_channel_name": self.channel_name},
-            }
-        )
-
     async def disconnect(self, close_code):
-        await self.channel_layer.group_send(
-            self.room_group_name,
-            {
-                "type": "send_sdp_signal",
-                "peer": "SERVER",
-                "action": "peer-disconnected",
-                "message": {"disconnected_peer": self.channel_name},
-            }
-        )
-        await self.channel_layer.group_discard(
-            self.room_group_name,
-            self.channel_name
-        )
+        # Leave room group
+        await self.channel_layer.group_discard(self.call_group_name, self.channel_name)
 
     async def receive(self, text_data):
         data = json.loads(text_data)
-        await self.channel_layer.group_send(
-            self.room_group_name,
-            {
-                "type": "send_sdp_signal",
-                "peer": data["peer"],
-                "action": data["action"],
-                "message": data["message"],
-            }
-        )
+        action = data.get("action")
 
-    async def send_sdp_signal(self, event):
-        await self.send(text_data=json.dumps(event))
+        if action == "call_started":
+            await self.channel_layer.group_send(
+                self.call_group_name,
+                {
+                    "type": "call.started",
+                    "call_id": data["call_id"]
+                }
+            )
+
+        elif action == "call_accepted":
+            await self.channel_layer.group_send(
+                self.call_group_name,
+                {
+                    "type": "call.accepted",
+                    "call_id": data["call_id"]
+                }
+            )
+
+        elif action == "webrtc_signal":
+            await self.channel_layer.group_send(
+                self.call_group_name,
+                {
+                    "type": "webrtc.signal",
+                    "signal": data["signal"],
+                    "from": data["from"]
+                }
+            )
+
+    async def call_started(self, event):
+        await self.send(text_data=json.dumps({"action": "call_started", "call_id": event["call_id"]}))
+
+    async def call_accepted(self, event):
+        await self.send(text_data=json.dumps({"action": "call_accepted", "call_id": event["call_id"]}))
+
+    async def webrtc_signal(self, event):
+        await self.send(text_data=json.dumps({"action": "webrtc_signal", "signal": event["signal"], "from": event["from"]}))

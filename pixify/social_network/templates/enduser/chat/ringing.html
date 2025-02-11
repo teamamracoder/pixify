@@ -33,7 +33,8 @@
     <script>
         document.addEventListener("DOMContentLoaded", () => {
             // Get chat_id from the hidden input
-            const chatId = document.getElementById("chatId").value;
+            const chatId = "{{ chat_id }}"
+            const callId = "{{ call_id }}"
 
             document.getElementById("end-call").addEventListener("click", () => {
                 if (chatId) {
@@ -43,6 +44,30 @@
                 }
             });
         });
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const chatId = "{{ chat_id }}";
+            const callId = "{{ call_id }}";
+            const socket = new WebSocket(`ws://${window.location.host}/ws/call/${chatId}/`);
+        
+            socket.onmessage = function (event) {
+                const data = JSON.parse(event.data);
+        
+                if (data.action === "call_accepted") {
+                    window.location.href = `/call/${callId}/${chatId}/`;
+                }
+            };
+        
+            document.querySelector(".accept-call").addEventListener("click", function () {
+                socket.send(JSON.stringify({
+                    action: "call_accepted",
+                    call_id: callId
+                }));
+        
+                window.location.href = `/call/${callId}/${chatId}/`;
+            });
+        });
+        
     </script>
 </body>
 

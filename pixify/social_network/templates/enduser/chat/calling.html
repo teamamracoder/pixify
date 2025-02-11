@@ -33,7 +33,10 @@
             // Wait until the DOM is fully loaded
             document.addEventListener("DOMContentLoaded", () => {
                 // Get chat ID from the hidden input
-                const chatId = document.getElementById("chatId").value;
+                const chatId = "{{ chat_id }}"
+                const callId = "{{ call_id }}"
+                console.log(chatId);
+                console.log(callId);
     
                 // Get the buttons by their class names
                 const acceptCallButton = document.querySelector(".accept-call");
@@ -41,8 +44,11 @@
     
                 // Add click event listener for "Accept Call" button
                 acceptCallButton.addEventListener("click", () => {
-                    alert("Call Accepted! 🎉");
-                    // You can add more functionality here, such as transitioning the interface to an ongoing call screen
+                    if (callId) {
+                        window.location.href = `/call/${callId}/${chatId}/`;
+                    } else {
+                        console.error("Call ID is missing!");
+                    }
                 });
     
                 // Add click event listener for "End Call" button
@@ -54,6 +60,30 @@
                     }
                 });
             });
+
+            document.addEventListener("DOMContentLoaded", function () {
+                const chatId = "{{ chat_id }}";
+                const callId = "{{ call_id }}";
+                const socket = new WebSocket(`ws://${window.location.host}/ws/call/${chatId}/`);
+            
+                socket.onmessage = function (event) {
+                    const data = JSON.parse(event.data);
+            
+                    if (data.action === "call_accepted") {
+                        window.location.href = `/call/${callId}/${chatId}/`;
+                    }
+                };
+            
+                document.querySelector(".accept-call").addEventListener("click", function () {
+                    socket.send(JSON.stringify({
+                        action: "call_accepted",
+                        call_id: callId
+                    }));
+            
+                    window.location.href = `/call/${callId}/${chatId}/`;
+                });
+            });
+            
         </script>
 
     <style>
