@@ -45,7 +45,7 @@ class ChatListView(View):
                 continue
 
             seen_by_all = chat_info['seen_by_all']
-            member = chat_service.count_members(chat.id)
+            member = chat_service.members(chat.id)
             latest_reaction = message_reaction_service.latest_reaction(chat, user)
             if member.count() < 2:
                 continue  

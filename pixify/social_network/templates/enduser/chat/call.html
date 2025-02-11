@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Call</title>
+</head>
+<body>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+<!-- Hidden input to store chat_id -->
+<input type="hidden" id="chatId" value="{{ chat_id }}">
+
+<div class="call-container">
+    <header class="call-header">
+        <p>Pixify</p>
+        <p>End-to-end encrypted</p>
+    </header>
+    <div class="call-body">
+        <div class="profile-icon">
+            <img src="http://celebrityinsider.org/wp-content/uploads/2019/04/tom-cruise.jpg" alt="">
+        </div>
+
+    </div>
+    <div class="call-footer">
+        <button class="action-button" id="mute"><i class="fas fa-microphone"></i></button>
+        <button class="action-button end-call" id="end-call"><i class="fas fa-phone-slash"></i></button>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const chatId = "{{ chat_id }}";
+        const callId = "{{ call_id }}";
+        const socket = new WebSocket(`ws://${window.location.host}/ws/call/${chatId}/`);
+    
+        let peerConnection;
+        let activeUsers = 0; // Track active users
+        const config = { iceServers: [{ urls: "stun:stun.l.google.com:19302" }] };
+    
+        socket.onmessage = function (event) {
+            const data = JSON.parse(event.data);
+    
+            if (data.action === "webrtc_signal") {
+                peerConnection.setRemoteDescription(new RTCSessionDescription(data.signal));
+                if (data.signal.type === "offer") {
+                    peerConnection.createAnswer().then(answer => {
+                        peerConnection.setLocalDescription(answer);
+                        socket.send(JSON.stringify({ action: "webrtc_signal", signal: answer, from: chatId }));
+                    });
+                }
+            } else if (data.action === "user_joined") {
+                activeUsers = data.active_users;
+                console.log(`Users in call: ${activeUsers}`);
+            } else if (data.action === "user_left") {
+                activeUsers = data.active_users;
+                console.log(`Users in call: ${activeUsers}`);
+    
+                // If only one user is left, end the call and redirect
+                if (activeUsers <= 1) {
+                    console.log("Only one user in call, ending call...");
+                    endCall();
+                }
+            }
+        };
+    
+        function startCall() {
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then(stream => {
+                    window.localStream = stream;
+                    peerConnection = new RTCPeerConnection(config);
+                    stream.getTracks().forEach(track => peerConnection.addTrack(track, stream));
+    
+                    peerConnection.onicecandidate = event => {
+                        if (event.candidate) {
+                            socket.send(JSON.stringify({
+                                action: "webrtc_signal",
+                                signal: event.candidate,
+                                from: chatId
+                            }));
+                        }
+                    };
+    
+                    peerConnection.createOffer().then(offer => {
+                        peerConnection.setLocalDescription(offer);
+                        socket.send(JSON.stringify({
+                            action: "webrtc_signal",
+                            signal: offer,
+                            from: chatId
+                        }));
+                    });
+    
+                    // Notify server that user joined
+                    socket.send(JSON.stringify({ action: "user_joined", chat_id: chatId }));
+                })
+                .catch(error => {
+                    console.error("Error accessing microphone:", error);
+                });
+        }
+    
+        function endCall() {
+            if (window.localStream) {
+                window.localStream.getTracks().forEach(track => track.stop());
+            }
+            // Notify server that user left
+            socket.send(JSON.stringify({ action: "user_left", chat_id: chatId }));
+    
+            // Redirect to messages page
+            window.location.href = `/chat/${chatId}/message/`;
+        }
+    
+        // Attach event listener to end call button
+        document.getElementById("end-call").addEventListener("click", endCall);
+    
+        startCall();
+    });
+    
+    
+    
+</script>
+<style>
+    /* General Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color:rgb(80, 5, 218);
+    color: white;
+}
+
+.call-container {
+    width: 350px;
+    height: 80vh;
+    background: #1e1e1e;
+    border-radius: 15px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    text-align: center;
+    overflow: hidden;
+    position: relative;
+}
+
+.call-header {
+    padding: 15px;
+    background: #222;
+    border-bottom: 1px solid #333;
+}
+
+.call-header p {
+    font-size: 14px;
+    color: #bbb;
+}
+
+.call-body {
+    padding: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.profile-icon img {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #444;
+}
+
+.call-footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    padding: 20px;
+    background: #222;
+    border-top: 1px solid #333;
+}
+
+.action-button {
+    width: 50px;
+    height: 50px;
+    background: #444;
+    border: none;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.action-button i {
+    font-size: 20px;
+    color: white;
+}
+
+.action-button:hover {
+    background: #666;
+}
+
+.end-call {
+    background: #d9534f;
+}
+
+.end-call:hover {
+    background: #c9302c;
+}
+</style>
+   
+</body>
+</html>
