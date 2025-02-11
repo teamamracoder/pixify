@@ -16,7 +16,7 @@ from social_network.constants.default_values import Role
 
 from pixify import settings
 from .. import services
-from ..models import User,Comment,Post,PostReaction
+from ..models import User,Comment,Post,PostReaction,MasterList
 from django.core.paginator import Paginator
 
 
@@ -53,7 +53,7 @@ class UserPostCreatView(View):
     @role_required(Role.ADMIN.value, Role.END_USER.value)
     def post(self, request):
             user_id =request.user.id
-            print(user_id)
+
             post_Title = request.POST.get('postTitle')
             postFiles = request.FILES.getlist('postFiles')
             media_urls = []
@@ -129,9 +129,11 @@ class UpdatePostReactionView(View):
     def post(self, request, *args, **kwargs):
         post_id = request.POST.get('post_id')
         reaction_id = request.POST.get('reaction_id')
+        print("reaction id new",reaction_id)
         user_id = request.user.id
-        print("user id ",user_id)
 
+        react=services.post_reaction_service.getemoji(reaction_id)
+        print("afklakflafk",react)
         try:
             post = Post.objects.get(id=post_id)
         except Post.DoesNotExist:
@@ -152,28 +154,38 @@ class UpdatePostReactionView(View):
         # Count the new reaction
         new_reaction_count = PostReaction.objects.filter(post_id_id=post, is_active=True).count()
 
-        return JsonResponse({'new_reaction_count': new_reaction_count})
+        return JsonResponse({'new_reaction_count': new_reaction_count,' reaction_id': reaction_id})
 
 
 class GetPostReactionsView(View):
     def get(self, request, *args, **kwargs):
         post_id = request.GET.get('post_id')
         user_id = request.user.id
-
+        print("a",post_id)
         try:
             post = Post.objects.get(id=post_id)
+
         except Post.DoesNotExist:
             return JsonResponse({'error': 'Post not found'}, status=404)
 
         # Get total reaction count
         total_count = PostReaction.objects.filter(post_id_id=post, is_active=True).count()
 
-        # Get the current user's reaction (if any)
-        #user_reaction = PostReaction.objects.filter(post_id_id=post, reacted_by_id=user_id, is_active=True).first()
-        #print("user name",user_reaction)
+        # Get the current usr's reaction (if any)
+        user_reaction = list(services.post_reaction_service.post_reactionby_name(post).values())
+
+        # print("user name",user_reaction)
+        # users = [reaction['reacted_by_id'] for reaction in user_reaction]
+        user_ids = [reaction['reacted_by_id'] for reaction in user_reaction]
+
+        users = list(User.objects.filter(id__in=user_ids).values_list('first_name', 'last_name'))
+        users = [f"{first} {last}" for first, last in users]
+
 
         return JsonResponse({
             'total_count': total_count,
+            'reaction_name':users,
+   
 
         })
 
@@ -221,3 +233,102 @@ class UserPostDeleteView(View):
 
         services.post_service.delete_post(post)
         return JsonResponse({'message': 'Post deleted successfully'}, status=200)
+
+
+
+
+ # post reaction 
+class PostReactionCreateView(View):
+    def post(self, request):
+        data = request.POST or request.json()
+        post_id = data.get('post_id')
+        reaction_id = data.get('reaction_id')
+
+        post = get_object_or_404(Post, id=post_id)
+        reaction_type = get_object_or_404(MasterList, id=reaction_id)
+
+        # Check if the user already reacted to this post
+        existing_reaction = PostReaction.objects.filter(post_id_id=post, reacted_by_id=request.user).first()
+
+        if existing_reaction:
+            if existing_reaction.reaction_type == reaction_type:
+                return JsonResponse({'success': False, 'message': 'Already reacted'}, status=400)
+            else:
+                existing_reaction.reaction_type = reaction_type
+                existing_reaction.save()
+        else:
+            PostReaction.objects.create(post_id_id=post, reacted_by_id=request.user, created_by_id=request.user)
+
+        return JsonResponse({'success': True})
+
+
+class PostReactionDeleteView(View):
+    def post(self, request):
+        data = request.POST or request.json()
+        post_id = data.get('post_id')
+
+        post = get_object_or_404(Post, id=post_id)
+        reaction = PostReaction.objects.filter(post_id_id=post, reacted_by_id=request.user).first()
+
+        if reaction:
+            reaction.delete()
+            return JsonResponse({'success': True})
+        return JsonResponse({'success': False, 'message': 'Reaction not found'}, status=400)
+
+class PostReactionsView(View):
+    def get(self, request, post_id):
+
+        reactions = PostReaction.objects.filter(post_id_id=post_id)
+        print("new react",reactions)
+        reaction_data = {}
+
+
+        for reaction in reactions:
+            reaction_type = reaction.reaction_id.value
+            if reaction_type in reaction_data:
+                reaction_data[reaction_type] += 1
+            else:
+                reaction_data[reaction_type] = 1
+
+        return JsonResponse({'reactions': reaction_data}) 
+
+
+class PostReactionsListView(View):
+
+    def get(self, request, post_id, *args, **kwargs):
+        post = get_object_or_404(Post, id=post_id)
+        user = request.user  # Get the logged-in user
+
+        # Get all reactions for the post
+        reactions = PostReaction.objects.filter(post_id_id=post).select_related('reacted_by')
+
+        # Get unique reaction counts
+        reaction_data = {}
+        user_reaction_id = None  # Store the current user's reaction
+
+        for reaction in reactions:
+            reacted_by = reaction.reacted_by
+            reaction_type = MasterList.objects.filter(id=reaction.id).first()
+
+            if reaction_type:
+                reaction_id = reaction_type.id
+                reaction_name = reaction_type.name
+                reaction_icon = reaction_type.value  # Stores the emoji/icon HTML
+
+                if reaction_id not in reaction_data:
+                    reaction_data[reaction_id] = {
+                        'name': reaction_name,
+                        'icon': reaction_icon,
+                        'count': 0
+                    }
+                reaction_data[reaction_id]['count'] += 1
+
+                # Check if the current user reacted and store their reaction
+                if reacted_by == user:
+                    user_reaction_id = reaction_id
+
+        return JsonResponse({
+            'post_id': post.id,
+            'reactions': list(reaction_data.values()),
+            'user_reaction': user_reaction_id
+        })

@@ -52,10 +52,9 @@ class HomeView(View):
         message = request.session.pop("message", "")
         message_type = request.session.pop("message_type", "")
         userid=request.user.id
-        print()
+        
 
         posts = services.post_service.Postlist_posts()
-        print("post ssgajgak...",posts)
         post_id = request.GET.get('post_id')
         comment_list = services.comment_service.comment_list(post_id)
         post_dict = {

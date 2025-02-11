@@ -111,7 +111,6 @@ class CommentsListView(View):
         user_details = list(services.comment_service.get_user(user_id).values())
         post_del = list(services.comment_service.get_post(post_id).values())
         comment_list = services.comment_service.comment_list(post_id)
-        print(comment_list)
         comment_count =services.comment_service.comment_count(post_id)
         print("comment__count",comment_count)
         for comment in comment_list:
@@ -187,7 +186,7 @@ class GetPostCommentView(View):
 
 
 
-
+ 
 
 class CommentReplyView(View):
     def post(self, request):  
@@ -200,21 +199,25 @@ class CommentReplyView(View):
         print("Received Data - reply_for (Comment ID if reply):", comment_id or "No Reply")
         print("Received Data - reply_text:", reply_text)
         comment_list = services.comment_service.comment_list(post_id)
+        
         if not reply_text or not post_id:
             return JsonResponse({"status": "error", "message": "Invalid data"}, status=400)
         try:
           
             if comment_id:  
                 services.comment_service.user_reply_create(reply_text, post_id, user_id, comment_id)
-                reply_list = list(comment_service.reply_list(comment_id).values()  )
+                reply_list = list(comment_service.reply_list(comment_id).values())
            
             else:
-                services.comment_service.user_comments_create(reply_text,post_id,user_id)
-                reply_list = [] 
+              services.comment_service.user_comments_create(reply_text,post_id,user_id)
+              reply_list = []
+         
             return JsonResponse({
                 "status": "success",
+                "comments":list(comment_list),
                 "replies": list(reply_list),
-                "comments":list(comment_list)
+                
+                
             })
         except Exception as e:
             return JsonResponse({"status": "error", "message": str(e)}, status=500)
