@@ -804,8 +804,7 @@ socket.onmessage = function (event) {
         if (currentUserId === callerId) {
             console.log("Redirecting to ringing.html...");
             window.location.href = `/call/ringing/${callId}/${chatId}/`;
-            
-            
+                        
         } else {
             console.log("Redirecting to calling.html...");
             window.location.href = `/call/calling/${callId}/${chatId}/`;
@@ -852,7 +851,7 @@ function appendMessageToChat(message, messageId, messageTime, senderName, profil
     const today = "Today";
 
     // Check if today's timestamp is already present
-    const timestamps = chatBody.querySelectorAll("#message-timestamp span");
+    const timestamps = chatBody.querySelectorAll(".message-timestamp span");
     let todayExists = false;
     timestamps.forEach(timestamp => {
         if (timestamp.innerText === today) {
@@ -1556,6 +1555,7 @@ window.addEventListener('load', function () {
     // Continuously check unread messages every 5 seconds
         setInterval(checkAndMarkUnreadMessages, 5000);
 });
+
 
 // Call Handel
 function generateCallId() {
