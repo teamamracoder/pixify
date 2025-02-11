@@ -36,7 +36,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
         del_type = text_data_json.get('del_type')
         user = self.scope['user']
         reaction_id=text_data_json.get('reaction_id')  
-        call_id = text_data_json.get('call_id')       
+        call_id = text_data_json.get('call_id')  
+        caller_id= text_data_json.get('caller_id')     
 
         print(f"The Received Data: {text_data_json}")
 
@@ -59,7 +60,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         elif action == 'stop_typing':
             await self.stop_typing(user_id)
         elif action == 'ringing':
-            await self.ringing(chat_id,call_id)
+            await self.ringing(chat_id,call_id,caller_id)
 
     async def typing(self,user_id):
         await self.typing_status(user_id,typing=True)
@@ -68,17 +69,18 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await self.typing_status(user_id,typing=False)
 
 
-    async def ringing(self, chat_id, call_id):
-        members = await sync_to_async(chat_service.chat_members)(chat_id)  # Returns a list of dicts
+    async def ringing(self, chat_id, call_id, caller_id):
+        members = await sync_to_async(chat_service.chat_members)(chat_id)  # Get members list
         ringing_data = {
             'type': 'ringing_notification',
             'call_id': call_id,
-            'chat_id': chat_id, 
-            'members': members,  # Now JSON serializable
+            'chat_id': chat_id,
+            'members': members,  
+            'caller_id': caller_id,  # Include caller ID
         }
         await self.channel_layer.group_send(
             self.chat_group_name,
-            ringing_data  # No need to reconstruct, directly send ringing_data
+            ringing_data
         )
 
     async def ringing_notification(self, event):
@@ -86,8 +88,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
             'action': 'ringing',
             'call_id': event['call_id'],
             'chat_id': event['chat_id'], 
-            'members': event['members'],  # Now a list of JSON-serializable dicts
+            'members': event['members'],
+            'caller_id': event['caller_id']  # Include caller ID in notification
         }))
+
 
 
 
