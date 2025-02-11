@@ -151,14 +151,8 @@ urlpatterns = [
     path('post/comment/', views.GetPostCommentView.as_view(), name='get_comment_reactions'),
     path("delete-comment/", views.DeleteCommentView.as_view(), name="delete-comment"),
     path('toggle-like/', views.ToggleLikeView.as_view(), name='toggle-like'),
+    path('fetch_reactions/', views.Fetch_reactions.as_view(), name='fetch_reactions'),
 
-    path('post-reaction/create/', views.PostReactionCreateView.as_view(), name='post_reaction_create'),
-    path('post-reaction/delete/', views.PostReactionDeleteView.as_view(), name='post_reaction_delete'),
-    path('post-reactions/<int:post_id>/', views.PostReactionsView.as_view(), name='post_reactions'),
-    path('post/<int:post_id>/reactions/', views.PostReactionsListView.as_view(), name='post_reactions'),
-  
-
-   
   
  
     #for enduser story
