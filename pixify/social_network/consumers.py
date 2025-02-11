@@ -116,13 +116,17 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await self.send_reaction_details(reaction_instance)
 
     async def delete_reaction(self, message_id, user):        
-        react = await sync_to_async(message_reaction_service.get_active_reaction)(message_id, user)
+        user_id = user.id        
+        reacted_by = await sync_to_async(message_reaction_service.get_reacted_by_by_message_id)(message_id)
+        print(reacted_by)
         
-        await sync_to_async(message_reaction_service.deactivate_reaction)(react)        
-    
-        await self.send_reaction_details(react)
+        if user_id in reacted_by:
+            react = await sync_to_async(message_reaction_service.get_active_reaction)(message_id, user)
+            await sync_to_async(message_reaction_service.deactivate_reaction)(react)
+            await self.send_reaction_details(react)
+        else:
+            return
         
-
     async def create_message(self, text_data_json, user):        
         text = text_data_json.get('message', '')
         media_files = text_data_json.get('mediaFiles', [])
@@ -333,12 +337,19 @@ class ChatConsumer(AsyncWebsocketConsumer):
          
     async def send_reaction_details(self, reaction_instance):
         react = bool(reaction_instance.reaction_id_id)
-        deleted=not reaction_instance.is_active
+        deleted = not reaction_instance.is_active
+
+        # Force evaluation of the QuerySet by converting it to a list.
+        aggregated_reaction = await sync_to_async(lambda: list(
+            message_reaction_service.reaction_count_by_reaction_id(reaction_instance.message_id_id)
+        ))()
+        print(aggregated_reaction)
 
         reaction_data = {
-            'react':react,
+            'react': react,
             'message_id': reaction_instance.message_id_id,
-            'deleted':deleted,
+            'aggregated_reactions': aggregated_reaction,
+            'deleted': deleted,
         }
 
         await self.channel_layer.group_send(
@@ -357,6 +368,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 'type': 'reaction',
                 'react': reaction['react'],
                 'message_id': reaction['message_id'],
+                'aggregated_reactions':reaction['aggregated_reactions'],
                 'rac_deleted':reaction['deleted'],
             }))
         else:
@@ -386,9 +398,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def typing_status(self, user, typing=False):
         sender = await sync_to_async(User.objects.get)(id=user)
 
+         # Set default image if user_pic is None
+        user_pic = sender.profile_photo_url or "/static/images/avatar.jpg"
+
         typer = {            
             'user': sender.first_name,
-            'user_pic': sender.profile_photo_url,
+            'user_pic': user_pic,
             'typing': typing,
         }
 
