@@ -1,17 +1,15 @@
 {% extends "enduser/base.html" %}
-
 {% block title %}Chat{% endblock %}
-
 {% block content %}
 {% load static %}
 
-{% if success_message %}
-<script>
-    $(document).ready(function() {
-        toastr.success("{{ success_message }}");
-    });
-</script>
-{% endif %}
+    {% if success_message %}
+        <script>
+            $(document).ready(function() {
+                toastr.success("{{ success_message }}");
+            });
+        </script>
+    {% endif %}
 
 <div class="chat-container">
     <!-- Chat Header -->
@@ -47,7 +45,7 @@
         <div class="timestamp-scrollbar" id="timestamp-scrollbar"></div>
 
         {% for date_group in data.grouped_messages %}
-        <div id="message-timestamp" class="message-timestamp">
+        <div class="message-timestamp">
             <span>{{ date_group.0 }}</span>
         </div>
 
@@ -121,11 +119,15 @@
             <div class="reaction-display" id="reaction-display-{{ message.id }}"></div>
         </div>
         {% endfor %}
-        {% endfor %}
-        
-    <div class="loader hidden"></div>
-
-
+        {% endfor %}    
+    </div>
+        <!-- Typing Indicator -->
+    <div class="chat-bubble" hidden>
+        <div class="typing">
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+        </div>
     </div>
 
     <!-- Chat Footer -->
@@ -557,13 +559,17 @@
             updateScrollIndicator();
         });
 
-    function updateScrollIndicator() {
+   window.updateScrollIndicator = function () {
         const chatBody = document.getElementById("chat-body");
-        const messages = document.querySelectorAll(".message"); // Get latest messages
-        const scrollPosition = chatBody.scrollTop + (chatBody.offsetHeight / 2); // Center of the chat body
+        const messages = document.querySelectorAll(".message");
+        const timestampIndicator = document.getElementById("timestamp-scrollbar");
 
+    if (messages.length === 0) return; // No messages to process
+
+    const scrollPosition = chatBody.scrollTop + chatBody.offsetHeight / 2; // Center of the chat body
         let closestMessage = null;
         let closestDistance = Infinity;
+    let closestTimestamp = null;
 
         messages.forEach((message) => {
             const messageTop = message.offsetTop;
@@ -577,20 +583,28 @@
         });
 
         if (closestMessage) {
-            let groupTimestamp = null;
             let sibling = closestMessage.previousElementSibling;
 
             while (sibling) {
                 if (sibling.classList.contains("message-timestamp")) {
-                    groupTimestamp = sibling.querySelector("span");
+                    closestTimestamp = sibling.innerText.trim();
                     break;
                 }
                 sibling = sibling.previousElementSibling;
-            }
+        }
+    }
 
-            if (groupTimestamp) {
-                showTimestampIndicator(groupTimestamp.innerText, closestMessage);
-            }
+    if (closestTimestamp) {
+        timestampIndicator.innerText = closestTimestamp;
+        timestampIndicator.style.display = "block";
+
+        // Clear any previous timeout
+        clearTimeout(window.timestampTimeout);
+
+        // Hide the timestamp after a delay (500ms instead of 200ms for better visibility)
+        window.timestampTimeout = setTimeout(() => {
+            timestampIndicator.style.display = "none";
+        }, 500);
         }
     }
 
@@ -699,41 +713,32 @@ socket.onmessage = function (event) {
   console.log('Message received from WebSocket:', event.data);
   const data = JSON.parse(event.data);
 
-if (data.seen_by_all === false) {
-        markAsRead(data.message_id);
-    } else {
-        const messageId = data.message_id;
-        const messageElement = document.getElementById(`message-${messageId}`);
-
-        // Ensure that messageElement exists before modifying it
-        if (messageElement) {
-            const seenStatusElement = messageElement.querySelector('.seen-status i');
-            
-            // If the tick is already double, no need to change
-            if (seenStatusElement && seenStatusElement.classList.contains('bi-check2-all')) {
-                return;
-            }
-
-            // Remove the old tick (single tick)
-            if (seenStatusElement) {
-                seenStatusElement.remove();
-            }
-
-            // Append the new double tick
-            const seenStatusHtml = `
-                <div class="seen-status">
-                    ${data.user === currentUser ? `
-                        <i class="bi bi-check2-all"></i>
-                    ` : ''}
-                </div>`;
-            
-            // Append the seen status to the message element
-            messageElement.insertAdjacentHTML('beforeend', seenStatusHtml);
+  // Update read status
+  if (data.seen_by_all === false) {
+    markAsRead(data.message_id);
+  } else {
+    const messageId = data.message_id;
+    const messageElement = document.getElementById(`message-${messageId}`);
+    if (messageElement) {
+      const seenStatusElement = messageElement.querySelector('.seen-status i');
+      if (seenStatusElement && seenStatusElement.classList.contains('bi-check2-all')) {
+        // Already updated; do nothing.
+        // (You may want to update even if already updated if necessary.)
+      } else {
+        if (seenStatusElement) {
+          seenStatusElement.remove();
         }
+        const seenStatusHtml = `
+          <div class="seen-status">
+            ${data.user === currentUser ? `<i class="bi bi-check2-all"></i>` : ''}
+          </div>`;
+        messageElement.insertAdjacentHTML('beforeend', seenStatusHtml);
+      }
     }
+  }
 
+  // Handle new or updated messages
   if (data.message_new) {
-    // Handle new message
     appendMessageToChat(
       data.message,
       data.message_id,
@@ -746,11 +751,9 @@ if (data.seen_by_all === false) {
       data.reply_userPic,
       data.media_urls || [],
       data.user === currentUser,
-      data.reactions || [],
-
+      data.reactions || []
     );
   } else if (data.update) {
-    // Handle message update
     updateMessageInChat(
       data.message,
       data.message_id,
@@ -764,8 +767,7 @@ if (data.seen_by_all === false) {
       data.media_urls || [],
       data.user === currentUser,
       data.seen_by_all,
-      data.reactions || [],
-
+      data.reactions || []
     );
   } else if (data.deleted === true && data.message_id) {
     const messageId = data.message_id;
@@ -774,15 +776,11 @@ if (data.seen_by_all === false) {
       console.warn(`Message with ID ${messageId} not found.`);
       return;
     }
-
     if (data.del_type == 1) {
-      // "Delete for me" - Hide message only for current user      
-      console.log(data.del_type);
-       if (data.del_by.includes(currentUserId)) {      
-      messageElement.style.display = "none";
+      if (data.del_by.includes(currentUser)) {
+        messageElement.style.display = "none";
       }
     } else if (data.del_type == 2) {
-      // "Delete for everyone" - Remove from DOM entirely        
       messageElement.remove();
     }
 }else if (data.react) {
@@ -793,25 +791,68 @@ if (data.seen_by_all === false) {
         const messageId = data.message_id;
         reactionManager.loadReactions(messageId);
     }else if (data.action === "ringing") {
-        const callId = data.call_id;
-        const members = data.members;
-        const callerId = data.caller_id;
-        const currentUserId = "{{ user.id }}";// Get logged-in user ID
+        const callId = data.call_id;  // Extract call ID
+        const members = data.members; // Extract members list
     
-        console.log("Caller ID:", callerId);
-        console.log("Current User ID:", currentUserId);
+        if (Array.isArray(members)) {  // Ensure members is a valid array
+            const checkInterval = setInterval(() => {
+                let allJoined = true;
     
-        if (currentUserId === callerId) {
-            console.log("Redirecting to ringing.html...");
-            window.location.href = `/call/ringing/${callId}/${chatId}/`;
-            
-            
-        } else {
-            console.log("Redirecting to calling.html...");
-            window.location.href = `/call/calling/${callId}/${chatId}/`;
-            
+                members.forEach(member => {
+                    if (!isUserJoined(member)) { // Check if user has joined
+                        allJoined = false;
+                    }
+                });
+    
+                if (allJoined) {
+                    clearInterval(checkInterval);  // Stop checking once all have joined
+                    window.location.href = "/call/" + callId + "/";
+
+                }
+            }, 500); // Check every 5 seconds
         }
     }
+    
+    // Simulated function to check if user has joined
+    function isUserJoined(userId) {
+        // Replace this with an actual API call or WebSocket status check
+        return true;  // Change logic based on your real implementation
+    }
+
+    // Handle typing indicator.
+const typingIndicator = document.querySelector('.chat-bubble');
+if (data.typing && data.user !== currentUser) {
+  // Update the inner HTML using template literals.
+  typingIndicator.innerHTML = `
+    <div class="typing-indicator">
+      <img src="${data.user_pic}" alt="User typing" class="typing-user-pic">
+      <div class="typing">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+      </div>
+    </div>
+  `;
+  typingIndicator.removeAttribute('hidden');
+} else {
+  typingIndicator.setAttribute('hidden', '');
+}
+
+
+
+// Handel Message Reaction
+  if (data.react && data.aggregated_reactions) {
+    const messageId = data.message_id;
+    reactionManager.updateReactions(messageId, data.aggregated_reactions);
+    return;
+  } else if (data.rac_deleted) {
+    const messageId = data.message_id;
+    reactionManager.loadReactions(messageId);
+    return;
+  }
+
+};
+
     
 };
 
@@ -821,7 +862,7 @@ function appendMessageToChat(message, messageId, messageTime, senderName, profil
     const today = "Today";
 
     // Check if today's timestamp is already present
-    const timestamps = chatBody.querySelectorAll("#message-timestamp span");
+    const timestamps = chatBody.querySelectorAll(".message-timestamp span");
     let todayExists = false;
     timestamps.forEach(timestamp => {
         if (timestamp.innerText === today) {
@@ -832,8 +873,7 @@ function appendMessageToChat(message, messageId, messageTime, senderName, profil
     // Add today's timestamp if it doesn't exist
     if (!todayExists) {
         const timestampDiv = document.createElement("div");
-        timestampDiv.classList.add("message-timestamp");
-        timestampDiv.setAttribute("id", "message-timestamp");
+        timestampDiv.classList.add("message-timestamp");        
         timestampDiv.innerHTML = `<span>${today}</span>`;
         chatBody.appendChild(timestampDiv);
     }
@@ -903,7 +943,7 @@ function appendMessageToChat(message, messageId, messageTime, senderName, profil
 
     // Scroll to the bottom and update the scroll indicator
     chatBody.scrollTop = chatBody.scrollHeight;
-    updateScrollIndicator();  // Call this function to update timestamp in real time
+    window.updateScrollIndicator();  // Call this function to update timestamp in real time
 }
 
 
@@ -1239,159 +1279,240 @@ function generateReactionPopupContent(reactions, messageId) {
 
 
 class ReactionManager {
-    constructor() {
-        this.reactionContainers = {};
+  constructor() {
+    // Stores container elements for each messageId.
+    this.reactionContainers = {};
+    // Local state for aggregated reactions per messageId.
+    // Structure: { messageId: { displayReaction: { count, reacted_by, names, photos } } }
+    this.reactionState = {};
+  }
+
+  // Initialize ReactionManager for a given message.
+  init(messageId) {
+    const container = document.getElementById(`reaction-container-${messageId}`);
+    if (!container) {
+      console.error(`Reaction container not found for messageId: ${messageId}`);
+      return;
+    }
+    this.reactionContainers[messageId] = container;
+    // Load initial state from server.
+    this.loadReactions(messageId);
+  }
+
+  addReaction(messageId, reactionId, reactionValue) {
+    const data = {
+      action: 'add_reaction',
+      message_id: messageId,
+      reaction_id: reactionId,
+    };
+
+    if (socket && socket.readyState === WebSocket.OPEN) {
+      socket.send(JSON.stringify(data));
+      toggleReactionPopup(messageId);
+      // For the sender's UI, force a reload after a short delay.
+      setTimeout(() => this.loadReactions(messageId), 500);
+    } else {
+      console.error('WebSocket is not connected.');
+    }
+  }
+
+  // Load initial reaction state via fetch.
+  loadReactions(messageId) {
+    const display = document.getElementById(`reaction-display-${messageId}`);
+    if (!display) {
+      console.error(`Reaction display not found for messageId: ${messageId}`);
+      return;
     }
 
-    init(messageId) {
-        const container = document.getElementById(`reaction-container-${messageId}`);
-        if (!container) {
-            console.error(`Reaction container not found for messageId: ${messageId}`);
-            return;
+    fetch(`/message-reactions/${messageId}/`)
+      .then(response => response.json())
+      .then(data => {
+        if (!data.reactions || !Array.isArray(data.reactions)) {
+          console.error('Invalid reaction data:', data);
+          return;
         }
-        this.reactionContainers[messageId] = container;
-        this.loadReactions(messageId);
-    }
+        // Aggregate the reaction data.
+        const aggregated = this.aggregateReactions(data.reactions);
+        this.reactionState[messageId] = aggregated;
+        this.renderReactions(messageId);
+      })
+      .catch(err => console.error(err));
+  }
 
-    addReaction(messageId, reactionId, reactionValue) {
-        const data = {
-            action: 'add_reaction',
-            message_id: messageId,
-            reaction_id: reactionId,
+  // Helper: Aggregate raw reaction records into an object.
+  // Uses the first element of react_value as the key if available.
+  aggregateReactions(reactions) {
+    console.log("Aggregating reactions:", reactions);
+    const aggregated = {};
+    reactions.forEach(reaction => {
+      // Use react_value[0] if available; otherwise fallback to reaction_id as a string.
+      const displayReaction = (reaction.react_value && reaction.react_value[0]) || String(reaction.reaction_id);
+      
+      let usersArray = [];
+      if (Array.isArray(reaction.reacted_by)) {
+        usersArray = reaction.reacted_by;
+      } else if (reaction.reacted_by !== undefined && reaction.reacted_by !== null) {
+        usersArray = [reaction.reacted_by];
+      }
+      
+      // Also gather names and photos if provided.
+      let namesArray = [];
+      if (Array.isArray(reaction.names)) {
+        namesArray = reaction.names;
+      }
+      let photosArray = [];
+      if (Array.isArray(reaction.photos)) {
+        photosArray = reaction.photos;
+      }
+      
+      if (aggregated.hasOwnProperty(displayReaction)) {
+        let currentReacted = aggregated[displayReaction].reacted_by;
+        if (!Array.isArray(currentReacted)) {
+          currentReacted = [currentReacted];
+        }
+        aggregated[displayReaction].count += reaction.count;
+        aggregated[displayReaction].reacted_by = Array.from(new Set(currentReacted.concat(usersArray)));
+        aggregated[displayReaction].names = Array.from(new Set(aggregated[displayReaction].names.concat(namesArray)));
+        aggregated[displayReaction].photos = Array.from(new Set(aggregated[displayReaction].photos.concat(photosArray)));
+      } else {
+        aggregated[displayReaction] = { 
+          count: reaction.count, 
+          reacted_by: usersArray,
+          names: namesArray,
+          photos: photosArray
         };
+      }
+    });
+    return aggregated;
+  }
 
-        // Send the data to the backend via WebSocket
-        if (socket && socket.readyState === WebSocket.OPEN) {
-            socket.send(JSON.stringify(data));
-            toggleReactionPopup(messageId);
-        } else {
+  // Update reaction state when receiving a WebSocket update.
+  updateReactions(messageId, newAggregatedReactions) {
+    let aggregated = {};
+    if (Array.isArray(newAggregatedReactions)) {
+      newAggregatedReactions.forEach(item => {
+        const displayReaction = (item.react_value && item.react_value[0]) || String(item.reaction_id);
+        aggregated[displayReaction] = { 
+          count: item.count, 
+          reacted_by: item.reacted_by,
+          names: item.names || [],
+          photos: item.photos || []
+        };
+      });
+    } else {
+      aggregated = newAggregatedReactions;
+    }
+    this.reactionState[messageId] = aggregated;
+    this.renderReactions(messageId);
+  }
+
+  // Render reactions for a given messageId.
+  renderReactions(messageId) {
+    const display = document.getElementById(`reaction-display-${messageId}`);
+    if (!display) {
+      console.error(`Reaction display not found for messageId: ${messageId}`);
+      return;
+    }
+    display.innerHTML = ''; // Clear current content.
+    const aggregated = this.reactionState[messageId];
+    if (!aggregated) return;
+    Object.keys(aggregated).forEach((reactionType) => {
+      const value = aggregated[reactionType];
+      const reactionElement = document.createElement('span');
+      // Display the reaction icon and count.
+      reactionElement.innerHTML = `${reactionType} ${value.count}`;
+      reactionElement.style.marginRight = '10px';
+      reactionElement.style.cursor = 'pointer';
+
+      // Click event: allow deletion if the current user is among those who reacted.
+      reactionElement.addEventListener('click', () => {
+        console.log("Reaction's reacted_by:", value.reacted_by);                        
+        console.log(`User ${currentUserId} clicked on reaction ${reactionType} for message ${messageId}`);                
+          const delData = {
+            action: 'del_reaction',
+            message_id: messageId,
+          };
+          if (socket && socket.readyState === WebSocket.OPEN) {
+                console.log('Reaction data sent:', delData);
+            socket.send(JSON.stringify(delData));
+          } else {
             console.error('WebSocket is not connected.');
         }
+      });
+
+      // Long press event: show modal with complete reaction details for this message.
+      let pressTimer;
+      reactionElement.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        pressTimer = setTimeout(() => this.showReactionDetailsModal(messageId), 500);
+      });
+      reactionElement.addEventListener('mouseup', () => clearTimeout(pressTimer));
+      reactionElement.addEventListener('mouseleave', () => clearTimeout(pressTimer));
+
+      display.appendChild(reactionElement);
+    });
+  }
+
+  // Show a modal that lists all reaction details for the message.
+  showReactionDetailsModal(messageId) {
+    const aggregated = this.reactionState[messageId];
+    if (!aggregated) {
+      console.error(`No aggregated data found for message ${messageId}`);
+      return;
     }
-
-    loadReactions(messageId) {
-        const display = document.getElementById(`reaction-display-${messageId}`);
-        if (!display) {
-            console.error(`Reaction display not found for messageId: ${messageId}`);
-            return;
-        }
-
-        fetch(`/message-reactions/${messageId}/`)
-            .then((response) => response.json())
-            .then((data) => {
-                if (!data.reactions || !Array.isArray(data.reactions)) {
-                    console.error('Invalid reaction data:', data);
-                    return;
-                }
-
-                // Clear previous reactions
-                display.innerHTML = '';
-
-                // Aggregate unique reactions into a Map.
-                // The key is the reaction type and the value is an object containing the count and reacted_by.
-                const uniqueReactions = new Map();
-                data.reactions.forEach((reaction) => {
-                    const { reaction: reactionType, reaction_count: count, reacted_by } = reaction;
-                    // If you expect multiple entries per reactionType, you may adjust this logic.
-                    uniqueReactions.set(reactionType, { count, reacted_by });
-                });
-
-                // Loop over each unique reaction and create an element.
-                uniqueReactions.forEach((value, reactionType) => {
-                    const reactionElement = document.createElement('span');
-                    reactionElement.innerHTML = `${reactionType} ${value.count}`;
-                    reactionElement.style.marginRight = '10px';
-                    reactionElement.style.cursor = 'pointer';
-
-                    // Click event: only allow deletion if the current user is the one who reacted.
-                    reactionElement.addEventListener('click', () => {
-                        if (value.reacted_by == currentUserId) {
-                            const delData = {
-                                action: 'del_reaction',
-                                message_id: messageId,
-                            };
-
-                            // Send the deletion data to the backend via WebSocket
-                            if (socket && socket.readyState === WebSocket.OPEN) {
-                                socket.send(JSON.stringify(delData));
-                            } else {
-                                console.error('WebSocket is not connected.');
-                            }
-                        }
-                    });
-
-                    // Handle long press event to show reaction details modal
-                    let pressTimer;
-                    reactionElement.addEventListener('mousedown', (e) => {
-                        e.preventDefault();
-                        pressTimer = setTimeout(() => this.showReactionDetailsModal(messageId, reactionType), 500);
-                    });
-                    reactionElement.addEventListener('mouseup', () => clearTimeout(pressTimer));
-                    reactionElement.addEventListener('mouseleave', () => clearTimeout(pressTimer));
-
-                    display.appendChild(reactionElement);
-                });
-            })
-            .catch((error) => {
-                console.error('Error while loading reactions:', error);
-            });
-    }
-
-    showReactionDetailsModal(messageId, reactionType) {
-        // Fetch the details for the selected reaction
-        fetch(`/reaction-details/${messageId}/${reactionType}/`)
-            .then(response => response.json())
-            .then(data => {
-                const modal = document.createElement('div');
-                modal.classList.add('message-modal'); // Use the updated class name for modal
-                modal.innerHTML = `
-                    <div class="message-modal-content" id="msg-ul"> <!-- Use the updated content class -->
-                        <span class="close-btn">&times;</span>
-                            All (${data.reaction_count})<hr>
-                        <ul id="msg-ul">
-                            <div style="display:flex;">
-                                ${data.users.map(user => `
-                                <p>
-                                    <div class="image-div">
-                                        <img src="${user.photo}" style="height:25px;width:25px; border-radius:50%">
-                                    </div>
-                                    <div class="content-div" id="msg-ul" style="display:flex">
-                                        ${user.name}
-                                    </div>
-                                    <div class="badge-div">
-                                        ${user.reaction}
-                                    </div>
-                                </p>`).join('')}
-                            </div>     
-                        </ul>
-                    </div>`;
-                document.body.appendChild(modal);
-
-                // Close the modal when the user clicks on the close button
-                modal.querySelector('.close-btnn').addEventListener('click', () => {
-                    document.body.removeChild(modal);
-                });
-
-                // Display the modal
-                modal.style.display = 'block';
-            })
-            .catch(error => {
-                console.error('Error while fetching reaction details:', error);
-            });
-    }
+    let listItems = "";
+    Object.keys(aggregated).forEach((reactionType) => {
+      const data = aggregated[reactionType];
+      listItems += `
+        <li style="margin-bottom:10px;">
+          <div><strong>${reactionType} ${data.count}</strong></div>
+          <ul style="list-style:none; padding-left:0;">`;
+      for (let i = 0; i < data.names.length; i++) {
+        const photo = data.photos[i] ? data.photos[i] : '/static/images/default-avatar.jpg';
+        const name = data.names[i] || 'Unknown';
+        listItems += `
+          <li style="display:flex; align-items:center; margin-bottom:5px;">
+            <img src="${photo}" alt="${name}" style="height:25px; width:25px; border-radius:50%; margin-right:5px;">
+            <span>${name}</span>
+          </li>`;
+      }
+      listItems += `</ul></li>`;
+    });
+    const modal = document.createElement('div');
+    modal.classList.add('message-modal');
+    modal.innerHTML = `
+      <div class="message-modal-content">
+        <span class="close-btn">&times;</span>
+        <h4>All Reactions</h4>
+        <hr>
+        <ul>
+          ${listItems}
+        </ul>
+      </div>
+    `;
+    document.body.appendChild(modal);
+    modal.querySelector('.close-btn').addEventListener('click', () => {
+      document.body.removeChild(modal);
+    });
+    modal.style.display = 'block';
+  }
 }
 
 const reactionManager = new ReactionManager();
+
 document.addEventListener('DOMContentLoaded', () => {
-    const messageIds = [...document.querySelectorAll('.reaction-container')].map(container =>
-        container.id.split('-')[2]
-    );
-    messageIds.forEach((messageId) => {
-        reactionManager.init(messageId);
-    });
+  // Initialize ReactionManager for every message that has a reaction container.
+  const containers = document.querySelectorAll('.reaction-container');
+  containers.forEach(container => {
+    // Assuming container id is in the format "reaction-container-<messageId>"
+    const parts = container.id.split('-');
+    const messageId = parts[2];
+    reactionManager.init(messageId);
+  });
 });
 
 
+// Mark as Read 
  function markAsRead(messageId) {
     const chatId = document.getElementById("chat_id").value;
     const senderId = "{{ user.id }}"; // Sender's ID from the context
@@ -1419,7 +1540,7 @@ function markAsReadWithRetry(messageId) {
         }));
     } else {
         console.warn("WebSocket is not open. Retrying in 1 second...");
-        setTimeout(() => markAsReadWithRetry(messageId), 1000); // Retry after 1 second
+        setTimeout(() => markAsReadWithRetry(messageId), 5000); // Retry after 5 second
     }
 }
 
@@ -1464,7 +1585,7 @@ document.getElementById('sendDataButton').addEventListener('click', function() {
 });
 
 
-
+// Typing Indicator
 document.addEventListener("DOMContentLoaded", function () {
     const messageInput = document.getElementById("message-input");
     const chatId = document.getElementById("chat_id").value;
@@ -1519,31 +1640,92 @@ document.addEventListener("DOMContentLoaded", function () {
     padding-right: 10px;
 }   
 
+.cancel-edit {
+    float: right;
+    color: red;
+    cursor: pointer;
+}
+
+
  #call_feature{
     margin-left: 250px;
     font-size: 20px;
  }   
 
-.loader {
-  width: 60px;
-  aspect-ratio: 2;
-  --_g: no-repeat radial-gradient(circle closest-side, #000 90%, #0000);
-  background: 
-    var(--_g) 0% 50%, 
-    var(--_g) 50% 50%, 
-    var(--_g) 100% 50%;
-  background-size: calc(100%/3) 50%;
-  animation: l3 1s infinite linear;
+
+
+/* Chat bubble container */
+.chat-bubble {
+  background-color: #E6F8F1;
+  padding: 16px 28px;
+  border-radius: 20px;
+  border-bottom-left-radius: 2px;
+  display: inline-block;
 }
-@keyframes l3 {
-    20% {background-position: 0% 0%, 50% 50%, 100% 50%}
-    40% {background-position: 0% 100%, 50% 0%, 100% 50%}
-    60% {background-position: 0% 50%, 50% 100%, 100% 0%}
-    80% {background-position: 0% 50%, 50% 50%, 100% 100%}
+
+/* Flex container for the typing indicator */
+.typing-indicator {
+  display: flex;
+  align-items: center;
 }
-.hidden {
-    display: none;
+
+/* Style for the profile picture */
+.typing-user-pic {
+  height: 30px;
+  width: 30px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 10px; /* space between the pic and the dots */
 }
+
+/* Typing container (for the dots) */
+.typing {
+  display: flex;
+  align-items: center;
+  height: 17px;
+}
+
+/* Dot styling */
+.typing .dot {
+  animation: mercuryTypingAnimation 1.8s infinite ease-in-out;
+  background-color: #6CAD96;
+  border-radius: 50%;
+  height: 7px;
+  width: 7px;
+  margin-right: 4px;
+  display: inline-block;
+}
+
+/* Adjust delays for each dot */
+.typing .dot:nth-child(1) {
+  animation-delay: 200ms;
+}
+.typing .dot:nth-child(2) {
+  animation-delay: 300ms;
+}
+.typing .dot:nth-child(3) {
+  animation-delay: 400ms;
+}
+.typing .dot:last-child {
+  margin-right: 0;
+}
+
+/* Keyframes for dot animation */
+@keyframes mercuryTypingAnimation {
+  0% {
+    transform: translateY(0px);
+    background-color: #6CAD96;
+  }
+  28% {
+    transform: translateY(-7px);
+    background-color: #9ECAB9;
+  }
+  44% {
+    transform: translateY(0px);
+    background-color: #B5D9CB;
+  }
+}
+
 
 
 /* The Modal (background) */
