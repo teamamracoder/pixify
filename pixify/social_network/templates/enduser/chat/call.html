@@ -29,47 +29,12 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-        const muteButton = document.getElementById("mute");
-        const endCallButton = document.getElementById("end-call");
-        const chatId = "{{chat_id}}";
-        const callId = "{{call_id}}";
-
-    
-        let isMuted = false;
-        
-        // Mute/Unmute function
-        muteButton.addEventListener("click", function () {
-            isMuted = !isMuted;
-            muteButton.innerHTML = isMuted 
-                ? '<i class="fas fa-microphone-slash"></i>' 
-                : '<i class="fas fa-microphone"></i>';
-            
-            // Assuming you're using WebRTC, mute the local audio track
-            if (window.localStream) {
-                window.localStream.getAudioTracks().forEach(track => {
-                    track.enabled = !isMuted;
-                });
-            }
-        });
-    
-        // End call function
-        endCallButton.addEventListener("click", function () {
-            // Close WebRTC streams if active
-            if (window.localStream) {
-                window.localStream.getTracks().forEach(track => track.stop());
-            }
-    
-            // Redirect to messages page or perform necessary cleanup
-            window.location.href = `/chat/${chatId}/message/`;
-        });
-    });
-
-    document.addEventListener("DOMContentLoaded", function () {
         const chatId = "{{ chat_id }}";
         const callId = "{{ call_id }}";
         const socket = new WebSocket(`ws://${window.location.host}/ws/call/${chatId}/`);
     
         let peerConnection;
+        let activeUsers = 0; // Track active users
         const config = { iceServers: [{ urls: "stun:stun.l.google.com:19302" }] };
     
         socket.onmessage = function (event) {
@@ -83,30 +48,72 @@
                         socket.send(JSON.stringify({ action: "webrtc_signal", signal: answer, from: chatId }));
                     });
                 }
+            } else if (data.action === "user_joined") {
+                activeUsers = data.active_users;
+                console.log(`Users in call: ${activeUsers}`);
+            } else if (data.action === "user_left") {
+                activeUsers = data.active_users;
+                console.log(`Users in call: ${activeUsers}`);
+    
+                // If only one user is left, end the call and redirect
+                if (activeUsers <= 1) {
+                    console.log("Only one user in call, ending call...");
+                    endCall();
+                }
             }
         };
     
         function startCall() {
-            navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then(stream => {
-                document.getElementById("localVideo").srcObject = stream;
-                peerConnection = new RTCPeerConnection(config);
-                stream.getTracks().forEach(track => peerConnection.addTrack(track, stream));
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then(stream => {
+                    window.localStream = stream;
+                    peerConnection = new RTCPeerConnection(config);
+                    stream.getTracks().forEach(track => peerConnection.addTrack(track, stream));
     
-                peerConnection.onicecandidate = event => {
-                    if (event.candidate) {
-                        socket.send(JSON.stringify({ action: "webrtc_signal", signal: event.candidate, from: chatId }));
-                    }
-                };
+                    peerConnection.onicecandidate = event => {
+                        if (event.candidate) {
+                            socket.send(JSON.stringify({
+                                action: "webrtc_signal",
+                                signal: event.candidate,
+                                from: chatId
+                            }));
+                        }
+                    };
     
-                peerConnection.createOffer().then(offer => {
-                    peerConnection.setLocalDescription(offer);
-                    socket.send(JSON.stringify({ action: "webrtc_signal", signal: offer, from: chatId }));
+                    peerConnection.createOffer().then(offer => {
+                        peerConnection.setLocalDescription(offer);
+                        socket.send(JSON.stringify({
+                            action: "webrtc_signal",
+                            signal: offer,
+                            from: chatId
+                        }));
+                    });
+    
+                    // Notify server that user joined
+                    socket.send(JSON.stringify({ action: "user_joined", chat_id: chatId }));
+                })
+                .catch(error => {
+                    console.error("Error accessing microphone:", error);
                 });
-            });
         }
+    
+        function endCall() {
+            if (window.localStream) {
+                window.localStream.getTracks().forEach(track => track.stop());
+            }
+            // Notify server that user left
+            socket.send(JSON.stringify({ action: "user_left", chat_id: chatId }));
+    
+            // Redirect to messages page
+            window.location.href = `/chat/${chatId}/message/`;
+        }
+    
+        // Attach event listener to end call button
+        document.getElementById("end-call").addEventListener("click", endCall);
     
         startCall();
     });
+    
     
     
 </script>
