@@ -86,11 +86,11 @@ class UpdatePostReactionView(View):
     def post(self, request, *args, **kwargs):
         post_id = request.POST.get('post_id')
         reaction_id = request.POST.get('reaction_id')
-        print("reaction id new",reaction_id)
+       
         user_id = request.user.id
 
         react=services.post_reaction_service.getemoji(reaction_id)
-        print("afklakflafk",react)
+      
         try:
             post = Post.objects.get(id=post_id)
         except Post.DoesNotExist:
@@ -119,7 +119,7 @@ class GetPostReactionsView(View):
     def get(self, request, *args, **kwargs):
         post_id = request.GET.get('post_id')
         user_id = request.user.id
-        print("a", post_id)
+      
         try:
             post = Post.objects.get(id=post_id)
         except Post.DoesNotExist:
@@ -130,7 +130,7 @@ class GetPostReactionsView(View):
 
         if user_reaction:
             react_id = user_reaction.master_list_id_id  # Get the reaction ID (react_id_id)
-            print("User's reaction ID:", react_id)
+           
         else:
             react_id = None  # No reaction found for the user
 
@@ -165,7 +165,7 @@ class UserPostEditView(View):
          user = request.user
          post_id = request.POST.get('post_id')
          post_title = request.POST.get('postTitle')
-         print("post id is",post_id, "post titile",post_title)
+        
 
          if not post_id or not post_title:
             return JsonResponse({'success': False, 'message': 'Missing post_id or postTitle'})
@@ -199,6 +199,16 @@ class Fetch_reactions(View):
          post_id = request.GET.get('post_id')
          user_id = request.GET.get('user_id')
          reaction_id = request.GET.get('emoji_id') 
-         print("emoji_id",reaction_id)
+
          react=list(services.post_reaction_service.getemoji(reaction_id).values())
          return JsonResponse({'success': True,'react':react})
+    
+
+class remove_reaction(View):
+     def get(self,request):
+        post_id = request.POST.get("post_id")
+        
+        reaction = get_object_or_404(PostReaction, post_id_id=post_id)
+        reaction.delete()
+        
+        return JsonResponse({"success": False, "error": "Invalid request"}, status=400)    
