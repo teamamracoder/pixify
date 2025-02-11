@@ -34,17 +34,17 @@ urlpatterns = [
     path('admin/messages/create/', views.ManageMessageCreateView.as_view(), name='manage_message_create'),
     path('admin/messages/toggle-active/<int:message_id>/', views.ManageToggleMessageActiveView.as_view(), name='manage_toggle_message_active'),
 
- 
+
     path('admin/posts/', views.ManagePostListView.as_view(), name='manage_post_list'),
     # path('admin/posts/toggle-active/<int:post_id>/', views.ManageTogglePostActiveView.as_view(), name='toggle_post_active'),
 
     path('admin/posts/create/', views.ManagePostCreateView.as_view(), name='manage_post_create'),
     path('admin/posts/', views.ManagePostListView.as_view(), name='manage_post_list'),
     path('admin/posts/<int:post_id>/details', views.ManagePostDetailView.as_view(), name='manage_post_detail'),
-    # path('admin/posts/toggle-active/<int:post_id>/', views.ManageTogglePostActiveView.as_view(), name='toggle_post_active'), 
+    # path('admin/posts/toggle-active/<int:post_id>/', views.ManageTogglePostActiveView.as_view(), name='toggle_post_active'),
     path('admin/posts/<int:post_id>/update/', views.ManagePostUpdateView.as_view(), name='manage_post_update'),
     path('admin/posts/toggle-active/<int:comment_id>/', views.ManageToggleCommentActiveView.as_view(), name='manage_toggle_comment_active'),
-    
+
 
     #chat
     path('chat/', views.ChatListView.as_view(), name='chat_list'),
@@ -76,7 +76,7 @@ urlpatterns = [
 
 
     # notification
-    path('notification/', views.NotificationView.as_view(), name='notification-view'), 
+    path('notification/', views.NotificationView.as_view(), name='notification-view'),
 
     # profile
     path('profile/', views.EnduserprofileView.as_view(), name='userprofile'),
@@ -128,23 +128,23 @@ urlpatterns = [
 
     # message mention list api
     path('message-mention/<int:chat_id>/', views.MessageMentionListViewApi.as_view(), name='message_mention'),
-    
+
     # message reply
     path('chat/message-reply/<int:message_id>/', views.MessageReplyCreateView.as_view(), name='message_reply'),
 
-  
+
 
 
     #for enduser post priya
     path('posts/create/', views.UserPostCreatView.as_view(),name='userpost_create'),
     path('post/update/',views.UserPostEditView.as_view(),name='UserPostEdit'),
-    
+
     path('post/reaction/update/', views.UpdatePostReactionView.as_view(), name='update_post_reaction'),
      path('fetch_reactions/', views.Fetch_reactions.as_view(), name='fetch_reactions'),
 
     path('post/delete/',views.UserPostDeleteView.as_view(),name='UserPostDelete'),
     path('comments/reply/',views.CommentReplyView.as_view(), name='reply_comment'),
- 
+
     path('comments/getReplies/', views.GetRepliesView.as_view(), name="get_replies"),
     #comment priya
     path('comments/',  views.CommentsCreateView.as_view(), name='comment'),
@@ -153,10 +153,10 @@ urlpatterns = [
     path('post/comment/', views.GetPostCommentView.as_view(), name='get_comment_reactions'),
     path("delete-comment/", views.DeleteCommentView.as_view(), name="delete-comment"),
     path('toggle-like/', views.ToggleLikeView.as_view(), name='toggle-like'),
-   
 
-  
- 
+
+
+
     #for enduser story
     path('story/create/', views.UserStoryCreatView.as_view(),name='userstory_create'),
     path('uploadStory/', views.UploadStoryView.as_view(),name='uploadStory'),
