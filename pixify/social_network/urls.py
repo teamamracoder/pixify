@@ -138,7 +138,7 @@ urlpatterns = [
     #for enduser post priya
     path('posts/create/', views.UserPostCreatView.as_view(),name='userpost_create'),
     path('post/update/',views.UserPostEditView.as_view(),name='UserPostEdit'),
-    
+
     path('post/reaction/update/', views.UpdatePostReactionView.as_view(), name='update_post_reaction'),
      path('fetch_reactions/', views.Fetch_reactions.as_view(), name='fetch_reactions'),
 
@@ -153,6 +153,7 @@ urlpatterns = [
     path('post/comment/', views.GetPostCommentView.as_view(), name='get_comment_reactions'),
     path("delete-comment/", views.DeleteCommentView.as_view(), name="delete-comment"),
     path('toggle-like/', views.ToggleLikeView.as_view(), name='toggle-like'),
+    path("remove_reaction/", views.remove_reaction.as_view(), name="remove_reaction"),
    
 
   

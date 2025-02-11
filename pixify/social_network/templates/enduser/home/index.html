@@ -274,18 +274,20 @@
             <div class="post-react" style="cursor: pointer;">
 
                 <div class="reaction-container" style="position: relative; display: inline-block;">
-                    <input type="hidden" class="getemoji"  style="background-color: gray;color: black;">
-                    <span class="post_reaction" style="font-size: 20px; cursor: pointer;position: relative;"><i class="bi bi-hand-thumbs-up pe-1" style="font-style:normal;font-size:20px;top: 3px; position: relative;"></i> </span>
-                    <!-- top: 3px; -->
-                    <div class="reaction-popover" style="display: none; position: absolute; top: -50px; left: 0; background: white;  border-radius: 10px; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);">
-                        <span class="emoji" data-reaction-id="1" style="font-size:25px;cursor: pointer;">❤️</span>
-                        <span class="emoji" data-reaction-id="2"style="font-size:25px;cursor: pointer;">😂</span>
-                        <span class="emoji" data-reaction-id="3"style="font-size:25px;cursor: pointer;">😊</span>
-                        <span class="emoji" data-reaction-id="4"style="font-size:25px;cursor: pointer;">😡</span>
+                    <input type="hidden" class="getemoji">
+                  <!-- <i class="post_reaction" style="font-style:normal;font-size:20px; position: relative;cursor: pointer;">❤️</i>  -->
+                    <span class="post_reaction" style="cursor: pointer;" > <i class=" bi bi-heart pe-1"  style="font-size: 18px; cursor: pointer;position: relative;top:5px;"></i>  </span> 
+
+                    <div  class="reaction-popover"  style="display: none; position: absolute; top: -50px; left: 0; background:black;  border-radius: 10px; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);">
+                         <i  data-reaction-id="1" class="fa-solid fa-heart" style="color: #ff0000;font-size: 20px;cursor: pointer;"></i> 
+                         <i data-reaction-id="2" class="fa-solid fa-face-laugh-squint" style="color: #ffcb0f;font-size: 20px;cursor: pointer;"></i>
+                         <i data-reaction-id="3" class="fa-solid fa-face-smile-beam" style="color: #FFD43B;font-size: 20px;cursor: pointer;"></i>
+                         <i data-reaction-id="4" class="fa-solid fa-face-angry" style="color: #ff0a0a;font-size: 20px;cursor: pointer;"></i>
+                        
                     </div>
            
                 </div>
-  
+
 
                     
                 <span data-toggle="modal" class="load-comments"><i class="fa-regular fa-comment"></i></span>
@@ -601,23 +603,76 @@
 
 
 
-// reaction post ajax
+// // reaction post ajax
+// $(document).ready(function() {
+//     // When the post_reaction is clicked, show the popover
+//     $('.post_reaction').click(function () {
+//         $(this).siblings('.reaction-popover').toggle();
+//     });
+
+//     // When an emoji is clicked, update the span and send AJAX request
+//     $('.emoji').click(function () {
+//         var reactionId = $(this).data('reaction-id');
+//         var selectedEmoji = $(this).text();
+//         var postContainer = $(this).closest('.reaction-container');
+//         var FirstPostId = $(this).closest('.post-box').find('.firstPostId').val();
+
+
+//         // Update the emoji in the main reaction span
+//         postContainer.find('.post_reaction').text(selectedEmoji);
+
+//         // Hide the popover after selection
+//         postContainer.find('.reaction-popover').hide();
+
+//         // Send AJAX request to update reaction
+//         $.ajax({
+//             url: "{% url 'update_post_reaction' %}",
+//             type: "POST",
+//             data: {
+//                 'post_id': FirstPostId,
+//                 'reaction_id': reactionId,
+//                 'csrfmiddlewaretoken': '{{ csrf_token }}'
+//             },
+//             success: function (response) {
+   
+
+//                 // Corrected: Update the hidden input field with the reaction ID
+//                 postContainer.closest('.post-box').find('.getemoji').val(reactionId);
+
+//                 // Update the reaction count displayed on the page
+//                 postContainer.closest('.post-box').find("#total-reaction-count").text(response.new_reaction_count);
+//             },
+//             error: function () {
+//                 alert('Error updating reaction');
+//             }
+//         });
+//     });
+
+//     // Hide popover when clicking outside
+//     $(document).click(function (e) {
+//         if (!$(e.target).closest('.reaction-container').length) {
+//             $('.reaction-popover').hide();
+//         }
+//     });
+// });
 $(document).ready(function() {
     // When the post_reaction is clicked, show the popover
     $('.post_reaction').click(function () {
         $(this).siblings('.reaction-popover').toggle();
     });
 
-    // When an emoji is clicked, update the span and send AJAX request
-    $('.emoji').click(function () {
+    // When a reaction icon is clicked, update the span and send AJAX request
+    $('.reaction-popover i').click(function () {
         var reactionId = $(this).data('reaction-id');
-        var selectedEmoji = $(this).text();
         var postContainer = $(this).closest('.reaction-container');
         var FirstPostId = $(this).closest('.post-box').find('.firstPostId').val();
-        console.log(FirstPostId);
+        var selectedIcon = $(this).attr('class');  // Get the class of selected icon
+        var selectedColor = $(this).css('color'); // Get the color of selected reaction
 
-        // Update the emoji in the main reaction span
-        postContainer.find('.post_reaction').text(selectedEmoji);
+        // Update the main reaction span with selected icon
+        postContainer.find('.post_reaction i')
+            .attr('class', selectedIcon)  // Change the icon class
+            .css('color', selectedColor); // Apply the selected color
 
         // Hide the popover after selection
         postContainer.find('.reaction-popover').hide();
@@ -632,9 +687,7 @@ $(document).ready(function() {
                 'csrfmiddlewaretoken': '{{ csrf_token }}'
             },
             success: function (response) {
-                console.log("new", response);
-
-                // Corrected: Update the hidden input field with the reaction ID
+                // Update hidden input field with the reaction ID
                 postContainer.closest('.post-box').find('.getemoji').val(reactionId);
 
                 // Update the reaction count displayed on the page
@@ -654,7 +707,6 @@ $(document).ready(function() {
     });
 });
 
-
 // get reaction ajax
 $(document).ready(function () {
     $(".post-box").each(function () {
@@ -669,11 +721,11 @@ $(document).ready(function () {
                 'post_id': postId
             },
             success: function (response) {
-                console.log("post reactions", response);
+ 
 
                 var userReactionId = response.user_reaction_id; // User's reaction ID
                 postContainer.find('.getemoji').val(userReactionId);  // Set value
-                console.log("Updated emoji value:", userReactionId); // Debug
+  
                  // Get reaction count and names
                 var totalReactions = response.total_count;
                 var reactionNames = response.reaction_name; // List of names
@@ -710,7 +762,7 @@ $(document).ready(function () {
                 fetchEmojiDetails(postContainer, postId);
             },
             error: function () {
-                console.log('Error fetching reactions');
+               
             }
         });
     });
@@ -719,7 +771,7 @@ $(document).ready(function () {
         var FirstUserId = postContainer.find('.firstUserId').val();
         var emoji = postContainer.find('.getemoji').val();  
 
-        console.log("Fetching emoji details with value:", emoji); // Debug
+      
 
         $.ajax({
             url: '/fetch_reactions/',  
@@ -730,12 +782,10 @@ $(document).ready(function () {
                 'emoji_id': emoji
             },
             success: function(response) {
-                console.log("Emoji details response:", response);
-                console.log(response.react[0].value)
-
+            
                 if (response.react && response.react.length > 0) {
                 var emojiHtml = response.react[0].value; // Get the emoji HTML like <i class="fa-solid fa-heart"></i>
-                console.log("Updated Emoji HTML:", emojiHtml);
+               
 
                 // Update the reaction span with the new emoji
                 postContainer.find('.post_reaction').html(emojiHtml);
@@ -780,8 +830,6 @@ $(document).ready(function () {
         commentBox.val(mentionText + currentText + " ");  
     }
 
-    console.log("Replying to comment ID:", replyForId);
-    console.log("Replying to comment Name:", replyForName);
 
     // Set focus to the input box
     commentBox.focus();
@@ -808,7 +856,7 @@ $(document).ready(function () {
                 },
                 headers: { "X-CSRFToken": "{{ csrf_token }}" },
                 success: function (data) {
-                    console.log("Comment submitted:", data);
+                  
                    
     
                     $('#commentText').val(''); // Clear textarea
@@ -883,9 +931,7 @@ $(document).ready(function () {
         $('.load-comments').click(function () {
             const FirstPostId = $(this).closest('.post-box').find('.firstPostId').val();
             const FirstUserId = $(this).closest('.post-box').find('.firstUserId').val();
-            console.log("closest  .... ",$(this).closest('.post-box'))
-            console.log("get comment",FirstPostId)
-            console.log("get user id",FirstUserId)
+          
 
 
 
@@ -900,8 +946,7 @@ $(document).ready(function () {
                     csrfmiddlewaretoken: '{{ csrf_token }}',
                   },
                 success: function (data) {
-                    console.log(data)
-                    console.log("dataa",data.posts)
+                   
 
                     $(this).closest('.post-box').find("#total-comment-count").text(data.comment_count);
    
@@ -1073,7 +1118,7 @@ $(document).ready(function () {
 //  view reply comment 
 $(document).on('click', '.view-comment', function () {
     const commentId = $(this).data('comment-id'); // Get clicked parent comment ID
-    console.log("Clicked comment ID:", commentId); // Debugging
+ 
 
     if (!commentId) {
         console.error("Error: commentId is not received!");
@@ -1091,7 +1136,7 @@ $(document).on('click', '.view-comment', function () {
             dataType: 'json',
             data: { comment_id: commentId },
             success: function (data) {
-                console.log("Received Data:", data);
+            
 
                 if (data.replies.length > 0) {
                     let replyHtml = `<div id="replies-${commentId}" class="ms-4" style="display: none;">`;
@@ -1133,7 +1178,7 @@ $(document).on('click', '.view-comment', function () {
 $(document).on("click", ".comlike", function () {
     const commentId = $(this).data('comment-id')
     let likeBtn = $(this);
-    console.log(commentId)
+
     let likeCountSpan = likeBtn.find(".like-count");
 
     $.ajax({
@@ -1144,6 +1189,7 @@ $(document).on("click", ".comlike", function () {
             csrfmiddlewaretoken: "{{ csrf_token }}" // CSRF token required for Django
         },
         success: function (response) {
+            console.log(response)
             if (response.success) {
                 if (response.liked) {
                     likeBtn.text("Unlike ");  // Update button text
@@ -1171,8 +1217,7 @@ $(document).on("click", ".comlike", function () {
         $('.editmodal').click(function () {
             const FirstPostId = $(this).closest('.post-box').find('.firstPostId').val();
             const FirstUserId = $(this).closest('.post-box').find('.firstUserId').val();
-            console.log(FirstPostId)
-  
+          
             $.ajax({
                 url: 'post/update/',
                 type: 'GET',
@@ -1183,7 +1228,7 @@ $(document).on("click", ".comlike", function () {
                     csrfmiddlewaretoken: '{{ csrf_token }}',
                   },
                 success: function (data) {
-                    console.log("data post",data.User_del)
+                 
                      const postid= FirstPostId
                      const userid=FirstUserId
                      document.getElementById("p_id").value = postid;
@@ -1281,7 +1326,7 @@ const photo = `
 
                     $('#updatePostBtn').click(function () {
                         const updatedTitle = $('#editTitle').val();
-                        console.log(updatedTitle)
+                       
                         $.ajax({
                             
                             type: 'POST',
@@ -1322,22 +1367,92 @@ const photo = `
 
 
 
-   $(document).ready(function () {
+//    $(document).ready(function () {
+//     let holdTimer; // Timer variable
+
+//     $(document).on("mousedown", ".allcomments", function () {
+//         let commentDiv = $(this);  // Store reference to comment
+//         let commentId = commentDiv.find(".comment-id").val(); // Get comment ID
+
+//         // Start the hold timer (1 seconds = 1000ms)
+//         holdTimer = setTimeout(function () {
+//             deleteComment(commentId, commentDiv);
+//         }, 1000);
+//     });
+
+//     $(document).on("mouseup mouseleave", ".allcomments", function () {
+//         clearTimeout(holdTimer); // Cancel the hold timer if user releases early
+//     });
+
+//     function deleteComment(commentId, commentElement) {
+//         $.ajax({
+//             url: "/delete-comment/", // Change to your actual delete endpoint
+//             type: "POST",
+//             data: {
+//                 comment_id: commentId,
+//                 csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val() // CSRF token for security
+//             },
+//             success: function (response) {
+//                 if (response.success) {
+//                     commentElement.fadeOut(300, function () { $(this).remove(); }); // Smooth fade out effect
+//                 } else {
+//                     alert("Failed to delete comment.");
+//                 }
+//             },
+//             error: function () {
+//                 alert("Error deleting comment.");
+//             }
+//         });
+//     }
+// });
+
+
+$(document).ready(function () {
     let holdTimer; // Timer variable
+    let commentToDelete = null; // Store reference to the comment
 
     $(document).on("mousedown", ".allcomments", function () {
-        let commentDiv = $(this);  // Store reference to comment
-        let commentId = commentDiv.find(".comment-id").val(); // Get comment ID
+        commentToDelete = $(this);  // Store reference to comment
+        let commentId = commentToDelete.find(".comment-id").val(); // Get comment ID
 
-        // Start the hold timer (1 seconds = 1000ms)
+        // Start the hold timer (1 second)
         holdTimer = setTimeout(function () {
-            deleteComment(commentId, commentDiv);
-        }, 1000);
+            showDeleteConfirmation(commentId, commentToDelete);
+        }, 500);
     });
 
     $(document).on("mouseup mouseleave", ".allcomments", function () {
         clearTimeout(holdTimer); // Cancel the hold timer if user releases early
     });
+
+    function showDeleteConfirmation(commentId, commentElement) {
+        // Create a modal dynamically
+        let modalHtml = `
+            <div id="deleteModal" class="delete-modal">
+                <div class="delete-modal-content">
+                    <p>Are you sure you want to delete this comment?</p>
+                    <button id="confirmDelete" data-comment-id="${commentId}">Confirm Delete</button>
+                    <button id="cancelDelete">Cancel</button>
+                </div>
+            </div>
+        `;
+
+        // Append to body and show modal
+        $("body").append(modalHtml);
+        $("#deleteModal").fadeIn(200);
+
+        // Handle cancel button
+        $("#cancelDelete").click(function () {
+            $("#deleteModal").fadeOut(200, function () { $(this).remove(); });
+        });
+
+        // Handle confirm delete button
+        $("#confirmDelete").click(function () {
+            let id = $(this).data("comment-id");
+            deleteComment(id, commentElement);
+            $("#deleteModal").fadeOut(200, function () { $(this).remove(); }); // Remove modal
+        });
+    }
 
     function deleteComment(commentId, commentElement) {
         $.ajax({
@@ -1361,9 +1476,48 @@ const photo = `
     }
 });
 
+
 </script>  
 
+<style>
+    .delete-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+}
+
+.delete-modal-content {
+    background: #2f066de3;;
+    padding: 20px;
+    border-radius: 5px;
+    text-align: center;
+}
+
+.delete-modal-content button {
+    margin: 10px;
+    padding: 10px 15px;
+    border: none;
+    cursor: pointer;
+}
+
+#confirmDelete {
+    background-color:transparent;
+    color: white;
+}
+
+#cancelDelete {
+    background-color:transparent;
+    color: white;
+}
+
+</style>
 
 
 {% comment %} post delete ajax {% endcomment %}
@@ -1392,7 +1546,7 @@ const photo = `
                     csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
                 },
                 success: function (response) {
-                    console.log(response.message);
+                  
     
                     // Fade out modal and post box
                     $('#deleteConfirmModal').modal('hide');
@@ -1438,9 +1592,10 @@ const photo = `
                     $('#postForm')[0].reset();
                     location.reload();
 
-                    } else {
-                        alert("Error: " + response.message);
                     }
+                    //  else {
+                    //     alert("Error: " + response.message);
+                    // }
                 },
                 error: function(xhr, status, error) {
                     alert("AJAX error: " + error);
@@ -1486,7 +1641,7 @@ width: 100%;
         position: absolute;
         top: -50px;
         left: 0;
-        background: white;
+        background: black;
         padding: 5px;
         border-radius: 10px;
         box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
