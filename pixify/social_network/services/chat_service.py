@@ -56,7 +56,7 @@ def get_chat_by_id(chat_id):
 def get_recipient_for_personal(chat_id,user):
     # check this
     try:
-        chat_member = ChatMember.objects.exclude(member_id=user.id).get(chat_id=chat_id)
+        chat_member = ChatMember.objects.exclude(member_id=user.id).get(chat_id=chat_id,is_active=True)
         if chat_member:
             member = chat_member.member_id
             return member
@@ -64,14 +64,18 @@ def get_recipient_for_personal(chat_id,user):
     except Exception as e:
         return False
 
-def count_members(chat_id ):
-    members=ChatMember.objects.filter(chat_id=chat_id)
+def members(chat_id ):
+    members=ChatMember.objects.filter(chat_id=chat_id,is_active=True)
     return members
+
+def chat_members(chat_id):
+    members = ChatMember.objects.filter(chat_id=chat_id, is_active=True)
+    return list(members.values("member_id"))  # Return user IDs instead
 
 
 
 def get_recipients_for_group(chat_id,user):
-        chat_members = ChatMember.objects.filter(chat_id=chat_id)
+        chat_members = ChatMember.objects.filter(chat_id=chat_id,is_active=True)
         first_names = [
         'You' if chat_member.member_id == user else chat_member.member_id.first_name
         for chat_member in chat_members
@@ -101,10 +105,58 @@ def list_followers_api(request, user):
             following=user, user_id__first_name__icontains=search_query
         ).values('user_id', 'user_id__first_name', 'user_id__last_name', 'user_id__email','user_id__profile_photo_url')
     else:
-        followers = []
-        followings =[]
+        chat_title = chat.title
+    chat_data = {
+        'id': chat.id,
+        'title': chat_title,
+        'chat_cover': chat.chat_cover if chat.chat_cover else '/static/images/group_pic.png',
+        'created_by':chat.created_by,
+        'is_group': chat.type == ChatType.GROUP.value,
+        'members': [
+            {
+                'id': member.member_id,
+                'first_name': "You" if member.member_id.id == user else member.member_id.first_name +" "+ member.member_id.last_name,
+                'profile': member.member_id.profile_photo_url if member.member_id.profile_photo_url else '/static/images/avatar.jpg'
+            }
+            for member in active_members
+        ]
+    }
 
-    response_data = { 'followers': list(followers), 'followings': list(followings) }
-    return response_data
+    return chat_data
+def latest_message_sender_name(chat_latest_message_sender_id, user_id):
+    if user_id == chat_latest_message_sender_id:
+        sender_name = 'You'
+    else:
+        # Fetch the sender's first name from the User model
+        sender = User.objects.filter(id=chat_latest_message_sender_id).values('first_name').first()
+        sender_name = sender['first_name'] if sender else ''  # Safely access first_name
+
+    # Return the name as a dictionary
+    name = {
+        'sender_name': sender_name
+    }
+    return name
+
+
+def message_seen_status(message):
+    members_count = ChatMember.objects.filter(
+        chat_id=message.chat_id,
+        is_active=True
+    ).count()
+
+    read_by_count = MessageReadStatus.objects.filter(
+        message_id=message,
+        is_active=True
+    ).values('read_by').distinct().count()
+
+    if read_by_count == members_count:
+        read_status = True
+    else:
+        read_status = False
+
+    return read_status
+
+
+
 
 

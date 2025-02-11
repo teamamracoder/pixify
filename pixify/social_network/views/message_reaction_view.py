@@ -6,23 +6,18 @@ from ..decorators import auth_required, role_required
 from social_network.decorators.exception_decorators import catch_error
 from ..services import message_reaction_service
 
+
 class MessageReactionsListView(View):
     @catch_error
     @auth_required
     @role_required(Role.ADMIN.value, Role.END_USER.value)
     def get(self, request, message_id):
         try:
-            reactions =message_reaction_service.get_active_message_reactions(message_id)
-            reaction_data = [
-                {
-                    'reaction': reaction.reaction_id.value,
-                    'reaction_count': message_reaction_service.get_reaction_count(message_id, reaction.reaction_id)
-                }
-                for reaction in reactions
-            ]
+            reaction_data = list(message_reaction_service.reaction_count_by_reaction_id(message_id))
             return JsonResponse({'reactions': reaction_data}, status=200)
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=400)
+
 
 class MessageReactionCreateView(View):
     @catch_error
