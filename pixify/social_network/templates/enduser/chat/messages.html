@@ -751,9 +751,10 @@ socket.onmessage = function (event) {
       data.reply_userPic,
       data.media_urls || [],
       data.user === currentUser,
-      data.reactions || []
+      data.reactions || [],
     );
   } else if (data.update) {
+    // Handle message update
     updateMessageInChat(
       data.message,
       data.message_id,
@@ -776,11 +777,15 @@ socket.onmessage = function (event) {
       console.warn(`Message with ID ${messageId} not found.`);
       return;
     }
+
     if (data.del_type == 1) {
-      if (data.del_by.includes(currentUser)) {
-        messageElement.style.display = "none";
+      // "Delete for me" - Hide message only for current user      
+      console.log(data.del_type);
+       if (data.del_by.includes(currentUserId)) {      
+      messageElement.style.display = "none";
       }
     } else if (data.del_type == 2) {
+      // "Delete for everyone" - Remove from DOM entirely        
       messageElement.remove();
     }
 }
@@ -788,36 +793,27 @@ socket.onmessage = function (event) {
 
 // Handel Calling
  if (data.action === "ringing") {
-        const callId = data.call_id;  // Extract call ID
-        const members = data.members; // Extract members list
+        const callId = data.call_id;
+        const members = data.members;
+        const callerId = data.caller_id;
+        const currentUserId = "{{ user.id }}";// Get logged-in user ID
     
-        if (Array.isArray(members)) {  // Ensure members is a valid array
-            const checkInterval = setInterval(() => {
-                let allJoined = true;
+        console.log("Caller ID:", callerId);
+        console.log("Current User ID:", currentUserId);
     
-                members.forEach(member => {
-                    if (!isUserJoined(member)) { // Check if user has joined
-                        allJoined = false;
-                    }
-                });
-    
-                if (allJoined) {
-                    clearInterval(checkInterval);  // Stop checking once all have joined
-                    window.location.href = "/call/" + callId + "/";
-
-                }
-            }, 500); // Check every 5 seconds
+        if (currentUserId === callerId) {
+            console.log("Redirecting to ringing.html...");
+            window.location.href = `/call/ringing/${callId}/${chatId}/`;
+            
+            
+        } else {
+            console.log("Redirecting to calling.html...");
+            window.location.href = `/call/calling/${callId}/${chatId}/`;
+            
         }
     }
-    
-    // Simulated function to check if user has joined
-    function isUserJoined(userId) {
-        // Replace this with an actual API call or WebSocket status check
-        return true;  // Change logic based on your real implementation
-    }
 
-
-    // Handle typing indicator.
+     // Handle typing indicator.
     const typingIndicator = document.querySelector('.chat-bubble');
     if (data.typing && data.user !== currentUser) {
     // Update the inner HTML using template literals.
@@ -850,14 +846,13 @@ socket.onmessage = function (event) {
 
 };
 
-
 // Function to append a message to the chat body
 function appendMessageToChat(message, messageId, messageTime, senderName, profilePic, reply, replyText, reply_username, reply_userPic, mediaUrls, isSent, reactions) {
     const chatBody = document.querySelector(".chat-body");
     const today = "Today";
 
     // Check if today's timestamp is already present
-    const timestamps = chatBody.querySelectorAll(".message-timestamp span");
+    const timestamps = chatBody.querySelectorAll("#message-timestamp span");
     let todayExists = false;
     timestamps.forEach(timestamp => {
         if (timestamp.innerText === today) {
@@ -868,7 +863,8 @@ function appendMessageToChat(message, messageId, messageTime, senderName, profil
     // Add today's timestamp if it doesn't exist
     if (!todayExists) {
         const timestampDiv = document.createElement("div");
-        timestampDiv.classList.add("message-timestamp");        
+        timestampDiv.classList.add("message-timestamp");
+        timestampDiv.setAttribute("id", "message-timestamp");
         timestampDiv.innerHTML = `<span>${today}</span>`;
         chatBody.appendChild(timestampDiv);
     }
@@ -1561,6 +1557,7 @@ window.addEventListener('load', function () {
         setInterval(checkAndMarkUnreadMessages, 5000);
 });
 
+// Call Handel
 function generateCallId() {
     return 'call_' + Math.random().toString(36).substr(2, 9); // Generates a random call ID
 }
@@ -2498,4 +2495,5 @@ document.addEventListener("DOMContentLoaded", function () {
 
     
 </style>
-{% endblock %} add a action when i type "@" in the form 
+{% endblock %} 
+add a action when i type "@" in the form 
