@@ -30,45 +30,43 @@
         </div>
     </div>
 
-    <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            // Get chat_id from the hidden input
-            const chatId = "{{ chat_id }}"
-            const callId = "{{ call_id }}"
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const chatId = "{{ chat_id }}";
+        const callId = "{{ call_id }}";
+        const socket = new WebSocket(`ws://${window.location.host}/ws/call/${chatId}/`);
 
-            document.getElementById("end-call").addEventListener("click", () => {
-                if (chatId) {
-                    window.location.href = `/chat/${chatId}/message/`;
-                } else {
-                    console.error("Chat ID is missing!");
-                }
-            });
-        });
+        // WebSocket event: When a member accepts the call, redirect the caller too
+        socket.onmessage = function (event) {
+            const data = JSON.parse(event.data);
 
-        document.addEventListener("DOMContentLoaded", function () {
-            const chatId = "{{ chat_id }}";
-            const callId = "{{ call_id }}";
-            const socket = new WebSocket(`ws://${window.location.host}/ws/call/${chatId}/`);
-        
-            socket.onmessage = function (event) {
-                const data = JSON.parse(event.data);
-        
-                if (data.action === "call_accepted") {
-                    window.location.href = `/call/${callId}/${chatId}/`;
-                }
-            };
-        
-            document.querySelector(".accept-call").addEventListener("click", function () {
-                socket.send(JSON.stringify({
-                    action: "call_accepted",
-                    call_id: callId
-                }));
-        
+            if (data.action === "call_accepted") {
+                console.log("Call accepted, redirecting to call.html...");
                 window.location.href = `/call/${callId}/${chatId}/`;
-            });
+            }
+        };
+
+        // End Call Button - Redirect to chat messages
+        document.getElementById("end-call").addEventListener("click", () => {
+            if (chatId) {
+                socket.send(JSON.stringify({ action: "user_left", chat_id: chatId })); // Notify server
+                window.location.href = `/chat/${chatId}/message/`;
+            } else {
+                console.error("Chat ID is missing!");
+            }
         });
-        
-    </script>
+
+        // Accept Call Button (for testing if needed)
+        document.querySelector(".accept-call")?.addEventListener("click", function () {
+            socket.send(JSON.stringify({
+                action: "call_accepted",
+                call_id: callId
+            }));
+
+            window.location.href = `/call/${callId}/${chatId}/`;
+        });
+    });
+</script>        
 </body>
 
 
