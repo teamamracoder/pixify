@@ -10,7 +10,7 @@ def get_reaction_by_id(post_id,user_id):
 
 def create_post_reaction(post_id,user_id,reaction_id):
     created = PostReaction.objects.create(post_id_id=post_id,reacted_by_id=user_id,
-                                          created_by_id= user_id,react_id_id=reaction_id,is_active= True)
+                                          created_by_id= user_id,master_list_id_id=reaction_id,is_active= True)
     
     return  created
 

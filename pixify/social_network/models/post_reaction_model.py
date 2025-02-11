@@ -9,7 +9,7 @@ class PostReaction(models.Model):
     is_active = models.BooleanField(db_default=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True, blank=True)
     updated_at = models.DateTimeField(auto_now=True, blank=True)
-    react_id=models.ForeignKey('MasterList', on_delete=models.CASCADE, blank=True,null=True, related_name='fk_post_reaction_masterlist_id')
+    master_list_id=models.ForeignKey('MasterList', on_delete=models.CASCADE, blank=True,null=True, related_name='fk_post_reaction_masterlist_id')
     created_by = models.ForeignKey('User', on_delete=models.CASCADE, blank=True, related_name='fk_create_post_reactions_users_id')
     updated_by = models.ForeignKey('User', on_delete=models.CASCADE, blank=True, null=True, related_name='fk_update_post_reactions_users_id')
     

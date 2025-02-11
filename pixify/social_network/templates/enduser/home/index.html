@@ -258,14 +258,14 @@
         <div>
             <div class="d-flex align-items-center px-2 "  >
              
-                <i class="bi bi-hand-thumbs-up pe-1" style="font-size:12px"></i>
-                 <i class="bi bi-heart" style="font-size:12px" ></i>
+                <i class="bi bi-hand-thumbs-up pe-1 emojis_hide" style="font-size:12px"></i>
+                 <i class="bi bi-heart emojis_hide" style="font-size:12px" ></i>
             
                <span  style="font-size:14px;color:#e9e6e6c7;margin-left: 5px;margin-bottom: 2px;" id="reaction-count">
                 <span style="font-size:14px;color:#e9e6e6c7;margin-left: 5px;" class="px-2" id="total-reaction-count" >
                   </span>
                 </span>
-                <span style="font-size:14px;color:#e9e6e6c7;" class="ms-auto pe-2"><span id="total-comment-count"></span> comments</span>
+                <span style="font-size:14px;color:#e9e6e6c7;" class="ms-auto pe-2 commentcountshow" ><span id="total-comment-count"></span> comments</span>
             </div>
         </div>
        
@@ -275,12 +275,13 @@
 
                 <div class="reaction-container" style="position: relative; display: inline-block;">
                     <input type="hidden" class="getemoji"  style="background-color: gray;color: black;">
-                    <span class="post_reaction" style="font-size: 20px; cursor: pointer;position: relative;top: 3px;">👍</span>
+                    <span class="post_reaction" style="font-size: 20px; cursor: pointer;position: relative;"><i class="bi bi-hand-thumbs-up pe-1" style="font-style:normal;font-size:20px;top: 3px; position: relative;"></i> </span>
+                    <!-- top: 3px; -->
                     <div class="reaction-popover" style="display: none; position: absolute; top: -50px; left: 0; background: white;  border-radius: 10px; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);">
-                        <span class="emoji" data-reaction-id="4" style="font-size:25px;cursor: pointer;">❤️</span>
-                        <span class="emoji" data-reaction-id="3"style="font-size:25px;cursor: pointer;">😂</span>
-                        <span class="emoji" data-reaction-id="2"style="font-size:25px;cursor: pointer;">😊</span>
-                        <span class="emoji" data-reaction-id="1"style="font-size:25px;cursor: pointer;">😡</span>
+                        <span class="emoji" data-reaction-id="1" style="font-size:25px;cursor: pointer;">❤️</span>
+                        <span class="emoji" data-reaction-id="2"style="font-size:25px;cursor: pointer;">😂</span>
+                        <span class="emoji" data-reaction-id="3"style="font-size:25px;cursor: pointer;">😊</span>
+                        <span class="emoji" data-reaction-id="4"style="font-size:25px;cursor: pointer;">😡</span>
                     </div>
            
                 </div>
@@ -600,37 +601,6 @@
 
 
 
-//$(document).ready(function () {
-//     $(".post-box").each(function () {
-
-//         const FirstPostId = $(this).closest('.post-box').find('.firstPostId').val();
-//         const FirstUserId = $(this).closest('.post-box').find('.firstUserId').val();
-//         const emoji = $(this).closest('.post-box').find('.getemoji').val();
-//         //const emoji = $(this).find('.getemoji');
-        
-//         console.log("emoji",emoji,FirstPostId)
-
-//         // Send AJAX request
-//         $.ajax({
-//             url: '/fetch_reactions/',  // Endpoint to fetch reactions
-//             method: 'GET',
-//             data: {
-//                 'post_id': FirstPostId,
-//                 'user_id': FirstUserId,
-//                 'emoji_id': emoji
-//             },
-//             success: function(response) {
-//                console.log("emojis",response)
-//             },
-//             error: function(xhr, status, error) {
-//                 console.error("AJAX Error: " + status + error);
-//             }
-//         });
-       
-//     });
-// });
-
-
 // reaction post ajax
 $(document).ready(function() {
     // When the post_reaction is clicked, show the popover
@@ -684,6 +654,8 @@ $(document).ready(function() {
     });
 });
 
+
+// get reaction ajax
 $(document).ready(function () {
     $(".post-box").each(function () {
         var postContainer = $(this);
@@ -707,6 +679,12 @@ $(document).ready(function () {
                 var reactionNames = response.reaction_name; // List of names
                 var userReactionId = response.user_reaction_id; // User's reaction ID
                 
+               
+                
+                if (parseInt(totalReactions)==0){
+                    
+                    postContainer.find(".emojis_hide").hide()
+                }
                 // Set the reaction ID in the hidden input box
                 postContainer.find('.getemoji').val(userReactionId);
 
@@ -721,6 +699,7 @@ $(document).ready(function () {
                         reactionText = `${reactionNames[0]}, ${reactionNames[1]} and ${totalReactions - 2} others`;
                     }
                 }
+                
 
                 // Update the total reaction count
                 postContainer.find("#total-reaction-count").text(totalReactions);
@@ -772,90 +751,6 @@ $(document).ready(function () {
         });
     }
 });
-
-// post reaction count ajax
-
-// $(document).ready(function () {
-//     $(".post-box").each(function () {
-//         var postContainer = $(this);
-//         var postId = postContainer.find('.firstPostId').val();
-      
-
-//         // Fetch reactions for each post
-//         $.ajax({
-//             url: "{% url 'get_post_reactions' %}",
-//             type: "GET",
-//             data: { 
-//                 'post_id': postId
-//             },
-//             success: function (response) {
-//                 console.log("post reactions", response);
-    
-//                 // Get reaction count and names
-//                 var totalReactions = response.total_count;
-//                 var reactionNames = response.reaction_name; // List of names
-//                 var userReactionId = response.user_reaction_id; // User's reaction ID
-                
-//                 // Set the reaction ID in the hidden input box
-//                 postContainer.find('.getemoji').val(userReactionId);
-
-//                 var reactionText = "";
-                
-//                 if (reactionNames.length > 0) {
-//                     if (reactionNames.length === 1) {
-//                         reactionText = `${reactionNames[0]}`;
-//                     } else if (reactionNames.length === 2) {
-//                         reactionText = `${reactionNames[0]} and ${reactionNames[1]}`;
-//                     } else {
-//                         reactionText = `${reactionNames[0]}, ${reactionNames[1]} and ${totalReactions - 2} others`;
-//                     }
-//                 }
-
-//                 // Update the total reaction count
-//                 postContainer.find("#total-reaction-count").text(totalReactions);
-
-//                 // Update the reaction display with names
-//                 postContainer.find("#reaction-count").html(reactionText);
-//             },
-//             error: function () {
-//                 console.log('Error fetching reactions');
-//             }
-//         });
-
-//     });
-// });
-
-// $(document).ready(function () {
-//     $(".post-box").each(function () {
-//         var postContainer = $(this);
-//         var postId = postContainer.find('.firstPostId').val();
-//         var FirstUserId = postContainer.find('.firstUserId').val();
-//         var emoji = postContainer.find('.getemoji').val();  // Make sure this gets the value correctly
-        
-//         // Log to ensure the emoji value is fetched properly
-//         console.log("emoji:", emoji);
-//         console.log("FirstPostId:", postId);
-
-//         // Send AJAX request to fetch reactions
-//         $.ajax({
-//             url: '/fetch_reactions/',  // Endpoint to fetch reactions
-//             method: 'GET',
-//             data: {
-//                 'post_id': postId,
-//                 'user_id': FirstUserId,
-//                 'emoji_id': emoji
-//             },
-//             success: function(response) {
-//                 console.log("emojis response:", response);
-//             },
-//             error: function(xhr, status, error) {
-//                 console.error("AJAX Error: " + status + error);
-//             }
-//         });
-//     });
-// });
-
-
 
 // comment reply
     $(document).ready(function () {
@@ -1148,16 +1043,22 @@ $(document).ready(function () {
         $(".post-box").each(function () {
             var postContainer = $(this);
             var postId = postContainer.find('.firstPostId').val();
-    
+           
             // Fetch reactions for each post
             $.ajax({
                 url: "{% url 'get_comment_reactions' %}",
                 type: "GET",
                 data: { 'post_id': postId },
                 success: function (response) {
-   
+                    
+                 if (parseInt(response.total_count) > 0){
 
                     postContainer.find("#total-comment-count").text(response.total_count);
+
+                 }
+                 else{
+                    postContainer.find(".commentcountshow").hide()
+                 }
                    
                 },
                 error: function () {
@@ -1261,61 +1162,6 @@ $(document).on("click", ".comlike", function () {
 
 </script>
 
-{% comment %} post reaction ajax {% endcomment %}
-<script>
-
-// $(document).ready(function () {
-//     $(".post-box").each(function () {
-//         var postContainer = $(this);
-//         var postId = postContainer.find('.firstPostId').val();
-
-//         // Fetch reactions for each post
-//         $.ajax({
-//             url: "{% url 'get_post_reactions' %}",
-//             type: "GET",
-//             data: { 'post_id': postId },
-//             success: function (response) {
-//                 console.log("post reactions", response);
-
-//                 // Update the total reaction count display
-//                 var reactionDisplay = postContainer.find("#reaction-count span#total-reaction-count");
-//                 reactionDisplay.text(response.total_count);
-
-//                 // Update the user's selected reaction emoji
-//                 var userReaction = postContainer.find(".post_reaction");
-//                 if (response.user_emoji) {
-//                     userReaction.text(response.user_emoji);
-//                 } else {
-//                     userReaction.text("👍"); // Default emoji if no reaction
-//                 }
-
-//                 // Construct and display reaction names
-//                 var reactionNames = response.reaction_names; // List of names
-//                 var reactionText = "";
-                
-//                 if (reactionNames.length > 0) {
-//                     if (reactionNames.length === 1) {
-//                         reactionText = `${reactionNames[0]}`;
-//                     } else if (reactionNames.length === 2) {
-//                         reactionText = `${reactionNames[0]} and ${reactionNames[1]}`;
-//                     } else {
-//                         reactionText = `${reactionNames[0]}, ${reactionNames[1]} and ${reactionNames.length - 2} others`;
-//                     }
-//                 }
-
-//                 // Update the reaction count span
-//                 postContainer.find("#reaction-count").html(reactionText);
-//             },
-//             error: function () {
-//                 console.log('Error fetching reactions');
-//             }
-//         });
-//     });
-// });
-
-
- 
-   </script>
 
 
 {% comment %} post update ajax {% endcomment %}

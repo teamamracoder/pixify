@@ -102,7 +102,7 @@ class UpdatePostReactionView(View):
 
         if existing_reaction:
             # If the user already reacted, update the reaction type
-            existing_reaction.react_id_id = reaction_id
+            existing_reaction.master_list_id_id = reaction_id
             existing_reaction.save()
         else:
             # If no reaction exists, create a new one
@@ -114,35 +114,6 @@ class UpdatePostReactionView(View):
         return JsonResponse({'new_reaction_count': new_reaction_count,' reaction_id': reaction_id})
 
 
-# class GetPostReactionsView(View):
-#     def get(self, request, *args, **kwargs):
-#         post_id = request.GET.get('post_id')
-#         user_id = request.user.id
-#         print("a",post_id)
-#         try:
-#             post = Post.objects.get(id=post_id)
-
-#         except Post.DoesNotExist:
-#             return JsonResponse({'error': 'Post not found'}, status=404)
-#         react=services.post_reaction_service.get_reaction_by_id(post_id,user_id)
-#         print("reactionssgsgjk",react)
-       
-#         # Get total reaction count
-#         total_count = PostReaction.objects.filter(post_id_id=post, is_active=True).count()
-        
-#         # Get the current usr's reaction (if any)
-#         user_reaction = list(services.post_reaction_service.post_reactionby_name(post).values())
-#         user_ids = [reaction['reacted_by_id'] for reaction in user_reaction]
-#         users = list(User.objects.filter(id__in=user_ids).values_list('first_name', 'last_name'))
-#         users = [f"{first} {last}" for first, last in users]
-
-
-#         return JsonResponse({
-#             'total_count': total_count,
-#             'reaction_name':users,
-   
-
-#         })
 
 class GetPostReactionsView(View):
     def get(self, request, *args, **kwargs):
@@ -158,7 +129,7 @@ class GetPostReactionsView(View):
         user_reaction = PostReaction.objects.filter(post_id_id=post_id, reacted_by_id=user_id, is_active=True).first()
 
         if user_reaction:
-            react_id = user_reaction.react_id_id  # Get the reaction ID (react_id_id)
+            react_id = user_reaction.master_list_id_id  # Get the reaction ID (react_id_id)
             print("User's reaction ID:", react_id)
         else:
             react_id = None  # No reaction found for the user

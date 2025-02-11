@@ -138,11 +138,13 @@ urlpatterns = [
     #for enduser post priya
     path('posts/create/', views.UserPostCreatView.as_view(),name='userpost_create'),
     path('post/update/',views.UserPostEditView.as_view(),name='UserPostEdit'),
+    
     path('post/reaction/update/', views.UpdatePostReactionView.as_view(), name='update_post_reaction'),
-    # path('post_reaction/create/', views.create_reaction, name='create_reaction'),
+     path('fetch_reactions/', views.Fetch_reactions.as_view(), name='fetch_reactions'),
+
     path('post/delete/',views.UserPostDeleteView.as_view(),name='UserPostDelete'),
     path('comments/reply/',views.CommentReplyView.as_view(), name='reply_comment'),
-    # path('post/comment/reply/', views.CommentReplyView.as_view(), name='UserPostCommentReply'),
+ 
     path('comments/getReplies/', views.GetRepliesView.as_view(), name="get_replies"),
     #comment priya
     path('comments/',  views.CommentsCreateView.as_view(), name='comment'),
@@ -151,7 +153,7 @@ urlpatterns = [
     path('post/comment/', views.GetPostCommentView.as_view(), name='get_comment_reactions'),
     path("delete-comment/", views.DeleteCommentView.as_view(), name="delete-comment"),
     path('toggle-like/', views.ToggleLikeView.as_view(), name='toggle-like'),
-    path('fetch_reactions/', views.Fetch_reactions.as_view(), name='fetch_reactions'),
+   
 
   
  
