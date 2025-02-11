@@ -69,6 +69,7 @@ class Reactions:
     KISS = '<i class="fa-solid fa-face-kiss-beam" style="color: #FFD43B;"></i>'
     HEARTBROKE = '<i class="fa-solid fa-heart-crack" style="color: #d40202;"></i>'
     FAKESMILE= '<i class="fa-solid fa-face-grin-beam-sweat" style="color: #FFD43B;"></i>'
+    
 
 class MessageDeleteType(Enum):
     NOT_DELETED = 1
