@@ -1299,7 +1299,7 @@ class ReactionManager {
                 modal.classList.add('message-modal'); // Use the updated class name for modal
                 modal.innerHTML = `
                     <div class="message-modal-content" id="msg-ul"> <!-- Use the updated content class -->
-                        <span class="close-btn">&times;</span>
+                        <span class="close-btnn">&times;</span>
                             All (${data.reaction_count})<hr>
                         <ul id="msg-ul">
                             <div style="display:flex;">
@@ -1321,7 +1321,7 @@ class ReactionManager {
                 document.body.appendChild(modal);
     
                 // Close the modal when the user clicks on the close button
-                modal.querySelector('.close-btn').addEventListener('click', () => {
+                modal.querySelector('.close-btnn').addEventListener('click', () => {
                     document.body.removeChild(modal);
                 });
     
@@ -1364,6 +1364,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 <style>
+.badge-div {
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    font-size: 20px;
+    padding-left: 10px;
+    padding-right: 10px;
+}   
 
  #call_feature{
     margin-left: 250px;
@@ -2012,7 +2020,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     .message-modal {
         display: none;
-        position: fixed;
+        position: absolute;
         z-index: 1;
         left: 0;
         top: 0;
@@ -2024,24 +2032,25 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     .message-modal .message-modal-content {
-        background-color: #151212;
-        margin: 5% auto;
-        padding: 16px;
-        border: 1px solid #888;
-        margin-top: 26%;
-        margin-right: 34%;
-        max-width: 325px;
-    }
+    position: relative;
+    background-color: #151212;
+    margin: 5% auto;
+    padding: 16px;
+    border: 1px solid #888;
+    margin-top: 18%;
+    /* margin-right: 34%; */
+    max-width: 325px;
+}
     
-    .message-modal .close-btn {
+    .message-modal .close-btnn {
         color: #aaa;
         float: right;
         font-size: 28px;
         font-weight: bold;
     }
     
-    .message-modal .close-btn:hover,
-    .message-modal .close-btn:focus {
+    .message-modal .close-btnn:hover,
+    .message-modal .close-btnn:focus {
         color: black;
         text-decoration: none;
         cursor: pointer;
