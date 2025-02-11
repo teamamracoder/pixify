@@ -783,14 +783,11 @@ socket.onmessage = function (event) {
     } else if (data.del_type == 2) {
       messageElement.remove();
     }
-}else if (data.react) {
- const messageId = data.message_id;
+}
 
-     reactionManager.loadReactions(messageId);
-}else if (data.rac_deleted) {
-        const messageId = data.message_id;
-        reactionManager.loadReactions(messageId);
-    }else if (data.action === "ringing") {
+
+// Handel Calling
+ if (data.action === "ringing") {
         const callId = data.call_id;  // Extract call ID
         const members = data.members; // Extract members list
     
@@ -819,25 +816,25 @@ socket.onmessage = function (event) {
         return true;  // Change logic based on your real implementation
     }
 
-    // Handle typing indicator.
-const typingIndicator = document.querySelector('.chat-bubble');
-if (data.typing && data.user !== currentUser) {
-  // Update the inner HTML using template literals.
-  typingIndicator.innerHTML = `
-    <div class="typing-indicator">
-      <img src="${data.user_pic}" alt="User typing" class="typing-user-pic">
-      <div class="typing">
-        <div class="dot"></div>
-        <div class="dot"></div>
-        <div class="dot"></div>
-      </div>
-    </div>
-  `;
-  typingIndicator.removeAttribute('hidden');
-} else {
-  typingIndicator.setAttribute('hidden', '');
-}
 
+    // Handle typing indicator.
+    const typingIndicator = document.querySelector('.chat-bubble');
+    if (data.typing && data.user !== currentUser) {
+    // Update the inner HTML using template literals.
+    typingIndicator.innerHTML = `
+        <div class="typing-indicator">
+        <img src="${data.user_pic}" alt="User typing" class="typing-user-pic">
+        <div class="typing">
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+        </div>
+        </div>
+    `;
+    typingIndicator.removeAttribute('hidden');
+    } else {
+    typingIndicator.setAttribute('hidden', '');
+    }
 
 
 // Handel Message Reaction
@@ -853,8 +850,6 @@ if (data.typing && data.user !== currentUser) {
 
 };
 
-    
-};
 
 // Function to append a message to the chat body
 function appendMessageToChat(message, messageId, messageTime, senderName, profilePic, reply, replyText, reply_username, reply_userPic, mediaUrls, isSent, reactions) {
