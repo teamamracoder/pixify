@@ -40,6 +40,13 @@
     </script>
 
 
+    
+  <!-- Loading Spinner (placed as an overlay) -->
+    <div id="loading-spinner" style="display: none;">
+      <div class="spinner"></div>
+    </div>
+
+
     <!-- Chat Body -->
     <div class="chat-body" id="chat-body">
         <div class="timestamp-scrollbar" id="timestamp-scrollbar"></div>
@@ -203,10 +210,7 @@
 
 
 <script>
-
-
 $(document).ready(function () {
-  console.log("Document ready: Initializing mention functionality.");
 
   let mentionedUsers = new Set();
   let mentionedAll = false;
@@ -216,20 +220,17 @@ $(document).ready(function () {
   const fallbackImage = '/static/images/avatar.jpg';
 
   function initializeMentionedUsers() {
-    console.log("Initializing mentioned users.");
     mentionedUsers.clear();
     mentionedAll = false;
   }
 
   function updateMentionedUsers(messageText) {
-    console.log("Updating mentioned users with text:", messageText);
     const mentionedRegex = /@(\w+)/g;
     let match;
     mentionedUsers.clear();
 
     while ((match = mentionedRegex.exec(messageText)) !== null) {
       const userId = match[1];
-      console.log("Found mention:", userId);
       if (userId === 'All') {
         mentionedAll = true;
         mentionedUsers.add('all');
@@ -239,14 +240,12 @@ $(document).ready(function () {
     }
 
     mentionedAll = mentionedUsers.has('all');
-    console.log("Current mentioned users set:", Array.from(mentionedUsers));
 
     // Update the hidden field with the mentioned users.
     $('#mentions').val(Array.from(mentionedUsers).join(','));
   }
 
   function createMentionItem(mention) {
-    console.log("Creating mention item for:", mention);
     const profileImage = mention.member_id__profile_photo_url || fallbackImage;
     if (mention.member_id === 'all') {
       return `
@@ -262,27 +261,22 @@ $(document).ready(function () {
   }
 
   function displayMentionList(searchQuery) {
-    console.log("Displaying mention list for query:", searchQuery);
     const mentionSuggestions = $('#mention-suggestions').empty();
     const chatId = $('#chat_id').val();
     const chatType = $('#chat_type').val();
-    console.log("Chat type:", chatType, "Chat ID:", chatId);
 
     if (chatType != '2') {
-      console.log("Chat type is not 2. Hiding mention modal.");
       $('#mentionModal').hide();
       return;
     }
 
     const excludeUsers = Array.from(mentionedUsers).join(',');
-    console.log("Excluding users:", excludeUsers);
 
     $.ajax({
       url: `/message-mention/${chatId}/`,
       type: 'GET',
       data: { search: searchQuery, exclude: excludeUsers, mentionedAll },
       success: function (res) {
-        console.log("Mention suggestions response:", res);
 
         if (!mentionedUsers.has('all')) {
           mentionSuggestions.append(createMentionItem({
@@ -294,16 +288,13 @@ $(document).ready(function () {
         }
 
         const filteredResults = res.filter(mention => mention.member_id !== 'all');
-        console.log("Filtered mention results:", filteredResults);
 
         if (filteredResults.length > 0 || !mentionedUsers.has('all')) {
           filteredResults.forEach(mention => {
             mentionSuggestions.append(createMentionItem(mention));
           });
-          console.log("Showing mention modal.");
           $('#mentionModal').show();
         } else {
-          console.log("No results found. Hiding mention modal.");
           $('#mentionModal').hide();
         }
       },
@@ -315,41 +306,34 @@ $(document).ready(function () {
 
   $('#message-input').on('input', function () {
     const messageText = $(this).val();
-    console.log("Message input changed:", messageText);
     const cursorPosition = this.selectionStart;
     console.log("Cursor position:", cursorPosition);
     const lastChar = messageText.charAt(cursorPosition - 1);
-    console.log("Last character entered:", lastChar);
 
     clearTimeout(typingTimer);
 
     // If @All was mentioned previously, but now removed, update the flag.
     if (mentionedAll && !messageText.includes('@All')) {
-      console.log("User removed '@All' from input.");
       mentionedAll = false;
     }
 
     // Check if the current position has a "@" symbol.
     if (lastChar === '@') {
       mentionTriggered = true;
-      console.log("Mention triggered: '@' detected");
       typingTimer = setTimeout(function () {
         displayMentionList('');
       }, debounceDelay);
     } else if (!lastChar.trim()) {
       mentionTriggered = false;
-      console.log("No valid character after '@'. Hiding mention modal.");
       $('#mentionModal').hide();
     } else if (mentionTriggered) {
       const atIndex = messageText.lastIndexOf('@');
       const searchQuery = messageText.slice(atIndex + 1, cursorPosition).trim();
-      console.log("Search query for mention:", searchQuery);
       if (searchQuery) {
         typingTimer = setTimeout(function () {
           displayMentionList(searchQuery);
         }, debounceDelay);
       } else {
-        console.log("Empty search query. Hiding mention modal.");
         $('#mentionModal').hide();
       }
     }
@@ -358,26 +342,21 @@ $(document).ready(function () {
   });
 
   $('#mention-suggestions').on('click', '.mention-item', function () {
-    console.log("Mention item clicked:", $(this).data('member-id'));
     if ($(this).hasClass('non-selectable')) {
-      console.log("This item is non-selectable.");
       return;
     }
 
     // Get mention details.
     const mentionText = $(this).text().trim();
     const userId = $(this).data('member-id');
-    console.log("User ID from clicked item:", userId);
     const messageInput = $('#message-input');
     const messageText = messageInput.val();
     const cursorPosition = messageInput[0].selectionStart;
     const atIndex = messageText.lastIndexOf('@', cursorPosition - 1);
     const newText = `${messageText.slice(0, atIndex)}@${mentionText} ${messageText.slice(cursorPosition)}`;
-    console.log("Updated message text after insertion:", newText);
     messageInput.val(newText).focus();
 
     if (userId === 'all') {
-      console.log("User selected '@All'");
       mentionedAll = true;
       mentionedUsers.clear();  // Clear previous mentions.
       mentionedUsers.add('all');
@@ -660,6 +639,100 @@ $(document).ready(function () {
 
 
 <script>
+document.addEventListener('DOMContentLoaded', function() {
+  let currentPage = parseInt('{{ data.current_page|default:"1" }}', 10);
+  const chatBody = document.getElementById('chat-body');
+  if (!chatBody) {
+    console.error('Element with id "chat-body" not found');
+    return;
+  }
+  const spinner = document.getElementById('loading-spinner');
+  let isLoading = false;
+
+  // This function removes duplicate timestamp headers from the chat body.
+  function removeDuplicateHeaders() {
+    const headers = document.querySelectorAll('.chat-body .message-timestamp');
+    if (!headers.length) return;
+    const seen = new Set();
+    headers.forEach(function(header) {
+      const text = header.textContent.trim();
+      if (seen.has(text)) {
+        header.remove();
+      } else {
+        seen.add(text);
+      }
+    });
+  }
+
+  function loadOlderMessages() {
+    if (isLoading) return;
+    if (currentPage <= 1) {
+      console.log('No older messages to load.');
+      return;
+    }
+    isLoading = true;
+    if (spinner) spinner.style.display = 'block';
+
+    const url = new URL(window.location.href);
+    url.searchParams.set('page', currentPage - 1);
+    
+    // Get the current top timestamp from the first rendered .message-timestamp element.
+    const topTimestampEl = document.querySelector('.chat-body .message-timestamp');
+    if (topTimestampEl) {
+      const topTimestamp = topTimestampEl.textContent.trim();
+      url.searchParams.set('last_timestamp', topTimestamp);
+    }
+
+    fetch(url.toString(), { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+      .then(response => response.json())
+      .then(data => {
+        // Insert the new HTML at the top of the chat body.
+        chatBody.insertAdjacentHTML('afterbegin', data.html);
+        currentPage = data.current_page;
+        console.log('Loaded older messages. Current page is now:', currentPage);
+        // Now remove any duplicate headers.
+        removeDuplicateHeaders();
+        isLoading = false;
+        if (spinner) spinner.style.display = 'none';
+      })
+      .catch(err => {
+        console.error('Error loading older messages:', err);
+        isLoading = false;
+        if (spinner) spinner.style.display = 'none';
+      });
+  }
+
+  function debounce(func, delay) {
+    let timeoutId;
+    return function(...args) {
+      if (timeoutId) clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => func.apply(this, args), delay);
+    };
+  }
+
+  chatBody.addEventListener('scroll', debounce(function() {
+    if (chatBody.scrollTop < 100) {
+      loadOlderMessages();
+    }
+  }, 150));
+});
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
 
     // WebSocket connection and initialization
     var chatId = $('#chat_id').val();  // Get chat_id dynamically
@@ -731,9 +804,8 @@ socket.onmessage = function (event) {
   const data = JSON.parse(event.data);
 
   // Update read status
-  if (data.seen_by_all === false) {
-    markAsRead(data.message_id);
-  } else {
+  if (data.seen_by_all) {
+
     const messageId = data.message_id;
     const messageElement = document.getElementById(`message-${messageId}`);
     if (messageElement) {
@@ -1349,7 +1421,6 @@ class ReactionManager {
   // Helper: Aggregate raw reaction records into an object.
   // Uses the first element of react_value as the key if available.
   aggregateReactions(reactions) {
-    console.log("Aggregating reactions:", reactions);
     const aggregated = {};
     reactions.forEach(reaction => {
       // Use react_value[0] if available; otherwise fallback to reaction_id as a string.
@@ -1433,14 +1504,11 @@ class ReactionManager {
 
       // Click event: allow deletion if the current user is among those who reacted.
       reactionElement.addEventListener('click', () => {
-        console.log("Reaction's reacted_by:", value.reacted_by);                        
-        console.log(`User ${currentUserId} clicked on reaction ${reactionType} for message ${messageId}`);                
           const delData = {
             action: 'del_reaction',
             message_id: messageId,
           };
           if (socket && socket.readyState === WebSocket.OPEN) {
-                console.log('Reaction data sent:', delData);
             socket.send(JSON.stringify(delData));
           } else {
             console.error('WebSocket is not connected.');
@@ -1519,59 +1587,52 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
+
+
 // Mark as Read 
- function markAsRead(messageId) {
+document.addEventListener('DOMContentLoaded', () => {
+    // Get the chat ID from the hidden input field
     const chatId = document.getElementById("chat_id").value;
-    const senderId = "{{ user.id }}"; // Sender's ID from the context
+    
+    // Sender's ID from the context (Django template)
+    const senderId = "{{ user.id }}";         
 
-    socket.send(JSON.stringify({
-        chat_id: chatId,
-        sender_id: senderId,
-        message_id: messageId, // Including the message ID
-        action: 'mark_as_read',
-    }));
-}
-
-
-// Function to handle the markAsRead logic with retry mechanism
-function markAsReadWithRetry(messageId) {
-    const chatId = document.getElementById("chat_id").value;
-    const senderId = "{{ user.id }}"; // Sender's ID from the context
-
-    if (socket.readyState === WebSocket.OPEN) {
+    // Define the function that sends the "mark as read" message
+    function markMessagesAsRead() {
         socket.send(JSON.stringify({
             chat_id: chatId,
             sender_id: senderId,
-            message_id: messageId,
-            action: 'mark_as_read',
+            action: 'mark_msg_as_read',
         }));
-    } else {
-        console.warn("WebSocket is not open. Retrying in 1 second...");
-        setTimeout(() => markAsReadWithRetry(messageId), 5000); // Retry after 5 second
     }
-}
 
-// Function to continuously check and mark unread messages
-function checkAndMarkUnreadMessages() {
-    const messages = document.querySelectorAll('.message');
-    messages.forEach(message => {
-        const messageId = message.id.split('-')[1];
-        const seenStatusElement = message.querySelector('.seen-status i');
+    // Check if the socket is already open
+    if (socket.readyState === WebSocket.OPEN) {
+        // Socket is open, send the message immediately
+        markMessagesAsRead();
+    } else {
+        // Socket is not open yet; wait for the open event
+        socket.addEventListener('open', markMessagesAsRead);
+    }
 
-        // Check if the message has a single tick (unread)
-        if (seenStatusElement && seenStatusElement.classList.contains('bi-check2') && !seenStatusElement.classList.contains('bi-check2-all')) {
-            markAsReadWithRetry(messageId);
-        }
+    // Optional: handle errors
+    socket.addEventListener('error', (error) => {
+        console.error('WebSocket error:', error);
     });
-}
-
-// Check all messages for read status after page refresh
-window.addEventListener('load', function () {
-    checkAndMarkUnreadMessages();
-
-    // Continuously check unread messages every 5 seconds
-        setInterval(checkAndMarkUnreadMessages, 5000);
+    
+    // Optional: handle messages from the server
+    socket.addEventListener('message', (event) => {
+        console.log('Message from server:', event.data);
+    });
+    
+    // Optional: handle WebSocket closure
+    socket.addEventListener('close', (event) => {
+        console.log('WebSocket closed:', event);
+    });
 });
+
+
+
 
 
 // Call Handel
@@ -1640,6 +1701,33 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 <style>
+
+/* Spinner Overlay */
+#loading-spinner {
+  position: fixed;             /* Fixed so it overlays the page */
+  top: 30%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 9999;               /* Make sure it's above other content */
+}
+
+/* Spinner Styles */
+.spinner {
+  border: 4px solid #f3f3f3;       /* Light grey */
+  border-top: 4px solid #3498db;     /* Blue */
+  border-radius: 50%;
+  width: 25px;
+  height: 25px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+
+
 .badge-div {
     justify-content: center;
     align-items: center;
@@ -1904,6 +1992,11 @@ document.addEventListener("DOMContentLoaded", function () {
         font-weight: bold;
         color: white;
     }
+
+    #chat-body {
+  max-height: 500px;
+  overflow-y: auto;
+}
 
     /* Chat Body */
     .chat-body {
