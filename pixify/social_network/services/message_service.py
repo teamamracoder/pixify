@@ -131,3 +131,6 @@ def user_unread_message(chat, user):
         fk_message_msg_status_messages_id__read_by=user
     )
     return list(unread_message)
+
+def get_message(message_id):
+    return Message.objects.get(id=message_id)

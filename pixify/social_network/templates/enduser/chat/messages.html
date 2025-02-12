@@ -804,27 +804,38 @@ socket.onmessage = function (event) {
   const data = JSON.parse(event.data);
 
   // Update read status
-  if (data.seen_by_all) {
-
-    const messageId = data.message_id;
-    const messageElement = document.getElementById(`message-${messageId}`);
-    if (messageElement) {
-      const seenStatusElement = messageElement.querySelector('.seen-status i');
-      if (seenStatusElement && seenStatusElement.classList.contains('bi-check2-all')) {
-        // Already updated; do nothing.
-        // (You may want to update even if already updated if necessary.)
-      } else {
-        if (seenStatusElement) {
-          seenStatusElement.remove();
+ if (data.seen_by_all) {
+  const messageId = data.message_id;
+  const messageElement = document.getElementById(`message-${messageId}`);
+  if (messageElement) {
+    // Locate the message footer inside the message element.
+    const footer = messageElement.querySelector('.message-footer');
+    if (footer) {
+      // Try to locate an existing seen-status container in the footer.
+      let seenStatusElement = footer.querySelector('.seen-status');
+      // If it exists, check if it already has the correct icon.
+      if (seenStatusElement) {
+        const icon = seenStatusElement.querySelector('i');
+        if (icon && icon.classList.contains('bi-check2-all')) {
+          // Already updated; do nothing.
+        } else {
+          // Update the seen-status content.
+          seenStatusElement.innerHTML = data.user === currentUser 
+            ? `<i class="bi bi-check2-all"></i>` 
+            : '';
         }
+      } else {
+        // If there's no seen-status element in the footer, create and insert one.
         const seenStatusHtml = `
           <div class="seen-status">
             ${data.user === currentUser ? `<i class="bi bi-check2-all"></i>` : ''}
           </div>`;
-        messageElement.insertAdjacentHTML('beforeend', seenStatusHtml);
+        footer.insertAdjacentHTML('beforeend', seenStatusHtml);
       }
     }
   }
+}
+
 
   // Handle new or updated messages
   if (data.message_new) {
@@ -934,21 +945,20 @@ socket.onmessage = function (event) {
 
 };
 
-// Function to append a message to the chat body
 function appendMessageToChat(message, messageId, messageTime, senderName, profilePic, reply, replyText, reply_username, reply_userPic, mediaUrls, isSent, reactions) {
     const chatBody = document.querySelector(".chat-body");
     const today = "Today";
 
-    // Check if today's timestamp is already present
+    // Check if today's timestamp is already present in the chat body.
     const timestamps = chatBody.querySelectorAll(".message-timestamp span");
     let todayExists = false;
     timestamps.forEach(timestamp => {
-        if (timestamp.innerText === today) {
+        if (timestamp.innerText.trim() === today) {
             todayExists = true;
         }
     });
 
-    // Add today's timestamp if it doesn't exist
+    // Add today's timestamp header if it doesn't exist.
     if (!todayExists) {
         const timestampDiv = document.createElement("div");
         timestampDiv.classList.add("message-timestamp");
@@ -957,33 +967,35 @@ function appendMessageToChat(message, messageId, messageTime, senderName, profil
         chatBody.appendChild(timestampDiv);
     }
 
-    // Create message div
+    // Create the message container div.
     const messageDiv = document.createElement("div");
     messageDiv.classList.add("message", isSent ? "sent" : "received");
     messageDiv.setAttribute("id", `message-${messageId}`);
 
-    // Prepare media preview if media URLs are present
+    // Prepare media preview (if any).
     let mediaPreview = "";
-    if (mediaUrls.length > 0) {
+    if (mediaUrls && mediaUrls.length > 0) {
         mediaPreview = mediaUrls
             .map(url => `<div class="message-media"><img src="${url}" alt="media"></div>`)
             .join("");
     }
 
-    // Prepare the parent message (reply) section if a reply exists
+    // Prepare the reply preview (if a reply exists).
     let replyPreview = "";
     if (reply) {
         replyPreview = `
             <div class="parent-message">
-                <span>${reply_username}: </span>                
+                <span>${reply_username}: </span>
                 <span>${replyText}</span>
                 ${reply.media_url ? `<span>${reply.media_url}</span>` : ""}
             </div>
         `;
     }
+
+    // Generate reaction popup content.
     const reactionPopupContent = generateReactionPopupContent(reactions, messageId);
 
-    // Construct the message content
+    // Construct the message inner HTML with proper structure.
     const messageContent = `
         <div class="message-content">
             <div class="message-header">
@@ -993,131 +1005,147 @@ function appendMessageToChat(message, messageId, messageTime, senderName, profil
             </div>
             <span class="message-text">${message}</span>
             ${mediaPreview}
-            <div class="message-footer">
-                <span class="time">${messageTime}</span>
-                <div class="message-options">
-                    <i class="bi bi-three-dots-vertical" onclick="toggleOptions('${messageId}')"></i>
-                    <i class="bi bi-emoji-smile" onclick="toggleReactionPopup('${messageId}')"></i>
+        </div>
+        <div class="message-footer">
+            <span class="time">${messageTime}</span>
+            <div class="message-options">
+                <i class="bi bi-three-dots-vertical" onclick="toggleOptions('${messageId}')"></i>
+                <i class="bi bi-emoji-smile" onclick="toggleReactionPopup('${messageId}')"></i>
+            </div>
+            <div class="options-popup" id="options-${messageId}" style="display: none;">
+                ${isSent ? `<a href="#" onclick="editMessage('${messageId}')">Edit</a>` : ""}
+                <a href="#" onclick="replyMessage('${messageId}', '${senderName}')">Reply</a>
+                <a href="#" onclick="openDeleteModal('${messageId}')">Delete</a>
+            </div>
+            <div class="reaction-container" id="reaction-container-${messageId}">
+                <div class="reaction-popup" id="reaction-popup-${messageId}" style="display: none;">
+                    ${reactionPopupContent}
                 </div>
-                <div class="options-popup" id="options-${messageId}" style="display: none;">
-                    ${isSent ? `<a href="#" onclick="editMessage('${messageId}')">Edit</a>` : ""}
-                    <a href="#" onclick="replyMessage('${messageId}', '${senderName}')">Reply</a>
-                    <a href="#" onclick="openDeleteModal('${messageId}')">Delete</a>
-                </div>
-                <div class="reaction-container" id="reaction-container-${messageId}">
-                    <div class="reaction-popup" id="reaction-popup-${messageId}" style="display: none;">
-                        ${reactionPopupContent}
-                    </div>
-                    <div class="reaction-display" id="reaction-display-${messageId}"></div>
-                </div>
+                <div class="reaction-display" id="reaction-display-${messageId}"></div>
+            </div>
+            <div class="seen-status">
+                ${senderName === currentUser ? `<i class="bi bi-check2"></i>` : ""}
             </div>
         </div>
-        <div class="seen-status">
-            ${senderName == currentUser ? `<i class="bi bi-check2"></i>` : ""}
-        </div>
     `;
-
     messageDiv.innerHTML = messageContent;
     chatBody.appendChild(messageDiv);
 
-    // Scroll to the bottom and update the scroll indicator
+    // Scroll to the bottom and update the scroll indicator.
     chatBody.scrollTop = chatBody.scrollHeight;
-    window.updateScrollIndicator();  // Call this function to update timestamp in real time
+    window.updateScrollIndicator();  // Call your function to update timestamps or scroll indicators.
 }
 
-
-
-// Function to update the message in the chat
-function updateMessageInChat(updatedMessage, messageId, messageTime, senderName, profilePic, reply, replyText, reply_username, reply_userPic, mediaUrls,isSent,seen_by_all,reactions) {
+function updateMessageInChat(updatedMessage, messageId, messageTime, senderName, profilePic, reply, replyText, reply_username, reply_userPic, mediaUrls, isSent, seen_by_all, reactions) {
     const messageDiv = document.getElementById(`message-${messageId}`);
-    if (messageDiv) {
-        let mediaPreview = "";
-        if (mediaUrls.length > 0) {
-            mediaPreview = mediaUrls
-                .map(url => `<div class="message-media"><img src="${url}" alt="media"></div>`)
-                .join(""); // Corrected to use backticks for string interpolation
-        }
+    if (!messageDiv) {
+        console.error(`Message not found for message ID: ${messageId}`);
+        return;
+    }
+    
+    // Prepare media preview if provided.
+    let mediaPreview = "";
+    if (mediaUrls && mediaUrls.length > 0) {
+        mediaPreview = mediaUrls
+            .map(url => `<div class="message-media"><img src="${url}" alt="media"></div>`)
+            .join("");
+    }
 
-        // Prepare the parent message (reply) section if a reply exists
-        let replyPreview = "";
-        if (reply) {
-            replyPreview = `
-                <div class="parent-message">
-                    <span>${reply_username}: </span>                    
-                    <span>${replyText}</span>
-                    ${reply.media_url ? `<span>${reply.media_url}</span>` : ""}
-                </div>
-            `;
-        }
-        
-        const reactionPopupContent = generateReactionPopupContent(reactions, messageId);   
-        // Update the message text and media
-        const messageContent = `
-            <div class="message-content">
-            ${replyPreview} <!-- Include the reply preview if it exists -->
-                <div class="message-header">
-                    <img src="${profilePic}" alt="${senderName}'s Profile Picture" class="message-profile-pic">
-                    <span class="message-username">${senderName}</span>
-                    
-                </div>
-                <span class="message-text">${updatedMessage}</span>
-                ${mediaPreview} <!-- Include media preview if it exists -->
-                <div class="edited-messages">
-                    <span class="edited-tag">(Edited)</span>
-                </div>
-                <div class="message-footer">
-                    <span class="time">${messageTime}</span>
-                    <div class="message-options">
-                        <i class="bi bi-three-dots-vertical" onclick="toggleOptions('${messageId}')"></i>
-                        <i class="bi bi-emoji-smile" onclick="toggleReactionPopup('${messageId}')"></i>
-                    </div>
-                    <div class="options-popup" id="options-${messageId}" style="display: none;">
-                        ${isSent ? `<a href="#" onclick="editMessage('${messageId}')">Edit</a>` : ""}                                          
-                        <a href="#" onclick="replyMessage('${messageId}', '${senderName}')">Reply</a>
-                        <a href="#" onclick="openDeleteModal('${messageId}')">Delete</a>                        
-                    </div>
-                    <div class="reaction-container" id="reaction-container-${messageId}">
-                            <div class="reaction-popup" id="reaction-popup-${messageId}" style="display: none;">
-                                ${reactionPopupContent} 
-                            </div>
-                            <div class="reaction-display" id="reaction-display-${messageId}"></div>
-                        </div> 
-                </div>
+    // Prepare the reply preview if there is a reply.
+    let replyPreview = "";
+    if (reply) {
+        replyPreview = `
+            <div class="parent-message">
+                <span>${reply_username}: </span>
+                <span>${replyText}</span>
+                ${reply.media_url ? `<span>${reply.media_url}</span>` : ""}
             </div>
         `;
-
-        
-// Only update the message content, not the entire message structure
-        const contentDiv = messageDiv.querySelector(".message-content");
-        if (contentDiv) {
-            // Update the text and media, while keeping the footer unchanged
-            const messageTextElement = contentDiv.querySelector(".message-text");
-            const footerDiv = contentDiv.querySelector(".message-footer");
-            
-            if (messageTextElement) {
-                messageTextElement.innerHTML = updatedMessage;
+    }
+    
+    // Generate updated reaction popup content.
+    const reactionPopupContent = generateReactionPopupContent(reactions, messageId);
+    
+    // Update the message-content.
+    const contentDiv = messageDiv.querySelector(".message-content");
+    if (contentDiv) {
+        // Update header: profile image and username.
+        const headerDiv = contentDiv.querySelector(".message-header");
+        if (headerDiv) {
+            const profileImg = headerDiv.querySelector("img");
+            if (profileImg) {
+                profileImg.src = profilePic;
+                profileImg.alt = `${senderName}'s Profile Picture`;
             }
-
-            if (footerDiv) {
-                // Update the time and add the "(Edited)" tag to the footer
-                footerDiv.querySelector(".time").textContent = messageTime;
-                const editedTag = footerDiv.querySelector(".edited-tag");
-                if (editedTag) {
-                    editedTag.style.display = "inline"; // Show the edited tag
-                } else {
-                    const newEditedTag = document.createElement("span");
-                    newEditedTag.classList.add("edited-tag");
-                    newEditedTag.textContent = "(Edited)";
-                    footerDiv.appendChild(newEditedTag);
+            const usernameSpan = headerDiv.querySelector(".message-username");
+            if (usernameSpan) {
+                usernameSpan.textContent = senderName;
+            }
+            // Update or insert reply preview.
+            let parentMessageDiv = headerDiv.querySelector(".parent-message");
+            if (reply) {
+                if (!parentMessageDiv) {
+                    parentMessageDiv = document.createElement("div");
+                    parentMessageDiv.classList.add("parent-message");
+                    headerDiv.insertAdjacentElement("afterend", parentMessageDiv);
                 }
+                parentMessageDiv.innerHTML = replyPreview;
+            } else if (parentMessageDiv) {
+                parentMessageDiv.remove();
             }
+        }
+        
+        // Update the message text.
+        const messageTextElement = contentDiv.querySelector(".message-text");
+        if (messageTextElement) {
+            messageTextElement.textContent = updatedMessage;
+        }
+        
+        // Update the media preview.
+        // We'll assume a container exists or create one.
+        let mediaContainer = contentDiv.querySelector(".message-media-container");
+        if (!mediaContainer) {
+            mediaContainer = document.createElement("div");
+            mediaContainer.classList.add("message-media-container");
+            contentDiv.appendChild(mediaContainer);
+        }
+        mediaContainer.innerHTML = mediaPreview;
+    }
+    
+    // Update the footer.
+    const footerDiv = messageDiv.querySelector(".message-footer");
+    if (footerDiv) {
+        // Update the time.
+        const timeSpan = footerDiv.querySelector(".time");
+        if (timeSpan) {
+            timeSpan.textContent = messageTime;
+        }
+        // Ensure the "(Edited)" tag is visible.
+        let editedTag = footerDiv.querySelector(".edited-tag");
+        if (editedTag) {
+            editedTag.style.display = "inline";
         } else {
-            console.error(`Message content not found for message ID: ${messageId}`);
+            editedTag = document.createElement("span");
+            editedTag.classList.add("edited-tag");
+            editedTag.textContent = "(Edited)";
+            footerDiv.appendChild(editedTag);
+        }
+        // Update options and reaction containers if needed (not shown here).
+        // Optionally, update seen-status if seen_by_all is provided.
+        if (seen_by_all) {
+            let seenStatusDiv = footerDiv.querySelector(".seen-status");
+            if (!seenStatusDiv) {
+                seenStatusDiv = document.createElement("div");
+                seenStatusDiv.classList.add("seen-status");
+                footerDiv.appendChild(seenStatusDiv);
+            }
+            seenStatusDiv.innerHTML = (senderName === currentUser) ? `<i class="bi bi-check2-all"></i>` : "";
         }
     } else {
-        console.error(`Message not found for message ID: ${messageId}`);
+        console.error(`Message footer not found for message ID: ${messageId}`);
     }
 }
+
 
 // Global variable to track the message being edited
 let editingMessageId = null;
@@ -1630,6 +1658,88 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log('WebSocket closed:', event);
     });
 });
+
+
+
+
+// Function to send a read receipt for a specific message.
+function MessagesAsRead(messageId) {
+    const payload = {
+        message_id: messageId,  // The specific message ID
+        sender_id: senderId,
+        action: 'mark_as_read',
+    };
+    if (socket.readyState === WebSocket.OPEN) {
+        socket.send(JSON.stringify(payload));
+        console.log("Sent read receipt:", payload);
+    } else {
+        socket.addEventListener('open', () => {
+            socket.send(JSON.stringify(payload));
+            console.log("Sent read receipt after socket open:", payload);
+        });
+    }
+}
+
+// --- INTERSECTION OBSERVER SETUP ---
+// Create an IntersectionObserver to detect when a message enters the viewport.
+const messageObserver = new IntersectionObserver((entries, observer) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            // Extract the message ID from the target element.
+            // Assumes each message element has an ID in the format "message-<messageId>"
+            const element = entry.target;
+            const idAttr = element.getAttribute("id");
+            if (idAttr && idAttr.startsWith("message-")) {
+                const messageId = idAttr.substring("message-".length);
+                // Send a read receipt for this message.
+                MessagesAsRead(messageId);
+            }
+            // Unobserve the element so that we don't send multiple read receipts for the same message.
+            observer.unobserve(entry.target);
+        }
+    });
+}, {
+    root: document.querySelector(".chat-body"), // Only observe within the chat body.
+    threshold: 0.5  // 50% of the message must be visible.
+});
+
+// --- FUNCTION TO OBSERVE NEW MESSAGE NODES ---
+// This function attaches the IntersectionObserver to any message elements that haven't been observed yet.
+function observeNewMessages() {
+    const newMessages = document.querySelectorAll(".chat-body .message:not([data-read-observed])");
+    newMessages.forEach(msg => {
+        // Mark this message so that we don't observe it again.
+        msg.setAttribute("data-read-observed", "true");
+        messageObserver.observe(msg);
+    });
+}
+
+// --- MUTATION OBSERVER SETUP ---
+// This observer will detect when new nodes are added to the chat body.
+const chatBody = document.querySelector(".chat-body");
+if (chatBody) {
+    const mutationObserver = new MutationObserver((mutationsList) => {
+        mutationsList.forEach(mutation => {
+            if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+                // Call observeNewMessages() to attach observers to newly added message elements.
+                observeNewMessages();
+            }
+        });
+    });
+    // Start observing the chat body for changes.
+    mutationObserver.observe(chatBody, { childList: true, subtree: true });
+}
+
+// --- INITIAL CALL ---
+// Call observeNewMessages on page load to observe any messages already present.
+observeNewMessages();
+
+
+
+// Optional: If you add new messages dynamically via your socket or AJAX, 
+// call observeMessages() after appending them so that the new messages are also observed.
+
+
 
 
 

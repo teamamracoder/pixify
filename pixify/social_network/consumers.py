@@ -295,7 +295,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
 
     async def mark_as_read(self, message_id, user_id):
-        message = await sync_to_async(message_service.get_message_by_id)(message_id)
+        message = await sync_to_async(message_service.get_message)(message_id)
         user= await sync_to_async(user_service.get_user)(user_id)
         await sync_to_async (message_read_status_service.create_message_read_status)(message, user)
         seen_all = await sync_to_async(chat_service.message_seen_status)(message)
