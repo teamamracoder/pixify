@@ -49,8 +49,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
             await self.reply_message(message_id, text_data_json, user)
         elif action == 'delete':
             await self.delete_message(message_id, user_id, del_type)
+        elif action == 'mark_msg_as_read':
+            await self.mark_message_as_read(chat_id, user_id)            
         elif action == 'mark_as_read':
-            await self.mark_message_as_read(message_id, user_id)
+            await self.mark_as_read(message_id, user_id)
         elif action == 'add_reaction':
             await self.add_reaction(message_id,user,reaction_id)
         elif action == 'del_reaction':
@@ -271,7 +273,28 @@ class ChatConsumer(AsyncWebsocketConsumer):
         # Notify the WebSocket group that the message was deleted
         await self.send_message_to_group(message, deleted=True)
 
-    async def mark_message_as_read(self, message_id, user_id):
+
+    async def mark_message_as_read(self, chat_id, user_id):
+        # Retrieve unread messages for the user in the chat
+        messages = await sync_to_async(message_service.user_unread_message)(chat_id, user_id)
+
+        # Retrieve the user instance
+        user = await sync_to_async(user_service.get_user)(user_id)
+
+        # Mark each message as read by the user
+        for msg in messages:
+            await sync_to_async(message_read_status_service.create_message_read_status)(msg, user)
+            
+            # Check if all users have seen the message
+            seen_all = await sync_to_async(chat_service.message_seen_status)(msg)
+
+            # Send the read status to the group based on whether all users have seen the message
+            await self.send_message_to_group(msg, seen_by_all=seen_all)
+
+
+
+
+    async def mark_as_read(self, message_id, user_id):
         message = await sync_to_async(message_service.get_message_by_id)(message_id)
         user= await sync_to_async(user_service.get_user)(user_id)
         await sync_to_async (message_read_status_service.create_message_read_status)(message, user)
@@ -292,7 +315,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         reply_username = None
         reply_user_pic = None
 
-        if message.reply_for_message_id_id:  # Access the ID directly
+        if message.reply_for_message_id_id:
             reply = True
             try:
                 replied_message = await sync_to_async(Message.objects.get)(id=message.reply_for_message_id_id)

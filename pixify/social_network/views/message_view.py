@@ -12,6 +12,15 @@ from social_network.constants.success_messages import SuccessMessage
 from collections import defaultdict
 from social_network.packages.response import success_response
 
+
+# views.py
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.http import JsonResponse
+
+from django.template.loader import render_to_string
+
+
+
 class MessageListView(View):
     @catch_error
     @auth_required
@@ -22,32 +31,55 @@ class MessageListView(View):
         reactions = message_reaction_service.show_reactions()
         messages = message_service.list_messages_by_chat_id(chat_id, user.id)
 
-        # Check if each message is editable (within the last 10 minutes)
+        # Process each message.
         for message in messages:
             message.is_editable = message_service.is_editable(message)
-        # Check if each message has been seen by all members        
             message.seen_by_all = chat_service.is_message_seen_by_all(message)
-        # Apply the timestamp formatting function to each message        
+            # Format the timestamp consistently (for grouping)
             message.formatted_timestamp = message_service.format_timestamp(message.created_at)
 
-        # Group the messages by their formatted timestamp
-        grouped_messages = defaultdict(list)                
+        # Group all messages by formatted timestamp.
+        all_grouped_messages = defaultdict(list)
+        for message in messages:
+            all_grouped_messages[message.formatted_timestamp].append(message)
+        grouped_messages_list = [
+            (date, sorted(msg_list, key=lambda x: x.created_at))
+            for date, msg_list in all_grouped_messages.items()
+        ]
+        grouped_messages_list = sorted(grouped_messages_list, key=lambda x: message_service.sort_key(x)[0])
 
-        for message in messages:            
-            grouped_messages[message.formatted_timestamp].append(message)
-
-        # Convert defaultdict to a list of tuples to make it easier to iterate in the template
-        grouped_messages_list = [(date, sorted(messages, key=lambda x: x.created_at)) if date == 'Today' else (date, messages) for date, messages in grouped_messages.items()]
-        
-        # Sort grouped messages based on the custom sort key
-        grouped_messages_list = sorted(grouped_messages_list, key=lambda x: message_service.sort_key(x)[0])   
-
+        # Determine seen status for the latest message.
         latest_message = message_service.get_latest_message(chat.id)
-        seen_by_all = False
+        seen_by_all = chat_service.is_message_seen_by_all(latest_message) if latest_message else False
 
-        if latest_message:
-            seen_by_all = chat_service.is_message_seen_by_all(latest_message)
+        # Set up pagination (10 messages per page).
+        per_page = 10
+        paginator = Paginator(messages, per_page)
+        page_param = request.GET.get('page')
+        if page_param:
+            try:
+                page = int(page_param)
+            except ValueError:
+                page = paginator.num_pages
+        else:
+            page = paginator.num_pages
 
+        try:
+            messages_page = paginator.page(page)
+        except (PageNotAnInteger, EmptyPage):
+            messages_page = paginator.page(paginator.num_pages)
+
+        # Group only the messages on the current page.
+        current_grouped = defaultdict(list)
+        for message in messages_page:
+            current_grouped[message.formatted_timestamp].append(message)
+        grouped_messages_current = [
+            (date, sorted(msg_list, key=lambda x: x.created_at))
+            for date, msg_list in current_grouped.items()
+        ]
+        grouped_messages_current = sorted(grouped_messages_current, key=lambda x: message_service.sort_key(x)[0])
+
+        # Prepare chat info.
         if chat.type == ChatType.PERSONAL.value:
             member = chat_service.get_recipient_for_personal(chat.id, user)
             if member:
@@ -60,34 +92,65 @@ class MessageListView(View):
             title = chat_service.get_recipients_for_group(chat.id, user)
             if chat.title:
                 title = chat.title
-            if chat.chat_cover:
-                chat_cover = chat.chat_cover
-            else:
-                chat_cover = ''
+            chat_cover = chat.chat_cover if chat.chat_cover else ''
 
-        chat_info = {            
+        chat_info = {
             'id': chat.id,
             'title': title,
-            'type':chat.type,
+            'type': chat.type,
             'chat_cover': chat_cover,
             'is_group': chat.type == ChatType.GROUP.value,
-            'seen_by_all': seen_by_all  # This is for the latest message
+            'seen_by_all': seen_by_all,
         }
 
-        return render(request, 'enduser/chat/messages.html',
-            success_response(               
-            message=request.session.pop("message", SuccessMessage.S000014.value),
-            message_type=request.session.pop(
-            "message_type", ResponseMessageType.INFO.value
-        ),
-            data={ 
-            'chat': chat_info,
-            'grouped_messages':grouped_messages_list,
-            'messages': messages,
-            'user': user,
-            'reactions': reactions
-        }
-        ))
+        # --- AJAX branch for older messages ---
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            # Get the last_timestamp passed from the client.
+            last_timestamp = request.GET.get('last_timestamp')
+            duplicate_timestamp = False
+            if last_timestamp and grouped_messages_current:
+                if grouped_messages_current[0][0] == last_timestamp:
+                    duplicate_timestamp = True
+
+            html = render_to_string(
+                'enduser/chat/messages_list_partial.html',
+                {
+                    'grouped_messages': grouped_messages_current,
+                    'messages': messages_page,
+                    'current_page': messages_page.number,
+                    'has_previous': messages_page.has_previous(),
+                    'reactions': reactions,
+                    'duplicate_timestamp': duplicate_timestamp,
+                },
+                request=request
+            )
+            return JsonResponse({'html': html, 'current_page': messages_page.number})
+        else:
+            # For a full-page load.
+            return render(
+                request,
+                'enduser/chat/messages.html',
+                {
+                    'data': {
+                        'chat': chat_info,
+                        'grouped_messages': grouped_messages_current,
+                        'messages': messages_page,
+                        'user': user,
+                        'reactions': reactions,
+                        'paginator': paginator,
+                        'current_page': messages_page.number,
+                    },
+                    'message': request.session.pop("message", SuccessMessage.S000014.value),
+                    'message_type': request.session.pop("message_type", ResponseMessageType.INFO.value),
+                }
+            )
+
+
+
+
+
+
+
          
 
 class MessageCreateView(View): 

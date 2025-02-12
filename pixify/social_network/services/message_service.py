@@ -5,19 +5,12 @@ from datetime import datetime, timedelta
 from django.db.models import Q
 from ..constants import MessageDeleteType
 
-def list_messages_by_chat_id(chat_id,user_id):
+def list_messages_by_chat_id(chat_id, user_id):
     messages = Message.objects.filter(chat_id=chat_id).exclude(
         Q(delete_type=MessageDeleteType.DELETED_FOR_EVERYONE.value) | Q(deleted_by__contains=[user_id])
-    )
-
-    for message in messages:
-        if not MessageReadStatus.objects.filter(message_id=message, read_by_id=user_id).exists():
-            MessageReadStatus.objects.create(
-                message_id=message,
-                read_by_id=user_id,
-                read_at=timezone.now(),
-                created_by_id=user_id) 
+    ).order_by('created_at')  # Order from oldest to newest
     return messages
+
 
 def create_message(text, media_url,sender_id, chat):
     return Message.objects.create(
@@ -127,3 +120,14 @@ def sort_key(item):
     
 def get_latest_message(chat_id):
     return Message.objects.filter(chat_id=chat_id, is_active=True).order_by('-send_at').first()
+
+# Function to get unread messages for a user in a chat
+def user_unread_message(chat, user):    
+    unread_message = Message.objects.filter(
+        chat_id=chat,
+        is_active=True,
+        delete_type=MessageDeleteType.NOT_DELETED.value
+    ).exclude(
+        fk_message_msg_status_messages_id__read_by=user
+    )
+    return list(unread_message)

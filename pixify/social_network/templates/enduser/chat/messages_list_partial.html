@@ -1,0 +1,81 @@
+{# templates/enduser/chat/messages_list_partial.html #}
+{% for date_group in grouped_messages %}
+  {% ifchanged date_group.0 %}
+    <div class="message-timestamp" data-timestamp="{{ date_group.0 }}">
+      <span>{{ date_group.0 }}</span>
+    </div>
+  {% endifchanged %}
+  
+  {% for message in date_group.1 %}
+    <div class="message {% if message.sender_id.id == request.user.id %}sent{% else %}received{% endif %}" id="message-{{ message.id }}">
+      <div class="message-content">
+        {% if message.reply_for_message_id %}
+          <div class="parent-message">
+            <span>{{ message.reply_for_message_id.sender_id.first_name }}: </span>
+            <span>{{ message.reply_for_message_id.text }}</span>
+            {% if message.reply_for_message_id.media_url %}
+              <span>{{ message.reply_for_message_id.media_url }}</span>
+            {% endif %}
+          </div>
+        {% endif %}
+  
+        <div class="message-header">
+          <img src="{{ message.sender_id.profile_photo_url|default:'\static\images\avatar.jpg' }}" 
+               alt="{{ message.sender_id.first_name }}'s Profile Picture" 
+               class="message-profile-pic">
+          <span class="message-username">{{ message.sender_id.first_name }}</span>
+        </div>
+        <span class="message-text">{{ message.text }}</span>
+        {% if message.media_url %}
+          <span class="message-media">{{ message.media_url }}</span>
+        {% endif %}
+  
+        {% if message.updated_by %}
+          <div class="edited-messages">
+            <span class="edited-tag">(Edited)</span>
+          </div>
+        {% endif %}
+      </div>
+  
+      <div class="message-footer">
+        <span class="time">{{ message.created_at|date:"h:i A" }}</span>
+        <div class="message-options">
+          <i class="bi bi-three-dots-vertical" onclick="toggleOptions({{ message.id }})"></i>
+          <i class="bi bi-emoji-smile" onclick="toggleReactionPopup({{ message.id }})"></i>
+        </div>
+  
+        <div class="options-popup" id="options-{{ message.id }}" style="display: none;">
+          {% if message.sender_id.id == request.user.id %}
+            {% if message.is_editable %}
+              <a href="#" onclick="editMessage('{{ message.id }}')">Edit</a>
+            {% endif %}
+          {% endif %}
+          <a href="#" onclick="replyMessage('{{ message.id }}', '{{ message.sender_id.first_name }}')">Reply</a>
+          <a href="#" class="delete-link" onclick="openDeleteModal('{{ message.id }}')">Delete</a>
+        </div>
+  
+        <div class="reaction-container" id="reaction-container-{{ message.id }}">
+          <div class="reaction-popup" id="reaction-popup-{{ message.id }}" style="display: none;">
+            {% for reaction in reactions %}
+              <span onclick="reactionManager.addReaction('{{ message.id }}', '{{ reaction.id }}', '{{ reaction.value|escapejs }}')">
+                {{ reaction.value|safe }}
+              </span>
+            {% endfor %}
+          </div>
+        </div>
+  
+        <div class="seen-status">
+          {% if message.sender_id.id == request.user.id %}
+            {% if message.seen_by_all %}
+              <i class="bi bi-check2-all"></i>
+            {% else %}
+              <i class="bi bi-check2"></i>
+            {% endif %}
+          {% endif %}
+        </div>
+      </div>
+  
+      <div class="reaction-display" id="reaction-display-{{ message.id }}"></div>
+    </div>
+  {% endfor %}
+{% endfor %}
