@@ -16,14 +16,14 @@
         </svg>
       </button>
     </h1>
-    <button class="exit-btn" onclick="removeChat()">Exit Group</button>
+    <button class="exit-btn" onclick="removeChat()"><i class="fa-sharp fa-solid fa-right-from-bracket"></i>Exit</button>
   </div>
 
     <!-- Modal Structure -->
     <div id="chatdet-editGroupNameModal" class="chatdet-modal">
         <div class="chatdet-modal-content">
             <span class="chatdet-close" onclick="closeChatdetModal()">&times;</span>
-            <h2>Edit Group Name</h2>
+            <h5>Edit Group Name</h5>
             {% csrf_token %}
             <input type="hidden" id="chat_id" name="chat_id" value="{{ data.chat.id }}">
             <input type="text" class="chatdet_search" id="chatdet-newGroupNameInput" placeholder="Enter new group name">
@@ -57,7 +57,7 @@
 
   <!-- Member List Section -->
   <div class="member-list">
-    <h3>Members(<span style="color:black;">{{ data.chat.members|length }}</span>)</h3>
+    <h3>Members(<span style="color:#ffff;">{{ data.chat.members|length }}</span>)</h3>
     <ul id="member-list">
       {% for member in data.chat.members %}
         {% if member.id == data.user %}
@@ -95,7 +95,7 @@
             {% if data.user == data.chat.created_by %}
               <div class="member-actions">
                 {% if member.id != data.chat.created_by %}              
-                  <button class="remove-btn" onclick="removeMember('{{ member.id }}')">Remove</button>
+                  <button class="remove-btn" onclick="removeMember('{{ member.id }}')"><i class="fa-solid fa-user-xmark"></i></button>
                 {% endif %}
               </div>
             {% endif %}
@@ -117,7 +117,7 @@
 <div id="parchat-addMemberModal" class="parchat-modal">
   <div class="parchat-modal-content">
     <span class="parchat-modal-close">&times;</span>
-    <h2>Add New Member</h2>
+    <h5>Add New Member</h5>
     <input type="text" id="parchat-searchin" class="parchat-form-control" placeholder="Search Name" aria-label="Search Name">
     
     <!-- Scrollable grid of profiles -->
@@ -495,7 +495,7 @@ function removeChat() {
 
 
 .remove-btn {
-    background-color: red;    
+    background-color: transparent;    
     color: white;             
     border: none;             
     padding: 10px 20px;      
@@ -513,11 +513,10 @@ function removeChat() {
 
 
 .group-admin-badge {
-    background-color: #3cf281;
-    color: black;              
+    background-color: #3cf28121;
+    color: #26ff00;              
     padding: 2px 5px;          
-    border-radius: 3px;        
-    font-weight: bold;         
+    border-radius: 3px;                
     margin-left: 10px;         
 }
 
@@ -528,13 +527,13 @@ function removeChat() {
 
   .no-members-message {
     text-align: center;
-    color: fff;          
-    font-weight: bold;   
+    color: #ffff;          
+    /* font-weight: bold;    */
     box-shadow: none;    
     border: none;        
     padding: 45px;          
     margin: 0;           
-    font-size: larger;
+    /* font-size: larger; */
 }
 
 
@@ -565,10 +564,11 @@ function removeChat() {
 }
 
 .chatdet-modal-content {
-    background-color: #6a4c9c;
+    background-color: #1F0545;
+    border-radius: 8px;
     margin: 15% auto;
     padding: 20px;
-    border: 1px solid #888;
+    /* border: 1px solid #888; */
     width: 80%;
     max-width: 400px;
 }
@@ -604,7 +604,7 @@ function removeChat() {
 
 /* Modal content box */
 .parchat-modal-content {
-  background-color: #6a4c9c;
+  background-color: #1F0545;
   margin: 10% auto; /* Centered */
   padding: 15px;
   border-radius: 8px;
@@ -629,7 +629,8 @@ function removeChat() {
 
 /* Search input styling */
 #parchat-searchin {
-  color: black;
+  background-color: #3D3D6B;
+  color: #ffff;
   width: 100%;
   padding: 8px;
   margin-bottom: 10px;
@@ -680,7 +681,7 @@ button:hover {
 
 
   .member-title{
-    color:rgb(1, 8, 13);
+    color:#ffff;
   }
   body {
     font-family: 'Arial', sans-serif;
@@ -700,7 +701,8 @@ button:hover {
 
   /* Header Section */
   .header {
-    background-color: #6a4c9c; /* Purple Background */
+    border:1px solid #827b7b70;
+    background-color: #1F0545; /* Purple Background */
     color: white;
     padding: 25px 30px;
     border-radius: 10px;
@@ -733,10 +735,9 @@ button:hover {
   }
 
   .exit-btn {
-    background-color: #7a5fb1;
+    background-color: transparent;
     color: white;
     border: none;
-    padding: 10px 20px;
     font-size: 16px;
     border-radius: 5px;
     cursor: pointer;
@@ -750,7 +751,8 @@ button:hover {
 
   /* Group Details Section */
   .group-details {
-    background-color:#6a4c9c;
+    background-color:#1F0545;
+    border: 1px solid #827b7b70;
     text-align: center;
     margin-top: 30px;
     padding: 20px;
@@ -761,6 +763,7 @@ button:hover {
   }
 
   .group-photo {
+    margin-left: 13%;
     width: 120px;
     height: 120px;
     border-radius: 50%;
@@ -783,18 +786,19 @@ button:hover {
 
   /* Member List Section */
   .member-list {
-    background-color: white;
+    border: 1px solid #827b7b70;
+    background-color: #1F0545;
     margin-top: 20px;
     padding: 20px;
     width: 100%;
     max-width: 650px;
     border-radius: 8px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  }
+}
 
   .member-list h3 {
     font-size: 20px;
-    color: #6a4c9c;
+    color: #ffff;
     margin-bottom: 15px;
   }
 
@@ -940,6 +944,27 @@ button:hover {
 
   .modal-close:hover {
     color: #333;
+  }
+
+  @media (max-width: 768px){
+    .parchat-modal-content{
+      margin: 46% auto;
+      width: 83%;
+    }
+  }
+  @media (max-width: 480px){
+    .parchat-modal-content{
+      margin: 80% auto;
+      width: 88%;
+    }
+    .chatdet-modal-content{
+      margin: 36% auto;
+      width: 89%;
+    }
+    .chatdet_search{
+      padding: 7px;
+      width: 295px;
+    }
   }
 </style>
 
