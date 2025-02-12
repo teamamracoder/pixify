@@ -25,7 +25,7 @@
                 <span class="username P-msg_chat-title">{{ data.chat.title }}</span>
             {% endif %}
         </div>
-        <button id="sendDataButton">start call</button>    
+        <div id="sendDataButton"><i class="fa-solid fa-phone"></i></div>    
     </div>
 
     <script>
@@ -1649,17 +1649,16 @@ document.addEventListener("DOMContentLoaded", function () {
     padding-right: 10px;
 }   
 
+#sendDataButton{
+    margin-left: 250px;
+    font-size: 20px;
+ } 
+
 .cancel-edit {
     float: right;
     color: red;
     cursor: pointer;
 }
-
-
- #call_feature{
-    margin-left: 250px;
-    font-size: 20px;
- }   
 
 
 
@@ -2462,7 +2461,7 @@ document.addEventListener("DOMContentLoaded", function () {
     display: contents;
 
     }  
-    #call_feature {
+    #sendDataButton {
     margin-left: 412px;
     font-size: 20px;
 } 
@@ -2495,7 +2494,7 @@ document.addEventListener("DOMContentLoaded", function () {
         font-size: 0.8rem;
         padding: 6px;
     }
-    #call_feature {
+    #sendDataButton {
     padding-top: 12px;
 
     margin-left: 160px;
