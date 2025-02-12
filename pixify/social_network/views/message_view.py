@@ -53,7 +53,7 @@ class MessageListView(View):
         seen_by_all = chat_service.is_message_seen_by_all(latest_message) if latest_message else False
 
         # Set up pagination (10 messages per page).
-        per_page = 10
+        per_page = 20
         paginator = Paginator(messages, per_page)
         page_param = request.GET.get('page')
         if page_param:
