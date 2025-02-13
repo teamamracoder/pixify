@@ -11,14 +11,9 @@ from ..constants import ChatType
 from social_network.constants.success_messages import SuccessMessage
 from collections import defaultdict
 from social_network.packages.response import success_response
-
-
-# views.py
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http import JsonResponse
-
 from django.template.loader import render_to_string
-
 
 
 class MessageListView(View):
