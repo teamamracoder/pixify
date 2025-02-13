@@ -6,29 +6,21 @@
 {% load static %}
 
 <div class="group-chat-container">
-  <div class="header">
-    <!-- Group Name with Edit Button -->
-    <h1 class="group-name">
-      <span id="group-name-text">{{ data.chat.title }}</span>  <!-- Display the chat title dynamically -->
-      <button class="edit-btn" onclick="editChatdetGroupName()">
-        <i class="fa-solid fa-pen"></i>
+    <div class="header">
+      <!-- Group Name with Edit Button -->
+      <h1 class="group-name">
+        <span id="group-name-text">{{ data.chat.title }}</span>
+        <button class="edit-btn" onclick="editGroupNameInline()">
+          <i class="fa-solid fa-pen"></i>
+        </button>
+      </h1>
+      {% csrf_token %}
+      <input type="hidden" id="chat_id" name="chat_id" value="{{ data.chat.id }}">
+      <button class="exit-btn" onclick="removeChat()">
+        <i class="fa-sharp fa-solid fa-right-from-bracket"></i>Exit
       </button>
-    </h1>
-    <button class="exit-btn" onclick="removeChat()"><i class="fa-sharp fa-solid fa-right-from-bracket"></i>Exit</button>
-  </div>
-
-    <!-- Modal Structure -->
-    <div id="chatdet-editGroupNameModal" class="chatdet-modal">
-        <div class="chatdet-modal-content">
-            <span class="chatdet-close" onclick="closeChatdetModal()">&times;</span>
-            <h6>Edit Group Name</h6>
-            {% csrf_token %}
-            <input type="hidden" id="chat_id" name="chat_id" value="{{ data.chat.id }}">
-            <input type="text" class="chatdet_search" id="chatdet-newGroupNameInput" placeholder="Enter new group name">
-            <button onclick="saveChatdetGroupName()">Save</button>
-        </div>
     </div>
-
+    
   <!-- Group Details Section -->
   <div class="group-details">
     <!-- Group Photo with Edit Button -->
@@ -44,8 +36,8 @@
     </div>
 
     <p class="group-description">
-      {{ data.chat.description }}  <!-- Display group description dynamically -->
-      <button class="edit-btn" onclick="editGroupDescription()">
+      {{ data.chat.chat_bio }}  <!-- Display group description dynamically -->
+      <button class="edit-btn" onclick="editGroupBio()">
         <i class="fa-solid fa-pen"></i>
       </button>
     </p>
@@ -130,9 +122,7 @@
 
 $(document).ready(function () {
     let selectedItems = []; // Array to store selected item IDs
-    let chatId = "{{ data.chat.id }}"; // Ensure chatId is safely handled as a string
-
-    console.log('Initial selectedItems:', selectedItems);
+    let chatId = "{{ data.chat.id }}"; // Ensure chatId is safely handled as a string  
 
     // Function to fetch followers and followings based on the search query
     function fetchFollowersAndFollowings(searchQuery = '') {
@@ -183,7 +173,6 @@ $(document).ready(function () {
             selectedItems.splice(index, 1);
         }
         $(`#user-${userId}`).toggleClass('selected');
-        console.log('Selected items:', selectedItems);
     };
 
     // Function to open the add member modal
@@ -207,9 +196,7 @@ $(document).ready(function () {
 
     // Function to add selected members to the chat
     window.addMember = function () {
-        console.log('Selected items to add:', selectedItems);
         if (selectedItems.length === 0) {
-            console.log('Please select at least one member to add.');
             return;
         }
 
@@ -230,19 +217,15 @@ $(document).ready(function () {
             return response.json(); // Parse the JSON response
         })
         .then(data => {
-            console.log('Success:', data);
             if (data.success) {
                 // Handle successful addition of members
                 location.reload();
                 $('#parchat-addMemberModal').hide(); // Hide the modal
                 // Optionally reload the chat or update the UI to reflect the changes
-            } else {
-                console.log(data.message || 'An error occurred.');
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            console.log('An unexpected error occurred.');
         });
     };
 
@@ -251,66 +234,94 @@ $(document).ready(function () {
 });
 
 
-// Function to show the modal and focus on the input field
-    function editChatdetGroupName() {
-        const modal = document.getElementById('chatdet-editGroupNameModal');
-        modal.style.display = 'block'; // Show the modal
 
-        const groupTitleElement = document.getElementById("group-name-text"); // Fetch the group name text element 
-        const inputElement = document.getElementById('chatdet-newGroupNameInput'); // Fetch the input element 
+// Function to transform the group name into an inline input field.
+function editGroupNameInline() {
+    const groupNameSpan = document.getElementById('group-name-text');
+    if (!groupNameSpan) return;
+    const currentValue = groupNameSpan.textContent.trim();
 
-        inputElement.value = groupTitleElement.textContent; // Pre-fill input with the current group name
-        
-        document.getElementById('chatdet-newGroupNameInput').focus(); // Focus on the input field
+    // Create an input field pre-filled with the current group name.
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.id = 'group-name-input';
+    input.className = 'group-name-input';
+    input.value = currentValue;
+
+    // Replace the span with the input field.
+    groupNameSpan.parentNode.replaceChild(input, groupNameSpan);
+
+    // Change the edit button icon to a tick icon and update its onclick to save.
+    const editButton = document.querySelector('.group-name .edit-btn');
+    if (editButton) {
+        editButton.innerHTML = '<i class="fa-solid fa-check"></i>';
+        editButton.onclick = saveGroupNameInline;
     }
 
+    // Focus on the input field.
+    input.focus();
 
-    // Function to close the modal
-    function closeChatdetModal() {
-        const modal = document.getElementById('chatdet-editGroupNameModal');
-        modal.style.display = 'none'; // Hide the modal
-    }
-
-    // Add an event listener for the Enter key press
-    document.getElementById('chatdet-newGroupNameInput').addEventListener('keypress', function(event) {
-        // Check if the key pressed is "Enter"
+    // Listen for Enter key press to trigger save.
+    input.addEventListener('keypress', function(event) {
         if (event.key === 'Enter') {
-            event.preventDefault(); // Prevent default form submit (if inside a form)
-            saveChatdetGroupName();  // Call the function to save the group name
+            saveGroupNameInline();
         }
     });
+}
 
-
-
-    // Close the modal if the user clicks outside of it
-    window.onclick = function(event) {
-        const modal = document.getElementById('chatdet-editGroupNameModal');
-        if (event.target === modal) {
-            closeChatdetModal();
+// Function to retrieve the CSRF token from cookies.
+function getCSRFToken() {
+    const name = 'csrftoken';
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+            return decodeURIComponent(cookie.substring(name.length + 1));
         }
     }
+    return '';
+}
 
-
-function saveChatdetGroupName() {
-    const title = document.getElementById('chatdet-newGroupNameInput').value;
+// Function to save the new group name.
+function saveGroupNameInline() {
+    const input = document.getElementById('group-name-input');
+    if (!input) return;
+    const newName = input.value.trim();
     const chatId = document.getElementById('chat_id').value;
 
+    // Send an AJAX request to update the group name.
     fetch(`/chat/${chatId}/update/`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
             'X-CSRFToken': getCSRFToken(),
         },
-        body: JSON.stringify({ title: title }),
+        body: JSON.stringify({ title: newName })
     })
     .then(response => response.json())
     .then(data => {
-        if (data.success) {            
-            location.reload();
+        if (data.success) {
+            // Create a new span with the updated group name.
+            const newSpan = document.createElement('span');
+            newSpan.id = 'group-name-text';
+            newSpan.textContent = newName;
+
+            // Replace the input field with the new span.
+            const groupNameHeading = document.querySelector('.group-name');
+            const inputElem = document.getElementById('group-name-input');
+            groupNameHeading.replaceChild(newSpan, inputElem);
+
+            // Revert the edit button icon back to a pen and update its onclick.
+            const editButton = groupNameHeading.querySelector('.edit-btn');
+            if (editButton) {
+                editButton.innerHTML = '<i class="fa-solid fa-pen"></i>';
+                editButton.onclick = editGroupNameInline;
+            }
         } else {
-            console.log('Error updating title: ' + data.error);
+            console.error('Error updating group name:', data.error);
         }
-    });
+    })
+    .catch(error => console.error('Error:', error));
 }
 
 function uploadImage(event) {
@@ -330,8 +341,6 @@ function uploadImage(event) {
     .then(data => {
         if (data.success) {            
             location.reload();
-        } else {
-            console.log('Error updating photo: ' + data.error);
         }
     });
 }
@@ -344,8 +353,6 @@ function getCSRFToken() {
 function removeMember(memberId) {
     const chatId = "{{ data.chat.id }}"; // Get the chat ID
     const url = `/chat/${chatId}/delete-members`; // Endpoint for deleting members
-    console.log(memberId);
-    console.log(chatId);
 
     fetch(url, {
         method: 'POST',
@@ -362,18 +369,14 @@ function removeMember(memberId) {
         return response.json(); // Parse the JSON response
     })
     .then(data => {
-        console.log('Success:', data);
         if (data.success) {
             // Remove the member's element from the DOM
             
             location.reload();
-        } else {
-            console.log(data.message || 'An error occurred.');
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        console.log('An unexpected error occurred.');
     });
 }
 
@@ -399,19 +402,13 @@ function removeChat() {
             return response.json(); // Parse the JSON response
         })
         .then(data => {
-            console.log('Success:', data);
             if (data.success) {
-                // Handle successful deletion
-                console.log('Chat deleted successfully');
                 // Redirect to another page or update the UI
                window.location.href = '/chat'; // Redirect to the specified URL
-            } else {
-                console.log(data.message || 'An error occurred.');
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            console.log('An unexpected error occurred.');
         });
     } else {
         // Trigger the member delete view for other members
@@ -430,21 +427,86 @@ function removeChat() {
             return response.json(); // Parse the JSON response
         })
         .then(data => {
-            console.log('Success:', data);
             if (data.success) {
-                // Handle successful deletion
-                console.log('You have left the group');
                 // Redirect to another page or update the UI
                 window.location.href = '/chat'; // Redirect to the chats page
-            } else {
-                console.log(data.message || 'An error occurred.');
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            console.log('An unexpected error occurred.');
         });
     }
+}
+
+// Function to transform the group bio into an inline input field.
+function editGroupBio() {
+  // Get the group description container.
+  const groupDescEl = document.querySelector('.group-description');
+  if (!groupDescEl) return;
+
+  // Get the current bio text.
+  const currentBio = groupDescEl.childNodes[0].textContent.trim();
+
+  // Create an input field for editing.
+  const inputField = document.createElement('input');
+  inputField.type = 'text';
+  inputField.className = 'group-description-input';
+  inputField.value = currentBio;
+
+  // Create a save button.
+  const saveButton = document.createElement('button');
+  saveButton.className = 'save-btn';
+  saveButton.innerHTML = '<i class="fa-solid fa-check"></i>';
+  saveButton.onclick = function() {
+    saveGroupBio(inputField.value);
+  };
+
+  // Clear out the group description element and insert the input and button.
+  groupDescEl.innerHTML = '';
+  groupDescEl.appendChild(inputField);
+  groupDescEl.appendChild(saveButton);
+
+  // Focus on the input.
+  inputField.focus();
+
+  // Listen for the Enter key.
+  inputField.addEventListener('keypress', function(event) {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      saveGroupBio(inputField.value);
+    }
+  });
+}
+
+// Function to save the new group bio with an AJAX call.
+function saveGroupBio(newBio) {
+  const groupDescEl = document.querySelector('.group-description');
+  const chatId = document.getElementById('chat_id').value;
+
+  // Send the AJAX request to update the group bio.
+  fetch(`/chat/${chatId}/update/`, {
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCSRFToken(),
+      },
+      body: JSON.stringify({ chat_bio: newBio })
+  })
+  .then(response => response.json())
+  .then(data => {
+      if (data.success) {
+          // Update the UI: replace the input and save button with the updated bio and an edit button.
+          groupDescEl.innerHTML = newBio + ' ';
+          const editButton = document.createElement('button');
+          editButton.className = 'edit-btn';
+          editButton.onclick = editGroupBio;
+          editButton.innerHTML = '<i class="fa-solid fa-pen"></i>';
+          groupDescEl.appendChild(editButton);          
+      } else {
+          console.error('Error updating group bio:', data.error);
+      }
+  })
+  .catch(error => console.error('Error:', error));
 }
 
 

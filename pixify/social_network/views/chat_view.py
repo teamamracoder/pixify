@@ -207,8 +207,11 @@ class ChatUpdateView(View):
             if 'application/json' in request.content_type:
                 data = json.loads(request.body)
                 title = data.get('title', None)  # Safely get the title
+                chat_bio = data.get('chat_bio', None)
                 if title:
                     chat_service.update_chat_title(chat, title, user)
+                if chat_bio:
+                    chat_service.update_chat_bio(chat, chat_bio, user)                    
 
             # Handle file upload separately
             if 'multipart/form-data' in request.content_type:
@@ -228,7 +231,10 @@ class ChatDeleteView(View):
     @auth_required
     @role_required(Role.ADMIN.value, Role.END_USER.value)
     def post(self, request, chat_id):
-        chat = chat_service.get_chat_by_id(chat_id)
+        user = request.user        
+        members = chat_member_service.get_chat_members(chat_id)
+        for member in members:
+            chat_member_service.delete_chat_member(chat_id, member, user)
         chat_service.delete_chat(chat_id)
         return JsonResponse({"success": True})
 
