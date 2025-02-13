@@ -25,27 +25,12 @@
                 <span class="username P-msg_chat-title">{{ data.chat.title }}</span>
             {% endif %}
         </div>
-        <div id="sendDataButton"><i class="fa-solid fa-phone"></i></div>    
     </div>
-
-    <script>
-        function startCall() {
-            const callId = generateCallId(); // Generate a unique call ID
-            window.location.href = `/call/${callId}/`;  // Ensure trailing slash
-        }
-    
-        function generateCallId() {
-            return Math.random().toString(36).substr(2, 9); // Simple unique ID generator
-        }
-    </script>
-
-
-    
+        
   <!-- Loading Spinner (placed as an overlay) -->
     <div id="loading-spinner" style="display: none;">
       <div class="spinner"></div>
     </div>
-
 
     <!-- Chat Body -->
     <div class="chat-body" id="chat-body">
