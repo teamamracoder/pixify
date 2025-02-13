@@ -10,15 +10,17 @@
       <!-- Group Name with Edit Button -->
       <h1 class="group-name ">
         <span id="group-name-text">{{ data.chat.title }}</span>
-        <button class="edit-btn" onclick="editGroupNameInline()">
-          <i class="fa-solid fa-pen"></i>
-        </button>
       </h1>
+      <div class="g-name">
+      <button class="edit-btn gp-name" onclick="editGroupNameInline()">
+        <i class="fa-solid fa-pen"></i>
+      </button>
       {% csrf_token %}
       <input type="hidden" id="chat_id" name="chat_id" value="{{ data.chat.id }}">
       <button class="exit-btn" onclick="removeChat()">
         <i class="fa-sharp fa-solid fa-right-from-bracket"></i>Exit
       </button>
+    </div>
     </div>
     
   <!-- Group Details Section -->
@@ -455,6 +457,7 @@ function editGroupBio() {
   inputField.className = 'group-description-input';
   inputField.value = currentBio;
 
+  
   // Create a save button.
   const saveButton = document.createElement('button');
   saveButton.className = 'save-btn';
@@ -462,6 +465,7 @@ function editGroupBio() {
   saveButton.onclick = function() {
     saveGroupBio(inputField.value);
   };
+
 
   // Clear out the group description element and insert the input and button.
   groupDescEl.innerHTML = '';
@@ -606,7 +610,7 @@ function saveGroupBio(newBio) {
     padding: 8px;
     width: 360px;
     margin: 0 auto;
-    margin-bottom: 20px;
+    margin-bottom: 0px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   }
   .group-description-input{
@@ -789,10 +793,12 @@ button:hover {
   }
 
   .group-name {
-    font-size: 28px;
-    margin: 0;
-    display: inline-flex;
-    align-items: center;
+    font-size:28px;
+    white-space: nowrap; 
+    overflow: hidden; 
+    text-overflow: ellipsis; 
+    max-width: 360px; /* Adjust width as needed */
+    display: inline-block;
   }
 
   .edit-btn {
@@ -801,6 +807,11 @@ button:hover {
     margin-left: 10px;
     cursor: pointer;
   }
+  .g-name{
+    display:flex;
+
+  }
+  
 
   .edit-icon {
     width: 20px;
@@ -846,11 +857,13 @@ button:hover {
   }
 
   .group-description {
-    font-size: 16px;
-    color: black;
+    font-size: 20px;
+    color: #ebe1c6;
     margin: 5px 0;
-    display: inline-flex;
+    display: flex;
     align-items: center;
+    justify-content:center;
+    font-weight: lighter
   }
 
   .total-members {
@@ -860,6 +873,7 @@ button:hover {
 
   /* Member List Section */
   .member-list {
+    overflow-y: scroll;
     position:relative;
     height: calc(-348.966px + 100vh);
     /* border: 1px solid #827b7b70; */
@@ -1030,6 +1044,29 @@ button:hover {
       margin: 46% auto;
       width: 83%;
     }
+  }
+  @media (min-width: 768px) and (max-width: 991px){
+    #group-name-input{
+      font-size: 15px;
+    background-color: #3D3D6B;
+    border: var(--bs-border-width) solid var(--bs-border-color);
+    color: #ffff;
+    display: flex;
+    border-radius: 4px;
+    padding: 8px;
+    width: 196px;
+    margin: 0 auto;
+    margin-bottom: 0px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    .group-name {
+      max-width: 196px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-size: 20px;
+      margin: 0;
+      display: inline-block;
   }
   @media (max-width: 480px){
     .parchat-modal-content{
