@@ -1670,47 +1670,74 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-// Mark as Read 
-document.addEventListener('DOMContentLoaded', () => {
-    // Get the chat ID from the hidden input field
+
+  // Global variable to store the last single-tick message ID that we sent
+  let lastSingleTickMessageId = null;
+
+  // Function to send a read receipt for a specific message.
+  function markMessagesAsRead(messageId) {
     const chatId = document.getElementById("chat_id").value;
-    
-    // Sender's ID from the context (Django template)
-    const senderId = "{{ user.id }}";         
+    const senderId = "{{ user.id }}";  // Provided by Django
+    const data = {
+      chat_id: chatId,
+      sender_id: senderId,
+      message_id: messageId,
+      action: 'mark_msg_as_read'
+    };
 
-    // Define the function that sends the "mark as read" message
-    function markMessagesAsRead() {
-        socket.send(JSON.stringify({
-            chat_id: chatId,
-            sender_id: senderId,
-            action: 'mark_msg_as_read',
-        }));
-    }
-
-    // Check if the socket is already open
-    if (socket.readyState === WebSocket.OPEN) {
-        // Socket is open, send the message immediately
-        markMessagesAsRead();
+    if (socket && socket.readyState === WebSocket.OPEN) {
+      socket.send(JSON.stringify(data));
+      console.log("Sent mark as read request for message id:", messageId);
     } else {
-        // Socket is not open yet; wait for the open event
-        socket.addEventListener('open', markMessagesAsRead);
+      socket.addEventListener('open', () => {
+        socket.send(JSON.stringify(data));
+        console.log("Sent mark as read request after socket open for message id:", messageId);
+      });
     }
+  }
 
-    // Optional: handle errors
-    socket.addEventListener('error', (error) => {
-        console.error('WebSocket error:', error);
-    });
-    
-    // Optional: handle messages from the server
-    socket.addEventListener('message', (event) => {
-        console.log('Message from server:', event.data);
-    });
-    
-    // Optional: handle WebSocket closure
-    socket.addEventListener('close', (event) => {
-        console.log('WebSocket closed:', event);
-    });
-});
+  // Function to check the seen status of the last message.
+  function checkLastMessageSeenStatusAndMark() {
+    const chatBody = document.getElementById('chat-body');
+    if (!chatBody) {
+      console.error('Element with id "chat-body" not found');
+      return;
+    }
+    const messages = chatBody.querySelectorAll('.message');
+    if (messages.length === 0) return;
+    // Get the last message (assumes messages are in order).
+    const lastMessage = messages[messages.length - 1];
+    const seenStatusEl = lastMessage.querySelector('.seen-status');
+    if (seenStatusEl) {
+      const icon = seenStatusEl.querySelector('i');
+      if (icon) {
+        // If the icon has class "bi-check2" but not "bi-check2-all", then it's a single tick.
+        if (icon.classList.contains('bi-check2') && !icon.classList.contains('bi-check2-all')) {
+          // Extract the message ID from the last message's ID attribute.
+          // Assuming the format is "message-<messageId>".
+          const currentMessageId = lastMessage.getAttribute('id').split('-')[1];
+          // Only send if this message hasn't already been processed.
+          if (lastSingleTickMessageId !== currentMessageId) {
+            lastSingleTickMessageId = currentMessageId;
+            markMessagesAsRead(currentMessageId);
+          }
+        } else {
+          console.log("Last message already marked as read (double tick).");
+        }
+      }
+    }
+  }
+
+  // When the socket is open, check the last message's seen status.
+  if (socket.readyState === WebSocket.OPEN) {
+    checkLastMessageSeenStatusAndMark();
+  } else {
+    socket.addEventListener('open', checkLastMessageSeenStatusAndMark);
+  }
+
+  // Also, if you load new messages via pagination or other dynamic methods,
+  // call checkLastMessageSeenStatusAndMark() after inserting the new messages.
+
 
 
 
