@@ -19,13 +19,6 @@ class ShortListView(View):
         return render(request, 'enduser/short/index.html', {'shorts': shorts})          
     
 
-
-class ShortVisitedView(View):
-    def get(self, request, post_id):
-        post = short_service.get_short(post_id)
-        return render(request, 'enduser/short/index.html', {'post': post})
-
-
 class ShortReactionCreateView(View):
     def post(self, request, post_id):
         user = request.user
