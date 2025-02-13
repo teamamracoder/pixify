@@ -64,9 +64,6 @@
                 {% endif %}
 
                 {% if message.updated_by %}
-                <div class="edited-messages">
-                    <span class="edited-tag">(Edited)</span>
-                </div>
                 {% endif %}
             </div>
 
@@ -1427,15 +1424,16 @@ function generateReactionPopupContent(reactions, messageId) {
     if (!reactions || reactions.length === 0) return "";
     return reactions
         .map(reaction => `
-            <div class="reaction-list" 
+            <span 
                  reaction_id="${reaction.id}" 
                  message_id="${messageId}"
                  onclick="reactionManager.addReaction('${messageId}', '${reaction.id}', '${reaction.value.replace(/'/g, "\\'").replace(/"/g, "&quot;")}')"> <!-- Escaping single and double quotes -->
                 ${reaction.value}  <!-- Make sure this outputs the correct HTML or icon -->
-            </div>
+            </span>
         `)
         .join("");
 }
+
 
 
 class ReactionManager {
@@ -2168,7 +2166,7 @@ document.addEventListener("DOMContentLoaded", function () {
         overflow-y: auto;
         display: flex;
         flex-direction: column;
-        scrollbar-width: thin; /* For Firefox */
+        scrollbar-width: none; /* For Firefox */
         scrollbar-color: #c7c5c5 #f2f2f2;
     }
         /* Customize scrollbar for Webkit browsers */
