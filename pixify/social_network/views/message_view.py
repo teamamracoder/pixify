@@ -37,6 +37,7 @@ class MessageListView(View):
             message.seen_by_all = chat_service.is_message_seen_by_all(message)
             # Format the timestamp consistently (for grouping)
             message.formatted_timestamp = message_service.format_timestamp(message.created_at)
+            message.reactions = message_reaction_service.get_active_message_reactions(message.id)  # Fetch reactions
 
         # Group all messages by formatted timestamp.
         all_grouped_messages = defaultdict(list)
@@ -121,6 +122,7 @@ class MessageListView(View):
                     'has_previous': messages_page.has_previous(),
                     'reactions': reactions,
                     'duplicate_timestamp': duplicate_timestamp,
+                    'message_reactions': {msg.id: msg.reactions for msg in messages_page},
                 },
                 request=request
             )
@@ -139,6 +141,7 @@ class MessageListView(View):
                         'reactions': reactions,
                         'paginator': paginator,
                         'current_page': messages_page.number,
+                        'message_reactions': {msg.id: msg.reactions for msg in messages_page}, 
                     },
                     'message': request.session.pop("message", SuccessMessage.S000014.value),
                     'message_type': request.session.pop("message_type", ResponseMessageType.INFO.value),
