@@ -20,12 +20,12 @@
         {% endif %}
   
         <div class="message-header">
-          <img src="{{ message.sender_id.profile_photo_url|default:'\static\images\avatar.jpg' }}" 
-               alt="{{ message.sender_id.first_name }}'s Profile Picture" 
+          <img src="{{ message.sender_id.profile_photo_url|default:'\static\images\avatar.jpg' }}"
+               alt="{{ message.sender_id.first_name }}'s Profile Picture"
                class="message-profile-pic">
           <span class="message-username">{{ message.sender_id.first_name }}</span>
         </div>
-        <span class="message-text">{{ message.text }}</span>
+        <div class="message-text">{{ message.text }}</div>
         {% if message.media_url %}
           <span class="message-media">{{ message.media_url }}</span>
         {% endif %}
@@ -38,7 +38,7 @@
       </div>
   
       <div class="message-footer">
-        <span class="time">{{ message.created_at|date:"h:i A" }}</span>
+        <div class="time">{{ message.created_at|date:"h:i A" }}</div>
         <div class="message-options">
           <i class="bi bi-three-dots-vertical" onclick="toggleOptions({{ message.id }})"></i>
           <i class="bi bi-emoji-smile" onclick="toggleReactionPopup({{ message.id }})"></i>
@@ -63,7 +63,27 @@
             {% endfor %}
           </div>
         </div>
+      </div>
   
+      <div class="reactionandseen">
+        <div class="reaction-display" id="reaction-display-{{ message.id }}">
+
+  {% comment %} 
+  Another approach for reaction
+   <div class="reaction-display" id="reaction-display-{{ message.id }}">
+      {% for reaction_id, count in message.msg_reaction_count.items %}
+        {% for key, react_values in message.msg_reaction_value.items %}
+          {% if key == reaction_id %}
+            <span style="margin-right: 5px; cursor: pointer;">
+              {{ react_values.0|safe }} {{ count }}
+            </span>
+          {% endif %}
+        {% endfor %}
+      {% endfor %}
+    </div> 
+  {% endcomment %}
+          
+        </div>
         <div class="seen-status">
           {% if message.sender_id.id == request.user.id %}
             {% if message.seen_by_all %}
@@ -74,9 +94,6 @@
           {% endif %}
         </div>
       </div>
-  
-      <div class="reaction-display" id="reaction-display-{{ message.id }}"></div>
     </div>
   {% endfor %}
 {% endfor %}
-
