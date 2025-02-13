@@ -234,7 +234,6 @@ $(document).ready(function () {
 });
 
 
-
 // Function to transform the group name into an inline input field.
 function editGroupNameInline() {
     const groupNameSpan = document.getElementById('group-name-text');
@@ -251,11 +250,10 @@ function editGroupNameInline() {
     // Replace the span with the input field.
     groupNameSpan.parentNode.replaceChild(input, groupNameSpan);
 
-    // Change the edit button icon to a tick icon and update its onclick to save.
+    // Hide the edit button while editing.
     const editButton = document.querySelector('.group-name .edit-btn');
     if (editButton) {
-        editButton.innerHTML = '<i class="fa-solid fa-check"></i>';
-        editButton.onclick = saveGroupNameInline;
+        editButton.style.display = 'none';
     }
 
     // Focus on the input field.
@@ -264,32 +262,19 @@ function editGroupNameInline() {
     // Listen for Enter key press to trigger save.
     input.addEventListener('keypress', function(event) {
         if (event.key === 'Enter') {
+            event.preventDefault();
             saveGroupNameInline();
         }
     });
 }
 
-// Function to retrieve the CSRF token from cookies.
-function getCSRFToken() {
-    const name = 'csrftoken';
-    const cookies = document.cookie.split(';');
-    for (let i = 0; i < cookies.length; i++) {
-        const cookie = cookies[i].trim();
-        if (cookie.substring(0, name.length + 1) === (name + '=')) {
-            return decodeURIComponent(cookie.substring(name.length + 1));
-        }
-    }
-    return '';
-}
-
-// Function to save the new group name.
+// Function to save the new group name via AJAX.
 function saveGroupNameInline() {
     const input = document.getElementById('group-name-input');
     if (!input) return;
     const newName = input.value.trim();
     const chatId = document.getElementById('chat_id').value;
 
-    // Send an AJAX request to update the group name.
     fetch(`/chat/${chatId}/update/`, {
         method: 'POST',
         headers: {
@@ -311,11 +296,10 @@ function saveGroupNameInline() {
             const inputElem = document.getElementById('group-name-input');
             groupNameHeading.replaceChild(newSpan, inputElem);
 
-            // Revert the edit button icon back to a pen and update its onclick.
+            // Show the edit button (with the pen icon).
             const editButton = groupNameHeading.querySelector('.edit-btn');
             if (editButton) {
-                editButton.innerHTML = '<i class="fa-solid fa-pen"></i>';
-                editButton.onclick = editGroupNameInline;
+                editButton.style.display = 'inline-block';
             }
         } else {
             console.error('Error updating group name:', data.error);
@@ -440,73 +424,69 @@ function removeChat() {
 
 // Function to transform the group bio into an inline input field.
 function editGroupBio() {
-  // Get the group description container.
-  const groupDescEl = document.querySelector('.group-description');
-  if (!groupDescEl) return;
+    const groupDescEl = document.querySelector('.group-description');
+    if (!groupDescEl) return;
 
-  // Get the current bio text.
-  const currentBio = groupDescEl.childNodes[0].textContent.trim();
+    // Get the current bio text (assumes the first child text node holds the bio).
+    const currentBio = groupDescEl.childNodes[0].textContent.trim();
 
-  // Create an input field for editing.
-  const inputField = document.createElement('input');
-  inputField.type = 'text';
-  inputField.className = 'group-description-input';
-  inputField.value = currentBio;
+    // Create an input field for editing.
+    const inputField = document.createElement('input');
+    inputField.type = 'text';
+    inputField.className = 'group-description-input';
+    inputField.value = currentBio;
 
-  // Create a save button.
-  const saveButton = document.createElement('button');
-  saveButton.className = 'save-btn';
-  saveButton.innerHTML = '<i class="fa-solid fa-check"></i>';
-  saveButton.onclick = function() {
-    saveGroupBio(inputField.value);
-  };
+    // Replace the current bio text with the input field.
+    groupDescEl.innerHTML = '';
+    groupDescEl.appendChild(inputField);
 
-  // Clear out the group description element and insert the input and button.
-  groupDescEl.innerHTML = '';
-  groupDescEl.appendChild(inputField);
-  groupDescEl.appendChild(saveButton);
-
-  // Focus on the input.
-  inputField.focus();
-
-  // Listen for the Enter key.
-  inputField.addEventListener('keypress', function(event) {
-    if (event.key === 'Enter') {
-      event.preventDefault();
-      saveGroupBio(inputField.value);
+    // Hide the edit button while editing.
+    const editButton = document.querySelector('.group-description .edit-btn');
+    if (editButton) {
+        editButton.style.display = 'none';
     }
-  });
+
+    // Focus on the input field.
+    inputField.focus();
+
+    // Listen for Enter key press to trigger save.
+    inputField.addEventListener('keypress', function(event) {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            saveGroupBio(inputField.value);
+        }
+    });
 }
 
-// Function to save the new group bio with an AJAX call.
+// Function to save the new group bio via AJAX.
 function saveGroupBio(newBio) {
-  const groupDescEl = document.querySelector('.group-description');
-  const chatId = document.getElementById('chat_id').value;
+    const groupDescEl = document.querySelector('.group-description');
+    const chatId = document.getElementById('chat_id').value;
 
-  // Send the AJAX request to update the group bio.
-  fetch(`/chat/${chatId}/update/`, {
-      method: 'POST',
-      headers: {
-          'Content-Type': 'application/json',
-          'X-CSRFToken': getCSRFToken(),
-      },
-      body: JSON.stringify({ chat_bio: newBio })
-  })
-  .then(response => response.json())
-  .then(data => {
-      if (data.success) {
-          // Update the UI: replace the input and save button with the updated bio and an edit button.
-          groupDescEl.innerHTML = newBio + ' ';
-          const editButton = document.createElement('button');
-          editButton.className = 'edit-btn';
-          editButton.onclick = editGroupBio;
-          editButton.innerHTML = '<i class="fa-solid fa-pen"></i>';
-          groupDescEl.appendChild(editButton);          
-      } else {
-          console.error('Error updating group bio:', data.error);
-      }
-  })
-  .catch(error => console.error('Error:', error));
+    fetch(`/chat/${chatId}/update/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCSRFToken(),
+        },
+        body: JSON.stringify({ chat_bio: newBio })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Replace the input with the updated bio text.
+            groupDescEl.innerHTML = newBio + ' ';
+            // Re-add the edit button.
+            const editButton = document.createElement('button');
+            editButton.className = 'edit-btn';
+            editButton.onclick = editGroupBio;
+            editButton.innerHTML = '<i class="fa-solid fa-pen"></i>';
+            groupDescEl.appendChild(editButton);
+        } else {
+            console.error('Error updating group bio:', data.error);
+        }
+    })
+    .catch(error => console.error('Error:', error));
 }
 
 
