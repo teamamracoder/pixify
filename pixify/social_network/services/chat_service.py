@@ -92,6 +92,11 @@ def update_chat_title(chat, title, user):
     chat.updated_by = user
     chat.save()
 
+def update_chat_bio(chat, bio, user):
+    chat.chat_bio = bio
+    chat.updated_by = user
+    chat.save()
+
 def update_chat_cover(chat, cover_url, user):
     chat.chat_cover = cover_url
     chat.updated_by = user
@@ -181,6 +186,7 @@ def chat_details(chat_id, user):
         'chat_cover': chat.chat_cover if chat.chat_cover else '/static/images/group_pic.png', 
         'created_by':chat.created_by,
         'is_group': chat.type == ChatType.GROUP.value,
+        'chat_bio':chat.chat_bio,
         'members': [
             {
                 'id': member.member_id,
