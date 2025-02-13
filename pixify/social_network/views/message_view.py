@@ -30,10 +30,24 @@ class MessageListView(View):
         for message in messages:
             message.is_editable = message_service.is_editable(message)
             message.seen_by_all = chat_service.is_message_seen_by_all(message)
-            # Format the timestamp consistently (for grouping)
             message.formatted_timestamp = message_service.format_timestamp(message.created_at)
-            message.reactions = message_reaction_service.get_active_message_reactions(message.id)  # Fetch reactions
+            
+            # Retrieve the reaction data for this message.
+            msg_reaction = message_reaction_service.reaction_by_message_id(message.id)
 
+            if msg_reaction:
+                # Create a dictionary keyed by reaction_id for counts.
+                message.msg_reaction_count = {
+                    item['reaction_id']: item['count'] for item in msg_reaction
+                }
+                # Create a dictionary keyed by reaction_id for react_value.
+                message.msg_reaction_value = {
+                    item['reaction_id']: item['react_value'] for item in msg_reaction
+                }
+            else:
+                message.msg_reaction_count = {}
+                message.msg_reaction_value = {}
+        
         # Group all messages by formatted timestamp.
         all_grouped_messages = defaultdict(list)
         for message in messages:
@@ -116,8 +130,7 @@ class MessageListView(View):
                     'current_page': messages_page.number,
                     'has_previous': messages_page.has_previous(),
                     'reactions': reactions,
-                    'duplicate_timestamp': duplicate_timestamp,
-                    'message_reactions': {msg.id: msg.reactions for msg in messages_page},
+                    'duplicate_timestamp': duplicate_timestamp,                    
                 },
                 request=request
             )
@@ -135,8 +148,7 @@ class MessageListView(View):
                         'user': user,
                         'reactions': reactions,
                         'paginator': paginator,
-                        'current_page': messages_page.number,
-                        'message_reactions': {msg.id: msg.reactions for msg in messages_page}, 
+                        'current_page': messages_page.number,                        
                     },
                     'message': request.session.pop("message", SuccessMessage.S000014.value),
                     'message_type': request.session.pop("message_type", ResponseMessageType.INFO.value),
