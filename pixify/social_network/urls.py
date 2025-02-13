@@ -180,8 +180,7 @@ urlpatterns = [
     path('short/<int:post_id>/comment/create/', views.ShortCommentCreateView.as_view(),name='short_comment_create'),
     path('short/comment/<int:comment_id>/delete/', views.ShortCommentDeleteView.as_view(),name='short_comment_delete'),
     path('short/comment/<int:comment_id>/reply/', views.ShortCommentReplyView.as_view(),name='short_comment_reply'),
-    path('short/comment/<int:comment_id>/reaction/', views.ShortCommentReactionView.as_view(),name='short_comment_reaction'),    
-    path('short/<int:post_id>/', views.ShortVisitedView.as_view(), name='short-detail'),
+    path('short/comment/<int:comment_id>/reaction/', views.ShortCommentReactionView.as_view(),name='short_comment_reaction'),
 ]
 
 
