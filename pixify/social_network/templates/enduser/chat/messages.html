@@ -1003,6 +1003,21 @@ function appendMessageToChat(message, messageId, messageTime, senderName, profil
     window.updateScrollIndicator();
 }
 
+function updateMessageInChat(updatedMessage, messageId, messageTime, senderName, profilePic, reply, replyText, reply_username, reply_userPic, mediaUrls, isSent, seen_by_all, reactions) {
+    const messageDiv = document.getElementById(`message-${messageId}`);
+    if (!messageDiv) {
+        console.error(`Message not found for message ID: ${messageId}`);
+        return;
+    }
+    
+    // Prepare media preview if provided.
+    let mediaPreview = "";
+    if (mediaUrls && mediaUrls.length > 0) {
+        mediaPreview = mediaUrls
+            .map(url => `<div class="message-media"><img src="${url}" alt="media"></div>`)
+            .join("");
+}
+
     // Prepare the reply preview if there is a reply.
     let replyPreview = "";
     if (reply) {
