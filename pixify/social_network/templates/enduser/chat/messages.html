@@ -25,7 +25,7 @@
                 <span class="username P-msg_chat-title">{{ data.chat.title }}</span>
             {% endif %}
         </div>
-        <button id="sendDataButton">start call</button>    
+        <div id="sendDataButton"><i class="fa-solid fa-phone"></i></div>    
     </div>
 
     <script>
@@ -62,7 +62,7 @@
                 {% if message.reply_for_message_id %}
                 <div class="parent-message">
                     <span>{{ message.reply_for_message_id.sender_id.first_name }}: </span>
-                    <span>{{ message.reply_for_message_id.text }}</span>
+                    <div>{{ message.reply_for_message_id.text }}</div>
                     {% if message.reply_for_message_id.media_url %}
                     <span>{{ message.reply_for_message_id.media_url }}</span>
                     {% endif %}
@@ -73,7 +73,7 @@
                     <img src="{{ message.sender_id.profile_photo_url|default:'\static\images\avatar.jpg' }}" alt="{{ message.sender_id.first_name }}'s Profile Picture" class="message-profile-pic">
                     <span class="message-username">{{ message.sender_id.first_name }}</span>
                 </div>
-                <span class="message-text">{{ message.text }}</span>
+                <div class="message-text">{{ message.text }}</div>
                 {% if message.media_url %}
                 <span class="message-media">{{ message.media_url }}</span>
                 {% endif %}
@@ -86,7 +86,7 @@
             </div>
 
             <div class="message-footer">
-                <span class="time">{{ message.created_at|date:"h:i A" }}</span>
+                <div class="time">{{ message.created_at|date:"h:i A" }}</div>
                 <div class="message-options">
                     <i class="bi bi-three-dots-vertical" onclick="toggleOptions({{ message.id }})"></i>
                     <i class="bi bi-emoji-smile" onclick="toggleReactionPopup({{ message.id }})"></i>
@@ -113,17 +113,19 @@
                     </div>
                 </div>
 
-                <div class="seen-status">
-                    {% if message.sender_id.id == user.id %}
-                        {% if message.seen_by_all %}
-                        <i class="bi bi-check2-all"></i>
-                        {% else %}
-                        <i class="bi bi-check2"></i>
-                        {% endif %}
-                    {% endif %}
-                </div>
             </div>
+            <div class="reactionandseen">
             <div class="reaction-display" id="reaction-display-{{ message.id }}"></div>
+            <div class="seen-status">
+                {% if message.sender_id.id == user.id %}
+                    {% if message.seen_by_all %}
+                    <i class="bi bi-check2-all"></i>
+                    {% else %}
+                    <i class="bi bi-check2"></i>
+                    {% endif %}
+                {% endif %}
+            </div>
+            </div>
         </div>
         {% endfor %}
         {% endfor %}    
@@ -1007,7 +1009,7 @@ function appendMessageToChat(message, messageId, messageTime, senderName, profil
             ${mediaPreview}
         </div>
         <div class="message-footer">
-            <span class="time">${messageTime}</span>
+            <div class="time">${messageTime}</div>
             <div class="message-options">
                 <i class="bi bi-three-dots-vertical" onclick="toggleOptions('${messageId}')"></i>
                 <i class="bi bi-emoji-smile" onclick="toggleReactionPopup('${messageId}')"></i>
@@ -1527,7 +1529,7 @@ class ReactionManager {
       const reactionElement = document.createElement('span');
       // Display the reaction icon and count.
       reactionElement.innerHTML = `${reactionType} ${value.count}`;
-      reactionElement.style.marginRight = '10px';
+      reactionElement.style.marginRight = '3px';
       reactionElement.style.cursor = 'pointer';
 
       // Click event: allow deletion if the current user is among those who reacted.
@@ -1811,6 +1813,31 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 <style>
+    .reactionandseen {
+        display: flex;
+        justify-content: space-between; /* Pushes children to opposite ends */
+        align-items: center; /* Aligns items vertically */
+        width: 100%; /* Ensures full width */
+    }
+    
+    .reaction-display {
+        text-align: left; /* Ensures the reaction stays on the left */
+    }
+    
+    .seen-status {
+        margin-right: 10px;
+        font-size: 12px;
+        text-align: right; /* Ensures the seen icon stays on the right */
+    }
+
+.time{
+    flex:1;
+    color:#c4b3b3;
+}    
+.message-text{
+    padding:0 10px 0 10px;
+    
+}
 
 /* Spinner Overlay */
 #loading-spinner {
@@ -1847,17 +1874,16 @@ document.addEventListener("DOMContentLoaded", function () {
     padding-right: 10px;
 }   
 
+#sendDataButton{
+    margin-left: 250px;
+    font-size: 20px;
+ } 
+
 .cancel-edit {
     float: right;
     color: red;
     cursor: pointer;
 }
-
-
- #call_feature{
-    margin-left: 250px;
-    font-size: 20px;
- }   
 
 
 
@@ -1938,7 +1964,7 @@ document.addEventListener("DOMContentLoaded", function () {
 /* The Modal (background) */
 .parmess-del-modal {
   display: none; 
-  position: fixed; 
+  position: absolute; 
   z-index: 1; 
   left: 0;
   top: 0;
@@ -1950,14 +1976,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
 /* Modal Content */
 .parmess-del-modal-content {
-  background-color:#533b79;
-  margin: 15% auto; 
-  padding: 20px;
-  border: 1px solid #888;
-  width: 25%; 
-  max-width: 400px; 
-  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-  border-radius: 10px;
+    position: absolute;
+    background-color: #1A0933;
+    margin-left: 38%;
+    margin-top: 20%;
+    padding: 20px;
+    /* border: 1px solid #888; */
+    width: 25%;
+    max-width: 400px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    border-radius: 10px;
 }
 
 /* The Close Button */
@@ -2090,8 +2118,8 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     .profile-pic {
-        width: 80px;
-        height: 80px;
+        width: 60px;
+        height: 60px;
         border-radius: 50%;
         margin-right: 20px;
         object-fit: cover;
@@ -2136,8 +2164,8 @@ document.addEventListener("DOMContentLoaded", function () {
     .message {
         max-width: 80%;
         margin-bottom: 12px;
-        padding: 12px 15px;
-        border-radius: 20px;
+        padding: 3px 2px;
+        border-radius: 8px;
         position: relative;
         font-size: 15px;
         display: flex;
@@ -2152,7 +2180,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     .message.sent {
         align-self: flex-end;
-        background-color:#3b82f6;; /*shubhankar change only color*/
+        background-color:#2E6DE6; /*shubhankar change only color*/
         color: white;
     }
 
@@ -2163,7 +2191,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     .message-content {
-        margin-bottom: 25px;
+        margin-bottom: 4px;
         position: relative;
     }
 
@@ -2175,8 +2203,8 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     .message-profile-pic {
-        width: 40px;
-        height: 40px;
+        width: 20px;
+        height: 20px;
         border-radius: 50%;
         object-fit: cover;
         margin-right: 10px;
@@ -2184,28 +2212,34 @@ document.addEventListener("DOMContentLoaded", function () {
 
     .message-username {
         font-weight: bold;
-        color: #fff;
-        font-size: 14px;
+        color: #c4b3b3;
+        font-size: 10px;
     }
 
     .message-footer {
-        position: absolute;
+        width:100%;
         bottom: 5px;
-        right: 5px;
+        right: 0px;
         font-size: 12px;
         color: #888;
         display: flex;
         align-items: center;
+        justify-content: right;
     }
 
     .message-footer .time {
+        margin-top:10px;
         margin-right: 10px;
+        margin-left: 10px;
     }
 
     .message-footer .bi-three-dots-vertical {
         cursor: pointer;
-        font-size: 18px; /* Smaller icon */
+        font-size: 12px; /* Smaller icon */
         margin-left: 5px;
+    }
+    .message-options{
+        
     }
 
 /* shubhankar */
@@ -2291,14 +2325,17 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     .message-footer {
+        font-size: 8px;
         position: relative;
         display: flex;
         align-items: center;
     }
+
     
     .bi-emoji-smile {
-        padding-right: 10px;
-        font-size: 20px;
+        padding-left:6px;
+        padding-right: 6px;
+        font-size: 12px;
         cursor: pointer;
         color: red; /*shubhankar change only color*/
     }
@@ -2338,8 +2375,9 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     
     .reaction-display span {
+        margin-left:10px;
         border-radius: 10px;
-        font-size: 20px;
+        font-size: 14px;
         display: inline-flex;
         align-items: center;
         font-weight: bold;
@@ -2625,11 +2663,16 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     .username {
-        font-size: 1.4rem;
+        font-size: 18px;
     }
     .chat-footer form{
         display: flex;
     }
+    #sendDataButton {
+        padding-top: 4px;
+        margin-left: 50px;
+        font-size: 20px;
+}
 }
 
 /* Medium Desktops (992px and below) */
@@ -2650,6 +2693,8 @@ document.addEventListener("DOMContentLoaded", function () {
         display: flex;
     }
 }
+
+
   
     @media (max-width: 768px) {
     .chat-container {
@@ -2663,10 +2708,23 @@ document.addEventListener("DOMContentLoaded", function () {
     display: contents;
 
     }  
-    #call_feature {
+    #sendDataButton {
     margin-left: 412px;
     font-size: 20px;
 } 
+.parmess-del-modal-content {
+    margin-left: 22%;
+    margin-top: 55%;
+    width: 53%;
+}
+}
+@media (max-width: 620px){
+    #sendDataButton {
+    padding-top: 12px;
+
+    margin-left: 160px;
+    font-size: 20px;
+}
 }
 @media (max-width: 480px) {
     .chat-container {
@@ -2696,7 +2754,7 @@ document.addEventListener("DOMContentLoaded", function () {
         font-size: 0.8rem;
         padding: 6px;
     }
-    #call_feature {
+    #sendDataButton {
     padding-top: 12px;
 
     margin-left: 160px;
@@ -2708,6 +2766,13 @@ document.addEventListener("DOMContentLoaded", function () {
 ;
     align-items: center;
 }
+.parmess-del-modal-content {
+        margin-left: 24%;
+        margin-top: 88%;
+        width: 53%;
+    }
+
+
 
 }
 
