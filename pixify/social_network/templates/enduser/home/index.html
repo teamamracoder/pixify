@@ -406,32 +406,35 @@
   
 <div id="carouselExample" class="carousel slide" data-bs-ride="carousel">
     <div class="carousel-inner">
-        {% for video in shorts %}
-        <div class="carousel-item {% if forloop.first %}active{% endif %}" id="videoBox{{ forloop.counter }}">
-            <div class="video-wrapper" id="video{{ video.id }}" data-post-id="{{ video.id }}">
-                <div class="video-box">
-                    {% if video.media_url %}
-                    <video id="myVideo{{ forloop.counter }}" autoplay loop muted>
-                        <source src="{% static video.media_url.0 %}" type="video/mp4">
-                        </video>
-                        {% else %}
-                        <p>No video available.</p>
-                    {% endif %}
-                </div>
-              </div>
-                </div>
-                {% endfor %}
-                    </div>                       
-                  <!-- Carousel Controls -->
-                        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExample" data-bs-slide="prev">
-                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                            <span class="visually-hidden">Previous</span>
-                            </button>                           
-                    <button class="carousel-control-next" type="button" data-bs-target="#carouselExample" data-bs-slide="next">
-                <span class="carousel-control-next-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Next</span>
+      {% for video in shorts %}
+      <div class="carousel-item {% if forloop.first %}active{% endif %}" id="videoBox{{ forloop.counter }}">
+        <a href="{% url 'short-detail' post_id=video.id %}" id="videoLink{{ forloop.counter }}">
+          <div class="video-wrapper" id="video{{ video.id }}" data-post-id="{{ video.id }}">
+            <div class="video-box">
+              {% if video.media_url %}
+              <video id="myVideo{{ forloop.counter }}" autoplay loop muted>
+                <source src="{% static video.media_url.0 %}" type="video/mp4">
+              </video>
+              {% else %}
+              <p>No video available.</p>
+              {% endif %}
+            </div>
+          </div>
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+    <!-- Carousel Controls -->
+    <button class="carousel-control-prev" type="button" data-bs-target="#carouselExample" data-bs-slide="prev">
+      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Previous</span>
     </button>
-</div> 
+    <button class="carousel-control-next" type="button" data-bs-target="#carouselExample" data-bs-slide="next">
+      <span class="carousel-control-next-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Next</span>
+    </button>
+  </div>
+  
 
 <style>
     #carouselExample {
