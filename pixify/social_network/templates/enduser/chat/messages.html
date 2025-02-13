@@ -700,102 +700,16 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }, 150));
 });
-// Paginator code to load older messages
-document.addEventListener('DOMContentLoaded', function() {
-  let currentPage = parseInt('{{ data.current_page|default:"1" }}', 10);
-  const chatBody = document.getElementById('chat-body');
-  if (!chatBody) {
-    console.error('Element with id "chat-body" not found');
-    return;
-  }
-  const spinner = document.getElementById('loading-spinner');
-  let isLoading = false;
-
-  // Remove duplicate timestamp headers from the chat body.
-  function removeDuplicateHeaders() {
-    const headers = document.querySelectorAll('.chat-body .message-timestamp');
-    if (!headers.length) return;
-    const seen = new Set();
-    headers.forEach(function(header) {
-      const text = header.textContent.trim();
-      if (seen.has(text)) {
-        header.remove();
-      } else {
-        seen.add(text);
-      }
-    });
-  }
-
-  // Load older messages via AJAX/pagination.
-  function loadOlderMessages() {
-    if (isLoading) return;
-    if (currentPage <= 1) {
-      console.log('No older messages to load.');
-      return;
-    }
-    isLoading = true;
-    if (spinner) spinner.style.display = 'block';
-
-    const url = new URL(window.location.href);
-    url.searchParams.set('page', currentPage - 1);
-    
-    // Get the current top timestamp from the first rendered .message-timestamp element.
-    const topTimestampEl = document.querySelector('.chat-body .message-timestamp');
-    if (topTimestampEl) {
-      const topTimestamp = topTimestampEl.textContent.trim();
-      url.searchParams.set('last_timestamp', topTimestamp);
-    }
-
-    fetch(url.toString(), { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
-      .then(response => response.json())
-      .then(data => {
-        // Insert the new HTML at the top of the chat body.
-        chatBody.insertAdjacentHTML('afterbegin', data.html);
-        currentPage = data.current_page;
-        console.log('Loaded older messages. Current page is now:', currentPage);
-        removeDuplicateHeaders();
-        // Initialize ReactionManager for the new messages.
-        initNewReactionContainers();
-        isLoading = false;
-        if (spinner) spinner.style.display = 'none';
-      })
-      .catch(err => {
-        console.error('Error loading older messages:', err);
-        isLoading = false;
-        if (spinner) spinner.style.display = 'none';
-      });
-  }
-
-  // Debounce helper for scroll event.
-  function debounce(func, delay) {
-    let timeoutId;
-    return function(...args) {
-      if (timeoutId) clearTimeout(timeoutId);
-      timeoutId = setTimeout(() => func.apply(this, args), delay);
-    };
-  }
-
-  // Attach scroll event listener.
-  chatBody.addEventListener('scroll', debounce(function() {
-    if (chatBody.scrollTop < 100) {
-      loadOlderMessages();
-    }
-  }, 150));
-
-  // Initialize ReactionManager for newly inserted messages.
-  function initNewReactionContainers() {
-    // Select reaction containers that haven't been initialized yet.
-    const newContainers = document.querySelectorAll('.reaction-container:not([data-reaction-initialized])');
-    newContainers.forEach(function(container) {
-      // Assuming container id is in the format "reaction-container-<messageId>"
-      const parts = container.id.split('-');
-      const messageId = parts.slice(2).join('-'); // handles IDs with dashes in them
-      reactionManager.init(messageId);
-      container.setAttribute('data-reaction-initialized', 'true');
-    });
-  }
-});
 </script>
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1636,7 +1550,7 @@ class ReactionManager {
     modal.classList.add('message-modal');
     modal.innerHTML = `
       <div class="message-modal-content">
-        <span class="close-btn">&times;</span>
+        <span class="close-btnn">&times;</span>
         <h4>All Reactions</h4>
         <hr>
         <ul>
@@ -1645,7 +1559,7 @@ class ReactionManager {
       </div>
     `;
     document.body.appendChild(modal);
-    modal.querySelector('.close-btn').addEventListener('click', () => {
+    modal.querySelector('.close-btnn').addEventListener('click', () => {
       document.body.removeChild(modal);
     });
     modal.style.display = 'block';

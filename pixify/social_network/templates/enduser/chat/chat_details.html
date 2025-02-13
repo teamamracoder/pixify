@@ -537,6 +537,7 @@ function saveGroupBio(newBio) {
 
 
 .remove-btn {
+   font-size: 20px;
     background-color: transparent;    
     color: white;             
     border: none;             
@@ -549,7 +550,7 @@ function saveGroupBio(newBio) {
 }
 
 .remove-btn:hover {
-    background-color: #5a3b89; 
+    background-color: transparent; 
     box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15); 
 }
 
@@ -736,6 +737,7 @@ button:hover {
 
 
 
+
   .member-title{
     color:#ffff;
   }
@@ -748,6 +750,7 @@ button:hover {
 
   /* Group Chat Container */
   .group-chat-container {
+    position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -772,7 +775,7 @@ button:hover {
 
   .group-name {
     font-size:28px;
-    white-space: nowrap; 
+    /* white-space: nowrap;  */
     overflow: hidden; 
     text-overflow: ellipsis; 
     max-width: 360px; /* Adjust width as needed */
@@ -852,7 +855,6 @@ button:hover {
   /* Member List Section */
   .member-list {
     overflow-y: scroll;
-    position:relative;
     height: calc(-348.966px + 100vh);
     /* border: 1px solid #827b7b70; */
     background-color: #1F0545;
@@ -897,7 +899,7 @@ button:hover {
   .add-member-btn {
     position: absolute;
     bottom: 33px;
-    right: 28px;
+    right: 46px;
     width: 40px; /* Adjust width */
     height: 40px; /* Adjust height */
     background-color: #6a4c9c;
@@ -1022,6 +1024,13 @@ button:hover {
       margin: 46% auto;
       width: 83%;
     }
+    .member-list{
+    height: calc(-448.966px + 100vh);
+    }
+    .add-member-btn{
+    bottom: 100px;
+    right: 62px;
+    }
   }
   @media (min-width: 768px) and (max-width: 991px){
     #group-name-input{
@@ -1038,14 +1047,12 @@ button:hover {
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     }
     .group-name {
-      max-width: 196px;
-      white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
       font-size: 20px;
       margin: 0;
       display: inline-block;
-  }
+  }}
   @media (max-width: 480px){
     .parchat-modal-content{
       margin: 80% auto;
@@ -1108,6 +1115,7 @@ button:hover {
       height: calc(-408.966px + 100vh);
     }
 }
+
 </style>
 
 {% endblock %}
