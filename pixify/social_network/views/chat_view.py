@@ -207,11 +207,10 @@ class ChatUpdateView(View):
             if 'application/json' in request.content_type:
                 data = json.loads(request.body)
                 title = data.get('title', None)  # Safely get the title
-                chat_bio = data.get('chat_bio', None)
                 if title:
                     chat_service.update_chat_title(chat, title, user)
-                if chat_bio:
-                    chat_service.update_chat_bio(chat, chat_bio, user)                    
+                if 'chat_bio' in data:
+                    chat_service.update_chat_bio(chat, data['chat_bio'], user)                  
 
             # Handle file upload separately
             if 'multipart/form-data' in request.content_type:
