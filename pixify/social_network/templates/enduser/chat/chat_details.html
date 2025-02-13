@@ -8,7 +8,7 @@
 <div class="group-chat-container">
     <div class="header">
       <!-- Group Name with Edit Button -->
-      <h1 class="group-name">
+      <h1 class="group-name ">
         <span id="group-name-text">{{ data.chat.title }}</span>
         <button class="edit-btn" onclick="editGroupNameInline()">
           <i class="fa-solid fa-pen"></i>
@@ -36,7 +36,9 @@
     </div>
 
     <p class="group-description">
-      {{ data.chat.chat_bio }}  <!-- Display group description dynamically -->
+      {% if data.chat.chat_bio %}
+      {{ data.chat.chat_bio }} <!-- Display group description dynamically -->
+      {% endif %}
       <button class="edit-btn" onclick="editGroupBio()">
         <i class="fa-solid fa-pen"></i>
       </button>
@@ -83,7 +85,7 @@
             {% if data.user == data.chat.created_by %}
               <div class="member-actions">
                 {% if member.id != data.chat.created_by %}              
-                  <button class="remove-btn" onclick="removeMember('{{ member.id }}')"><i class="fa-solid fa-user-xmark"></i></button>
+                  <button class="remove-btn" onclick="removeMember('{{ member.id }}')"><i class="bi bi-person-dash-fill"></i></button>
                 {% endif %}
               </div>
             {% endif %}
@@ -594,8 +596,20 @@ function saveGroupBio(newBio) {
     font-size: 11px;
 }
 
-
-  .chatdet_search{
+ #group-name-input{
+    font-size: 16px;
+    background-color: #3D3D6B;
+    border: var(--bs-border-width) solid var(--bs-border-color);
+    color: #ffff;
+    display: flex;
+    border-radius: 4px;
+    padding: 8px;
+    width: 360px;
+    margin: 0 auto;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  }
+  .group-description-input{
     font-size: 16px;
     background-color: #3D3D6B;
     border: var(--bs-border-width) solid var(--bs-border-color);
