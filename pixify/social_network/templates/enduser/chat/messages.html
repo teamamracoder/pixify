@@ -806,38 +806,27 @@ socket.onmessage = function (event) {
   const data = JSON.parse(event.data);
 
   // Update read status
- if (data.seen_by_all) {
-  const messageId = data.message_id;
-  const messageElement = document.getElementById(`message-${messageId}`);
-  if (messageElement) {
-    // Locate the message footer inside the message element.
-    const footer = messageElement.querySelector('.message-footer');
-    if (footer) {
-      // Try to locate an existing seen-status container in the footer.
-      let seenStatusElement = footer.querySelector('.seen-status');
-      // If it exists, check if it already has the correct icon.
-      if (seenStatusElement) {
-        const icon = seenStatusElement.querySelector('i');
-        if (icon && icon.classList.contains('bi-check2-all')) {
-          // Already updated; do nothing.
-        } else {
-          // Update the seen-status content.
-          seenStatusElement.innerHTML = data.user === currentUser 
-            ? `<i class="bi bi-check2-all"></i>` 
-            : '';
-        }
+  if (data.seen_by_all) {
+
+    const messageId = data.message_id;
+    const messageElement = document.getElementById(`message-${messageId}`);
+    if (messageElement) {
+      const seenStatusElement = messageElement.querySelector('.seen-status i');
+      if (seenStatusElement && seenStatusElement.classList.contains('bi-check2-all')) {
+        // Already updated; do nothing.
+        // (You may want to update even if already updated if necessary.)
       } else {
-        // If there's no seen-status element in the footer, create and insert one.
+        if (seenStatusElement) {
+          seenStatusElement.remove();
+        }
         const seenStatusHtml = `
           <div class="seen-status">
             ${data.user === currentUser ? `<i class="bi bi-check2-all"></i>` : ''}
           </div>`;
-        footer.insertAdjacentHTML('beforeend', seenStatusHtml);
+        messageElement.insertAdjacentHTML('beforeend', seenStatusHtml);
       }
     }
   }
-}
-
 
   // Handle new or updated messages
   if (data.message_new) {
