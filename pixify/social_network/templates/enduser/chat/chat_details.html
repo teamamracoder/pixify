@@ -8,17 +8,19 @@
 <div class="group-chat-container">
     <div class="header">
       <!-- Group Name with Edit Button -->
-      <h1 class="group-name">
+      <h1 class="group-name ">
         <span id="group-name-text">{{ data.chat.title }}</span>
-        <button class="edit-btn" onclick="editGroupNameInline()">
-          <i class="fa-solid fa-pen"></i>
-        </button>
       </h1>
+      <div class="g-name">
+      <button class="edit-btn gp-name" onclick="editGroupNameInline()">
+        <i class="fa-solid fa-pen"></i>
+      </button>
       {% csrf_token %}
       <input type="hidden" id="chat_id" name="chat_id" value="{{ data.chat.id }}">
       <button class="exit-btn" onclick="removeChat()">
         <i class="fa-sharp fa-solid fa-right-from-bracket"></i>Exit
       </button>
+    </div>
     </div>
     
   <!-- Group Details Section -->
@@ -36,7 +38,9 @@
     </div>
 
     <p class="group-description">
-      {{ data.chat.chat_bio }}  <!-- Display group description dynamically -->
+      {% if data.chat.chat_bio %}
+      {{ data.chat.chat_bio }} <!-- Display group description dynamically -->
+      {% endif %}
       <button class="edit-btn" onclick="editGroupBio()">
         <i class="fa-solid fa-pen"></i>
       </button>
@@ -83,7 +87,7 @@
             {% if data.user == data.chat.created_by %}
               <div class="member-actions">
                 {% if member.id != data.chat.created_by %}              
-                  <button class="remove-btn" onclick="removeMember('{{ member.id }}')"><i class="fa-solid fa-user-xmark"></i></button>
+                  <button class="remove-btn" onclick="removeMember('{{ member.id }}')"><i class="bi bi-person-dash-fill"></i></button>
                 {% endif %}
               </div>
             {% endif %}
@@ -533,6 +537,7 @@ function saveGroupBio(newBio) {
 
 
 .remove-btn {
+   font-size: 20px;
     background-color: transparent;    
     color: white;             
     border: none;             
@@ -545,7 +550,7 @@ function saveGroupBio(newBio) {
 }
 
 .remove-btn:hover {
-    background-color: #5a3b89; 
+    background-color: transparent; 
     box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15); 
 }
 
@@ -574,8 +579,20 @@ function saveGroupBio(newBio) {
     font-size: 11px;
 }
 
-
-  .chatdet_search{
+ #group-name-input{
+    font-size: 16px;
+    background-color: #3D3D6B;
+    border: var(--bs-border-width) solid var(--bs-border-color);
+    color: #ffff;
+    display: flex;
+    border-radius: 4px;
+    padding: 8px;
+    width: 360px;
+    margin: 0 auto;
+    margin-bottom: 0px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  }
+  .group-description-input{
     font-size: 16px;
     background-color: #3D3D6B;
     border: var(--bs-border-width) solid var(--bs-border-color);
@@ -720,6 +737,7 @@ button:hover {
 
 
 
+
   .member-title{
     color:#ffff;
   }
@@ -732,6 +750,7 @@ button:hover {
 
   /* Group Chat Container */
   .group-chat-container {
+    position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -755,10 +774,12 @@ button:hover {
   }
 
   .group-name {
-    font-size: 28px;
-    margin: 0;
-    display: inline-flex;
-    align-items: center;
+    font-size:28px;
+    /* white-space: nowrap;  */
+    overflow: hidden; 
+    text-overflow: ellipsis; 
+    max-width: 360px; /* Adjust width as needed */
+    display: inline-block;
   }
 
   .edit-btn {
@@ -767,6 +788,11 @@ button:hover {
     margin-left: 10px;
     cursor: pointer;
   }
+  .g-name{
+    display:flex;
+
+  }
+  
 
   .edit-icon {
     width: 20px;
@@ -812,11 +838,13 @@ button:hover {
   }
 
   .group-description {
-    font-size: 16px;
-    color: black;
+    font-size: 20px;
+    color: #ebe1c6;
     margin: 5px 0;
-    display: inline-flex;
+    display: flex;
     align-items: center;
+    justify-content:center;
+    font-weight: lighter
   }
 
   .total-members {
@@ -826,7 +854,7 @@ button:hover {
 
   /* Member List Section */
   .member-list {
-    position:relative;
+    overflow-y: scroll;
     height: calc(-348.966px + 100vh);
     /* border: 1px solid #827b7b70; */
     background-color: #1F0545;
@@ -871,7 +899,7 @@ button:hover {
   .add-member-btn {
     position: absolute;
     bottom: 33px;
-    right: 28px;
+    right: 46px;
     width: 40px; /* Adjust width */
     height: 40px; /* Adjust height */
     background-color: #6a4c9c;
@@ -996,7 +1024,35 @@ button:hover {
       margin: 46% auto;
       width: 83%;
     }
+    .member-list{
+    height: calc(-448.966px + 100vh);
+    }
+    .add-member-btn{
+    bottom: 100px;
+    right: 62px;
+    }
   }
+  @media (min-width: 768px) and (max-width: 991px){
+    #group-name-input{
+      font-size: 15px;
+    background-color: #3D3D6B;
+    border: var(--bs-border-width) solid var(--bs-border-color);
+    color: #ffff;
+    display: flex;
+    border-radius: 4px;
+    padding: 8px;
+    width: 196px;
+    margin: 0 auto;
+    margin-bottom: 0px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    .group-name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-size: 20px;
+      margin: 0;
+      display: inline-block;
+  }}
   @media (max-width: 480px){
     .parchat-modal-content{
       margin: 80% auto;
@@ -1059,6 +1115,7 @@ button:hover {
       height: calc(-408.966px + 100vh);
     }
 }
+
 </style>
 
 {% endblock %}
