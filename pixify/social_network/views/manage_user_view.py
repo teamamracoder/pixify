@@ -73,7 +73,7 @@ class ManageUserCreateView(View):
                 'address': form.cleaned_data['address'],
                 'relationship_status': form.cleaned_data['relationship_status'],
                 'hobbies': form.cleaned_data['hobbies'],
-                'roles': [2],  # Set the default role
+                'roles': [1],  # Set the default role
                 'created_by': user
             }
 
