@@ -18,7 +18,12 @@ urlpatterns = [
 
     # manage-user
     path('admin/users/', views.ManageUserListView.as_view(), name='user_list'),
-    path('admin/users/profile', views.ManageUserProfileView.as_view(), name='user_profile'),
+    # path('admin/users/profile/<int:user_id>/', views.ManageAdminProfileView.as_view(), name='user_profile'),
+    path('admin/users/profile/<int:user_id>/', views.ManageAdminProfileView.as_view(), name='user_profile'),
+    path('admin/users/profileimg/<int:user_id>/', views.ManageAdminProfilePicView.as_view(), name='user_profile_update'),
+
+    # path('upload-profile-photo/', views.ManageAdminProfilePicView.as_view(), name='upload_profile_photo'),
+
     path('admin/users/toggle-active/<int:user_id>/', views.ManageToggleUserActiveView.as_view(), name='toggle_user_active'),
     path('admin/users/create/', views.ManageUserCreateView.as_view(), name='user_create'),
     path('admin/users/<int:user_id>/', views.ManageUserDetailView.as_view(), name='user_detail'),

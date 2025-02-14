@@ -114,11 +114,12 @@
                         <div id="profile" class="accordion-collapse collapse" data-bs-parent="#accordionContainer">
                             <div class="accordion-body p-0">
                                 <div class="list-group rounded-0">
-                                    <a href="{%url 'user_profile'%}"
-                                        class="list-group-item list-group-item-action ui-bg-grey border-0 ps-4">
+                                    <a href="{% url 'user_profile' user.id %}"
+                                    class="list-group-item list-group-item-action ui-bg-grey border-0 ps-4">
                                         <i class="bi bi-person-check fs-5 me-2"></i>
-                                        my profile
+                                        My Profile
                                     </a>
+
                                     <a href="{%url 'logout'%}"
                                         class="list-group-item list-group-item-action ui-bg-grey border-0 ps-4">
                                         <i class="bi bi-box-arrow-right fs-6 me-2"></i>

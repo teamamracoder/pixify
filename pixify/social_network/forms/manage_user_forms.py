@@ -86,3 +86,36 @@ class ManageUserUpdateForm(forms.ModelForm):
         required=False,  # Middle name is optional
         widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "Enter your middle name"})
     )
+
+
+#Admin Profile Update Form
+
+class ManageAdminProfileUpdateForm(forms.ModelForm):
+    """Form for updating user data"""
+    class Meta:
+        model = User
+        fields = ['first_name', 'middle_name', 'last_name', 'dob', 'address', 'hobbies']
+        
+        widgets = {
+            'first_name': forms.TextInput(attrs={"class": "form-control", "placeholder": "Enter your first name"}),
+            'middle_name': forms.TextInput(attrs={"class": "form-control", "placeholder": "Enter your middle name"}),
+            'last_name': forms.TextInput(attrs={"class": "form-control", "placeholder": "Enter your last name"}),
+            'dob': forms.DateInput(attrs={"class": "form-control", "type": "date"}),
+            'address': forms.Textarea(attrs={"class": "form-control", "placeholder": "Enter Address", "rows": 2}),
+            'hobbies': forms.TextInput(attrs={"class": "form-control", "placeholder": "Enter hobbies (comma-separated)"}),
+        }
+        
+        labels = {
+            'first_name': "First Name",
+            'middle_name': "Middle Name",
+            'last_name': "Last Name",
+            'dob': "Date of Birth",
+            'address': "Address",
+            'hobbies': "Hobbies",
+        }
+
+    middle_name = forms.CharField(
+        label="Middle Name",
+        required=False,  # Middle name is optional
+        widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "Enter your middle name"})
+    )

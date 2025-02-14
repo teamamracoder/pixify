@@ -3,6 +3,7 @@
 {% block title %}Post Details{% endblock %}
 
 {% block content %}
+{%load static%}
 <style>
     /* Custom shadow for the outer div */
     .custom-shadow {
@@ -12,37 +13,88 @@
         width: 100%;
         height: 100vh;
     }
+    .img-container{
+      
+    }
+    label {
+      display: block; /* Makes label appear on a new line */
+      margin-bottom: 5px; /* Adds space between label and the h5 */
+      font-weight: bold;
+      text-align: center;
+  }
+  
 </style>
 
 <div class="container shadow h-75 profile-main-div py-4 mt-5">
     <div class="row">
       <!-- Profile Picture and Basic Information -->
       <div class="col-md-4 text-center mb-4 mb-md-0">
-        <img 
-          src="https://th.bing.com/th/id/OIP.y_-RrO81dmnPR5dKO0GYWAHaHa?w=193&h=192&c=7&r=0&o=5&pid=1.7" 
-          class="rounded-circle mb-3 border border-primary" 
-          alt="Profile Picture" 
-          width="150" height="150">
-        <h5 class="text-dark">Rajat Sutradhar</h5>
+        
+        <div class="col-md-4 text-center mb-4 mb-md-0">
+
+          {% comment %} <div class="img-container"> {% endcomment %}
+              <!-- Profile Picture -->
+              {% comment %} <img 
+                  id="profile-pic"
+                  src="{%  static user.profile_photo_url|default:'/images/avat.png' %}" 
+                  class="rounded-circle mb-3 border border-primary" 
+                  alt="Profile Picture" 
+                  width="150" height="150"
+                  style="cursor: pointer;"
+              > {% endcomment %}
+
+              {% comment %} <img id="profilePhoto" style="display:none;" alt="Profile Photo" width="100" height="100"> {% endcomment %}
+      
+              <!-- Hidden file input -->
+              {% comment %} <input type="file" id="file-input" accept="image/*" style="display: none;"> {% endcomment %}
+              
+              {% comment %} <input type="file" id="profilePhotoInput" name="profile_photo" accept="image/*">
+
+              <h5 class="text-dark">{{ user.first_name }} {{ user.middle_name }} {{ user.last_name }}</h5>
+          </div> {% endcomment %}
+
+          <div class="img-container">
+            <!-- Profile Picture -->
+             <img 
+                id="profile-pic"
+                src="{% if user.profile_photo_url %}{{ user.profile_photo_url }}{% else %}/images/avat.png{% endif %}" 
+                class="rounded-circle mb-3 border border-primary" 
+                alt="Profile Picture" 
+                width="150" height="150"
+                style="cursor: pointer;"
+                onerror="this.onerror=null; this.src='/images/avat.png';"
+            > 
+        
+            <!-- Hidden file input -->
+            <input type="file" id="file-input" accept="image/*" style="display: none;">
+        
+            <h5 class="text-dark">{{ user.first_name }} {{ user.middle_name }} {{ user.last_name }}</h5>
+        </div>
+        
+        
+        
+          </div>
+      
       </div>
   
       <!-- Profile Form -->
       <div class="col-md-8">
         <div class=" text-info mb-4 fs-4">Profile Page</div>
-        <form>
+        <form method="post" id="admin_form">
+          {% csrf_token %}
           <!-- First Name and Last Name -->
           <div class="row">
             <div class="col-md-4 mb-3">
               <label for="firstName" class="form-label text-secondary">First Name</label>
-              <input type="text" class="form-control" id="firstName" placeholder="First Name">
+              <input type="text" class="form-control" name="first_name" id="firstName" placeholder="First Name" value="{{ user.first_name }}">
             </div>
             <div class="col-md-4 mb-3">
               <label for="middleName" class="form-label text-secondary">Middle Name</label>
-              <input type="text" class="form-control" id="middleName" placeholder="Middle Name">
+              <input type="text" class="form-control" name="middle_name" id="middleName" placeholder="Middle Name" value="{{ user.middle_name }}">
             </div>
             <div class="col-md-4 mb-3">
               <label for="lastName" class="form-label text-secondary">Last Name</label>
-              <input type="text" class="form-control" id="lastName" placeholder="Last Name">
+              <input type="text" class="form-control" name="last_name" id="lastName" placeholder="Last Name" value="{{ user.last_name }}">
             </div>
           </div>
   
@@ -50,16 +102,19 @@
           <div class="row">
             <div class="col-md-4 mb-3">
               <label for="email" class="form-label text-secondary">Email</label>
-              <input type="email" class="form-control" id="email" placeholder="email">
+              <input type="email" class="form-control" name="email"  id="email" placeholder="email" value="{{ user.email }}">
             </div>
             <div class="col-md-4 mb-3">
               <label for="phone" class="form-label text-secondary">Phone</label>
-              <input type="text" class="form-control" id="phone" placeholder="Phone">
+              <input type="text" class="form-control" name="phone" id="phone" placeholder="Phone" value="{{ user.phone }}">
             </div>
 
             <div class="col-md-4 mb-3">
               <label for="hobbies" class="form-label text-secondary">Hobbies</label>
-              <input type="text" class="form-control" id="hobbies" placeholder="Hobbies">
+              <input type="text" class="form-control" name="hobbies" id="hobbies" 
+       placeholder="Hobbies (comma-separated)" value="{{ form.initial.hobbies }}">
+
+
             </div>
           </div>
   
@@ -67,7 +122,7 @@
           <div class="row">
             <div class="col-md-4 mb-3">
               <label for="gender" class="form-label text-secondary">Gender</label>
-              <select class="form-select form-control" id="gender">
+              <select class="form-select form-control" name="gender"  id="gender" value="{{ user.gender }}">
                 <option>Male</option>
                 <option>Female</option>
                 <option>Other</option>
@@ -75,18 +130,18 @@
             </div>
               <div class="col-md-4 mb-3">
               <label for="bio" class="form-label text-secondary">Bio</label>
-              <input type="text" class="form-control" id="bio" placeholder="Bio">
+              <input type="text" class="form-control" id="bio" placeholder="Bio" value="{{ user.bio }}">
             </div>
             <div class="col-md-4 mb-3">
               <label for="dob" class="form-label text-secondary">Date of Birth</label>
-              <input type="date" class="form-control" id="dob">
+              <input type="date" class="form-control" id="dob" name="dob" value="{{ user.dob }}">
             </div>
           </div>
   
           <div class="row">
             <div class="col-md-6 mb-3">
               <label for="relationshipstatus" class="form-label text-secondary">Relationship Status</label>
-              <select class="form-select form-control" id="relationshipstatus">
+              <select class="form-select form-control" id="relationshipstatus" value="{{ user.relationship_status }}">
                 <option>Married</option>
                 <option>Single</option>
                 <option>Commited</option>
@@ -94,15 +149,172 @@
             </div>
             <div class="col-md-6 mb-3">
               <label for="country" class="form-label text-secondary">Country</label>
-              <input type="text" class="form-control" id="country" placeholder="Country">
+              <input type="text" class="form-control" name="country" id="country" placeholder="Country" value="{{ user.country }}">
             </div>
             
           </div>
-  
+          <button type="submit" class="btn btn-sm btn-primary " >Save</button>
         
         </form>
       </div>
     </div>
   </div>
-  
+ {% comment %} <script>
+    $(document).ready(function(){
+        // Click event on profile picture
+        $("#profile-pic").click(function(){
+            $("#file-input").click(); // Open file dialog
+        });
+
+        // Handle file selection
+        $("#file-input").change(function(){
+            var file = this.files[0];
+            if (file) {
+                var reader = new FileReader();
+
+                reader.onload = function(e) {
+                    $("#profile-pic").attr("src", e.target.result); // Preview image
+                };
+
+                reader.readAsDataURL(file);
+
+                // Upload image to the server
+                var formData = new FormData();
+                formData.append("profile_picture", file);
+                
+                $.ajax({
+                    url: "{% url 'user_profile_update' %}",  // Django view URL
+                    type: "POST",
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    headers: {
+                        "X-CSRFToken": "{{ csrf_token }}"  // CSRF Token for security
+                    },
+                    success: function(response) {
+                        alert("Profile picture updated successfully!");
+                    },
+                    error: function() {
+                        alert("Error updating profile picture!");
+                    }
+                });
+            }
+        });
+    });
+</script>   {% endcomment %}
+
+
+{% comment %} <script>
+  // Listen for file selection
+  document.getElementById('profilePhotoInput').addEventListener('change', function() {
+      var formData = new FormData();
+      var fileInput = document.getElementById('profilePhotoInput');
+      var file = fileInput.files[0];
+
+      if (file) {
+          formData.append('profile_photo', file);
+
+          fetch('/upload-profile-photo/', {
+              method: 'POST',
+              body: formData,
+              headers: {
+                  'X-CSRFToken': getCookie('csrftoken')  // Include CSRF token for security
+              }
+          })
+          .then(response => response.json())
+          .then(data => {
+              if (data.message) {
+                  document.getElementById('responseMessage').innerText = data.message;
+                  document.getElementById('profilePhoto').src = data.file_url;  // Show uploaded image
+                  document.getElementById('profilePhoto').style.display = 'block';  // Display image
+              } else {
+                  document.getElementById('responseMessage').innerText = 'Upload failed';
+              }
+          })
+          .catch(error => {
+              console.error('Error:', error);
+              document.getElementById('responseMessage').innerText = 'An error occurred';
+          });
+      } else {
+          document.getElementById('responseMessage').innerText = 'Please select a file';
+      }
+  });
+
+  // Function to get CSRF token from the cookies
+  function getCookie(name) {
+      var cookieValue = null;
+      if (document.cookie && document.cookie !== "") {
+          var cookies = document.cookie.split(";");
+          for (var i = 0; i < cookies.length; i++) {
+              var cookie = cookies[i].trim();
+              if (cookie.substring(0, name.length + 1) === (name + "=")) {
+                  cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                  break;
+              }
+          }
+      }
+      return cookieValue;
+  }
+</script> {% endcomment %}
+
+
+<script>
+  $(document).ready(function(){
+      // Load saved profile picture from the database
+      let savedProfilePic = "{{ user.profile_photo_url }}";
+      if (savedProfilePic) {
+          $("#profile-pic").attr("src", savedProfilePic);
+      }
+
+      $("#profile-pic").click(function(){
+          $("#file-input").click();  // Open file selection
+      });
+
+      $("#file-input").change(function(){
+          var file = this.files[0];
+          if (!file) return;
+
+          var reader = new FileReader();
+          reader.onload = function(e) {
+              $("#profile-pic").attr("src", e.target.result); // Preview image
+          };
+          reader.readAsDataURL(file);
+
+          // Upload image to the server
+          var formData = new FormData();
+          formData.append("profile_picture", file);
+
+          $.ajax({
+              url: `/admin/users/profileimg/{{ user.id }}/`,  // Dynamic user ID
+              type: "POST",
+              data: formData,
+              processData: false,
+              contentType: false,
+              headers: {
+                  "X-CSRFToken": "{{ csrf_token }}"
+              },
+              success: function(response) {
+                if (response.success) {
+                    let profileUrl = response.profile_photo_url;
+            
+                    // If necessary, modify the URL (not recommended unless really needed)
+                     profileUrl = profileUrl.replace('/media/', '/static/media/');
+            
+                    $("#profile-pic").attr("src", profileUrl);  // Update profile image
+                    localStorage.setItem("profile_photo_url", profileUrl); // Store in localStorage
+                    
+                    alert("Profile picture updated successfully!");
+                } else {
+                    alert(response.message || "Error updating profile picture!");
+                }
+            }
+            
+          });
+      });
+  });
+</script>
+
+
+
+
 {% endblock %}

@@ -1,19 +1,25 @@
 from datetime import datetime
+import os
 from pyexpat.errors import messages
 from django.http import HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, render, redirect
+from django.urls import reverse
 from django.views import View
 
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
+
+
+from pixify import settings
 from social_network.utils.common_utils import print_log
 from social_network.constants.default_values import SortingOrder
 from social_network.decorators.exception_decorators import catch_error
 from social_network.packages.response import success_response
 
-from ..forms.manage_user_forms import ManageUserUpdateForm
+from ..forms.manage_user_forms import ManageAdminProfileUpdateForm, ManageUserUpdateForm
 from ..models.user_model import User
 
 from ..decorators.exception_decorators import catch_error
-
 from .. import services
 from ..constants import Gender, RelationShipStatus, Role
 from django.core.paginator import Paginator   
@@ -21,6 +27,18 @@ from django.http import JsonResponse
 from ..forms import ManageUserCreateForm
 
 from user_agents import parse
+
+
+
+
+from django.views import View
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
+from django.conf import settings
+from urllib.parse import urljoin
+import uuid
 
 
 class ManageUserListView(View):
@@ -205,9 +223,94 @@ class ManageToggleUserActiveView(View):
         user.save()
         return JsonResponse({'is_active': user.is_active})
 
-class ManageUserProfileView(View):
-    def get(self, request):
-        return render(request, 'adminuser/user/user_profile.html')
+# class ManageAdminProfileView(View):
+    
+    
+#     @catch_error
+#     def get(self, request, user_id):
+#         user = get_object_or_404(User, id=user_id)  # Assuming you have a User model
+#         print (user)
+#         form = ManageAdminProfileUpdateForm(initial={
+#             'first_name': user.first_name,
+#             'middle_name': user.middle_name,
+#             'last_name': user.last_name,
+#             'address': user.address,
+#             'hobbies': user.hobbies,
+#             'dob': user.dob       
+#         })
+#         return render(request,  'admin/users/profile/', {"form": form, "user_id": user.id})
+#     @catch_error
+#     def post(self, request, user_id):
+        
+#         user = get_object_or_404(User, id=user_id)
+
+#         form = ManageAdminProfileUpdateForm(request.POST)
+
+#         if form.is_valid():
+#             user.first_name = form.cleaned_data['first_name']
+#             user.middle_name = form.cleaned_data.get('middle_name', '')  # Default to empty string if None
+#             user.last_name = form.cleaned_data['last_name']
+#             user.address = form.cleaned_data['address']
+#             user.hobbies = form.cleaned_data['hobbies']
+#             dob = form.cleaned_data.get('dob')
+#             if dob:
+#                 user.dob = dob
+#             else:
+#                 user.dob = None  # Set default value (None) for blank D.O.B.
+
+#             user.updated_by = user
+#             user.save()  # Save the updated user instance
+
+#             return redirect(' admin/users/profile/')  # Redirect to the list page after successful save
+
+#         # Render form with errors if invalid
+#         return render(request, ' admin/users/profile/', {
+#             'form': form,
+#             'user_id': user.id,
+#         })
+class ManageAdminProfileView(View):
+    
+    @catch_error
+    def get(self, request, user_id):
+        user = get_object_or_404(User, id=user_id)  
+        form = ManageAdminProfileUpdateForm(initial={
+            'first_name': user.first_name,
+            'middle_name': user.middle_name,
+            'last_name': user.last_name,
+            'address': user.address,
+            'hobbies': ", ".join(user.hobbies) if user.hobbies else "",
+            'dob': user.dob       
+        })
+        return render(request, 'adminuser/user/user_profile.html', {"form": form, "user_id": user.id})
+
+    @catch_error
+    def post(self, request, user_id):
+        login_user=request.user
+        user = get_object_or_404(User, id=user_id)
+        form = ManageAdminProfileUpdateForm(request.POST)
+        print(user)
+
+        if form.is_valid():
+            user.first_name = form.cleaned_data['first_name']
+            user.middle_name = form.cleaned_data.get('middle_name', '')
+            user.last_name = form.cleaned_data['last_name']
+            user.address = form.cleaned_data['address']
+            user.hobbies = form.cleaned_data['hobbies']
+            # user.dob = form.cleaned_data.get('dob', None)  
+            dob = form.cleaned_data.get('dob')
+            if dob:
+                user.dob = dob
+            else:
+                user.dob = None 
+
+            user.updated_by = login_user
+            user.save()  
+
+            return redirect('user_profile', user_id=user.id)
+
+        return render(request, 'adminuser/user/user_profile.html', {'form': form})
+
+    
     
 class ChangeMyThemeView(View):
     def post(self, request):
@@ -216,5 +319,79 @@ class ChangeMyThemeView(View):
         services.user_service.change_theme(user, ui_mode=theme)
         return JsonResponse(success_response('Theme changed to {theme} mode', {'theme': theme}))
 
+
+
+
+# class ManageAdminProfilePicView(View):
+    # def post(self, request, user_id):
+    #     login_user=request.user
+    #     user = get_object_or_404(User, id=user_id)
+    #     try:
+    #         user_id = request.user
+    #         # post_Title = request.POST.get('postTitle')
+    #         profile_photo_url = request.FILES.getlist('postFiles')
+            
+
+           
+    #         user.profile_photo_url
+    #         user.save()
+    #         return JsonResponse({'success': True, 'redirect_url': reverse('admin/users/profile/')})
+    #     except Exception as e:
+    #         return JsonResponse({'success': False, 'message': str(e)})
+
+
+
+
+
+    # def upload_profile_photo(request):
+    #     if request.method == 'POST' and request.FILES.get('profile_photo'):
+    #     # Get the uploaded file
+    #         profile_photo = request.FILES['profile_photo']
+
+    #     # Save the file using default storage (it will be stored in MEDIA_ROOT)
+    #     filename = default_storage.save(f"profile_photos/{profile_photo.name}", profile_photo)
+    #     file_url = default_storage.url(filename)  # Get the URL for the uploaded file
+
+    #     # Save the URL in the profile (ensure the user has a profile)
+    #     user_profile, created = user_profile.objects.get_or_create(user=request.user)
+    #     user_profile.profile_photo_url = file_url
+    #     user_profile.save()
+
+    #     # Return the file URL in the JSON response
+    #     return JsonResponse({'message': 'File uploaded successfully!', 'file_url': file_url})
+
+    # # return JsonResponse({'message': 'No file uploaded'}, status=400)
+
+
+
+
+class ManageAdminProfilePicView(View):
+    def post(self, request, user_id):
+        user = get_object_or_404(User, id=user_id)
+
+        profile_picture = request.FILES.get('profile_picture')
+        if not profile_picture:
+            return JsonResponse({'success': False, 'message': 'No file uploaded'})
+
+        try:
+            # Generate a unique filename
+            file_extension = profile_picture.name.split('.')[-1]
+            unique_filename = f"profile_pics/{user.id}_{uuid.uuid4().hex}.{file_extension}"
+            
+            # Save file to media storage
+            file_path = default_storage.save(unique_filename, ContentFile(profile_picture.read()))
+
+            # Construct the full URL to access the saved file
+            profile_url = urljoin(settings.MEDIA_URL, file_path)
+
+            # Save the URL to the database
+            user.profile_photo_url = profile_url
+            user.save()
+
+            return JsonResponse({'success': True, 'profile_photo_url': profile_url})
+
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': f'Error saving file: {str(e)}'})
+        
 
 
