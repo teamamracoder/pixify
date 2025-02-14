@@ -26,7 +26,8 @@
         let days = null; // Initially null to fetch all data from the beginning
 
         // Initial API call when the page loads (without filtering)
-        get_admin_chart_data(currentDate, days);
+        get_admin_chart_data(currentDate, 360);
+    });
 
         // Dropdown change event
         $("#dropdown").change(function () {
@@ -95,7 +96,7 @@
             }
             return cookieValue;
         }
-    });
+   
 
 
 </script>
@@ -107,6 +108,7 @@
 
         <div class="col-md-4 justify-content-center">
             <div class="card shadow posts" style="background-color: #d4edda;">
+                <a href="{% url 'user_list' %}" class="btn btn-sm btn-outline-secondary">
                 <div class="card-body d-flex justify-content-between align-items-center">
                     <h5 class="card-title text-dark">Users</h5>
                     <span class="fs-2 text-secondary"><i class="bi bi-person-circle"></i></span>
@@ -115,12 +117,12 @@
                     <span id="countTotalUser"></span>
                     <span class="fs-4">&gt;</span>
                 </div>
+            </a>
             </div>
         </div>
-
-
         <div class="col-md-4 justify-content-center">
             <div class="card shadow orders" style="background-color: #cce5ff;">
+                <a href="#" class="btn btn-sm btn-outline-secondary">
                 <div class="card-body d-flex justify-content-between align-items-center">
                     <h5 class="card-title text-dark">Admins</h5>
                     <span class="fs-2 text-secondary"><i class="bi bi-person"></i></span>
@@ -129,11 +131,12 @@
                     <span id="countTotalAdmin"></span>
                     <span class="fs-4">&gt;</span>
                 </div>
+                </a>
             </div>
         </div>
-
         <div class="col-md-4 justify-content-center ">
             <div class="card shadow products" style="background-color: #fff3cd;">
+                <a href="{% url 'manage_post_list' %}" class="btn btn-sm btn-outline-secondary">
                 <div class="card-body d-flex justify-content-between align-items-center">
                     <h5 class="card-title text-dark">Posts</h5>
                     <span class="fs-2 text-secondary"><i class="bi bi-image-fill"></i></span>
@@ -142,6 +145,7 @@
                     <span id="countTotalPost"></span>
                     <span class="fs-4">&gt;</span>
                 </div>
+                </a>
             </div>
         </div>
 
