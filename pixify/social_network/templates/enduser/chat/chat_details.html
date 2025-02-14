@@ -134,7 +134,7 @@ $(document).ready(function () {
             url: `/chat/${chatId}/members/api?search=${searchQuery}`,
             type: 'GET',
             success: function (res) {
-                var combinedHtml = '';
+                let combinedHtml = '';
                 const fallbackImage = '/static/images/avatar.jpg';
 
                 if (res.members.length === 0) {
@@ -368,8 +368,8 @@ function removeMember(memberId) {
     });
 }
 
-var memberId = {{ data.user.id }}; // Assuming data.user is an object and you need the id attribute
-var createdById = {{ data.chat.created_by.id }}; // Ensure that you are accessing the correct id attribute
+const memberId = {{ data.user.id }}; // Assuming data.user is an object and you need the id attribute
+const createdById = {{ data.chat.created_by.id }}; // Ensure that you are accessing the correct id attribute
 
 function removeChat() {
     let chatId = "{{ data.chat.id }}"; // Ensure chatId is safely handled as a string
