@@ -322,47 +322,6 @@ class ChangeMyThemeView(View):
 
 
 
-# class ManageAdminProfilePicView(View):
-    # def post(self, request, user_id):
-    #     login_user=request.user
-    #     user = get_object_or_404(User, id=user_id)
-    #     try:
-    #         user_id = request.user
-    #         # post_Title = request.POST.get('postTitle')
-    #         profile_photo_url = request.FILES.getlist('postFiles')
-            
-
-           
-    #         user.profile_photo_url
-    #         user.save()
-    #         return JsonResponse({'success': True, 'redirect_url': reverse('admin/users/profile/')})
-    #     except Exception as e:
-    #         return JsonResponse({'success': False, 'message': str(e)})
-
-
-
-
-
-    # def upload_profile_photo(request):
-    #     if request.method == 'POST' and request.FILES.get('profile_photo'):
-    #     # Get the uploaded file
-    #         profile_photo = request.FILES['profile_photo']
-
-    #     # Save the file using default storage (it will be stored in MEDIA_ROOT)
-    #     filename = default_storage.save(f"profile_photos/{profile_photo.name}", profile_photo)
-    #     file_url = default_storage.url(filename)  # Get the URL for the uploaded file
-
-    #     # Save the URL in the profile (ensure the user has a profile)
-    #     user_profile, created = user_profile.objects.get_or_create(user=request.user)
-    #     user_profile.profile_photo_url = file_url
-    #     user_profile.save()
-
-    #     # Return the file URL in the JSON response
-    #     return JsonResponse({'message': 'File uploaded successfully!', 'file_url': file_url})
-
-    # # return JsonResponse({'message': 'No file uploaded'}, status=400)
-
-
 
 
 class ManageAdminProfilePicView(View):

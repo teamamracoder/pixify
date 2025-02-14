@@ -32,26 +32,6 @@
         
         <div class="col-md-4 text-center mb-4 mb-md-0">
 
-          {% comment %} <div class="img-container"> {% endcomment %}
-              <!-- Profile Picture -->
-              {% comment %} <img 
-                  id="profile-pic"
-                  src="{%  static user.profile_photo_url|default:'/images/avat.png' %}" 
-                  class="rounded-circle mb-3 border border-primary" 
-                  alt="Profile Picture" 
-                  width="150" height="150"
-                  style="cursor: pointer;"
-              > {% endcomment %}
-
-              {% comment %} <img id="profilePhoto" style="display:none;" alt="Profile Photo" width="100" height="100"> {% endcomment %}
-      
-              <!-- Hidden file input -->
-              {% comment %} <input type="file" id="file-input" accept="image/*" style="display: none;"> {% endcomment %}
-              
-              {% comment %} <input type="file" id="profilePhotoInput" name="profile_photo" accept="image/*">
-
-              <h5 class="text-dark">{{ user.first_name }} {{ user.middle_name }} {{ user.last_name }}</h5>
-          </div> {% endcomment %}
 
           <div class="img-container">
             <!-- Profile Picture -->
@@ -159,104 +139,7 @@
       </div>
     </div>
   </div>
- {% comment %} <script>
-    $(document).ready(function(){
-        // Click event on profile picture
-        $("#profile-pic").click(function(){
-            $("#file-input").click(); // Open file dialog
-        });
-
-        // Handle file selection
-        $("#file-input").change(function(){
-            var file = this.files[0];
-            if (file) {
-                var reader = new FileReader();
-
-                reader.onload = function(e) {
-                    $("#profile-pic").attr("src", e.target.result); // Preview image
-                };
-
-                reader.readAsDataURL(file);
-
-                // Upload image to the server
-                var formData = new FormData();
-                formData.append("profile_picture", file);
-                
-                $.ajax({
-                    url: "{% url 'user_profile_update' %}",  // Django view URL
-                    type: "POST",
-                    data: formData,
-                    processData: false,
-                    contentType: false,
-                    headers: {
-                        "X-CSRFToken": "{{ csrf_token }}"  // CSRF Token for security
-                    },
-                    success: function(response) {
-                        alert("Profile picture updated successfully!");
-                    },
-                    error: function() {
-                        alert("Error updating profile picture!");
-                    }
-                });
-            }
-        });
-    });
-</script>   {% endcomment %}
-
-
-{% comment %} <script>
-  // Listen for file selection
-  document.getElementById('profilePhotoInput').addEventListener('change', function() {
-      var formData = new FormData();
-      var fileInput = document.getElementById('profilePhotoInput');
-      var file = fileInput.files[0];
-
-      if (file) {
-          formData.append('profile_photo', file);
-
-          fetch('/upload-profile-photo/', {
-              method: 'POST',
-              body: formData,
-              headers: {
-                  'X-CSRFToken': getCookie('csrftoken')  // Include CSRF token for security
-              }
-          })
-          .then(response => response.json())
-          .then(data => {
-              if (data.message) {
-                  document.getElementById('responseMessage').innerText = data.message;
-                  document.getElementById('profilePhoto').src = data.file_url;  // Show uploaded image
-                  document.getElementById('profilePhoto').style.display = 'block';  // Display image
-              } else {
-                  document.getElementById('responseMessage').innerText = 'Upload failed';
-              }
-          })
-          .catch(error => {
-              console.error('Error:', error);
-              document.getElementById('responseMessage').innerText = 'An error occurred';
-          });
-      } else {
-          document.getElementById('responseMessage').innerText = 'Please select a file';
-      }
-  });
-
-  // Function to get CSRF token from the cookies
-  function getCookie(name) {
-      var cookieValue = null;
-      if (document.cookie && document.cookie !== "") {
-          var cookies = document.cookie.split(";");
-          for (var i = 0; i < cookies.length; i++) {
-              var cookie = cookies[i].trim();
-              if (cookie.substring(0, name.length + 1) === (name + "=")) {
-                  cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                  break;
-              }
-          }
-      }
-      return cookieValue;
-  }
-</script> {% endcomment %}
-
+ 
 
 <script>
   $(document).ready(function(){
