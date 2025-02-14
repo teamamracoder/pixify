@@ -139,8 +139,8 @@
         <!-- Delete Modal -->
         <div id="deleteModal" class="parmess-del-modal">
             <div class="parmess-del-modal-content">
-                <span class="parmess-del-close" onclick="closeModal()">&times;</span>
-                <p>Are you sure you want to delete this message?</p>
+                <span class="parmess-del-close" onclick="closeModal()"><i class="bi bi-x-circle"></i></span>
+                <p style="margin-right: 20px;">Are you sure you want to delete this message?</p>
                 <ul class="parmess-del-options">
                     <li><button id="deleteForMe" onclick="deleteMessage(1)">Delete for Me</button></li>
                     <li><button id="deleteForEveryone" onclick="deleteMessage(2)">Delete for Everyone</button></li>
@@ -152,9 +152,9 @@
         <!-- Edit Preview -->
         <div id="edit-preview" style="display: none;">
             <div class="edit-message-bar">
-                <span style="color:black;">Edit message:</span>
+                <span style="color:black; font-weight: bold;">Edit message:</span>
                 <span class="edit-text"style="color:black;"></span>
-                <button class="cancel-edit" style="color:red; margin-left: 135px;" onclick="cancelEdit()">X</button>
+                <div class="cancel-edit" style="color:red; margin-left: 135px;" onclick="cancelEdit()">✖</div>
             </div>
         </div>
 
@@ -1529,31 +1529,33 @@ class ReactionManager {
       return;
     }
     let listItems = "";
-    Object.keys(aggregated).forEach((reactionType) => {
-      const data = aggregated[reactionType];
-      listItems += `
-        <li style="margin-bottom:10px;">
-          <div><strong>${reactionType} ${data.count}</strong></div>
-          <ul style="list-style:none; padding-left:0;">`;
-      for (let i = 0; i < data.names.length; i++) {
-        const photo = data.photos[i] ? data.photos[i] : '/static/images/default-avatar.jpg';
-        const name = data.names[i] || 'Unknown';
-        listItems += `
-          <li style="display:flex; align-items:center; margin-bottom:5px;">
-            <img src="${photo}" alt="${name}" style="height:25px; width:25px; border-radius:50%; margin-right:5px;">
-            <span>${name}</span>
-          </li>`;
-      }
-      listItems += `</ul></li>`;
-    });
+Object.keys(aggregated).forEach((reactionType) => {
+  const data = aggregated[reactionType];
+  listItems += `
+    <li style="margin-bottom:10px;align-items: center;justify-content: space-between;display: flex;list-style: none;">
+        <ul style="list-style:none; padding-left:0;">`;
+  for (let i = 0; i < data.names.length; i++) {
+    const photo = data.photos[i] ? data.photos[i] : '/static/images/default-avatar.jpg';
+    const name = data.names[i] || 'Unknown';
+    listItems += `
+      <li style="display:flex; align-items:center; margin-bottom:5px;">
+        <img src="${photo}" alt="${name}" style="height:25px; width:25px; border-radius:50%; margin-right:5px;">
+        <span>${name}</span>
+      </li>`;
+  }
+  listItems += `</ul>
+      <div><strong>${reactionType} ${data.count}</strong></div>
+    </li>`;
+});
+
     const modal = document.createElement('div');
     modal.classList.add('message-modal');
     modal.innerHTML = `
       <div class="message-modal-content">
-        <span class="close-btnn">&times;</span>
+        <span class="close-btnn"><i class="bi bi-x-circle"></i></span>
         <h4>All Reactions</h4>
         <hr>
-        <ul>
+        <ul style="padding-left: 0;">
           ${listItems}
         </ul>
       </div>
@@ -1954,11 +1956,11 @@ document.addEventListener("DOMContentLoaded", function () {
 .parmess-del-options button {
   color:red;
   width: 100%;
-  padding: 10px;
+  /* padding: 10px; */
   border: none;
   border-radius: 5px;
   cursor: pointer;
-  font-size: 16px;
+  font-size: 12px;
 }
 
 .parmess-del-options button:hover {
@@ -2008,7 +2010,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     /* Overall Chat Container */
     .chat-container {
-        height: 620px;
+        height: 88vh;
         background-color: #211237f2; /*shubhankar change only color*/
         border-radius: 10px;
         box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
@@ -2040,13 +2042,13 @@ document.addEventListener("DOMContentLoaded", function () {
         text-overflow: ellipsis; 
     }
     .chat-header {
-        background-color: #533b79;
-        color: white;
-        padding: 15px;
-        display: flex;
-        justify-content: flex-start;
-        align-items: center;
-        border-radius: 10px 10px 0 0;
+    background-color: #291546;
+    color: white;
+    padding: 6px 0px 8px 8px;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    border-radius: 10px 10px 0 0;
     }
 
     .user-info {
@@ -2055,8 +2057,8 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     .profile-pic {
-        width: 60px;
-        height: 60px;
+        width: 50px;
+        height: 50px;
         border-radius: 50%;
         margin-right: 20px;
         object-fit: cover;
@@ -2141,7 +2143,7 @@ document.addEventListener("DOMContentLoaded", function () {
         height: 20px;
         border-radius: 50%;
         object-fit: cover;
-        margin-right: 10px;
+        margin-right: 4px;
     }
 
     .message-username {
@@ -2216,7 +2218,7 @@ document.addEventListener("DOMContentLoaded", function () {
     /* Footer */
     .chat-footer {
         padding: 4px;
-        background-color: #e6e6e6;        
+        background-color: #00e6ff;        
         display: flex;
         justify-content: space-between;
         flex-direction: column;
@@ -2378,25 +2380,25 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     .parent-message {
+        align-items: center;
+        display: flex;
         padding: 10px;
-        background-color: #e0e0e0;
+        background-color: #4da3dc69;
         border-left: 4px solid #4caf50;
         border-radius: 8px;
-        margin-bottom: 5px;
-        margin-top: 5px;    
+        margin-bottom: 5px;  
         color: #333;
     }
 
     .parent-message span:first-child {
         font-size: 15px;
         color:black;
-        font-weight: bold;
         margin-right: 5px;
     }
 
     .parent-message span:last-child {
         font-size: 14px;
-        color: #555;
+        color: #fff;
     }
 
 
@@ -2441,7 +2443,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     .parmess-button {
-        padding: 12px 20px;
+        padding: 16px 20px;
         background-color: #533b79;
         color: white;
         border: none;
@@ -2462,6 +2464,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     .close-reply{
+        float: right;
         color:red;
         cursor: pointer;
     }
@@ -2567,10 +2570,11 @@ document.addEventListener("DOMContentLoaded", function () {
     
     .message-modal .message-modal-content {
     position: relative;
-    background-color: #151212;
+    border-radius: 6px;
+    background-color: #0e0e2e;;
     margin: 5% auto;
     padding: 16px;
-    border: 1px solid #888;
+    /* border: 1px solid #888; */
     margin-top: 18%;
     /* margin-right: 34%; */
     max-width: 325px;
@@ -2593,7 +2597,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     @media (max-width: 1200px) {
     .chat-container {
-        max-width: 75%;
+        max-width: 100%;
     }
 
     .username {
@@ -2607,12 +2611,15 @@ document.addEventListener("DOMContentLoaded", function () {
         margin-left: 50px;
         font-size: 20px;
 }
+.message-modal .message-modal-content{
+    margin-top: 25%;
+}
 }
 
 /* Medium Desktops (992px and below) */
 @media (max-width: 992px) {
     .chat-container {
-        max-width: 85%;
+        max-width: 100%;
     }
 
     .username {
@@ -2626,6 +2633,9 @@ document.addEventListener("DOMContentLoaded", function () {
     .chat-footer form{
         display: flex;
     }
+    .message-modal .message-modal-content{
+    margin-top: 50%;
+}
 }
 
 
@@ -2633,7 +2643,7 @@ document.addEventListener("DOMContentLoaded", function () {
     @media (max-width: 768px) {
     .chat-container {
         height: 90vh;
-        max-width: 100%;
+        width: 100%;
     }
     .chat-footer form{
         display: flex;
@@ -2645,13 +2655,18 @@ document.addEventListener("DOMContentLoaded", function () {
     #sendDataButton {
     margin-left: 412px;
     font-size: 20px;
-} 
+}
+.message-modal .message-modal-content{
+    margin-top: 50%;
+}
 .parmess-del-modal-content {
     margin-left: 22%;
     margin-top: 55%;
     width: 53%;
 }
-}
+} 
+
+
 @media (max-width: 620px){
     #sendDataButton {
     padding-top: 12px;
@@ -2659,10 +2674,13 @@ document.addEventListener("DOMContentLoaded", function () {
     margin-left: 160px;
     font-size: 20px;
 }
+.message-modal .message-modal-content{
+    margin-top: 50%;
+}
 }
 @media (max-width: 480px) {
     .chat-container {
-        height: 88vh;
+        height: 89vh;
         border-radius: 0; /* No border-radius on small screens */
     }
 
@@ -2686,7 +2704,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     .chat-footer button {
         font-size: 0.8rem;
-        padding: 6px;
+        /* padding: 6px; */
     }
     #sendDataButton {
     padding-top: 12px;
@@ -2705,6 +2723,9 @@ document.addEventListener("DOMContentLoaded", function () {
         margin-top: 88%;
         width: 53%;
     }
+.message-modal .message-modal-content{
+    margin-top: 80%;
+}
 
 
 
