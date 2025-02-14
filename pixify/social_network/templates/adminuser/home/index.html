@@ -3,7 +3,26 @@
 {% block title %}Post List{% endblock %}
 
 {% block content %}
+<style>
+/* Prevent button hover from changing background */
+.orders .users:hover a:hover, .users a:hover {
+    background-color: #a8dfc0 !important;
+    color: #155724 !important; 
+}
 
+.orders:hover a:hover {
+    background-color: #99ccff !important; 
+    color: #004085 !important; 
+}
+
+
+/* Prevent button hover from changing background */
+.posts:hover a:hover {
+    background-color: #ffeb99 !important; 
+    color: #856404 !important; 
+}
+
+</style>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <h1 class="text-center mt-5">Dashboard</h1>
 
@@ -96,58 +115,55 @@
             }
             return cookieValue;
         }
-   
-
 
 </script>
-
-
-
 <div class="container py-5">
     <div class="row g-3 justify-content-center">
 
         <div class="col-md-4 justify-content-center">
-            <div class="card shadow posts" style="background-color: #d4edda;">
-                <a href="{% url 'user_list' %}" class="btn btn-sm btn-outline-secondary">
-                <div class="card-body d-flex justify-content-between align-items-center">
-                    <h5 class="card-title text-dark">Users</h5>
-                    <span class="fs-2 text-secondary"><i class="bi bi-person-circle"></i></span>
-                </div>
-                <div class="card-footer d-flex justify-content-between bg-white text-dark">
-                    <span id="countTotalUser"></span>
-                    <span class="fs-4">&gt;</span>
-                </div>
-            </a>
+            <div class="card shadow users" style="background-color: #d4edda;">
+                <a href="{% url 'user_list' %}" class="btn btn-sm btn-outline-success border-0">
+                    <div class="card-body d-flex justify-content-between align-items-center">
+                        <h5 class="card-title text-dark">Users</h5>
+                        <span class="fs-2 text-secondary"><i class="bi bi-person-circle"></i></span>
+                    </div>
+                    <div class="card-footer d-flex justify-content-between bg-white text-dark">
+                        <span id="countTotalUser"></span>
+                        <span class="fs-4">&gt;</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+        
+        <div class="col-md-4 justify-content-center">
+            <div class="card shadow orders" style="background-color: #cce5ff;">
+                <a href="#" class="btn btn-sm btn-outline-secondary border-0">
+                    <div class="card-body d-flex justify-content-between align-items-center">
+                        <h5 class="card-title text-dark">Admins</h5>
+                        <span class="fs-2 text-secondary"><i class="bi bi-person"></i></span>
+                    </div>
+                    <div class="card-footer d-flex justify-content-between bg-white text-dark">
+                        <span id="countTotalAdmin"></span>
+                        <span class="fs-4">&gt;</span>
+                    </div>
+                </a>
             </div>
         </div>
         <div class="col-md-4 justify-content-center">
-            <div class="card shadow orders" style="background-color: #cce5ff;">
-                <a href="#" class="btn btn-sm btn-outline-secondary">
-                <div class="card-body d-flex justify-content-between align-items-center">
-                    <h5 class="card-title text-dark">Admins</h5>
-                    <span class="fs-2 text-secondary"><i class="bi bi-person"></i></span>
-                </div>
-                <div class="card-footer d-flex justify-content-between bg-white text-dark">
-                    <span id="countTotalAdmin"></span>
-                    <span class="fs-4">&gt;</span>
-                </div>
+            <div class="card shadow posts" style="background-color: #fff3cd;">
+                <a href="{% url 'manage_post_list' %}" class="btn btn-sm btn-outline-secondary border-0">
+                    <div class="card-body d-flex justify-content-between align-items-center">
+                        <h5 class="card-title text-dark">Posts</h5>
+                        <span class="fs-2 text-secondary"><i class="bi bi-image-fill"></i></span>
+                    </div>
+                    <div class="card-footer d-flex justify-content-between bg-white text-dark">
+                        <span id="countTotalPost"></span>
+                        <span class="fs-4">&gt;</span>
+                    </div>
                 </a>
             </div>
         </div>
-        <div class="col-md-4 justify-content-center ">
-            <div class="card shadow products" style="background-color: #fff3cd;">
-                <a href="{% url 'manage_post_list' %}" class="btn btn-sm btn-outline-secondary">
-                <div class="card-body d-flex justify-content-between align-items-center">
-                    <h5 class="card-title text-dark">Posts</h5>
-                    <span class="fs-2 text-secondary"><i class="bi bi-image-fill"></i></span>
-                </div>
-                <div class="card-footer d-flex justify-content-between bg-white text-dark background-color-#cce5ff">
-                    <span id="countTotalPost"></span>
-                    <span class="fs-4">&gt;</span>
-                </div>
-                </a>
-            </div>
-        </div>
+        
 
     </div>
 </div>
