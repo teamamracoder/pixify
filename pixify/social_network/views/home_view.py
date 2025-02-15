@@ -9,6 +9,40 @@ from social_network.decorators.exception_decorators import catch_error
 
 from ..decorators import auth_required, role_required
 from social_network.packages.response import success_response
+import random
+
+
+# class HomeView(View):
+
+#     @catch_error
+#     @auth_required
+#     @role_required(Role.ADMIN.value, Role.END_USER.value)
+#     def get(self, request):
+#         message = request.session.pop("message", "")
+#         message_type = request.session.pop("message_type", "")
+#         posts =services.post_service.Postlist_posts()
+#         post_id = request.GET.get('post_id')
+#         comment_list = services.comment_service.comment_list(post_id)
+#         post_dict={
+#                   'posts':posts,
+#                   'name':'priya',
+#                   'comment_list':comment_list,
+#                   'count_commnet' :services.comment_service.get_count_comment(59)
+#                 }
+
+#         context = success_response(message=message, message_type=message_type)
+#         context.update({'post_dict': post_dict})
+
+#         storys = services.story_service.storylist_storys()
+#         story_dict={
+#                   'storys':storys,
+#                   'name':'sribash',
+#                 }
+#         context2 = success_response(message=message, message_type=message_type)
+#         context2.update({'story_dict': story_dict})
+
+#         return render(request, "enduser/home/index.html", context)
+
 
 class HomeView(View):
 
@@ -16,6 +50,7 @@ class HomeView(View):
     @auth_required
     @role_required(Role.ADMIN.value, Role.END_USER.value)
     def get(self, request):
+        user=request.user
         message = request.session.pop("message", "")
         message_type = request.session.pop("message_type", "")
         userid=request.user.id
@@ -39,14 +74,23 @@ class HomeView(View):
             'storys': storys,
             #'name': 'sribash',
         }
-        print("storys",storys)
+        shorts = services.short_service.get_shorts()
+        for short in shorts:
+            count = services.short_service.reaction_count(short.id)
+            short.reaction_count = services.short_service.format_count(count)
+            comments = services.short_service.comment_count(short.id)
+            short.comments_count = services.short_service.format_count(comments)
+            short.user_reacted = services.short_service.user_has_reacted(short, user)
+
+        random.shuffle(shorts)  # Randomize the list
+
         # Merge everything into a single context
         context = success_response(message=message, message_type=message_type)
         context.update({
             'post_dict': post_dict,
             'story_dict': story_dict,
+            'shorts':shorts,
             'userid':userid,
-
         })
 
         return render(request, "enduser/home/index.html", context)
