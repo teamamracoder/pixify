@@ -10,6 +10,7 @@ from social_network.decorators.exception_decorators import catch_error
 
 from ..decorators import auth_required, role_required
 from social_network.packages.response import success_response
+import random
 
 
 
@@ -43,7 +44,6 @@ class HomeView(View):
             'storys': storys,
             #'name': 'sribash',
         }
-
         shorts = services.short_service.get_shorts()
         for short in shorts:
             count = services.short_service.reaction_count(short.id)

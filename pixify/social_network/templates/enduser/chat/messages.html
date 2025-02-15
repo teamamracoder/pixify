@@ -42,11 +42,11 @@
         </div>
 
         {% for message in date_group.1 %}
-        <div class="message {% if message.sender_id.id == user.id %}sent{% else %}received{% endif %}" id="message-{{ message.id }}">
+        <div class="message {% if message.sender_id.id == user.id %}sent{% else %}received{% endif %} {% if message.seen_by_all %}read{% endif %}" id="message-{{ message.id }}">
             <div class="message-content">
                 {% if message.reply_for_message_id %}
                 <div class="parent-message">
-                    <span>{{ message.reply_for_message_id.sender_id.first_name }}: </span>
+                    <span>{{ message.reply_for_message_id.sender_id.first_name }} </span>
                     <div>{{ message.reply_for_message_id.text }}</div>
                     {% if message.reply_for_message_id.media_url %}
                     <span>{{ message.reply_for_message_id.media_url }}</span>
@@ -64,9 +64,9 @@
                 {% endif %}
 
                 {% if message.updated_by %}
-                <div class="edited-messages">
+                    <div class="edited-messages">
                     <span class="edited-tag">(Edited)</span>
-                </div>
+                    </div>
                 {% endif %}
             </div>
 
@@ -80,11 +80,11 @@
                 <div class="options-popup" id="options-{{ message.id }}" style="display: none;">
                     {% if message.sender_id.id == user.id %}
                         {% if message.is_editable %}
-                        <a href="#" onclick="editMessage('{{ message.id }}')">Edit</a>
+                            <a href="#" onclick="editMessage('{{ message.id }}'); closeOptions('{{ message.id }}');">Edit</a>
                         {% endif %}
                     {% endif %}
-                    <a href="#" onclick="replyMessage('{{ message.id }}', '{{ message.sender_id.first_name }}')">Reply</a>
-                    <a href="#" class="delete-link" onclick="openDeleteModal('{{ message.id }}')">Delete</a>
+                    <a href="#" onclick="replyMessage('{{ message.id }}', '{{ message.sender_id.first_name }}'); closeOptions('{{ message.id }}');">Reply</a>
+                    <a href="#" class="delete-link" onclick="openDeleteModal('{{ message.id }}', '{{ message.sender_id.id }}'); closeOptions('{{ message.id }}');">Delete</a>
                 </div>
 
                 <div class="reaction-container" id="reaction-container-{{ message.id }}">
@@ -142,8 +142,8 @@
         <!-- Delete Modal -->
         <div id="deleteModal" class="parmess-del-modal">
             <div class="parmess-del-modal-content">
-                <span class="parmess-del-close" onclick="closeModal()">&times;</span>
-                <p>Are you sure you want to delete this message?</p>
+                <span class="parmess-del-close" onclick="closeModal()"><i class="bi bi-x-circle"></i></span>
+                <p style="margin-right: 20px;">Are you sure you want to delete this message?</p>
                 <ul class="parmess-del-options">
                     <li><button id="deleteForMe" onclick="deleteMessage(1)">Delete for Me</button></li>
                     <li><button id="deleteForEveryone" onclick="deleteMessage(2)">Delete for Everyone</button></li>
@@ -155,9 +155,9 @@
         <!-- Edit Preview -->
         <div id="edit-preview" style="display: none;">
             <div class="edit-message-bar">
-                <span style="color:black;">Edit message:</span>
+                <span style="color:black; font-weight: bold;">Edit message:</span>
                 <span class="edit-text"style="color:black;"></span>
-                <button class="cancel-edit" style="color:red; margin-left: 135px;" onclick="cancelEdit()">X</button>
+                <div class="cancel-edit" style="color:red; margin-left: 135px;" onclick="cancelEdit()">✖</div>
             </div>
         </div>
 
@@ -197,6 +197,8 @@
 
 
 <script>
+
+// Message Mention JS
 $(document).ready(function () {
 
   let mentionedUsers = new Set();
@@ -294,7 +296,6 @@ $(document).ready(function () {
   $('#message-input').on('input', function () {
     const messageText = $(this).val();
     const cursorPosition = this.selectionStart;
-    console.log("Cursor position:", cursorPosition);
     const lastChar = messageText.charAt(cursorPosition - 1);
 
     clearTimeout(typingTimer);
@@ -621,11 +622,61 @@ $(document).ready(function () {
         }
     });
 
+
+    // Unread Message tag
+    function insertUnreadMessagesTag() {
+        const chatBody = document.getElementById('chat-body');
+        if (!chatBody) {
+            console.error('Element with id "chat-body" not found');
+            return;
+        }
+        
+        // Remove any existing Unread Messages tag to avoid duplicates.
+        const existingTag = chatBody.querySelector('.message-timestamp');
+        if (existingTag) {
+            existingTag.remove();
+        }
+        
+        // Select unread messages:
+        // Unread messages are assumed to be those with the 'received' class and without the 'read' class.
+        const unreadMessages = chatBody.querySelectorAll('.message.received:not(.read)');
+        
+        if (unreadMessages.length === 0) {
+            return;
+        }
+        
+        // Get the first unread message.
+        const firstUnreadMessage = unreadMessages[0];
+        
+        // Create the tag element.
+        const tagElement = document.createElement('div');
+        tagElement.className = 'message-timestamp';
+        tagElement.innerText = 'Unread Messages';
+        
+        // Insert the tag before the first unread message.
+        firstUnreadMessage.parentNode.insertBefore(tagElement, firstUnreadMessage);
+        
+        // After 3 seconds, add the hidden class to fade out the tag.
+        setTimeout(() => {
+            tagElement.classList.add('hidden');
+            // Optionally remove the element from the DOM after the fade-out transition (500ms).
+            setTimeout(() => {
+            tagElement.remove();
+            }, 500);
+        }, 3000);
+        }
+
+        // Call the function when the DOM content is loaded.
+        document.addEventListener('DOMContentLoaded', () => {
+        insertUnreadMessagesTag();
+    });
+
+
 </script>
 
 
 
-<script>
+<script>        // Paginator script
 document.addEventListener('DOMContentLoaded', function() {
   let currentPage = parseInt('{{ data.current_page|default:"1" }}', 10);
   const chatBody = document.getElementById('chat-body');
@@ -654,7 +705,6 @@ document.addEventListener('DOMContentLoaded', function() {
   function loadOlderMessages() {
     if (isLoading) return;
     if (currentPage <= 1) {
-      console.log('No older messages to load.');
       return;
     }
     isLoading = true;
@@ -676,7 +726,6 @@ document.addEventListener('DOMContentLoaded', function() {
         // Insert the new HTML at the top of the chat body.
         chatBody.insertAdjacentHTML('afterbegin', data.html);
         currentPage = data.current_page;
-        console.log('Loaded older messages. Current page is now:', currentPage);
         // Now remove any duplicate headers.
         removeDuplicateHeaders();
         isLoading = false;
@@ -703,101 +752,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }, 150));
 });
-// Paginator code to load older messages
-document.addEventListener('DOMContentLoaded', function() {
-  let currentPage = parseInt('{{ data.current_page|default:"1" }}', 10);
-  const chatBody = document.getElementById('chat-body');
-  if (!chatBody) {
-    console.error('Element with id "chat-body" not found');
-    return;
-  }
-  const spinner = document.getElementById('loading-spinner');
-  let isLoading = false;
-
-  // Remove duplicate timestamp headers from the chat body.
-  function removeDuplicateHeaders() {
-    const headers = document.querySelectorAll('.chat-body .message-timestamp');
-    if (!headers.length) return;
-    const seen = new Set();
-    headers.forEach(function(header) {
-      const text = header.textContent.trim();
-      if (seen.has(text)) {
-        header.remove();
-      } else {
-        seen.add(text);
-      }
-    });
-  }
-
-  // Load older messages via AJAX/pagination.
-  function loadOlderMessages() {
-    if (isLoading) return;
-    if (currentPage <= 1) {
-      console.log('No older messages to load.');
-      return;
-    }
-    isLoading = true;
-    if (spinner) spinner.style.display = 'block';
-
-    const url = new URL(window.location.href);
-    url.searchParams.set('page', currentPage - 1);
-    
-    // Get the current top timestamp from the first rendered .message-timestamp element.
-    const topTimestampEl = document.querySelector('.chat-body .message-timestamp');
-    if (topTimestampEl) {
-      const topTimestamp = topTimestampEl.textContent.trim();
-      url.searchParams.set('last_timestamp', topTimestamp);
-    }
-
-    fetch(url.toString(), { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
-      .then(response => response.json())
-      .then(data => {
-        // Insert the new HTML at the top of the chat body.
-        chatBody.insertAdjacentHTML('afterbegin', data.html);
-        currentPage = data.current_page;
-        console.log('Loaded older messages. Current page is now:', currentPage);
-        removeDuplicateHeaders();
-        // Initialize ReactionManager for the new messages.
-        initNewReactionContainers();
-        isLoading = false;
-        if (spinner) spinner.style.display = 'none';
-      })
-      .catch(err => {
-        console.error('Error loading older messages:', err);
-        isLoading = false;
-        if (spinner) spinner.style.display = 'none';
-      });
-  }
-
-  // Debounce helper for scroll event.
-  function debounce(func, delay) {
-    let timeoutId;
-    return function(...args) {
-      if (timeoutId) clearTimeout(timeoutId);
-      timeoutId = setTimeout(() => func.apply(this, args), delay);
-    };
-  }
-
-  // Attach scroll event listener.
-  chatBody.addEventListener('scroll', debounce(function() {
-    if (chatBody.scrollTop < 100) {
-      loadOlderMessages();
-    }
-  }, 150));
-
-  // Initialize ReactionManager for newly inserted messages.
-  function initNewReactionContainers() {
-    // Select reaction containers that haven't been initialized yet.
-    const newContainers = document.querySelectorAll('.reaction-container:not([data-reaction-initialized])');
-    newContainers.forEach(function(container) {
-      // Assuming container id is in the format "reaction-container-<messageId>"
-      const parts = container.id.split('-');
-      const messageId = parts.slice(2).join('-'); // handles IDs with dashes in them
-      reactionManager.init(messageId);
-      container.setAttribute('data-reaction-initialized', 'true');
-    });
-  }
-});
 </script>
 
 
@@ -805,13 +759,23 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 
-<script>
+
+
+
+
+
+
+
+
+
+<script> // WebSocket JS
 
     // WebSocket connection and initialization
-    var chatId = $('#chat_id').val();  // Get chat_id dynamically
-    var socket = new WebSocket('ws://' + window.location.host + '/ws/chat/' + chatId + '/');
-    var currentUser = "{{ user.first_name }}"; // Django context variable for current user's name
-    var currentUserId = "{{ user.id }}"; 
+    const chatId = $('#chat_id').val();  // Get chat_id dynamically
+    const socket = new WebSocket('ws://' + window.location.host + '/ws/chat/' + chatId + '/');
+    const currentUser = "{{ user.first_name }}"; // Django context variable for current user's name
+    const currentUserId = "{{ user.id }}"; 
+    const senderId = "{{ user.id }}"; // Django context variable
 
     // When WebSocket connection is established
     socket.onopen = function(e) {
@@ -830,7 +794,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    var senderId = "{{ user.id }}"; // Django context variable
     // Sending message function
     async function sendMessage() {
         const input = document.getElementById("message-input");
@@ -867,8 +830,6 @@ document.addEventListener('DOMContentLoaded', function() {
             input.value = "";
             document.getElementById("file-input").value = "";
             clearFilePreviews();
-        } else {
-            console.log("Please enter a message or attach a file.");
         }
     }
 
@@ -915,6 +876,7 @@ if (data.seen_by_all) {
       data.message,
       data.message_id,
       data.messageTime,
+      data.user_id,
       data.user || 'Unknown',
       data.ProfilePic || '/static/images/avatar.jpg',
       data.reply,
@@ -995,7 +957,7 @@ if (data.seen_by_all) {
 
 };
 
-function appendMessageToChat(message, messageId, messageTime, senderName, profilePic, reply, replyText, reply_username, reply_userPic, mediaUrls, isSent, reactions) {
+function appendMessageToChat(message, messageId, messageTime, senderId, senderName, profilePic, reply, replyText, reply_username, reply_userPic, mediaUrls, isSent, reactions) {
     const chatBody = document.querySelector(".chat-body");
     const today = "Today";
 
@@ -1023,20 +985,20 @@ function appendMessageToChat(message, messageId, messageTime, senderName, profil
     messageDiv.setAttribute("id", `message-${messageId}`);
 
     // Build media preview if mediaUrls are provided.
-    let mediaPreview = "";
+    let mediaPreviewHtml = "";
     if (mediaUrls && mediaUrls.length > 0) {
-        mediaPreview = mediaUrls
+        mediaPreviewHtml = mediaUrls
             .map(url => `<div class="message-media"><img src="${url}" alt="media"></div>`)
             .join("");
     }
 
     // Build reply preview if a reply exists.
-    let replyPreview = "";
+    let parentMessageHtml = "";
     if (reply) {
-        replyPreview = `
+        parentMessageHtml = `
             <div class="parent-message">
-                <span>${reply_username}: </span>
-                <span>${replyText}</span>
+                <span>${reply_username} </span>
+                <div>${replyText}</div>
                 ${reply.media_url ? `<span>${reply.media_url}</span>` : ""}
             </div>
         `;
@@ -1045,16 +1007,17 @@ function appendMessageToChat(message, messageId, messageTime, senderName, profil
     // Generate the reaction popup content.
     const reactionPopupContent = generateReactionPopupContent(reactions, messageId);
 
-    // Construct the message inner HTML.
-    const messageContent = `
+    const messageContentHtml = `
         <div class="message-content">
+            ${parentMessageHtml}
             <div class="message-header">
                 <img src="${profilePic}" alt="${senderName}'s Profile Picture" class="message-profile-pic">
                 <span class="message-username">${senderName}</span>
-                ${replyPreview}
             </div>
             <div class="message-text">${message}</div>
-            ${mediaPreview}
+            <div class="message-media-container">
+                ${mediaPreviewHtml}
+            </div>
         </div>
         <div class="message-footer">
             <div class="time">${messageTime}</div>
@@ -1063,9 +1026,9 @@ function appendMessageToChat(message, messageId, messageTime, senderName, profil
                 <i class="bi bi-emoji-smile" onclick="toggleReactionPopup('${messageId}')"></i>
             </div>
             <div class="options-popup" id="options-${messageId}" style="display: none;">
-                ${isSent ? `<a href="#" onclick="editMessage('${messageId}')">Edit</a>` : ""}
-                <a href="#" onclick="replyMessage('${messageId}', '${senderName}')">Reply</a>
-                <a href="#" onclick="openDeleteModal('${messageId}')">Delete</a>
+                ${isSent ? `<a href="#" onclick="editMessage('${messageId}'); closeOptions('${messageId}');">Edit</a>` : ""}
+                <a href="#" onclick="replyMessage('${messageId}', '${senderName}'); closeOptions('${messageId}');">Reply</a>
+                <a href="#" onclick="openDeleteModal('${messageId}', '${senderId}'); closeOptions('${messageId}');">Delete</a>
             </div>
             <div class="reaction-container" id="reaction-container-${messageId}">
                 <div class="reaction-popup" id="reaction-popup-${messageId}" style="display: none;">
@@ -1081,7 +1044,7 @@ function appendMessageToChat(message, messageId, messageTime, senderName, profil
         </div>
     `;
 
-    messageDiv.innerHTML = messageContent;
+    messageDiv.innerHTML = messageContentHtml;
     chatBody.appendChild(messageDiv);
 
     // Scroll to bottom and update scroll indicator.
@@ -1089,150 +1052,174 @@ function appendMessageToChat(message, messageId, messageTime, senderName, profil
     window.updateScrollIndicator();
 }
 
+
 function updateMessageInChat(updatedMessage, messageId, messageTime, senderName, profilePic, reply, replyText, reply_username, reply_userPic, mediaUrls, isSent, seen_by_all, reactions) {
-    const messageDiv = document.getElementById(`message-${messageId}`);
-    if (!messageDiv) {
-        console.error(`Message not found for message ID: ${messageId}`);
-        return;
+  const messageDiv = document.getElementById(`message-${messageId}`);
+  if (!messageDiv) {
+    console.error(`Message not found for message ID: ${messageId}`);
+    return;
+  }
+
+  // Prepare media preview if provided.
+  let mediaPreviewHtml = "";
+  if (mediaUrls && mediaUrls.length > 0) {
+    mediaPreviewHtml = mediaUrls
+      .map(
+        (url) =>
+          `<div class="message-media"><img src="${url}" alt="media"></div>`
+      )
+      .join("");
+  }
+
+  // Prepare reply preview if there is a reply.
+  let parentMessageHtml = "";
+  if (reply) {
+    parentMessageHtml = `
+      <span>${reply_username} </span>
+      <div>${replyText}</div>
+      ${reply.media_url ? `<span>${reply.media_url}</span>` : ""}
+    `;
+  }
+
+  // Generate updated reaction popup content.
+  const reactionPopupContent = generateReactionPopupContent(reactions, messageId);
+
+  // Update the message-content.
+  const contentDiv = messageDiv.querySelector(".message-content");
+  if (contentDiv) {
+    // Update or insert the parent-message block at the top of contentDiv.
+    let parentMessageDiv = contentDiv.querySelector(".parent-message");
+    if (reply) {
+      if (!parentMessageDiv) {
+        parentMessageDiv = document.createElement("div");
+        parentMessageDiv.classList.add("parent-message");
+        contentDiv.insertBefore(parentMessageDiv, contentDiv.firstChild);
+      }
+      parentMessageDiv.innerHTML = parentMessageHtml;
+    } else if (parentMessageDiv) {
+      parentMessageDiv.remove();
     }
-    
-    // Prepare media preview if provided.
-    let mediaPreview = "";
-    if (mediaUrls && mediaUrls.length > 0) {
-        mediaPreview = mediaUrls
-            .map(url => `<div class="message-media"><img src="${url}" alt="media"></div>`)
-            .join("");
+
+    // Update message-header.
+    const headerDiv = contentDiv.querySelector(".message-header");
+    if (headerDiv) {
+      const profileImg = headerDiv.querySelector("img");
+      if (profileImg) {
+        profileImg.src = profilePic;
+        profileImg.alt = `${senderName}'s Profile Picture`;
+      }
+      const usernameSpan = headerDiv.querySelector(".message-username");
+      if (usernameSpan) {
+        usernameSpan.textContent = senderName;
+      }
+    }
+
+    // Update the message text.
+    const messageTextElement = contentDiv.querySelector(".message-text");
+    if (messageTextElement) {
+      messageTextElement.textContent = updatedMessage;
+    }
+
+    // Update media preview.
+    let mediaContainer = contentDiv.querySelector(".message-media-container");
+    if (!mediaContainer) {
+      mediaContainer = document.createElement("div");
+      mediaContainer.classList.add("message-media-container");
+      contentDiv.appendChild(mediaContainer);
+    }
+    mediaContainer.innerHTML = mediaPreviewHtml;
+
+    // Corrected position: update or create the edited tag within message-content.
+    let editedMessagesDiv = contentDiv.querySelector(".edited-messages");
+    if (!editedMessagesDiv) {
+      editedMessagesDiv = document.createElement("div");
+      editedMessagesDiv.classList.add("edited-messages");
+      // Insert it right after the message text element if it exists.
+      if (messageTextElement) {
+        messageTextElement.insertAdjacentElement("afterend", editedMessagesDiv);
+      } else {
+        contentDiv.appendChild(editedMessagesDiv);
+      }
+    }
+    let editedTag = editedMessagesDiv.querySelector(".edited-tag");
+    if (!editedTag) {
+      editedTag = document.createElement("span");
+      editedTag.classList.add("edited-tag");
+      editedMessagesDiv.appendChild(editedTag);
+    }
+    editedTag.textContent = "(Edited)";
+    editedTag.style.display = "inline";
+  }
+
+  // Update the footer.
+  const footerDiv = messageDiv.querySelector(".message-footer");
+  if (footerDiv) {
+    // Update the time.
+    const timeSpan = footerDiv.querySelector(".time");
+    if (timeSpan) {
+      timeSpan.textContent = messageTime;
+    }
+    // Optionally update seen-status if provided.
+    if (seen_by_all) {
+      let seenStatusDiv = footerDiv.querySelector(".seen-status");
+      if (!seenStatusDiv) {
+        seenStatusDiv = document.createElement("div");
+        seenStatusDiv.classList.add("seen-status");
+        footerDiv.appendChild(seenStatusDiv);
+      }
+      seenStatusDiv.innerHTML =
+        senderName === currentUser ? `<i class="bi bi-check2-all"></i>` : "";
+    }
+  } else {
+    console.error(`Message footer not found for message ID: ${messageId}`);
+  }
 }
 
-    // Prepare the reply preview if there is a reply.
-    let replyPreview = "";
-    if (reply) {
-        replyPreview = `
-            <div class="parent-message">
-                <span>${reply_username}: </span>
-                <span>${replyText}</span>
-                ${reply.media_url ? `<span>${reply.media_url}</span>` : ""}
-            </div>
-        `;
-    }
-    
-    // Generate updated reaction popup content.
-    const reactionPopupContent = generateReactionPopupContent(reactions, messageId);
-    
-    // Update the message-content.
-    const contentDiv = messageDiv.querySelector(".message-content");
-    if (contentDiv) {
-        // Update header: profile image and username.
-        const headerDiv = contentDiv.querySelector(".message-header");
-        if (headerDiv) {
-            const profileImg = headerDiv.querySelector("img");
-            if (profileImg) {
-                profileImg.src = profilePic;
-                profileImg.alt = `${senderName}'s Profile Picture`;
-            }
-            const usernameSpan = headerDiv.querySelector(".message-username");
-            if (usernameSpan) {
-                usernameSpan.textContent = senderName;
-            }
-            // Update or insert reply preview.
-            let parentMessageDiv = headerDiv.querySelector(".parent-message");
-            if (reply) {
-                if (!parentMessageDiv) {
-                    parentMessageDiv = document.createElement("div");
-                    parentMessageDiv.classList.add("parent-message");
-                    headerDiv.insertAdjacentElement("afterend", parentMessageDiv);
-                }
-                parentMessageDiv.innerHTML = replyPreview;
-            } else if (parentMessageDiv) {
-                parentMessageDiv.remove();
-            }
-        }
-        
-        // Update the message text.
-        const messageTextElement = contentDiv.querySelector(".message-text");
-        if (messageTextElement) {
-            messageTextElement.textContent = updatedMessage;
-        }
-        
-        // Update the media preview.
-        // We'll assume a container exists or create one.
-        let mediaContainer = contentDiv.querySelector(".message-media-container");
-        if (!mediaContainer) {
-            mediaContainer = document.createElement("div");
-            mediaContainer.classList.add("message-media-container");
-            contentDiv.appendChild(mediaContainer);
-        }
-        mediaContainer.innerHTML = mediaPreview;
-    }
-    
-    // Update the footer.
-    const footerDiv = messageDiv.querySelector(".message-footer");
-    if (footerDiv) {
-        // Update the time.
-        const timeSpan = footerDiv.querySelector(".time");
-        if (timeSpan) {
-            timeSpan.textContent = messageTime;
-        }
-        // Ensure the "(Edited)" tag is visible.
-        let editedTag = footerDiv.querySelector(".edited-tag");
-        if (editedTag) {
-            editedTag.style.display = "inline";
-        } else {
-            editedTag = document.createElement("span");
-            editedTag.classList.add("edited-tag");
-            editedTag.textContent = "(Edited)";
-            footerDiv.appendChild(editedTag);
-        }
-        // Update options and reaction containers if needed (not shown here).
-        // Optionally, update seen-status if seen_by_all is provided.
-        if (seen_by_all) {
-            let seenStatusDiv = footerDiv.querySelector(".seen-status");
-            if (!seenStatusDiv) {
-                seenStatusDiv = document.createElement("div");
-                seenStatusDiv.classList.add("seen-status");
-                footerDiv.appendChild(seenStatusDiv);
-            }
-            seenStatusDiv.innerHTML = (senderName === currentUser) ? `<i class="bi bi-check2-all"></i>` : "";
-        }
-    } else {
-        console.error(`Message footer not found for message ID: ${messageId}`);
-    }
-}
 
 
 // Global variable to track the message being edited
-let editingMessageId = null;
+    let editingMessageId = null;
 
 // Edit message
-function editMessage(messageId) {
-    const messageDiv = document.getElementById(`message-${messageId}`);
-    if (!messageDiv) {
-        console.error(`Message with ID ${messageId} not found.`);
-        return;
+    function editMessage(messageId) {
+        // If reply mode is active, cancel it
+        if (document.getElementById('reply-preview').style.display === 'block') {
+            cancelReply();
+        }
+        
+        const messageDiv = document.getElementById(`message-${messageId}`);
+        if (!messageDiv) {
+            console.error(`Message with ID ${messageId} not found.`);
+            return;
+        }
+
+        const messageTextElement = messageDiv.querySelector(".message-text");
+        if (!messageTextElement) {
+            console.error(`Message text not found for message ID: ${messageId}`);
+            return;
+        }
+
+        const messageInput = document.getElementById("message-input");
+        messageInput.value = messageTextElement.textContent; // Pre-fill input with current message content
+        messageInput.focus();
+
+        // Display the "edit-preview" section
+        const editPreview = document.getElementById("edit-preview");
+        editPreview.style.display = "block";
+        editPreview.querySelector(".edit-text").textContent = messageTextElement.textContent;
+
+        // Store the message ID being edited
+        editingMessageId = messageId;
     }
 
-    const messageTextElement = messageDiv.querySelector(".message-text");
-
-    // Check if the message text exists
-    if (!messageTextElement) {
-        console.error(`Message text not found for message ID: ${messageId}`);
-        return;
+    // Cancel edit
+    function cancelEdit() {
+        editingMessageId = null;
+        const editMessageInput = document.getElementById("message-input");
+        editMessageInput.value = ""; // Clear input
+        const editPreview = document.getElementById("edit-preview");
+        editPreview.style.display = "none"; // Hide edit preview
     }
-
-    const messageInput = document.getElementById("message-input");
-    messageInput.value = messageTextElement.textContent; // Pre-fill input with the current message content
-    messageInput.focus(); // Focus the input field
-
-    // Display the "edit-preview" section
-    const replyPreview = document.getElementById("edit-preview");
-    replyPreview.style.display = "block";
-
-    // Correctly set the text content of the edit preview (not the input field)
-    replyPreview.querySelector(".edit-text").textContent = messageTextElement.textContent;
-
-    // Store the message ID being edited
-    editingMessageId = messageId;
-}
 
     // Save the updated message
     function saveEditedMessage() {
@@ -1269,31 +1256,51 @@ function editMessage(messageId) {
         saveButton.style.display = "none"; // Hide the save button
     }
 
-    // Cancel edit
-    function cancelEdit() {
-        editingMessageId = null;
-        const editMessageInput = document.getElementById("message-input");
-        editMessageInput.value = ""; // Clear the input
-        const editPreview = document.getElementById("edit-preview");
-        editPreview.style.display = "none"; // Hide the edit preview
-    }
-
+    // Global variables to store current reply message IDs
     let ReplyMessageId = null;
-    // Reply to a message
-    function replyMessage(messageId, senderName) {
-        const messageDiv = document.getElementById(`message-${messageId}`);
-        const replyPreview = document.getElementById("reply-preview");        
-        const messageTextElement = messageDiv.querySelector(".message-text");
 
+    // Reply message
+    function replyMessage(messageId, senderName) {
+        // If edit mode is active, cancel it
+        if (document.getElementById('edit-preview').style.display === 'block') {
+            cancelEdit();
+        }
+        // Also cancel any existing reply
+        cancelReply();
+        
+        const messageDiv = document.getElementById(`message-${messageId}`);
+        if (!messageDiv) {
+            console.error(`Message with ID ${messageId} not found for reply.`);
+            return;
+        }
+        
+        const messageTextElement = messageDiv.querySelector(".message-text");
+        if (!messageTextElement) {
+            console.error(`Message text not found for message ID: ${messageId}`);
+            return;
+        }
+        
+        const replyPreview = document.getElementById("reply-preview");
         replyPreview.style.display = "block";
         replyPreview.querySelector(".reply-username").textContent = senderName;
         replyPreview.querySelector(".reply-text").textContent = messageTextElement.textContent;
+        
         const messageInput = document.getElementById("message-input");
         messageInput.focus();
-        ReplyMessageId = messageId;        
+        
+        ReplyMessageId = messageId;
     }
 
-    // Save the updated message
+    // Cancel reply
+    function cancelReply() {
+        const replyPreview = document.getElementById('reply-preview');
+        if (replyPreview) {
+            replyPreview.style.display = 'none';
+        }
+        ReplyMessageId = null;
+    }
+
+    // Save the Reply message
     function saveReplyMessage() {
         if (!ReplyMessageId) {
             return;
@@ -1333,11 +1340,6 @@ function editMessage(messageId) {
         saveButton.style.display = "none"; // Hide the save button
     }
 
-    function cancelReply() {
-        document.getElementById('reply-preview').style.display = 'none';
-        
-    }
-
     // Convert file to base64
     function convertFileToBase64(file) {
         return new Promise((resolve, reject) => {
@@ -1362,6 +1364,15 @@ function editMessage(messageId) {
         }
     }
 
+    function closeOptions(messageId) {
+    const optionsPopup = document.getElementById(`options-${messageId}`);
+    if (optionsPopup) {
+        optionsPopup.style.display = "none";
+    }
+}
+
+
+
     // Toggle reaction popup
     function toggleReactionPopup(messageId) {
         const reactionPopup = document.getElementById(`reaction-popup-${messageId}`);
@@ -1371,19 +1382,28 @@ function editMessage(messageId) {
     }
 
     // Get the modal
-    var modal = document.getElementById("deleteModal");
+    const modal = document.getElementById("deleteModal");
 
-    function openDeleteModal(messageId) {
-    modal.style.display = "block";
-    modal.setAttribute('data-message-id', messageId);
+    function openDeleteModal(messageId, senderId) {
+    // Assume currentUserId is defined (the logged-in user's ID)
+    const deleteForEveryoneContainer = document.getElementById('deleteForEveryone');
+    if (senderId === currentUserId) {
+        deleteForEveryoneContainer.style.display = 'block';
+    } else {
+        deleteForEveryoneContainer.style.display = 'none';
     }
+    // Store messageId in a global variable or in the modal for later use by deleteMessage()
+    // ...
+    modal.style.display = 'block';
+}
+
 
     function closeModal() {
     modal.style.display = "none";
     }
 
     function deleteMessage(option) {
-    var messageId = modal.getAttribute('data-message-id');
+    const messageId = modal.getAttribute('data-message-id');
 
     if (messageId) {
         if (option === 1) {
@@ -1427,15 +1447,16 @@ function generateReactionPopupContent(reactions, messageId) {
     if (!reactions || reactions.length === 0) return "";
     return reactions
         .map(reaction => `
-            <div class="reaction-list" 
+            <span 
                  reaction_id="${reaction.id}" 
                  message_id="${messageId}"
                  onclick="reactionManager.addReaction('${messageId}', '${reaction.id}', '${reaction.value.replace(/'/g, "\\'").replace(/"/g, "&quot;")}')"> <!-- Escaping single and double quotes -->
                 ${reaction.value}  <!-- Make sure this outputs the correct HTML or icon -->
-            </div>
+            </span>
         `)
         .join("");
 }
+
 
 
 class ReactionManager {
@@ -1617,37 +1638,39 @@ class ReactionManager {
       return;
     }
     let listItems = "";
-    Object.keys(aggregated).forEach((reactionType) => {
-      const data = aggregated[reactionType];
-      listItems += `
-        <li style="margin-bottom:10px;">
-          <div><strong>${reactionType} ${data.count}</strong></div>
-          <ul style="list-style:none; padding-left:0;">`;
-      for (let i = 0; i < data.names.length; i++) {
-        const photo = data.photos[i] ? data.photos[i] : '/static/images/default-avatar.jpg';
-        const name = data.names[i] || 'Unknown';
-        listItems += `
-          <li style="display:flex; align-items:center; margin-bottom:5px;">
-            <img src="${photo}" alt="${name}" style="height:25px; width:25px; border-radius:50%; margin-right:5px;">
-            <span>${name}</span>
-          </li>`;
-      }
-      listItems += `</ul></li>`;
-    });
+Object.keys(aggregated).forEach((reactionType) => {
+  const data = aggregated[reactionType];
+  listItems += `
+    <li style="margin-bottom:10px;align-items: center;justify-content: space-between;display: flex;list-style: none;">
+        <ul style="list-style:none; padding-left:0;">`;
+  for (let i = 0; i < data.names.length; i++) {
+    const photo = data.photos[i] ? data.photos[i] : '/static/images/default-avatar.jpg';
+    const name = data.names[i] || 'Unknown';
+    listItems += `
+      <li style="display:flex; align-items:center; margin-bottom:5px;">
+        <img src="${photo}" alt="${name}" style="height:25px; width:25px; border-radius:50%; margin-right:5px;">
+        <span>${name}</span>
+      </li>`;
+  }
+  listItems += `</ul>
+      <div><strong>${reactionType} ${data.count}</strong></div>
+    </li>`;
+});
+
     const modal = document.createElement('div');
     modal.classList.add('message-modal');
     modal.innerHTML = `
       <div class="message-modal-content">
-        <span class="close-btn">&times;</span>
+        <span class="close-btnn"><i class="bi bi-x-circle"></i></span>
         <h4>All Reactions</h4>
         <hr>
-        <ul>
+        <ul style="padding-left: 0;">
           ${listItems}
         </ul>
       </div>
     `;
     document.body.appendChild(modal);
-    modal.querySelector('.close-btn').addEventListener('click', () => {
+    modal.querySelector('.close-btnn').addEventListener('click', () => {
       document.body.removeChild(modal);
     });
     modal.style.display = 'block';
@@ -1671,111 +1694,88 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-  // Global variable to store the last single-tick message ID that we sent
-  let lastSingleTickMessageId = null;
 
-  // Function to send a read receipt for a specific message.
-  function markMessagesAsRead(messageId) {
-    const chatId = document.getElementById("chat_id").value;
-    const senderId = "{{ user.id }}";  // Provided by Django
-    const data = {
-      chat_id: chatId,
-      sender_id: senderId,
-      message_id: messageId,
-      action: 'mark_msg_as_read'
-    };
-
-    if (socket && socket.readyState === WebSocket.OPEN) {
-      socket.send(JSON.stringify(data));
-      console.log("Sent mark as read request for message id:", messageId);
-    } else {
-      socket.addEventListener('open', () => {
-        socket.send(JSON.stringify(data));
-        console.log("Sent mark as read request after socket open for message id:", messageId);
-      });
-    }
+function getUnreadReceivedMessageIds() {
+  const chatBody = document.getElementById('chat-body');
+  if (!chatBody) {
+    console.error('Element with id "chat-body" not found');
+    return [];
   }
 
-  // Function to check the seen status of the last message.
-  function checkLastMessageSeenStatusAndMark() {
-    const chatBody = document.getElementById('chat-body');
-    if (!chatBody) {
-      console.error('Element with id "chat-body" not found');
-      return;
-    }
-    const messages = chatBody.querySelectorAll('.message');
-    if (messages.length === 0) return;
-    // Get the last message (assumes messages are in order).
-    const lastMessage = messages[messages.length - 1];
-    const seenStatusEl = lastMessage.querySelector('.seen-status');
-    if (seenStatusEl) {
-      const icon = seenStatusEl.querySelector('i');
-      if (icon) {
-        // If the icon has class "bi-check2" but not "bi-check2-all", then it's a single tick.
-        if (icon.classList.contains('bi-check2') && !icon.classList.contains('bi-check2-all')) {
-          // Extract the message ID from the last message's ID attribute.
-          // Assuming the format is "message-<messageId>".
-          const currentMessageId = lastMessage.getAttribute('id').split('-')[1];
-          // Only send if this message hasn't already been processed.
-          if (lastSingleTickMessageId !== currentMessageId) {
-            lastSingleTickMessageId = currentMessageId;
-            markMessagesAsRead(currentMessageId);
-          }
-        } else {
-          console.log("Last message already marked as read (double tick).");
-        }
+  // Select all messages with the "received" class.
+  const receivedMessages = chatBody.querySelectorAll('.message.received');
+  const unreadIds = [];
+
+  receivedMessages.forEach(message => {
+    // Check if the message does not have the "read" class.
+    if (!message.classList.contains('read')) {
+      const idAttr = message.getAttribute('id'); // Expects format "message-<id>"
+      if (idAttr && idAttr.startsWith('message-')) {
+        const messageId = idAttr.split('-')[1];
+        unreadIds.push(messageId);
       }
     }
-  }
+  });
 
-  // When the socket is open, check the last message's seen status.
-  if (socket.readyState === WebSocket.OPEN) {
-    checkLastMessageSeenStatusAndMark();
-  } else {
-    socket.addEventListener('open', checkLastMessageSeenStatusAndMark);
-  }
+  return unreadIds;
+}
 
-  // Also, if you load new messages via pagination or other dynamic methods,
-  // call checkLastMessageSeenStatusAndMark() after inserting the new messages.
+  document.addEventListener('DOMContentLoaded', () => {
+    const unreadMessageIds = getUnreadReceivedMessageIds();    
+    const chatId = document.getElementById("chat_id").value;
+        const payload = {
+        message_id:unreadMessageIds, // The specific message ID
+        sender_id: senderId,
+        action: 'mark_messages_as_read',
+    };
+    if (socket.readyState === WebSocket.OPEN) {
+        socket.send(JSON.stringify(payload));        
+    } else {
+        socket.addEventListener('open', () => {
+            socket.send(JSON.stringify(payload));            
+        });
+    }
+});
 
 
 
 
+
+// Online Message read status Update
 
 // Function to send a read receipt for a specific message.
 function MessagesAsRead(messageId) {
     const payload = {
         message_id: messageId,  // The specific message ID
-        sender_id: senderId,
+        sender_id: senderId,    // The current user's ID (the one sending the receipt)
         action: 'mark_as_read',
     };
+
     if (socket.readyState === WebSocket.OPEN) {
         socket.send(JSON.stringify(payload));
-        console.log("Sent read receipt:", payload);
     } else {
         socket.addEventListener('open', () => {
             socket.send(JSON.stringify(payload));
-            console.log("Sent read receipt after socket open:", payload);
         });
     }
 }
 
 // --- INTERSECTION OBSERVER SETUP ---
-// Create an IntersectionObserver to detect when a message enters the viewport.
+// This observer detects when a message element enters the viewport.
 const messageObserver = new IntersectionObserver((entries, observer) => {
     entries.forEach(entry => {
         if (entry.isIntersecting) {
-            // Extract the message ID from the target element.
-            // Assumes each message element has an ID in the format "message-<messageId>"
             const element = entry.target;
-            const idAttr = element.getAttribute("id");
-            if (idAttr && idAttr.startsWith("message-")) {
-                const messageId = idAttr.substring("message-".length);
-                // Send a read receipt for this message.
-                MessagesAsRead(messageId);
+            // Only proceed if this is a "received" message.
+            if (element.classList.contains("received")) {
+                const idAttr = element.getAttribute("id");
+                if (idAttr && idAttr.startsWith("message-")) {
+                    const messageId = idAttr.substring("message-".length);
+                    MessagesAsRead(messageId);
+                }
             }
-            // Unobserve the element so that we don't send multiple read receipts for the same message.
-            observer.unobserve(entry.target);
+            // Stop observing this element to avoid multiple receipts.
+            observer.unobserve(element);
         }
     });
 }, {
@@ -1784,40 +1784,41 @@ const messageObserver = new IntersectionObserver((entries, observer) => {
 });
 
 // --- FUNCTION TO OBSERVE NEW MESSAGE NODES ---
-// This function attaches the IntersectionObserver to any message elements that haven't been observed yet.
+// This function attaches the IntersectionObserver to any new message elements.
 function observeNewMessages() {
     const newMessages = document.querySelectorAll(".chat-body .message:not([data-read-observed])");
     newMessages.forEach(msg => {
-        // Mark this message so that we don't observe it again.
+        // Mark the new message so we don't observe it again.
         msg.setAttribute("data-read-observed", "true");
         messageObserver.observe(msg);
     });
 }
 
 // --- MUTATION OBSERVER SETUP ---
-// This observer will detect when new nodes are added to the chat body.
+// This observer watches for new messages added to the chat body.
 const chatBody = document.querySelector(".chat-body");
 if (chatBody) {
     const mutationObserver = new MutationObserver((mutationsList) => {
         mutationsList.forEach(mutation => {
             if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
-                // Call observeNewMessages() to attach observers to newly added message elements.
+                // Attach observers to any newly added message elements.
                 observeNewMessages();
             }
         });
     });
-    // Start observing the chat body for changes.
     mutationObserver.observe(chatBody, { childList: true, subtree: true });
 }
 
-// --- INITIAL CALL ---
-// Call observeNewMessages on page load to observe any messages already present.
-observeNewMessages();
+// Mark initial messages as "observed" so they don't trigger a read receipt on page load.
+if (chatBody) {
+    const initialMessages = chatBody.querySelectorAll(".message");
+    initialMessages.forEach(msg => {
+        msg.setAttribute("data-read-observed", "true");
+    });
+}
 
 
 
-// Optional: If you add new messages dynamically via your socket or AJAX, 
-// call observeMessages() after appending them so that the new messages are also observed.
 
 // Typing Indicator
 document.addEventListener("DOMContentLoaded", function () {
@@ -1855,6 +1856,8 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 
+
+
 </script>
 
 
@@ -1865,6 +1868,27 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 <style>
+
+/* Styles for the Unread Messages tag */
+.unread-messages-tag {
+    padding: 8px;
+    text-align: center;
+    background-color: #f0f0f0;
+    color: #333;
+    font-weight: bold;
+    margin: 10px 0;
+    border-radius: 4px;
+    opacity: 1;
+    transition: opacity 0.5s ease-in-out;
+}
+
+/* Hidden state for fade out */
+.unread-messages-tag.hidden {
+    opacity: 0;
+}
+
+
+
     .reactionandseen {
         display: flex;
         justify-content: space-between; /* Pushes children to opposite ends */
@@ -2069,11 +2093,11 @@ document.addEventListener("DOMContentLoaded", function () {
 .parmess-del-options button {
   color:red;
   width: 100%;
-  padding: 10px;
+  /* padding: 10px; */
   border: none;
   border-radius: 5px;
   cursor: pointer;
-  font-size: 16px;
+  font-size: 12px;
 }
 
 .parmess-del-options button:hover {
@@ -2123,7 +2147,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     /* Overall Chat Container */
     .chat-container {
-        height: 620px;
+        height: 88vh;
         background-color: #211237f2; /*shubhankar change only color*/
         border-radius: 10px;
         box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
@@ -2155,13 +2179,13 @@ document.addEventListener("DOMContentLoaded", function () {
         text-overflow: ellipsis; 
     }
     .chat-header {
-        background-color: #533b79;
-        color: white;
-        padding: 15px;
-        display: flex;
-        justify-content: flex-start;
-        align-items: center;
-        border-radius: 10px 10px 0 0;
+    background-color: #291546;
+    color: white;
+    padding: 6px 0px 8px 8px;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    border-radius: 10px 10px 0 0;
     }
 
     .user-info {
@@ -2170,8 +2194,8 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     .profile-pic {
-        width: 60px;
-        height: 60px;
+        width: 50px;
+        height: 50px;
         border-radius: 50%;
         margin-right: 20px;
         object-fit: cover;
@@ -2183,10 +2207,7 @@ document.addEventListener("DOMContentLoaded", function () {
         color: white;
     }
 
-    #chat-body {
-  max-height: 500px;
-  overflow-y: auto;
-}
+
 
     /* Chat Body */
     .chat-body {
@@ -2195,7 +2216,7 @@ document.addEventListener("DOMContentLoaded", function () {
         overflow-y: auto;
         display: flex;
         flex-direction: column;
-        scrollbar-width: thin; /* For Firefox */
+        scrollbar-width: none; /* For Firefox */
         scrollbar-color: #c7c5c5 #f2f2f2;
     }
         /* Customize scrollbar for Webkit browsers */
@@ -2259,7 +2280,7 @@ document.addEventListener("DOMContentLoaded", function () {
         height: 20px;
         border-radius: 50%;
         object-fit: cover;
-        margin-right: 10px;
+        margin-right: 4px;
     }
 
     .message-username {
@@ -2334,7 +2355,7 @@ document.addEventListener("DOMContentLoaded", function () {
     /* Footer */
     .chat-footer {
         padding: 4px;
-        background-color: #e6e6e6;        
+        background-color: #00e6ff;        
         display: flex;
         justify-content: space-between;
         flex-direction: column;
@@ -2410,9 +2431,9 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     
     .reaction-popup span {
-        margin: 5px;
+        margin: 2px;
         cursor: pointer;
-        font-size: 18px;
+        font-size: 10px;
     }
     
     .reaction-popup span:hover {
@@ -2496,25 +2517,25 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     .parent-message {
+        align-items: center;
+        display: flex;
         padding: 10px;
-        background-color: #e0e0e0;
+        background-color: #4da3dc69;
         border-left: 4px solid #4caf50;
         border-radius: 8px;
-        margin-bottom: 5px;
-        margin-top: 5px;    
+        margin-bottom: 5px;  
         color: #333;
     }
 
     .parent-message span:first-child {
         font-size: 15px;
         color:black;
-        font-weight: bold;
         margin-right: 5px;
     }
 
-    .parent-message span:last-child {
+    .parent-message div:last-child {
         font-size: 14px;
-        color: #555;
+        color: #fff;
     }
 
 
@@ -2559,7 +2580,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     .parmess-button {
-        padding: 12px 20px;
+        padding: 16px 20px;
         background-color: #533b79;
         color: white;
         border: none;
@@ -2580,6 +2601,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     .close-reply{
+        float: right;
         color:red;
         cursor: pointer;
     }
@@ -2685,10 +2707,11 @@ document.addEventListener("DOMContentLoaded", function () {
     
     .message-modal .message-modal-content {
     position: relative;
-    background-color: #151212;
+    border-radius: 6px;
+    background-color: #0e0e2e;;
     margin: 5% auto;
     padding: 16px;
-    border: 1px solid #888;
+    /* border: 1px solid #888; */
     margin-top: 18%;
     /* margin-right: 34%; */
     max-width: 325px;
@@ -2711,7 +2734,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     @media (max-width: 1200px) {
     .chat-container {
-        max-width: 75%;
+        max-width: 100%;
     }
 
     .username {
@@ -2725,12 +2748,15 @@ document.addEventListener("DOMContentLoaded", function () {
         margin-left: 50px;
         font-size: 20px;
 }
+.message-modal .message-modal-content{
+    margin-top: 25%;
+}
 }
 
 /* Medium Desktops (992px and below) */
 @media (max-width: 992px) {
     .chat-container {
-        max-width: 85%;
+        max-width: 100%;
     }
 
     .username {
@@ -2744,6 +2770,9 @@ document.addEventListener("DOMContentLoaded", function () {
     .chat-footer form{
         display: flex;
     }
+    .message-modal .message-modal-content{
+    margin-top: 50%;
+}
 }
 
 
@@ -2751,7 +2780,7 @@ document.addEventListener("DOMContentLoaded", function () {
     @media (max-width: 768px) {
     .chat-container {
         height: 90vh;
-        max-width: 100%;
+        width: 100%;
     }
     .chat-footer form{
         display: flex;
@@ -2763,13 +2792,18 @@ document.addEventListener("DOMContentLoaded", function () {
     #sendDataButton {
     margin-left: 412px;
     font-size: 20px;
-} 
+}
+.message-modal .message-modal-content{
+    margin-top: 50%;
+}
 .parmess-del-modal-content {
     margin-left: 22%;
     margin-top: 55%;
     width: 53%;
 }
-}
+} 
+
+
 @media (max-width: 620px){
     #sendDataButton {
     padding-top: 12px;
@@ -2777,10 +2811,13 @@ document.addEventListener("DOMContentLoaded", function () {
     margin-left: 160px;
     font-size: 20px;
 }
+.message-modal .message-modal-content{
+    margin-top: 50%;
+}
 }
 @media (max-width: 480px) {
     .chat-container {
-        height: 88vh;
+        height: 89vh;
         border-radius: 0; /* No border-radius on small screens */
     }
 
@@ -2804,7 +2841,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     .chat-footer button {
         font-size: 0.8rem;
-        padding: 6px;
+        /* padding: 6px; */
     }
     #sendDataButton {
     padding-top: 12px;
@@ -2823,6 +2860,9 @@ document.addEventListener("DOMContentLoaded", function () {
         margin-top: 88%;
         width: 53%;
     }
+.message-modal .message-modal-content{
+    margin-top: 80%;
+}
 
 
 

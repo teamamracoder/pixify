@@ -1,5 +1,8 @@
 {% extends "enduser/base.html" %}
 
+{% load static %}
+
+
 {% block title %}Group Chat Details{% endblock %}
 
 {% block content %}
@@ -8,24 +11,26 @@
 <div class="group-chat-container">
     <div class="header">
       <!-- Group Name with Edit Button -->
-      <h1 class="group-name">
+      <h1 class="group-name ">
         <span id="group-name-text">{{ data.chat.title }}</span>
-        <button class="edit-btn" onclick="editGroupNameInline()">
-          <i class="fa-solid fa-pen"></i>
-        </button>
       </h1>
+      <div class="g-name">
+      <button class="edit-btn gp-name" onclick="editGroupNameInline()">
+        <i class="fa-solid fa-pen"></i>
+      </button>
       {% csrf_token %}
       <input type="hidden" id="chat_id" name="chat_id" value="{{ data.chat.id }}">
       <button class="exit-btn" onclick="removeChat()">
         <i class="fa-sharp fa-solid fa-right-from-bracket"></i>Exit
       </button>
     </div>
+    </div>
     
   <!-- Group Details Section -->
   <div class="group-details">
     <!-- Group Photo with Edit Button -->
     <div class="group-photo-container">
-        <img src="{{ data.chat.chat_cover }}" alt="Group Photo" class="group-photo">
+        <img src="{% static data.chat.chat_cover %}" alt="Group Photo" class="group-photo">
         <button class="edit-btn" onclick="document.getElementById('group-photo-input').click();">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-image" viewBox="0 0 16 16">
                 <path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0"/>
@@ -36,7 +41,9 @@
     </div>
 
     <p class="group-description">
-      {{ data.chat.chat_bio }}  <!-- Display group description dynamically -->
+      {% if data.chat.chat_bio %}
+      {{ data.chat.chat_bio }} <!-- Display group description dynamically -->
+      {% endif %}
       <button class="edit-btn" onclick="editGroupBio()">
         <i class="fa-solid fa-pen"></i>
       </button>
@@ -83,7 +90,7 @@
             {% if data.user == data.chat.created_by %}
               <div class="member-actions">
                 {% if member.id != data.chat.created_by %}              
-                  <button class="remove-btn" onclick="removeMember('{{ member.id }}')"><i class="fa-solid fa-user-xmark"></i></button>
+                  <button class="remove-btn" onclick="removeMember('{{ member.id }}')"><i class="bi bi-person-dash-fill"></i></button>
                 {% endif %}
               </div>
             {% endif %}
@@ -130,7 +137,7 @@ $(document).ready(function () {
             url: `/chat/${chatId}/members/api?search=${searchQuery}`,
             type: 'GET',
             success: function (res) {
-                var combinedHtml = '';
+                let combinedHtml = '';
                 const fallbackImage = '/static/images/avatar.jpg';
 
                 if (res.members.length === 0) {
@@ -364,8 +371,8 @@ function removeMember(memberId) {
     });
 }
 
-var memberId = {{ data.user.id }}; // Assuming data.user is an object and you need the id attribute
-var createdById = {{ data.chat.created_by.id }}; // Ensure that you are accessing the correct id attribute
+const memberId = {{ data.user.id }}; // Assuming data.user is an object and you need the id attribute
+const createdById = {{ data.chat.created_by.id }}; // Ensure that you are accessing the correct id attribute
 
 function removeChat() {
     let chatId = "{{ data.chat.id }}"; // Ensure chatId is safely handled as a string
@@ -494,12 +501,11 @@ function saveGroupBio(newBio) {
 
 <style>
 
-  .parchat-profile-text{
-    color:black;
-  }
+  
 
 
 .parchat-selection-body {
+  margin-bottom: 2px;
     display: flex;
     align-items: center;
     padding: 10px;
@@ -513,7 +519,7 @@ function saveGroupBio(newBio) {
 }
 
 .parchat-selection-body.selected {
-    background-color: #d3f9d8; /* Light green background for selected members */
+    background-color: #3a15ec4a; /* Light green background for selected members */
     border: 2px solid #28a745; /* Darker green border for emphasis */
 }
 
@@ -525,14 +531,15 @@ function saveGroupBio(newBio) {
 }
 
 .parchat-profile-text {
-    font-size: 16px;
-    color: #333;
+    font-size: 14px;
+    color: #ffffff;
 }
 
 
 
 
 .remove-btn {
+   font-size: 20px;
     background-color: transparent;    
     color: white;             
     border: none;             
@@ -545,7 +552,7 @@ function saveGroupBio(newBio) {
 }
 
 .remove-btn:hover {
-    background-color: #5a3b89; 
+    background-color: transparent; 
     box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15); 
 }
 
@@ -559,7 +566,7 @@ function saveGroupBio(newBio) {
 }
 
 .parchat-selection-body:hover {
-    background-color: #f1f1f1;  
+    background-color: #3a15ec4a;  
 }
 
 
@@ -574,8 +581,20 @@ function saveGroupBio(newBio) {
     font-size: 11px;
 }
 
-
-  .chatdet_search{
+ #group-name-input{
+    font-size: 16px;
+    background-color: #3D3D6B;
+    border: var(--bs-border-width) solid var(--bs-border-color);
+    color: #ffff;
+    display: flex;
+    border-radius: 4px;
+    padding: 8px;
+    width: 301px;
+    margin: 0 auto;
+    margin-bottom: 0px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  }
+  .group-description-input{
     font-size: 16px;
     background-color: #3D3D6B;
     border: var(--bs-border-width) solid var(--bs-border-color);
@@ -690,8 +709,8 @@ function saveGroupBio(newBio) {
 
 /* Profile photo styling */
 .parchat-profile-photo {
-  width: 40px;
-  height: 40px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
   object-fit: cover;
   margin-right: 10px;
@@ -720,6 +739,7 @@ button:hover {
 
 
 
+
   .member-title{
     color:#ffff;
   }
@@ -732,6 +752,7 @@ button:hover {
 
   /* Group Chat Container */
   .group-chat-container {
+    position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -755,10 +776,12 @@ button:hover {
   }
 
   .group-name {
-    font-size: 28px;
-    margin: 0;
-    display: inline-flex;
-    align-items: center;
+    font-size:28px;
+    /* white-space: nowrap;  */
+    overflow: hidden; 
+    text-overflow: ellipsis; 
+    max-width: 360px; /* Adjust width as needed */
+    display: inline-block;
   }
 
   .edit-btn {
@@ -767,6 +790,11 @@ button:hover {
     margin-left: 10px;
     cursor: pointer;
   }
+  .g-name{
+    display:flex;
+
+  }
+  
 
   .edit-icon {
     width: 20px;
@@ -803,6 +831,7 @@ button:hover {
   }
 
   .group-photo {
+    object-fit: cover;
     margin-left: 13%;
     width: 120px;
     height: 120px;
@@ -812,11 +841,13 @@ button:hover {
   }
 
   .group-description {
-    font-size: 16px;
-    color: black;
+    font-size: 20px;
+    color: #ebe1c6;
     margin: 5px 0;
-    display: inline-flex;
+    display: flex;
     align-items: center;
+    justify-content:center;
+    font-weight: lighter
   }
 
   .total-members {
@@ -826,7 +857,7 @@ button:hover {
 
   /* Member List Section */
   .member-list {
-    position:relative;
+    overflow-y: scroll;
     height: calc(-348.966px + 100vh);
     /* border: 1px solid #827b7b70; */
     background-color: #1F0545;
@@ -871,7 +902,7 @@ button:hover {
   .add-member-btn {
     position: absolute;
     bottom: 33px;
-    right: 28px;
+    right: 46px;
     width: 40px; /* Adjust width */
     height: 40px; /* Adjust height */
     background-color: #6a4c9c;
@@ -996,7 +1027,35 @@ button:hover {
       margin: 46% auto;
       width: 83%;
     }
+    .member-list{
+    height: calc(-448.966px + 100vh);
+    }
+    .add-member-btn{
+    bottom: 100px;
+    right: 62px;
+    }
   }
+  @media (min-width: 768px) and (max-width: 991px){
+    #group-name-input{
+      font-size: 15px;
+    background-color: #3D3D6B;
+    border: var(--bs-border-width) solid var(--bs-border-color);
+    color: #ffff;
+    display: flex;
+    border-radius: 4px;
+    padding: 8px;
+    width: 196px;
+    margin: 0 auto;
+    margin-bottom: 0px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    .group-name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-size: 20px;
+      margin: 0;
+      display: inline-block;
+  }}
   @media (max-width: 480px){
     .parchat-modal-content{
       margin: 80% auto;
@@ -1059,6 +1118,7 @@ button:hover {
       height: calc(-408.966px + 100vh);
     }
 }
+
 </style>
 
 {% endblock %}

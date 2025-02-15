@@ -78,9 +78,9 @@ def change_theme(user, ui_mode):
 def get_user_details(user_id):
     return get_object_or_404(User, id=user_id)
 
+def get_user_name_and_img(user_id):
+    return User.objects.filter(id=user_id,is_active = True)
+
 def friends_count(user_id):
     friends = Follower.objects.filter(user_id=user_id).select_related( 'following').count()
     return friends
-
-def get_user_name_and_img(user_id):
-    return User.objects.filter(id=user_id,is_active = True)
