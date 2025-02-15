@@ -14,7 +14,7 @@ from django.core.paginator import Paginator
 
 from datetime import datetime, timedelta, timezone
 from django.utils.timezone import now
-from ..constants import PostContentType
+from ..constants import PostContentType,PostType
 
 class UserStoryCreatView(View):
     def post(self, request):
@@ -24,13 +24,14 @@ class UserStoryCreatView(View):
         text_content = request.POST.get('story-text', None)  # Fetch text content
 
         media_urls = []
-        media_types = []
+        #media_types = []
+        media_types=[]
         music_url = None
 
         # Process media files
         for file in storyFiles:
             file_extension = file.name.split('.')[1].lower()
-            file_type = 'video' if file_extension in ['mp4', 'mov', 'avi'] else 'image'
+            file_type = PostContentType.VIDEO.value if file_extension in ['mp4', 'mov', 'avi'] else PostContentType.PHOTO.value
             file_path = os.path.join(settings.MEDIA_ROOT, file.name)
 
             with open(file_path, 'wb+') as destination:
@@ -39,6 +40,7 @@ class UserStoryCreatView(View):
 
             media_urls.append(f"{settings.MEDIA_URL}{file.name}")
             media_types.append(file_type)
+            #print("file_type",file_type)
 
         # Process music file
         if music_file:
@@ -52,7 +54,7 @@ class UserStoryCreatView(View):
         if text_content:
             services.story_service.user_story(
                 media_urls=[],
-                media_types=[],
+                media_types= PostContentType.TEXT.value,
                 user_id=user_id,
                 story_text=text_content,
             )
@@ -115,7 +117,7 @@ class UserActiveStories(View):
 
         for user in users_with_stories:
             user_id = user["posted_by_id"]
-            user_stories = Post.objects.filter(posted_by_id=user_id).order_by(
+            user_stories = Post.objects.filter(posted_by_id=user_id,type=PostType.STATUS.value).order_by(
                 "created_at"
             )  # Get all stories of the user
 
@@ -130,8 +132,19 @@ class UserActiveStories(View):
                 }
                 for story in user_stories
             ]
-        print("all_stories",all_stories)
-        return JsonResponse({"stories": all_stories})
+        user_queryset = services.user_service.get_user_name_and_img(user_id=user_id)
+        user_instance = user_queryset.first()
+        print("user_instance",user_instance)
+        if user_instance:
+            user_details = {
+                "first_name": user_instance.first_name,
+                "profile_photo_url": user_instance.profile_photo_url,
+            }
+        else:
+            user_details = None
+        print("user_details",user_details)
+        return JsonResponse({"stories": all_stories, "userDetails": user_details})
+
 
 
 class UploadStoryView(View):

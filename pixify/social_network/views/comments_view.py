@@ -39,20 +39,20 @@ def time_ago(time):
 class CommentsCreateView(View):
     def get(self, request):
         return render(request, 'enduser/home/index.html')
-    
-    def post(self,request):  
-         post_id = request.POST.get('post_id') 
+
+    def post(self,request):
+         post_id = request.POST.get('post_id')
          user_id = request.user.id
          user_details=list(services.comment_service.get_user(user_id).values())
-         commentstext=request.POST['comment_text']    
+         commentstext=request.POST['comment_text']
          services.comment_service.user_comments_create(commentstext,post_id,user_id)
 
          post_del=list(services.comment_service.get_post(post_id).values())
 
          comment_list = services.comment_service.comment_list(post_id)
          return JsonResponse({ "status": "success", "comments":list(comment_list),"posts":list(post_del),"user_details":list(user_details)})
-           
-   
+
+
 
 
 
@@ -62,24 +62,24 @@ class CommentsCreateView(View):
 
 class CommentsListView(View):
     def get(self, request):
-        post_id = request.GET.get('post_id') 
+        post_id = request.GET.get('post_id')
         user_id = request.GET.get('user_id')
 
         user_details = list(services.comment_service.get_user(user_id).values())
         post_del = list(services.comment_service.get_post(post_id).values())
         comment_list = services.comment_service.comment_list(post_id)
         comment_count =services.comment_service.comment_count(post_id)
-      
+
         for comment in comment_list:
-           
+
             if 'comment_by' in comment and isinstance(comment['comment_by'], dict):
                 comment['comment_by_first_name'] = comment['comment_by'].get('first_name', 'Unknown')
                 comment['comment_by_last_name'] = comment['comment_by'].get('last_name', 'Unknown')
-           
+
 
         return JsonResponse({
             "status": "success",
-            "comments": list(comment_list), 
+            "comments": list(comment_list),
             "posts": list(post_del),
             "user_details": list(user_details),
             "comment_count":comment_count,
@@ -102,36 +102,37 @@ class GetPostCommentView(View):
         })
 
 
- 
+
 
 class CommentReplyView(View):
-    def post(self, request):  
+    def post(self, request):
         post_id = request.POST.get('post_id')
         comment_id = request.POST.get('reply_for')  # Can be empty for top-level comments
         user_id = request.user.id
         reply_text = request.POST.get('reply_text')
 
 
-        comment_list = services.comment_service.comment_list(post_id)
-        
+
+
         if not reply_text or not post_id:
             return JsonResponse({"status": "error", "message": "Invalid data"}, status=400)
         try:
-          
-            if comment_id:  
+
+            if comment_id:
                 services.comment_service.user_reply_create(reply_text, post_id, user_id, comment_id)
                 reply_list = list(comment_service.reply_list(comment_id).values())
-           
+
             else:
               services.comment_service.user_comments_create(reply_text,post_id,user_id)
               reply_list = []
-         
+
+            comment_list = services.comment_service.comment_list(post_id)
             return JsonResponse({
                 "status": "success",
                 "comments":list(comment_list),
                 "replies": list(reply_list),
-                
-                
+
+
             })
         except Exception as e:
             return JsonResponse({"status": "error", "message": str(e)}, status=500)
@@ -157,9 +158,9 @@ class DeleteCommentView(View):
 #         comment_likes = {}
 #         comment_id = request.POST.get("comment_id")
 #         like_count = CommentReaction.objects.filter(comment_id_id=comment_id).count()
-#         print("like_count",like_count) 
-            
-       
+#         print("like_count",like_count)
+
+
 
 #         return JsonResponse(comment_likes)
 
@@ -174,7 +175,7 @@ class fetch_comment_likes(View):
             # Fetch like count for a specific comment
             like_count = CommentReaction.objects.filter(comment_id_id=comment_id).count()
             user_liked = CommentReaction.objects.filter(comment_id_id=comment_id, user_id=user_id).exists()
-            
+
             return JsonResponse({
                 "comment_id": comment_id,
                 "like_count": like_count,
@@ -193,7 +194,7 @@ class fetch_comment_likes(View):
             comment_likes[c_id] = {"like_count": like_count, "user_liked": user_liked}
 
         return JsonResponse(comment_likes)
-    
+
 
 
 class ToggleLikeView(View):
@@ -217,14 +218,14 @@ class ToggleLikeView(View):
 class GetRepliesView(View):
     def get(self, request):
         comment_id = request.GET.get('comment_id')
-       
-        
+
+
         # Fetch only replies where reply_for_id matches the comment_id
         replies = Comment.objects.filter(reply_for_id=comment_id).values(
             'id', 'comment', 'comment_by__first_name', 'comment_by__last_name', 'created_at'
         )
         reply_count = replies.count()  # Count number of replies
-        
+
         return JsonResponse({'replies': list(replies), 'reply_count': reply_count})
 
 

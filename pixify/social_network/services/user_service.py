@@ -26,8 +26,8 @@ def update_user(user_id,first_name,last_name,email,phone,gender,address,dob,coun
     user.bio=bio
     user.hobbies=hobbies
     user.relationship_status=relationship_status
-    #if profile_picture:
-     #   user.profile_photo_url = profile_picture
+    if profile_picture:
+        user.profile_photo_url = profile_picture
     user.updated_by = user
     user.save()
     return user
@@ -52,3 +52,5 @@ def change_theme(user, ui_mode):
 def get_user_details(user_id):
     return get_object_or_404(User, id=user_id)
 
+def get_user_name_and_img(user_id):
+    return User.objects.filter(id=user_id,is_active = True)

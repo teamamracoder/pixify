@@ -58,6 +58,7 @@
 
 
     {% for story in story_dict.storys %}
+       {% if story.content_type != 1 %}
 
     <div class="story" style="border: 2px solid #fff;" onclick="openStoryView('{{ story.posted_by.id }}', '{{ forloop.counter0 }}')">
         <div class="authorrr">{{ story.posted_by.first_name }}      {{ story.posted_by.last_name }}</div>
@@ -70,19 +71,37 @@
             </video>
         {% elif story.content_type == 2 and story.media_url.0 %}
             <img src="{% static story.media_url.0 %}" alt="Story Image">
-        {% elif story.description %}
-            <p class="story-text"style="margin:10px;">{{ story.description }}</p>
+
         {% else %}
             <p>No media or text available.</p>
         {% endif %}
         <div id="dp">
-            {% if story.posted_by.profile_photo_url.0 %}
-            <img src="{% static story.posted_by.profile_photo_url.0 %}" alt="">
+            {% if story.posted_by.profile_photo_url %}
+            <img src="{% static story.posted_by.profile_photo_url %}" alt="">
                {% else %}
               <img src="{% static 'images/avatar.jpg' %}" alt="Default Profile">
        {% endif %}
         </div>
     </div>
+
+    {% else %}
+    <div class="story txtStory" onclick="openStoryView('{{ story.posted_by.id }}', '{{ forloop.counter0 }}')">
+        <div class="authorrr">{{ story.posted_by.first_name }}      {{ story.posted_by.last_name }}</div>
+        {% if story.description %}
+            <p class="story-text"style="margin:10px;">{{ story.description }}</p>
+        {% else %}
+            <p>No media or text available.</p>
+        {% endif %}
+        <div id="dp">
+            {% if story.posted_by.profile_photo_url %}
+            <img src="{% static story.posted_by.profile_photo_url %}" alt="">
+               {% else %}
+              <img src="{% static 'images/avatar.jpg' %}" alt="Default Profile">
+            {% endif %}
+        </div>
+    </div>
+
+    {% endif %}
 {% endfor %}
 
 
@@ -240,7 +259,7 @@
 
         <div class="post-top" style="height: 45px;">
             <a href="">
-     <img src="{%  static post.posted_by.profile_photo_url|default:'/images/avat.png' %}"
+     <img src="{%  static post.posted_by.profile_photo_url|default:'/images/avatar.jpg' %}"
     class="rounded-circle me-1"
      style="width: 35px; object-fit: cover; height: 35px;">
                 <!-- <img src="{% static 'images/IMG_20240915_213320.jpg' %}" alt="avatar" class="rounded-circle me-1 " style="width: 35px; object-fit: cover; height: 35px; " > -->
@@ -554,7 +573,7 @@
            </div>
 
 
-            <div class="post-center pb-3 " style="margin-left: 0px;" id="photo_com">
+            <div class="post-center pb-3 CommentSectionPostImgDiv" style="margin-left: 0px;" id="photo_com">
                 <p class="px-3 pt-2" style="font-size:15px; margin: 0; margin-bottom: 5px;" >wow cool</p>
 
 
@@ -570,7 +589,7 @@
 
     <div class="comment-section " >
 
-        <div style="height:50px;"> </div>
+        <div class="CommentSectionEmptyDiv" style="height:50px;"> </div>
         <div class="comment-box p-1 com "id="comments-container"  style="height:500px; overflow-y: scroll;margin-left:20px;">
 
             <div class="pt-2 pe-2" style="height: auto;" class="comment" id="commentList"  id="autorefresh" id="commentsDiv">
@@ -899,6 +918,7 @@ $(document).ready(function () {
                 },
                 headers: { "X-CSRFToken": "{{ csrf_token }}" },
                 success: function (data) {
+                    console.log("Comment data",data)
 
 
 

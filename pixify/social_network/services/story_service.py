@@ -45,7 +45,7 @@ def manage_list_posts_filtered(search_query,sort_by='posted_by'):
 
 #sribash sarkar
 
-from ..constants import PostContentType
+from ..constants import PostContentType,PostType
 
 def user_story(media_urls, media_types, user_id, music_url=None, story_text=None):
     posts = []
@@ -54,15 +54,17 @@ def user_story(media_urls, media_types, user_id, music_url=None, story_text=None
             description=story_text,  # Store the text story in the description field
             created_by_id=user_id,
             posted_by_id=user_id,
+            type=PostType.STATUS.value,
             media_url=[],  # No media for text stories
-            media_type=None,  # No media type for text stories
+            content_type=media_types,  # No media type for text stories
         ))
     else:
         for media_url, media_type in zip(media_urls, media_types):
             posts.append(Post(
                 media_url=[media_url],
                 #media_type=media_type,
-                content_type=2,
+                type=PostType.STATUS.value,
+                content_type=media_type,
                 created_by_id=user_id,
                 posted_by_id=user_id,
             ))
@@ -72,6 +74,7 @@ def storylist_storys():
         Post.objects.values('posted_by')
         .annotate(latest_created_at=Max('created_at'))
         .values_list('posted_by', 'latest_created_at')
+        .filter(type=PostType.STATUS.value)
     )
     latest_post_filters = [
         Q(posted_by=user_id, created_at=created_at)
