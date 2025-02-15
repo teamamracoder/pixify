@@ -240,7 +240,10 @@
 
         <div class="post-top" style="height: 45px;">
             <a href="">
-                <img src="{% static 'images/IMG_20240915_213320.jpg' %}" alt="avatar" class="rounded-circle me-1 " style="width: 35px; object-fit: cover; height: 35px; " >
+     <img src="{%  static post.posted_by.profile_photo_url|default:'/images/avat.png' %}"
+    class="rounded-circle me-1"
+     style="width: 35px; object-fit: cover; height: 35px;">
+                <!-- <img src="{% static 'images/IMG_20240915_213320.jpg' %}" alt="avatar" class="rounded-circle me-1 " style="width: 35px; object-fit: cover; height: 35px; " > -->
             </a>
 
             <div class="d-flex "style="flex-direction: column;" >
@@ -307,8 +310,9 @@
 
                 <div class="reaction-container" style="position: relative; display: inline-block;">
                     <input type="hidden" class="getemoji">
-                  <!-- <i class="post_reaction" style="font-style:normal;font-size:20px; position: relative;cursor: pointer;">❤️</i>  -->
-                    <span class="post_reaction" style="cursor: pointer;" > <i class=" bi bi-heart pe-1"  style="font-size: 18px; cursor: pointer;position: relative;top:5px;"></i>  </span>
+                    <span class="post_reaction" style="cursor: pointer;" >
+                        <i class=" bi bi-heart pe-1 "  style="font-size: 18px; cursor: pointer;position: relative;top: 6px;"></i>
+                    </span>
 
                     <div  class="reaction-popover"  style="display: none; position: absolute; top: -50px; left: 0; background:black;  border-radius: 10px; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);">
                          <i  data-reaction-id="1" class="fa-solid fa-heart" style="color: #ff0000;font-size: 20px;cursor: pointer;"></i>
@@ -344,9 +348,9 @@
     {% endif %}
 
 <!-- Delete Confirmation Modal -->
-<div id="deleteConfirmModal" class="modal fade" tabindex="-1" role="dialog">
+<div id="deleteConfirmModal" class="modal fade" tabindex="-1" role="dialog" >
     <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content shadow-lg">
+        <div class="modal-content shadow-lg"  style="background-color:black;">
             <div class="modal-header border-0">
                 <h5 class="modal-title fw-bold text-light">Confirm Deletion</h5>
                 <button type="button" class="close text-muted" data-dismiss="modal" aria-label="Close">
@@ -357,8 +361,8 @@
                 <p class="text-light">Are you sure you want to delete this post?</p>
             </div>
             <div class="modal-footer border-0 d-flex justify-content-center">
-                <button type="button" class="btn  px-4 py-2" id="cancelDeleteBtn">Cancel</button>
-                <button type="button" class="btn  px-4 py-2" id="confirmDeleteBtn">Yes, Delete</button>
+                <button type="button"  class="btn  px-4 py-2 " id="cancelDeleteBtn" style="background-color: gray;">Cancel</button>
+                <button type="button" class="btn  px-4 py-2" id="confirmDeleteBtn" style="background-color: #732323;">Yes, Delete</button>
             </div>
         </div>
     </div>
@@ -633,60 +637,50 @@
  <script src="{% static 'js/sribash.js' %}"></script>
 <script>
 
+$(document).ready(function () {
+    let holdTimer; // Track the hold time
+
+    $(".post_reaction").on("mousedown", function () {
+        let reactionButton = $(this);
+        let postContainer = reactionButton.closest('.reaction-container');
+        let postId = postContainer.closest('.post-box').find('.firstPostId').val();
+
+        // Start a timer when the button is pressed
+        holdTimer = setTimeout(function () {
+            deleteReaction(reactionButton, postId);
+        }, 1000); // 1-second delay
+    });
+
+    $(".post_reaction").on("mouseup mouseleave", function () {
+        clearTimeout(holdTimer); // Cancel timer if released before 1 second
+    });
+
+    function deleteReaction(button, postId) {
+        $.ajax({
+            url: "{% url 'delete_post_reaction' %}",  // Define this URL in Django
+            type: "POST",
+            data: {
+                'post_id': postId,
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+            },
+            success: function (response) {
+                if (response.success) {
+                    button.find("i").removeClass().addClass("bi bi-heart").css({'color': '#a7358b', 'position': 'relative','top': '6px'}); // Reset icon
+                    button.closest('.post-box').find("#total-reaction-count").text(response.total_count); // Update count
+
+                    if (response.total_count === 0) {
+                        button.closest('.reaction-container').find(".emojis_hide").hide(); // Hide if no reactions
+                    }
+                }
+            },
+            error: function () {
+                alert('Error deleting reaction');
+            }
+        });
+    }
+});
 
 
-// // reaction post ajax
-// $(document).ready(function() {
-//     // When the post_reaction is clicked, show the popover
-//     $('.post_reaction').click(function () {
-//         $(this).siblings('.reaction-popover').toggle();
-//     });
-
-//     // When an emoji is clicked, update the span and send AJAX request
-//     $('.emoji').click(function () {
-//         var reactionId = $(this).data('reaction-id');
-//         var selectedEmoji = $(this).text();
-//         var postContainer = $(this).closest('.reaction-container');
-//         var FirstPostId = $(this).closest('.post-box').find('.firstPostId').val();
-
-
-//         // Update the emoji in the main reaction span
-//         postContainer.find('.post_reaction').text(selectedEmoji);
-
-//         // Hide the popover after selection
-//         postContainer.find('.reaction-popover').hide();
-
-//         // Send AJAX request to update reaction
-//         $.ajax({
-//             url: "{% url 'update_post_reaction' %}",
-//             type: "POST",
-//             data: {
-//                 'post_id': FirstPostId,
-//                 'reaction_id': reactionId,
-//                 'csrfmiddlewaretoken': '{{ csrf_token }}'
-//             },
-//             success: function (response) {
-
-
-//                 // Corrected: Update the hidden input field with the reaction ID
-//                 postContainer.closest('.post-box').find('.getemoji').val(reactionId);
-
-//                 // Update the reaction count displayed on the page
-//                 postContainer.closest('.post-box').find("#total-reaction-count").text(response.new_reaction_count);
-//             },
-//             error: function () {
-//                 alert('Error updating reaction');
-//             }
-//         });
-//     });
-
-//     // Hide popover when clicking outside
-//     $(document).click(function (e) {
-//         if (!$(e.target).closest('.reaction-container').length) {
-//             $('.reaction-popover').hide();
-//         }
-//     });
-// });
 $(document).ready(function() {
     // When the post_reaction is clicked, show the popover
     $('.post_reaction').click(function () {
@@ -705,7 +699,8 @@ $(document).ready(function() {
         postContainer.find('.post_reaction i')
             .attr('class', selectedIcon)  // Change the icon class
             .css('color', selectedColor)// Apply the selected color
-            .css('top', 0)
+            .css('top', 0);
+
 
         // Hide the popover after selection
         postContainer.find('.reaction-popover').hide();
@@ -720,23 +715,41 @@ $(document).ready(function() {
                 'csrfmiddlewaretoken': '{{ csrf_token }}'
             },
             success: function (response) {
-                // Update hidden input field with the reaction ID
-                postContainer.closest('.post-box').find('.getemoji').val(reactionId);
+                console.log(response);
 
-                // Update the reaction count displayed on the page
-                postContainer.closest('.post-box').find("#total-reaction-count").text(response.new_reaction_count);
+                var totalReactions = response.total_count; // Total reactions
+                var reactionNames = response.reaction_name; // List of user names
+                var userReactionId = response.user_reaction_id; // User's reaction ID
+
+                // Update reaction count text dynamically
+                var reactionText = "";
+                if (reactionNames.length > 0) {
+                    if (reactionNames.length === 1) {
+                        reactionText = `${reactionNames[0]}`;
+                    } else if (reactionNames.length === 2) {
+                        reactionText = `${reactionNames[0]} and ${reactionNames[1]}`;
+                    } else {
+                        reactionText = `${reactionNames[0]}, ${reactionNames[1]} and ${totalReactions - 2} others`;
+                    }
+                }
+
+                // Update total reaction count
+                postContainer.closest('.post-box').find("#total-reaction-count").text(totalReactions);
+
+                // Update reaction names display
+                postContainer.closest('.post-box').find("#reaction-count").html(reactionText);
+
+                // Hide the reaction container if no reactions
+                if (parseInt(totalReactions) === 0) {
+                    postContainer.find(".emojis_hide").hide();
+                } else {
+                    postContainer.find(".emojis_hide").show();
+                }
             },
             error: function () {
                 alert('Error updating reaction');
             }
         });
-    });
-
-    // Hide popover when clicking outside
-    $(document).click(function (e) {
-        if (!$(e.target).closest('.reaction-container').length) {
-            $('.reaction-popover').hide();
-        }
     });
 });
 
@@ -826,9 +839,7 @@ $(document).ready(function () {
 
 
             },
-            error: function(xhr, status, error) {
-                console.error("AJAX Error: " + status + error);
-            }
+
         });
     }
     }
@@ -918,7 +929,8 @@ $(document).ready(function () {
                                         </div>
                                         <div class="d-flex p-1 comment_by" style="gap:20px; margin-left: 17px;">
                                             <span style="font-size:11px;cursor:pointer;">${new Date(comment.created_at).toLocaleString([], { weekday: 'long' })} ${new Date(comment.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                                            <span style="font-size:11px;cursor:pointer;">Like</span>
+                                            <span style="font-size:11px;cursor:pointer;" class="commentlike" style="font-size:14px;"><i class="bi bi-heart"></i> <span class="like-count" style="font-size:12px; margin-left:5px;">0</span></span>
+
 
                                           <input type="hidden" value="${comment.id}" id="com_by">
                                            <input type="hidden" value="${comment.comment_by__first_name}" id="com_by_name">
@@ -1081,7 +1093,8 @@ photo_com.html(postItem);
                                         </div>
                                         <div class="d-flex p-1 comment_by" style="gap:20px; margin-left: 17px;">
                                             <span style="font-size:11px;cursor:pointer;">${new Date(comment.created_at).toLocaleString([], { weekday: 'long' })} ${new Date(comment.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                                            <span style="font-size:11px;cursor:pointer;">Like</span>
+                                            <span style="font-size:11px;cursor:pointer;" class="commentlike"><i class="bi bi-heart" style="font-size:14px;"></i><span class="like-count" style="font-size:12px; margin-left:5px;">0</span></span>
+
 
                                           <input type="hidden" value="${comment.id}" id="com_by">
                                            <input type="hidden" value="${comment.comment_by__first_name}" id="com_by_name">
@@ -1206,34 +1219,53 @@ $(document).on('click', '.view-comment', function () {
     }
 });
 
+$(document).on("click", ".commentlike", function () {
+    var commentLikeBtn = $(this);
+    var commentId = commentLikeBtn.closest(".allcomments").find(".comment-id").val();
+    var likeCountSpan = commentLikeBtn.closest(".allcomments").find(".like-count");
 
-$(document).on("click", ".comlike", function () {
-    const commentId = $(this).data('comment-id')
-    let likeBtn = $(this);
-
-    let likeCountSpan = likeBtn.find(".like-count");
+    console.log(commentId)
 
     $.ajax({
         type: "POST",
-        url: "/toggle-like/",
+        url: "/toggle-like/",  // URL defined in urls.py
         data: {
             comment_id: commentId,
-            csrfmiddlewaretoken: "{{ csrf_token }}" // CSRF token required for Django
+            csrfmiddlewaretoken: $("input[name=csrfmiddlewaretoken]").val(),
         },
         success: function (response) {
             console.log(response)
-            if (response.success) {
-                if (response.liked) {
-                    likeBtn.text("Unlike ");  // Update button text
-                } else {
-                    likeBtn.text("Like ");
-                }
-                likeCountSpan.text(response.like_count);  // Update like count
+
+            if (response.liked) {
+                commentLikeBtn.find("i").removeClass("bi-heart").addClass("bi-heart-fill").css("color", "red");
+            } else {
+                commentLikeBtn.find("i").removeClass("bi-heart-fill").addClass("bi-heart").css("color", "");
             }
+            likeCountSpan.text(response.like_count);
         },
-        error: function () {
-            alert("An error occurred while liking the comment.");
+    });
+});
+$(document).ready(function () {
+    $(".allcomments").each(function () {
+        var commentId = $(this).find(".comment-id").val();
+
+        console.log("commentId:", commentId);
+
+        if (!commentId) {
+            console.error("Comment ID not found in:", $(this));
+            return;  // Skip if no comment ID
         }
+
+        $.ajax({
+            type: "GET",
+            url: "/fetch-comment-likes/",
+            data: {
+                comment_id: commentId,
+            },
+            success: function (response) {
+                console.log("Response for comment", commentId, ":", response);
+            },
+        });
     });
 });
 
@@ -1393,51 +1425,6 @@ const photo = `
     });
 
 
-    // Add event listener for the update button
-
-
-
-
-
-//    $(document).ready(function () {
-//     let holdTimer; // Timer variable
-
-//     $(document).on("mousedown", ".allcomments", function () {
-//         let commentDiv = $(this);  // Store reference to comment
-//         let commentId = commentDiv.find(".comment-id").val(); // Get comment ID
-
-//         // Start the hold timer (1 seconds = 1000ms)
-//         holdTimer = setTimeout(function () {
-//             deleteComment(commentId, commentDiv);
-//         }, 1000);
-//     });
-
-//     $(document).on("mouseup mouseleave", ".allcomments", function () {
-//         clearTimeout(holdTimer); // Cancel the hold timer if user releases early
-//     });
-
-//     function deleteComment(commentId, commentElement) {
-//         $.ajax({
-//             url: "/delete-comment/", // Change to your actual delete endpoint
-//             type: "POST",
-//             data: {
-//                 comment_id: commentId,
-//                 csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val() // CSRF token for security
-//             },
-//             success: function (response) {
-//                 if (response.success) {
-//                     commentElement.fadeOut(300, function () { $(this).remove(); }); // Smooth fade out effect
-//                 } else {
-//                     alert("Failed to delete comment.");
-//                 }
-//             },
-//             error: function () {
-//                 alert("Error deleting comment.");
-//             }
-//         });
-//     }
-// });
-
 
 $(document).ready(function () {
     let holdTimer; // Timer variable
@@ -1460,11 +1447,11 @@ $(document).ready(function () {
     function showDeleteConfirmation(commentId, commentElement) {
         // Create a modal dynamically
         let modalHtml = `
-            <div id="deleteModal" class="delete-modal">
-                <div class="delete-modal-content">
+            <div id="deleteModal" class="delete-modal" style=" padding: 20px; border-radius: 5px;text-align: center;" >
+                <div class="delete-modal-content" style="background-color:black;">
                     <p>Are you sure you want to delete this comment?</p>
-                    <button id="confirmDelete" data-comment-id="${commentId}">Confirm Delete</button>
-                    <button id="cancelDelete">Cancel</button>
+                    <button id="confirmDelete" data-comment-id="${commentId}" style="background-color:red;">Confirm Delete</button>
+                    <button id="cancelDelete" style="background-color:gray; margin: 10px;padding: 10px 15px;border: none;cursor: pointer;" >Cancel</button>
                 </div>
             </div>
         `;
@@ -1511,45 +1498,6 @@ $(document).ready(function () {
 
 </script>
 
-<style>
-    .delete-modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 10000;
-}
-
-.delete-modal-content {
-    background: #2f066de3;;
-    padding: 20px;
-    border-radius: 5px;
-    text-align: center;
-}
-
-.delete-modal-content button {
-    margin: 10px;
-    padding: 10px 15px;
-    border: none;
-    cursor: pointer;
-}
-
-#confirmDelete {
-    background-color:transparent;
-    color: white;
-}
-
-#cancelDelete {
-    background-color:transparent;
-    color: white;
-}
-
-</style>
 
 
 {% comment %} post delete ajax {% endcomment %}
@@ -1640,17 +1588,8 @@ $(document).ready(function () {
 
 
 
-<style>
 
-.custom-modal .modal-dialog {
-     max-width: 1000px;
-}
-.modal-image {
- object-fit: cover;
-width: 100%;
-}
 
-</style>
 <style>
     @media (min-width: 950px) {
         #CommentsectionTextarea {
@@ -1663,11 +1602,6 @@ width: 100%;
             width: 300px;
         }
     }
-
-</style>
-
-<style>
-
     .reaction-popover {
         display: none;
         position: absolute;
@@ -1679,18 +1613,78 @@ width: 100%;
         box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
         display: flex; /* Make it row-wise */
         gap: 10px; /* Adds spacing between emojis */
+        z-index: 5000;
     }
     .emoji {
         font-size: 24px;
         cursor: pointer;
-        transition: transform 0.2s;
+       transition: transform 0.2s;
     }
-    .emoji:hover {
-        transform: scale(1.2); /* Slightly enlarge on hover */
+      .emoji:hover {
+        transform: scale(1.2);
     }
+
     .allcomments {
     cursor:pointer;
     }
+
+   .delete-modal {
+   position: fixed;
+   top: 0;
+   left: 0;
+   width: 100%;
+   height: 100%;
+
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   z-index: 10000;
+}
+
+.delete-modal-content {
+   background: #2f066de3;;
+   padding: 20px;
+   border-radius: 5px;
+   text-align: center;
+}
+
+.delete-modal-content button {
+   margin: 10px;
+   padding: 10px 15px;
+   border: none;
+   cursor: pointer;
+
+}
+
+#confirmDelete {
+
+   color: white;
+   margin: 10px;
+   padding: 10px 15px;
+   border: none;
+   cursor: pointer;
+}
+
+
+#cancelDelete {
+
+   color: white;
+   margin: 10px;
+   padding: 10px 15px;
+   border: none;
+   cursor: pointer;
+}
+
+
+.custom-modal .modal-dialog {
+     max-width: 1000px;
+}
+.modal-image {
+ object-fit: cover;
+width: 100%;
+}
+
+
 </style>
 {% comment %} For Sribash section {% endcomment %}
 <script src="{% static 'js/sribash.js' %}"></script>
