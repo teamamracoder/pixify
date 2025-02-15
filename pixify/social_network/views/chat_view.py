@@ -247,35 +247,30 @@ class ChatListViewApi(View):
                 member = chat_service.get_recipient_for_personal(chat.id, user)
                 title = f"{member.first_name} {member.last_name}"
                 chat_cover = member.profile_photo_url or '/static/images/avatar.jpg'
-                if chat_cover:
-                    chat_info = {
-                        'id': chat.id,
-                        'title': title,
-                        'chat_cover': chat_cover,
-                    }
-                else:
-                    chat_info = {
-                        'id': chat.id,
-                        'title': title,
-                        'chat_cover': '/static/images/avatar.jpg',
-                    } 
+                chat_info = {
+                    'id': chat.id,
+                    'title': title,
+                    'chat_cover': chat_cover,
+                }
             elif chat.type == ChatType.GROUP.value:
                 title = chat.title or chat_service.get_recipients_for_group(chat.id, user)
                 chat_cover = chat.chat_cover or '/static/images/group_pic.png'
-                if chat_cover:
-                    chat_info = {
-                        'id': chat.id,
-                        'title': title,
-                        'chat_cover': chat_cover,
-                    }
-                else:
-                    chat_info = {
-                        'id': chat.id,
-                        'title': title,
-                        'chat_cover':'/static/images/group_pic.png',
-                    } 
+                chat_info = {
+                    'id': chat.id,
+                    'title': title,
+                    'chat_cover': chat_cover,
+                }
             chat_data_list.append(chat_info)
-        chats = chat_service.list_chats_api(request,chat_data_list)
-        return JsonResponse(chats, safe=False)
+        
+        # Get the search query from the request; if empty, return all chats.
+        search_query = request.GET.get('search', '').strip()
+        if search_query:
+            filtered_chats = chat_service.list_chats_api(request,chat_data_list)
+
+        else:
+            filtered_chats = chat_data_list
+        
+        # Return the (filtered) list of chats.
+        return JsonResponse(filtered_chats, safe=False)
     
   
