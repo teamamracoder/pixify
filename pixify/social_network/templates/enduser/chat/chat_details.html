@@ -498,12 +498,11 @@ function saveGroupBio(newBio) {
 
 <style>
 
-  .parchat-profile-text{
-    color:black;
-  }
+  
 
 
 .parchat-selection-body {
+  margin-bottom: 2px;
     display: flex;
     align-items: center;
     padding: 10px;
@@ -517,7 +516,7 @@ function saveGroupBio(newBio) {
 }
 
 .parchat-selection-body.selected {
-    background-color: #d3f9d8; /* Light green background for selected members */
+    background-color: #3a15ec4a; /* Light green background for selected members */
     border: 2px solid #28a745; /* Darker green border for emphasis */
 }
 
@@ -529,8 +528,8 @@ function saveGroupBio(newBio) {
 }
 
 .parchat-profile-text {
-    font-size: 16px;
-    color: #333;
+    font-size: 14px;
+    color: #ffffff;
 }
 
 
@@ -564,7 +563,7 @@ function saveGroupBio(newBio) {
 }
 
 .parchat-selection-body:hover {
-    background-color: #f1f1f1;  
+    background-color: #3a15ec4a;  
 }
 
 
@@ -587,7 +586,7 @@ function saveGroupBio(newBio) {
     display: flex;
     border-radius: 4px;
     padding: 8px;
-    width: 360px;
+    width: 301px;
     margin: 0 auto;
     margin-bottom: 0px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
@@ -707,8 +706,8 @@ function saveGroupBio(newBio) {
 
 /* Profile photo styling */
 .parchat-profile-photo {
-  width: 40px;
-  height: 40px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
   object-fit: cover;
   margin-right: 10px;
@@ -829,6 +828,7 @@ button:hover {
   }
 
   .group-photo {
+    object-fit: cover;
     margin-left: 13%;
     width: 120px;
     height: 120px;
