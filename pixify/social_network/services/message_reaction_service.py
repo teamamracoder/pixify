@@ -168,3 +168,12 @@ def get_reacted_by_by_message_id(message_id):
     reacted_by = MessageReaction.objects.filter(message_id=message_id, is_active=True).values_list("reacted_by", flat=True)    
     return list(reacted_by)
 
+def reaction_by_message_id(message_id):
+    results = MessageReaction.objects.filter(message_id=message_id, is_active=True)\
+        .values('reaction_id')\
+        .annotate(
+            count=models.Count('reaction_id'),
+            react_value=ArrayAgg('reaction_id__value', distinct=True)
+        )\
+        .order_by()
+    return results
