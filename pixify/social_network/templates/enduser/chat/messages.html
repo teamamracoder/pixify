@@ -46,7 +46,7 @@
             <div class="message-content">
                 {% if message.reply_for_message_id %}
                 <div class="parent-message">
-                    <span>{{ message.reply_for_message_id.sender_id.first_name }}: </span>
+                    <span>{{ message.reply_for_message_id.sender_id.first_name }} </span>
                     <div>{{ message.reply_for_message_id.text }}</div>
                     {% if message.reply_for_message_id.media_url %}
                     <span>{{ message.reply_for_message_id.media_url }}</span>
@@ -64,6 +64,9 @@
                 {% endif %}
 
                 {% if message.updated_by %}
+                    <div class="edited-messages">
+                    <span class="edited-tag">(Edited)</span>
+                    </div>
                 {% endif %}
             </div>
 
@@ -994,8 +997,8 @@ function appendMessageToChat(message, messageId, messageTime, senderId, senderNa
     if (reply) {
         parentMessageHtml = `
             <div class="parent-message">
-                <span>${reply_username}: </span>
-                <span>${replyText}</span>
+                <span>${reply_username} </span>
+                <div>${replyText}</div>
                 ${reply.media_url ? `<span>${reply.media_url}</span>` : ""}
             </div>
         `;
@@ -1051,112 +1054,127 @@ function appendMessageToChat(message, messageId, messageTime, senderId, senderNa
 
 
 function updateMessageInChat(updatedMessage, messageId, messageTime, senderName, profilePic, reply, replyText, reply_username, reply_userPic, mediaUrls, isSent, seen_by_all, reactions) {
-    const messageDiv = document.getElementById(`message-${messageId}`);
-    if (!messageDiv) {
-        console.error(`Message not found for message ID: ${messageId}`);
-        return;
-    }
-    
-    // Prepare media preview if provided.
-    let mediaPreviewHtml = "";
-    if (mediaUrls && mediaUrls.length > 0) {
-        mediaPreviewHtml = mediaUrls
-            .map(url => `<div class="message-media"><img src="${url}" alt="media"></div>`)
-            .join("");
-    }
-    
-    // Prepare reply preview if there is a reply.
-    let parentMessageHtml = "";
+  const messageDiv = document.getElementById(`message-${messageId}`);
+  if (!messageDiv) {
+    console.error(`Message not found for message ID: ${messageId}`);
+    return;
+  }
+
+  // Prepare media preview if provided.
+  let mediaPreviewHtml = "";
+  if (mediaUrls && mediaUrls.length > 0) {
+    mediaPreviewHtml = mediaUrls
+      .map(
+        (url) =>
+          `<div class="message-media"><img src="${url}" alt="media"></div>`
+      )
+      .join("");
+  }
+
+  // Prepare reply preview if there is a reply.
+  let parentMessageHtml = "";
+  if (reply) {
+    parentMessageHtml = `
+      <span>${reply_username} </span>
+      <div>${replyText}</div>
+      ${reply.media_url ? `<span>${reply.media_url}</span>` : ""}
+    `;
+  }
+
+  // Generate updated reaction popup content.
+  const reactionPopupContent = generateReactionPopupContent(reactions, messageId);
+
+  // Update the message-content.
+  const contentDiv = messageDiv.querySelector(".message-content");
+  if (contentDiv) {
+    // Update or insert the parent-message block at the top of contentDiv.
+    let parentMessageDiv = contentDiv.querySelector(".parent-message");
     if (reply) {
-        parentMessageHtml = `
-                <span>${reply_username}: </span>
-                <span>${replyText}</span>
-                ${reply.media_url ? `<span>${reply.media_url}</span>` : ""}
-        `;
+      if (!parentMessageDiv) {
+        parentMessageDiv = document.createElement("div");
+        parentMessageDiv.classList.add("parent-message");
+        contentDiv.insertBefore(parentMessageDiv, contentDiv.firstChild);
+      }
+      parentMessageDiv.innerHTML = parentMessageHtml;
+    } else if (parentMessageDiv) {
+      parentMessageDiv.remove();
     }
-    
-    // Generate updated reaction popup content.
-    const reactionPopupContent = generateReactionPopupContent(reactions, messageId);
-    
-    // Update the message-content.
-    const contentDiv = messageDiv.querySelector(".message-content");
-    if (contentDiv) {
-        // Update or insert the parent-message block at the top of contentDiv.
-        let parentMessageDiv = contentDiv.querySelector(".parent-message");
-        if (reply) {
-            if (!parentMessageDiv) {
-                parentMessageDiv = document.createElement("div");
-                parentMessageDiv.classList.add("parent-message");
-                contentDiv.insertBefore(parentMessageDiv, contentDiv.firstChild);
-            }
-            parentMessageDiv.innerHTML = parentMessageHtml;
-        } else if (parentMessageDiv) {
-            parentMessageDiv.remove();
-        }
-        
-        // Update message-header.
-        const headerDiv = contentDiv.querySelector(".message-header");
-        if (headerDiv) {
-            const profileImg = headerDiv.querySelector("img");
-            if (profileImg) {
-                profileImg.src = profilePic;
-                profileImg.alt = `${senderName}'s Profile Picture`;
-            }
-            const usernameSpan = headerDiv.querySelector(".message-username");
-            if (usernameSpan) {
-                usernameSpan.textContent = senderName;
-            }
-        }
-        
-        // Update the message text.
-        const messageTextElement = contentDiv.querySelector(".message-text");
-        if (messageTextElement) {
-            messageTextElement.textContent = updatedMessage;
-        }
-        
-        // Update media preview.
-        let mediaContainer = contentDiv.querySelector(".message-media-container");
-        if (!mediaContainer) {
-            mediaContainer = document.createElement("div");
-            mediaContainer.classList.add("message-media-container");
-            contentDiv.appendChild(mediaContainer);
-        }
-        mediaContainer.innerHTML = mediaPreviewHtml;
+
+    // Update message-header.
+    const headerDiv = contentDiv.querySelector(".message-header");
+    if (headerDiv) {
+      const profileImg = headerDiv.querySelector("img");
+      if (profileImg) {
+        profileImg.src = profilePic;
+        profileImg.alt = `${senderName}'s Profile Picture`;
+      }
+      const usernameSpan = headerDiv.querySelector(".message-username");
+      if (usernameSpan) {
+        usernameSpan.textContent = senderName;
+      }
     }
-    
-    // Update the footer.
-    const footerDiv = messageDiv.querySelector(".message-footer");
-    if (footerDiv) {
-        // Update the time.
-        const timeSpan = footerDiv.querySelector(".time");
-        if (timeSpan) {
-            timeSpan.textContent = messageTime;
-        }
-        // Ensure the "(Edited)" tag is visible.
-        let editedTag = footerDiv.querySelector(".edited-tag");
-        if (editedTag) {
-            editedTag.style.display = "inline";
-        } else {
-            editedTag = document.createElement("span");
-            editedTag.classList.add("edited-tag");
-            editedTag.textContent = "(Edited)";
-            footerDiv.appendChild(editedTag);
-        }
-        // Update options and reaction containers if needed (not shown here).
-        // Optionally, update seen-status if seen_by_all is provided.
-        if (seen_by_all) {
-            let seenStatusDiv = footerDiv.querySelector(".seen-status");
-            if (!seenStatusDiv) {
-                seenStatusDiv = document.createElement("div");
-                seenStatusDiv.classList.add("seen-status");
-                footerDiv.appendChild(seenStatusDiv);
-            }
-            seenStatusDiv.innerHTML = (senderName === currentUser) ? `<i class="bi bi-check2-all"></i>` : "";
-        }
-    } else {
-        console.error(`Message footer not found for message ID: ${messageId}`);
+
+    // Update the message text.
+    const messageTextElement = contentDiv.querySelector(".message-text");
+    if (messageTextElement) {
+      messageTextElement.textContent = updatedMessage;
     }
+
+    // Update media preview.
+    let mediaContainer = contentDiv.querySelector(".message-media-container");
+    if (!mediaContainer) {
+      mediaContainer = document.createElement("div");
+      mediaContainer.classList.add("message-media-container");
+      contentDiv.appendChild(mediaContainer);
+    }
+    mediaContainer.innerHTML = mediaPreviewHtml;
+
+    // Corrected position: update or create the edited tag within message-content.
+    let editedMessagesDiv = contentDiv.querySelector(".edited-messages");
+    if (!editedMessagesDiv) {
+      editedMessagesDiv = document.createElement("div");
+      editedMessagesDiv.classList.add("edited-messages");
+      // Insert it right after the message text element if it exists.
+      if (messageTextElement) {
+        messageTextElement.insertAdjacentElement("afterend", editedMessagesDiv);
+      } else {
+        contentDiv.appendChild(editedMessagesDiv);
+      }
+    }
+    let editedTag = editedMessagesDiv.querySelector(".edited-tag");
+    if (!editedTag) {
+      editedTag = document.createElement("span");
+      editedTag.classList.add("edited-tag");
+      editedMessagesDiv.appendChild(editedTag);
+    }
+    editedTag.textContent = "(Edited)";
+    editedTag.style.display = "inline";
+  }
+
+  // Update the footer.
+  const footerDiv = messageDiv.querySelector(".message-footer");
+  if (footerDiv) {
+    // Update the time.
+    const timeSpan = footerDiv.querySelector(".time");
+    if (timeSpan) {
+      timeSpan.textContent = messageTime;
+    }
+    // Optionally update seen-status if provided.
+    if (seen_by_all) {
+      let seenStatusDiv = footerDiv.querySelector(".seen-status");
+      if (!seenStatusDiv) {
+        seenStatusDiv = document.createElement("div");
+        seenStatusDiv.classList.add("seen-status");
+        footerDiv.appendChild(seenStatusDiv);
+      }
+      seenStatusDiv.innerHTML =
+        senderName === currentUser ? `<i class="bi bi-check2-all"></i>` : "";
+    }
+  } else {
+    console.error(`Message footer not found for message ID: ${messageId}`);
+  }
 }
+
 
 
 // Global variable to track the message being edited
@@ -2512,7 +2530,7 @@ document.addEventListener("DOMContentLoaded", function () {
         margin-right: 5px;
     }
 
-    .parent-message span:last-child {
+    .parent-message div:last-child {
         font-size: 14px;
         color: #555;
     }

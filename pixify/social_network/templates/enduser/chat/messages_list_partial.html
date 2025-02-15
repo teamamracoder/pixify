@@ -11,8 +11,8 @@
       <div class="message-content">
         {% if message.reply_for_message_id %}
           <div class="parent-message">
-            <span>{{ message.reply_for_message_id.sender_id.first_name }}: </span>
-            <span>{{ message.reply_for_message_id.text }}</span>
+            <span>{{ message.reply_for_message_id.sender_id.first_name }} </span>
+            <div>{{ message.reply_for_message_id.text }}</div>
             {% if message.reply_for_message_id.media_url %}
               <span>{{ message.reply_for_message_id.media_url }}</span>
             {% endif %}
