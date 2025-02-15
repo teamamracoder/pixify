@@ -25,20 +25,12 @@
                 <span class="username P-msg_chat-title">{{ data.chat.title }}</span>
             {% endif %}
         </div>
-        <button id="sendDataButton">start call</button>    
     </div>
-
-    <script>
-        function startCall() {
-            const callId = generateCallId(); // Generate a unique call ID
-            window.location.href = `/call/${callId}/`;  // Ensure trailing slash
-        }
-    
-        function generateCallId() {
-            return Math.random().toString(36).substr(2, 9); // Simple unique ID generator
-        }
-    </script>
-
+        
+  <!-- Loading Spinner (placed as an overlay) -->
+    <div id="loading-spinner" style="display: none;">
+      <div class="spinner"></div>
+    </div>
 
     <!-- Chat Body -->
     <div class="chat-body" id="chat-body">
@@ -55,7 +47,7 @@
                 {% if message.reply_for_message_id %}
                 <div class="parent-message">
                     <span>{{ message.reply_for_message_id.sender_id.first_name }}: </span>
-                    <span>{{ message.reply_for_message_id.text }}</span>
+                    <div>{{ message.reply_for_message_id.text }}</div>
                     {% if message.reply_for_message_id.media_url %}
                     <span>{{ message.reply_for_message_id.media_url }}</span>
                     {% endif %}
@@ -66,20 +58,17 @@
                     <img src="{{ message.sender_id.profile_photo_url|default:'\static\images\avatar.jpg' }}" alt="{{ message.sender_id.first_name }}'s Profile Picture" class="message-profile-pic">
                     <span class="message-username">{{ message.sender_id.first_name }}</span>
                 </div>
-                <span class="message-text">{{ message.text }}</span>
+                <div class="message-text">{{ message.text }}</div>
                 {% if message.media_url %}
                 <span class="message-media">{{ message.media_url }}</span>
                 {% endif %}
 
                 {% if message.updated_by %}
-                <div class="edited-messages">
-                    <span class="edited-tag">(Edited)</span>
-                </div>
                 {% endif %}
             </div>
 
             <div class="message-footer">
-                <span class="time">{{ message.created_at|date:"h:i A" }}</span>
+                <div class="time">{{ message.created_at|date:"h:i A" }}</div>
                 <div class="message-options">
                     <i class="bi bi-three-dots-vertical" onclick="toggleOptions({{ message.id }})"></i>
                     <i class="bi bi-emoji-smile" onclick="toggleReactionPopup({{ message.id }})"></i>
@@ -106,17 +95,19 @@
                     </div>
                 </div>
 
-                <div class="seen-status">
-                    {% if message.sender_id.id == user.id %}
-                        {% if message.seen_by_all %}
-                        <i class="bi bi-check2-all"></i>
-                        {% else %}
-                        <i class="bi bi-check2"></i>
-                        {% endif %}
-                    {% endif %}
-                </div>
             </div>
+            <div class="reactionandseen">
             <div class="reaction-display" id="reaction-display-{{ message.id }}"></div>
+            <div class="seen-status">
+                {% if message.sender_id.id == user.id %}
+                    {% if message.seen_by_all %}
+                    <i class="bi bi-check2-all"></i>
+                    {% else %}
+                    <i class="bi bi-check2"></i>
+                    {% endif %}
+                {% endif %}
+            </div>
+            </div>
         </div>
         {% endfor %}
         {% endfor %}    
@@ -148,8 +139,8 @@
         <!-- Delete Modal -->
         <div id="deleteModal" class="parmess-del-modal">
             <div class="parmess-del-modal-content">
-                <span class="parmess-del-close" onclick="closeModal()">&times;</span>
-                <p>Are you sure you want to delete this message?</p>
+                <span class="parmess-del-close" onclick="closeModal()"><i class="bi bi-x-circle"></i></span>
+                <p style="margin-right: 20px;">Are you sure you want to delete this message?</p>
                 <ul class="parmess-del-options">
                     <li><button id="deleteForMe" onclick="deleteMessage(1)">Delete for Me</button></li>
                     <li><button id="deleteForEveryone" onclick="deleteMessage(2)">Delete for Everyone</button></li>
@@ -161,9 +152,9 @@
         <!-- Edit Preview -->
         <div id="edit-preview" style="display: none;">
             <div class="edit-message-bar">
-                <span style="color:black;">Edit message:</span>
+                <span style="color:black; font-weight: bold;">Edit message:</span>
                 <span class="edit-text"style="color:black;"></span>
-                <button class="cancel-edit" style="color:red; margin-left: 135px;" onclick="cancelEdit()">X</button>
+                <div class="cancel-edit" style="color:red; margin-left: 135px;" onclick="cancelEdit()">✖</div>
             </div>
         </div>
 
@@ -203,10 +194,7 @@
 
 
 <script>
-
-
 $(document).ready(function () {
-  console.log("Document ready: Initializing mention functionality.");
 
   let mentionedUsers = new Set();
   let mentionedAll = false;
@@ -216,20 +204,17 @@ $(document).ready(function () {
   const fallbackImage = '/static/images/avatar.jpg';
 
   function initializeMentionedUsers() {
-    console.log("Initializing mentioned users.");
     mentionedUsers.clear();
     mentionedAll = false;
   }
 
   function updateMentionedUsers(messageText) {
-    console.log("Updating mentioned users with text:", messageText);
     const mentionedRegex = /@(\w+)/g;
     let match;
     mentionedUsers.clear();
 
     while ((match = mentionedRegex.exec(messageText)) !== null) {
       const userId = match[1];
-      console.log("Found mention:", userId);
       if (userId === 'All') {
         mentionedAll = true;
         mentionedUsers.add('all');
@@ -239,14 +224,12 @@ $(document).ready(function () {
     }
 
     mentionedAll = mentionedUsers.has('all');
-    console.log("Current mentioned users set:", Array.from(mentionedUsers));
 
     // Update the hidden field with the mentioned users.
     $('#mentions').val(Array.from(mentionedUsers).join(','));
   }
 
   function createMentionItem(mention) {
-    console.log("Creating mention item for:", mention);
     const profileImage = mention.member_id__profile_photo_url || fallbackImage;
     if (mention.member_id === 'all') {
       return `
@@ -262,27 +245,22 @@ $(document).ready(function () {
   }
 
   function displayMentionList(searchQuery) {
-    console.log("Displaying mention list for query:", searchQuery);
     const mentionSuggestions = $('#mention-suggestions').empty();
     const chatId = $('#chat_id').val();
     const chatType = $('#chat_type').val();
-    console.log("Chat type:", chatType, "Chat ID:", chatId);
 
     if (chatType != '2') {
-      console.log("Chat type is not 2. Hiding mention modal.");
       $('#mentionModal').hide();
       return;
     }
 
     const excludeUsers = Array.from(mentionedUsers).join(',');
-    console.log("Excluding users:", excludeUsers);
 
     $.ajax({
       url: `/message-mention/${chatId}/`,
       type: 'GET',
       data: { search: searchQuery, exclude: excludeUsers, mentionedAll },
       success: function (res) {
-        console.log("Mention suggestions response:", res);
 
         if (!mentionedUsers.has('all')) {
           mentionSuggestions.append(createMentionItem({
@@ -294,16 +272,13 @@ $(document).ready(function () {
         }
 
         const filteredResults = res.filter(mention => mention.member_id !== 'all');
-        console.log("Filtered mention results:", filteredResults);
 
         if (filteredResults.length > 0 || !mentionedUsers.has('all')) {
           filteredResults.forEach(mention => {
             mentionSuggestions.append(createMentionItem(mention));
           });
-          console.log("Showing mention modal.");
           $('#mentionModal').show();
         } else {
-          console.log("No results found. Hiding mention modal.");
           $('#mentionModal').hide();
         }
       },
@@ -315,41 +290,34 @@ $(document).ready(function () {
 
   $('#message-input').on('input', function () {
     const messageText = $(this).val();
-    console.log("Message input changed:", messageText);
     const cursorPosition = this.selectionStart;
     console.log("Cursor position:", cursorPosition);
     const lastChar = messageText.charAt(cursorPosition - 1);
-    console.log("Last character entered:", lastChar);
 
     clearTimeout(typingTimer);
 
     // If @All was mentioned previously, but now removed, update the flag.
     if (mentionedAll && !messageText.includes('@All')) {
-      console.log("User removed '@All' from input.");
       mentionedAll = false;
     }
 
     // Check if the current position has a "@" symbol.
     if (lastChar === '@') {
       mentionTriggered = true;
-      console.log("Mention triggered: '@' detected");
       typingTimer = setTimeout(function () {
         displayMentionList('');
       }, debounceDelay);
     } else if (!lastChar.trim()) {
       mentionTriggered = false;
-      console.log("No valid character after '@'. Hiding mention modal.");
       $('#mentionModal').hide();
     } else if (mentionTriggered) {
       const atIndex = messageText.lastIndexOf('@');
       const searchQuery = messageText.slice(atIndex + 1, cursorPosition).trim();
-      console.log("Search query for mention:", searchQuery);
       if (searchQuery) {
         typingTimer = setTimeout(function () {
           displayMentionList(searchQuery);
         }, debounceDelay);
       } else {
-        console.log("Empty search query. Hiding mention modal.");
         $('#mentionModal').hide();
       }
     }
@@ -358,26 +326,21 @@ $(document).ready(function () {
   });
 
   $('#mention-suggestions').on('click', '.mention-item', function () {
-    console.log("Mention item clicked:", $(this).data('member-id'));
     if ($(this).hasClass('non-selectable')) {
-      console.log("This item is non-selectable.");
       return;
     }
 
     // Get mention details.
     const mentionText = $(this).text().trim();
     const userId = $(this).data('member-id');
-    console.log("User ID from clicked item:", userId);
     const messageInput = $('#message-input');
     const messageText = messageInput.val();
     const cursorPosition = messageInput[0].selectionStart;
     const atIndex = messageText.lastIndexOf('@', cursorPosition - 1);
     const newText = `${messageText.slice(0, atIndex)}@${mentionText} ${messageText.slice(cursorPosition)}`;
-    console.log("Updated message text after insertion:", newText);
     messageInput.val(newText).focus();
 
     if (userId === 'all') {
-      console.log("User selected '@All'");
       mentionedAll = true;
       mentionedUsers.clear();  // Clear previous mentions.
       mentionedUsers.add('all');
@@ -660,6 +623,100 @@ $(document).ready(function () {
 
 
 <script>
+document.addEventListener('DOMContentLoaded', function() {
+  let currentPage = parseInt('{{ data.current_page|default:"1" }}', 10);
+  const chatBody = document.getElementById('chat-body');
+  if (!chatBody) {
+    console.error('Element with id "chat-body" not found');
+    return;
+  }
+  const spinner = document.getElementById('loading-spinner');
+  let isLoading = false;
+
+  // This function removes duplicate timestamp headers from the chat body.
+  function removeDuplicateHeaders() {
+    const headers = document.querySelectorAll('.chat-body .message-timestamp');
+    if (!headers.length) return;
+    const seen = new Set();
+    headers.forEach(function(header) {
+      const text = header.textContent.trim();
+      if (seen.has(text)) {
+        header.remove();
+      } else {
+        seen.add(text);
+      }
+    });
+  }
+
+  function loadOlderMessages() {
+    if (isLoading) return;
+    if (currentPage <= 1) {
+      console.log('No older messages to load.');
+      return;
+    }
+    isLoading = true;
+    if (spinner) spinner.style.display = 'block';
+
+    const url = new URL(window.location.href);
+    url.searchParams.set('page', currentPage - 1);
+    
+    // Get the current top timestamp from the first rendered .message-timestamp element.
+    const topTimestampEl = document.querySelector('.chat-body .message-timestamp');
+    if (topTimestampEl) {
+      const topTimestamp = topTimestampEl.textContent.trim();
+      url.searchParams.set('last_timestamp', topTimestamp);
+    }
+
+    fetch(url.toString(), { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+      .then(response => response.json())
+      .then(data => {
+        // Insert the new HTML at the top of the chat body.
+        chatBody.insertAdjacentHTML('afterbegin', data.html);
+        currentPage = data.current_page;
+        console.log('Loaded older messages. Current page is now:', currentPage);
+        // Now remove any duplicate headers.
+        removeDuplicateHeaders();
+        isLoading = false;
+        if (spinner) spinner.style.display = 'none';
+      })
+      .catch(err => {
+        console.error('Error loading older messages:', err);
+        isLoading = false;
+        if (spinner) spinner.style.display = 'none';
+      });
+  }
+
+  function debounce(func, delay) {
+    let timeoutId;
+    return function(...args) {
+      if (timeoutId) clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => func.apply(this, args), delay);
+    };
+  }
+
+  chatBody.addEventListener('scroll', debounce(function() {
+    if (chatBody.scrollTop < 100) {
+      loadOlderMessages();
+    }
+  }, 150));
+});
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
 
     // WebSocket connection and initialization
     var chatId = $('#chat_id').val();  // Get chat_id dynamically
@@ -731,28 +788,37 @@ socket.onmessage = function (event) {
   const data = JSON.parse(event.data);
 
   // Update read status
-  if (data.seen_by_all === false) {
-    markAsRead(data.message_id);
-  } else {
+if (data.seen_by_all) {
     const messageId = data.message_id;
     const messageElement = document.getElementById(`message-${messageId}`);
     if (messageElement) {
-      const seenStatusElement = messageElement.querySelector('.seen-status i');
-      if (seenStatusElement && seenStatusElement.classList.contains('bi-check2-all')) {
-        // Already updated; do nothing.
-        // (You may want to update even if already updated if necessary.)
-      } else {
-        if (seenStatusElement) {
-          seenStatusElement.remove();
+        // Find the container that holds reactions and seen status.
+        const reactionAndSeen = messageElement.querySelector('.reactionandseen');
+        if (reactionAndSeen) {
+            // Look for the existing seen-status container.
+            let seenStatusElement = reactionAndSeen.querySelector('.seen-status');
+            if (!seenStatusElement) {
+                // If not found, create one.
+                seenStatusElement = document.createElement('div');
+                seenStatusElement.classList.add('seen-status');
+                reactionAndSeen.appendChild(seenStatusElement);
+            }
+            // Update the seen-status element with the "seen" icon if the user is the current user.
+            if (data.user === currentUser) {
+                seenStatusElement.innerHTML = `<i class="bi bi-check2-all"></i>`;
+            } else {
+                seenStatusElement.innerHTML = "";
+            }
+        } else {
+            // Fallback: if .reactionandseen isn't found, insert at the end of messageElement.
+            const seenStatusHtml = data.user === currentUser 
+                ? `<div class="seen-status"><i class="bi bi-check2-all"></i></div>` 
+                : "";
+            messageElement.insertAdjacentHTML('beforeend', seenStatusHtml);
         }
-        const seenStatusHtml = `
-          <div class="seen-status">
-            ${data.user === currentUser ? `<i class="bi bi-check2-all"></i>` : ''}
-          </div>`;
-        messageElement.insertAdjacentHTML('beforeend', seenStatusHtml);
-      }
     }
-  }
+}
+
 
   // Handle new or updated messages
   if (data.message_new) {
@@ -807,28 +873,6 @@ socket.onmessage = function (event) {
     }
 }
 
-
-// Handel Calling
- if (data.action === "ringing") {
-        const callId = data.call_id;
-        const members = data.members;
-        const callerId = data.caller_id;
-        const currentUserId = "{{ user.id }}";// Get logged-in user ID
-    
-        console.log("Caller ID:", callerId);
-        console.log("Current User ID:", currentUserId);
-    
-        if (currentUserId === callerId) {
-            console.log("Redirecting to ringing.html...");
-            window.location.href = `/call/ringing/${callId}/${chatId}/`;
-                        
-        } else {
-            console.log("Redirecting to calling.html...");
-            window.location.href = `/call/calling/${callId}/${chatId}/`;
-            
-        }
-    }
-
      // Handle typing indicator.
     const typingIndicator = document.querySelector('.chat-bubble');
     if (data.typing && data.user !== currentUser) {
@@ -862,21 +906,20 @@ socket.onmessage = function (event) {
 
 };
 
-// Function to append a message to the chat body
 function appendMessageToChat(message, messageId, messageTime, senderName, profilePic, reply, replyText, reply_username, reply_userPic, mediaUrls, isSent, reactions) {
     const chatBody = document.querySelector(".chat-body");
     const today = "Today";
 
-    // Check if today's timestamp is already present
+    // Check if today's timestamp header is already present.
     const timestamps = chatBody.querySelectorAll(".message-timestamp span");
     let todayExists = false;
     timestamps.forEach(timestamp => {
-        if (timestamp.innerText === today) {
+        if (timestamp.innerText.trim() === today) {
             todayExists = true;
         }
     });
 
-    // Add today's timestamp if it doesn't exist
+    // If not, add the timestamp header.
     if (!todayExists) {
         const timestampDiv = document.createElement("div");
         timestampDiv.classList.add("message-timestamp");
@@ -885,33 +928,35 @@ function appendMessageToChat(message, messageId, messageTime, senderName, profil
         chatBody.appendChild(timestampDiv);
     }
 
-    // Create message div
+    // Create the main message container.
     const messageDiv = document.createElement("div");
     messageDiv.classList.add("message", isSent ? "sent" : "received");
     messageDiv.setAttribute("id", `message-${messageId}`);
 
-    // Prepare media preview if media URLs are present
+    // Build media preview if mediaUrls are provided.
     let mediaPreview = "";
-    if (mediaUrls.length > 0) {
+    if (mediaUrls && mediaUrls.length > 0) {
         mediaPreview = mediaUrls
             .map(url => `<div class="message-media"><img src="${url}" alt="media"></div>`)
             .join("");
     }
 
-    // Prepare the parent message (reply) section if a reply exists
+    // Build reply preview if a reply exists.
     let replyPreview = "";
     if (reply) {
         replyPreview = `
             <div class="parent-message">
-                <span>${reply_username}: </span>                
+                <span>${reply_username}: </span>
                 <span>${replyText}</span>
                 ${reply.media_url ? `<span>${reply.media_url}</span>` : ""}
             </div>
         `;
     }
+
+    // Generate the reaction popup content.
     const reactionPopupContent = generateReactionPopupContent(reactions, messageId);
 
-    // Construct the message content
+    // Construct the message inner HTML.
     const messageContent = `
         <div class="message-content">
             <div class="message-header">
@@ -919,133 +964,152 @@ function appendMessageToChat(message, messageId, messageTime, senderName, profil
                 <span class="message-username">${senderName}</span>
                 ${replyPreview}
             </div>
-            <span class="message-text">${message}</span>
+            <div class="message-text">${message}</div>
             ${mediaPreview}
-            <div class="message-footer">
-                <span class="time">${messageTime}</span>
-                <div class="message-options">
-                    <i class="bi bi-three-dots-vertical" onclick="toggleOptions('${messageId}')"></i>
-                    <i class="bi bi-emoji-smile" onclick="toggleReactionPopup('${messageId}')"></i>
-                </div>
-                <div class="options-popup" id="options-${messageId}" style="display: none;">
-                    ${isSent ? `<a href="#" onclick="editMessage('${messageId}')">Edit</a>` : ""}
-                    <a href="#" onclick="replyMessage('${messageId}', '${senderName}')">Reply</a>
-                    <a href="#" onclick="openDeleteModal('${messageId}')">Delete</a>
-                </div>
-                <div class="reaction-container" id="reaction-container-${messageId}">
-                    <div class="reaction-popup" id="reaction-popup-${messageId}" style="display: none;">
-                        ${reactionPopupContent}
-                    </div>
-                    <div class="reaction-display" id="reaction-display-${messageId}"></div>
+        </div>
+        <div class="message-footer">
+            <div class="time">${messageTime}</div>
+            <div class="message-options">
+                <i class="bi bi-three-dots-vertical" onclick="toggleOptions('${messageId}')"></i>
+                <i class="bi bi-emoji-smile" onclick="toggleReactionPopup('${messageId}')"></i>
+            </div>
+            <div class="options-popup" id="options-${messageId}" style="display: none;">
+                ${isSent ? `<a href="#" onclick="editMessage('${messageId}')">Edit</a>` : ""}
+                <a href="#" onclick="replyMessage('${messageId}', '${senderName}')">Reply</a>
+                <a href="#" onclick="openDeleteModal('${messageId}')">Delete</a>
+            </div>
+            <div class="reaction-container" id="reaction-container-${messageId}">
+                <div class="reaction-popup" id="reaction-popup-${messageId}" style="display: none;">
+                    ${reactionPopupContent}
                 </div>
             </div>
         </div>
-        <div class="seen-status">
-            ${senderName == currentUser ? `<i class="bi bi-check2"></i>` : ""}
+        <div class="reactionandseen">
+            <div class="reaction-display" id="reaction-display-${messageId}"></div>
+            <div class="seen-status">
+                ${senderName === currentUser ? `<i class="bi bi-check2"></i>` : ""}
+            </div>
         </div>
     `;
 
     messageDiv.innerHTML = messageContent;
     chatBody.appendChild(messageDiv);
 
-    // Scroll to the bottom and update the scroll indicator
+    // Scroll to bottom and update scroll indicator.
     chatBody.scrollTop = chatBody.scrollHeight;
-    window.updateScrollIndicator();  // Call this function to update timestamp in real time
+    window.updateScrollIndicator();
 }
 
-
-
-// Function to update the message in the chat
-function updateMessageInChat(updatedMessage, messageId, messageTime, senderName, profilePic, reply, replyText, reply_username, reply_userPic, mediaUrls,isSent,seen_by_all,reactions) {
+function updateMessageInChat(updatedMessage, messageId, messageTime, senderName, profilePic, reply, replyText, reply_username, reply_userPic, mediaUrls, isSent, seen_by_all, reactions) {
     const messageDiv = document.getElementById(`message-${messageId}`);
-    if (messageDiv) {
-        let mediaPreview = "";
-        if (mediaUrls.length > 0) {
-            mediaPreview = mediaUrls
-                .map(url => `<div class="message-media"><img src="${url}" alt="media"></div>`)
-                .join(""); // Corrected to use backticks for string interpolation
-        }
+    if (!messageDiv) {
+        console.error(`Message not found for message ID: ${messageId}`);
+        return;
+    }
+    
+    // Prepare media preview if provided.
+    let mediaPreview = "";
+    if (mediaUrls && mediaUrls.length > 0) {
+        mediaPreview = mediaUrls
+            .map(url => `<div class="message-media"><img src="${url}" alt="media"></div>`)
+            .join("");
+}
 
-        // Prepare the parent message (reply) section if a reply exists
-        let replyPreview = "";
-        if (reply) {
-            replyPreview = `
-                <div class="parent-message">
-                    <span>${reply_username}: </span>                    
-                    <span>${replyText}</span>
-                    ${reply.media_url ? `<span>${reply.media_url}</span>` : ""}
-                </div>
-            `;
-        }
-        
-        const reactionPopupContent = generateReactionPopupContent(reactions, messageId);   
-        // Update the message text and media
-        const messageContent = `
-            <div class="message-content">
-            ${replyPreview} <!-- Include the reply preview if it exists -->
-                <div class="message-header">
-                    <img src="${profilePic}" alt="${senderName}'s Profile Picture" class="message-profile-pic">
-                    <span class="message-username">${senderName}</span>
-                    
-                </div>
-                <span class="message-text">${updatedMessage}</span>
-                ${mediaPreview} <!-- Include media preview if it exists -->
-                <div class="edited-messages">
-                    <span class="edited-tag">(Edited)</span>
-                </div>
-                <div class="message-footer">
-                    <span class="time">${messageTime}</span>
-                    <div class="message-options">
-                        <i class="bi bi-three-dots-vertical" onclick="toggleOptions('${messageId}')"></i>
-                        <i class="bi bi-emoji-smile" onclick="toggleReactionPopup('${messageId}')"></i>
-                    </div>
-                    <div class="options-popup" id="options-${messageId}" style="display: none;">
-                        ${isSent ? `<a href="#" onclick="editMessage('${messageId}')">Edit</a>` : ""}                                          
-                        <a href="#" onclick="replyMessage('${messageId}', '${senderName}')">Reply</a>
-                        <a href="#" onclick="openDeleteModal('${messageId}')">Delete</a>                        
-                    </div>
-                    <div class="reaction-container" id="reaction-container-${messageId}">
-                            <div class="reaction-popup" id="reaction-popup-${messageId}" style="display: none;">
-                                ${reactionPopupContent} 
-                            </div>
-                            <div class="reaction-display" id="reaction-display-${messageId}"></div>
-                        </div> 
-                </div>
+    // Prepare the reply preview if there is a reply.
+    let replyPreview = "";
+    if (reply) {
+        replyPreview = `
+            <div class="parent-message">
+                <span>${reply_username}: </span>
+                <span>${replyText}</span>
+                ${reply.media_url ? `<span>${reply.media_url}</span>` : ""}
             </div>
         `;
-
-        
-// Only update the message content, not the entire message structure
-        const contentDiv = messageDiv.querySelector(".message-content");
-        if (contentDiv) {
-            // Update the text and media, while keeping the footer unchanged
-            const messageTextElement = contentDiv.querySelector(".message-text");
-            const footerDiv = contentDiv.querySelector(".message-footer");
-            
-            if (messageTextElement) {
-                messageTextElement.innerHTML = updatedMessage;
+    }
+    
+    // Generate updated reaction popup content.
+    const reactionPopupContent = generateReactionPopupContent(reactions, messageId);
+    
+    // Update the message-content.
+    const contentDiv = messageDiv.querySelector(".message-content");
+    if (contentDiv) {
+        // Update header: profile image and username.
+        const headerDiv = contentDiv.querySelector(".message-header");
+        if (headerDiv) {
+            const profileImg = headerDiv.querySelector("img");
+            if (profileImg) {
+                profileImg.src = profilePic;
+                profileImg.alt = `${senderName}'s Profile Picture`;
             }
-
-            if (footerDiv) {
-                // Update the time and add the "(Edited)" tag to the footer
-                footerDiv.querySelector(".time").textContent = messageTime;
-                const editedTag = footerDiv.querySelector(".edited-tag");
-                if (editedTag) {
-                    editedTag.style.display = "inline"; // Show the edited tag
-                } else {
-                    const newEditedTag = document.createElement("span");
-                    newEditedTag.classList.add("edited-tag");
-                    newEditedTag.textContent = "(Edited)";
-                    footerDiv.appendChild(newEditedTag);
+            const usernameSpan = headerDiv.querySelector(".message-username");
+            if (usernameSpan) {
+                usernameSpan.textContent = senderName;
+            }
+            // Update or insert reply preview.
+            let parentMessageDiv = headerDiv.querySelector(".parent-message");
+            if (reply) {
+                if (!parentMessageDiv) {
+                    parentMessageDiv = document.createElement("div");
+                    parentMessageDiv.classList.add("parent-message");
+                    headerDiv.insertAdjacentElement("afterend", parentMessageDiv);
                 }
+                parentMessageDiv.innerHTML = replyPreview;
+            } else if (parentMessageDiv) {
+                parentMessageDiv.remove();
             }
+        }
+        
+        // Update the message text.
+        const messageTextElement = contentDiv.querySelector(".message-text");
+        if (messageTextElement) {
+            messageTextElement.textContent = updatedMessage;
+        }
+        
+        // Update the media preview.
+        // We'll assume a container exists or create one.
+        let mediaContainer = contentDiv.querySelector(".message-media-container");
+        if (!mediaContainer) {
+            mediaContainer = document.createElement("div");
+            mediaContainer.classList.add("message-media-container");
+            contentDiv.appendChild(mediaContainer);
+        }
+        mediaContainer.innerHTML = mediaPreview;
+    }
+    
+    // Update the footer.
+    const footerDiv = messageDiv.querySelector(".message-footer");
+    if (footerDiv) {
+        // Update the time.
+        const timeSpan = footerDiv.querySelector(".time");
+        if (timeSpan) {
+            timeSpan.textContent = messageTime;
+        }
+        // Ensure the "(Edited)" tag is visible.
+        let editedTag = footerDiv.querySelector(".edited-tag");
+        if (editedTag) {
+            editedTag.style.display = "inline";
         } else {
-            console.error(`Message content not found for message ID: ${messageId}`);
+            editedTag = document.createElement("span");
+            editedTag.classList.add("edited-tag");
+            editedTag.textContent = "(Edited)";
+            footerDiv.appendChild(editedTag);
+        }
+        // Update options and reaction containers if needed (not shown here).
+        // Optionally, update seen-status if seen_by_all is provided.
+        if (seen_by_all) {
+            let seenStatusDiv = footerDiv.querySelector(".seen-status");
+            if (!seenStatusDiv) {
+                seenStatusDiv = document.createElement("div");
+                seenStatusDiv.classList.add("seen-status");
+                footerDiv.appendChild(seenStatusDiv);
+            }
+            seenStatusDiv.innerHTML = (senderName === currentUser) ? `<i class="bi bi-check2-all"></i>` : "";
         }
     } else {
-        console.error(`Message not found for message ID: ${messageId}`);
+        console.error(`Message footer not found for message ID: ${messageId}`);
     }
 }
+
 
 // Global variable to track the message being edited
 let editingMessageId = null;
@@ -1274,15 +1338,16 @@ function generateReactionPopupContent(reactions, messageId) {
     if (!reactions || reactions.length === 0) return "";
     return reactions
         .map(reaction => `
-            <div class="reaction-list" 
+            <span 
                  reaction_id="${reaction.id}" 
                  message_id="${messageId}"
                  onclick="reactionManager.addReaction('${messageId}', '${reaction.id}', '${reaction.value.replace(/'/g, "\\'").replace(/"/g, "&quot;")}')"> <!-- Escaping single and double quotes -->
                 ${reaction.value}  <!-- Make sure this outputs the correct HTML or icon -->
-            </div>
+            </span>
         `)
         .join("");
 }
+
 
 
 class ReactionManager {
@@ -1349,7 +1414,6 @@ class ReactionManager {
   // Helper: Aggregate raw reaction records into an object.
   // Uses the first element of react_value as the key if available.
   aggregateReactions(reactions) {
-    console.log("Aggregating reactions:", reactions);
     const aggregated = {};
     reactions.forEach(reaction => {
       // Use react_value[0] if available; otherwise fallback to reaction_id as a string.
@@ -1428,19 +1492,16 @@ class ReactionManager {
       const reactionElement = document.createElement('span');
       // Display the reaction icon and count.
       reactionElement.innerHTML = `${reactionType} ${value.count}`;
-      reactionElement.style.marginRight = '10px';
+      reactionElement.style.marginRight = '3px';
       reactionElement.style.cursor = 'pointer';
 
       // Click event: allow deletion if the current user is among those who reacted.
       reactionElement.addEventListener('click', () => {
-        console.log("Reaction's reacted_by:", value.reacted_by);                        
-        console.log(`User ${currentUserId} clicked on reaction ${reactionType} for message ${messageId}`);                
           const delData = {
             action: 'del_reaction',
             message_id: messageId,
           };
           if (socket && socket.readyState === WebSocket.OPEN) {
-                console.log('Reaction data sent:', delData);
             socket.send(JSON.stringify(delData));
           } else {
             console.error('WebSocket is not connected.');
@@ -1468,37 +1529,39 @@ class ReactionManager {
       return;
     }
     let listItems = "";
-    Object.keys(aggregated).forEach((reactionType) => {
-      const data = aggregated[reactionType];
-      listItems += `
-        <li style="margin-bottom:10px;">
-          <div><strong>${reactionType} ${data.count}</strong></div>
-          <ul style="list-style:none; padding-left:0;">`;
-      for (let i = 0; i < data.names.length; i++) {
-        const photo = data.photos[i] ? data.photos[i] : '/static/images/default-avatar.jpg';
-        const name = data.names[i] || 'Unknown';
-        listItems += `
-          <li style="display:flex; align-items:center; margin-bottom:5px;">
-            <img src="${photo}" alt="${name}" style="height:25px; width:25px; border-radius:50%; margin-right:5px;">
-            <span>${name}</span>
-          </li>`;
-      }
-      listItems += `</ul></li>`;
-    });
+Object.keys(aggregated).forEach((reactionType) => {
+  const data = aggregated[reactionType];
+  listItems += `
+    <li style="margin-bottom:10px;align-items: center;justify-content: space-between;display: flex;list-style: none;">
+        <ul style="list-style:none; padding-left:0;">`;
+  for (let i = 0; i < data.names.length; i++) {
+    const photo = data.photos[i] ? data.photos[i] : '/static/images/default-avatar.jpg';
+    const name = data.names[i] || 'Unknown';
+    listItems += `
+      <li style="display:flex; align-items:center; margin-bottom:5px;">
+        <img src="${photo}" alt="${name}" style="height:25px; width:25px; border-radius:50%; margin-right:5px;">
+        <span>${name}</span>
+      </li>`;
+  }
+  listItems += `</ul>
+      <div><strong>${reactionType} ${data.count}</strong></div>
+    </li>`;
+});
+
     const modal = document.createElement('div');
     modal.classList.add('message-modal');
     modal.innerHTML = `
       <div class="message-modal-content">
-        <span class="close-btn">&times;</span>
+        <span class="close-btnn"><i class="bi bi-x-circle"></i></span>
         <h4>All Reactions</h4>
         <hr>
-        <ul>
+        <ul style="padding-left: 0;">
           ${listItems}
         </ul>
       </div>
     `;
     document.body.appendChild(modal);
-    modal.querySelector('.close-btn').addEventListener('click', () => {
+    modal.querySelector('.close-btnn').addEventListener('click', () => {
       document.body.removeChild(modal);
     });
     modal.style.display = 'block';
@@ -1519,80 +1582,129 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
+
+
 // Mark as Read 
- function markAsRead(messageId) {
+document.addEventListener('DOMContentLoaded', () => {
+    // Get the chat ID from the hidden input field
     const chatId = document.getElementById("chat_id").value;
-    const senderId = "{{ user.id }}"; // Sender's ID from the context
+    
+    // Sender's ID from the context (Django template)
+    const senderId = "{{ user.id }}";         
 
-    socket.send(JSON.stringify({
-        chat_id: chatId,
-        sender_id: senderId,
-        message_id: messageId, // Including the message ID
-        action: 'mark_as_read',
-    }));
-}
-
-
-// Function to handle the markAsRead logic with retry mechanism
-function markAsReadWithRetry(messageId) {
-    const chatId = document.getElementById("chat_id").value;
-    const senderId = "{{ user.id }}"; // Sender's ID from the context
-
-    if (socket.readyState === WebSocket.OPEN) {
+    // Define the function that sends the "mark as read" message
+    function markMessagesAsRead() {
         socket.send(JSON.stringify({
             chat_id: chatId,
             sender_id: senderId,
-            message_id: messageId,
-            action: 'mark_as_read',
+            action: 'mark_msg_as_read',
         }));
+    }
+
+    // Check if the socket is already open
+    if (socket.readyState === WebSocket.OPEN) {
+        // Socket is open, send the message immediately
+        markMessagesAsRead();
     } else {
-        console.warn("WebSocket is not open. Retrying in 1 second...");
-        setTimeout(() => markAsReadWithRetry(messageId), 5000); // Retry after 5 second
+        // Socket is not open yet; wait for the open event
+        socket.addEventListener('open', markMessagesAsRead);
+    }
+
+    // Optional: handle errors
+    socket.addEventListener('error', (error) => {
+        console.error('WebSocket error:', error);
+    });
+    
+    // Optional: handle messages from the server
+    socket.addEventListener('message', (event) => {
+        console.log('Message from server:', event.data);
+    });
+    
+    // Optional: handle WebSocket closure
+    socket.addEventListener('close', (event) => {
+        console.log('WebSocket closed:', event);
+    });
+});
+
+
+
+
+// Function to send a read receipt for a specific message.
+function MessagesAsRead(messageId) {
+    const payload = {
+        message_id: messageId,  // The specific message ID
+        sender_id: senderId,
+        action: 'mark_as_read',
+    };
+    if (socket.readyState === WebSocket.OPEN) {
+        socket.send(JSON.stringify(payload));
+        console.log("Sent read receipt:", payload);
+    } else {
+        socket.addEventListener('open', () => {
+            socket.send(JSON.stringify(payload));
+            console.log("Sent read receipt after socket open:", payload);
+        });
     }
 }
 
-// Function to continuously check and mark unread messages
-function checkAndMarkUnreadMessages() {
-    const messages = document.querySelectorAll('.message');
-    messages.forEach(message => {
-        const messageId = message.id.split('-')[1];
-        const seenStatusElement = message.querySelector('.seen-status i');
-
-        // Check if the message has a single tick (unread)
-        if (seenStatusElement && seenStatusElement.classList.contains('bi-check2') && !seenStatusElement.classList.contains('bi-check2-all')) {
-            markAsReadWithRetry(messageId);
+// --- INTERSECTION OBSERVER SETUP ---
+// Create an IntersectionObserver to detect when a message enters the viewport.
+const messageObserver = new IntersectionObserver((entries, observer) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            // Extract the message ID from the target element.
+            // Assumes each message element has an ID in the format "message-<messageId>"
+            const element = entry.target;
+            const idAttr = element.getAttribute("id");
+            if (idAttr && idAttr.startsWith("message-")) {
+                const messageId = idAttr.substring("message-".length);
+                // Send a read receipt for this message.
+                MessagesAsRead(messageId);
+            }
+            // Unobserve the element so that we don't send multiple read receipts for the same message.
+            observer.unobserve(entry.target);
         }
+    });
+}, {
+    root: document.querySelector(".chat-body"), // Only observe within the chat body.
+    threshold: 0.5  // 50% of the message must be visible.
+});
+
+// --- FUNCTION TO OBSERVE NEW MESSAGE NODES ---
+// This function attaches the IntersectionObserver to any message elements that haven't been observed yet.
+function observeNewMessages() {
+    const newMessages = document.querySelectorAll(".chat-body .message:not([data-read-observed])");
+    newMessages.forEach(msg => {
+        // Mark this message so that we don't observe it again.
+        msg.setAttribute("data-read-observed", "true");
+        messageObserver.observe(msg);
     });
 }
 
-// Check all messages for read status after page refresh
-window.addEventListener('load', function () {
-    checkAndMarkUnreadMessages();
-
-    // Continuously check unread messages every 5 seconds
-        setInterval(checkAndMarkUnreadMessages, 5000);
-});
-
-
-// Call Handel
-function generateCallId() {
-    return 'call_' + Math.random().toString(36).substr(2, 9); // Generates a random call ID
+// --- MUTATION OBSERVER SETUP ---
+// This observer will detect when new nodes are added to the chat body.
+const chatBody = document.querySelector(".chat-body");
+if (chatBody) {
+    const mutationObserver = new MutationObserver((mutationsList) => {
+        mutationsList.forEach(mutation => {
+            if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+                // Call observeNewMessages() to attach observers to newly added message elements.
+                observeNewMessages();
+            }
+        });
+    });
+    // Start observing the chat body for changes.
+    mutationObserver.observe(chatBody, { childList: true, subtree: true });
 }
 
-document.getElementById('sendDataButton').addEventListener('click', function() {
-    const chatId = document.getElementById("chat_id").value;
-    const callId = generateCallId();
-    const callerId = currentUserId;// Function to get the caller's ID
+// --- INITIAL CALL ---
+// Call observeNewMessages on page load to observe any messages already present.
+observeNewMessages();
 
-    // Send updated data to the server
-    socket.send(JSON.stringify({
-        action: 'ringing',
-        call_id: callId,
-        chat_id: chatId,
-        caller_id: callerId // Include caller ID
-    }));
-});
 
+
+// Optional: If you add new messages dynamically via your socket or AJAX, 
+// call observeMessages() after appending them so that the new messages are also observed.
 
 // Typing Indicator
 document.addEventListener("DOMContentLoaded", function () {
@@ -1640,6 +1752,58 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 <style>
+    .reactionandseen {
+        display: flex;
+        justify-content: space-between; /* Pushes children to opposite ends */
+        align-items: center; /* Aligns items vertically */
+        width: 100%; /* Ensures full width */
+    }
+    
+    .reaction-display {
+        text-align: left; /* Ensures the reaction stays on the left */
+    }
+    
+    .seen-status {
+        margin-right: 10px;
+        font-size: 12px;
+        text-align: right; /* Ensures the seen icon stays on the right */
+    }
+
+.time{
+    flex:1;
+    color:#c4b3b3;
+}    
+.message-text{
+    padding:0 10px 0 10px;
+    
+}
+
+/* Spinner Overlay */
+#loading-spinner {
+  position: fixed;             /* Fixed so it overlays the page */
+  top: 30%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 9999;               /* Make sure it's above other content */
+}
+
+/* Spinner Styles */
+.spinner {
+  border: 4px solid #f3f3f3;       /* Light grey */
+  border-top: 4px solid #3498db;     /* Blue */
+  border-radius: 50%;
+  width: 25px;
+  height: 25px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+
+
 .badge-div {
     justify-content: center;
     align-items: center;
@@ -1649,17 +1813,16 @@ document.addEventListener("DOMContentLoaded", function () {
     padding-right: 10px;
 }   
 
+#sendDataButton{
+    margin-left: 250px;
+    font-size: 20px;
+ } 
+
 .cancel-edit {
     float: right;
     color: red;
     cursor: pointer;
 }
-
-
- #call_feature{
-    margin-left: 250px;
-    font-size: 20px;
- }   
 
 
 
@@ -1740,7 +1903,7 @@ document.addEventListener("DOMContentLoaded", function () {
 /* The Modal (background) */
 .parmess-del-modal {
   display: none; 
-  position: fixed; 
+  position: absolute; 
   z-index: 1; 
   left: 0;
   top: 0;
@@ -1752,14 +1915,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
 /* Modal Content */
 .parmess-del-modal-content {
-  background-color:#533b79;
-  margin: 15% auto; 
-  padding: 20px;
-  border: 1px solid #888;
-  width: 25%; 
-  max-width: 400px; 
-  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-  border-radius: 10px;
+    position: absolute;
+    background-color: #1A0933;
+    margin-left: 38%;
+    margin-top: 20%;
+    padding: 20px;
+    /* border: 1px solid #888; */
+    width: 25%;
+    max-width: 400px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    border-radius: 10px;
 }
 
 /* The Close Button */
@@ -1791,11 +1956,11 @@ document.addEventListener("DOMContentLoaded", function () {
 .parmess-del-options button {
   color:red;
   width: 100%;
-  padding: 10px;
+  /* padding: 10px; */
   border: none;
   border-radius: 5px;
   cursor: pointer;
-  font-size: 16px;
+  font-size: 12px;
 }
 
 .parmess-del-options button:hover {
@@ -1845,7 +2010,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     /* Overall Chat Container */
     .chat-container {
-        height: 620px;
+        height: 88vh;
         background-color: #211237f2; /*shubhankar change only color*/
         border-radius: 10px;
         box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
@@ -1877,13 +2042,13 @@ document.addEventListener("DOMContentLoaded", function () {
         text-overflow: ellipsis; 
     }
     .chat-header {
-        background-color: #533b79;
-        color: white;
-        padding: 15px;
-        display: flex;
-        justify-content: flex-start;
-        align-items: center;
-        border-radius: 10px 10px 0 0;
+    background-color: #291546;
+    color: white;
+    padding: 6px 0px 8px 8px;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    border-radius: 10px 10px 0 0;
     }
 
     .user-info {
@@ -1892,8 +2057,8 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     .profile-pic {
-        width: 80px;
-        height: 80px;
+        width: 50px;
+        height: 50px;
         border-radius: 50%;
         margin-right: 20px;
         object-fit: cover;
@@ -1905,6 +2070,7 @@ document.addEventListener("DOMContentLoaded", function () {
         color: white;
     }
 
+
     /* Chat Body */
     .chat-body {
         flex: 1;
@@ -1912,7 +2078,7 @@ document.addEventListener("DOMContentLoaded", function () {
         overflow-y: auto;
         display: flex;
         flex-direction: column;
-        scrollbar-width: thin; /* For Firefox */
+        scrollbar-width: none; /* For Firefox */
         scrollbar-color: #c7c5c5 #f2f2f2;
     }
         /* Customize scrollbar for Webkit browsers */
@@ -1933,8 +2099,8 @@ document.addEventListener("DOMContentLoaded", function () {
     .message {
         max-width: 80%;
         margin-bottom: 12px;
-        padding: 12px 15px;
-        border-radius: 20px;
+        padding: 3px 2px;
+        border-radius: 8px;
         position: relative;
         font-size: 15px;
         display: flex;
@@ -1949,7 +2115,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     .message.sent {
         align-self: flex-end;
-        background-color:#3b82f6;; /*shubhankar change only color*/
+        background-color:#2E6DE6; /*shubhankar change only color*/
         color: white;
     }
 
@@ -1960,7 +2126,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     .message-content {
-        margin-bottom: 25px;
+        margin-bottom: 4px;
         position: relative;
     }
 
@@ -1972,37 +2138,43 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     .message-profile-pic {
-        width: 40px;
-        height: 40px;
+        width: 20px;
+        height: 20px;
         border-radius: 50%;
         object-fit: cover;
-        margin-right: 10px;
+        margin-right: 4px;
     }
 
     .message-username {
         font-weight: bold;
-        color: #fff;
-        font-size: 14px;
+        color: #c4b3b3;
+        font-size: 10px;
     }
 
     .message-footer {
-        position: absolute;
+        width:100%;
         bottom: 5px;
-        right: 5px;
+        right: 0px;
         font-size: 12px;
         color: #888;
         display: flex;
         align-items: center;
+        justify-content: right;
     }
 
     .message-footer .time {
+        margin-top:10px;
         margin-right: 10px;
+        margin-left: 10px;
     }
 
     .message-footer .bi-three-dots-vertical {
         cursor: pointer;
-        font-size: 18px; /* Smaller icon */
+        font-size: 12px; /* Smaller icon */
         margin-left: 5px;
+    }
+    .message-options{
+        
     }
 
 /* shubhankar */
@@ -2045,7 +2217,7 @@ document.addEventListener("DOMContentLoaded", function () {
     /* Footer */
     .chat-footer {
         padding: 4px;
-        background-color: #e6e6e6;        
+        background-color: #00e6ff;        
         display: flex;
         justify-content: space-between;
         flex-direction: column;
@@ -2088,14 +2260,17 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     .message-footer {
+        font-size: 8px;
         position: relative;
         display: flex;
         align-items: center;
     }
+
     
     .bi-emoji-smile {
-        padding-right: 10px;
-        font-size: 20px;
+        padding-left:6px;
+        padding-right: 6px;
+        font-size: 12px;
         cursor: pointer;
         color: red; /*shubhankar change only color*/
     }
@@ -2118,9 +2293,9 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     
     .reaction-popup span {
-        margin: 5px;
+        margin: 2px;
         cursor: pointer;
-        font-size: 18px;
+        font-size: 10px;
     }
     
     .reaction-popup span:hover {
@@ -2135,8 +2310,9 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     
     .reaction-display span {
+        margin-left:10px;
         border-radius: 10px;
-        font-size: 20px;
+        font-size: 14px;
         display: inline-flex;
         align-items: center;
         font-weight: bold;
@@ -2203,25 +2379,25 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     .parent-message {
+        align-items: center;
+        display: flex;
         padding: 10px;
-        background-color: #e0e0e0;
+        background-color: #4da3dc69;
         border-left: 4px solid #4caf50;
         border-radius: 8px;
-        margin-bottom: 5px;
-        margin-top: 5px;    
+        margin-bottom: 5px;  
         color: #333;
     }
 
     .parent-message span:first-child {
         font-size: 15px;
         color:black;
-        font-weight: bold;
         margin-right: 5px;
     }
 
     .parent-message span:last-child {
         font-size: 14px;
-        color: #555;
+        color: #fff;
     }
 
 
@@ -2266,7 +2442,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     .parmess-button {
-        padding: 12px 20px;
+        padding: 16px 20px;
         background-color: #533b79;
         color: white;
         border: none;
@@ -2287,6 +2463,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     .close-reply{
+        float: right;
         color:red;
         cursor: pointer;
     }
@@ -2392,10 +2569,11 @@ document.addEventListener("DOMContentLoaded", function () {
     
     .message-modal .message-modal-content {
     position: relative;
-    background-color: #151212;
+    border-radius: 6px;
+    background-color: #0e0e2e;;
     margin: 5% auto;
     padding: 16px;
-    border: 1px solid #888;
+    /* border: 1px solid #888; */
     margin-top: 18%;
     /* margin-right: 34%; */
     max-width: 325px;
@@ -2418,21 +2596,29 @@ document.addEventListener("DOMContentLoaded", function () {
 
     @media (max-width: 1200px) {
     .chat-container {
-        max-width: 75%;
+        max-width: 100%;
     }
 
     .username {
-        font-size: 1.4rem;
+        font-size: 18px;
     }
     .chat-footer form{
         display: flex;
     }
+    #sendDataButton {
+        padding-top: 4px;
+        margin-left: 50px;
+        font-size: 20px;
+}
+.message-modal .message-modal-content{
+    margin-top: 25%;
+}
 }
 
 /* Medium Desktops (992px and below) */
 @media (max-width: 992px) {
     .chat-container {
-        max-width: 85%;
+        max-width: 100%;
     }
 
     .username {
@@ -2446,12 +2632,17 @@ document.addEventListener("DOMContentLoaded", function () {
     .chat-footer form{
         display: flex;
     }
+    .message-modal .message-modal-content{
+    margin-top: 50%;
 }
+}
+
+
   
     @media (max-width: 768px) {
     .chat-container {
         height: 90vh;
-        max-width: 100%;
+        width: 100%;
     }
     .chat-footer form{
         display: flex;
@@ -2460,14 +2651,35 @@ document.addEventListener("DOMContentLoaded", function () {
     display: contents;
 
     }  
-    #call_feature {
+    #sendDataButton {
     margin-left: 412px;
     font-size: 20px;
+}
+.message-modal .message-modal-content{
+    margin-top: 50%;
+}
+.parmess-del-modal-content {
+    margin-left: 22%;
+    margin-top: 55%;
+    width: 53%;
+}
 } 
+
+
+@media (max-width: 620px){
+    #sendDataButton {
+    padding-top: 12px;
+
+    margin-left: 160px;
+    font-size: 20px;
+}
+.message-modal .message-modal-content{
+    margin-top: 50%;
+}
 }
 @media (max-width: 480px) {
     .chat-container {
-        height: 88vh;
+        height: 89vh;
         border-radius: 0; /* No border-radius on small screens */
     }
 
@@ -2491,9 +2703,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
     .chat-footer button {
         font-size: 0.8rem;
-        padding: 6px;
+        /* padding: 6px; */
     }
-    #call_feature {
+    #sendDataButton {
     padding-top: 12px;
 
     margin-left: 160px;
@@ -2505,6 +2717,16 @@ document.addEventListener("DOMContentLoaded", function () {
 ;
     align-items: center;
 }
+.parmess-del-modal-content {
+        margin-left: 24%;
+        margin-top: 88%;
+        width: 53%;
+    }
+.message-modal .message-modal-content{
+    margin-top: 80%;
+}
+
+
 
 }
 

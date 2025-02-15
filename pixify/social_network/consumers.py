@@ -31,13 +31,13 @@ class ChatConsumer(AsyncWebsocketConsumer):
         text_data_json = json.loads(text_data)
         action = text_data_json.get('action', None)
         message_id = text_data_json.get('message_id', None)
-        chat_id = text_data_json.get('chat_id', None)
+        chat_id = text_data_json.get('chat_id', None)        
         user_id =text_data_json.get('sender_id')
         del_type = text_data_json.get('del_type')
         user = self.scope['user']
-        reaction_id=text_data_json.get('reaction_id')
-        call_id = text_data_json.get('call_id')
-        caller_id= text_data_json.get('caller_id')
+        reaction_id=text_data_json.get('reaction_id')  
+        call_id = text_data_json.get('call_id')  
+        caller_id= text_data_json.get('caller_id')     
 
         print(f"The Received Data: {text_data_json}")
 
@@ -49,8 +49,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
             await self.reply_message(message_id, text_data_json, user)
         elif action == 'delete':
             await self.delete_message(message_id, user_id, del_type)
+        elif action == 'mark_msg_as_read':
+            await self.mark_message_as_read(chat_id, user_id)            
         elif action == 'mark_as_read':
-            await self.mark_message_as_read(message_id, user_id)
+            await self.mark_as_read(message_id, user_id)
         elif action == 'add_reaction':
             await self.add_reaction(message_id,user,reaction_id)
         elif action == 'del_reaction':
@@ -75,7 +77,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             'type': 'ringing_notification',
             'call_id': call_id,
             'chat_id': chat_id,
-            'members': members,
+            'members': members,  
             'caller_id': caller_id,  # Include caller ID
         }
         await self.channel_layer.group_send(
@@ -87,7 +89,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=json.dumps({
             'action': 'ringing',
             'call_id': event['call_id'],
-            'chat_id': event['chat_id'],
+            'chat_id': event['chat_id'], 
             'members': event['members'],
             'caller_id': event['caller_id']  # Include caller ID in notification
         }))
@@ -111,28 +113,28 @@ class ChatConsumer(AsyncWebsocketConsumer):
         reaction_instance = await sync_to_async(
             message_reaction_service.create_or_update_message_reaction
         )(message_id, user, reaction_id)
-
+        
         # Send reaction details using the instance
         await self.send_reaction_details(reaction_instance)
 
-    async def delete_reaction(self, message_id, user):
-        user_id = user.id
+    async def delete_reaction(self, message_id, user):        
+        user_id = user.id        
         reacted_by = await sync_to_async(message_reaction_service.get_reacted_by_by_message_id)(message_id)
         print(reacted_by)
-
+        
         if user_id in reacted_by:
             react = await sync_to_async(message_reaction_service.get_active_reaction)(message_id, user)
             await sync_to_async(message_reaction_service.deactivate_reaction)(react)
             await self.send_reaction_details(react)
         else:
             return
-
-    async def create_message(self, text_data_json, user):
+        
+    async def create_message(self, text_data_json, user):        
         text = text_data_json.get('message', '')
         media_files = text_data_json.get('mediaFiles', [])
         mentions = text_data_json.get('mentions', [])
         chat_id = text_data_json.get('chat_id')
-        chat = await sync_to_async(Chat.objects.get)(id=chat_id)
+        chat = await sync_to_async(Chat.objects.get)(id=chat_id)            
 
         # Save media files if any
         media_urls = []
@@ -149,7 +151,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         mention_ids = []
         numeric_ids = [id for id in mentions if id.isdigit()]
         mention_ids = numeric_ids[:]
-
+        
         for mention in mentions:
             if 'all' in mention:
                 chat_members = await sync_to_async(lambda: list(ChatMember.objects.filter(chat_id=chat.id, is_active=True).exclude(member_id=user).values_list('member_id', flat=True)))()
@@ -162,7 +164,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         for mentioned_user in mention_ids:
             mentioned_user_instance = await sync_to_async(user_service.get_user)(mentioned_user)
             await sync_to_async(message_mention_service.create_message_mentions)(message, mentioned_user_instance, user)
-
+                        
         # Send the message to the WebSocket group
         await self.send_message_to_group(message, message_new=True)
 
@@ -196,7 +198,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 user_obj = await sync_to_async(lambda: User.objects.filter(first_name__iexact=mention).first())()
                 if user_obj:
                     mention_ids.append(user_obj.id)
-
+  
         # Fetch current mentions and ids asynchronously
         current_mentions = await sync_to_async(message_mention_service.get_message_mentions)(message)
         current_mention_ids = set(await sync_to_async(lambda: list(current_mentions.values_list('user_id', flat=True)))())
@@ -245,7 +247,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         mention_ids = []
         numeric_ids = [id for id in mentions if id.isdigit()]
         mention_ids = numeric_ids[:]
-
+        
         for mention in mentions:
             if 'all' in mention:
                 chat_members = await sync_to_async(lambda: list(ChatMember.objects.filter(chat_id=chat.id, is_active=True).exclude(member_id=user).values_list('member_id', flat=True)))()
@@ -254,7 +256,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 user_obj = await sync_to_async(lambda: User.objects.filter(first_name__iexact=mention).first())()
                 if user_obj:
                     mention_ids.append(user_obj.id)
-
+        
         for mentioned_user in mention_ids:
             mentioned_user_instance = await sync_to_async(user_service.get_user)(mentioned_user)
             await sync_to_async(message_mention_service.create_message_mentions)(reply_message, mentioned_user_instance, user)
@@ -271,13 +273,34 @@ class ChatConsumer(AsyncWebsocketConsumer):
         # Notify the WebSocket group that the message was deleted
         await self.send_message_to_group(message, deleted=True)
 
-    async def mark_message_as_read(self, message_id, user_id):
-        message = await sync_to_async(message_service.get_message_by_id)(message_id)
+
+    async def mark_message_as_read(self, chat_id, user_id):
+        # Retrieve unread messages for the user in the chat
+        messages = await sync_to_async(message_service.user_unread_message)(chat_id, user_id)
+
+        # Retrieve the user instance
+        user = await sync_to_async(user_service.get_user)(user_id)
+
+        # Mark each message as read by the user
+        for msg in messages:
+            await sync_to_async(message_read_status_service.create_message_read_status)(msg, user)
+            
+            # Check if all users have seen the message
+            seen_all = await sync_to_async(chat_service.message_seen_status)(msg)
+
+            # Send the read status to the group based on whether all users have seen the message
+            await self.send_message_to_group(msg, seen_by_all=seen_all)
+
+
+
+
+    async def mark_as_read(self, message_id, user_id):
+        message = await sync_to_async(message_service.get_message)(message_id)
         user= await sync_to_async(user_service.get_user)(user_id)
         await sync_to_async (message_read_status_service.create_message_read_status)(message, user)
         seen_all = await sync_to_async(chat_service.message_seen_status)(message)
 
-        if seen_all:
+        if seen_all:                
             await self.send_message_to_group(message,seen_by_all=True)
         else:
             await self.send_message_to_group(message,seen_by_all=False)
@@ -292,7 +315,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         reply_username = None
         reply_user_pic = None
 
-        if message.reply_for_message_id_id:  # Access the ID directly
+        if message.reply_for_message_id_id:
             reply = True
             try:
                 replied_message = await sync_to_async(Message.objects.get)(id=message.reply_for_message_id_id)
@@ -304,8 +327,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 pass
 
         # Convert datetime to string using a format for h:m AM/PM
-        message_time_str = message.created_at.strftime('%I:%M %p')  # 12-hour format with AM/PM
-        reactions = await self.fetch_reactions()  # fetch emoji from masterlist table
+        message_time_str = message.created_at.strftime('%I:%M %p')  # 12-hour format with AM/PM    
+        reactions = await self.fetch_reactions()  # fetch emoji from masterlist table          
         message_data = {
             'message_id': message.id,
             'message': message.text,
@@ -334,7 +357,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             }
         )
 
-
+         
     async def send_reaction_details(self, reaction_instance):
         react = bool(reaction_instance.reaction_id_id)
         deleted = not reaction_instance.is_active
@@ -401,7 +424,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
          # Set default image if user_pic is None
         user_pic = sender.profile_photo_url or "/static/images/avatar.jpg"
 
-        typer = {
+        typer = {            
             'user': sender.first_name,
             'user_pic': user_pic,
             'typing': typing,
@@ -414,7 +437,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 'typer': typer,
             }
         )
-
+        
     async def typing_stat(self, event):
         typer = event['typer']
         await self.send(text_data=json.dumps({
@@ -428,132 +451,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def fetch_reactions(self):
         reactions = await sync_to_async(message_reaction_service.show_reactions)()
         return reactions
-
+    
     async def message_reactions(self,message_id):
         msg_reactions = await sync_to_async(message_reaction_service.message_reaction)(message_id)
         return msg_reactions
 
 
-
-
-
-import json
-from channels.generic.websocket import AsyncWebsocketConsumer
-
-class CallConsumer(AsyncWebsocketConsumer):
-    active_users = {}  # Dictionary to track active users in each call
-
-    async def connect(self):
-        self.chat_id = self.scope['url_route']['kwargs']['chat_id']
-        self.call_group_name = f"call_{self.chat_id}"
-
-        # Add user to active users list
-        if self.call_group_name not in self.active_users:
-            self.active_users[self.call_group_name] = 0
-        self.active_users[self.call_group_name] += 1
-
-        # Join room group
-        await self.channel_layer.group_add(self.call_group_name, self.channel_name)
-        await self.accept()
-
-        # Notify others about user join
-        await self.channel_layer.group_send(
-            self.call_group_name,
-            {
-                "type": "user.joined",
-                "active_users": self.active_users[self.call_group_name]
-            }
-        )
-
-    async def disconnect(self, close_code):
-        # Remove user from active users list
-        if self.call_group_name in self.active_users:
-            self.active_users[self.call_group_name] -= 1
-            if self.active_users[self.call_group_name] <= 0:
-                del self.active_users[self.call_group_name]
-
-        # Leave room group
-        await self.channel_layer.group_discard(self.call_group_name, self.channel_name)
-
-        # Notify others about user leave
-        await self.channel_layer.group_send(
-            self.call_group_name,
-            {
-                "type": "user.left",
-                "active_users": self.active_users.get(self.call_group_name, 0)
-            }
-        )
-
-    async def receive(self, text_data):
-        data = json.loads(text_data)
-        action = data.get("action")
-
-        if action == "call_started":
-            await self.channel_layer.group_send(
-                self.call_group_name,
-                {
-                    "type": "call.started",
-                    "call_id": data["call_id"]
-                }
-            )
-
-        elif action == "call_accepted":
-            await self.channel_layer.group_send(
-                self.call_group_name,
-                {
-                    "type": "call.accepted",
-                    "call_id": data["call_id"]
-                }
-            )
-
-        elif action == "webrtc_signal":
-            await self.channel_layer.group_send(
-                self.call_group_name,
-                {
-                    "type": "webrtc.signal",
-                    "signal": data["signal"],
-                    "from": data["from"]
-                }
-            )
-
-        elif action == "user_joined":
-            await self.channel_layer.group_send(
-                self.call_group_name,
-                {
-                    "type": "user.joined",
-                    "active_users": self.active_users[self.call_group_name]
-                }
-            )
-
-        elif action == "user_left":
-            await self.channel_layer.group_send(
-                self.call_group_name,
-                {
-                    "type": "user.left",
-                    "active_users": self.active_users.get(self.call_group_name, 0)
-                }
-            )
-        elif action == "call_accepted":
-            await self.channel_layer.group_send(
-                self.call_group_name,
-                {
-                    "type": "call.accepted",
-                    "call_id": data["call_id"]
-                }
-            )
-
-    async def call_started(self, event):
-        await self.send(text_data=json.dumps({"action": "call_started", "call_id": event["call_id"]}))
-
-    async def call_accepted(self, event):
-        await self.send(text_data=json.dumps({"action": "call_accepted", "call_id": event["call_id"]}))
-
-    async def webrtc_signal(self, event):
-        await self.send(text_data=json.dumps({"action": "webrtc_signal", "signal": event["signal"], "from": event["from"]}))
-
-    async def user_joined(self, event):
-        await self.send(text_data=json.dumps({"action": "user_joined", "active_users": event["active_users"]}))
-
-    async def user_left(self, event):
-        await self.send(text_data=json.dumps({"action": "user_left", "active_users": event["active_users"]}))
-
+ 
