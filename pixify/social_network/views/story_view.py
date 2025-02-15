@@ -1,4 +1,4 @@
-
+#story_view.py
 import os
 from django.shortcuts import render, redirect
 from django.http import HttpResponseBadRequest, JsonResponse
@@ -7,64 +7,140 @@ from django.views import View
 
 from pixify import settings
 from .. import services
-from ..models import User
+from ..models import User,Post,User
 from django.core.paginator import Paginator
 
 
 
 from datetime import datetime, timedelta, timezone
 from django.utils.timezone import now
+from ..constants import PostContentType
 
-# create story for enduser
 class UserStoryCreatView(View):
-    # def get(self, request):
-    #     return render(request, 'enduser/home/index.html')
-
     def post(self, request):
-        user_id = 1
-        # story_Title = request.POST['story-text']
-        # story_Title = request.POST['story-text']
+        user_id = request.user.id  # Replace with the logged-in user's ID
         storyFiles = request.FILES.getlist('story-input')
-        print("storyFiles",storyFiles)
+        music_file = request.FILES.get('music-input')
+        text_content = request.POST.get('story-text', None)  # Fetch text content
 
-        storyFile = []
+        media_urls = []
+        media_types = []
+        music_url = None
+
+        # Process media files
         for file in storyFiles:
-            storyFile.append(file.name)
-        media_urls=[]
-        for file in storyFiles:
-            file_path=os.path.join(settings.MEDIA_ROOT,file.name)
-            with open(file_path,'wb+') as destination:
+            file_extension = file.name.split('.')[1].lower()
+            file_type = 'video' if file_extension in ['mp4', 'mov', 'avi'] else 'image'
+            file_path = os.path.join(settings.MEDIA_ROOT, file.name)
+
+            with open(file_path, 'wb+') as destination:
                 for chunk in file.chunks():
                     destination.write(chunk)
+
             media_urls.append(f"{settings.MEDIA_URL}{file.name}")
+            media_types.append(file_type)
 
+        # Process music file
+        if music_file:
+            music_path = os.path.join(settings.MEDIA_ROOT, music_file.name)
+            with open(music_path, 'wb+') as destination:
+                for chunk in music_file.chunks():
+                    destination.write(chunk)
+            music_url = f"{settings.MEDIA_URL}{music_file.name}"
 
-        services.story_service.uploadStory(media_urls,user_id)
+        # Save story data using the service
+        if text_content:
+            services.story_service.user_story(
+                media_urls=[],
+                media_types=[],
+                user_id=user_id,
+                story_text=text_content,
+            )
+        else:
+            services.story_service.user_story(
+                media_urls, media_types, user_id, music_url=music_url
+            )
+
         return redirect('home')
-        #return render(request, 'enduser/home/index.html')
 
-
-
-
-
-# display story for enduser create by priya
 class UserstoryListView(View):
-    def get(self, request):
-
-        storys = services.story_service.storylist_storys()
-
-        story_dict={
-                  'storys':storys,
-                  'name':'sribash',
-                #   'count_commnet' :services.comment_service.get_count_comment()
-
+    def get(self, request, user_id=None):
+        """
+        If `user_id` is provided, fetch all stories by that user; otherwise, fetch all stories.
+        """
+        if user_id:
+            user_stories = services.story_service.get_user_stories(user_id)
+            return render(request, 'enduser/home/index.html', {'stories': user_stories})
 
 
+        # Default behavior: Fetch all stories
+        user_id= request.user.id
+        stories = services.story_service.get_all_stories()
+        latest_story = services.story_service.get_latest_story()
+        story_dict = {
+            'stories': stories,
+            'latest_story': latest_story,
+            'user_id': user_id,
+
+        }
+        return render(request, 'enduser/home/index.html', {'story_dict': story_dict,'stories': user_stories})
+
+
+# class UserActiveStories(View):
+#     def get(self, request, user_id):
+#         user_stories = services.story_service.get_user_stories(user_id)
+#         active_stories = [
+#             {
+#                 'media_url': story.media_url[0] if story.media_url else None,
+#                 'media_type': story.media_type,
+#                 'description': story.description,
+#                 'posted_by': story.posted_by.id,
+#             }
+#             for story in user_stories
+#         ]
+#         print(active_stories)
+#         return JsonResponse({'stories': active_stories})
+
+
+class UserActiveStories(View):
+    def get(self, request, user_id):
+        """
+        Fetch all stories grouped by user.
+        """
+        users_with_stories = (
+            Post.objects.values("posted_by_id").distinct()
+        )  # Get unique users with stories
+
+        all_stories = {}
+
+        for user in users_with_stories:
+            user_id = user["posted_by_id"]
+            user_stories = Post.objects.filter(posted_by_id=user_id).order_by(
+                "created_at"
+            )  # Get all stories of the user
+
+            all_stories[user_id] = [
+                {
+                    "media_url": story.media_url[0] if story.media_url else None,
+                    "media_type": story.content_type,
+                    "description": story.description,
+                    "posted_by": story.posted_by.id,
+                    "first_name": story.posted_by.first_name,
+                    "last_name" : story.posted_by.last_name
                 }
-        print('storage',storys)
-        return render(request, 'enduser/home/index.html', {'story_dict': story_dict})
+                for story in user_stories
+            ]
+        print("all_stories",all_stories)
+        return JsonResponse({"stories": all_stories})
 
 
 class UploadStoryView(View):
     def get(self, request):
-        return render(request, 'enduser/story/uploadStory.html')
+        user = request.user  # Get the currently logged-in user
+        user_data = {
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'profile_photo_url': user.profile_photo_url
+        }
+        print("dfdf",user_data)
+        return render(request, 'enduser/story/uploadStory.html', {'user_data': user_data})

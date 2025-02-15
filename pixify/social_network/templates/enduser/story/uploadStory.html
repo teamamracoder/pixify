@@ -1,3 +1,5 @@
+
+{%load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -49,10 +51,24 @@
       margin: 0 auto 1rem;
     }
 
-    .uploaded-content img, .uploaded-content video {
-      max-width: 100%;
-      max-height: 100%;
+    .uploaded-content img {
+      width: 100%;
+      height: 100%;
       border-radius: 10px;
+      object-fit: cover;
+          }
+      .uploaded-content video{
+        width: 100%;
+      height: 100%;
+      border-radius: 10px;
+      object-fit: cover;
+      max-width: 55vh;
+      max-height: 75vh;
+      }
+    .uploaded-content{
+      height: 90vh;
+      width: 55vh;
+      overflow: hidden;
     }
 
     .uploaded-content, .text-content {
@@ -114,6 +130,7 @@
     <a class="navbar-brand mx-3" href="#">
       <img src="/static/images/logo.png" alt="Logo" width="30" height="30">
     </a>
+
     <div class="d-flex align-items-center ms-auto">
       <button class="btn btn-light me-2" >
         <i class="fa-solid fa-bars"></i>
@@ -121,7 +138,7 @@
       <button class="btn btn-light me-2 position-relative">
         <i class="fa-regular fa-bell"></i>
       </button>
-      <img src="/static/images/sribashsarkar.jpg" alt="Profile" class="rounded-circle" width="30" height="30">
+      <img src="{% static user_data.profile_photo_url|default:'/images/avatar.jpg' %}" alt="Profile" class="rounded-circle" width="30" height="30">
     </div>
   </nav>
   <form action="/story/create/" method="post" enctype="multipart/form-data">
@@ -132,14 +149,14 @@
       <div class="col-md-3" style="height: 90vh;background-color: rgb(61, 61, 107); " >
         <div class="d-flex justify-content-between mb-1">
           <h5 style="color: #fff;">Your Story</h5>
-              <button class="btn btn-light p-2" id="redirectButton">
+              <button class="btn btn-light p-2" >
                 <i class="fa-solid fa-xmark"></i>
               </button>
         </div>
-           <div class="d-flex align-items-center">
-              <img src="/static/images/sribashsarkar.jpg" alt="Profile" class="rounded-circle me-3" width="50" height="50">
-              <span style="color: #fff;">Ram Sarkar</span>
-            </div>
+        <div class="d-flex align-items-center">
+          <img src="{% static user_data.profile_photo_url|default:'/images/avatar.jpg' %}" alt="Profile" class="rounded-circle me-3" width="50" height="50">
+          <span style="color: #fff;">{{ user_data.first_name }} {{ user_data.last_name }}</span>
+      </div>
             </div>
 
       <div class="col-md-9 d-flex align-items-center justify-content-center">
@@ -166,14 +183,18 @@
         <div class="uploaded-content" id="uploadedContent">
           <h6>Uploaded Content</h6>
           <div id="preview"></div>
-          <button class="btn btn-primary mt-3" type="submit">Upload Again</button>
+          <button class="btn btn-primary mt-3" type="submit">Upload</button>
         </div>
-
         <!-- Text Input Box -->
-        <div class="text-content" id="textContent" >
-          <input type="text" placeholder="Write your story here...">
-          <button class="btn btn-primary mt-3" id="submitText">Upload Text</button>
-        </div>
+        <form action="/story/create/" method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+          <div class="text-content" id="textContent">
+              <input type="text" name="story-text" placeholder="Write your story here...">
+              <button class="btn btn-primary mt-3" type="submit" id="submitText">Upload</button>
+          </div>
+      </form>
+
+
 
         {% comment %} <input type="file" id="fileInput" name="StoryFile" accept="image/*,video/*" style="display: none;"> {% endcomment %}
         <input type="file" id="fileInput" name="story-input" accept="image/*,video/*" style="display: none;">
@@ -182,13 +203,6 @@
     </div>
   </div>
 </form>
-<script>
-  document.getElementById('redirectButton').addEventListener('click', function (event) {
-    event.preventDefault();
-
-    window.location.href = "/";
-  });
-</script>
   <script>
     const picUpload = document.getElementById("picUpload");
     const textUpload = document.getElementById("textUpload");
