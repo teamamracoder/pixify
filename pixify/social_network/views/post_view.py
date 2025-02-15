@@ -18,9 +18,6 @@ from pixify import settings
 from .. import services
 from ..models import User,Comment,Post,PostReaction,MasterList
 from django.core.paginator import Paginator
-
-
-
 from datetime import datetime, timedelta, timezone
 from django.utils.timezone import now
 
@@ -41,8 +38,8 @@ def time_ago(dt):
     else:
         return f"{int(seconds // 604800)} weeks ago"
     
-    
-    
+
+
         
 # use ajax post create
 class UserPostCreatView(View):
@@ -79,6 +76,42 @@ class UserPostDetail(View):
 
 
 
+# class UpdatePostReactionView(View):
+#     @catch_error
+#     @auth_required
+#     @role_required(Role.ADMIN.value, Role.END_USER.value)
+#     def post(self, request, *args, **kwargs):
+#         post_id = request.POST.get('post_id')
+#         reaction_id = request.POST.get('reaction_id')
+       
+#         user_id = request.user.id
+
+#         react=services.post_reaction_service.getemoji(reaction_id)
+      
+#         try:
+#             post = Post.objects.get(id=post_id)
+#         except Post.DoesNotExist:
+#             return JsonResponse({'error': 'Post not found'}, status=404)
+
+#         # Check if the user has already reacted to the post
+#         existing_reaction = PostReaction.objects.filter(post_id_id=post, reacted_by_id=user_id,
+#                                           created_by_id= user_id,is_active= True).first()
+
+#         if existing_reaction:
+#             # If the user already reacted, update the reaction type
+#             existing_reaction.master_list_id_id = reaction_id
+#             existing_reaction.save()
+#         else:
+#             # If no reaction exists, create a new one
+#             #PostReaction.objects.create(post_id_id=post, reacted_by_id=user_id,created_by_id= user_id,is_active= True )
+#            services.post_reaction_service.create_post_reaction(post_id,user_id,reaction_id)
+#         # Count the new reaction
+#         new_reaction_count = PostReaction.objects.filter(post_id_id=post, is_active=True).count()
+
+#         return JsonResponse({'new_reaction_count': new_reaction_count,' reaction_id': reaction_id})
+
+
+
 class UpdatePostReactionView(View):
     @catch_error
     @auth_required
@@ -96,22 +129,48 @@ class UpdatePostReactionView(View):
         except Post.DoesNotExist:
             return JsonResponse({'error': 'Post not found'}, status=404)
 
-        # Check if the user has already reacted to the post
         existing_reaction = PostReaction.objects.filter(post_id_id=post, reacted_by_id=user_id,
                                           created_by_id= user_id,is_active= True).first()
 
         if existing_reaction:
-            # If the user already reacted, update the reaction type
+ 
             existing_reaction.master_list_id_id = reaction_id
             existing_reaction.save()
         else:
-            # If no reaction exists, create a new one
-            #PostReaction.objects.create(post_id_id=post, reacted_by_id=user_id,created_by_id= user_id,is_active= True )
+
+
            services.post_reaction_service.create_post_reaction(post_id,user_id,reaction_id)
-        # Count the new reaction
+
+        
+        user_reaction = PostReaction.objects.filter(post_id_id=post_id, reacted_by_id=user_id, is_active=True).first()
+
+        if user_reaction:
+            react_id = user_reaction.master_list_id_id  # Get the reaction ID (react_id_id)
+           
+        else:
+            react_id = None  # No reaction found for the user
+
+        # Get total reaction count
+        total_count = PostReaction.objects.filter(post_id_id=post, is_active=True).count()
+
+        # Get the names of users who reacted
+        user_reactions = list(services.post_reaction_service.post_reactionby_name(post).values())
+        user_ids = [reaction['reacted_by_id'] for reaction in user_reactions]
+        users = list(User.objects.filter(id__in=user_ids).values_list('first_name', 'last_name'))
+        users = [f"{first} {last}" for first, last in users]
+
+
+
         new_reaction_count = PostReaction.objects.filter(post_id_id=post, is_active=True).count()
 
-        return JsonResponse({'new_reaction_count': new_reaction_count,' reaction_id': reaction_id})
+        return JsonResponse({
+                             'new_reaction_count': new_reaction_count,
+                             'reaction_id': reaction_id,
+                             'total_count': total_count,
+                             'reaction_name': users,
+                             'user_reaction_id': react_id  # Include the user's reaction ID in the response
+                             
+                             })
 
 
 
@@ -212,3 +271,28 @@ class remove_reaction(View):
         reaction.delete()
         
         return JsonResponse({"success": False, "error": "Invalid request"}, status=400)    
+
+
+
+class DeletePostReactionView(View):
+    def post(self, request, *args, **kwargs):
+        post_id = request.POST.get('post_id')
+        user_id = request.user.id
+
+        try:
+            post = Post.objects.get(id=post_id)
+        except Post.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Post not found'}, status=404)
+
+        # Find existing reaction by the user
+        reaction = PostReaction.objects.filter(post_id=post, reacted_by_id=user_id, is_active=True).first()
+
+        if reaction:
+            reaction.delete()  # Delete the reaction
+        else:
+            return JsonResponse({'success': False, 'error': 'Reaction not found'}, status=404)
+
+        # Get updated reaction count
+        total_count = PostReaction.objects.filter(post_id=post, is_active=True).count()
+
+        return JsonResponse({'success': True, 'total_count': total_count})        

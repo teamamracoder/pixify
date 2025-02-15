@@ -151,28 +151,67 @@ class DeleteCommentView(View):
 
 
 
-class ToggleLikeView(View):
-    def post(self, request, *args, **kwargs):
-        comment_id = request.POST.get("comment_id")
-        comment = Comment.objects.get(id=comment_id)
-        user_id=request.user.id
+# class fetch_comment_likes(View):
+#     def get(self, request, *args, **kwargs):
+#         user_id = request.user  # Get logged-in user
+#         comment_likes = {}
+#         comment_id = request.POST.get("comment_id")
+#         like_count = CommentReaction.objects.filter(comment_id_id=comment_id).count()
+#         print("like_count",like_count) 
+            
        
 
-        created =services.comment_service.create_reaction(comment_id,user_id)
-
-        # if not created:
-        #     reaction.delete()  # Remove like if it already exists (toggle behavior)
-        #     liked = False
-        # else:
-        #     liked = True
-
-         #like_count = CommentReaction.comment_id_id.count()  # Count total likes
-        #, "like_count": like_count
-        return JsonResponse({"success": True})
+#         return JsonResponse(comment_likes)
 
 
+class fetch_comment_likes(View):
+    def get(self, request, *args, **kwargs):
+        user_id = request.user.id  # Get logged-in user's ID
+        comment_id = request.GET.get("comment_id")  # Use GET instead of POST
+        print("afafa",comment_id)
+
+        if comment_id:
+            # Fetch like count for a specific comment
+            like_count = CommentReaction.objects.filter(comment_id_id=comment_id).count()
+            user_liked = CommentReaction.objects.filter(comment_id_id=comment_id, user_id=user_id).exists()
+            
+            return JsonResponse({
+                "comment_id": comment_id,
+                "like_count": like_count,
+                "user_liked": user_liked
+            })
+
+        # Fetch likes for all comments if no specific comment_id is given
+        comment_likes = {}
+        all_comments = CommentReaction.objects.values("comment_id_id").distinct()
+
+        for comment in all_comments:
+            c_id = comment["comment_id_id"]
+            like_count = CommentReaction.objects.filter(comment_id_id=c_id).count()
+            user_liked = CommentReaction.objects.filter(comment_id_id=c_id, user_id=user_id).exists()
+
+            comment_likes[c_id] = {"like_count": like_count, "user_liked": user_liked}
+
+        return JsonResponse(comment_likes)
+    
 
 
+class ToggleLikeView(View):
+    def post(self, request, *args, **kwargs):
+
+        comment_id = request.POST.get("comment_id")
+        user_id = request.user.id  # Assuming user is logged in
+
+        comment = get_object_or_404(Comment, id=comment_id)
+        like_count = CommentReaction.objects.filter(comment_id_id=comment_id).count()
+        print(like_count)
+        like, created = CommentReaction.objects.get_or_create(comment_id_id=comment_id, reacted_by_id=user_id,created_by_id=user_id, is_active=True)
+
+        if not created:
+            like.delete()  # Unlike if already liked
+            return JsonResponse({"liked": False})
+
+        return JsonResponse({"liked": True,"like_count":like_count})
 
 
 class GetRepliesView(View):
