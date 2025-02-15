@@ -75,9 +75,9 @@
 
                         <li class="nav-item" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Notification">
                             <a class="nav-link" href="/notification/">
-                                <span
+                                <span id="notification-counts"
                                     class="position-absolute top-0 start-30 translate-middle badge rounded-pill bg-danger"
-                                    style="margin-left:27px; margin-top:7px;">2+</span>
+                                    style="margin-left:27px; margin-top:7px;">(0)</span>
                                     <i class="bi bi-bell-fill"></i>
                             </a>
                         </li>
@@ -359,6 +359,24 @@
 
     // call show toast message
     show_toastr("{{ message|escapejs }}", "{{ message_type|escapejs }}");
+
+// notification icon counts
+ async function fetchUnreadNotificationsCount() {
+        try {
+            const response = await fetch('/notifications/unread_count/');
+            if (response.ok) {
+                const data = await response.json();
+                document.getElementById('notification-counts').textContent = `(${data.unread_count})`;
+            } else {
+                console.error('Failed to fetch unread notifications count');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
+  
+    document.addEventListener('DOMContentLoaded', fetchUnreadNotificationsCount);
+   
 
 </script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>

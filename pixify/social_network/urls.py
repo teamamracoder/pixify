@@ -1,6 +1,10 @@
 from django.urls import path # type: ignore
 from . import views
 
+from django.urls import path
+
+
+
 urlpatterns = [
     # home
     path('admin/', views.AdminHomeView.as_view(), name='home'),
@@ -28,6 +32,7 @@ urlpatterns = [
     path('admin/notifications/create/', views.ManageNotificationCreateView.as_view(), name='manage_notification_create'),
     path('admin/notifications/<int:notification_id>/detail/', views.ManageNotificationDetailView.as_view(), name='manage_notification_detail'),
     path('admin/notifications/<int:notification_id>/update/', views.ManageNotificationUpdateView.as_view(), name='manage_notification_update'),
+    path('notifications/unread_count/', views.unread_notifications_count, name='unread_notifications_count'),
 
     # admin message
     path('admin/messages/', views.ManageMessageListView.as_view(), name='manage_message_list'),
@@ -96,7 +101,6 @@ urlpatterns = [
 
     path('birthday/', views.BirthdayView.as_view(), name='birthday'),
 
-    path('userprofile/', views.UserprofileView.as_view(), name='userprofile'),
 
     # message
     path('chat/<int:chat_id>/message/', views.MessageListView.as_view(), name='message'),

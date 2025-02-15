@@ -2,9 +2,7 @@ from ..models import Chat, User, ChatMember,Follower,Message
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 from django.db.models import Max
-# badhan
 from datetime import date
-
 from django.db.models import Max,Q,Subquery,OuterRef,F
 from django.db.models.functions import Coalesce
 from social_network.utils.common_utils import print_log
@@ -42,7 +40,17 @@ def update_chat(chat, title, chat_cover,user):
     chat.chat_cover = chat_cover
     chat.updated_by=user
     chat.save()
-    return chat
+
+def update_chat_bio(chat, bio, user):
+    chat.chat_bio = bio
+    chat.updated_by = user
+    chat.save()
+
+def update_chat_cover(chat, cover_url, user):
+    chat.chat_cover = cover_url
+    chat.updated_by = user
+    chat.save()
+
 
 def delete_chat(chat_id):
     chat = get_object_or_404(Chat, id=chat_id)
@@ -112,6 +120,7 @@ def list_followers_api(request, user):
         'chat_cover': chat.chat_cover if chat.chat_cover else '/static/images/group_pic.png',
         'created_by':chat.created_by,
         'is_group': chat.type == ChatType.GROUP.value,
+        'chat_bio':chat.chat_bio,
         'members': [
             {
                 'id': member.member_id,
@@ -127,9 +136,57 @@ def latest_message_sender_name(chat_latest_message_sender_id, user_id):
     if user_id == chat_latest_message_sender_id:
         sender_name = 'You'
     else:
+        followers = []
+        followings =[]
+
+    response_data = { 'followers': list(followers), 'followings': list(followings) }
+    return response_data
+
+def list_followers_birthday(user):
+    try:
+        today = date.today()
+
+        # Filter followings who have birthdays today and exclude the user themselves
+        followings = Follower.objects.filter(
+            follower=user,  # Only the people the user follows
+            is_active=True,
+            user_id__dob__month=today.month,
+            user_id__dob__day=today.day,
+
+        ).exclude(user_id=user).values(  # Exclude the user's own profile
+            'user_id',
+            'user_id__first_name',
+            'user_id__last_name',
+            'user_id__profile_photo_url',
+            'user_id__dob'
+        )
+    except Exception:
+        followings = []
+
+    return {'followings': list(followings)}
+
+
+def list_followings(user, offset=0, limit=5):
+    try:
+        followings = Follower.objects.filter(
+            follower=user,
+            is_active=True
+        ).exclude(user_id=user).values(
+            'user_id',
+            'user_id__first_name',
+            'user_id__last_name',
+            'user_id__profile_photo_url'
+        )[offset:offset + limit]
+    except Exception:
+        followings = []
+
+    return {'followings': followings}
+
+
+
         # Fetch the sender's first name from the User model
-        sender = User.objects.filter(id=chat_latest_message_sender_id).values('first_name').first()
-        sender_name = sender['first_name'] if sender else ''  # Safely access first_name
+       # sender = User.objects.filter(id=chat_latest_message_sender_id).values('first_name').first()
+       # sender_name = sender['first_name'] if sender else ''  # Safely access first_name
 
     # Return the name as a dictionary
     name = {
