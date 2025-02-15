@@ -90,8 +90,9 @@
                             {% else %}
                             <i class="bi bi-check2"></i>
                             {% endif %}
-                            You : 
-                        
+                            <span class="msg_sender">
+                            You:
+                            </span>
                         {% else %}
                        
                             {% if chat.seen_by_all %}
@@ -103,7 +104,9 @@
                         {% endif %} 
                         {% else %}   
                          {% if chat.is_group %} 
+                         <span class="msg_sender">
                             {{chat.latest_message_sender_name}}: 
+                         </span>
                          {% comment %} {% else %}
                            {{chat.latest_message_sender_name}}: {% endcomment %}
                         {% endif %} 
@@ -1109,6 +1112,10 @@ $(document).ready(function() {
     .parchat-input-wrapper:focus-within {
         border-color: #007BFF;
         box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+    }
+    .msg_sender{
+      color: #4f8892;
+      padding-right:5px;
     }
 
 
