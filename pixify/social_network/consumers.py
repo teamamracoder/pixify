@@ -49,8 +49,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
             await self.reply_message(message_id, text_data_json, user)
         elif action == 'delete':
             await self.delete_message(message_id, user_id, del_type)
-        elif action == 'mark_msg_as_read':
-            await self.mark_message_as_read(chat_id, user_id)            
+        elif action == 'mark_messages_as_read':
+            await self.mark_message_as_read(message_id, user_id)            
         elif action == 'mark_as_read':
             await self.mark_as_read(message_id, user_id)
         elif action == 'add_reaction':
@@ -95,20 +95,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
         }))
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     async def add_reaction(self, message_id, user, reaction_id):
         reaction_instance = await sync_to_async(
             message_reaction_service.create_or_update_message_reaction
@@ -120,7 +106,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def delete_reaction(self, message_id, user):        
         user_id = user.id        
         reacted_by = await sync_to_async(message_reaction_service.get_reacted_by_by_message_id)(message_id)
-        print(reacted_by)
         
         if user_id in reacted_by:
             react = await sync_to_async(message_reaction_service.get_active_reaction)(message_id, user)
@@ -274,24 +259,19 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await self.send_message_to_group(message, deleted=True)
 
 
-    async def mark_message_as_read(self, chat_id, user_id):
-        # Retrieve unread messages for the user in the chat
-        messages = await sync_to_async(message_service.user_unread_message)(chat_id, user_id)
-
-        # Retrieve the user instance
+    async def mark_message_as_read(self, messages, user_id):
         user = await sync_to_async(user_service.get_user)(user_id)
 
         # Mark each message as read by the user
         for msg in messages:
-            await sync_to_async(message_read_status_service.create_message_read_status)(msg, user)
+            m = await sync_to_async(message_service.get_message_by_id)(msg)
+            await sync_to_async(message_read_status_service.create_message_read_status)(m, user)
             
             # Check if all users have seen the message
-            seen_all = await sync_to_async(chat_service.message_seen_status)(msg)
+            seen_all = await sync_to_async(chat_service.message_seen_status)(m)
 
             # Send the read status to the group based on whether all users have seen the message
-            await self.send_message_to_group(msg, seen_by_all=seen_all)
-
-
+            await self.send_message_to_group(m, seen_by_all=seen_all)
 
 
     async def mark_as_read(self, message_id, user_id):
@@ -304,6 +284,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             await self.send_message_to_group(message,seen_by_all=True)
         else:
             await self.send_message_to_group(message,seen_by_all=False)
+
 
     async def send_message_to_group(self, message, deleted=False, message_new=False, seen_by_all=False):
         sender = await sync_to_async(User.objects.get)(id=message.sender_id_id)
@@ -338,6 +319,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             'replyText': reply_text,
             'reply_username': reply_username,
             'reply_userPic': reply_user_pic,
+            'user_id': sender.id,
             'user': sender.first_name,
             'user_pic': sender.profile_photo_url,
             'media_urls': message.media_url,
@@ -366,7 +348,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
         aggregated_reaction = await sync_to_async(lambda: list(
             message_reaction_service.reaction_count_by_reaction_id(reaction_instance.message_id_id)
         ))()
-        print(aggregated_reaction)
 
         reaction_data = {
             'react': react,
@@ -405,6 +386,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 'replyText': message['replyText'],
                 'reply_username': message['reply_username'],
                 'reply_userPic': message['reply_userPic'],
+                'user_id': message['user_id'],
                 'user': message['user'],
                 'ProfilePic': message['user_pic'],
                 'message_id': message['message_id'],

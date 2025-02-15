@@ -7,7 +7,7 @@ def get_short(short_id):
 
 def get_shorts():
     shorts = Post.objects.filter(type=PostType.SHOTS.value, content_type=PostContentType.VIDEO.value, is_active=True)
-    return list(shorts)
+    return list(shorts) 
 
 def short_reaction(post, user):
     reaction, created = PostReaction.objects.get_or_create(
