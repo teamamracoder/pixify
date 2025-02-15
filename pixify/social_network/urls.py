@@ -140,7 +140,9 @@ urlpatterns = [
     path('post/update/',views.UserPostEditView.as_view(),name='UserPostEdit'),
 
     path('post/reaction/update/', views.UpdatePostReactionView.as_view(), name='update_post_reaction'),
-     path('fetch_reactions/', views.Fetch_reactions.as_view(), name='fetch_reactions'),
+    path('fetch_reactions/', views.Fetch_reactions.as_view(), name='fetch_reactions'),
+    path('delete-post-reaction/', views.DeletePostReactionView.as_view(), name='delete_post_reaction'),
+
 
     path('post/delete/',views.UserPostDeleteView.as_view(),name='UserPostDelete'),
     path('comments/reply/',views.CommentReplyView.as_view(), name='reply_comment'),
@@ -154,6 +156,8 @@ urlpatterns = [
     path("delete-comment/", views.DeleteCommentView.as_view(), name="delete-comment"),
     path('toggle-like/', views.ToggleLikeView.as_view(), name='toggle-like'),
     path("remove_reaction/", views.remove_reaction.as_view(), name="remove_reaction"),
+    path("fetch-comment-likes/", views.fetch_comment_likes.as_view(), name="fetch_comment_likes"),
+
    
 
   
