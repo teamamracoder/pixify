@@ -1315,8 +1315,8 @@ textarea::placeholder {
     font-style: normal;
     position: absolute;
     bottom: 0;
-    left: 30%;
-    right: 0;
+    /* left: 30%;
+    right: 0; */
     padding: 3px;
     font-size: 13px;
     /* margin-top: -6px; */
@@ -1443,7 +1443,7 @@ textarea::placeholder {
     left: 40px;
     width: 50px;
     height: 50px;
-    border: 3px solid #975fec;
+    border: 2px solid #975fec;
     border-radius: 50%;
     overflow: hidden;
 }
@@ -2167,3 +2167,27 @@ font-size: 30px;
         top: 10px;
         right: 10px;
     }
+/*added By Subhasis After Merge*/
+@media (max-width: 765px) {
+
+     .CommentSectionPostImgDiv,.CommentSectionEmptyDiv{
+        display: none;
+     }
+     #commentList{
+        margin-bottom: 32px;
+      }
+  }
+.story-contentt{
+    background: linear-gradient(to bottom, #FF9A9E, #FECFEF);
+}
+.txtStory{
+    border: 2px solid #fff;background: linear-gradient(to bottom, #FF9A9E, #FECFEF);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+}
+.txtStory .story-text{
+    color: black;
+    font-size: 14px;
+}

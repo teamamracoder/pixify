@@ -1,6 +1,9 @@
+import os
 from pyexpat.errors import messages
 from django.shortcuts import render, redirect
 from django.views import View
+
+from pixify import settings
 from ..services import user_service
 from ..constants import Gender
 from ..constants import RelationShipStatus
@@ -49,7 +52,15 @@ class EnduserprofileUpdateView(View):
             'Other': RelationShipStatus.OTHER.value,
         }
         relationship_status = relationship_status_mapping.get(relationship_status, None)
-        profile_picture = request.FILES.get('profile_picture')
+        profile_file = request.FILES.get('profile_picture')
+        profile_file_path = os.path.join(settings.MEDIA_ROOT, profile_file.name)
+        if profile_file:
+            with open(profile_file_path, 'wb+') as destination:
+              for chunk in profile_file.chunks():
+                 destination.write(chunk)
+            profile_picture=(f"{settings.MEDIA_URL}{profile_file.name}")
+        else :
+           profile_picture = None
 
 
         user_service.update_user(user_id, first_name, last_name, email, phone, gender,address,dob,country,bio,hobbies,relationship_status, profile_picture)

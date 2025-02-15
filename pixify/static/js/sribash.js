@@ -1,8 +1,8 @@
 
-let storiesByUser = {}; // Store all user stories
-let currentUserIndex = 0; // Track the current user's index
-let currentStoryIndex = 0; // Track the current story index
-let userIds = []; // Store user IDs
+//let storiesByUser = {}; // Store all user stories
+//let currentUserIndex = 0; // Track the current user's index
+//let currentStoryIndex = 0; // Track the current story index
+//let userIds = []; // Store user IDs
 let storyTimer; // Timer for auto-changing stories
 
 // Fetch and store stories when a story is clicked
@@ -10,7 +10,7 @@ function openStoryView(userId) {
 fetch(`/stories/view/${userId}`)
     .then(response => response.json())
     .then(data => {
-        console.log(data)
+        console.log(data.userDetails.first_name)
         storiesByUser = data.stories;
         userIds = Object.keys(storiesByUser); // Get list of user IDs
         currentUserIndex = userIds.indexOf(userId.toString()); // Set current user index
@@ -21,9 +21,13 @@ fetch(`/stories/view/${userId}`)
 
             // ✅ Update user profile image (if available)
             let profileImg = document.querySelector(".profile-img img");
-            if (profileImg) {
+            let username=document.querySelector("#usernamecr");
+            if (username && data.userDetails.first_name) {
+              username.textContent = data.userDetails.first_name;
             }
-            profileImg.src = data.profile_photo_url ? data.profile_photo_url : "/static/images/avatar.jpg";
+            //profileImg.src = data.userDetails.profile_photo_url ? data.userDetails.profile_photo_url : "/static/images/avatar.jpg";
+            profileImg.src = data.userDetails.profile_photo_url ? `/static${data.userDetails.profile_photo_url}` : "/static/images/avatar.jpg";
+
 
 
 
@@ -48,8 +52,8 @@ function loadStory(userIndex, storyIndex) {
     console.log(story)
     let storyContent = document.getElementById("storyContent");
    // let userNameContainer = document.querySelector(".username");// Select the username element
-    let profileImg = document.querySelector(".profile-img img"); // Select the profile image element
-    storyContent.innerHTML = "";
+    //let profileImg = document.querySelector(".profile-img img"); // Select the profile image element
+    //storyContent.innerHTML = "";
 
     // Set user's name dynamically
 
@@ -76,9 +80,9 @@ console.log('story.media_type',story.media_type);
         textContainer.classList.add("story-text");
         textContainer.textContent = story.description;
         textContainer.style.fontSize = "20px";
-        textContainer.style.color = "#fff";
+        textContainer.style.color = "black";
         textContainer.style.textAlign = "center";
-        textContainer.style.marginTop = "50%";
+        textContainer.style.marginTop = "75%";
         textContainer.style.padding = "20px";
         storyContent.appendChild(textContainer);
     } else {
