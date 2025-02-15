@@ -126,8 +126,8 @@ class EnduserprofileUpdateView(View):
         }
         relationship_status = relationship_status_mapping.get(relationship_status, None)
         profile_file = request.FILES.get('profile_picture')
-        profile_file_path = os.path.join(settings.MEDIA_ROOT, profile_file.name)
         if profile_file:
+            profile_file_path = os.path.join(settings.MEDIA_ROOT, profile_file.name)
             with open(profile_file_path, 'wb+') as destination:
               for chunk in profile_file.chunks():
                  destination.write(chunk)
