@@ -1,3 +1,4 @@
+import random
 from django.shortcuts import get_object_or_404, render
 from django.views import View
 
@@ -59,6 +60,7 @@ class HomeView(View):
             'post_dict': post_dict,
             'story_dict': story_dict,
             'shorts':shorts,
+            'userid':userid,
         })
 
         return render(request, "enduser/home/index.html", context)

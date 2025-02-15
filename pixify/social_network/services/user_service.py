@@ -80,5 +80,7 @@ def get_user_details(user_id):
 
 def friends_count(user_id):
     friends = Follower.objects.filter(user_id=user_id).select_related( 'following').count()
-    return friends def get_user_name_and_img(user_id):
+    return friends
+
+def get_user_name_and_img(user_id):
     return User.objects.filter(id=user_id,is_active = True)

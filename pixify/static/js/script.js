@@ -235,11 +235,11 @@ document.addEventListener("DOMContentLoaded", () => {
             document.querySelectorAll(".reply-open").forEach(reply => {
 
                 reply.style.display = "none";
-            });   
-            
+            });
+
             document.querySelectorAll(".view-comment").forEach(comment => {
             comment.innerHTML = comment.innerHTML.replace("Hide reply", "View reply");
-              
+
 
             });
 
@@ -247,7 +247,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (replyOpen.style.display === "none" || replyOpen.style.display === "") {
                 replyOpen.style.display = "block";
 
-                
+
                 viewComment.innerHTML = viewComment.innerHTML.replace("View reply", "Hide reply");
             } else {
                 replyOpen.style.display = "none";

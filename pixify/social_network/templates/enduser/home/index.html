@@ -413,160 +413,18 @@
                 </div>
                 <div class="mb-3  " id="updatepost">
 
-                      </div>
-
-                  <div class="con">
-                  </div>
-              </div>
-              <div class="pt-1 pb-1 px-2 mb-1  fw-semibold text-dark rounded align-items-center" >
-                <div class=" d-flex justify-content-between rounded p-2" style="border:1px solid black;align-items:center;box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;background-color:white;" >
-
-                    <span class="">Add to your post</span>
-
-                    <div class="gap-3 d-flex md-icon ">
-                    <i class="bi bi-images text-success" ></i>
-                    <i class="bi bi-tag text-primary"></i>
-                    <i class="bi bi-emoji-smile text-warning"></i>
-                    <i class="bi bi-geo-alt-fill text-danger"></i>
-                    <i class="bi bi-filetype-gif text-info"></i>
-                </div>
-                  </div>
-
-              </div>
-            </div>
-            <div class="justify-content-center mx-auto mb-3">
-                <button type="button" class="btn text-dark mx-auto b_btn px-5" style="background-color:white" >Post</button>
-                </div>
-                </div>
-                </div>
-                </div>
-
-
-
-{% comment %} Here work by Badhan {% endcomment %}
-
-<div id="carouselExample" class="carousel slide" data-bs-ride="carousel">
-    <div class="carousel-inner">
-      {% for video in shorts %}
-      <div class="carousel-item {% if forloop.first %}active{% endif %}" id="videoBox{{ forloop.counter }}">
-        <a href="{% url 'short' %}?post_id={{ video.id }}" id="videoLink{{ forloop.counter }}">
-          <div class="video-wrapper" id="video{{ video.id }}" data-post-id="{{ video.id }}">
-            <div class="video-box">
-              {% if video.media_url %}
-              <video id="myVideo{{ forloop.counter }}" autoplay loop muted>
-                <source src="{% static video.media_url.0 %}" type="video/mp4">
-              </video>
-              {% else %}
-              <p>No video available.</p>
-              {% endif %}
-            </div>
-          </div>
-        </a>
-      </div>
-      {% endfor %}
+               </div>
+               </div>
+               </div>
+        </form>
     </div>
-    <!-- Carousel Controls -->
-    <button class="carousel-control-prev" type="button" data-bs-target="#carouselExample" data-bs-slide="prev">
-      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-      <span class="visually-hidden">Previous</span>
-    </button>
-    <button class="carousel-control-next" type="button" data-bs-target="#carouselExample" data-bs-slide="next">
-      <span class="carousel-control-next-icon" aria-hidden="true"></span>
-      <span class="visually-hidden">Next</span>
-    </button>
-  </div>
+    </div>
 
 
-<style>
-    #carouselExample {
-        max-width: 100%;
-        margin: 10px auto;
-        overflow-x: hidden; /* Hide horizontal overflow */
-    }
 
-    .carousel-inner {
-        display: flex;
-        flex-wrap: nowrap; /* Prevent wrapping */
-        justify-content: flex-start; /* Align items to the start */
-        margin-left:10px;
-        gap: 5px;
-    }
 
-    .carousel-item {
-        flex: 0 0 auto;
-        width: 100%;
-        max-width: calc(100% / 3 - 20px); /* Default to 3 videos per row */
-        margin: 5px;
-        box-sizing: border-box;
-        transition: transform 0.5s ease;
-    }
 
-    .carousel-item video {
-        width: 100%;
-        height: auto;
-        margin:auto;
-        aspect-ratio: 9/16; /* Aspect ratio for vertical videos */
-        object-fit: cover;
-        border-radius: 10px;
-    }
 
-    @media (max-width: 768px) {
-        .carousel-item {
-            max-width: calc(100% / 2 - 20px); /* Adjust to 2 videos per row for smaller screens */
-        }
-    }
-
-</style>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const carousel = document.getElementById('carouselExample');
-        const prevButton = carousel.querySelector('.carousel-control-prev');
-        const nextButton = carousel.querySelector('.carousel-control-next');
-        const items = carousel.querySelectorAll('.carousel-item');
-        let currentIndex = 0;
-        const videosPerView = () => window.innerWidth < 768 ? 2 : 3;
-
-        function showItems() {
-            const perView = videosPerView();
-            items.forEach((item, index) => {
-                item.style.display = (index >= currentIndex && index < currentIndex + perView) ? 'block' : 'none';
-            });
-            updateButtons();
-        }
-
-        function showNextItem() {
-            if (currentIndex + videosPerView() < items.length) {
-                currentIndex++;
-            }
-            showItems();
-        }
-
-        function showPrevItem() {
-            if (currentIndex > 0) {
-                currentIndex--;
-            }
-            showItems();
-        }
-
-        function updateButtons() {
-            const isFirstItem = currentIndex === 0;
-            const isLastItem = currentIndex + videosPerView() >= items.length;
-            prevButton.style.display = isFirstItem ? 'none' : 'block';
-            nextButton.style.display = isLastItem ? 'none' : 'block';
-        }
-
-        prevButton.addEventListener('click', showPrevItem);
-        nextButton.addEventListener('click', showNextItem);
-        window.addEventListener('resize', showItems);
-
-        showItems();
-        updateButtons();
-    });
-
-</script>
-
-{% comment %} End by Badhan {% endcomment %}
 
 
     <!--Share Modal-->
@@ -577,6 +435,8 @@
                   <h5 class="modal-title mx-auto" id="shareModalLabel">Share Post</h5>
                   <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="margin-left: 0px;"></button>
                 </div>
+
+
                 <div class="share-container">
                     <h5><img src="https://cdn-icons-png.flaticon.com/128/6997/6997662.png" alt="Profile Picture"
                             class="profile-pic">Rima Das </h5>
@@ -691,8 +551,7 @@
 
 
 
-
-    {% comment %} comment modal by priya {% endcomment %}
+{% comment %} comment modal by priya {% endcomment %}
 <div  class="modal fade custom-modal" id="commentModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
 
     <div class="modal-dialog modal-dialog-centered "role="document" >

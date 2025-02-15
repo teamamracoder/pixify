@@ -190,8 +190,6 @@ urlpatterns = [
     path('short/comment/<int:comment_id>/reply/', views.ShortCommentReplyView.as_view(),name='short_comment_reply'),
     path('short/comment/<int:comment_id>/reaction/', views.ShortCommentReactionView.as_view(),name='short_comment_reaction'),
 
-    path('call/<str:call_id>/', views.CallView.as_view(),name='call_page'),
-
 
 ]
 
