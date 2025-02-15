@@ -25,6 +25,7 @@
                 <span class="username P-msg_chat-title">{{ data.chat.title }}</span>
             {% endif %}
         </div>
+        <div id="sendDataButton"><i class="fa-solid fa-phone"></i></div>    
     </div>
         
   <!-- Loading Spinner (placed as an overlay) -->
@@ -873,6 +874,28 @@ if (data.seen_by_all) {
     }
 }
 
+// Handel Calling
+if (data.action === "ringing") {
+    const callId = data.call_id;
+    const members = data.members;
+    const callerId = data.caller_id;
+    const currentUserId = "{{ user.id }}";// Get logged-in user ID
+
+    console.log("Caller ID:", callerId);
+    console.log("Current User ID:", currentUserId);
+
+    if (currentUserId === callerId) {
+        console.log("Redirecting to ringing.html...");
+        window.location.href = `/call/ringing/${callId}/${chatId}/`;
+                    
+    } else {
+        console.log("Redirecting to calling.html...");
+        window.location.href = `/call/calling/${callId}/${chatId}/`;
+        
+    }
+}
+
+
      // Handle typing indicator.
     const typingIndicator = document.querySelector('.chat-bubble');
     if (data.typing && data.user !== currentUser) {
@@ -1705,6 +1728,24 @@ observeNewMessages();
 
 // Optional: If you add new messages dynamically via your socket or AJAX, 
 // call observeMessages() after appending them so that the new messages are also observed.
+// Call Handel
+function generateCallId() {
+    return 'call_' + Math.random().toString(36).substr(2, 9); // Generates a random call ID
+}
+
+document.getElementById('sendDataButton').addEventListener('click', function() {
+    const chatId = document.getElementById("chat_id").value;
+    const callId = generateCallId();
+    const callerId = currentUserId;// Function to get the caller's ID
+
+    // Send updated data to the server
+    socket.send(JSON.stringify({
+        action: 'ringing',
+        call_id: callId,
+        chat_id: chatId,
+        caller_id: callerId // Include caller ID
+    }));
+});
 
 // Typing Indicator
 document.addEventListener("DOMContentLoaded", function () {
@@ -1741,7 +1782,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }, 300); // Stop typing status after 3 seconds of inactivity
     });
 });
-
+    
 </script>
 
 
