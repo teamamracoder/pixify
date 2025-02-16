@@ -2,7 +2,7 @@
 {% block content %} {% load static %}
 
 <div class="maindiv">
-<div class="px-3 py-3 mt-3 users chats-list-box" style="height: calc(-88px + 100vh);">
+<div class="px-3 py-3 mt-3 users chats-list-box" style="height: calc(-84px + 100vh);">
     <!-- heading -->
     <div class="m-2">
         <div class="p-3 fnd-pic" style="justify-content: space-between; display: flex">
@@ -482,11 +482,6 @@ function fetchFollowersAndFollowings(searchQuery = '') {
     fetchFollowersAndFollowings();    
 });
 
-$(document).ready(function() {
-    var navbarHeight = $('#navbar').outerHeight();
-    $('.chats-list-box').css('height', 'calc(100vh - ' + (navbarHeight * 2) + 'px)');    
-});
-
 </script>
 
 </div>
@@ -897,6 +892,9 @@ $(document).ready(function() {
             text-overflow: ellipsis;
             
             font-size: 12px;
+        }
+        .plus-modal{
+            bottom: 90px;
         }
         
         

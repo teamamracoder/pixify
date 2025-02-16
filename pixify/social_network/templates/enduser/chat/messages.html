@@ -2028,14 +2028,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
     /* Header */
     .G-msg_chat-title {
-        display: block;         
-        width: 35%;             
-        white-space: nowrap;    
-        overflow: hidden;        
-        text-overflow: ellipsis; 
+      
     }
-    .P-msg_chat-title {
-        display: block;         
+    .P-msg_chat-title {        
         width: 70%;             
         white-space: nowrap;    
         overflow: hidden;        
@@ -2052,8 +2047,11 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     .user-info {
-        display: flex;
-        align-items: center;
+        display: block;         
+        width: 50%;             
+        white-space: nowrap;    
+        overflow: hidden;        
+        text-overflow: ellipsis;
     }
 
     .profile-pic {
@@ -2534,7 +2532,9 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     .message-timestamp{
-        margin-left: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     }
 
     #timestamp-scrollbar {
@@ -2641,6 +2641,7 @@ document.addEventListener("DOMContentLoaded", function () {
   
     @media (max-width: 768px) {
     .chat-container {
+        margin-top: 2%;
         height: 90vh;
         width: 100%;
     }
@@ -2679,7 +2680,8 @@ document.addEventListener("DOMContentLoaded", function () {
 }
 @media (max-width: 480px) {
     .chat-container {
-        height: 89vh;
+        margin-top: 10px;
+        height: 88vh;
         border-radius: 0; /* No border-radius on small screens */
     }
 
