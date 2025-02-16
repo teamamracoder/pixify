@@ -213,7 +213,7 @@ function fetchFollowersAndFollowings(searchQuery = '') {
         url: '/chat/followers/api?search=' + searchQuery,
         type: 'GET',
         success: function (res) {
-            var combinedHtml = '';
+            let combinedHtml = '';
             const fallbackImage = '/static/images/avatar.jpg';
 
             if (res.members.length === 0) {

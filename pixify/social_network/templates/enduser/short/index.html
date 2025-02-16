@@ -8,7 +8,7 @@
         <div class="video-box {% if forloop.first %}active{% else %}hidden{% endif %}" id="videoBox{{ forloop.counter }}">
             <div class="reels-header">Shorts</div>
 
-            {% if video.media_url|length >= 1 %}
+            {% if video.media_url|length >= 1 %} 
             <video id="myVideo{{ forloop.counter }}" autoplay loop>
                 <source src="{% static video.media_url.0 %}" type="video/mp4">
                 <p>Your browser does not support the video tag.</p>
@@ -43,9 +43,9 @@
                 <div class="reaction-count">{{ video.comments_count }}</div>
             </div>
             <div>
-                <span class="icon" aria-label="Send">
+                <button class="icon" onclick="shareShort('{{ video.id }}')">
                     <i class="bi bi-send"></i>
-                </span>
+                </button>
             </div>
             <div>
                 <span class="icon" aria-label="More options">⋮</span>
@@ -99,7 +99,77 @@
 </div>
 
 <script>
+// Function to update the URL using the History API.
+function updateReelURL(videoId) {
+  const newUrl = window.location.pathname + '?video_id=' + videoId;
+  history.replaceState(null, null, newUrl); // Use replaceState to avoid creating history stack entries
+}
 
+// IntersectionObserver to detect when a short becomes active.
+const reelObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      // Get the video ID from a data attribute (data-post-id).
+      const videoId = entry.target.getAttribute('data-post-id');
+      if (videoId) {
+        updateReelURL(videoId);
+      }
+    }
+  });
+}, {
+  root: null,       // Viewport
+  threshold: 0.5    // When 50% of the element is visible
+});
+
+// Helper function to parse query parameters.
+function getQueryParams() {
+  const params = {};
+  const queryString = window.location.search.substring(1);
+  queryString.split("&").forEach(function(pair) {
+    if (pair) {
+      const [key, value] = pair.split("=");
+      params[decodeURIComponent(key)] = decodeURIComponent(value);
+    }
+  });
+  return params;
+}
+
+// Function to scroll to a specific short (reel) when it becomes available.
+function scrollToReel(videoId) {
+  // Poll until the target element is in the DOM.
+  const checkExist = setInterval(() => {
+    const target = document.querySelector(`.video-wrapper[data-post-id="${videoId}"]`);
+    if (target) {
+      clearInterval(checkExist);
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      // Optionally highlight the short.
+      target.classList.add('highlight');
+      setTimeout(() => target.classList.remove('highlight'), 2000);
+    }
+  }, 100); // check every 100ms
+}
+
+// Flag to detect if the page was loaded due to a refresh.
+const isPageRefreshed = performance.navigation.type === performance.navigation.TYPE_RELOAD;
+
+// Start observing all video wrappers.
+document.addEventListener('DOMContentLoaded', function() {
+  const wrappers = document.querySelectorAll('.video-wrapper');
+  wrappers.forEach(wrapper => {
+    reelObserver.observe(wrapper);
+  });
+
+  // Check if the URL contains a video_id parameter.
+  const params = getQueryParams();
+  if (params.video_id && !isPageRefreshed) {
+    scrollToReel(params.video_id);
+  }
+});
+</script>
+
+
+
+<script>
 document.addEventListener('DOMContentLoaded', () => {
     // Handle reactions (like/dislike)
     const handleReaction = (iconElement, isDelete = false) => {
