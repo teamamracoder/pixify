@@ -1,6 +1,6 @@
 from django.views import View
 from django.shortcuts import render, redirect
-from ..services import short_service
+from ..services import short_service, chat_service, follower_service
 import random
 from django.http import JsonResponse
 import json
@@ -140,3 +140,12 @@ class ShortCommentReactionView(View):
             'user_liked': user_liked  # Whether the user liked the comment
         })
 
+
+class ShortShareListViewApi(View):
+    def get(self, request):
+        user = request.user 
+        chats = chat_service.list_top_chats_api(request, user)
+
+        follow = follower_service.list_followers_api(request, user)                     
+
+        return chats,follow

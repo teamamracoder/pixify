@@ -16,13 +16,17 @@
     <div class="chat-header">
         <div class="user-info">
             {% if data.chat.is_group %}
+            <div class="profile-pic">
                 <img src="{{ data.chat.chat_cover|default:'\static\images\group_pic.png' }}" alt="Group Chat" class="profile-pic">
-                <a href="{% url 'chat_details' chat_id=data.chat.id %}" id="hyperlink-text" class="chat_title user-info-link">
-                    <span class="username G-msg_chat-title">{{ data.chat.title }}</span>
-                </a>
+            </div>
+            <div class="username" onclick="window.location.href='{% url 'chat_details' data.chat.id %}'">
+               <div style="display: block;text-overflow: ellipsis;overflow: hidden;white-space: nowrap;width: 80%;"> {{ data.chat.title }} </div>
+            </div>
             {% else %}
+            <div class="profile-pic">
                 <img src="{{ data.chat.chat_cover|default:'\static\images\avatar.jpg' }}" alt="Profile Picture" class="profile-pic"onclick="window.location.href='{% url 'userprofile' %}';">
-                <span class="username P-msg_chat-title">{{ data.chat.title }}</span>
+            </div>
+            <div class="username ">{{ data.chat.title }}</div>
             {% endif %}
         </div>
         <div id="sendDataButton"><i class="fa-solid fa-phone"></i></div>    
@@ -47,8 +51,10 @@
             <div class="message-content">
                 {% if message.reply_for_message_id %}
                 <div class="parent-message">
-                    <span>{{ message.reply_for_message_id.sender_id.first_name }} </span>
-                    <div>{{ message.reply_for_message_id.text }}</div>
+                    <span>{{ message.reply_for_message_id.sender_id.first_name }}: </span>
+                    <div style="font-size:10px;display: block;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;width: 50px;">
+                        {{ message.reply_for_message_id.text }}
+                    </div>
                     {% if message.reply_for_message_id.media_url %}
                     <span>{{ message.reply_for_message_id.media_url }}</span>
                     {% endif %}
@@ -2004,11 +2010,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
 /* Chat bubble container */
 .chat-bubble {
-  background-color: #E6F8F1;
-  padding: 16px 28px;
-  border-radius: 20px;
-  border-bottom-left-radius: 2px;
-  display: inline-block;
+    width: 70px;
+    height: 40px;
+    /* padding: 20px; */
+    position: absolute;
+    bottom: 12%;
+    transform: translateX(-50%);
+    background: #611fbe5e;
+    margin-left: 36px;
+    border-radius: 5px;
+    z-index: 10;
 }
 
 /* Flex container for the typing indicator */
@@ -2204,14 +2215,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
     /* Header */
     .G-msg_chat-title {
-        display: block;         
-        width: 35%;             
-        white-space: nowrap;    
-        overflow: hidden;        
-        text-overflow: ellipsis; 
+      
     }
-    .P-msg_chat-title {
-        display: block;         
+    .P-msg_chat-title {        
         width: 70%;             
         white-space: nowrap;    
         overflow: hidden;        
@@ -2228,22 +2234,27 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     .user-info {
-        display: flex;
+        margin-left:6px;
+        justify-content: center;
         align-items: center;
+        display: flex;
     }
 
     .profile-pic {
+        align-items: center;
+        display: flex;
         width: 50px;
         height: 50px;
         border-radius: 50%;
-        margin-right: 20px;
-        object-fit: cover;
+        object-fit:cover;
+        margin-right: 10px;
     }
 
     .username {
         font-size: 22px;
         font-weight: bold;
         color: white;
+        width:350px;
     }
 
 
@@ -2567,8 +2578,9 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     .parent-message span:first-child {
-        font-size: 15px;
-        color:black;
+        font-weight: bold;
+        font-size: 8px;
+        color: #b3a8a8;
         margin-right: 5px;
     }
 
@@ -2711,7 +2723,9 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     .message-timestamp{
-        margin-left: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     }
 
     #timestamp-scrollbar {
@@ -2818,6 +2832,7 @@ document.addEventListener("DOMContentLoaded", function () {
   
     @media (max-width: 768px) {
     .chat-container {
+        margin-top: 2%;
         height: 90vh;
         width: 100%;
     }
@@ -2856,7 +2871,8 @@ document.addEventListener("DOMContentLoaded", function () {
 }
 @media (max-width: 480px) {
     .chat-container {
-        height: 89vh;
+        margin-top: 10px;
+        height: 88vh;
         border-radius: 0; /* No border-radius on small screens */
     }
 
@@ -2887,21 +2903,21 @@ document.addEventListener("DOMContentLoaded", function () {
 
     margin-left: 160px;
     font-size: 20px;
-}
-.user-info {
-    padding-top: 12px;
-    display: flex
-;
-    align-items: center;
-}
-.parmess-del-modal-content {
-        margin-left: 24%;
-        margin-top: 88%;
-        width: 53%;
     }
-.message-modal .message-modal-content{
-    margin-top: 80%;
-}
+    .user-info {
+        padding-top: 12px;
+        display: flex
+    ;
+        align-items: center;
+    }
+    .parmess-del-modal-content {
+            margin-left: 24%;
+            margin-top: 88%;
+            width: 53%;
+        }
+    .message-modal .message-modal-content{
+        margin-top: 80%;
+    }
 
 
 

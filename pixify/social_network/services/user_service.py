@@ -26,10 +26,14 @@ def update_user(user_id,first_name,last_name,email,phone,gender,address,dob,coun
     user.bio=bio
     user.hobbies=hobbies
     user.relationship_status=relationship_status
+    if profile_picture:
+        user.profile_photo_url = profile_picture
     user.updated_by = user
     user.save()
     return user
 
+def filter_user(user_id):
+    return User.objects.filter(id=user_id)
 
 
 
@@ -69,8 +73,13 @@ def change_theme(user, ui_mode):
     user.ui_mode = ui_mode
     user.save()
     return user
+
+
 def get_user_details(user_id):
     return get_object_or_404(User, id=user_id)
+
+def get_user_name_and_img(user_id):
+    return User.objects.filter(id=user_id,is_active = True)
 
 def friends_count(user_id):
     friends = Follower.objects.filter(user_id=user_id).select_related( 'following').count()

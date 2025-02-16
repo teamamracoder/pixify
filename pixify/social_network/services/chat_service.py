@@ -4,6 +4,7 @@ from django.shortcuts import get_object_or_404
 from django.db.models import Max,Q,Subquery,OuterRef,F
 from django.db.models.functions import Coalesce
 from social_network.utils.common_utils import print_log
+from datetime import date
 
 
 def list_chats_by_user(user):
@@ -154,7 +155,7 @@ def list_chats_api(request,chat_data_list):
             if search_query.lower() in chat['title'].lower()
         ]
     else:
-        filtered_chats =''
+        filtered_chats =[]
     return filtered_chats
 
 def get_existing_personal_chat(type, user_id, member):
@@ -235,3 +236,86 @@ def message_seen_status(message):
 
 
 
+
+def list_followers_birthday(user):  
+    try:
+        today = date.today()
+
+        # Filter followings who have birthdays today and exclude the user themselves
+        followings = Follower.objects.filter(
+            follower=user,  # Only the people the user follows
+            is_active=True,
+            user_id__dob__month=today.month,
+            user_id__dob__day=today.day, 
+
+        ).exclude(user_id=user).values(  # Exclude the user's own profile
+            'user_id',
+            'user_id__first_name',
+            'user_id__last_name',
+            'user_id__profile_photo_url',
+            'user_id__dob'
+        )
+    except Exception:
+        followings = []
+
+    return {'followings': list(followings)}
+
+def list_followings(user, offset=0, limit=5):  
+    try:
+        followings = Follower.objects.filter(
+            follower=user,
+            is_active=True
+        ).exclude(user_id=user).values(
+            'user_id',
+            'user_id__first_name',
+            'user_id__last_name',
+            'user_id__profile_photo_url'
+        )[offset:offset + limit]
+    except Exception:
+        followings = []
+
+    return {'followings': followings}
+
+
+
+def list_top_chats_api(request, user):
+    search_query = request.GET.get('search', '')
+    chats = Chat.objects.filter(members=user, is_active=True)   
+
+    chat_data_list = []  
+    for chat in chats:
+        if chat.type == ChatType.PERSONAL.value:
+            member = get_recipient_for_personal(chat.id, user)
+            title = f"{member.first_name} {member.last_name}"
+            chat_cover = member.profile_photo_url or '/static/images/avatar.jpg'
+            chat_info = {
+                'id': chat.id,
+                'title': title,
+                'chat_cover': chat_cover,
+            }
+        elif chat.type == ChatType.GROUP.value:
+            title = chat.title or get_recipients_for_group(chat.id, user)
+            chat_cover = chat.chat_cover or '/static/images/group_pic.png'
+            chat_info = {
+                'id': chat.id,
+                'title': title,
+                'chat_cover': chat_cover,
+            }
+        chat_data_list.append(chat_info)
+        
+    user_chats = chats  
+    if search_query:        
+        user_chats = chats.filter(
+            Q(members__first_name__icontains=search_query) | 
+            Q(members__last_name__icontains=search_query)
+        )
+    
+    for chat in user_chats:        
+        chat.meg = Message.objects.filter(chat_id=chat).count()
+    
+    top_chats = list(user_chats)
+    top_chats.sort(key=lambda chat: chat.meg, reverse=True)
+
+    return top_chats
+      
+    
