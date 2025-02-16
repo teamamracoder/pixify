@@ -20,7 +20,11 @@ from ..models import User,Comment,Post,PostReaction,MasterList
 from django.core.paginator import Paginator
 from datetime import datetime, timedelta, timezone
 from django.utils.timezone import now
-
+from django.http import JsonResponse
+from django.core.files.storage import default_storage
+from django.conf import settings
+from django.utils.timezone import now
+import os
 
 def time_ago(dt):
     now = datetime.now(timezone.utc)
@@ -40,31 +44,58 @@ def time_ago(dt):
     
 
 
-        
-# use ajax post create
+
+
+
 class UserPostCreatView(View):
     def get(self, request):
         return render(request, 'enduser/home/index.html')
+
     @catch_error
     @auth_required
     @role_required(Role.ADMIN.value, Role.END_USER.value)
     def post(self, request):
-            user_id =request.user.id
+        user_id = request.user.id
+        post_Title = request.POST.get('postTitle')
+        postFiles = request.FILES.getlist('postFiles')  # Get list of uploaded files
 
-            post_Title = request.POST.get('postTitle')
-            postFiles = request.FILES.getlist('postFiles')
-            media_urls = []
+        IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.gif', '.webp']
+        VIDEO_EXTENSIONS = ['.mp4', '.webm', '.avi', '.mov']
 
-            for file in postFiles:
-                file_path = os.path.join(settings.MEDIA_ROOT, file.name)
-                with open(file_path, 'wb+') as destination:
-                    for chunk in file.chunks():
-                        destination.write(chunk)
-                media_urls.append(f"{settings.MEDIA_URL}{file.name}")
+        media_urls = []
 
-            services.post_service.user_post(post_Title, media_urls, user_id)
-            return JsonResponse({'success': True, 'redirect_url': reverse('home')})
-     
+        for file in postFiles:
+            file_extension = os.path.splitext(file.name)[1].lower()
+            unique_timestamp = now().strftime('%Y%m%d%H%M%S')
+            file_name = f"{unique_timestamp}_{file.name}"
+
+            # Save all files directly in /media/
+            file_path = file_name  
+
+            saved_path = default_storage.save(file_path, file)
+
+            media_urls.append(f"{settings.MEDIA_URL}{saved_path}")
+
+        if not media_urls:
+            return JsonResponse({'success': False, 'error': 'No files uploaded'}, status=400)
+
+        # Debugging: Print to console to verify the stored URLs
+  
+
+        # Store the post in the database
+        post = Post.objects.create(
+            title=post_Title,
+            media_url=media_urls,  # Store as a list
+            posted_by_id=user_id,
+            created_by_id=user_id,
+        )
+
+        return JsonResponse({'success': True, 'redirect_url': reverse('home')})
+
+
+
+
+
 
 class UserPostDetail(View):
     def get(self, request, post_id):
@@ -74,41 +105,6 @@ class UserPostDetail(View):
                    }
          return render(request, 'enduser/home/index.html', {'comment_dic':comment_dic})
 
-
-
-# class UpdatePostReactionView(View):
-#     @catch_error
-#     @auth_required
-#     @role_required(Role.ADMIN.value, Role.END_USER.value)
-#     def post(self, request, *args, **kwargs):
-#         post_id = request.POST.get('post_id')
-#         reaction_id = request.POST.get('reaction_id')
-       
-#         user_id = request.user.id
-
-#         react=services.post_reaction_service.getemoji(reaction_id)
-      
-#         try:
-#             post = Post.objects.get(id=post_id)
-#         except Post.DoesNotExist:
-#             return JsonResponse({'error': 'Post not found'}, status=404)
-
-#         # Check if the user has already reacted to the post
-#         existing_reaction = PostReaction.objects.filter(post_id_id=post, reacted_by_id=user_id,
-#                                           created_by_id= user_id,is_active= True).first()
-
-#         if existing_reaction:
-#             # If the user already reacted, update the reaction type
-#             existing_reaction.master_list_id_id = reaction_id
-#             existing_reaction.save()
-#         else:
-#             # If no reaction exists, create a new one
-#             #PostReaction.objects.create(post_id_id=post, reacted_by_id=user_id,created_by_id= user_id,is_active= True )
-#            services.post_reaction_service.create_post_reaction(post_id,user_id,reaction_id)
-#         # Count the new reaction
-#         new_reaction_count = PostReaction.objects.filter(post_id_id=post, is_active=True).count()
-
-#         return JsonResponse({'new_reaction_count': new_reaction_count,' reaction_id': reaction_id})
 
 
 
@@ -217,6 +213,7 @@ class UserPostEditView(View):
          post_id = request.GET.get('post_id')
          user_id = request.GET.get('user_id')
          User_del=list(services.user_service.filter_user(user_id).values())
+         print(User_del)
          post_detail =list(services.post_service.get_post(post_id).values())
          return JsonResponse({'success': True, 'message': 'Title updated successfully.','post_detail':list(post_detail),'User_del':list(User_del) })
 

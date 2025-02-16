@@ -243,19 +243,14 @@
 
 
 
+
+
     {% if post_dict.posts %}
-
-        {% for post in post_dict.posts %}
-
-
-     <div class="container post-center pb-3 mb-3">
-
-        <div class="post-box">
-
-            <input type="hidden" class="firstPostId" name="firstPostId" value="{{post.id}}">
-            <input type="hidden" class="firstUserId" name="firstUserId" value="{{post.posted_by_id}}">
-
-
+    {% for post in post_dict.posts %}
+        <div class="container post-center pb-3 mb-3">
+            <div class="post-box">
+                <input type="hidden" class="firstPostId" name="firstPostId" value="{{post.id}}">
+                <input type="hidden" class="firstUserId" name="firstUserId" value="{{post.posted_by_id}}">
 
         <div class="post-top" style="height: 45px;">
             <a href="">
@@ -274,102 +269,111 @@
             </div>
         </div>
 
-        <div class="post-des-img" class="post_title">
-            <p class="px-3 pt-2" id="title" style="font-size:15px; margin: 0; margin-bottom: 5px;padding-bottom:13px;">{{ post.title }}</p>
+                <div class="post-des-img">
+                    <p class="px-3 pt-2" id="title" style="font-size:15px; margin: 0; margin-bottom: 5px;padding-bottom:13px;">
+                        {{ post.title }}
+                    </p>
 
-            {% if post.media_url|length == 1 %}
-            <div style="height:450px;">
-                <img src="{% static post.media_url.0 %}" class="img-fluid" alt="Responsive image"style="height:100%;width:100%;object-fit:cover;">
-            </div>
-            {% elif post.media_url|length > 1 %}
-                <div id="carouselExampleIndicators{{ post.id }}" class="carousel slide">
-                    <div class="carousel-indicators">
-                        {% for media in post.media_url %}
-                            <button type="button" data-bs-target="#carouselExampleIndicators{{ post.id }}" data-bs-slide-to="{{ forloop.counter0 }}" class="{% if forloop.first %}active{% endif %}" aria-current="{% if forloop.first %}true{% endif %}" aria-label="Slide {{ forloop.counter }}"></button>
-                        {% endfor %}
-                    </div>
-
-                    <div class="carousel-inner">
-                        {% for media in post.media_url %}
-                            <div class="carousel-item {% if forloop.first %}active{% endif %}" style="height:450px">
-                                <img src="{% static media %}" class="d-block" height="350" width="100%" alt="Slide {{ forloop.counter }}">
+                    {% if post.media_url|length == 1 %}
+                        <div style="height:450px;">
+                            {% if post.media_url.0|lower|slice:"-4:" == ".mp4" or post.media_url.0|lower|slice:"-5:" == ".webm" %}
+                                <video controls class="img-fluid" style="height:100%;width:100%;object-fit:cover;">
+                                    <source src="{% static post.media_url.0 %}" type="video/mp4">
+                                    Your browser does not support the video tag.
+                                </video>
+                            {% else %}
+                                <img src="{% static post.media_url.0 %}" class="img-fluid" alt="Post Image"
+                                     style="height:100%;width:100%;object-fit:cover;">
+                            {% endif %}
+                        </div>
+                    {% elif post.media_url|length > 1 %}
+                        <div id="carouselExampleIndicators{{ post.id }}" class="carousel slide">
+                            <div class="carousel-indicators">
+                                {% for media in post.media_url %}
+                                    <button type="button" data-bs-target="#carouselExampleIndicators{{ post.id }}"
+                                            data-bs-slide-to="{{ forloop.counter0 }}" class="{% if forloop.first %}active{% endif %}"
+                                            aria-current="{% if forloop.first %}true{% endif %}"
+                                            aria-label="Slide {{ forloop.counter }}" style="display:none">
+                                    </button>
+                                {% endfor %}
                             </div>
-                        {% endfor %}
-                    </div>
 
-                    <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators{{ post.id }}" data-bs-slide="prev">
-                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                        <span class="visually-hidden">Previous</span>
-                    </button>
-                    <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators{{ post.id }}" data-bs-slide="next">
-                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                        <span class="visually-hidden">Next</span>
-                    </button>
-                </div>
-            {% endif %}
-        </div>
+                            <div class="carousel-inner">
+                                {% for media in post.media_url %}
+                                    <div class="carousel-item {% if forloop.first %}active{% endif %}" style="height:450px;width:100% !important;">
+                                        {% if media|lower|slice:"-4:" == ".mp4" or media|lower|slice:"-5:" == ".webm" %}
+                                            <video controls class="d-block" height="350" width="100%"style="object-fit:cover;"  >
+                                                <source src="{% static media %}" type="video/mp4">
+                                                Your browser does not support the video tag.
+                                            </video>
+                                        {% else %}
+                                            <img src="{% static media %}" class="d-block" height="350" width="100%"
+                                                 alt="Slide {{ forloop.counter }}">
+                                        {% endif %}
+                                    </div>
+                                {% endfor %}
+                            </div>
 
-        <div>
-            <div class="d-flex align-items-center px-2 "  >
-
-                <i class="bi bi-hand-thumbs-up pe-1 emojis_hide" style="font-size:12px"></i>
-                 <i class="bi bi-heart emojis_hide" style="font-size:12px" ></i>
-
-               <span  style="font-size:14px;color:#e9e6e6c7;margin-left: 5px;margin-bottom: 2px;" id="reaction-count">
-                <span style="font-size:14px;color:#e9e6e6c7;margin-left: 5px;" class="px-2" id="total-reaction-count" >
-                  </span>
-                </span>
-                <span style="font-size:14px;color:#e9e6e6c7;" class="ms-auto pe-2 commentcountshow" ><span id="total-comment-count"></span> comments</span>
-            </div>
-        </div>
-
-        <div class="post-react-det" >
-
-            <div class="post-react" style="cursor: pointer;">
-
-                <div class="reaction-container" style="position: relative; display: inline-block;">
-                    <input type="hidden" class="getemoji">
-                    <span class="post_reaction" style="cursor: pointer;" >
-                        <i class=" bi bi-heart pe-1 "  style="font-size: 18px; cursor: pointer;position: relative;top: 6px;"></i>
-                    </span>
-
-                    <div  class="reaction-popover"  style="display: none; position: absolute; top: -50px; left: 0; background:black;  border-radius: 10px; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);">
-                         <i  data-reaction-id="1" class="fa-solid fa-heart" style="color: #ff0000;font-size: 20px;cursor: pointer;"></i>
-                         <i data-reaction-id="2" class="fa-solid fa-face-laugh-squint" style="color: #ffcb0f;font-size: 20px;cursor: pointer;"></i>
-                         <i data-reaction-id="3" class="fa-solid fa-face-smile-beam" style="color: #FFD43B;font-size: 20px;cursor: pointer;"></i>
-                         <i data-reaction-id="4" class="fa-solid fa-face-angry" style="color: #ff0a0a;font-size: 20px;cursor: pointer;"></i>
-
-                    </div>
-
+                            <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators{{ post.id }}" data-bs-slide="prev">
+                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Previous</span>
+                            </button>
+                            <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators{{ post.id }}" data-bs-slide="next">
+                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Next</span>
+                            </button>
+                        </div>
+                    {% endif %}
                 </div>
 
+                <div>
+                    <div class="d-flex align-items-center px-2">
+                        <i class="bi bi-hand-thumbs-up pe-1 emojis_hide" style="font-size:12px"></i>
+                        <i class="bi bi-heart emojis_hide" style="font-size:12px"></i>
+                        <span style="font-size:14px;color:#e9e6e6c7;margin-left: 5px;margin-bottom: 2px;" id="reaction-count">
+                            <span style="font-size:14px;color:#e9e6e6c7;margin-left: 5px;" class="px-2" id="total-reaction-count"></span>
+                        </span>
+                        <span style="font-size:14px;color:#e9e6e6c7;" class="ms-auto pe-2 commentcountshow">
+                            <span id="total-comment-count"></span> comments
+                        </span>
+                    </div>
+                </div>
 
+                <div class="post-react-det">
+                    <div class="post-react" style="cursor: pointer;">
+                        <div class="reaction-container" style="position: relative; display: inline-block;">
+                            <input type="hidden" class="getemoji">
+                            <span class="post_reaction" style="cursor: pointer;">
+                                <i class="bi bi-heart pe-1" style="font-size: 18px; cursor: pointer;position: relative;top: 6px;"></i>
+                            </span>
 
-                <span data-toggle="modal" class="load-comments"><i class="fa-regular fa-comment"></i></span>
-                <i class="fa-solid fa-share-nodes" data-bs-toggle="modal" data-bs-target="#shareModal"></i>
+                            <div class="reaction-popover" style="display: none; position: absolute; top: -50px; left: 0; background:black; border-radius: 10px; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);">
+                                <i data-reaction-id="1" class="fa-solid fa-heart" style="color: #ff0000;font-size: 20px;cursor: pointer;"></i>
+                                <i data-reaction-id="2" class="fa-solid fa-face-laugh-squint" style="color: #ffcb0f;font-size: 20px;cursor: pointer;"></i>
+                                <i data-reaction-id="3" class="fa-solid fa-face-smile-beam" style="color: #FFD43B;font-size: 20px;cursor: pointer;"></i>
+                                <i data-reaction-id="4" class="fa-solid fa-face-angry" style="color: #ff0a0a;font-size: 20px;cursor: pointer;"></i>
+                            </div>
+                        </div>
 
+                        <span data-toggle="modal" class="load-comments"><i class="fa-regular fa-comment"></i></span>
+                        <i class="fa-solid fa-share-nodes" data-bs-toggle="modal" data-bs-target="#shareModal"></i>
 
-               {% if  post.posted_by_id == userid %}
-                <span data-bs-toggle="modal" class="editmodal"><i class="fa-solid fa-pen post-pe-icon" ></i></span>
-                <i class="fa-solid fa-trash post-pe-icon" id="deletePostBtn"></i>
-                {% endif %}
-
+                        {% if post.posted_by_id == userid %}
+                            <span data-bs-toggle="modal" class="editmodal"><i class="fa-solid fa-pen post-pe-icon"></i></span>
+                            <i class="fa-solid fa-trash post-pe-icon" id="deletePostBtn"></i>
+                        {% endif %}
+                    </div>
+                </div>
             </div>
         </div>
-        </div>
-    </div>
-    <!-- reaction container -->
-
-
-
-
     {% endfor %}
-    {% endif %}
+{% endif %}
+
 
 <!-- Delete Confirmation Modal -->
 <div id="deleteConfirmModal" class="modal fade" tabindex="-1" role="dialog" >
     <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content shadow-lg"  style="background-color:black;">
+        <div class="modal-content shadow-lg"  style="background-color:#1f0447fb;">
             <div class="modal-header border-0">
                 <h5 class="modal-title fw-bold text-light">Confirm Deletion</h5>
                 <button type="button" class="close text-muted" data-dismiss="modal" aria-label="Close">
@@ -380,11 +384,12 @@
                 <p class="text-light">Are you sure you want to delete this post?</p>
             </div>
             <div class="modal-footer border-0 d-flex justify-content-center">
-                <button type="button"  class="btn  px-4 py-2 " id="cancelDeleteBtn" style="background-color: gray;">Cancel</button>
-                <button type="button" class="btn  px-4 py-2" id="confirmDeleteBtn" style="background-color: #732323;">Yes, Delete</button>
+                <button type="button"  class="btn  px-4 py-2 " id="cancelDeleteBtn" style="background-color: rgb(94, 94, 94);color:white">Cancel</button>
+                <button type="button" class="btn  px-4 py-2" id="confirmDeleteBtn" style="background-color:#ea4545;color:white;">Yes, Delete</button>
             </div>
         </div>
     </div>
+
 </div>
 
 
@@ -782,18 +787,19 @@
 $(document).ready(function () {
     let holdTimer; // Track the hold time
 
-    $(".post_reaction").on("mousedown", function () {
+    $(".post_reaction").on("mousedown touchstart", function (event) {
+        event.preventDefault(); // Prevent unintended behavior on mobile
         let reactionButton = $(this);
         let postContainer = reactionButton.closest('.reaction-container');
         let postId = postContainer.closest('.post-box').find('.firstPostId').val();
 
-        // Start a timer when the button is pressed
+        // Start a timer when the button is pressed or touched
         holdTimer = setTimeout(function () {
             deleteReaction(reactionButton, postId);
         }, 1000); // 1-second delay
     });
 
-    $(".post_reaction").on("mouseup mouseleave", function () {
+    $(".post_reaction").on("mouseup mouseleave touchend touchcancel", function () {
         clearTimeout(holdTimer); // Cancel timer if released before 1 second
     });
 
@@ -807,7 +813,7 @@ $(document).ready(function () {
             },
             success: function (response) {
                 if (response.success) {
-                    button.find("i").removeClass().addClass("bi bi-heart").css({'color': '#a7358b', 'position': 'relative','top': '6px'}); // Reset icon
+                    button.find("i").removeClass().addClass("bi bi-heart").css({'color': '#a7358b', 'position': 'relative', 'top': '6px'}); // Reset icon
                     button.closest('.post-box').find("#total-reaction-count").text(response.total_count); // Update count
 
                     if (response.total_count === 0) {
@@ -955,37 +961,38 @@ $(document).ready(function () {
         });
     });
 
+
     function fetchEmojiDetails(postContainer, postId) {
-        var FirstUserId = postContainer.find('.firstUserId').val();
-        var emoji = postContainer.find('.getemoji').val();
-        if(emoji){
-        $.ajax({
-            url: '/fetch_reactions/',
-            method: 'GET',
-            data: {
-                'post_id': postId,
-                'user_id': FirstUserId,
-                'emoji_id': emoji
-            },
-            success: function(response) {
+    var FirstUserId = postContainer.find('.firstUserId').val();
+    var emoji_id = postContainer.find('.getemoji').val();
 
-                if (response.react && response.react.length > 0) {
+    // Prepare data object
+    var requestData = {
+        'post_id': postId,
+        'user_id': FirstUserId
+    };
+
+    // Only add emoji_id if it's not null or empty
+    if (emoji_id) {
+        requestData['emoji_id'] = emoji_id;
+    }
+
+    $.ajax({
+        url: '/fetch_reactions/',
+        method: 'GET',
+        data: requestData,  // Send only non-null values
+        success: function(response) {
+            if (response.react && response.react.length > 0) {
                 var emojiHtml = response.react[0].value; // Get the emoji HTML like <i class="fa-solid fa-heart"></i>
-
-
                 // Update the reaction span with the new emoji
                 postContainer.find('.post_reaction').html(emojiHtml);
             }
+        }
+    });
+}
 
-
-
-
-            },
-
-        });
-    }
-    }
 });
+
 
 // comment reply
     $(document).ready(function () {
@@ -1041,8 +1048,6 @@ $(document).ready(function () {
                 },
                 headers: { "X-CSRFToken": "{{ csrf_token }}" },
                 success: function (data) {
-                    console.log("Comment data",data)
-
 
 
                     $('#commentText').val(''); // Clear textarea
@@ -1055,10 +1060,12 @@ $(document).ready(function () {
                     if (data.comments.length > 0 ) {
                         data.comments.forEach(comment => {
                             if (comment.reply_for_id==null){
+                            const profileImage = comment.comment_by__profile_photo_url
+
                             const commentItem = `
                          <div class="d-flex py-1 allcomments">
-                                    <img src="{% static 'images/green.png' %}" alt="User" class="rounded-circle"
-                                        style="width:35px; height:35px;">
+                                    <img src="static${profileImage}" alt="User" class="rounded-circle"
+                                        style="width:35px; height:35px;object-fit: cover;">
                                     <div class="d-flex flex-column">
 
 
@@ -1134,7 +1141,7 @@ $(document).ready(function () {
                   },
                 success: function (data) {
 
-
+                    console.log(data)
                     $(this).closest('.post-box').find("#total-comment-count").text(data.comment_count);
 
 
@@ -1150,11 +1157,12 @@ $(document).ready(function () {
 
 
 data.user_details.forEach(com_del => {
+    const profileImage = com_del.profile_photo_url
 const com_prof=`
 
 
 <a href="" class="mx-1">
-                    <img src="{% static 'images/IMG_20240915_213320.jpg' %}" alt="avatar" class="rounded-circle me-2 " style="width: 35px; object-fit: cover; height: 35px; " >
+                    <img src="/static${profileImage}" alt="avatar" class="rounded-circle me-2 " style="width: 35px; object-fit: cover; height: 35px; " >
                 </a>
 
                 <div class="d-flex "style="flex-direction: column;" >
@@ -1166,51 +1174,79 @@ com_profile.html(com_prof);
     });
 
 
-  //  com_name.html(comname);
-//});
 
-const postItem = `
+let uniqueId = `carousel${data.posts[0].id}_${Math.random().toString(36).substring(7)}`; // Ensure a unique ID
+
+let postItem = `
     <div class="post-des-img">
         <p class="px-3 pt-2" style="font-size:15px; margin: 0; margin-bottom: 5px;">${data.posts[0].title}</p>
 
         <div class="post-box pb-2 px-2">
             ${
-                // Check if there's more than one image
                 data.posts[0].media_url.length > 1
                 ?
-                // If more than one image, make it a carousel
+                // Carousel for multiple media files (images and videos)
                 `
-                    <div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="carousel">
+                    <div id="${uniqueId}" class="carousel slide" data-bs-ride="carousel">
+                        <div class="carousel-indicators">
+                            ${data.posts[0].media_url.map((media, index) => `
+                                <button type="button" data-bs-target="#${uniqueId}"
+                                        data-bs-slide-to="${index}" class="${index === 0 ? 'active' : ''}"
+                                        aria-current="${index === 0 ? 'true' : 'false'}"
+                                        aria-label="Slide ${index + 1}" style="display:none;">
+                                </button>
+                            `).join('')}
+                        </div>
+
                         <div class="carousel-inner">
-                            ${data.posts[0].media_url.map((post, index) => `
-                                <div class="carousel-item ${index === 0 ? 'active' : ''}">
-                                    <img src="static${post}" class="d-block w-100" alt="Responsive image" style="height: 500px; object-fit: cover;">
+                            ${data.posts[0].media_url.map((media, index) => `
+                                <div class="carousel-item ${index === 0 ? 'active' : ''}" style="height:450px;width:100% !important;">
+                                    ${media.toLowerCase().endsWith('.mp4') || media.toLowerCase().endsWith('.webm')
+                                        ? `<video controls class="d-block w-100" style="height:100%;object-fit:cover;">
+                                            <source src="static${media}" type="video/mp4">
+                                            Your browser does not support the video tag.
+                                           </video>`
+                                        : `<img src="static${media}" class="d-block w-100" alt="Slide ${index + 1}" style="height:100%;object-fit:cover;">`
+                                    }
                                 </div>
                             `).join('')}
                         </div>
-                        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
+
+                        <button class="carousel-control-prev" type="button" data-bs-target="#${uniqueId}" data-bs-slide="prev">
                             <span class="carousel-control-prev-icon" aria-hidden="true"></span>
                             <span class="visually-hidden">Previous</span>
                         </button>
-                        <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
+                        <button class="carousel-control-next" type="button" data-bs-target="#${uniqueId}" data-bs-slide="next">
                             <span class="carousel-control-next-icon" aria-hidden="true"></span>
                             <span class="visually-hidden">Next</span>
                         </button>
                     </div>
                 `
                 :
-                // If there's only one image, just display it normally
-                data.posts[0].media_url.map(post => `
-                    <div style="height:500px;">
-                        <img src="static${post}" class="img-fluid" alt="Responsive image" style="height:100%;width:100%;object-fit:cover;">
+                // Single media file (image or video)
+                `
+                    <div style="height:450px;">
+                        ${data.posts[0].media_url[0].toLowerCase().endsWith('.mp4') || data.posts[0].media_url[0].toLowerCase().endsWith('.webm')
+                            ? `<video controls class="img-fluid" style="height:100%;width:100%;object-fit:cover;">
+                                <source src="static${data.posts[0].media_url[0]}" type="video/mp4">
+                                Your browser does not support the video tag.
+                               </video>`
+                            : `<img src="static${data.posts[0].media_url[0]}" class="img-fluid" alt="Post Image" style="height:100%;width:100%;object-fit:cover;">`
+                        }
                     </div>
-                `).join('')
+                `
             }
         </div>
     </div>
-
-
 `;
+
+// **Manually initialize Bootstrap carousel after adding it to the DOM**
+setTimeout(() => {
+    let carouselElement = document.getElementById(uniqueId);
+    if (carouselElement) {
+        new bootstrap.Carousel(carouselElement);
+    }
+}, 500); // Delay to ensure it's added to the DOM
 
 photo_com.html(postItem);
 
@@ -1219,10 +1255,11 @@ photo_com.html(postItem);
                     if (data.comments.length > 0 ) {
                         data.comments.forEach(comment => {
                             if (comment.reply_for_id==null){
+                                const profileImage = comment.comment_by__profile_photo_url
                             const commentItem = `
                                 <div class="d-flex py-1 allcomments">
-                                    <img src="{% static 'images/green.png' %}" alt="User" class="rounded-circle"
-                                        style="width:35px; height:35px;">
+                                    <img src="static${profileImage}" alt="User" class="rounded-circle"
+                                        style="width:35px; height:35px;object-fit: cover;">
                                     <div class="d-flex flex-column">
 
 
@@ -1304,9 +1341,11 @@ $(document).ready(function () {
 
 
 //  view reply comment
+
+// View reply comment
 $(document).on('click', '.view-comment', function () {
     const commentId = $(this).data('comment-id'); // Get clicked parent comment ID
-
+    let button = $(this); // Store reference to the clicked button
 
     if (!commentId) {
         console.error("Error: commentId is not received!");
@@ -1314,9 +1353,16 @@ $(document).on('click', '.view-comment', function () {
     }
 
     let repliesContainer = $(`#replies-${commentId}`);
-    // If replies already exist, toggle visibility
+
     if (repliesContainer.length > 0) {
-        repliesContainer.slideToggle();
+        // Toggle visibility and update button text accordingly
+        repliesContainer.slideToggle(function () {
+            if ($(this).is(':visible')) {
+                button.text('Hide Reply');
+            } else {
+                button.text('View Reply');
+            }
+        });
     } else {
         $.ajax({
             url: 'comments/getReplies/',
@@ -1324,8 +1370,6 @@ $(document).on('click', '.view-comment', function () {
             dataType: 'json',
             data: { comment_id: commentId },
             success: function (data) {
-
-
                 if (data.replies.length > 0) {
                     let replyHtml = `<div id="replies-${commentId}" class="ms-4" style="display: none;">`;
 
@@ -1349,10 +1393,11 @@ $(document).on('click', '.view-comment', function () {
                     $(`#replies-${commentId}`).remove();
 
                     // Append replies to the correct parent comment
-                    $(`[data-comment-id="${commentId}"]`).parent().append(replyHtml);
+                    button.parent().append(replyHtml);
 
-                    // Show the replies with animation
+                    // Show the replies with animation and change button text
                     $(`#replies-${commentId}`).slideDown();
+                    button.text('Hide Reply');
                 }
             },
             error: function (xhr, status, error) {
@@ -1420,61 +1465,51 @@ $(document).ready(function () {
 {% comment %} post update ajax {% endcomment %}
    <script>
 
-    $(document).ready(function () {
-        $('.editmodal').click(function () {
-            const FirstPostId = $(this).closest('.post-box').find('.firstPostId').val();
-            const FirstUserId = $(this).closest('.post-box').find('.firstUserId').val();
 
-            $.ajax({
-                url: 'post/update/',
-                type: 'GET',
-                dataType: 'json',
-                data: {
-                    post_id: FirstPostId,
-                    user_id: FirstUserId,
-                    csrfmiddlewaretoken: '{{ csrf_token }}',
-                  },
-                success: function (data) {
+$(document).ready(function () {
+    $('.editmodal').click(function () {
+        const FirstPostId = $(this).closest('.post-box').find('.firstPostId').val();
+        const FirstUserId = $(this).closest('.post-box').find('.firstUserId').val();
+        const updatedTitle = $('#editTitle').val();
+        $.ajax({
+            url: 'post/update/',
+            type: 'GET',
+            dataType: 'json',
+            data: {
+                post_id: FirstPostId,
+                user_id: FirstUserId,
+                postTitle: updatedTitle,
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+            },
+            success: function (data) {
+                document.getElementById("p_id").value = FirstPostId;
+                document.getElementById("p_user").value = FirstUserId;
+                const Post_photo = $('#updatepost');
+                const user_detail = $('#update_userpost');
 
-                     const postid= FirstPostId
-                     const userid=FirstUserId
-                     document.getElementById("p_id").value = postid;
-                     document.getElementById("p_user").value = userid;
-                     const Post_photo = $('#updatepost');
-                     const user_detail=$('#update_userpost')
-                     /*${user.profile_photo_url.map(photo =>``).join('')}*/
+                data.User_del.forEach(user => {
+                    const profile_pic=user.profile_photo_url
+                    user_detail.html(`
+                        <img src="static${profile_pic}" alt="User Avatar" class="user-avatar me-2"style="object-fit:cover;">
+                        <span class="fw-bold text-light">${user.first_name} ${user.last_name}</span>
+                    `);
+                });
 
-
-data.User_del.forEach(user => {
-const user_del=`
-
-                 <img src="{% static 'images/IMG_20240915_213320.jpg' %}" alt="User Avatar"class="user-avatar me-2">
-                 <span class="fw-bold text-light">${user.first_name} ${user.last_name}</span>`;
-                 user_detail.html(user_del)
-                     });
-
-
-data.post_detail.forEach(post => {
-const photo = `
-
-                    <textarea class="form-control text-light " placeholder="caption..." rows="2" id="editTitle"
-                         style="outline:none;border:none;resize: none; background-color: #27236e"  >${post.title}</textarea>
-                </div>
-
-                <div class="mb-3 ">
-
-
-                     ${
-
-                        post.media_url.length > 1
-                        ?
-
-                        `
+                data.post_detail.forEach(post => {
+                    let mediaContent = '';
+                    if (post.media_url.length > 1) {
+                        mediaContent = `
                             <div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="carousel">
                                 <div class="carousel-inner">
-                                    ${post.media_url.map((photo, index) => `
+                                    ${post.media_url.map((media, index) => `
                                         <div class="carousel-item ${index === 0 ? 'active' : ''}">
-                                            <img src="static${photo}" class="d-block w-100" alt="Responsive image" style="height: 200px; object-fit: cover;">
+                                            ${media.endsWith('.mp4') || media.endsWith('.webm') ?
+                                                `<video controls class="d-block w-100" style="height: 200px; object-fit: cover;">
+                                                    <source src="static${media}" type="video/mp4">
+                                                    Your browser does not support the video tag.
+                                                </video>` :
+                                                `<img src="static${media}" class="d-block w-100" alt="Responsive image" style="height: 200px; object-fit: cover;">`
+                                            }
                                         </div>
                                     `).join('')}
                                 </div>
@@ -1486,115 +1521,130 @@ const photo = `
                                     <span class="carousel-control-next-icon" aria-hidden="true"></span>
                                     <span class="visually-hidden">Next</span>
                                 </button>
+                            </div>`;
+                    } else {
+                        mediaContent = post.media_url.map(media => `
+                            <div class="editpic rounded" style="width: 100%; outline:none;border:none">
+                                ${media.endsWith('.mp4') || media.endsWith('.webm') ?
+                                    `<video controls class="rounded" style="width: 100%; height: auto;">
+                                        <source src="static${media}" type="video/mp4">
+                                        Your browser does not support the video tag.
+                                    </video>` :
+                                    `<img src="static${media}" class="rounded">`
+                                }
+                                <span style="font-size:40px;">&times;</span>
                             </div>
-                        `
-                        :
-                       post.media_url.map(photo => `
-              <div  class=" editpic  rounded" style="width: 100%; outline:none;border:none">
-                        <img src="static${photo}"  class="rounded">
-                    <span style="font-size:40px;">&times</span>
+                        `).join('');
+                    }
 
-                      </div>
-                `).join('')
-}
+                    const postContent = `
+                        <textarea class="form-control text-light" placeholder="caption..." rows="2" id="editTitle"
+                            style="outline:none;border:none;resize: none; background-color: #27236e">${post.title}</textarea>
+                        </div>
+                        <div class="mb-3">${mediaContent}</div>
+                        <div class="pt-1 pb-1 px-2 mb-1 fw-semibold text-dark rounded align-items-center">
+                            <div class="d-flex justify-content-between rounded p-2" style="border:1px solid black;align-items:center;box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;background-color:white;">
+                                <span>Add to your post</span>
+                                <div class="gap-3 d-flex md-icon">
+                                    <i class="bi bi-images text-success"></i>
+                                    <i class="bi bi-tag text-primary"></i>
+                                    <i class="bi bi-emoji-smile text-warning"></i>
+                                    <i class="bi bi-geo-alt-fill text-danger"></i>
+                                    <i class="bi bi-filetype-gif text-info"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="justify-content-center mx-auto mb-3" style="display: flex;">
+                            <button type="submit" id="updatePostBtn" class="btn text-dark mx-auto b_btn px-5" style="background-color:white">Post</button>
+                        </div>
+                    `;
 
+                    Post_photo.html(postContent);
+                });
 
+                $('#editpostModal').modal('show');
 
-                  <div class="con">
-
-                  </div>
-              </div>
-              <div class="pt-1 pb-1 px-2 mb-1  fw-semibold text-dark rounded align-items-center" >
-                <div class=" d-flex justify-content-between rounded p-2" style="border:1px solid black;align-items:center;box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;background-color:white;" >
-
-                    <span class="">Add to your post</span>
-
-                    <div class="gap-3 d-flex md-icon ">
-                    <i class="bi bi-images text-success" ></i>
-                    <i class="bi bi-tag text-primary"></i>
-                    <i class="bi bi-emoji-smile text-warning"></i>
-                    <i class="bi bi-geo-alt-fill text-danger"></i>
-                    <i class="bi bi-filetype-gif text-info"></i>
-                </div>
-                  </div>
-
-              </div>
-            </div>
-            <div class="justify-content-center mx-auto mb-3"style="display: flex;">
-                <button type="submit" id="updatePostBtn" class="btn text-dark mx-auto b_btn px-5" style="background-color:white" >Post</button>
-            </div>
-
-                  `;
-
-                  Post_photo.html(photo);
-                     });
-                    $('#editpostModal').modal('show');
-
-
-                    $('#updatePostBtn').click(function () {
-                        const updatedTitle = $('#editTitle').val();
-
-                        $.ajax({
-
-                            type: 'POST',
-                            url: '/post/update/',
-                            dataType: 'json',
-                            data: {
-                                post_id: postid,
-                                postTitle: updatedTitle,
-                                csrfmiddlewaretoken: '{{ csrf_token }}',
-
-                            },
-                            success: function (response) {
+                $('#updatePostBtn').click(function () {
+                    const updatedTitle = $('#editTitle').val();
+                    $.ajax({
+                        type: 'POST',
+                        url: '/post/update/',
+                        dataType: 'json',
+                        data: {
+                            post_id: FirstPostId,
+                            postTitle: updatedTitle,
+                            csrfmiddlewaretoken: '{{ csrf_token }}',
+                        },
+                        success: function (response) {
 
 
-                            },
-                            error: function (xhr, status, error) {
-                                console.error('Error updating title:', error);
-                            }
-                        });
+// Update post title in modal
+                $('#editTitle').val(updatedTitle);
+
+                // Find the corresponding post box and update title
+                $('.post-box').each(function () {
+                    const currentPostId = $(this).find('.firstPostId').val();
+                    if (currentPostId == postid) {
+                        $(this).find('#title').text(updatedTitle);
+                    }
+                });
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        },
+                        error: function (xhr, status, error) {
+
+                            console.error('Error updating title:', error);
+                        }
                     });
-
-
-                },
-
-                error: function (xhr, status, error) {
-                    console.error('Error updating post:', error);
-                }
-            });
-
-
+                });
+            },
+            error: function (xhr, status, error) {
+                console.error('Error updating post:', error);
+            }
         });
     });
-
+});
 
 
 $(document).ready(function () {
     let holdTimer; // Timer variable
     let commentToDelete = null; // Store reference to the comment
 
-    $(document).on("mousedown", ".allcomments", function () {
+    $(document).on("mousedown touchstart", ".allcomments", function (event) {
+        event.preventDefault(); // Prevent unintended scrolling on mobile
+
         commentToDelete = $(this);  // Store reference to comment
         let commentId = commentToDelete.find(".comment-id").val(); // Get comment ID
 
-        // Start the hold timer (1 second)
+        // Start the hold timer (0.5 seconds)
         holdTimer = setTimeout(function () {
             showDeleteConfirmation(commentId, commentToDelete);
         }, 500);
     });
 
-    $(document).on("mouseup mouseleave", ".allcomments", function () {
+    $(document).on("mouseup mouseleave touchend touchcancel", ".allcomments", function () {
         clearTimeout(holdTimer); // Cancel the hold timer if user releases early
     });
 
     function showDeleteConfirmation(commentId, commentElement) {
         // Create a modal dynamically
         let modalHtml = `
-            <div id="deleteModal" class="delete-modal" style=" padding: 20px; border-radius: 5px;text-align: center;" >
-                <div class="delete-modal-content" style="background-color:black;">
+            <div id="deleteModal" class="delete-modal" style="padding: 20px; border-radius: 5px; text-align: center;">
+                <div class="delete-modal-content" style="background-color:#1f0447fb;">
                     <p>Are you sure you want to delete this comment?</p>
                     <button id="confirmDelete" data-comment-id="${commentId}" style="background-color:red;">Confirm Delete</button>
-                    <button id="cancelDelete" style="background-color:gray; margin: 10px;padding: 10px 15px;border: none;cursor: pointer;" >Cancel</button>
+                    <button id="cancelDelete" style="background-color:gray; margin: 10px; padding: 10px 15px; border: none; cursor: pointer;">Cancel</button>
                 </div>
             </div>
         `;
@@ -1626,7 +1676,7 @@ $(document).ready(function () {
             },
             success: function (response) {
                 if (response.success) {
-                    commentElement.fadeOut(300, function () { $(this).remove(); }); // Smooth fade out effect
+                    commentElement.fadeOut(300, function () { $(this).remove(); }); // Smooth fade-out effect
                 } else {
                     alert("Failed to delete comment.");
                 }
@@ -1750,7 +1800,7 @@ $(document).ready(function () {
         position: absolute;
         top: -50px;
         left: 0;
-        background: black;
+        background:#1f0447fb;
         padding: 5px;
         border-radius: 10px;
         box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
