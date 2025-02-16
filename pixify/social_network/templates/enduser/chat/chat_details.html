@@ -31,7 +31,7 @@
     <!-- Group Photo with Edit Button -->
     <div class="group-photo-container">
       <div class="gp_dp_image">
-        <img src="{{ data.chat.chat_cover }}" alt=" " class="group-photo">
+        <img src="{% static data.chat.chat_cover %}" alt=" " class="group-photo">
       </div>
       <div class="gp_name_btn">
         <button class="edit-btn" onclick="document.getElementById('group-photo-input').click();">
