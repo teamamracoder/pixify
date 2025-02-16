@@ -16,13 +16,17 @@
     <div class="chat-header">
         <div class="user-info">
             {% if data.chat.is_group %}
+            <div class="profile-pic">
                 <img src="{{ data.chat.chat_cover|default:'\static\images\group_pic.png' }}" alt="Group Chat" class="profile-pic">
-                <a href="{% url 'chat_details' chat_id=data.chat.id %}" id="hyperlink-text" class="chat_title user-info-link">
-                    <span class="username G-msg_chat-title">{{ data.chat.title }}</span>
-                </a>
+            </div>
+            <div class="username" onclick="window.location.href='{% url 'chat_details' data.chat.id %}'">
+               <div style="display: block;text-overflow: ellipsis;overflow: hidden;white-space: nowrap;width: 80%;"> {{ data.chat.title }} </div>
+            </div>
             {% else %}
+            <div class="profile-pic">
                 <img src="{{ data.chat.chat_cover|default:'\static\images\avatar.jpg' }}" alt="Profile Picture" class="profile-pic"onclick="window.location.href='{% url 'userprofile' %}';">
-                <span class="username P-msg_chat-title">{{ data.chat.title }}</span>
+            </div>
+            <div class="username ">{{ data.chat.title }}</div>
             {% endif %}
         </div>
     </div>
@@ -47,7 +51,9 @@
                 {% if message.reply_for_message_id %}
                 <div class="parent-message">
                     <span>{{ message.reply_for_message_id.sender_id.first_name }}: </span>
-                    <div>{{ message.reply_for_message_id.text }}</div>
+                    <div style="font-size:10px;display: block;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;width: 50px;">
+                        {{ message.reply_for_message_id.text }}
+                    </div>
                     {% if message.reply_for_message_id.media_url %}
                     <span>{{ message.reply_for_message_id.media_url }}</span>
                     {% endif %}
@@ -2047,25 +2053,27 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     .user-info {
-        display: block;         
-        width: 50%;             
-        white-space: nowrap;    
-        overflow: hidden;        
-        text-overflow: ellipsis;
+        margin-left:6px;
+        justify-content: center;
+        align-items: center;
+        display: flex;
     }
 
     .profile-pic {
+        align-items: center;
+        display: flex;
         width: 50px;
         height: 50px;
         border-radius: 50%;
-        margin-right: 20px;
-        object-fit: cover;
+        object-fit:cover;
+        margin-right: 10px;
     }
 
     .username {
         font-size: 22px;
         font-weight: bold;
         color: white;
+        width:350px;
     }
 
 
@@ -2388,8 +2396,9 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     .parent-message span:first-child {
-        font-size: 15px;
-        color:black;
+        font-weight: bold;
+        font-size: 8px;
+        color: #b3a8a8;
         margin-right: 5px;
     }
 
