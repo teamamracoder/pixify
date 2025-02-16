@@ -268,7 +268,7 @@ class ManageToggleUserActiveView(View):
 #             'form': form,
 #             'user_id': user.id,
 #         })
-class ManageAdminProfileView(View):
+class ManageAdminProfileUpdateView(View):
     
     @catch_error
     def get(self, request, user_id):
