@@ -7,8 +7,9 @@ from django.urls import path
 
 urlpatterns = [
     # home
-    path('admin/', views.AdminHomeView.as_view(), name='home'),
+    path('admin/', views.ManageAdminHomeView.as_view(), name='admin_home'),
     path('admin-dashboard/', views.ManageAdminHomeView.as_view(), name='get_filtered_users'),
+
     # home
     path('', views.HomeView.as_view(), name='home'),
     path('home/loginuserdetails/', views.LoginUserDetailsView.as_view(), name='loginuserdetails'),

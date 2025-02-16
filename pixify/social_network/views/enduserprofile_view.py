@@ -140,15 +140,15 @@ class EnduserprofileUpdateView(View):
         return redirect('userprofile')
 
 
-def edit_information(request):
-    if request.method == "POST":
-        form = UserProfileForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('success')
-    else:
-        form = UserProfileForm()
-    return render(request, 'edit_information.html', {'form': form})
+# def edit_information(request):
+#     if request.method == "POST":
+#         form = UserProfileForm(request.POST)
+#         if form.is_valid():
+#             form.save()
+#             return redirect('success')
+#     else:
+#         form = UserProfileForm()
+#     return render(request, 'edit_information.html', {'form': form})
 
 
 @login_required
