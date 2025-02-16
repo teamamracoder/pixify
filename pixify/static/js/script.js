@@ -84,142 +84,209 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 
+// post upload
+// document.addEventListener("DOMContentLoaded", () => {
+//     let files = [];
+//     let container = document.querySelector(".con");
+//     let input = document.querySelector("#fileInput");
 
-// Badhan
-// Function to update time stamps
+//     if (input) {
+//         input.addEventListener('change', () => {
+//             let file = input.files;
+//             for (let i = 0; i < file.length; i++) {
+//                 if (files.every(e => e.name !== file[i].name)) files.push(file[i]);
+//             }
+//             showMedia();
+//         });
+//     }
 
-// function updateTimeStamps() {
-//     document.getElementById('time1').innerText = '11h';
-//     document.getElementById('time2').innerText = '1m';
-//     document.getElementById('time3').innerText = '20m';
-//     document.getElementById('time4').innerText = '5m';
-//     document.getElementById('time5').innerText = '2h';
-//     document.getElementById('time6').innerText = '9h';
-// }
+//     const showMedia = () => {
+//         let mediaContent = '';
+//         files.forEach((e, i) => {
+//             let mediaElement;
+//             if (e.type.startsWith("image")) {
+//                 mediaElement = `<img src="${URL.createObjectURL(e)}" alt="Uploaded Image Preview" style="width: 100%; height: 100%; object-fit: cover;">`;
+//             } else if (e.type.startsWith("video")) {
+//                 mediaElement = `<video src="${URL.createObjectURL(e)}" muted loop style="width: 100%; height: 100%; object-fit: cover;"></video>`;
+//             }
+//             mediaContent += `<div class="media" style="position: relative; display: inline-block; width: 95px; height: 95px; margin: 5px; overflow: hidden; border-radius: 5px;">
+//                 ${mediaElement}
+//                 <span onclick="window.delMedia(${i})" style="position: absolute; top: 5px; left: 80%; cursor: pointer; font-size: 18px; color: red; font-weight: bold;">&times;</span>
+//             </div>`;
+//         });
+//         container.innerHTML = mediaContent;
+//     };
 
-// updateTimeStamps();
-// updateTimeStamps();
-//End Badhan
+//     window.delMedia = index => {
+//         files.splice(index, 1);
+//         showMedia();
+//     };
 
-// select post photo and videos--Priya
-// let files = [],
-//     container = document.querySelector(".con"),
-//     browse = document.querySelector(".select"),
-//     input = document.querySelector("#fileInput");
-// if (browse && input) {
-//     browse.addEventListener('click', () => input.click());
+//     const dropZone = document.getElementById("dropZone");
+//     const fileInput = document.getElementById("fileInput");
 
-//     input.addEventListener('change', () => {
-//         let file = input.files;
-//         for (let i = 0; i < file.length; i++) {
-//             if (files.every(e => e.name !== file[i].name)) files.push(file[i]);
+//     dropZone.addEventListener("dragover", (e) => {
+//         e.preventDefault();
+//         dropZone.style.borderColor = "blue"; 
+//         dropZone.style.backgroundColor = "#f0f8ff";
+//     });
+
+//     dropZone.addEventListener("dragleave", () => {
+//         dropZone.style.borderColor = "#ccc"; 
+//         dropZone.style.backgroundColor = "transparent";
+//     });
+
+//     dropZone.addEventListener("drop", (e) => {
+//         e.preventDefault();
+//         dropZone.style.borderColor = "#ccc"; 
+//         dropZone.style.backgroundColor = "transparent";
+
+//         const droppedFiles = Array.from(e.dataTransfer.files);
+//         handleFiles(droppedFiles);
+//     });
+
+//     const handleFiles = (selectedFiles) => {
+//         selectedFiles.forEach((file) => {
+//             if (files.every((e) => e.name !== file.name)) {
+//                 files.push(file);
+//             }
+//         });
+//         showMedia();
+//     };
+// });
+
+// post upload
+
+// document.addEventListener("DOMContentLoaded", () => {
+//     let files = [];
+//     let container = document.querySelector(".con");
+//     let input = document.querySelector("#fileInput");
+//     let postForm = document.querySelector("#postForm");
+
+//     if (input) {
+//         input.addEventListener('change', () => {
+//             let file = input.files;
+//             for (let i = 0; i < file.length; i++) {
+//                 if (files.every(e => e.name !== file[i].name)) {
+//                     files.push(file[i]);
+//                 }
+//             }
+//             showMedia();
+//         });
+//     }
+
+//     const showMedia = () => {
+//         let mediaContent = '';
+//         files.forEach((e, i) => {
+//             let mediaElement;
+//             if (e.type.startsWith("image")) {
+//                 mediaElement = `<img src="${URL.createObjectURL(e)}" alt="Uploaded Image Preview" style="width: 100%; height: 100%; object-fit: cover;">`;
+//             } else if (e.type.startsWith("video")) {
+//                 mediaElement = `<video src="${URL.createObjectURL(e)}" muted loop style="width: 100%; height: 100%; object-fit: cover;"></video>`;
+//             }
+//             mediaContent += `<div class="media" style="position: relative; display: inline-block; width: 95px; height: 95px; margin: 5px; overflow: hidden; border-radius: 5px;">
+//                 ${mediaElement}
+//                 <span onclick="window.delMedia(${i})" style="position: absolute; top: 5px; left: 80%; cursor: pointer; font-size: 18px; color: red; font-weight: bold;">&times;</span>
+//             </div>`;
+//         });
+//         container.innerHTML = mediaContent;
+//     };
+
+//     window.delMedia = index => {
+//         files.splice(index, 1);
+//         showMedia();
+//     };
+
+//     postForm.addEventListener("submit", async (event) => {
+//         event.preventDefault();
+//         let formData = new FormData(postForm);
+        
+//         // Append all selected files to FormData
+//         files.forEach(file => {
+//             formData.append("postFiles", file);
+//         });
+
+//         try {
+//             let response = await fetch(postForm.action, {
+//                 method: "POST",
+//                 body: formData,
+//             });
+
+//             let result = await response.json();
+//             if (result.success) {
+//                 window.location.href = result.redirect_url;
+//             }
+//         } catch (error) {
+//             console.error("Error:", error);
 //         }
-
-//         //input.value = "";
-//         showImages();
 //     });
-// }
-// const showImages = () => {
-//     let images = '';
-//     files.forEach((e, i) => {
-//         images += `<div class="images">
-//             <img src="${URL.createObjectURL(e)}" alt="Uploaded Image Preview">
-//             <span onclick="delImage(${i})" style="cursor: pointer;">&times;</span>
-//         </div>`;
-//     });
-//     container.innerHTML = images;
-// };
-// const delImage = index => {
-//     files.splice(index, 1);
-//     showImages();
-// };
+// });
 
-
-// select post photo and videos--Priya
 
 document.addEventListener("DOMContentLoaded", () => {
     let files = [];
     let container = document.querySelector(".con");
-    //let browse = document.querySelector(".select");
     let input = document.querySelector("#fileInput");
+    let postForm = document.querySelector("#postForm");
 
     if (input) {
-        input.addEventListener('change', () => {
-            let file = input.files;
-            for (let i = 0; i < file.length; i++) {
-                if (files.every(e => e.name !== file[i].name)) files.push(file[i]);
-            }
-
-            showImages();
+        input.addEventListener('change', (event) => {
+            let fileList = Array.from(event.target.files);
+            fileList.forEach(file => {
+                if (!files.some(e => e.name === file.name)) {
+                    files.push(file);
+                }
+            });
+            showMedia();
+            input.value = ''; // Reset input field to allow re-selection of the same files
         });
     }
 
-    const showImages = () => {
-        let images = '';
-        files.forEach((e, i) => {
-            images += `<div class="images">
-                <img src="${URL.createObjectURL(e)}" alt="Uploaded Image Preview">
-                <span onclick="window.delImage(${i})" style="cursor: pointer;">&times;</span>
-            </div>`;
-        });
-        container.innerHTML = images;
-    };
-
-    window.delImage = index => {
-        files.splice(index, 1);
-        showImages();
-    };
-    const dropZone = document.getElementById("dropZone");
-    const fileInput = document.getElementById("fileInput");
-
-    //let files = [];
-
-    // Highlight drop zone when dragging files over
-    dropZone.addEventListener("dragover", (e) => {
-        e.preventDefault();
-        dropZone.style.borderColor = "blue"; // Highlight border color
-        dropZone.style.backgroundColor = "#f0f8ff";
-    });
-
-    // Remove highlight when dragging out
-    dropZone.addEventListener("dragleave", () => {
-        dropZone.style.borderColor = "#ccc"; // Reset border color
-        dropZone.style.backgroundColor = "transparent";
-    });
-
-    // Handle file drop
-    dropZone.addEventListener("drop", (e) => {
-        e.preventDefault();
-        dropZone.style.borderColor = "#ccc"; // Reset border color
-        dropZone.style.backgroundColor = "transparent";
-
-        const droppedFiles = Array.from(e.dataTransfer.files);
-        handleFiles(droppedFiles);
-    });
-
-    // Handle file processing
-    const handleFiles = (selectedFiles) => {
-        selectedFiles.forEach((file) => {
-            if (files.every((e) => e.name !== file.name)) {
-                files.push(file);
+    const showMedia = () => {
+        let mediaContent = '';
+        files.forEach((file, index) => {
+            let mediaElement = '';
+            if (file.type.startsWith("image")) {
+                mediaElement = `<img src="${URL.createObjectURL(file)}" alt="Image Preview" style="width: 100%; height: 100%; object-fit: cover;">`;
+            } else if (file.type.startsWith("video")) {
+                mediaElement = `<video src="${URL.createObjectURL(file)}" muted loop style="width: 100%; height: 100%; object-fit: cover;"></video>`;
             }
+
+            mediaContent += `
+                <div class="media" style="position: relative; display: inline-block; width: 95px; height: 95px; margin: 5px; overflow: hidden; border-radius: 5px;">
+                    ${mediaElement}
+                    <span onclick="delMedia(${index})" style="position: absolute; top: 5px; left: 80%; cursor: pointer; font-size: 18px; color: red; font-weight: bold;">&times;</span>
+                </div>`;
         });
-        showImages();
+        container.innerHTML = mediaContent;
     };
 
+    window.delMedia = (index) => {
+        files.splice(index, 1);
+        showMedia();
+    };
 
+    // Ensure all selected files are included in form submission
+    postForm.addEventListener("submit", () => {
+        let fileInputField = document.createElement("input");
+        fileInputField.type = "file";
+        fileInputField.name = "postFiles";
+        fileInputField.multiple = true;
+        fileInputField.style.display = "none";
+
+        let dataTransfer = new DataTransfer();
+        files.forEach(file => dataTransfer.items.add(file));
+        fileInputField.files = dataTransfer.files;
+
+        postForm.appendChild(fileInputField);
+    });
+
+    // Prevent clearing files when modal closes
+    let modal = document.getElementById("addPhotosVideosModal");
+    modal.addEventListener("hidden.bs.modal", () => {
+        showMedia();
+    });
 });
-
-
-
-// select post photo and videos--Priya End
-
-
-
-
-
-
-
 
 
 //For Comment

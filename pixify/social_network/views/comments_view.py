@@ -112,7 +112,7 @@ class CommentReplyView(View):
         reply_text = request.POST.get('reply_text')
 
 
-        comment_list = services.comment_service.comment_list(post_id)
+        
         
         if not reply_text or not post_id:
             return JsonResponse({"status": "error", "message": "Invalid data"}, status=400)
@@ -125,7 +125,7 @@ class CommentReplyView(View):
             else:
               services.comment_service.user_comments_create(reply_text,post_id,user_id)
               reply_list = []
-         
+            comment_list = services.comment_service.comment_list(post_id)
             return JsonResponse({
                 "status": "success",
                 "comments":list(comment_list),
