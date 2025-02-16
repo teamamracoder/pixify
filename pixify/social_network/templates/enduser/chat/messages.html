@@ -93,7 +93,7 @@
                     <a href="#" class="delete-link" onclick="openDeleteModal('{{ message.id }}', '{{ message.sender_id.id }}'); closeOptions('{{ message.id }}');">Delete</a>
                 </div>
 
-                <div class="reaction-container" id="reaction-container-{{ message.id }}">
+                <div class="reaction-containerrrr" id="reaction-containerrrr-{{ message.id }}">
                     <div class="reaction-popup" id="reaction-popup-{{ message.id }}" style="display: none;">
                         {% for reaction in data.reactions %}
                         <span onclick="reactionManager.addReaction('{{ message.id }}', '{{ reaction.id }}', '{{ reaction.value|escapejs }}')">
@@ -1036,7 +1036,7 @@ function appendMessageToChat(message, messageId, messageTime, senderId, senderNa
                 <a href="#" onclick="replyMessage('${messageId}', '${senderName}'); closeOptions('${messageId}');">Reply</a>
                 <a href="#" onclick="openDeleteModal('${messageId}', '${senderId}'); closeOptions('${messageId}');">Delete</a>
             </div>
-            <div class="reaction-container" id="reaction-container-${messageId}">
+            <div class="reaction-containerrrr" id="reaction-containerrrr-${messageId}">
                 <div class="reaction-popup" id="reaction-popup-${messageId}" style="display: none;">
                     ${reactionPopupContent}
                 </div>
@@ -1379,13 +1379,32 @@ function updateMessageInChat(updatedMessage, messageId, messageTime, senderName,
 
 
 
-    // Toggle reaction popup
-    function toggleReactionPopup(messageId) {
-        const reactionPopup = document.getElementById(`reaction-popup-${messageId}`);
-        if (reactionPopup) {
-            reactionPopup.style.display = reactionPopup.style.display === "none" ? "block" : "none";
+// Toggle reaction popup
+function toggleReactionPopup(messageId) {
+    const reactionPopup = document.getElementById(`reaction-popup-${messageId}`);
+
+    if (reactionPopup) {
+        // Toggle visibility
+        const isVisible = reactionPopup.style.display === "block";
+        reactionPopup.style.display = isVisible ? "none" : "block";
+
+        // If showing, add event listener to detect outside click
+        if (!isVisible) {
+            setTimeout(() => { // Timeout to allow the toggle click event to complete
+                document.addEventListener("click", outsideClickListener);
+            }, 0);
         }
     }
+
+    // Function to detect click outside the popup
+    function outsideClickListener(event) {
+        if (!reactionPopup.contains(event.target)) {
+            reactionPopup.style.display = "none"; // Hide the popup
+            document.removeEventListener("click", outsideClickListener); // Remove event listener
+        }
+    }
+}
+
 
     // Get the modal
     const modal = document.getElementById("deleteModal");
@@ -1476,7 +1495,7 @@ class ReactionManager {
 
   // Initialize ReactionManager for a given message.
   init(messageId) {
-    const container = document.getElementById(`reaction-container-${messageId}`);
+    const container = document.getElementById(`reaction-containerrrr-${messageId}`);
     if (!container) {
       console.error(`Reaction container not found for messageId: ${messageId}`);
       return;
@@ -1687,9 +1706,9 @@ const reactionManager = new ReactionManager();
 
 document.addEventListener('DOMContentLoaded', () => {
   // Initialize ReactionManager for every message that has a reaction container.
-  const containers = document.querySelectorAll('.reaction-container');
+  const containers = document.querySelectorAll('.reaction-containerrrr');
   containers.forEach(container => {
-    // Assuming container id is in the format "reaction-container-<messageId>"
+    // Assuming container id is in the format "reaction-containerrrr-<messageId>"
     const parts = container.id.split('-');
     const messageId = parts[2];
     reactionManager.init(messageId);
@@ -2883,7 +2902,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 }
-
+.reaction-popup span{
+    margin:2px;
+    cursor:pointer;
+    font-size:10px;
+}
 
 
 

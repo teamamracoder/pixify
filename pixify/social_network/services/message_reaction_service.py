@@ -132,14 +132,14 @@ def latest_reaction(chat, user):
 def message_reactions(chat_id):
     # Get reactions for the given chat_id, including related reaction data
     reactions = MessageReaction.objects.filter(message_id__chat_id=chat_id).select_related('reaction_id').values('message_id', 'reaction_id', 'reaction_id__value')
-    print(reactions)
+    # print(reactions)
    
     return list(reactions)
 
 
 def message_reaction(message_id):
     reactions = MessageReaction.objects.filter(message_id=message_id).values('reaction_id__value')
-    print(reactions)
+    # print(reactions)
     
     return list(reactions)
 
