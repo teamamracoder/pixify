@@ -53,7 +53,7 @@ def user_post(post_Title,media_urls,user_id):
 
 # priya
 def Postlist_posts():
-    return Post.objects.filter(type=PostType.NORMAL.value).order_by('-created_at')
+    return Post.objects.filter(type__in=[PostType.NORMAL.value, PostType.SHOTS.value]).order_by('-created_at')
 
 
 # def get_post(post_id):
