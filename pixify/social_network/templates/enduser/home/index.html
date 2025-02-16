@@ -1019,7 +1019,7 @@ $(document).ready(function () {
                     if (data.comments.length > 0 ) {
                         data.comments.forEach(comment => {
                             if (comment.reply_for_id==null){
-                            const profileImage = comment.comment_by__profile_photo_url 
+                            const profileImage = comment.comment_by__profile_photo_url ? comment.comment_by__profile_photo_url : '/images/avatar.jpg';
                             
                             const commentItem = `
                          <div class="d-flex py-1 allcomments">
@@ -1116,7 +1116,7 @@ $(document).ready(function () {
 
 
 data.user_details.forEach(com_del => {
-    const profileImage = com_del.profile_photo_url 
+    const profileImage = com_del.profile_photo_url ? com_del.profile_photo_url : '/images/avatar.jpg';
 const com_prof=`
 
 
@@ -1214,7 +1214,7 @@ photo_com.html(postItem);
                     if (data.comments.length > 0 ) {
                         data.comments.forEach(comment => {
                             if (comment.reply_for_id==null){
-                                const profileImage = comment.comment_by__profile_photo_url 
+                                const profileImage = comment.comment_by__profile_photo_url ? comment.comment_by__profile_photo_url : '/images/avatar.jpg'
                             const commentItem = `
                                 <div class="d-flex py-1 allcomments">
                                     <img src="static${profileImage}" alt="User" class="rounded-circle"
@@ -1329,13 +1329,15 @@ $(document).on('click', '.view-comment', function () {
             dataType: 'json',
             data: { comment_id: commentId },
             success: function (data) {
+                console.log("af",data)
                 if (data.replies.length > 0) {
                     let replyHtml = `<div id="replies-${commentId}" class="ms-4" style="display: none;">`;
 
                     data.replies.forEach(reply => {
+                        profile_pic=reply.comment_by__profile_photo_url ? reply.comment_by__profile_photo_url : '/images/avatar.jpg'
                         replyHtml += `
                             <div class="d-flex py-1 allcomments">
-                                <img src="{% static 'images/green.png' %}" alt="User" class="rounded-circle" style="width:30px; height:30px;">
+                                <img src="static${profile_pic}" alt="User" class="rounded-circle" style="width:30px; height:30px;object-fit:cover;">
                                 <div class="d-flex flex-column">
                                     <div class="comment-text mb-0 ps-2 py-1 rounded px-3" style="background-color:#311e4ee3;width: 250px;">
                                         <span class="d-block fw-bold">${reply.comment_by__first_name} ${reply.comment_by__last_name}</span>
@@ -1447,7 +1449,7 @@ $(document).ready(function () {
                 const user_detail = $('#update_userpost');
 
                 data.User_del.forEach(user => {
-                    const profile_pic=user.profile_photo_url
+                    const profile_pic=user.profile_photo_url ? user.profile_photo_url : '/images/avatar.jpg';
                     user_detail.html(`
                         <img src="static${profile_pic}" alt="User Avatar" class="user-avatar me-2"style="object-fit:cover;">
                         <span class="fw-bold text-light">${user.first_name} ${user.last_name}</span>
