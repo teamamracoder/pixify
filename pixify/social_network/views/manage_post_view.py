@@ -82,22 +82,11 @@ class ManagePostDetailView(View):
         return render(request, 'adminuser/post/detail.html', {'post_dic':post_dic,'comment_count':comment_count})
 
 class ManagePostUpdateView(View):
-    @catch_error
     def get(self, request, post_id):
-        post = get_object_or_404(Post, id=post_id)  
-        form = ManagePostUpdateForm(initial={
-            'title': post.title,
-            'type': post.type,
-            'description' : post.description,
-            'posted_by': post.posted_by.id,
-            'content_type': post.content_type,
-            'accessability': post.accessability,
-            'treat_as': post.treat_as
-            
-        })
-        return render(request, 'adminuser/post/update.html', {"form": form, "post_id": post.id})
+        form = ManagePostCreateForm()
+        post = services.post_service.get_post(post_id)
+        return render(request, 'adminuser/post/update.html', {'post': post, 'form': form})
 
-    @catch_error
     def post(self, request, post_id):
         post = get_object_or_404(Post, id=post_id)
         form = ManagePostUpdateForm(request.POST)
@@ -117,17 +106,17 @@ class ManagePostUpdateView(View):
 
 class ManagePostDeleteView(View):
     def get(self, request, post_id):
-        post = services.post_service.manage_get_post(post_id)
+        post = services.post_service.get_post(post_id)
         return render(request, 'adminuser/post/delete.html', {'post': post})
 
     def post(self, request, post_id):
-        post = services.post_service.manage_get_post(post_id)
-        services.post_service.manage_delete_post(post)
-        return redirect('manage_post_list')
-    
+        post = services.post_service.get_post(post_id)
+        services.post_service.delete_post(post)
+        return redirect('post_list')
+
 class ManageTogglePostActiveView(View):
     def post(self, request, post_id):
-        post = services.post_service.manage_get_post(post_id)
+        post = services.post_service.get_post(post_id)
         post.is_active = not post.is_active  # Toggle active status
         post.save()
         return JsonResponse({'is_active': post.is_active})
