@@ -262,14 +262,7 @@ class ChatListViewApi(View):
                 }
             chat_data_list.append(chat_info)
         
-        # Get the search query from the request; if empty, return all chats.
-        search_query = request.GET.get('search', '').strip()
-        if search_query:
             filtered_chats = chat_service.list_chats_api(request,chat_data_list)
-
-        else:
-            filtered_chats = chat_data_list
-        
         # Return the (filtered) list of chats.
         return JsonResponse(filtered_chats, safe=False)
     
