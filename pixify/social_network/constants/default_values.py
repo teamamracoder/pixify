@@ -38,7 +38,7 @@ class RelationShipStatus(Enum):
     DIVORCED = 3
     WIDOWED = 4
     OTHER = 5
-    
+
 class MasterType(Enum):
     REACTION = 1
 
@@ -53,7 +53,7 @@ class ResponseMessageType(Enum):
 class SortingOrder(Enum):
     ASC='asc',
     DESC='desc'
-    
+
 class UIMODES(Enum):
     LIGHT=1
     DARK=2
@@ -72,5 +72,5 @@ class Reactions:
     
 
 class MessageDeleteType(Enum):
-    NOT_DELETED = 1    
+    NOT_DELETED = 1
     DELETED_FOR_EVERYONE = 2

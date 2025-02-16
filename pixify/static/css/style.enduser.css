@@ -60,7 +60,7 @@ nav {
     display: flex;
     justify-content: center;
     border-radius: 20px;
-    
+
 }
 
 #but button {
@@ -1311,7 +1311,7 @@ textarea::placeholder {
 .stories-container .stories {
     display: flex;
     gap: 8px;
-   
+
 }
 
 .stories-container .content {
@@ -1324,21 +1324,24 @@ textarea::placeholder {
     /* scrollbar-width: none; */
 }
 
-.stories-container .author {
+.stories-container .authorrr {
+    color: #fff;
+    /* font-size: 16px; */
+    font-style: normal;
     position: absolute;
     bottom: 0;
-    left: 30%;
-    right: 0;
+    /* left: 30%;
+    right: 0; */
     padding: 3px;
-    font-size: 12px;
-    margin-top: -6px;
+    font-size: 13px;
+    /* margin-top: -6px; */
     /* font-family: "Roboto", sans-serif; */
     /* font-weight: bold; */
-    color: #975fec;
+    /* color: #975fec; */
     /* background: linear-gradient(transparent, #222 130%); */
     height: fit-content;
     text-align: start;
-    padding-left: 10px;
+    /* padding-left: 10px; */
 }
 .story .dp {
     /* display: flex; */
@@ -1455,7 +1458,7 @@ textarea::placeholder {
     left: 40px;
     width: 50px;
     height: 50px;
-    border: 3px solid #975fec;
+    border: 2px solid #975fec;
     border-radius: 50%;
     overflow: hidden;
 }
@@ -1466,14 +1469,7 @@ textarea::placeholder {
     object-fit: cover;
 }
 
-/* Author Name */
-.author {
-    top: 15px;
-    left: 100px;
-    color: #fff;
-    font-size: 16px;
-    font-style: normal;
-}
+
 
 /* Time-line Progress Bar */
 .time-line {
@@ -1967,7 +1963,7 @@ textarea::placeholder {
 #CommentsectionTextarea textarea:focus {
     outline: none;
     border: none;
-   
+
 }
 
 /*End Subhasis*/
@@ -1976,12 +1972,12 @@ textarea::placeholder {
     display: inline-block;
     cursor: pointer;
   }
-  
+
   .reaction-container {
-  
+
     transition: transform 0.2s;
   }
-  
+
   .reaction-container:hover {
     transform: scale(1.1);
   }
@@ -2004,7 +2000,7 @@ font-size: 30px;
     visibility: hidden;
     transition: opacity 0.3s, visibility 0.3s;
   }
-  
+
   .hover-container:hover .emoji-reactions {
     opacity: 1;
     visibility: visible;
@@ -2012,12 +2008,12 @@ font-size: 30px;
   }
 
 
-  
+
 
     .modal-content {
         border-radius: 12px;
         border: none;
-  
+
     }
 
     .modal-header {
@@ -2063,34 +2059,150 @@ font-size: 30px;
         left: 0;
         width: 100%;
         height: 100%;
-    
+
         display: flex;
         align-items: center;
         justify-content: center;
         z-index: 10000;
     }
-    
+
     .delete-modal-content {
         background: #2f066de3;;
         padding: 20px;
         border-radius: 5px;
         text-align: center;
     }
-    
+
     .delete-modal-content button {
         margin: 10px;
         padding: 10px 15px;
         border: none;
         cursor: pointer;
     }
-    
+
     #confirmDelete {
         background-color:transparent;
         color: white;
     }
-    
+
     #cancelDelete {
         background-color:transparent;
         color: white;
     }
-    
+
+    /* Sribash Home-Index page Css*/
+    /* body {
+
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        font-family: Arial, sans-serif;
+    } */
+    .stories-full-view {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+    }
+    .story-section {
+        width: 100%;
+        max-width: 45vh;
+        height: 85vh;
+        background: #111;
+        border-radius: 16px;
+        overflow: hidden;
+        position: relative;
+        color: white;
+        margin-left: 0%;
+    }
+    .top-bar {
+        padding: 10px;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 10;
+    }
+    .profile-img img {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        margin-right: 10px;
+    }
+    .timelinea {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        padding: 0 5px;
+        z-index: 10;
+    }
+    .timelinea-item {
+        width: 100%;
+        height: 5px;
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 2px;
+        overflow: hidden;
+        margin-right: 5px;
+    }
+    .story-contentt {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        position: relative;
+    }
+    .story-contentt img {
+        height: 100%;
+        width: 100%;
+        object-fit: cover;
+    }
+    .navigation-icons {
+        position: absolute;
+        top: 50%;
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        padding: 0 10px;
+        z-index: 10;
+    }
+    .prev-iconn, .next-iconn, .close-icon {
+        width: 40px;
+        height: 40px;
+        background: rgba(0, 0, 0, 0.5);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+    }
+    .close-icon {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+    }
+/*added By Subhasis After Merge*/
+@media (max-width: 765px) {
+
+     .CommentSectionPostImgDiv,.CommentSectionEmptyDiv{
+        display: none;
+     }
+     #commentList{
+        margin-bottom: 32px;
+      }
+  }
+.story-contentt{
+    background: linear-gradient(to bottom, #FF9A9E, #FECFEF);
+}
+.txtStory{
+    border: 2px solid #fff;background: linear-gradient(to bottom, #FF9A9E, #FECFEF);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+}
+.txtStory .story-text{
+    color: black;
+    font-size: 14px;
+}

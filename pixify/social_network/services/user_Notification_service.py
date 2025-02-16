@@ -9,6 +9,8 @@ def count_notification():
     return Notification.objects.all()
 
 
+def count_unread_notifications(user_id):
+    return Notification.objects.filter(receiver_id=user_id, is_read=False).count() 
 
 
 from datetime import datetime, timedelta

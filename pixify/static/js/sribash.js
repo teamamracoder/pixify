@@ -1,97 +1,172 @@
 
-const storiesw = document.querySelectorAll(".stories .story img"); // Select all story images
-const storyView = document.getElementById("story-view"); // Full view container
-const storyImgw = document.getElementById("story-img"); // Full view image element
-const prevStoryBtnnn = document.getElementById("prev-story"); // Previous button
-const nextStoryBtnnm = document.getElementById("next-story"); // Next button
-const closeStoryBtn = document.getElementById("close-story"); // Close button
+//let storiesByUser = {}; // Store all user stories
+//let currentUserIndex = 0; // Track the current user's index
+//let currentStoryIndex = 0; // Track the current story index
+//let userIds = []; // Store user IDs
+let storyTimer; // Timer for auto-changing stories
 
-let currentIndexww = 0; // To track the currently displayed story
+// Fetch and store stories when a story is clicked
+function openStoryView(userId) {
+fetch(`/stories/view/${userId}`)
+    .then(response => response.json())
+    .then(data => {
+        console.log(data.userDetails.first_name)
+        storiesByUser = data.stories;
+        userIds = Object.keys(storiesByUser); // Get list of user IDs
+        currentUserIndex = userIds.indexOf(userId.toString()); // Set current user index
+        currentStoryIndex = 0; // Reset story index
 
-// Function to show the full view with a specific story
-function showStory(index) {
-  currentIndexww = index;
-  const selectedStory = storiesw[currentIndexww];
-  storyImgw.src = selectedStory.src; // Update the full view image
-  storyView.style.display = "flex"; // Show the full view container
+
+            // userNameContainer.innerHTML = "sham sing"
+
+            // ✅ Update user profile image (if available)
+            let profileImg = document.querySelector(".profile-img img");
+            let username=document.querySelector("#usernamecr");
+            if (username && data.userDetails.first_name) {
+              username.textContent = data.userDetails.first_name;
+            }
+            //profileImg.src = data.userDetails.profile_photo_url ? data.userDetails.profile_photo_url : "/static/images/avatar.jpg";
+            profileImg.src = data.userDetails.profile_photo_url ? `/static${data.userDetails.profile_photo_url}` : "/static/images/avatar.jpg";
+
+
+
+
+        document.getElementById("story-view").style.display = "flex";
+        loadStory(currentUserIndex, currentStoryIndex);
+    })
+    .catch(error => console.error("Error loading stories:", error));
 }
 
-// Event listener for each story image
-storiesw.forEach((story, index) => {
-  story.addEventListener("click", () => {
-    showStory(index);
-  });
-});
+//
+function loadStory(userIndex, storyIndex) {
+    let userId = userIds[userIndex]; // Get user ID
+    let userStories = storiesByUser[userId]; // Get stories of the selected user
 
-// Navigate to the next story
-function nextStory() {
-  if (currentIndexww < storiesw.length - 1) {
-    currentIndexww++;
-    showStory(currentIndexww);
-  } else {
-    // If no more stories, close the full view
-    storyView.style.display = "none";
-  }
-}
+    if (storyIndex < 0 || storyIndex >= userStories.length) {
+        return;
+    }
+    currentUserIndex = userIndex;
+    currentStoryIndex = storyIndex;
 
-// Navigate to the previous story
-function prevStory() {
-  if (currentIndexww > 0) {
-    currentIndexww--;
-    showStory(currentIndexww);
-  }
-}
+    let story = userStories[storyIndex];
+    console.log(story)
+    let storyContent = document.getElementById("storyContent");
+   // let userNameContainer = document.querySelector(".username");// Select the username element
+    //let profileImg = document.querySelector(".profile-img img"); // Select the profile image element
+    //storyContent.innerHTML = "";
 
-// Add event listeners for navigation buttons
-nextStoryBtnnm.addEventListener("click", nextStory);
-prevStoryBtnnn.addEventListener("click", prevStory);
+    // Set user's name dynamically
 
-// Close the full view
-closeStoryBtn.addEventListener("click", () => {
-  storyView.style.display = "none"; // Hide the full view container
-});
-
-// Handle click on full view container to navigate to next story
-storyView.addEventListener("click", (event) => {
-  if (!event.target.closest(".previous-btn") && !event.target.closest(".next-btn") && !event.target.closest(".close-btn")) {
-    nextStory();
-  }
-});
-
-
-
-const nextBtn = document.querySelector(".stories-container .next-btn");
-const storiesContent = document.querySelector(".stories-container .content");
-const previousBtn = document.querySelector(".stories-container .previous-btn");
-
-
-nextBtn.addEventListener("click", () => {
-    storiesContent.scrollTo({
-        left: storiesContent.scrollLeft + 300,
-        behavior: 'smooth'
-    });
-});
-
-previousBtn.addEventListener("click", () => {
-    storiesContent.scrollTo({
-        left: storiesContent.scrollLeft - 300,
-        behavior: 'smooth'
-    });
-});
-storiesContent.addEventListener("scroll", () => {
-    if (storiesContent.scrollLeft <= 24) {
-        previousBtn.classList.remove("actived");
+console.log('story.media_type',story.media_type);
+    // Check for media type and render appropriately
+    if (story.media_type === 3 && story.media_url) {
+        let video = document.createElement("video");
+        video.src = story.media_url.startsWith("/") ? `static${story.media_url}` : story.media_url;
+        video.controls = true;
+        video.autoplay = true;
+        video.style.width = "100%";
+        video.style.height = "100%";
+        video.style.objectFit = "cover";
+        storyContent.appendChild(video);
+    } else if (story.media_type == 2 && story.media_url) {
+        let img = document.createElement("img");
+        img.src = story.media_url.startsWith("/") ? `static${story.media_url}` : story.media_url;
+        img.style.width = "100%";
+        img.style.height = "100%";
+        img.style.objectFit = "cover";
+        storyContent.appendChild(img);
+    } else if (story.description) {
+        let textContainer = document.createElement("div");
+        textContainer.classList.add("story-text");
+        textContainer.textContent = story.description;
+        textContainer.style.fontSize = "20px";
+        textContainer.style.color = "black";
+        textContainer.style.textAlign = "center";
+        textContainer.style.marginTop = "75%";
+        textContainer.style.padding = "20px";
+        storyContent.appendChild(textContainer);
     } else {
-        previousBtn.classList.add("actived");
+        // If no media or text is available
+        let noContent = document.createElement("p");
+        noContent.textContent = "No media or text available.";
+        noContent.style.color = "#fff";
+        storyContent.appendChild(noContent);
     }
 
-    let maxScrollValue = storiesContent.scrollWidth - storiesContent.clientWidth - 24;
 
-    if (storiesContent.scrollLeft >= maxScrollValue) {
-        nextBtn.classList.remove("actived");
+    // let userNameContainer = document.getElementById("usernamecr");
+    //        if (userNameContainer) {
+    //            userNameContainer.textContent = story.first_name ,story.last_name ? story.first_name:"hejibi " ;
+    //             console.log("dshgs",data.first_name)   // Set the fetched first_name
+    //         }
+
+
+    updateTimeline(userStories.length, storyIndex);
+    startAutoChange(); // Start auto transition
+}
+
+// Update timeline progress
+function updateTimeline(totalStories, currentStoryIndex) {
+let timeline = document.querySelector(".timelinea");
+timeline.innerHTML = "";
+for (let i = 0; i < totalStories; i++) {
+    let timelineItem = document.createElement("div");
+    timelineItem.className = "timelinea-item";
+    timelineItem.style.background = i <= currentStoryIndex ? "#fff" : "rgba(255, 255, 255, 0.3)";
+    timeline.appendChild(timelineItem);
+}
+}
+
+// Auto-change stories every 25 seconds
+function startAutoChange() {
+clearTimeout(storyTimer); // Reset timer
+storyTimer = setTimeout(() => {
+    let userId = userIds[currentUserIndex];
+    let userStories = storiesByUser[userId];
+
+    if (currentStoryIndex < userStories.length - 1) {
+        currentStoryIndex++;
+    } else if (currentUserIndex < userIds.length - 1) {
+        currentUserIndex++;
+        currentStoryIndex = 0;
     } else {
-        nextBtn.classList.add("actived");
+        document.getElementById("story-view").style.display = "none"; // Close if last story
+        return;
     }
+    loadStory(currentUserIndex, currentStoryIndex);
+}, 25000); // 25 seconds auto switch
+}
 
+// Move to the next story manually
+document.getElementById("nextIcon").addEventListener("click", () => {
+clearTimeout(storyTimer); // Reset auto-change timer
+let userId = userIds[currentUserIndex];
+let userStories = storiesByUser[userId];
+
+if (currentStoryIndex < userStories.length - 1) {
+    currentStoryIndex++;
+} else if (currentUserIndex < userIds.length - 1) {
+    currentUserIndex++;
+    currentStoryIndex = 0;
+}
+loadStory(currentUserIndex, currentStoryIndex);
 });
 
+// Move to the previous story manually
+document.getElementById("prevIcon").addEventListener("click", () => {
+clearTimeout(storyTimer); // Reset auto-change timer
+if (currentStoryIndex > 0) {
+    currentStoryIndex--;
+} else if (currentUserIndex > 0) {
+    currentUserIndex--;
+    let previousUserId = userIds[currentUserIndex];
+    currentStoryIndex = storiesByUser[previousUserId].length - 1;
+}
+loadStory(currentUserIndex, currentStoryIndex);
+});
+
+// Close Story View
+document.getElementById("closeIcon").addEventListener("click", () => {
+clearTimeout(storyTimer); // Stop auto change when closing
+document.getElementById("story-view").style.display = "none";
+});
