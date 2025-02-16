@@ -28,12 +28,12 @@
 from django.shortcuts import render
 from django.views import View
 from datetime import date
-from ..services import chat_service
+from ..services import chat_service,follower_service
 
 class BirthdayView(View):
     def get(self, request):
         user = request.user
-        data = chat_service.list_followers_birthday(user)
+        data = follower_service.list_followers_birthday(user)
 
         # Today's date
         today = date.today()

@@ -53,17 +53,19 @@ class HomeView(View):
         user=request.user
         message = request.session.pop("message", "")
         message_type = request.session.pop("message_type", "")
+        userid=request.user.id
 
-        # Fetch posts
+
         posts = services.post_service.Postlist_posts()
+        postreaction=services.post_reaction_service.get_reaction()
+
         post_id = request.GET.get('post_id')
         comment_list = services.comment_service.comment_list(post_id)
-
         post_dict = {
             'posts': posts,
-            #'name': 'priya',
             'comment_list': comment_list,
-            'count_comment': services.comment_service.get_count_comment(59),
+            'postreaction':postreaction,
+
         }
 
         # Fetch stories
@@ -72,7 +74,6 @@ class HomeView(View):
             'storys': storys,
             #'name': 'sribash',
         }
-
         shorts = services.short_service.get_shorts()
         for short in shorts:
             count = services.short_service.reaction_count(short.id)
@@ -89,6 +90,7 @@ class HomeView(View):
             'post_dict': post_dict,
             'story_dict': story_dict,
             'shorts':shorts,
+            'userid':userid,
         })
 
         return render(request, "enduser/home/index.html", context)
