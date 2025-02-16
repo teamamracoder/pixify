@@ -566,7 +566,22 @@ i {
     margin-right: 7px;
 }
 
-.con .images img {
+.con .images video {
+    height: 100%;
+    width: 100%;
+}
+.con  video {
+    height: 95px;
+    width: 95px;
+    border-radius: 5px;
+    box-shadow: 0 0 5px rgba(107, 99, 99, 0.3);
+    overflow: hidden;
+    position: relative;
+    margin-bottom: 7px;
+    margin-right: 7px;
+}
+
+.con  video {
     height: 100%;
     width: 100%;
 }
