@@ -12,3 +12,5 @@ migrations
 .idea/
 TeamSchedules.txt
 TeamANotes.txt
+# Google Cloud Service Account JSON (Sensitive file)
+serviceAccountKey.json
