@@ -1971,11 +1971,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
 /* Chat bubble container */
 .chat-bubble {
-  background-color: #E6F8F1;
-  padding: 16px 28px;
-  border-radius: 20px;
-  border-bottom-left-radius: 2px;
-  display: inline-block;
+    width: 70px;
+    height: 40px;
+    /* padding: 20px; */
+    position: absolute;
+    bottom: 12%;
+    transform: translateX(-50%);
+    background: #611fbe5e;
+    margin-left: 36px;
+    border-radius: 5px;
+    z-index: 10;
 }
 
 /* Flex container for the typing indicator */
@@ -2859,21 +2864,21 @@ document.addEventListener("DOMContentLoaded", function () {
 
     margin-left: 160px;
     font-size: 20px;
-}
-.user-info {
-    padding-top: 12px;
-    display: flex
-;
-    align-items: center;
-}
-.parmess-del-modal-content {
-        margin-left: 24%;
-        margin-top: 88%;
-        width: 53%;
     }
-.message-modal .message-modal-content{
-    margin-top: 80%;
-}
+    .user-info {
+        padding-top: 12px;
+        display: flex
+    ;
+        align-items: center;
+    }
+    .parmess-del-modal-content {
+            margin-left: 24%;
+            margin-top: 88%;
+            width: 53%;
+        }
+    .message-modal .message-modal-content{
+        margin-top: 80%;
+    }
 
 
 

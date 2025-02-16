@@ -10,10 +10,15 @@
 
 <div class="group-chat-container">
     <div class="header">
+      <div class="parent-g-name">
+      <div style="margin-right:20px;font-size:16px;" onclick="window.location.href='{% url 'message' chat_id=data.chat.id %}';">
+        <i class="fas fa-arrow-left text-gray-700 hover:text-black text-xl"></i>
+      </div>
       <!-- Group Name with Edit Button -->
       <h1 class="group-name ">
         <span id="group-name-text">{{ data.chat.title }}</span>
       </h1>
+    </div>
       <div class="g-name">
       <button class="edit-btn gp-name" onclick="editGroupNameInline()">
         <i class="fa-solid fa-pen"></i>
@@ -1136,7 +1141,11 @@ button {
   border-radius: 50%;
 
 }
-
+.parent-g-name{
+  display: flex;
+    align-items: center;
+    justify-content: center;
+}
 
 </style>
 
