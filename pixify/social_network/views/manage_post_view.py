@@ -50,7 +50,6 @@ class ManagePostListView(View):
        
         # Fetch the search query from the URL parameters
         search_query = request.GET.get('search', '')
-        search_query = request.GET.get('search', '')
         sort_by = request.GET.get('sort_by', 'posted_by')
         sort_order = request.GET.get('sort_order', SortingOrder.DESC.value)
         page_number = request.GET.get('page', 1)
@@ -84,8 +83,9 @@ class ManagePostDetailView(View):
 
 class ManagePostUpdateView(View):
     def get(self, request, post_id):
+        form = ManagePostCreateForm()
         post = services.post_service.get_post(post_id)
-        return render(request, 'adminuser/post/update.html', {'post': post})
+        return render(request, 'adminuser/post/update.html', {'post': post, 'form': form})
 
     def post(self, request, post_id):
         post = get_object_or_404(Post, id=post_id)
