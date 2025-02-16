@@ -1,0 +1,188 @@
+{% extends "adminuser/base.html" %}
+
+{% block title %}Post List{% endblock %}
+
+{% block content %}
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<h1 class="text-center mt-5">Dashboard</h1>
+
+
+
+
+
+<div class="container my-4">
+    <!-- Header Stats Section -->
+    <div class="row text-center mb-4">
+        <div class="col-md-4">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Users</h5>
+                    <div>1000</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Admins</h5>
+                    <div>10</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Posts</h5>
+                    <div>25000</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart Section -->
+    
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Chart.js Dashboard</title>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+        <style>
+            .chart-container {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 400px; /* Ensures all charts have the same height */
+            }
+            .chart-container1 {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 400px; /* Ensures all charts have the same height */
+            }
+            canvas {
+                max-width: 100%; /* Ensures responsiveness */
+                max-height: 120%;
+            }
+        </style>
+    </head>
+    <body>
+    
+    <div class="container">
+        <div class="row">
+            <!-- Bar Chart -->
+            <div class="col-md-4 chart-container1">
+                <canvas id="barChart"></canvas>
+            </div>
+    
+            <!-- Pie Chart -->
+            <div class="col-md-4 chart-container">
+                <canvas id="pieChart"></canvas>
+            </div>
+    
+            <!-- Radar Chart -->
+            <div class="col-md-4 chart-container">
+                <canvas id="radarChart"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        new Chart(document.getElementById('barChart').getContext('2d'), {
+        type: 'bar',
+        data: {
+            labels: ['Users'],  // Add your labels dynamically if needed
+            datasets: [
+                {
+                    label: '2020',
+                    data: {{ data_2020|safe }},
+                    backgroundColor: 'blue'
+                },
+                {
+                    label: '2021',
+                    data: {{ data_2021|safe }},
+                    backgroundColor: 'orange'
+                },
+                {
+                    label: '2022',
+                    data: {{ data_2022|safe }},
+                    backgroundColor: 'gray'
+                },
+                {
+                    label: '2023',
+                    data: {{ data_2023|safe }},
+                    backgroundColor: 'green'
+                }
+            ]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    min: 0,
+                    max: 100,  // Set the maximum value dynamically if needed
+                    ticks: {
+                        stepSize: 10  // Scale increments by 10 (0, 10, 20, 30, 40)
+                    }
+                }
+            }
+        }
+    });
+
+    
+        // Pie Chart
+        new Chart(document.getElementById('pieChart').getContext('2d'), {
+            type: 'pie',
+            data: {
+                labels: ['Admins'],
+                datasets: [
+                    { data: [10, 20, 30], backgroundColor: ['blue', 'orange', 'gray'] }
+                ]
+            }
+        });
+    
+        // Radar Chart
+        new Chart(document.getElementById('radarChart').getContext('2d'), {
+            type: 'radar',
+            data: {
+                labels: ['Metric A', 'Metric B', 'Metric C', 'Metric D', 'Metric E', 'Metric F'],
+                datasets: [
+                    { label: '2020', data: [1, 2, 3, 4, 5, 6], backgroundColor: 'rgba(0, 0, 255, 0.2)', borderColor: 'blue' },
+                    { label: '2021', data: [7, 3, 5, 4, 5, 3], backgroundColor: 'rgba(255, 165, 0, 0.2)', borderColor: 'orange' },
+                    { label: '2022', data: [9, 4, 7, 3, 5, 6], backgroundColor: 'rgba(128, 128, 128, 0.2)', borderColor: 'gray' }
+                ]
+            },
+            options: {
+                scales: { r: { beginAtZero: true } }
+            }
+        });
+    </script>
+    
+    </body>
+    </html>
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    
+    
+    
+    
+    <!-- <div class="card" style="width: 18rem; height: 10rem; ">
+        <div class="card-body">
+          <h5 class="card-title text-center">Users</h5>
+        </div>
+      </div>
+    
+    
+    <div class="row container ">
+        <div class="col-lg-4 col-md-4 col-sm-12" >post</div>
+        <div class="col-lg-4 col-md-4 col-sm-12">admin</div>
+        <div class="col-lg-4 col-md-4 col-sm-12">user</div>
+    </div> -->
+    
+
+{% endblock %}

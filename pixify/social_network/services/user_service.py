@@ -48,8 +48,6 @@ def calculate_age(date_of_birth):
         return today.year - date_of_birth.year - ((today.month, today.day) < (date_of_birth.month, date_of_birth.day))
     return "N/A"
 
-  # End by Badhan
-
 
 
 def calculate_age(date_of_birth):

@@ -140,7 +140,6 @@ class UpdatePostReactionView(View):
                                           created_by_id= user_id,is_active= True).first()
 
         if existing_reaction:
-
             existing_reaction.master_list_id_id = reaction_id
             existing_reaction.save()
         else:
@@ -148,12 +147,10 @@ class UpdatePostReactionView(View):
 
            services.post_reaction_service.create_post_reaction(post_id,user_id,reaction_id)
 
-
         user_reaction = PostReaction.objects.filter(post_id_id=post_id, reacted_by_id=user_id, is_active=True).first()
 
         if user_reaction:
             react_id = user_reaction.master_list_id_id  # Get the reaction ID (react_id_id)
-
         else:
             react_id = None  # No reaction found for the user
 
@@ -176,7 +173,6 @@ class UpdatePostReactionView(View):
                              'total_count': total_count,
                              'reaction_name': users,
                              'user_reaction_id': react_id  # Include the user's reaction ID in the response
-
                              })
 
 
@@ -185,7 +181,6 @@ class GetPostReactionsView(View):
     def get(self, request, *args, **kwargs):
         post_id = request.GET.get('post_id')
         user_id = request.user.id
-
         try:
             post = Post.objects.get(id=post_id)
         except Post.DoesNotExist:
@@ -196,7 +191,6 @@ class GetPostReactionsView(View):
 
         if user_reaction:
             react_id = user_reaction.master_list_id_id  # Get the reaction ID (react_id_id)
-
         else:
             react_id = None  # No reaction found for the user
 
@@ -232,7 +226,6 @@ class UserPostEditView(View):
          user = request.user
          post_id = request.POST.get('post_id')
          post_title = request.POST.get('postTitle')
-
 
          if not post_id or not post_title:
             return JsonResponse({'success': False, 'message': 'Missing post_id or postTitle'})

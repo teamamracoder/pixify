@@ -9,7 +9,7 @@ from ..models.post_model import Post
 from ..decorators.exception_decorators import catch_error
 from .. import services
 from ..models import User
-from django.core.paginator import Paginator 
+from django.core.paginator import Paginator
 from django.http import HttpResponseBadRequest
 from social_network.packages.response import success_response
 from social_network.constants.default_values import SortingOrder
@@ -21,14 +21,14 @@ class ManagePostCreateView(View):
     def get(self,request):
         form = ManagePostCreateForm() #Form Initialization:
         return render(request,'adminuser/post/create.html', {"form": form})# empty form
-    
+
 
     @catch_error
-    def post(self, request): 
-        user = request.user # reffers to currently logged-in user 
+    def post(self, request):
+        user = request.user # reffers to currently logged-in user
         form = ManagePostCreateForm(request.POST) # data submitted through an HTML form
         if form.is_valid():
-             post_data = {  
+             post_data = {
                     'posted_by': User.objects.get(id=request.POST['posted_by']),
                     'created_by' : user,  # curent user
                     'type': form.cleaned_data['type'],
@@ -38,7 +38,7 @@ class ManagePostCreateView(View):
                     'accessability': form.cleaned_data['accessability'],
                     'treat_as': form.cleaned_data['treat_as']
                 }
-             services.post_service.manage_create_post(**post_data) 
+             services.post_service.manage_create_post(**post_data)
              return redirect('manage_post_list')
         return render(request, 'adminuser/post/create.html',   success_response(
                 message = messages),
@@ -47,9 +47,8 @@ class ManagePostCreateView(View):
 class ManagePostListView(View):
 
     def get(self, request):
-       
+
         # Fetch the search query from the URL parameters
-        search_query = request.GET.get('search', '')
         search_query = request.GET.get('search', '')
         sort_by = request.GET.get('sort_by', 'posted_by')
         sort_order = request.GET.get('sort_order', SortingOrder.DESC.value)
@@ -65,11 +64,11 @@ class ManagePostListView(View):
         return render(request,
             'adminuser/post/list.html',
             success_response("post data fetched successfully", data)
-        ) 
-    
+        )
+
 class ManagePostDetailView(View):
      def get(self, request, post_id):
-        
+
         comment_count = services.get_comment_count_by_post(post_id)
         post_likes = services.post_service.manage_list_likes_filtered(post_id)
         post_liked_users = services.get_post_user(post_likes)
@@ -84,8 +83,9 @@ class ManagePostDetailView(View):
 
 class ManagePostUpdateView(View):
     def get(self, request, post_id):
+        form = ManagePostCreateForm()
         post = services.post_service.get_post(post_id)
-        return render(request, 'adminuser/post/update.html', {'post': post})
+        return render(request, 'adminuser/post/update.html', {'post': post, 'form': form})
 
     def post(self, request, post_id):
         post = get_object_or_404(Post, id=post_id)
@@ -97,7 +97,7 @@ class ManagePostUpdateView(View):
             post.content_type = form.cleaned_data['content_type']
             post.accessability = form.cleaned_data['accessability']
             post.treat_as = form.cleaned_data['treat_as']
-            post.save()  
+            post.save()
             return redirect('manage_post_list')
         # return render(request, 'adminuser/post/update.html', {"form": form, "post_id": post.id})
         return render(request, 'adminuser/post/create.html',   success_response(
@@ -120,12 +120,11 @@ class ManageTogglePostActiveView(View):
         post.is_active = not post.is_active  # Toggle active status
         post.save()
         return JsonResponse({'is_active': post.is_active})
-    
+
 
 class ManageToggleCommentActiveView(View):
      def post(self, request, comment_id):
         comment = services.post_service.manage_get_comment(comment_id)
-        comment.is_active = not comment.is_active  
+        comment.is_active = not comment.is_active
         comment.save()
-        return JsonResponse({'is_active': comment.is_active})  
-     
+        return JsonResponse({'is_active': comment.is_active})

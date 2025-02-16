@@ -427,7 +427,6 @@
 
 
 {% comment %} Here work by Badhan {% endcomment %}
-
 <div id="carouselExample" class="carousel slide" data-bs-ride="carousel">
     <div class="carousel-inner">
       {% for video in shorts %}
@@ -459,14 +458,12 @@
     </button>
   </div>
 
-
 <style>
     #carouselExample {
         max-width: 100%;
         margin: 10px auto;
         overflow-x: hidden; /* Hide horizontal overflow */
     }
-
     .carousel-inner {
         display: flex;
         flex-wrap: nowrap; /* Prevent wrapping */
@@ -474,7 +471,6 @@
         margin-left:10px;
         gap: 5px;
     }
-
     .carousel-item {
         flex: 0 0 auto;
         width: 100%;
@@ -483,7 +479,6 @@
         box-sizing: border-box;
         transition: transform 0.5s ease;
     }
-
     .carousel-item video {
         width: 100%;
         height: auto;
@@ -492,7 +487,6 @@
         object-fit: cover;
         border-radius: 10px;
     }
-
     @media (max-width: 768px) {
         .carousel-item {
             max-width: calc(100% / 2 - 20px); /* Adjust to 2 videos per row for smaller screens */

@@ -91,7 +91,6 @@ class EnduserprofileView(View):
 
 #         return render(request, 'enduser/profile/index.html', {'user_details': user_details, 'errors': "An error occurred"})
 
-
 class EnduserprofileUpdateView(View):
     def get(self, request, user_id):
         user_details = user_service.get_user_details(user_id)

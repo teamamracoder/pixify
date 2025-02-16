@@ -97,7 +97,7 @@ class CommentsListView(View):
 
         # Fetch comments using the updated comment_list function
         comment_list = services.comment_service.comment_list(post_id)
- 
+
         comment_count = services.comment_service.comment_count(post_id)
 
         # Ensure proper naming and data structure
@@ -141,8 +141,8 @@ class CommentReplyView(View):
         reply_text = request.POST.get('reply_text')
 
 
-        
-        
+
+
         if not reply_text or not post_id:
             return JsonResponse({"status": "error", "message": "Invalid data"}, status=400)
         try:
@@ -156,7 +156,7 @@ class CommentReplyView(View):
               reply_list = []
 
             comment_list = services.comment_service.comment_list(post_id)
-  
+
 
             return JsonResponse({
                 "status": "success",
@@ -200,7 +200,7 @@ class fetch_comment_likes(View):
     def get(self, request, *args, **kwargs):
         user_id = request.user.id  # Get logged-in user's ID
         comment_id = request.GET.get("comment_id")  # Use GET instead of POST
- 
+
 
         if comment_id:
             # Fetch like count for a specific comment
@@ -236,7 +236,6 @@ class ToggleLikeView(View):
 
         comment = get_object_or_404(Comment, id=comment_id)
         like_count = CommentReaction.objects.filter(comment_id_id=comment_id).count()
-
         like, created = CommentReaction.objects.get_or_create(comment_id_id=comment_id, reacted_by_id=user_id,created_by_id=user_id, is_active=True)
 
         if not created:

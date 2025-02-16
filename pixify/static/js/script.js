@@ -184,7 +184,6 @@ document.addEventListener("DOMContentLoaded", () => {
             if (replyOpen.style.display === "none" || replyOpen.style.display === "") {
                 replyOpen.style.display = "block";
 
-
                 viewComment.innerHTML = viewComment.innerHTML.replace("View reply", "Hide reply");
             } else {
                 replyOpen.style.display = "none";

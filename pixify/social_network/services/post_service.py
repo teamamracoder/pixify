@@ -1,5 +1,6 @@
-
-from ..models import Post,Comment,PostReaction
+from ..models.user_model import User
+from . import GetData
+from ..models import Post,Comment,PostReaction,PostReaction
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
 from ..constants.default_values import PostType
@@ -82,7 +83,6 @@ def get_comment_count_by_post(post_id):
 
 def get_post(post_id):
     return Post.objects.filter(id=post_id)
-
 
 
 # update post
