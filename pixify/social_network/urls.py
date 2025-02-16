@@ -11,6 +11,7 @@ urlpatterns = [
 
     # home
     path('', views.HomeView.as_view(), name='home'),
+    path('home/loginuserdetails/', views.LoginUserDetailsView.as_view(), name='loginuserdetails'),
 
 
     # manage-user
@@ -190,7 +191,11 @@ urlpatterns = [
     path('short/comment/<int:comment_id>/reply/', views.ShortCommentReplyView.as_view(),name='short_comment_reply'),
     path('short/comment/<int:comment_id>/reaction/', views.ShortCommentReactionView.as_view(),name='short_comment_reaction'),
 
-
+    # path('save-fcm-token/', views.save_fcm_token, name='save-fcm-token'),
+    path('firebase-messaging-sw.js', views.FirebaseMessagingSwFile, name='firebase-messaging-sw'),
+    path('firebase-notify/', views.Firebasenotify, name='firebase-notify'),
+    path('save_fcm_token/', views.save_fcm_token, name="save_fcm_token"),
+    path('send_notification/',views.send_notification, name="send_notification"),
 
 
 ]

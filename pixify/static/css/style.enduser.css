@@ -4,7 +4,7 @@
     margin: 0;
     padding: 0;
     color: whitesmoke;
-    font-family: "Open Sans", sans-serif;
+    /*font-family: "Open Sans", sans-serif;*/
 }
 input textarea::placeholder {
     color:black;
@@ -1311,6 +1311,7 @@ textarea::placeholder {
 
 .stories-container .authorrr {
     color: #fff;
+    left: 16%;
     /* font-size: 16px; */
     font-style: normal;
     position: absolute;
@@ -1741,7 +1742,14 @@ textarea::placeholder {
     }
   }
 
-
+.brandName {
+    font-size: 1.8rem;
+    font-weight: bold;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #ff4500;
+    padding-left: 61px;
+}
 #SmallScreenNavItem .nav-link{
     font-size: 19px;
 }
@@ -2191,3 +2199,4 @@ font-size: 30px;
     color: black;
     font-size: 14px;
 }
+

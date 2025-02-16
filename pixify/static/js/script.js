@@ -6,7 +6,7 @@ console.log(
 );
 
 
-
+//For NavBar--Subhasis
 document.addEventListener("DOMContentLoaded", function () {
     const navItems = document.querySelectorAll('.nav-item');
     const currentPath = window.location.pathname;
@@ -63,7 +63,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
             if (userDropdown) {
                 userImage.addEventListener("click", function (event) {
-                    console.log("Working");
+                    //console.log("Working");
                     event.stopPropagation();
 
                     if (userDropdown.style.display === "none" || userDropdown.style.display === "") {
@@ -82,7 +82,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
 });
-
+//For NavBar End
 
 
 // Badhan
@@ -175,6 +175,7 @@ document.addEventListener("DOMContentLoaded", () => {
     //let files = [];
 
     // Highlight drop zone when dragging files over
+if(dropZone){
     dropZone.addEventListener("dragover", (e) => {
         e.preventDefault();
         dropZone.style.borderColor = "blue"; // Highlight border color
@@ -196,7 +197,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const droppedFiles = Array.from(e.dataTransfer.files);
         handleFiles(droppedFiles);
     });
-
+}
     // Handle file processing
     const handleFiles = (selectedFiles) => {
         selectedFiles.forEach((file) => {

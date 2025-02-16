@@ -17,3 +17,5 @@ pillow==11.1.0
 pyyaml==6.0.1
 ua-parser==0.16.1
 user-agents==2.2.0
+firebase-admin
+

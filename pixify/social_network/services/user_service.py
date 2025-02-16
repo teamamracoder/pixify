@@ -1,3 +1,4 @@
+from urllib import request
 from ..models import User,Follower
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
@@ -30,7 +31,7 @@ def update_user(user_id,first_name,last_name,email,phone,gender,address,dob,coun
         user.profile_photo_url = profile_picture
     user.updated_by = user
     user.save()
-    return user
+    #return user
 
 def filter_user(user_id):
     return User.objects.filter(id=user_id)
@@ -84,3 +85,11 @@ def get_user_name_and_img(user_id):
 def friends_count(user_id):
     friends = Follower.objects.filter(user_id=user_id).select_related( 'following').count()
     return friends
+
+def updateFCMToken(user_id,fcm_token):
+    user = User.objects.get(id=user_id)
+    user.fcm_token = fcm_token
+    user.save()
+
+def getFCMtoken(user_id):
+    return User.objects.filter(id=user_id).values_list('fcm_token', flat=True).first()

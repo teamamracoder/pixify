@@ -1,4 +1,5 @@
 import random
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.views import View
 
@@ -11,7 +12,7 @@ from social_network.decorators.exception_decorators import catch_error
 from ..decorators import auth_required, role_required
 from social_network.packages.response import success_response
 import random
-
+from django.forms import model_to_dict
 
 
 class HomeView(View):
@@ -64,3 +65,49 @@ class HomeView(View):
         })
 
         return render(request, "enduser/home/index.html", context)
+
+class LoginUserDetailsView(View):
+    @catch_error
+    @auth_required
+    @role_required(Role.ADMIN.value, Role.END_USER.value)
+    # def get(self,request):
+    #     user_id= request.user.id
+    #     user_details=services.user_service.get_user(user_id)
+    #     user_details_dict = model_to_dict(user_details)
+    #     post_del=services.comment_service.get_post(1)
+    #     comment=services.comment_service.comment_list(1)
+    #     print(comment)
+    #     post_del = list(services.comment_service.get_post(1).values())
+    #     comment_queryset = services.comment_service.comment_list(1)
+    #     comments = [model_to_dict(comment) for comment in comment_queryset]
+
+    #     return JsonResponse({
+    #         "status": "success",
+    #         "user_details": user_details_dict,
+    #         "post_del": list(post_del),
+    #         "comments": comments
+    #     })
+
+    def get(self, request):
+        user_id = request.user.id
+        user_details = services.user_service.get_user(user_id)
+
+        user_details_dict = model_to_dict(user_details)
+        totalUnreadNotification=services.user_Notification_service.count_unread_notifications(user_id)
+        user_details_dict = {
+            "id": user_details.id,
+            "first_name": user_details.first_name,
+            "last_name":user_details.last_name,
+            "email": user_details.email,
+            "country":user_details.country,
+            "profile_image_url":user_details.profile_photo_url,
+            "unreadNotification":totalUnreadNotification,
+            "unreadMessage":0
+
+        }
+
+        return JsonResponse({
+            "status": "success",
+            "user_details": user_details_dict,
+        })
+

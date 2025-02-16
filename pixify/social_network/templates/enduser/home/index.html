@@ -42,12 +42,12 @@
         <div class="stories">
 
             <div class="mx-1 bg- rounded story" onclick="uploadStory()" type="button" style="width: 120px; height: 180px;background-color: #bf16e0e3">
-                {% if story_dict.story.posted_by.profile_photo_url.0 %}
+                {% comment %} {% if story_dict.story.posted_by.profile_photo_url.0 %}
                 <img src="{% static storys.posted_by.profile_photo_url.0 %}" alt="" class="card-img-top" style="min-height: 105px; object-fit: cover;">
                    {% else %}
                   <img src="{% static 'images/avatar.jpg' %}" alt="Default Profile" class="card-img-top" style="min-height: 105px; object-fit: cover;">
-           {% endif %}
-                <!-- <img src="static\images\p1.jpg" alt="story post" class="card-img-top" style="min-height: 105px; object-fit: cover;"> -->
+           {% endif %} {% endcomment %}
+                <img src="{% static 'images/avatar.jpg' %}" alt="Default Profile" id="StorysectionUserProfile" class="card-img-top" style="min-height: 105px; object-fit: cover;">
                 <div class="d-flex align-items-center justify-content-center position-relative" style="min-height: 65px; background: relative;">
                     <p class="mb-0 text-center fs-7 fw-bold" style="color: white; position: relative;">Create story</p>
                     <div class="position-absolute top-0 start-50 translate-middle plus-btn">
@@ -149,7 +149,7 @@
 
     <div class="container mt-4">
       <div class="d-flex align-items-center">
-        <img src="{% static 'images/green.png'%}" alt="Profile" class="rounded-circle me-3" style="width: 40px; height: 40px; object-fit: cover;">
+        <img src="" alt="Profile" class="rounded-circle me-3" id="userProfileUploadSection" style="width: 40px; height: 40px; object-fit: cover;">
         <div class="pb-1" data-bs-toggle="modal" data-bs-target="#addPhotosVideosModal" id="addPhotosVideosModalInputdiv">
             <input class="form-control" placeholder="" id="addPhotosVideosModalInput"></input>
       </div>

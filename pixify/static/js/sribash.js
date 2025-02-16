@@ -1,8 +1,8 @@
 
-//let storiesByUser = {}; // Store all user stories
-//let currentUserIndex = 0; // Track the current user's index
-//let currentStoryIndex = 0; // Track the current story index
-//let userIds = []; // Store user IDs
+let storiesByUser = {}; // Store all user stories
+let currentUserIndex = 0; // Track the current user's index
+let currentStoryIndex = 0; // Track the current story index
+let userIds = []; // Store user IDs
 let storyTimer; // Timer for auto-changing stories
 
 // Fetch and store stories when a story is clicked
@@ -10,7 +10,7 @@ function openStoryView(userId) {
 fetch(`/stories/view/${userId}`)
     .then(response => response.json())
     .then(data => {
-        console.log(data.userDetails.first_name)
+        console.log(data.userDetails.profile_photo_url)
         storiesByUser = data.stories;
         userIds = Object.keys(storiesByUser); // Get list of user IDs
         currentUserIndex = userIds.indexOf(userId.toString()); // Set current user index
@@ -26,8 +26,7 @@ fetch(`/stories/view/${userId}`)
               username.textContent = data.userDetails.first_name;
             }
             //profileImg.src = data.userDetails.profile_photo_url ? data.userDetails.profile_photo_url : "/static/images/avatar.jpg";
-            profileImg.src = data.userDetails.profile_photo_url ? `/static${data.userDetails.profile_photo_url}` : "/static/images/avatar.jpg";
-
+           profileImg.src = data.userDetails.profile_photo_url ? `/static${data.userDetails.profile_photo_url}` : "/static/images/avatar.jpg";
 
 
 
@@ -52,8 +51,8 @@ function loadStory(userIndex, storyIndex) {
     console.log(story)
     let storyContent = document.getElementById("storyContent");
    // let userNameContainer = document.querySelector(".username");// Select the username element
-    //let profileImg = document.querySelector(".profile-img img"); // Select the profile image element
-    //storyContent.innerHTML = "";
+    let profileImg = document.querySelector(".profile-img img"); // Select the profile image element
+    storyContent.innerHTML = "";
 
     // Set user's name dynamically
 
@@ -169,4 +168,14 @@ loadStory(currentUserIndex, currentStoryIndex);
 document.getElementById("closeIcon").addEventListener("click", () => {
 clearTimeout(storyTimer); // Stop auto change when closing
 document.getElementById("story-view").style.display = "none";
+});
+
+// Close story view when clicking outside the content
+document.getElementById("story-view").addEventListener("click", (event) => {
+    let storyContainer = document.getElementById("storySection"); // The main content
+
+    if (!storyContainer.contains(event.target)) {
+        document.getElementById("story-view").style.display = "none";
+        clearTimeout(storyTimer); // Stop auto-change
+    }
 });
