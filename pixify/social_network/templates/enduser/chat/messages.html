@@ -1379,13 +1379,32 @@ function updateMessageInChat(updatedMessage, messageId, messageTime, senderName,
 
 
 
-    // Toggle reaction popup
-    function toggleReactionPopup(messageId) {
-        const reactionPopup = document.getElementById(`reaction-popup-${messageId}`);
-        if (reactionPopup) {
-            reactionPopup.style.display = reactionPopup.style.display === "none" ? "block" : "none";
+// Toggle reaction popup
+function toggleReactionPopup(messageId) {
+    const reactionPopup = document.getElementById(`reaction-popup-${messageId}`);
+    
+    if (reactionPopup) {
+        // Toggle visibility
+        const isVisible = reactionPopup.style.display === "block";
+        reactionPopup.style.display = isVisible ? "none" : "block";
+
+        // If showing, add event listener to detect outside click
+        if (!isVisible) {
+            setTimeout(() => { // Timeout to allow the toggle click event to complete
+                document.addEventListener("click", outsideClickListener);
+            }, 0);
         }
     }
+
+    // Function to detect click outside the popup
+    function outsideClickListener(event) {
+        if (!reactionPopup.contains(event.target)) {
+            reactionPopup.style.display = "none"; // Hide the popup
+            document.removeEventListener("click", outsideClickListener); // Remove event listener
+        }
+    }
+}
+
 
     // Get the modal
     const modal = document.getElementById("deleteModal");
@@ -2441,17 +2460,7 @@ document.addEventListener("DOMContentLoaded", function () {
         z-index: 10;
     }
     
-    .reaction-popup span {
-        margin: 2px;
-        cursor: pointer;
-        font-size: 10px;
-    }
-    
-    .reaction-popup span:hover {
-        transform: scale(1.2);
-        transition: 0.3s;
-    }
-    
+
     .reaction-display {
         display: flex;
         gap: 2px;
