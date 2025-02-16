@@ -1176,6 +1176,12 @@ textarea::placeholder {
     width: 100%;
     padding: 0 10px 10px 10px;
 }
+.post-center .post-box .post-des-img video {
+    background-color: #1f0447fb;
+    height: 100%;
+    width: 100%;
+    padding: 0 10px 10px 10px;
+}
 
 .post-center .post-box .post-des-img .post-text .text-in {
     height: 50px;

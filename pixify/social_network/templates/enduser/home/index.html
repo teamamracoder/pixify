@@ -293,7 +293,7 @@
                                     <button type="button" data-bs-target="#carouselExampleIndicators{{ post.id }}" 
                                             data-bs-slide-to="{{ forloop.counter0 }}" class="{% if forloop.first %}active{% endif %}" 
                                             aria-current="{% if forloop.first %}true{% endif %}" 
-                                            aria-label="Slide {{ forloop.counter }}">
+                                            aria-label="Slide {{ forloop.counter }}" style="display:none">
                                     </button>
                                 {% endfor %}
                             </div>
@@ -373,7 +373,7 @@
 <!-- Delete Confirmation Modal -->
 <div id="deleteConfirmModal" class="modal fade" tabindex="-1" role="dialog" >
     <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content shadow-lg"  style="background-color:black;">
+        <div class="modal-content shadow-lg"  style="background-color:#1f0447fb;">
             <div class="modal-header border-0">
                 <h5 class="modal-title fw-bold text-light">Confirm Deletion</h5>
                 <button type="button" class="close text-muted" data-dismiss="modal" aria-label="Close">
@@ -1591,7 +1591,7 @@ $(document).ready(function () {
         // Create a modal dynamically
         let modalHtml = `
             <div id="deleteModal" class="delete-modal" style="padding: 20px; border-radius: 5px; text-align: center;">
-                <div class="delete-modal-content" style="background-color:black;">
+                <div class="delete-modal-content" style="background-color:#1f0447fb;">
                     <p>Are you sure you want to delete this comment?</p>
                     <button id="confirmDelete" data-comment-id="${commentId}" style="background-color:red;">Confirm Delete</button>
                     <button id="cancelDelete" style="background-color:gray; margin: 10px; padding: 10px 15px; border: none; cursor: pointer;">Cancel</button>
@@ -1750,7 +1750,7 @@ $(document).ready(function () {
         position: absolute;
         top: -50px;
         left: 0;
-        background: black;
+        background:#1f0447fb;
         padding: 5px;
         border-radius: 10px;
         box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
