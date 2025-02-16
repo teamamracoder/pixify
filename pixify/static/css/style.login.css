@@ -1,6 +1,6 @@
 /*request OTP*/
 .full-screen-image {
-    width: 83vw;
+    width: 100vw;
     height: 100vh;
     object-fit: cover;
 }
@@ -18,7 +18,7 @@
 }
 
 @media (max-width: 767.98px) {
-    body {
+    .login_mainContainer {
         background-color: #1a0933;
         display: flex;
         align-items: center;
@@ -156,7 +156,7 @@
 }
 
 @media (max-width: 767.98px) {
-    body {
+    .login_mainContainer {
         background-color: #1a0933;
         display: flex;
         align-items: center;
@@ -318,7 +318,7 @@
 }
 
 @media (max-width: 767.98px) {
-    body {
+    .login_mainContainer {
         background-color: #1a0933;
         display: flex;
         align-items: center;
@@ -438,7 +438,7 @@
     }
 }
 
-#req_otp_form,#register_form,#verify_otp_form label{
+#req_otp_form label,#register_form label,#verify_otp_form label{
     font-size: 1.25rem !important;
     margin-bottom: 0.5rem;
 }

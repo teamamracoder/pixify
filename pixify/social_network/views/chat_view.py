@@ -45,7 +45,7 @@ class ChatListView(View):
                 continue
 
             seen_by_all = chat_info['seen_by_all']
-            member = chat_service.count_members(chat.id)
+            member = chat_service.members(chat.id)
             latest_reaction = message_reaction_service.latest_reaction(chat, user)
             if member.count() < 2:
                 continue  
@@ -209,6 +209,8 @@ class ChatUpdateView(View):
                 title = data.get('title', None)  # Safely get the title
                 if title:
                     chat_service.update_chat_title(chat, title, user)
+                if 'chat_bio' in data:
+                    chat_service.update_chat_bio(chat, data['chat_bio'], user)                  
 
             # Handle file upload separately
             if 'multipart/form-data' in request.content_type:
@@ -228,7 +230,10 @@ class ChatDeleteView(View):
     @auth_required
     @role_required(Role.ADMIN.value, Role.END_USER.value)
     def post(self, request, chat_id):
-        chat = chat_service.get_chat_by_id(chat_id)
+        user = request.user        
+        members = chat_member_service.get_chat_members(chat_id)
+        for member in members:
+            chat_member_service.delete_chat_member(chat_id, member, user)
         chat_service.delete_chat(chat_id)
         return JsonResponse({"success": True})
 
