@@ -300,7 +300,7 @@
 
                             <div class="carousel-inner">
                                 {% for media in post.media_url %}
-                                    <div class="carousel-item {% if forloop.first %}active{% endif %}" style="height:450px;">
+                                    <div class="carousel-item {% if forloop.first %}active{% endif %}" style="height:450px;width:100% !important;">
                                         {% if media|lower|slice:"-4:" == ".mp4" or media|lower|slice:"-5:" == ".webm" %}
                                             <video controls class="d-block" height="350" width="100%"style="object-fit:cover;"  >
                                                 <source src="{% static media %}" type="video/mp4">
@@ -459,46 +459,6 @@
   </div>
   
 
-<style>
-    #carouselExample {
-        max-width: 100%;
-        margin: 10px auto;
-        overflow-x: hidden; /* Hide horizontal overflow */
-    }
-    
-    .carousel-inner {
-        display: flex;
-        flex-wrap: nowrap; /* Prevent wrapping */
-        justify-content: flex-start; /* Align items to the start */
-        margin-left:10px;
-        gap: 5px;
-    }
-    
-    .carousel-item {
-        flex: 0 0 auto;
-        width: 100%;
-        max-width: calc(100% / 3 - 20px); /* Default to 3 videos per row */
-        margin: 5px;
-        box-sizing: border-box;
-        transition: transform 0.5s ease;
-    }
-    
-    .carousel-item video {
-        width: 100%;
-        height: auto;
-        margin:auto;
-        aspect-ratio: 9/16; /* Aspect ratio for vertical videos */
-        object-fit: cover;
-        border-radius: 10px;
-    }
-    
-    @media (max-width: 768px) {
-        .carousel-item {
-            max-width: calc(100% / 2 - 20px); /* Adjust to 2 videos per row for smaller screens */
-        }
-    }
-    
-</style>
  
 <script>
     document.addEventListener('DOMContentLoaded', function () { 
@@ -959,32 +919,7 @@ $(document).ready(function () {
         });
     });
 
-    // function fetchEmojiDetails(postContainer, postId) {
-    //     var FirstUserId = postContainer.find('.firstUserId').val();
-    //     var emoji_id = postContainer.find('.getemoji').val();  
-    //     $.ajax({
-    //         url: '/fetch_reactions/',  
-    //         method: 'GET',
-    //         data: {
-    //             'post_id': postId,
-    //             'user_id': FirstUserId,
-    //             'emoji_id': emoji_id
-    //         },
-    //         success: function(response) {
-            
-    //             if (response.react && response.react.length > 0) {
-    //             var emojiHtml = response.react[0].value; // Get the emoji HTML like <i class="fa-solid fa-heart"></i>
-               
-
-    //             // Update the reaction span with the new emoji
-    //             postContainer.find('.post_reaction').html(emojiHtml);
-    //         }
-
-    //         },
-         
-    //     });
-    // }
-
+    
     function fetchEmojiDetails(postContainer, postId) {
     var FirstUserId = postContainer.find('.firstUserId').val();
     var emoji_id = postContainer.find('.getemoji').val();
@@ -1071,9 +1006,7 @@ $(document).ready(function () {
                 },
                 headers: { "X-CSRFToken": "{{ csrf_token }}" },
                 success: function (data) {
-                    console.log("Comment data",data)
-
-
+                    
 
                     $('#commentText').val(''); // Clear textarea
                     const commentList = $('#commentList');
@@ -1085,10 +1018,12 @@ $(document).ready(function () {
                     if (data.comments.length > 0 ) {
                         data.comments.forEach(comment => {
                             if (comment.reply_for_id==null){
+                            const profileImage = comment.comment_by__profile_photo_url 
+                            
                             const commentItem = `
                          <div class="d-flex py-1 allcomments">
-                                    <img src="{% static 'images/green.png' %}" alt="User" class="rounded-circle"
-                                        style="width:35px; height:35px;">
+                                    <img src="static${profileImage}" alt="User" class="rounded-circle"
+                                        style="width:35px; height:35px;object-fit: cover;">
                                     <div class="d-flex flex-column">
 
 
@@ -1121,7 +1056,7 @@ $(document).ready(function () {
                                 </div>
 
                             `;
-
+                    
 
                             commentList.append(commentItem);
                         } });
@@ -1164,7 +1099,7 @@ $(document).ready(function () {
                   },
                 success: function (data) {
 
-
+                    console.log(data)
                     $(this).closest('.post-box').find("#total-comment-count").text(data.comment_count);
 
 
@@ -1180,11 +1115,12 @@ $(document).ready(function () {
 
 
 data.user_details.forEach(com_del => {
+    const profileImage = com_del.profile_photo_url 
 const com_prof=`
 
 
 <a href="" class="mx-1">
-                    <img src="{% static 'images/IMG_20240915_213320.jpg' %}" alt="avatar" class="rounded-circle me-2 " style="width: 35px; object-fit: cover; height: 35px; " >
+                    <img src="/static${profileImage}" alt="avatar" class="rounded-circle me-2 " style="width: 35px; object-fit: cover; height: 35px; " >
                 </a>
 
                 <div class="d-flex "style="flex-direction: column;" >
@@ -1196,51 +1132,79 @@ com_profile.html(com_prof);
     });
 
 
-  //  com_name.html(comname);
-//});
 
-const postItem = `
+let uniqueId = `carousel${data.posts[0].id}_${Math.random().toString(36).substring(7)}`; // Ensure a unique ID
+
+let postItem = `
     <div class="post-des-img">
         <p class="px-3 pt-2" style="font-size:15px; margin: 0; margin-bottom: 5px;">${data.posts[0].title}</p>
 
         <div class="post-box pb-2 px-2">
             ${
-                // Check if there's more than one image
-                data.posts[0].media_url.length > 1
-                ?
-                // If more than one image, make it a carousel
+                data.posts[0].media_url.length > 1 
+                ? 
+                // Carousel for multiple media files (images and videos)
                 `
-                    <div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="carousel">
+                    <div id="${uniqueId}" class="carousel slide" data-bs-ride="carousel">
+                        <div class="carousel-indicators">
+                            ${data.posts[0].media_url.map((media, index) => `
+                                <button type="button" data-bs-target="#${uniqueId}" 
+                                        data-bs-slide-to="${index}" class="${index === 0 ? 'active' : ''}" 
+                                        aria-current="${index === 0 ? 'true' : 'false'}" 
+                                        aria-label="Slide ${index + 1}">
+                                </button>
+                            `).join('')}
+                        </div>
+
                         <div class="carousel-inner">
-                            ${data.posts[0].media_url.map((post, index) => `
-                                <div class="carousel-item ${index === 0 ? 'active' : ''}">
-                                    <img src="static${post}" class="d-block w-100" alt="Responsive image" style="height: 500px; object-fit: cover;">
+                            ${data.posts[0].media_url.map((media, index) => `
+                                <div class="carousel-item ${index === 0 ? 'active' : ''}" style="height:450px;width:100% !important;">
+                                    ${media.toLowerCase().endsWith('.mp4') || media.toLowerCase().endsWith('.webm') 
+                                        ? `<video controls class="d-block w-100" style="height:100%;object-fit:cover;">
+                                            <source src="static${media}" type="video/mp4">
+                                            Your browser does not support the video tag.
+                                           </video>`
+                                        : `<img src="static${media}" class="d-block w-100" alt="Slide ${index + 1}" style="height:100%;object-fit:cover;">`
+                                    }
                                 </div>
                             `).join('')}
                         </div>
-                        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
-                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                            <span class="visually-hidden">Previous</span>
-                        </button>
-                        <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
-                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                            <span class="visually-hidden">Next</span>
-                        </button>
+
+                        <button class="carousel-control-prev" type="button" data-bs-target="#${uniqueId}" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span> 
+                            <span class="visually-hidden">Previous</span> 
+                        </button> 
+                        <button class="carousel-control-next" type="button" data-bs-target="#${uniqueId}" data-bs-slide="next"> 
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span> 
+                            <span class="visually-hidden">Next</span> 
+                        </button>  
                     </div>
                 `
-                :
-                // If there's only one image, just display it normally
-                data.posts[0].media_url.map(post => `
-                    <div style="height:500px;">
-                        <img src="static${post}" class="img-fluid" alt="Responsive image" style="height:100%;width:100%;object-fit:cover;">
+                : 
+                // Single media file (image or video)
+                `
+                    <div style="height:450px;">
+                        ${data.posts[0].media_url[0].toLowerCase().endsWith('.mp4') || data.posts[0].media_url[0].toLowerCase().endsWith('.webm') 
+                            ? `<video controls class="img-fluid" style="height:100%;width:100%;object-fit:cover;">
+                                <source src="static${data.posts[0].media_url[0]}" type="video/mp4">
+                                Your browser does not support the video tag.
+                               </video>`
+                            : `<img src="static${data.posts[0].media_url[0]}" class="img-fluid" alt="Post Image" style="height:100%;width:100%;object-fit:cover;">`
+                        }
                     </div>
-                `).join('')
+                `
             }
         </div>
     </div>
-
-
 `;
+
+// **Manually initialize Bootstrap carousel after adding it to the DOM**
+setTimeout(() => {
+    let carouselElement = document.getElementById(uniqueId);
+    if (carouselElement) {
+        new bootstrap.Carousel(carouselElement);
+    }
+}, 500); // Delay to ensure it's added to the DOM
 
 photo_com.html(postItem);
 
@@ -1249,10 +1213,11 @@ photo_com.html(postItem);
                     if (data.comments.length > 0 ) {
                         data.comments.forEach(comment => {
                             if (comment.reply_for_id==null){
+                                const profileImage = comment.comment_by__profile_photo_url 
                             const commentItem = `
                                 <div class="d-flex py-1 allcomments">
-                                    <img src="{% static 'images/green.png' %}" alt="User" class="rounded-circle"
-                                        style="width:35px; height:35px;">
+                                    <img src="static${profileImage}" alt="User" class="rounded-circle"
+                                        style="width:35px; height:35px;object-fit: cover;">
                                     <div class="d-flex flex-column">
 
 
@@ -1450,61 +1415,51 @@ $(document).ready(function () {
 {% comment %} post update ajax {% endcomment %}
    <script>
 
-    $(document).ready(function () {
-        $('.editmodal').click(function () {
-            const FirstPostId = $(this).closest('.post-box').find('.firstPostId').val();
-            const FirstUserId = $(this).closest('.post-box').find('.firstUserId').val();
 
-            $.ajax({
-                url: 'post/update/',
-                type: 'GET',
-                dataType: 'json',
-                data: {
-                    post_id: FirstPostId,
-                    user_id: FirstUserId,
-                    csrfmiddlewaretoken: '{{ csrf_token }}',
-                  },
-                success: function (data) {
+$(document).ready(function () {
+    $('.editmodal').click(function () {
+        const FirstPostId = $(this).closest('.post-box').find('.firstPostId').val();
+        const FirstUserId = $(this).closest('.post-box').find('.firstUserId').val();
+        const updatedTitle = $('#editTitle').val();
+        $.ajax({
+            url: 'post/update/',
+            type: 'GET',
+            dataType: 'json',
+            data: {
+                post_id: FirstPostId,
+                user_id: FirstUserId,
+                postTitle: updatedTitle,
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+            },
+            success: function (data) {
+                document.getElementById("p_id").value = FirstPostId;
+                document.getElementById("p_user").value = FirstUserId;
+                const Post_photo = $('#updatepost');
+                const user_detail = $('#update_userpost');
 
-                     const postid= FirstPostId
-                     const userid=FirstUserId
-                     document.getElementById("p_id").value = postid;
-                     document.getElementById("p_user").value = userid;
-                     const Post_photo = $('#updatepost');
-                     const user_detail=$('#update_userpost')
-                     /*${user.profile_photo_url.map(photo =>``).join('')}*/
+                data.User_del.forEach(user => {
+                    const profile_pic=user.profile_photo_url
+                    user_detail.html(`
+                        <img src="static${profile_pic}" alt="User Avatar" class="user-avatar me-2"style="object-fit:cover;">
+                        <span class="fw-bold text-light">${user.first_name} ${user.last_name}</span>
+                    `);
+                });
 
-
-data.User_del.forEach(user => {
-const user_del=`
-
-                 <img src="{% static 'images/IMG_20240915_213320.jpg' %}" alt="User Avatar"class="user-avatar me-2">
-                 <span class="fw-bold text-light">${user.first_name} ${user.last_name}</span>`;
-                 user_detail.html(user_del)
-                     });
-
-
-data.post_detail.forEach(post => {
-const photo = `
-
-                    <textarea class="form-control text-light " placeholder="caption..." rows="2" id="editTitle"
-                         style="outline:none;border:none;resize: none; background-color: #27236e"  >${post.title}</textarea>
-                </div>
-
-                <div class="mb-3 ">
-
-
-                     ${
-
-                        post.media_url.length > 1
-                        ?
-
-                        `
+                data.post_detail.forEach(post => {
+                    let mediaContent = '';
+                    if (post.media_url.length > 1) {
+                        mediaContent = `
                             <div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="carousel">
                                 <div class="carousel-inner">
-                                    ${post.media_url.map((photo, index) => `
+                                    ${post.media_url.map((media, index) => `
                                         <div class="carousel-item ${index === 0 ? 'active' : ''}">
-                                            <img src="static${photo}" class="d-block w-100" alt="Responsive image" style="height: 200px; object-fit: cover;">
+                                            ${media.endsWith('.mp4') || media.endsWith('.webm') ? 
+                                                `<video controls class="d-block w-100" style="height: 200px; object-fit: cover;">
+                                                    <source src="static${media}" type="video/mp4">
+                                                    Your browser does not support the video tag.
+                                                </video>` :
+                                                `<img src="static${media}" class="d-block w-100" alt="Responsive image" style="height: 200px; object-fit: cover;">`
+                                            }
                                         </div>
                                     `).join('')}
                                 </div>
@@ -1516,87 +1471,100 @@ const photo = `
                                     <span class="carousel-control-next-icon" aria-hidden="true"></span>
                                     <span class="visually-hidden">Next</span>
                                 </button>
+                            </div>`;
+                    } else {
+                        mediaContent = post.media_url.map(media => `
+                            <div class="editpic rounded" style="width: 100%; outline:none;border:none">
+                                ${media.endsWith('.mp4') || media.endsWith('.webm') ? 
+                                    `<video controls class="rounded" style="width: 100%; height: auto;">
+                                        <source src="static${media}" type="video/mp4">
+                                        Your browser does not support the video tag.
+                                    </video>` :
+                                    `<img src="static${media}" class="rounded">`
+                                }
+                                <span style="font-size:40px;">&times;</span>
                             </div>
-                        `
-                        :
-                       post.media_url.map(photo => `
-              <div  class=" editpic  rounded" style="width: 100%; outline:none;border:none">
-                        <img src="static${photo}"  class="rounded">
-                    <span style="font-size:40px;">&times</span>
+                        `).join('');
+                    }
 
-                      </div>
-                `).join('')
-}
+                    const postContent = `
+                        <textarea class="form-control text-light" placeholder="caption..." rows="2" id="editTitle"
+                            style="outline:none;border:none;resize: none; background-color: #27236e">${post.title}</textarea>
+                        </div>
+                        <div class="mb-3">${mediaContent}</div>
+                        <div class="pt-1 pb-1 px-2 mb-1 fw-semibold text-dark rounded align-items-center">
+                            <div class="d-flex justify-content-between rounded p-2" style="border:1px solid black;align-items:center;box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;background-color:white;">
+                                <span>Add to your post</span>
+                                <div class="gap-3 d-flex md-icon">
+                                    <i class="bi bi-images text-success"></i>
+                                    <i class="bi bi-tag text-primary"></i>
+                                    <i class="bi bi-emoji-smile text-warning"></i>
+                                    <i class="bi bi-geo-alt-fill text-danger"></i>
+                                    <i class="bi bi-filetype-gif text-info"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="justify-content-center mx-auto mb-3" style="display: flex;">
+                            <button type="submit" id="updatePostBtn" class="btn text-dark mx-auto b_btn px-5" style="background-color:white">Post</button>
+                        </div>
+                    `;
 
+                    Post_photo.html(postContent);
+                });
 
+                $('#editpostModal').modal('show');
 
-                  <div class="con">
+                $('#updatePostBtn').click(function () {
+                    const updatedTitle = $('#editTitle').val();
+                    $.ajax({
+                        type: 'POST',
+                        url: '/post/update/',
+                        dataType: 'json',
+                        data: {
+                            post_id: FirstPostId,
+                            postTitle: updatedTitle,
+                            csrfmiddlewaretoken: '{{ csrf_token }}',
+                        },
+                        success: function (response) {
 
-                  </div>
-              </div>
-              <div class="pt-1 pb-1 px-2 mb-1  fw-semibold text-dark rounded align-items-center" >
-                <div class=" d-flex justify-content-between rounded p-2" style="border:1px solid black;align-items:center;box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;background-color:white;" >
-
-                    <span class="">Add to your post</span>
-
-                    <div class="gap-3 d-flex md-icon ">
-                    <i class="bi bi-images text-success" ></i>
-                    <i class="bi bi-tag text-primary"></i>
-                    <i class="bi bi-emoji-smile text-warning"></i>
-                    <i class="bi bi-geo-alt-fill text-danger"></i>
-                    <i class="bi bi-filetype-gif text-info"></i>
-                </div>
-                  </div>
-
-              </div>
-            </div>
-            <div class="justify-content-center mx-auto mb-3"style="display: flex;">
-                <button type="submit" id="updatePostBtn" class="btn text-dark mx-auto b_btn px-5" style="background-color:white" >Post</button>
-            </div>
-
-                  `;
-
-                  Post_photo.html(photo);
-                     });
-                    $('#editpostModal').modal('show');
-
-
-                    $('#updatePostBtn').click(function () {
-                        const updatedTitle = $('#editTitle').val();
-
-                        $.ajax({
-
-                            type: 'POST',
-                            url: '/post/update/',
-                            dataType: 'json',
-                            data: {
-                                post_id: postid,
-                                postTitle: updatedTitle,
-                                csrfmiddlewaretoken: '{{ csrf_token }}',
-
-                            },
-                            success: function (response) {
+                            
+// Update post title in modal
+                $('#editTitle').val(updatedTitle);
+                
+                // Find the corresponding post box and update title
+                $('.post-box').each(function () {
+                    const currentPostId = $(this).find('.firstPostId').val();
+                    if (currentPostId == postid) {
+                        $(this).find('#title').text(updatedTitle);
+                    }
+                });
 
 
-                            },
-                            error: function (xhr, status, error) {
-                                console.error('Error updating title:', error);
-                            }
-                        });
+
+
+
+
+
+
+
+
+
+
+
+                        },
+                        error: function (xhr, status, error) {
+
+                            console.error('Error updating title:', error);
+                        }
                     });
-
-
-                },
-
-                error: function (xhr, status, error) {
-                    console.error('Error updating post:', error);
-                }
-            });
-
-
+                });
+            },
+            error: function (xhr, status, error) {
+                console.error('Error updating post:', error);
+            }
         });
     });
-
+});
 
 
 $(document).ready(function () {

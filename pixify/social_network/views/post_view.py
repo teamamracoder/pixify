@@ -80,7 +80,7 @@ class UserPostCreatView(View):
             return JsonResponse({'success': False, 'error': 'No files uploaded'}, status=400)
 
         # Debugging: Print to console to verify the stored URLs
-        print("Stored Media URLs:", media_urls)
+  
 
         # Store the post in the database
         post = Post.objects.create(
@@ -213,6 +213,7 @@ class UserPostEditView(View):
          post_id = request.GET.get('post_id')
          user_id = request.GET.get('user_id')
          User_del=list(services.user_service.filter_user(user_id).values())
+         print(User_del)
          post_detail =list(services.post_service.get_post(post_id).values())
          return JsonResponse({'success': True, 'message': 'Title updated successfully.','post_detail':list(post_detail),'User_del':list(User_del) })
 
