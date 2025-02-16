@@ -154,7 +154,7 @@ def list_chats_api(request,chat_data_list):
             if search_query.lower() in chat['title'].lower()
         ]
     else:
-        filtered_chats =''
+        filtered_chats =[]
     return filtered_chats
 
 def get_existing_personal_chat(type, user_id, member):
