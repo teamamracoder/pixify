@@ -20,10 +20,17 @@ def get_count_comment(postid):
 # def comment_list(post_id):
 #     return models.Comment.objects.filter(post_id=post_id).order_by('created_at').values()
 
+# def comment_list(post_id):
+#     comments = Comment.objects.filter(post_id=post_id)
+#     return list(comments.values('id', 'comment', 'created_at',
+#                                 'comment_by__first_name', 'comment_by__last_name','reply_for_id'))
 def comment_list(post_id):
-    comments = Comment.objects.filter(post_id=post_id)
-    return list(comments.values('id', 'comment', 'created_at', 
-                                'comment_by__first_name', 'comment_by__last_name','reply_for_id'))
+    comments = Comment.objects.filter(post_id=post_id).values(
+        'id', 'comment', 'created_at',
+        'comment_by__first_name', 'comment_by__last_name',
+        'comment_by__profile_photo_url', 'reply_for_id'
+    )
+    return list(comments)
 
     #.select_related('comment_by')
 

@@ -10,10 +10,15 @@
 
 <div class="group-chat-container">
     <div class="header">
+      <div class="parent-g-name">
+      <div style="margin-right:20px;font-size:16px;" onclick="window.location.href='{% url 'message' chat_id=data.chat.id %}';">
+        <i class="fas fa-arrow-left text-gray-700 hover:text-black text-xl"></i>
+      </div>
       <!-- Group Name with Edit Button -->
       <h1 class="group-name ">
         <span id="group-name-text">{{ data.chat.title }}</span>
       </h1>
+    </div>
       <div class="g-name">
       <button class="edit-btn gp-name" onclick="editGroupNameInline()">
         <i class="fa-solid fa-pen"></i>
@@ -25,18 +30,22 @@
       </button>
     </div>
     </div>
-    
+
   <!-- Group Details Section -->
   <div class="group-details">
     <!-- Group Photo with Edit Button -->
     <div class="group-photo-container">
-        <img src="{% static data.chat.chat_cover %}" alt="Group Photo" class="group-photo">
+      <div class="gp_dp_image">
+        <img src="{% static data.chat.chat_cover %}" alt=" " class="group-photo">
+      </div>
+      <div class="gp_name_btn">
         <button class="edit-btn" onclick="document.getElementById('group-photo-input').click();">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-image" viewBox="0 0 16 16">
                 <path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0"/>
                 <path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1z"/>
             </svg>
         </button>
+      </div>
         <input type="file" id="group-photo-input" style="display:none;" accept="image/*" onchange="uploadImage(event)">
     </div>
 
@@ -77,7 +86,7 @@
           </li>
         {% endif %}
       {% endfor %}
-      
+
       {% for member in data.chat.members %}
         {% if member.id != data.user and  member.id != data.chat.created_by %}
           <li>
@@ -85,11 +94,11 @@
               <img src="{{ member.profile }}" class="profile-pic">
               {{ member.first_name }}
             </div>
-            {% if member.id == data.chat.created_by %}<span class="group-admin-badge">Group admin</span>{% endif %}     
-            
+            {% if member.id == data.chat.created_by %}<span class="group-admin-badge">Group admin</span>{% endif %}
+
             {% if data.user == data.chat.created_by %}
               <div class="member-actions">
-                {% if member.id != data.chat.created_by %}              
+                {% if member.id != data.chat.created_by %}
                   <button class="remove-btn" onclick="removeMember('{{ member.id }}')"><i class="bi bi-person-dash-fill"></i></button>
                 {% endif %}
               </div>
@@ -97,11 +106,11 @@
           </li>
         {% endif %}
       {% endfor %}
-      
+
       {% if data.chat.members|length == 0 %}
         <li>No members in this chat.</li>
       {% endif %}
-    </ul>   
+    </ul>
     {% if data.user == data.chat.created_by %}
       <button class="add-member-btn" onclick="openAddMemberModal()"><i class="bi bi-person-fill-add"></i></button>
     {% endif %}
@@ -114,12 +123,12 @@
     <span class="parchat-modal-close">&times;</span>
     <h6>Add New Member</h6>
     <input type="text" id="parchat-searchin" class="parchat-form-control" placeholder="Search Name" aria-label="Search Name">
-    
+
     <!-- Scrollable grid of profiles -->
     <div id="parchat-profile-list" class="parchat-profile-list">
       <!-- Profiles will be dynamically added here -->
     </div>
-    
+
     <button onclick="addMember()">Add</button>
   </div>
 </div>
@@ -129,7 +138,7 @@
 
 $(document).ready(function () {
     let selectedItems = []; // Array to store selected item IDs
-    let chatId = "{{ data.chat.id }}"; // Ensure chatId is safely handled as a string  
+    let chatId = "{{ data.chat.id }}"; // Ensure chatId is safely handled as a string
 
     // Function to fetch followers and followings based on the search query
     function fetchFollowersAndFollowings(searchQuery = '') {
@@ -158,7 +167,7 @@ $(document).ready(function () {
 
                 // Update profiles in the DOM
                 $("#parchat-profile-list").html(combinedHtml);
-                
+
                 // Reapply selected class to previously selected items
                 selectedItems.forEach(function (itemId) {
                     $(`#user-${itemId}`).addClass('selected');
@@ -258,7 +267,7 @@ function editGroupNameInline() {
     groupNameSpan.parentNode.replaceChild(input, groupNameSpan);
 
     // Hide the edit button while editing.
-    const editButton = document.querySelector('.group-name .edit-btn');
+    const editButton = document.querySelector('.g-name .edit-btn');
     if (editButton) {
         editButton.style.display = 'none';
     }
@@ -330,7 +339,7 @@ function uploadImage(event) {
     })
     .then(response => response.json())
     .then(data => {
-        if (data.success) {            
+        if (data.success) {
             location.reload();
         }
     });
@@ -362,7 +371,7 @@ function removeMember(memberId) {
     .then(data => {
         if (data.success) {
             // Remove the member's element from the DOM
-            
+
             location.reload();
         }
     })
@@ -501,7 +510,7 @@ function saveGroupBio(newBio) {
 
 <style>
 
-  
+
 
 
 .parchat-selection-body {
@@ -540,44 +549,44 @@ function saveGroupBio(newBio) {
 
 .remove-btn {
    font-size: 20px;
-    background-color: transparent;    
-    color: white;             
-    border: none;             
-    padding: 10px 20px;      
+    background-color: transparent;
+    color: white;
+    border: none;
+    padding: 10px 20px;
     cursor: pointer;          /* Change cursor to pointer on hover */
-    font-weight: bold;        
-    border-radius: 5px;       
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
-    transition: background-color 0.3s, box-shadow 0.3s; 
+    font-weight: bold;
+    border-radius: 5px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s, box-shadow 0.3s;
 }
 
 .remove-btn:hover {
-    background-color: transparent; 
-    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15); 
+    background-color: transparent;
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
 }
 
 
 .group-admin-badge {
     background-color: #3cf28121;
-    color: #bbc4b9;              
-    padding: 2px 5px;          
-    border-radius: 3px;                
-    margin-left: 10px;         
+    color: #bbc4b9;
+    padding: 2px 5px;
+    border-radius: 3px;
+    margin-left: 10px;
 }
 
 .parchat-selection-body:hover {
-    background-color: #3a15ec4a;  
+    background-color: #3a15ec4a;
 }
 
 
   .no-members-message {
     text-align: center;
-    color: #aca7a7;          
+    color: #aca7a7;
     /* font-weight: bold;    */
-    box-shadow: none;    
-    border: none;        
-    padding: 45px;          
-    margin: 0;           
+    box-shadow: none;
+    border: none;
+    padding: 45px;
+    margin: 0;
     font-size: 11px;
 }
 
@@ -727,9 +736,6 @@ button {
   font-size: 12px;
 }
 
-button:hover {
-  background-color:rgba(102, 43, 191, 0.63);
-}
 
 /* Fade-in animation */
 @keyframes fadeIn {
@@ -778,8 +784,8 @@ button:hover {
   .group-name {
     font-size:28px;
     /* white-space: nowrap;  */
-    overflow: hidden; 
-    text-overflow: ellipsis; 
+    overflow: hidden;
+    text-overflow: ellipsis;
     max-width: 360px; /* Adjust width as needed */
     display: inline-block;
   }
@@ -794,7 +800,7 @@ button:hover {
     display:flex;
 
   }
-  
+
 
   .edit-icon {
     width: 20px;
@@ -831,13 +837,14 @@ button:hover {
   }
 
   .group-photo {
+    justify-content: center;
+    align-items: center;
+    display: flex;
     object-fit: cover;
-    margin-left: 13%;
-    width: 120px;
-    height: 120px;
+    width: 100%;
+    height: 100%;
     border-radius: 50%;
     border: 4px solid #6a4c9c;
-    margin-bottom: 20px;
   }
 
   .group-description {
@@ -917,11 +924,11 @@ button:hover {
     justify-content: center;
     align-items: center;
   }
-  
+
   .add-member-btn i {
     font-size: 20px; /* Adjust the icon size to fit inside the smaller button */
   }
-  
+
   .add-member-btn:hover {
     background-color: #5a3b89;
   }
@@ -1074,7 +1081,7 @@ button:hover {
     }
     .exit-btn{
       font-size: 12px;
-    } 
+    }
     .edit-btn{
       font-size: 12px;
     }
@@ -1117,6 +1124,26 @@ button:hover {
     .member-list {
       height: calc(-408.966px + 100vh);
     }
+}
+
+.group-photo-container{
+  justify-content: center;
+  align-items: center;
+  display: flex;
+}
+.gp_dp_image{
+  justify-content: center;
+  align-items: center;
+  display: flex;
+  height: 120px;
+  width: 120px;
+  border-radius: 50%;
+
+}
+.parent-g-name{
+  display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 </style>

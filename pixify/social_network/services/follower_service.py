@@ -5,17 +5,17 @@ from django.db.models import Q
 def list_followers_api(request, user):
     search_query = request.GET.get('search', '')
     if search_query:
-        followers = Follower.objects.filter(following=user).filter(
+        followers = Follower.objects.filter(following=user, is_active=True).filter(
             Q(user_id__first_name__icontains=search_query) | Q(user_id__last_name__icontains=search_query)
         ).values('user_id', 'user_id__first_name', 'user_id__last_name', 'user_id__email', 'user_id__profile_photo_url')
 
-        followings = Follower.objects.filter(follower=user).filter(
+        followings = Follower.objects.filter(follower=user, is_active=True).filter(
             Q(user_id__first_name__icontains=search_query) | Q(user_id__last_name__icontains=search_query)
         ).values('user_id', 'user_id__first_name', 'user_id__last_name', 'user_id__email', 'user_id__profile_photo_url')
 
     else:
-        followers = Follower.objects.filter(following=user).values('user_id', 'user_id__first_name', 'user_id__last_name', 'user_id__email', 'user_id__profile_photo_url')
-        followings = Follower.objects.filter(follower=user).values('user_id', 'user_id__first_name', 'user_id__last_name', 'user_id__email', 'user_id__profile_photo_url')
+        followers = Follower.objects.filter(following=user, is_active=True).values('user_id', 'user_id__first_name', 'user_id__last_name', 'user_id__email', 'user_id__profile_photo_url')
+        followings = Follower.objects.filter(follower=user, is_active=True).values('user_id', 'user_id__first_name', 'user_id__last_name', 'user_id__email', 'user_id__profile_photo_url')
 
     combined_list = list(followers) + list(followings)
     unique_members = {member['user_id']: member for member in combined_list}.values()
@@ -29,8 +29,8 @@ def list_followers_api(request, user):
 def members_list_api(request, user, chat_members):
     search_query = request.GET.get('search', '')
 
-    followers_query = Follower.objects.filter(following=user)
-    followings_query = Follower.objects.filter(follower=user)
+    followers_query = Follower.objects.filter(following=user, is_active=True)
+    followings_query = Follower.objects.filter(follower=user, is_active=True)
 
     if search_query:
         followers_query = followers_query.filter(Q(user_id__first_name__icontains=search_query) | Q(user_id__last_name__icontains=search_query))

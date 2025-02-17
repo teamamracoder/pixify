@@ -6,7 +6,7 @@
 <style>
     .hover-bg:hover {
         background-color: rgba(240, 242, 245, 0.1);
-        color:aqua; 
+        color:aqua;
     }
     .current {
         font-weight: bold;
@@ -19,10 +19,11 @@
             <h2 class="text-center mb-4">Chat List</h2>
 
             <div class="d-flex justify-content-between mb-3">
-                <button class="btn btn-primary btn-sm"><a href="{% url 'manage_chat_create' %}"
+                <div>
+                <!-- <button class="btn btn-primary btn-sm"><a href="{% url 'manage_chat_create' %}"
                         class="text-white text-decoration-none">Add Chat</a>
-                </button>
-
+                </button> -->
+               </div>
                 <form method="get" action="{% url 'manage_chat_list' %}">
                     <div class="input-group" style="max-width: 300px;">
                         <input type="text" class="form-control border-secondary" placeholder="Search"
@@ -30,30 +31,30 @@
                         <button class="btn btn-outline-secondary">Search</button>
                     </div>
                 </form>
-            </div>                            
+            </div>
                 <div class="table-responsive">
                     <table class="table table-bordered">
-                        <thead class="table-info text-white"> 
+                        <thead class="table-info text-white">
                             <tr>
                                 <th>
                                     <a href="?sort_by=title&sort_order={% if data.applied_options.sort.order == 'asc' %}desc{% else %}asc{% endif %}">Title</a>
                                 </th>
                                 <th>
                                     <a href="?sort_by=type&sort_order={% if data.applied_options.sort.order == 'asc' %}desc{% else %}asc{% endif %}">Type
-                                    </th>                                 
+                                    </th>
                                 <th>
                                     <a href="?sort_by=chat_cover&sort_order={% if data.applied_options.sort.order == 'asc' %}desc{% else %}asc{% endif %}">Chat_Cover</a>
                                 </th>
-                                <th>Status</th>                            
+                                <th>Status</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for chat in data.data %}
                             <tr>
-                                <td>                                       
+                                <td>
                                     <a class="text-decoration-none text-primary hover-bg" href="{% url 'manage_chat_detail' chat.id %}">
-                                        {{ chat.title }} 
-                                    </a>                                       
+                                        {{ chat.title }}
+                                    </a>
                                 </td>
                                 <td>
                                     {% for type in data.choices_type %}
@@ -65,7 +66,7 @@
                                     {% endfor %}
                                 {% endfor %}
                                 </td>
-                                
+
                                 <td>{{ chat.chat_cover }}</td>
                                 <td>
                                     <button class="btn btn-sm toggle-status" data-chat-id="{{ chat.id }}">
@@ -76,8 +77,8 @@
                                         {% endif %}
                                     </button>
                                 </td>
-                                
-                                
+
+
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -88,7 +89,7 @@
                                 <span class="text-info me-3">Total {{ data.pagination.total }} chats</span>
                                 Page {{ data.pagination.current_page }} of {{ data.pagination.total_page }}.
                             </div>
-    
+
                             <div class="step-links ml-auto">
                                 <nav aria-label="Page navigation example">
                                     <ul class="pagination">
@@ -106,22 +107,22 @@
                                             </a>
                                         </li>
                                         {% endif %}
-    
+
                                         <li class="page-item">
                                             <a class="page-link active" href="#">
                                                 {{ data.pagination.current_page }}
                                             </a>
                                         </li>
-    
+
                                         {% if data.pagination.next_page %}
-    
+
                                         <li class="page-item">
                                             <a class="page-link"
                                                 href="?page={{ data.pagination.next_page }}&search={{ data.applied_options.search.text }}&sort_by={{ data.applied_options.sort.field }}&sort_order={{ data.applied_options.sort.order }}">
                                                 {{ data.pagination.next_page }}
                                             </a>
                                         </li>
-    
+
                                         <li class="page-item">
                                             <a class="page-link"
                                                 href="?page={{ data.pagination.total_page }}&search={{ data.applied_options.search.text }}&sort_by={{ data.applied_options.sort.field }}&sort_order={{ data.applied_options.sort.order }}"
@@ -136,11 +137,11 @@
                         </div>
                     </div>
                 </div>
-                        
-                    
+
+
             </div>
         </div>
-    </div>       
+    </div>
 </div>
 
 

@@ -1,10 +1,11 @@
+from urllib import request
 from ..models import User,Follower
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
 
 
 def list_users():
-    return User.objects.all() 
+    return User.objects.all()
 
 def create_user(first_name, last_name, email):
     return User.objects.create(first_name=first_name, last_name=last_name, email=email)
@@ -54,7 +55,7 @@ def update_user(request, user_id, first_name, last_name, email, phone, gender, a
         user.profile_photo_url = profile_picture
     user.updated_by = request.user
     user.save()
-    return user
+    #return user
 
 def filter_user(user_id):
     return User.objects.filter(id=user_id)
@@ -70,8 +71,6 @@ def calculate_age(date_of_birth):
         today = date.today()
         return today.year - date_of_birth.year - ((today.month, today.day) < (date_of_birth.month, date_of_birth.day))
     return "N/A"
-
-  # End by Badhan  
 
 
 
@@ -107,4 +106,12 @@ def get_user_name_and_img(user_id):
 
 def friends_count(user_id):
     friends = Follower.objects.filter(user_id=user_id).select_related( 'following').count()
-    return friends 
+    return friends
+
+def updateFCMToken(user_id,fcm_token):
+    user = User.objects.get(id=user_id)
+    user.fcm_token = fcm_token
+    user.save()
+
+def getFCMtoken(user_id):
+    return User.objects.filter(id=user_id).values_list('fcm_token', flat=True).first()
