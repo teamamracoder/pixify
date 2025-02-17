@@ -1,19 +1,23 @@
+from itertools import count
+import json
 import os
-
-from django.shortcuts import render, redirect
+from django.utils.functional import SimpleLazyObject
+from django.views.decorators.csrf import csrf_exempt
+from django.shortcuts import get_object_or_404, render, redirect
 from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import render, redirect
 from django.views import View
-from django.urls import reverse # type: ignore
+from django.urls import reverse
 
+from social_network.services import post_reaction_service # type: ignore
+from ..decorators import auth_required, role_required
+from social_network.decorators.exception_decorators import catch_error
+from social_network.constants.default_values import Role
 
 from pixify import settings
 from .. import services
-from ..models import User,Comment,Post
+from ..models import User,Comment,Post,PostReaction,MasterList
 from django.core.paginator import Paginator
-
-
-
 from datetime import datetime, timedelta, timezone
 from django.utils.timezone import now
 
@@ -34,122 +38,19 @@ def time_ago(dt):
     else:
         return f"{int(seconds // 604800)} weeks ago"
     
-    
-# class AdminPostListView(View):
-#     def get(self, request):
-#         # Fetch the search query from the URL parameters
-#         search_query = request.GET.get('search', '')
-#         sort_by = request.GET.get('sort_by', 'posted_by')
-#         sort_order = request.GET.get('sort_order', 'asc')
-#         page_number = request.GET.get('page', 1)
 
 
-#         # Adjust sort order for descending order
-#         if sort_order == 'desc':
-#             sort_by = '-' + sort_by
-
-       
-#         # Get filtered and sorted users based on search
-#         posts = services.post_service.admin_list_posts_filtered(search_query, sort_by)
-
-#         # Paginate the users
-#         paginator = Paginator(posts, 10)  # Show 10 users per page
-#         page_obj = paginator.get_page(page_number)
-
-#         # choices_gender = [{gender.value: gender.name} for gender in Gender]
-
-#         return render(request, 'adminuser/post/list.html', {
-#             'posts': page_obj,
-#             # 'choices_gender': choices_gender,
-#             'sort_by': sort_by,
-#             'sort_order': sort_order,
-#             'search_query': search_query,  # Ensure this is being passed to the template
-#             'page_obj': page_obj,
-#         })
-
-# class AdminPostCreateView(View):
-#     def get(self, request):
-#         return render(request, 'adminuser/post/create.html')
-
-#     def post(self, request):
-#         post_data = {
-#                     'posted_by': User.objects.get(id=request.POST['posted_by']),
-#                     'created_by': User.objects.get(id=request.POST['posted_by'])
-                   
-#                 }
-#         services.post_service.create_post(**post_data)
-#         # return redirect(request,'adminuser/post/create.html')
-#         return redirect('post_list')
-
-
-# class AdminPostDetailView(View):
-#     def get(self, request, post_id):
-#         post = services.post_service.get_post(post_id)
-#         return render(request, 'adminuser/post/detail.html', {'post': post})
-
-# class AdminPostUpdateView(View):
-#     def get(self, request, post_id):
-#         post = services.post_service.get_post(post_id)
-#         return render(request, 'adminuser/post/update.html', {'post': post})
-
-#     def post(self, request, post_id):
-#         post = services.post_service.get_post(post_id)
-#         title = request.POST['title']
-#         description = request.POST['description']
-#         services.post_service.update_post(post, title, description)
-#         return redirect('post_detail', post_id=post.id)
-
-# class AdminPostDeleteView(View):
-#     def get(self, request, post_id):
-#         post = services.post_service.get_post(post_id)
-#         return render(request, 'adminuser/post/delete.html', {'post': post})
-
-#     def post(self, request, post_id):
-#         post = services.post_service.get_post(post_id)
-#         services.post_service.delete_post(post)
-#         return redirect('post_list')
-
-# class AdminTogglePostActiveView(View):
-#     def post(self, request, post_id):
-#         post = services.post_service.get_post(post_id)
-#         post.is_active = not post.is_active  # Toggle active status
-#         post.save()
-#         return JsonResponse({'is_active': post.is_active})
-
-
-
-
-# # create post for enduser 
-# class UserPostCreatView(View):
-#     def get(self, request):
-#         return render(request, 'enduser/home/index.html')
-
-#     def post(self, request):
-#         user_id = 1;
-#         post_Title = request.POST['postTitle']
-#         postFiles = request.FILES.getlist('postFiles')
-#         postFile = []
-#         for file in postFiles:
-#             postFile.append(file.name)
-#         media_urls=[]
-#         for file in postFiles:
-#             file_path=os.path.join(settings.MEDIA_ROOT,file.name)
-#             with open(file_path,'wb+') as destination:
-#                 for chunk in file.chunks():
-#                     destination.write(chunk)
-#             media_urls.append(f"{settings.MEDIA_URL}{file.name}")
-
-
-#         services.post_service.user_post(post_Title,media_urls,user_id)
-#         return redirect('Userposts_list')
         
 # use ajax post create
 class UserPostCreatView(View):
     def get(self, request):
         return render(request, 'enduser/home/index.html')
+    @catch_error
+    @auth_required
+    @role_required(Role.ADMIN.value, Role.END_USER.value)
     def post(self, request):
-        try:
-            user_id = 1
+            user_id =request.user.id
+
             post_Title = request.POST.get('postTitle')
             postFiles = request.FILES.getlist('postFiles')
             media_urls = []
@@ -161,31 +62,9 @@ class UserPostCreatView(View):
                         destination.write(chunk)
                 media_urls.append(f"{settings.MEDIA_URL}{file.name}")
 
-            # Call the service to save post data
             services.post_service.user_post(post_Title, media_urls, user_id)
-            # return JsonResponse({ "status": True, })
-
             return JsonResponse({'success': True, 'redirect_url': reverse('home')})
-        except Exception as e:
-            return JsonResponse({'success': False, 'message': str(e)})
-
-
-# # display post for enduser create by priya
-# class UserPostListView(View):
-#     def get(self, request):
-        
-#         posts = services.post_service.Postlist_posts()
-        
-        
-#         post_dict={
-#                   'posts':posts,
-#                   'name':'priya',
-#                   'count_commnet' :services.comment_service.get_count_comment(59)
-#                 }
-        
-#         return render(request, 'enduser/home/index.html', {'post_dict': post_dict})
-
-    
+     
 
 class UserPostDetail(View):
     def get(self, request, post_id):
@@ -196,21 +75,224 @@ class UserPostDetail(View):
          return render(request, 'enduser/home/index.html', {'comment_dic':comment_dic})
 
 
-class UserPostListView(View):
-    def get(self, request):
-        
-       
-        posts = services.post_service.Postlist_posts()
-       
-        post_dict = {
-            'posts': posts,
-            'name': 'priya',
-             'count_commnet' :services.comment_service.get_count_comment(post_ids)
-        }
-        print("postss",posts)
-        # Check if the request is an AJAX request
-        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-      
-            return JsonResponse(post_dict)
 
-        return render(request, 'enduser/home/index.html', {'post_dict': post_dict})
+# class UpdatePostReactionView(View):
+#     @catch_error
+#     @auth_required
+#     @role_required(Role.ADMIN.value, Role.END_USER.value)
+#     def post(self, request, *args, **kwargs):
+#         post_id = request.POST.get('post_id')
+#         reaction_id = request.POST.get('reaction_id')
+       
+#         user_id = request.user.id
+
+#         react=services.post_reaction_service.getemoji(reaction_id)
+      
+#         try:
+#             post = Post.objects.get(id=post_id)
+#         except Post.DoesNotExist:
+#             return JsonResponse({'error': 'Post not found'}, status=404)
+
+#         # Check if the user has already reacted to the post
+#         existing_reaction = PostReaction.objects.filter(post_id_id=post, reacted_by_id=user_id,
+#                                           created_by_id= user_id,is_active= True).first()
+
+#         if existing_reaction:
+#             # If the user already reacted, update the reaction type
+#             existing_reaction.master_list_id_id = reaction_id
+#             existing_reaction.save()
+#         else:
+#             # If no reaction exists, create a new one
+#             #PostReaction.objects.create(post_id_id=post, reacted_by_id=user_id,created_by_id= user_id,is_active= True )
+#            services.post_reaction_service.create_post_reaction(post_id,user_id,reaction_id)
+#         # Count the new reaction
+#         new_reaction_count = PostReaction.objects.filter(post_id_id=post, is_active=True).count()
+
+#         return JsonResponse({'new_reaction_count': new_reaction_count,' reaction_id': reaction_id})
+
+
+
+class UpdatePostReactionView(View):
+    @catch_error
+    @auth_required
+    @role_required(Role.ADMIN.value, Role.END_USER.value)
+    def post(self, request, *args, **kwargs):
+        post_id = request.POST.get('post_id')
+        reaction_id = request.POST.get('reaction_id')
+       
+        user_id = request.user.id
+
+        react=services.post_reaction_service.getemoji(reaction_id)
+      
+        try:
+            post = Post.objects.get(id=post_id)
+        except Post.DoesNotExist:
+            return JsonResponse({'error': 'Post not found'}, status=404)
+
+        existing_reaction = PostReaction.objects.filter(post_id_id=post, reacted_by_id=user_id,
+                                          created_by_id= user_id,is_active= True).first()
+
+        if existing_reaction:
+ 
+            existing_reaction.master_list_id_id = reaction_id
+            existing_reaction.save()
+        else:
+
+
+           services.post_reaction_service.create_post_reaction(post_id,user_id,reaction_id)
+
+        
+        user_reaction = PostReaction.objects.filter(post_id_id=post_id, reacted_by_id=user_id, is_active=True).first()
+
+        if user_reaction:
+            react_id = user_reaction.master_list_id_id  # Get the reaction ID (react_id_id)
+           
+        else:
+            react_id = None  # No reaction found for the user
+
+        # Get total reaction count
+        total_count = PostReaction.objects.filter(post_id_id=post, is_active=True).count()
+
+        # Get the names of users who reacted
+        user_reactions = list(services.post_reaction_service.post_reactionby_name(post).values())
+        user_ids = [reaction['reacted_by_id'] for reaction in user_reactions]
+        users = list(User.objects.filter(id__in=user_ids).values_list('first_name', 'last_name'))
+        users = [f"{first} {last}" for first, last in users]
+
+
+
+        new_reaction_count = PostReaction.objects.filter(post_id_id=post, is_active=True).count()
+
+        return JsonResponse({
+                             'new_reaction_count': new_reaction_count,
+                             'reaction_id': reaction_id,
+                             'total_count': total_count,
+                             'reaction_name': users,
+                             'user_reaction_id': react_id  # Include the user's reaction ID in the response
+                             
+                             })
+
+
+
+class GetPostReactionsView(View):
+    def get(self, request, *args, **kwargs):
+        post_id = request.GET.get('post_id')
+        user_id = request.user.id
+      
+        try:
+            post = Post.objects.get(id=post_id)
+        except Post.DoesNotExist:
+            return JsonResponse({'error': 'Post not found'}, status=404)
+
+        # Fetch the user's reaction for the post
+        user_reaction = PostReaction.objects.filter(post_id_id=post_id, reacted_by_id=user_id, is_active=True).first()
+
+        if user_reaction:
+            react_id = user_reaction.master_list_id_id  # Get the reaction ID (react_id_id)
+           
+        else:
+            react_id = None  # No reaction found for the user
+
+        # Get total reaction count
+        total_count = PostReaction.objects.filter(post_id_id=post, is_active=True).count()
+
+        # Get the names of users who reacted
+        user_reactions = list(services.post_reaction_service.post_reactionby_name(post).values())
+        user_ids = [reaction['reacted_by_id'] for reaction in user_reactions]
+        users = list(User.objects.filter(id__in=user_ids).values_list('first_name', 'last_name'))
+        users = [f"{first} {last}" for first, last in users]
+
+        return JsonResponse({
+            'total_count': total_count,
+            'reaction_name': users,
+            'user_reaction_id': react_id  # Include the user's reaction ID in the response
+        })
+
+
+class UserPostEditView(View):
+    @catch_error
+    @auth_required
+    @role_required(Role.ADMIN.value, Role.END_USER.value)
+    def get(self,request):
+         post_id = request.GET.get('post_id')
+         user_id = request.GET.get('user_id')
+         User_del=list(services.user_service.filter_user(user_id).values())
+         post_detail =list(services.post_service.get_post(post_id).values())
+         return JsonResponse({'success': True, 'message': 'Title updated successfully.','post_detail':list(post_detail),'User_del':list(User_del) })
+
+    def post(self, request):
+         user = request.user
+         post_id = request.POST.get('post_id')
+         post_title = request.POST.get('postTitle')
+        
+
+         if not post_id or not post_title:
+            return JsonResponse({'success': False, 'message': 'Missing post_id or postTitle'})
+
+         services.post_service.update_post(user, post_id, post_title)
+         
+         return JsonResponse({'success': True, 'message': 'Title updated successfully.' })
+
+
+        
+    
+
+    
+
+class UserPostDeleteView(View):
+    def post(self, request):
+        post_id = request.POST.get('post_id')
+        if not post_id:
+            return JsonResponse({'error': 'Post ID is required'}, status=400)
+
+        post = services.post_service.get_post(post_id)
+        if not post:
+            return JsonResponse({'error': 'Post not found'}, status=404)
+
+        services.post_service.delete_post(post)
+        return JsonResponse({'message': 'Post deleted successfully'}, status=200)
+
+
+class Fetch_reactions(View):
+    def get(self,request):
+         post_id = request.GET.get('post_id')
+         user_id = request.GET.get('user_id')
+         reaction_id = request.GET.get('emoji_id') 
+
+         react=list(services.post_reaction_service.getemoji(reaction_id).values())
+         return JsonResponse({'success': True,'react':react})
+    
+
+class remove_reaction(View):
+     def get(self,request):
+        post_id = request.POST.get("post_id")
+        
+        reaction = get_object_or_404(PostReaction, post_id_id=post_id)
+        reaction.delete()
+        
+        return JsonResponse({"success": False, "error": "Invalid request"}, status=400)    
+
+
+
+class DeletePostReactionView(View):
+    def post(self, request, *args, **kwargs):
+        post_id = request.POST.get('post_id')
+        user_id = request.user.id
+
+        try:
+            post = Post.objects.get(id=post_id)
+        except Post.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Post not found'}, status=404)
+
+        # Find existing reaction by the user
+        reaction = PostReaction.objects.filter(post_id=post, reacted_by_id=user_id, is_active=True).first()
+
+        if reaction:
+            reaction.delete()  # Delete the reaction
+        else:
+            return JsonResponse({'success': False, 'error': 'Reaction not found'}, status=404)
+
+        # Get updated reaction count
+        total_count = PostReaction.objects.filter(post_id=post, is_active=True).count()
+
+        return JsonResponse({'success': True, 'total_count': total_count})        

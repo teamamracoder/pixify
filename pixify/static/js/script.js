@@ -102,6 +102,40 @@ document.addEventListener("DOMContentLoaded", function () {
 //End Badhan
 
 // select post photo and videos--Priya
+// let files = [],
+//     container = document.querySelector(".con"),
+//     browse = document.querySelector(".select"),
+//     input = document.querySelector("#fileInput");
+// if (browse && input) {
+//     browse.addEventListener('click', () => input.click());
+
+//     input.addEventListener('change', () => {
+//         let file = input.files;
+//         for (let i = 0; i < file.length; i++) {
+//             if (files.every(e => e.name !== file[i].name)) files.push(file[i]);
+//         }
+
+//         //input.value = "";
+//         showImages();
+//     });
+// }
+// const showImages = () => {
+//     let images = '';
+//     files.forEach((e, i) => {
+//         images += `<div class="images">
+//             <img src="${URL.createObjectURL(e)}" alt="Uploaded Image Preview">
+//             <span onclick="delImage(${i})" style="cursor: pointer;">&times;</span>
+//         </div>`;
+//     });
+//     container.innerHTML = images;
+// };
+// const delImage = index => {
+//     files.splice(index, 1);
+//     showImages();
+// };
+
+
+// select post photo and videos--Priya
 
 document.addEventListener("DOMContentLoaded", () => {
     let files = [];
@@ -179,9 +213,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 // select post photo and videos--Priya End
-//For Comment
 
+
+
+
+
+
+
+
+
+//For Comment
 // comment reply section by priya mitra
+
+
+
+
 document.addEventListener("DOMContentLoaded", () => {
     document.querySelectorAll(".view-comment").forEach((viewComment) => {
 
@@ -189,14 +235,19 @@ document.addEventListener("DOMContentLoaded", () => {
             document.querySelectorAll(".reply-open").forEach(reply => {
 
                 reply.style.display = "none";
-            });
+            });   
+            
             document.querySelectorAll(".view-comment").forEach(comment => {
-                comment.innerHTML = comment.innerHTML.replace("Hide reply", "View reply");
+            comment.innerHTML = comment.innerHTML.replace("Hide reply", "View reply");
+              
+
             });
 
             const replyOpen = viewComment.nextElementSibling;
             if (replyOpen.style.display === "none" || replyOpen.style.display === "") {
                 replyOpen.style.display = "block";
+
+                
                 viewComment.innerHTML = viewComment.innerHTML.replace("View reply", "Hide reply");
             } else {
                 replyOpen.style.display = "none";
@@ -208,6 +259,10 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 
+
+
+const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]')
+const popoverList = [...popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl))
 
 
 //End Comment
