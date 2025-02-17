@@ -41,91 +41,117 @@
     
         socket.onmessage = async function (event) {
             const data = JSON.parse(event.data);
-            console.log("Received WebSocket message:", data);
-    
+            console.log("📩 Received WebSocket message:", data);
+
             if (data.action === "webrtc_signal") {
                 if (!peerConnection) {
-                    console.warn("PeerConnection is not initialized yet.");
-                    return;
+                    console.warn("⚠️ PeerConnection is not initialized yet. Initializing now...");
+                    initializePeerConnection(); // Ensure this function exists
                 }
-    
+
                 if (data.signal.type === "offer") {
+                    console.log("📞 Received WebRTC Offer. Current signaling state:", peerConnection.signalingState);
+
                     if (peerConnection.signalingState !== "stable") {
-                        console.warn("Skipping offer because signaling state is:", peerConnection.signalingState);
+                        console.warn("⚠️ Skipping offer because signaling state is:", peerConnection.signalingState);
                         return;
                     }
-    
+
                     try {
                         await peerConnection.setRemoteDescription(new RTCSessionDescription(data.signal));
-                        console.log("Remote offer set successfully.");
-    
+                        console.log("✅ Remote offer set successfully.");
+
                         const answer = await peerConnection.createAnswer();
+                        console.log("📝 Created WebRTC Answer:", answer);
+
                         await peerConnection.setLocalDescription(answer);
+                        console.log("✅ Local description set. Sending answer...");
+
                         socket.send(JSON.stringify({
                             action: "webrtc_signal",
                             signal: answer,
                             from: chatId
                         }));
-    
+
                         // Process queued ICE candidates
-                        iceCandidateQueue.forEach(candidate => {
-                            peerConnection.addIceCandidate(new RTCIceCandidate(candidate))
-                                .then(() => console.log("Buffered ICE candidate added"))
-                                .catch(error => console.error("Error adding buffered ICE candidate:", error));
-                        });
-                        iceCandidateQueue = []; // Clear queue
-    
+                        processQueuedICECandidates();
                     } catch (error) {
-                        console.error("Error handling offer:", error);
+                        console.error("❌ Error handling offer:", error);
                     }
-                } else if (data.signal.type === "answer") {
+                } 
+                else if (data.signal.type === "answer") {
+                    console.log("📞 Received WebRTC Answer. Current signaling state:", peerConnection.signalingState);
+
                     if (peerConnection.signalingState !== "have-local-offer") {
-                        console.warn("Skipping answer because signaling state is:", peerConnection.signalingState);
+                        console.warn("⚠️ Skipping answer because signaling state is:", peerConnection.signalingState);
                         return;
                     }
-    
+
                     try {
                         await peerConnection.setRemoteDescription(new RTCSessionDescription(data.signal));
-                        console.log("Remote answer set successfully.");
-    
+                        console.log("✅ Remote answer set successfully.");
+
                         // Process queued ICE candidates
-                        iceCandidateQueue.forEach(candidate => {
-                            peerConnection.addIceCandidate(new RTCIceCandidate(candidate))
-                                .then(() => console.log("Buffered ICE candidate added"))
-                                .catch(error => console.error("Error adding buffered ICE candidate:", error));
-                        });
-                        iceCandidateQueue = []; // Clear queue
-    
+                        processQueuedICECandidates();
                     } catch (error) {
-                        console.error("Error setting remote answer:", error);
+                        console.error("❌ Error setting remote answer:", error);
                     }
-                } else if (data.signal.candidate) {
-                    if (peerConnection.remoteDescription) {
+                } 
+                else if (data.signal.candidate) {
+                    console.log("🌍 Received ICE Candidate:", data.signal);
+
+                    if (peerConnection.remoteDescription && peerConnection.remoteDescription.type) {
+                        // Remote SDP is set, add ICE candidate immediately
                         try {
                             await peerConnection.addIceCandidate(new RTCIceCandidate(data.signal));
-                            console.log("ICE candidate added:", data.signal);
+                            console.log("✅ ICE candidate added:", data.signal);
                         } catch (error) {
-                            console.error("Error adding ICE candidate:", error);
+                            console.error("❌ Error adding ICE candidate:", error);
                         }
                     } else {
-                        console.warn("Remote SDP not set yet. Queueing ICE candidate.");
+                        // Remote SDP not set yet, queue the ICE candidate
+                        console.warn("⚠️ Remote SDP not set yet. Queuing ICE candidate.");
                         iceCandidateQueue.push(data.signal);
+
+                        // Retry adding ICE candidates after a short delay
+                        setTimeout(processQueuedICECandidates, 500);
                     }
                 }
-            } else if (data.action === "user_joined") {
+            } 
+            else if (data.action === "user_joined") {
                 activeUsers = data.active_users;
-                console.log(`Users in call: ${activeUsers}`);
-            } else if (data.action === "user_left") {
+                console.log(`👥 Users in call: ${activeUsers}`);
+            } 
+            else if (data.action === "user_left") {
                 activeUsers = data.active_users;
-                console.log(`Users in call: ${activeUsers}`);
-    
+                console.log(`👥 Users in call: ${activeUsers}`);
+
                 if (activeUsers <= 1) {
-                    console.log("Only one user in call, ending call...");
+                    console.log("🚪 Only one user in call, ending call...");
                     endCall();
                 }
             }
         };
-    
+
+        /**
+        * Processes queued ICE candidates once the remote description is set.
+        */
+        async function processQueuedICECandidates() {
+            if (peerConnection.remoteDescription && peerConnection.remoteDescription.type) {
+                console.log("🔄 Processing queued ICE candidates...");
+                for (let candidate of iceCandidateQueue) {
+                    try {
+                        await peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+                        console.log("✅ Buffered ICE candidate added:", candidate);
+                    } catch (error) {
+                        console.error("❌ Error adding buffered ICE candidate:", error);
+                    }
+                }
+                iceCandidateQueue = []; // Clear queue after processing
+            }
+        }
+
+        
         async function startCall() {
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
