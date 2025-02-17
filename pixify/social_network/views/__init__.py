@@ -29,4 +29,4 @@ from .story_view import *
 from .manage_user_view import *
 from .short_view import *
 from .post_view import *
-
+from .firebase_view import *

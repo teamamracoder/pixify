@@ -14,7 +14,7 @@
         height: 100vh;
     }
     /* .img-container{
-      
+
     } */
     label {
       display: block; /* Makes label appear on a new line */
@@ -22,41 +22,41 @@
       font-weight: bold;
       text-align: center;
   }
-  
+
 </style>
 
 <div class="container shadow h-75 profile-main-div py-4 mt-5">
     <div class="row">
       <!-- Profile Picture and Basic Information -->
       <div class="col-md-4 text-center mb-4 mb-md-0">
-        
+
         <div class="col-md-4 text-center mb-4 mb-md-0">
 
 
           <div class="img-container">
             <!-- Profile Picture -->
-             <img 
+             <img
                 id="profile-pic"
-                src="{% if user.profile_photo_url %}{{ user.profile_photo_url }}{% else %}/images/avat.png{% endif %}" 
-                class="rounded-circle mb-3 border border-primary" 
-                alt="Profile Picture" 
+                src="{% if user.profile_photo_url %}{{ user.profile_photo_url }}{% else %}/images/avat.png{% endif %}"
+                class="rounded-circle mb-3 border border-primary"
+                alt="Profile Picture"
                 width="150" height="150"
                 style="cursor: pointer;"
                 onerror="this.onerror=null; this.src='/images/avat.png';"
-            > 
-        
+            >
+
             <!-- Hidden file input -->
             <input type="file" id="file-input" accept="image/*" style="display: none;">
-        
+
             <h5 class="text-dark">{{ user.first_name }} {{ user.middle_name }} {{ user.last_name }}</h5>
         </div>
-        
-        
-        
+
+
+
           </div>
-      
+
       </div>
-  
+
      <div class=" text-info mb-4 fs-4">Profile Page</div>
         <form method="post" id="admin_form">
           {% csrf_token %}
@@ -75,7 +75,7 @@
               <input type="text" class="form-control" name="last_name" id="lastName" placeholder="Last Name" value="{{ user.last_name }}">
             </div>
           </div>
-  
+
           <!-- Email and Phone -->
           <div class="row">
             <div class="col-md-4 mb-3">
@@ -89,13 +89,13 @@
 
             <div class="col-md-4 mb-3">
               <label for="hobbies" class="form-label text-secondary">Hobbies</label>
-              <input type="text" class="form-control" name="hobbies" id="hobbies" 
+              <input type="text" class="form-control" name="hobbies" id="hobbies"
        placeholder="Hobbies (comma-separated)" value="{{ form.initial.hobbies }}">
 
 
             </div>
           </div>
-  
+
           <!-- Gender and Language -->
           <div class="row">
             <div class="col-md-4 mb-3">
@@ -115,7 +115,7 @@
               <input type="date" class="form-control" id="dob" name="dob" value="{{ user.dob }}">
             </div>
           </div>
-  
+
           <div class="row">
             <div class="col-md-6 mb-3">
               <label for="relationshipstatus" class="form-label text-secondary">Relationship Status</label>
@@ -129,16 +129,16 @@
               <label for="country" class="form-label text-secondary">Country</label>
               <input type="text" class="form-control" name="country" id="country" placeholder="Country" value="{{ user.country }}">
             </div>
-            
+
           </div>
           <button type="submit" class="btn btn-sm btn-primary " >Save</button>
-        
+
         </form>
       </div>
 
     </div>
   </div>
- 
+
 
   <script>
     $(document).ready(function(){
@@ -149,25 +149,25 @@
             savedProfilePic = savedProfilePic.replace('/media/', '/static/media/');
             $("#profile-pic").attr("src", savedProfilePic);
         }
-  
+
         $("#profile-pic").click(function(){
             $("#file-input").click();  // Open file selection
         });
-  
+
         $("#file-input").change(function(){
             var file = this.files[0];
             if (!file) return;
-  
+
             var reader = new FileReader();
             reader.onload = function(e) {
                 $("#profile-pic").attr("src", e.target.result); // Preview image
             };
             reader.readAsDataURL(file);
-  
+
             // Prepare form data to send with the file
             var formData = new FormData();
             formData.append("profile_picture", file);
-  
+
             $.ajax({
                 url: `/admin/users/profileimg/{{ user.id }}/`,  // Dynamic user ID
                 type: "POST",
@@ -180,13 +180,13 @@
                 success: function(response) {
                     if (response.success) {
                         let profileUrl = response.profile_photo_url;
-                
+
                         // Modify the URL to match the "/static/media/" if needed
                         profileUrl = profileUrl.replace('/media/', '/static/media/');
-                
+
                         $("#profile-pic").attr("src", profileUrl);  // Update profile image
                         localStorage.setItem("profile_photo_url", profileUrl); // Store in localStorage
-                        
+
                         alert("Profile picture updated successfully!");
                     } else {
                         alert(response.message || "Error updating profile picture!");
@@ -199,6 +199,6 @@
         });
     });
   </script>
-  
+
 
 {% endblock %}

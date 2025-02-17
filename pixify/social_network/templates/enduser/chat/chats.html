@@ -23,7 +23,7 @@
                                 aria-label="Example text with button addon" aria-describedby="button-addon1" />
                             </div>
                         </div>
-                        <div id="fill" >       
+                        <div id="fill" >
                         </div>
                     </div>
                 </div>
@@ -37,10 +37,10 @@
                                 success: function (res) {
                                     // Clear previous results
                                     $("#fill").html('');
-                    
+
                                     // Append each chat to the DOM
                                     res.forEach(chat => {
-                                        
+
                                         $("#fill").append(`
                                         <div class="modal-list">
                                         <img src="${chat.chat_cover}" id="profile-photo">
@@ -55,7 +55,7 @@
                     });
                 })
             });
-        </script>        
+        </script>
     </div>
 </div>
 
@@ -72,7 +72,7 @@
                     <img src="{{ chat.chat_cover|default:'/static/images/avatar.jpg' }}" alt="Chat Cover" class="profile-photo">
                 {% endif %}
             </div>
-        
+
             <!-- Middle Section -->
             <div class="content-div">
                 <p class="chat-title">
@@ -84,7 +84,7 @@
                     <span class="chat-message">
                        {% if chat.latest_message_sender_id == user.id and chat.latest_message_time >= chat.latest_reaction_time %}
                         {% if chat.is_group %}
-                        
+
                             {% if chat.seen_by_all %}
                             <i class="bi bi-check2-all"></i>
                             {% else %}
@@ -94,22 +94,22 @@
                             You:
                             </span>
                         {% else %}
-                       
+
                             {% if chat.seen_by_all %}
                                 <i class="bi bi-check2-all"></i>
                             {% else %}
                                 <i class="bi bi-check2"></i>
                             {% endif %}
-                     
-                        {% endif %} 
-                        {% else %}   
-                         {% if chat.is_group %} 
+
+                        {% endif %}
+                        {% else %}
+                         {% if chat.is_group %}
                          <span class="msg_sender">
-                            {{chat.latest_message_sender_name}}: 
+                            {{chat.latest_message_sender_name}}:
                          </span>
                          {% comment %} {% else %}
                            {{chat.latest_message_sender_name}}: {% endcomment %}
-                        {% endif %} 
+                        {% endif %}
                       {% endif %}
                     </span>
                     <span>
@@ -122,16 +122,16 @@
                     {% else %}
                         <p class="chat-message chat_title">No messages yet</p>
                     {% endif %}
-                    
+
                     </span>
                 </div>
             </div>
-        
+
             <!-- Right-aligned Section -->
             <div class="badge-div">
                 <span class="badge unread-messages">{{ chat.unread_messages }}</span>
                 <span class="timestamp">
-                        <span class="timestamp">{{ chat.latest_message_timestamp }}</span>                                  
+                        <span class="timestamp">{{ chat.latest_message_timestamp }}</span>
                 </span>
             </div>
         </div>
@@ -164,7 +164,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <div class="input-group mb-3">
-                                                                    
+
                     <div class="parchat-container">
                         <div class="parchat-trend-text">Make A Conversation</div>
                         <div class="parchat-input-wrapper">
@@ -373,14 +373,14 @@ function fetchFollowersAndFollowings(searchQuery = '') {
     } else {
         console.error("Arrow button element not found!");
     }
-    
+
     // Redirect to chat with the selected user
     window.redirectToChat = function (userId) {
         if (redirectEnabled) {
             checkExistingChat(userId, function (existingChat) {
                 if (existingChat && existingChat.chat_id) {
                     // Redirect to the existing chat
-                    window.location.href = '/chat/' + existingChat.chat_id + '/message/?message=' + encodeURIComponent(existingChat.message || ''); 
+                    window.location.href = '/chat/' + existingChat.chat_id + '/message/?message=' + encodeURIComponent(existingChat.message || '');
                 } else {
                     // Create a new chat if no existing chat is found
                     createChat(1, [userId]);
@@ -430,8 +430,8 @@ function fetchFollowersAndFollowings(searchQuery = '') {
                 members: members,
                 _token: $('meta[name="csrf-token"]').attr('content') // CSRF token for security
             }),
-           success: function (res) { 
-            window.location.href = '/chat/' + res.chat_id + '/message/?message=' + encodeURIComponent(res.message); 
+           success: function (res) {
+            window.location.href = '/chat/' + res.chat_id + '/message/?message=' + encodeURIComponent(res.message);
             },
             error: function (xhr, status, error) {
                 console.log('Error:', xhr, status, error);
@@ -479,7 +479,7 @@ function fetchFollowersAndFollowings(searchQuery = '') {
     });
 
     // Fetch all followers and followings on page load
-    fetchFollowersAndFollowings();    
+    fetchFollowersAndFollowings();
 });
 
 </script>
@@ -503,7 +503,7 @@ function fetchFollowersAndFollowings(searchQuery = '') {
     .plus-modal{
         font-size: 24px;
         position: absolute;
-        bottom: 33px;right: 
+        bottom: 33px;right:
         28px;background-color:  #6a0b7d;
         height: 40px;
         width: 40px;
@@ -519,16 +519,16 @@ function fetchFollowersAndFollowings(searchQuery = '') {
 
     .no-members-message {
     text-align: center;
-    color: fff;          
-    font-weight: bold;   
-    box-shadow: none;    
-    border: none;        
-    padding: 45px;          
-    margin: 0;           
+    color: fff;
+    font-weight: bold;
+    box-shadow: none;
+    border: none;
+    padding: 45px;
+    margin: 0;
     font-size: larger;
 }
 
-    
+
     .modal-list{
         margin:10px;
         border-radius:5px;
@@ -536,7 +536,7 @@ function fetchFollowersAndFollowings(searchQuery = '') {
         padding:10px;
         display:flex;
         border: 2px solid #7474c1;
-    
+
     }
     #unread_color{
         background-color:#ffffff63 !important;
@@ -546,7 +546,7 @@ function fetchFollowersAndFollowings(searchQuery = '') {
         height: 40px;
         border-radius:50%;
     }
-    
+
     #hyperlink-text{
         text-decoration:none;
         color:white;
@@ -649,7 +649,7 @@ function fetchFollowersAndFollowings(searchQuery = '') {
 
 
 
-    
+
     /* General Container */
 .chat-item {
     display: flex;
@@ -737,12 +737,12 @@ function fetchFollowersAndFollowings(searchQuery = '') {
         width: 70px; /* Adjust for smaller screens */
     }
     #hyperlink-text {
-        display: block;         
-        width: 100%;             
-        white-space: nowrap;    
-        overflow: hidden;        
+        display: block;
+        width: 100%;
+        white-space: nowrap;
+        overflow: hidden;
         text-overflow: ellipsis;
-        
+
         font-size: 17px;
     }
 }
@@ -756,12 +756,12 @@ function fetchFollowersAndFollowings(searchQuery = '') {
             bottom: 100px;
         }
         #hyperlink-text {
-            display: block;         
-            width: 100%;             
-            white-space: nowrap;    
-            overflow: hidden;        
+            display: block;
+            width: 100%;
+            white-space: nowrap;
+            overflow: hidden;
             text-overflow: ellipsis;
-            
+
             font-size: 17px;
         }
     }
@@ -777,12 +777,12 @@ function fetchFollowersAndFollowings(searchQuery = '') {
             bottom: 85px;
         }
         #hyperlink-text {
-            display: block;         
-            width: 100%;             
-            white-space: nowrap;    
-            overflow: hidden;        
+            display: block;
+            width: 100%;
+            white-space: nowrap;
+            overflow: hidden;
             text-overflow: ellipsis;
-            
+
             font-size: 13px;
         }
     }
@@ -790,7 +790,7 @@ function fetchFollowersAndFollowings(searchQuery = '') {
     /* Hide the element on screens smaller than 768px (or your desired breakpoint) */
     @media only screen and (max-width: 768px) {
         .mobile-hide {
-            
+
         }
     }
 
@@ -816,12 +816,12 @@ function fetchFollowersAndFollowings(searchQuery = '') {
             bottom: 55px;
         }
         #hyperlink-text {
-            display: block;         
-            width: 100%;             
-            white-space: nowrap;    
-            overflow: hidden;        
+            display: block;
+            width: 100%;
+            white-space: nowrap;
+            overflow: hidden;
             text-overflow: ellipsis;
-            
+
             font-size: 17px;
         }
     }
@@ -853,12 +853,12 @@ function fetchFollowersAndFollowings(searchQuery = '') {
 
         }
         #hyperlink-text {
-            display: block;         
-            width: 100%;             
-            white-space: nowrap;    
-            overflow: hidden;        
+            display: block;
+            width: 100%;
+            white-space: nowrap;
+            overflow: hidden;
             text-overflow: ellipsis;
-            
+
             font-size: 17px;
         }
     }
@@ -884,19 +884,19 @@ function fetchFollowersAndFollowings(searchQuery = '') {
             font-size: 0.9rem;
         }
         #hyperlink-text {
-            display: block;         
-            width: 100%;             
-            white-space: nowrap;    
-            overflow: hidden;        
+            display: block;
+            width: 100%;
+            white-space: nowrap;
+            overflow: hidden;
             text-overflow: ellipsis;
-            
+
             font-size: 12px;
         }
         .plus-modal{
             bottom: 90px;
         }
-        
-        
+
+
     }
     .user-item {
         display: flex;
@@ -928,7 +928,7 @@ function fetchFollowersAndFollowings(searchQuery = '') {
 
     #searchin {
         height:40px;
-        width: 320px; 
+        width: 320px;
         border-radius:15px;
         background-color : rgb(86 185 200);
         border-top-right-radius:0px;
@@ -995,8 +995,8 @@ function fetchFollowersAndFollowings(searchQuery = '') {
     }
 
     .parchat-btn,
-    .parchat-btn-outline-secondary {    
-        background:none;    
+    .parchat-btn-outline-secondary {
+        background:none;
         margin-top: 10px;
         padding: 10px;
         font-size: 16px;
@@ -1010,7 +1010,7 @@ function fetchFollowersAndFollowings(searchQuery = '') {
 
     .parchat-btn-outline-secondary {
         background-color: black;
-        color: #333;    
+        color: #333;
     }
 
     .parchat-modal {
@@ -1054,7 +1054,7 @@ function fetchFollowersAndFollowings(searchQuery = '') {
     #arrow-button {
         display: none; /* Hide by default */
         position: fixed;
-    
+
     }
 
     .parchat-arrow-button {

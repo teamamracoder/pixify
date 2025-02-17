@@ -12,6 +12,7 @@ urlpatterns = [
 
     # home
     path('', views.HomeView.as_view(), name='home'),
+    path('home/loginuserdetails/', views.LoginUserDetailsView.as_view(), name='loginuserdetails'),
 
     # manage-user
     path('admin/users/', views.ManageUserListView.as_view(), name='user_list'),
@@ -40,11 +41,11 @@ urlpatterns = [
     path('admin/messages/create/', views.ManageMessageCreateView.as_view(), name='manage_message_create'),
     path('admin/messages/toggle-active/<int:message_id>/', views.ManageToggleMessageActiveView.as_view(), name='manage_toggle_message_active'),
 
-  
+
     path('admin/posts/create/', views.ManagePostCreateView.as_view(), name='manage_post_create'),
     path('admin/posts/', views.ManagePostListView.as_view(), name='manage_post_list'),
     path('admin/posts/<int:post_id>/details', views.ManagePostDetailView.as_view(), name='manage_post_detail'),
-    path('admin/posts/toggle-active/<int:post_id>/', views.ManageTogglePostActiveView.as_view(), name='toggle_post_active'), 
+    path('admin/posts/toggle-active/<int:post_id>/', views.ManageTogglePostActiveView.as_view(), name='toggle_post_active'),
     path('admin/posts/<int:post_id>/update/', views.ManagePostUpdateView.as_view(), name='manage_post_update'),
     path('admin/posts/toggle-active/<int:comment_id>/', views.ManageToggleCommentActiveView.as_view(), name='manage_toggle_comment_active'),
 
@@ -83,7 +84,7 @@ urlpatterns = [
 
     # profile
     path('profile/', views.EnduserprofileView.as_view(), name='userprofile'),
-    path('editprofile/<int:user_id>/', views.EnduserprofileUpdateView.as_view(),name='enduser_edit_profile'), 
+    path('editprofile/<int:user_id>/', views.EnduserprofileUpdateView.as_view(),name='enduser_edit_profile'),
 
     # aboutus
     path('aboutus/', views.AboutUsView.as_view(), name='aboutus'),
@@ -187,6 +188,12 @@ urlpatterns = [
     path('short/comment/<int:comment_id>/delete/', views.ShortCommentDeleteView.as_view(),name='short_comment_delete'),
     path('short/comment/<int:comment_id>/reply/', views.ShortCommentReplyView.as_view(),name='short_comment_reply'),
     path('short/comment/<int:comment_id>/reaction/', views.ShortCommentReactionView.as_view(),name='short_comment_reaction'),
+
+    # path('save-fcm-token/', views.save_fcm_token, name='save-fcm-token'),
+    path('firebase-messaging-sw.js', views.FirebaseMessagingSwFile, name='firebase-messaging-sw'),
+    path('firebase-notify/', views.Firebasenotify, name='firebase-notify'),
+    path('save_fcm_token/', views.save_fcm_token, name="save_fcm_token"),
+    path('send_notification/',views.send_notification, name="send_notification"),
 
     # Short Share List Api
     path('short/share/api', views.ShortShareListViewApi.as_view(), name='short_share_api'),

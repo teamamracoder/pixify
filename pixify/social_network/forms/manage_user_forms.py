@@ -7,7 +7,7 @@ class ManageUserCreateForm(forms.ModelForm):
     class Meta:
         model = User
         fields = ['first_name', 'middle_name', 'last_name', 'email', 'dob', 'gender', 'address', 'relationship_status', 'hobbies']
-        
+
         widgets = {
             'first_name': forms.TextInput(attrs={"class": "form-control", "placeholder": "Enter your first name"}),
             'middle_name': forms.TextInput(attrs={"class": "form-control", "placeholder": "Enter your middle name"}),
@@ -17,7 +17,7 @@ class ManageUserCreateForm(forms.ModelForm):
             'address': forms.Textarea(attrs={"class": "form-control", "placeholder": "Enter Address", "rows": 2}),
             'hobbies': forms.TextInput(attrs={"class": "form-control", "placeholder": "Enter hobbies (comma-separated)"}),
         }
-        
+
         labels = {
             'first_name': "First Name",
             'middle_name': "Middle Name",
@@ -62,7 +62,7 @@ class ManageUserUpdateForm(forms.ModelForm):
     class Meta:
         model = User
         fields = ['first_name', 'middle_name', 'last_name', 'dob', 'address', 'hobbies']
-        
+
         widgets = {
             'first_name': forms.TextInput(attrs={"class": "form-control", "placeholder": "Enter your first name"}),
             'middle_name': forms.TextInput(attrs={"class": "form-control", "placeholder": "Enter your middle name"}),
@@ -71,7 +71,7 @@ class ManageUserUpdateForm(forms.ModelForm):
             'address': forms.Textarea(attrs={"class": "form-control", "placeholder": "Enter Address", "rows": 2}),
             'hobbies': forms.TextInput(attrs={"class": "form-control", "placeholder": "Enter hobbies (comma-separated)"}),
         }
-        
+
         labels = {
             'first_name': "First Name",
             'middle_name': "Middle Name",
@@ -95,7 +95,7 @@ class ManageAdminProfileUpdateForm(forms.ModelForm):
     class Meta:
         model = User
         fields = ['first_name', 'middle_name', 'last_name', 'dob', 'address', 'hobbies']
-        
+
         widgets = {
             'first_name': forms.TextInput(attrs={"class": "form-control", "placeholder": "Enter your first name"}),
             'middle_name': forms.TextInput(attrs={"class": "form-control", "placeholder": "Enter your middle name"}),
@@ -104,7 +104,7 @@ class ManageAdminProfileUpdateForm(forms.ModelForm):
             'address': forms.Textarea(attrs={"class": "form-control", "placeholder": "Enter Address", "rows": 2}),
             'hobbies': forms.TextInput(attrs={"class": "form-control", "placeholder": "Enter hobbies (comma-separated)"}),
         }
-        
+
         labels = {
             'first_name': "First Name",
             'middle_name': "Middle Name",
