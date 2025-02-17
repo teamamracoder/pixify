@@ -456,16 +456,16 @@
   
 
 <style>
-    #carouselExample {
+     #carouselExample {
         max-width: 100%;
         margin: 10px auto;
-        overflow-x: hidden; /* Hide horizontal overflow */
+        overflow-x: hidden; 
     }
     
     .carousel-inner {
         display: flex;
-        flex-wrap: nowrap; /* Prevent wrapping */
-        justify-content: flex-start; /* Align items to the start */
+        flex-wrap: nowrap; 
+        justify-content: flex-start; 
         margin-left:10px;
         gap: 5px;
     }
@@ -473,7 +473,7 @@
     .carousel-item {
         flex: 0 0 auto;
         width: 100%;
-        max-width: calc(100% / 3 - 20px); /* Default to 3 videos per row */
+        max-width: calc(100% / 3 - 20px); 
         margin: 5px;
         box-sizing: border-box;
         transition: transform 0.5s ease;
@@ -483,21 +483,22 @@
         width: 100%;
         height: auto;
         margin:auto;
-        aspect-ratio: 9/16; /* Aspect ratio for vertical videos */
+        aspect-ratio: 9/16; 
         object-fit: cover;
         border-radius: 10px;
     }
     
     @media (max-width: 768px) {
         .carousel-item {
-            max-width: calc(100% / 2 - 20px); /* Adjust to 2 videos per row for smaller screens */
+            max-width: calc(100% / 2 - 20px); 
         }
     }
     
+   
 </style>
  
-<script>
-    document.addEventListener('DOMContentLoaded', function () { 
+<script>  
+     document.addEventListener('DOMContentLoaded', function () { 
         const carousel = document.getElementById('carouselExample'); 
         const prevButton = carousel.querySelector('.carousel-control-prev'); 
         const nextButton = carousel.querySelector('.carousel-control-next'); 
@@ -540,7 +541,7 @@
     
         showItems(); 
         updateButtons(); 
-    }); 
+    });
     
 </script> 
 
