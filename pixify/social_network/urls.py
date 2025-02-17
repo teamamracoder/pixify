@@ -9,13 +9,6 @@ urlpatterns = [
     # home
     path('', views.HomeView.as_view(), name='home'),
 
-  
-#   manage-dashboard
-# ManageAdminView.as_view() is a class-based view that renders the admin dashboard.
-  # path('admin/notifications/', views.ManageNotificationListView.as_view(), name='manage_notification_listAAAA'),
-
-
-
     # manage-user
     path('admin/users/', views.ManageUserListView.as_view(), name='user_list'),
     path('admin/users/profile', views.ManageUserProfileView.as_view(), name='user_profile'),
@@ -23,7 +16,8 @@ urlpatterns = [
     path('admin/users/create/', views.ManageUserCreateView.as_view(), name='user_create'),
     path('admin/users/<int:user_id>/', views.ManageUserDetailView.as_view(), name='user_detail'),
     path('admin/users/<int:user_id>/update/', views.ManageUserUpdateView.as_view(), name='user_update'),
-    # path('admin/users/<int:user_id>/delete/', views.ManageUserDeleteView.as_view(), name='user_delete'),
+    path('admin/users/profile/<int:user_id>/', views.ManageAdminProfileUpdateView.as_view(), name='user_profile_update'),
+    path('admin/users/profileimg/<int:user_id>/', views.ManageAdminProfilePicView.as_view(), name='user_profile_pic_update'),
 
     path('change-my-theme/', views.ChangeMyThemeView.as_view(), name='change_my_theme'),
 
