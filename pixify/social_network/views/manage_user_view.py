@@ -1,13 +1,17 @@
 from datetime import datetime
+import os
 from pyexpat.errors import messages
 from django.http import HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, render, redirect
+from django.urls import reverse
 from django.views import View
+
 from social_network.utils.common_utils import print_log
 from social_network.constants.default_values import SortingOrder
 from social_network.decorators.exception_decorators import catch_error
 from social_network.packages.response import success_response
-from ..forms.manage_user_forms import ManageAdminProfileUpdateForm, ManageUserUpdateForm
+
+from ..forms.manage_user_forms import ManageUserUpdateForm
 from ..models.user_model import User
 from ..decorators.exception_decorators import catch_error
 from .. import services
@@ -16,13 +20,6 @@ from django.core.paginator import Paginator
 from django.http import JsonResponse
 from ..forms import ManageUserCreateForm
 from user_agents import parse
-from django.http import JsonResponse
-from django.shortcuts import get_object_or_404
-from django.core.files.storage import default_storage
-from django.core.files.base import ContentFile
-from django.conf import settings
-import uuid
-from urllib.parse import urljoin
 
 
 class ManageUserListView(View):
@@ -207,17 +204,51 @@ class ManageToggleUserActiveView(View):
         user.save()
         return JsonResponse({'is_active': user.is_active})
 
-class ManageUserProfileView(View):
-    def get(self, request):
-        return render(request, 'adminuser/user/user_profile.html')
+# class ManageAdminProfileView(View):
     
-class ChangeMyThemeView(View):
-    def post(self, request):
-        theme = request.POST.get('theme')
-        user = services.user_service.get_user(request.user.id)
-        services.user_service.change_theme(user, ui_mode=theme)
-        return JsonResponse(success_response('Theme changed to {theme} mode', {'theme': theme}))
+    
+#     @catch_error
+#     def get(self, request, user_id):
+#         user = get_object_or_404(User, id=user_id)  # Assuming you have a User model
+#         print (user)
+#         form = ManageAdminProfileUpdateForm(initial={
+#             'first_name': user.first_name,
+#             'middle_name': user.middle_name,
+#             'last_name': user.last_name,
+#             'address': user.address,
+#             'hobbies': user.hobbies,
+#             'dob': user.dob       
+#         })
+#         return render(request,  'admin/users/profile/', {"form": form, "user_id": user.id})
+#     @catch_error
+#     def post(self, request, user_id):
+        
+#         user = get_object_or_404(User, id=user_id)
 
+#         form = ManageAdminProfileUpdateForm(request.POST)
+
+#         if form.is_valid():
+#             user.first_name = form.cleaned_data['first_name']
+#             user.middle_name = form.cleaned_data.get('middle_name', '')  # Default to empty string if None
+#             user.last_name = form.cleaned_data['last_name']
+#             user.address = form.cleaned_data['address']
+#             user.hobbies = form.cleaned_data['hobbies']
+#             dob = form.cleaned_data.get('dob')
+#             if dob:
+#                 user.dob = dob
+#             else:
+#                 user.dob = None  # Set default value (None) for blank D.O.B.
+
+#             user.updated_by = user
+#             user.save()  # Save the updated user instance
+
+#             return redirect(' admin/users/profile/')  # Redirect to the list page after successful save
+
+#         # Render form with errors if invalid
+#         return render(request, ' admin/users/profile/', {
+#             'form': form,
+#             'user_id': user.id,
+#         })
 class ManageAdminProfileUpdateView(View):
     
     @catch_error
@@ -256,36 +287,18 @@ class ManageAdminProfileUpdateView(View):
             user.updated_by = login_user
             user.save()  
 
-            return redirect('user_profile_update', user_id=user.id)
+            return redirect('user_profile', user_id=user.id)
 
         return render(request, 'adminuser/user/user_profile.html', {'form': form})
 
+    
+    
+class ChangeMyThemeView(View):
+    def post(self, request):
+        theme = request.POST.get('theme')
+        user = services.user_service.get_user(request.user.id)
+        services.user_service.change_theme(user, ui_mode=theme)
+        return JsonResponse(success_response('Theme changed to {theme} mode', {'theme': theme}))
 
-class ManageAdminProfilePicView(View):
-    def post(self, request, user_id):
-        user = get_object_or_404(User, id=user_id)
 
-        profile_picture = request.FILES.get('profile_picture')
-        if not profile_picture:
-            return JsonResponse({'success': False, 'message': 'No file uploaded'})
 
-        try:
-            # Generate a unique filename and save the file
-            file_extension = profile_picture.name.split('.')[-1]
-            unique_filename = f"profile_pics/{user.id}_{uuid.uuid4().hex}.{file_extension}"
-            
-            # Save file and get the file path
-            file_path = default_storage.save(unique_filename, ContentFile(profile_picture.read()))
-            
-            # Construct the profile URL
-            profile_url = urljoin(settings.MEDIA_URL, file_path)
-            
-            # Update user's profile photo URL and save
-            user.profile_photo_url = profile_url
-            user.save()
-
-            return JsonResponse({'success': True, 'profile_photo_url': profile_url})
-
-        except Exception as e:
-            return JsonResponse({'success': False, 'message': f'Error saving file: {str(e)}'})
-        
