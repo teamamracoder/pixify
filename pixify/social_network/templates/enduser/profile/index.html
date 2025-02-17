@@ -14,7 +14,7 @@
             {% for user in user_data %}
             <div id="p-pic" class="col-md-4 col-lg-5 col-xl-5 col-xxl-5" id="item-1">
                 {% if user.profile_photo %}
-                <img class="img-fluid" src="{{ user.profile_photo }}" alt="User Profile Photo" >
+                <img class="img-fluid" src="{% static user.profile_photo %}" alt="User Profile Photo" >
                 {% else %}
                 <img class="img-fluid" src="{% static 'images/user.png' %}" alt="User Profile Photo" >
                 {% endif %}
@@ -24,7 +24,6 @@
                         <i class="bi bi-person"></i> {{ user.first_name }}
                          <i class="bi bi-patch-check prof-check" style="padding-right: 2px;"></i>
                     </h4>
-                
 
                 <ul class=" prof-ul" mr-5>
                     {% if user.status == True %}
@@ -43,19 +42,19 @@
                                  {% endfor %}
                                  <li class="pb-2">
                                   <a href="#" class="text-white">
-                                      <i class="bi bi-bell"></i> Notifications 
+                                      <i class="bi bi-bell"></i> Notifications
                                       <span id="notification-count" class="text-t fw-medium">(0)</span>
                                   </a>
-                              </li>                              
+                              </li>
                          </ul>
 
                 <div class="col-auto col-sm-auto d-flex" style="gap:10px">
                   <button type="button" class="prof-btn btn btn-primary" style="font-size:14px;">
-                      <a href="{% url 'enduser_edit_profile' user.id %}" style="text-decoration:none; color:White;">EDIT</a>
+                      <a href="{% url 'enduser_edit_profile' user.id %}" style="text-decoration:none; color:White;">EDIT DETAILS</a>
                   </button>
-                  <button type="button" class="btn btn-primary prof-btn" data-bs-toggle="modal" data-bs-target="#changePasswordModal" style="font-size:14px;">CHANGE PASSWORD</button>
+                  {% comment %} <button type="button" class="btn btn-primary prof-btn" data-bs-toggle="modal" data-bs-target="#changePasswordModal" style="font-size:14px;">CHANGE PASSWORD</button> {% endcomment %}
               </div>
-              
+
             </div>
         </div>
 
@@ -67,19 +66,18 @@
 
             <div  class="m-2">
               <div class="px-3 py-2 fnd-pic d-flex justify-content-around">
-                <button id="load-more-btn" 
+                <button id="load-more-btn"
                     style="all: unset; display: inline-block; color: rgb(0, 255, 242); cursor: pointer; font-size: 14px; font-weight: 600; text-align: center; margin-left: auto;">
                     See All
                 </button>
             </div>
-              
               </div>
             <div>
             {% for following in followings %}
             <div class="m-2 friend-item" style="border: 1px solid black; border-radius: 3px;">
                 <div class="p-3 fnd-pic">
                     <a href="#" style="text-decoration: none; display: flex; align-items: center; gap: 20px;">
-                        <img class="img-fluid" src="{{ following.user_id__profile_photo_url|default:'https://static.turbosquid.com/Preview/001292/481/WV/_D.jpg' }}" 
+                        <img class="img-fluid" src="{{ following.user_id__profile_photo_url|default:'https://static.turbosquid.com/Preview/001292/481/WV/_D.jpg' }}"
                              alt="" style="height: 40px; border-radius: 50%;">
                         <p class="verify-Icon-div">
                             {{ following.user_id__first_name }} {{ following.user_id__last_name }}
@@ -89,7 +87,7 @@
             </div>
             {% endfor %}
             </div>
-        </div> 
+        </div>
 
         <div class="galary justify-content-center "id="item-3" >
             <div style="width: 100%; display:flex;justify-content:center;">
@@ -252,12 +250,11 @@
     .galary .col{
     padding-right:0;
     }
-    
       </style>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-let offset = 5; 
+let offset = 5;
 const limit = 5;
 
 document.getElementById('load-more-btn').addEventListener('click', function () {
@@ -279,7 +276,7 @@ document.getElementById('load-more-btn').addEventListener('click', function () {
                 friendDiv.innerHTML = `
                     <div class="p-3 fnd-pic">
                         <a href="#" style="text-decoration: none; display: flex; align-items: center; gap: 20px;">
-                            <img class="img-fluid" src="${following.user_id__profile_photo_url || 'https://static.turbosquid.com/Preview/001292/481/WV/_D.jpg'}" 
+                            <img class="img-fluid" src="${following.user_id__profile_photo_url || 'https://static.turbosquid.com/Preview/001292/481/WV/_D.jpg'}"
                                  alt="" style="height: 40px; border-radius: 50%;">
                             <p class="verify-Icon-div">
                                 ${following.user_id__first_name} ${following.user_id__last_name}
@@ -289,13 +286,13 @@ document.getElementById('load-more-btn').addEventListener('click', function () {
                 `;
                 container.appendChild(friendDiv);
             });
-            offset += limit; 
-        } 
-        
+            offset += limit;
+        }
+
         if (!data.followings || data.followings.length < limit) {
             loadMoreButton.style.display = 'none';
         } else {
-            loadMoreButton.style.display = 'block'; 
+            loadMoreButton.style.display = 'block';
         }
     })
     .catch(error => console.error('Error:', error));

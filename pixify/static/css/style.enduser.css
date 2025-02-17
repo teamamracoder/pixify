@@ -4,7 +4,7 @@
     margin: 0;
     padding: 0;
     color: whitesmoke;
-    font-family: "Open Sans", sans-serif;
+    /*font-family: "Open Sans", sans-serif;*/
 }
 input textarea::placeholder {
     color:black;
@@ -566,7 +566,22 @@ i {
     margin-right: 7px;
 }
 
-.con .images img {
+.con .images video {
+    height: 100%;
+    width: 100%;
+}
+.con  video {
+    height: 95px;
+    width: 95px;
+    border-radius: 5px;
+    box-shadow: 0 0 5px rgba(107, 99, 99, 0.3);
+    overflow: hidden;
+    position: relative;
+    margin-bottom: 7px;
+    margin-right: 7px;
+}
+
+.con  video {
     height: 100%;
     width: 100%;
 }
@@ -1161,6 +1176,12 @@ textarea::placeholder {
     width: 100%;
     padding: 0 10px 10px 10px;
 }
+.post-center .post-box .post-des-img video {
+    background-color: #1f0447fb;
+    height: 100%;
+    width: 100%;
+    padding: 0 10px 10px 10px;
+}
 
 .post-center .post-box .post-des-img .post-text .text-in {
     height: 50px;
@@ -1311,6 +1332,7 @@ textarea::placeholder {
 
 .stories-container .authorrr {
     color: #fff;
+    left: 16%;
     /* font-size: 16px; */
     font-style: normal;
     position: absolute;
@@ -1741,7 +1763,14 @@ textarea::placeholder {
     }
   }
 
-
+.brandName {
+    font-size: 1.8rem;
+    font-weight: bold;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #ff4500;
+    padding-left: 61px;
+}
 #SmallScreenNavItem .nav-link{
     font-size: 19px;
 }
@@ -2191,3 +2220,4 @@ font-size: 30px;
     color: black;
     font-size: 14px;
 }
+

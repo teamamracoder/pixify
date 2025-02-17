@@ -69,6 +69,7 @@
       height: 90vh;
       width: 55vh;
       overflow: hidden;
+      margin: auto;
     }
 
     .uploaded-content, .text-content {
@@ -133,6 +134,9 @@
   #storyUploadDiv{
     margin-top: 30px !important;
   }
+  .uploaded-content{
+    width: auto !important;
+  }
 }
   </style>
 </head>
@@ -162,7 +166,7 @@
       <div class="col-md-3 storyUploadSideBar" style="height: 90vh;background-color: rgb(61, 61, 107); " >
         <div class="d-flex justify-content-between mb-1">
           <h5 style="color: #fff;">Your Story</h5>
-              <button class="btn btn-light p-2" >
+              <button class="btn btn-light p-2" onclick="CancelUploadStory()" >
                 <i class="fa-solid fa-xmark"></i>
               </button>
         </div>
@@ -198,6 +202,7 @@
           <h6>Uploaded Content</h6>
           <div id="preview"></div>
           <button class="btn btn-primary mt-3" type="submit">Upload</button>
+          <button class="btn btn-secondary mt-3 ps-2" onclick="CancelUploadStory()" type="reset">Cancel</button>
         </div>
         <!-- Text Input Box -->
         <form action="/story/create/" method="post" enctype="multipart/form-data">
@@ -292,6 +297,12 @@
     textUpload.style.display = "none";
   }
 });
+
+function CancelUploadStory(){
+  event.preventDefault();
+  window.location.href = "/";
+}
+
 
   </script>
 </body>

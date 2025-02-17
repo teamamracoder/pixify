@@ -8,7 +8,7 @@
 
 ## Step 1: Clone Repository and Switch to new Branch
 
-    > git clone https://token@github.com/teamamracoder/pixify.git 
+    > git clone https://token@github.com/teamamracoder/pixify.git
     > cd pixify
     > git checkout -b writeYourNewBanchName
     > code .
@@ -36,7 +36,7 @@
     - create database 'pixify'
     - make sure you have set password = 2023 ,for default user 'postgres' while installing and setting up postgresSQL database
         - if not then open query tool on the database 'pixify' and run below commands
-            - if username is correct and password is wrong 
+            - if username is correct and password is wrong
                 > ALTER USER postgres WITH PASSWORD '2023';
             - if username is no correct
                 > CREATE USER postgres WITH PASSWORD '2023';
@@ -62,8 +62,8 @@
 
     > python manage.py runserver
 
-## Step 8: 
+## Step 8:
     - If got this error - "ModuleNotFoundError: No module named 'user_agents'"
-        -step 8.1: install 
+        -step 8.1: install
             > pip install pyyaml ua-parser user-agents
 

@@ -9,16 +9,16 @@ from ..constants import Gender
 from ..constants import RelationShipStatus
 from ..services import chat_service
 from django.http import JsonResponse
-from ..services import manage_notification_service 
+from ..services import manage_notification_service
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
-from ..models import Notification 
+from ..models import Notification
 
 class EnduserprofileView(View):
     def get(self, request):
         user = request.user
-        
-        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':  
+
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
             offset = int(request.GET.get('offset', 0))
             limit = int(request.GET.get('limit', 5))
             data = chat_service.list_followings(user, offset, limit)
@@ -26,8 +26,8 @@ class EnduserprofileView(View):
 
         else:
             user = request.user
-            data = chat_service.list_followings(user, 0, 5)  
-            user_details = [user_service.get_user_details(user.id)]  
+            data = chat_service.list_followings(user, 0, 5)
+            user_details = [user_service.get_user_details(user.id)]
             friends = user_service.friends_count(user.id)
             user_data = []
 
@@ -40,9 +40,9 @@ class EnduserprofileView(View):
                     'profile_photo': detail.profile_photo_url,
                     'age': age,
                     'status': detail.is_active,
-                    'friends': friends,  
+                    'friends': friends,
                 })
-                
+
             return render(
                 request,
                 'enduser/profile/index.html',
@@ -55,7 +55,7 @@ class EnduserprofileView(View):
 #         user_details = user_service.get_user_details(user_id)
 #         print(user_details)
 #         return render(request, 'enduser/profile/editprofile.html',
-#         'enduser/profile/index.html', {'user_details': user_details}) 
+#         'enduser/profile/index.html', {'user_details': user_details})
 
 #     def post(self, request, user_id):
 #         user_details = user_service.get_user_details(user_id)
@@ -90,12 +90,11 @@ class EnduserprofileView(View):
 #         user_service.update_user(user_id, first_name, last_name, email, phone, gender,address,dob,country,bio,hobbies,relationship_status, profile_picture)
 
 #         return render(request, 'enduser/profile/index.html', {'user_details': user_details, 'errors': "An error occurred"})
-  
 
 class EnduserprofileUpdateView(View):
     def get(self, request, user_id):
         user_details = user_service.get_user_details(user_id)
-        print(user_details)
+        #print(user_details)
         return render(request, 'enduser/profile/editprofile.html', {'user_details': user_details})
 
     def post(self, request, user_id):
@@ -107,7 +106,7 @@ class EnduserprofileUpdateView(View):
         phone = request.POST.get('phone')
         gender = request.POST.get('gender')
         address = request.POST.get('address')
-        dob = request.POST.get('dob')
+        dob = request.POST.get('dob') or None
         country = request.POST.get('country')
         bio = request.POST.get('bio')
         if request.method == 'POST':
@@ -137,18 +136,19 @@ class EnduserprofileUpdateView(View):
 
         user_service.update_user(user_id, first_name, last_name, email, phone, gender, address, dob, country, bio, hobbies, relationship_status, profile_picture)
 
-        return render(request, 'enduser/profile/index.html', {'user_details': user_details, 'errors': "An error occurred"})
+        #return render(request, 'enduser/profile/index.html', {'user_details': user_details, 'errors': "An error occurred"})
+        return redirect('userprofile')
 
 
-def edit_information(request):
-    if request.method == "POST":
-        form = UserProfileForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('success')
-    else:
-        form = UserProfileForm()
-    return render(request, 'edit_information.html', {'form': form})
+# def edit_information(request):
+#     if request.method == "POST":
+#         form = UserProfileForm(request.POST)
+#         if form.is_valid():
+#             form.save()
+#             return redirect('success')
+#     else:
+#         form = UserProfileForm()
+#     return render(request, 'edit_information.html', {'form': form})
 
 
 @login_required

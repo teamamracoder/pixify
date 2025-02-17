@@ -31,7 +31,7 @@
         </div>
         <div id="sendDataButton"><i class="fa-solid fa-phone"></i></div>    
     </div>
-        
+
   <!-- Loading Spinner (placed as an overlay) -->
     <div id="loading-spinner" style="display: none;">
       <div class="spinner"></div>
@@ -94,13 +94,13 @@
                     <a href="#" class="delete-link" onclick="openDeleteModal('{{ message.id }}', '{{ message.sender_id.id }}'); closeOptions('{{ message.id }}');">Delete</a>
                 </div>
 
-                <div class="reaction-container" id="reaction-container-{{ message.id }}">
+                <div class="reaction-containerrrr" id="reaction-containerrrr-{{ message.id }}">
                     <div class="reaction-popup" id="reaction-popup-{{ message.id }}" style="display: none;">
                         {% for reaction in data.reactions %}
                         <span onclick="reactionManager.addReaction('{{ message.id }}', '{{ reaction.id }}', '{{ reaction.value|escapejs }}')">
                             {{ reaction.value|safe }}
                         </span>
-                                                            
+
                         {% endfor %}
                     </div>
                 </div>
@@ -120,7 +120,7 @@
             </div>
         </div>
         {% endfor %}
-        {% endfor %}    
+        {% endfor %}
     </div>
         <!-- Typing Indicator -->
     <div class="chat-bubble" hidden>
@@ -481,15 +481,15 @@ $(document).ready(function () {
 
     //Toast notification implementation
     $(document).ready(function() {
-        const urlParams = new URLSearchParams(window.location.search); 
+        const urlParams = new URLSearchParams(window.location.search);
         const message = urlParams.get('message');
         if (message)
-        { toastr.success(decodeURIComponent(message)); } 
+        { toastr.success(decodeURIComponent(message)); }
     });
 
     // Focusing the input field on page load
-    document.addEventListener('DOMContentLoaded', function() { 
-        document.getElementById('message-input').focus(); 
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('message-input').focus();
     });
 
     // Prevent empty message on form submission (via button)
@@ -499,11 +499,11 @@ $(document).ready(function () {
 
         if (!message) {
             event.preventDefault(); // Prevent form submission
-            
+
             messageInput.focus(); // Set focus back to the input field
         }
     });
-  
+
     //Show the scroll-to-bottom button based on scroll
     document.addEventListener("DOMContentLoaded", function () {
         const chatBody = document.querySelector('.chat-body');
@@ -534,7 +534,7 @@ $(document).ready(function () {
         scrollToBottomBtn.addEventListener('click', function () {
             enableSmoothScrolling();
             chatBody.scrollTop = chatBody.scrollHeight;
-            
+
             // Disable smooth scrolling after scrolling is complete to avoid interfering with future scrolls
             setTimeout(disableSmoothScrolling, 500); // Adjust time if necessary for smoother behavior
         });
@@ -546,7 +546,7 @@ $(document).ready(function () {
         const messages = document.querySelectorAll(".message");
         const timestampContainer = document.getElementById("timestamp-scrollbar");
 
-        chatBody.addEventListener("scroll", function () {            
+        chatBody.addEventListener("scroll", function () {
             updateScrollIndicator();
         });
 
@@ -599,13 +599,13 @@ $(document).ready(function () {
         }
     }
 
-        
+
         function showTimestampIndicator(timestampText, closestMessage) {
         const timestampIndicator = document.getElementById("timestamp-scrollbar");
 
         // Set the timestamp text
         timestampIndicator.innerText = timestampText;
-        
+
         // Style the indicator to appear in the middle of the chat body
         // timestampIndicator.style.top = `${chatBody.offsetHeight / 2 - timestampIndicator.offsetHeight / 2}px`; // Center vertically
         timestampIndicator.style.display = "block"; // Ensure it's visible
@@ -637,32 +637,32 @@ $(document).ready(function () {
             console.error('Element with id "chat-body" not found');
             return;
         }
-        
+
         // Remove any existing Unread Messages tag to avoid duplicates.
         const existingTag = chatBody.querySelector('.message-timestamp');
         if (existingTag) {
             existingTag.remove();
         }
-        
+
         // Select unread messages:
         // Unread messages are assumed to be those with the 'received' class and without the 'read' class.
         const unreadMessages = chatBody.querySelectorAll('.message.received:not(.read)');
-        
+
         if (unreadMessages.length === 0) {
             return;
         }
-        
+
         // Get the first unread message.
         const firstUnreadMessage = unreadMessages[0];
-        
+
         // Create the tag element.
         const tagElement = document.createElement('div');
         tagElement.className = 'message-timestamp';
         tagElement.innerText = 'Unread Messages';
-        
+
         // Insert the tag before the first unread message.
         firstUnreadMessage.parentNode.insertBefore(tagElement, firstUnreadMessage);
-        
+
         // After 3 seconds, add the hidden class to fade out the tag.
         setTimeout(() => {
             tagElement.classList.add('hidden');
@@ -719,7 +719,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const url = new URL(window.location.href);
     url.searchParams.set('page', currentPage - 1);
-    
+
     // Get the current top timestamp from the first rendered .message-timestamp element.
     const topTimestampEl = document.querySelector('.chat-body .message-timestamp');
     if (topTimestampEl) {
@@ -781,7 +781,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const chatId = $('#chat_id').val();  // Get chat_id dynamically
     const socket = new WebSocket('ws://' + window.location.host + '/ws/chat/' + chatId + '/');
     const currentUser = "{{ user.first_name }}"; // Django context variable for current user's name
-    const currentUserId = "{{ user.id }}"; 
+    const currentUserId = "{{ user.id }}";
     const senderId = "{{ user.id }}"; // Django context variable
 
     // When WebSocket connection is established
@@ -805,7 +805,7 @@ document.addEventListener('DOMContentLoaded', function() {
     async function sendMessage() {
         const input = document.getElementById("message-input");
         const message = input.value.trim();
-        const chatId = document.getElementById("chat_id").value;        
+        const chatId = document.getElementById("chat_id").value;
         const senderName = "{{ user.first_name }}"; // User's name from the context
         const mentionsInput = document.getElementById("mentions").value.trim();
 
@@ -868,8 +868,8 @@ if (data.seen_by_all) {
             }
         } else {
             // Fallback: if .reactionandseen isn't found, insert at the end of messageElement.
-            const seenStatusHtml = data.user === currentUser 
-                ? `<div class="seen-status"><i class="bi bi-check2-all"></i></div>` 
+            const seenStatusHtml = data.user === currentUser
+                ? `<div class="seen-status"><i class="bi bi-check2-all"></i></div>`
                 : "";
             messageElement.insertAdjacentHTML('beforeend', seenStatusHtml);
         }
@@ -920,13 +920,13 @@ if (data.seen_by_all) {
     }
 
     if (data.del_type == 1) {
-      // "Delete for me" - Hide message only for current user      
+      // "Delete for me" - Hide message only for current user
       console.log(data.del_type);
-       if (data.del_by.includes(currentUserId)) {      
+       if (data.del_by.includes(currentUserId)) {
       messageElement.style.display = "none";
       }
     } else if (data.del_type == 2) {
-      // "Delete for everyone" - Remove from DOM entirely        
+      // "Delete for everyone" - Remove from DOM entirely
       messageElement.remove();
     }
 }
@@ -1059,7 +1059,7 @@ function appendMessageToChat(message, messageId, messageTime, senderId, senderNa
                 <a href="#" onclick="replyMessage('${messageId}', '${senderName}'); closeOptions('${messageId}');">Reply</a>
                 <a href="#" onclick="openDeleteModal('${messageId}', '${senderId}'); closeOptions('${messageId}');">Delete</a>
             </div>
-            <div class="reaction-container" id="reaction-container-${messageId}">
+            <div class="reaction-containerrrr" id="reaction-containerrrr-${messageId}">
                 <div class="reaction-popup" id="reaction-popup-${messageId}" style="display: none;">
                     ${reactionPopupContent}
                 </div>
@@ -1215,7 +1215,7 @@ function updateMessageInChat(updatedMessage, messageId, messageTime, senderName,
         if (document.getElementById('reply-preview').style.display === 'block') {
             cancelReply();
         }
-        
+
         const messageDiv = document.getElementById(`message-${messageId}`);
         if (!messageDiv) {
             console.error(`Message with ID ${messageId} not found.`);
@@ -1275,7 +1275,7 @@ function updateMessageInChat(updatedMessage, messageId, messageTime, senderName,
             chat_id: chatId,
             message_id: editingMessageId,
             message: updatedMessage,
-            mentions: mentions, 
+            mentions: mentions,
         }));
 
         // Reset the editing state
@@ -1296,27 +1296,27 @@ function updateMessageInChat(updatedMessage, messageId, messageTime, senderName,
         }
         // Also cancel any existing reply
         cancelReply();
-        
+
         const messageDiv = document.getElementById(`message-${messageId}`);
         if (!messageDiv) {
             console.error(`Message with ID ${messageId} not found for reply.`);
             return;
         }
-        
+
         const messageTextElement = messageDiv.querySelector(".message-text");
         if (!messageTextElement) {
             console.error(`Message text not found for message ID: ${messageId}`);
             return;
         }
-        
+
         const replyPreview = document.getElementById("reply-preview");
         replyPreview.style.display = "block";
         replyPreview.querySelector(".reply-username").textContent = senderName;
         replyPreview.querySelector(".reply-text").textContent = messageTextElement.textContent;
-        
+
         const messageInput = document.getElementById("message-input");
         messageInput.focus();
-        
+
         ReplyMessageId = messageId;
     }
 
@@ -1343,7 +1343,7 @@ function updateMessageInChat(updatedMessage, messageId, messageTime, senderName,
         }
 
         const chatId = document.getElementById("chat_id").value;
-        const senderId = "{{ user.id }}"; // Django context variable        
+        const senderId = "{{ user.id }}"; // Django context variable
         const mentionsInput = document.getElementById("mentions").value.trim();
 
         // Split the mentions string by comma and trim each mention
@@ -1357,8 +1357,8 @@ function updateMessageInChat(updatedMessage, messageId, messageTime, senderName,
             action: 'reply',
             chat_id: chatId,
             message_id: ReplyMessageId,
-            message: ReplyMessage, 
-            mentions:mentions, 
+            message: ReplyMessage,
+            mentions:mentions,
             mediaFiles:mediaFiles,
         }));
 
@@ -1402,13 +1402,32 @@ function updateMessageInChat(updatedMessage, messageId, messageTime, senderName,
 
 
 
-    // Toggle reaction popup
-    function toggleReactionPopup(messageId) {
-        const reactionPopup = document.getElementById(`reaction-popup-${messageId}`);
-        if (reactionPopup) {
-            reactionPopup.style.display = reactionPopup.style.display === "none" ? "block" : "none";
+// Toggle reaction popup
+function toggleReactionPopup(messageId) {
+    const reactionPopup = document.getElementById(`reaction-popup-${messageId}`);
+
+    if (reactionPopup) {
+        // Toggle visibility
+        const isVisible = reactionPopup.style.display === "block";
+        reactionPopup.style.display = isVisible ? "none" : "block";
+
+        // If showing, add event listener to detect outside click
+        if (!isVisible) {
+            setTimeout(() => { // Timeout to allow the toggle click event to complete
+                document.addEventListener("click", outsideClickListener);
+            }, 0);
         }
     }
+
+    // Function to detect click outside the popup
+    function outsideClickListener(event) {
+        if (!reactionPopup.contains(event.target)) {
+            reactionPopup.style.display = "none"; // Hide the popup
+            document.removeEventListener("click", outsideClickListener); // Remove event listener
+        }
+    }
+}
+
 
     // Get the modal
     const modal = document.getElementById("deleteModal");
@@ -1457,11 +1476,11 @@ function updateMessageInChat(updatedMessage, messageId, messageTime, senderName,
             sender_id: senderId,
             del_type: 2,
             })
-        );      
-        
+        );
+
         }
         closeModal();
-    } 
+    }
     }
 
     // Close modal when clicking outside it
@@ -1476,8 +1495,8 @@ function generateReactionPopupContent(reactions, messageId) {
     if (!reactions || reactions.length === 0) return "";
     return reactions
         .map(reaction => `
-            <span 
-                 reaction_id="${reaction.id}" 
+            <span
+                 reaction_id="${reaction.id}"
                  message_id="${messageId}"
                  onclick="reactionManager.addReaction('${messageId}', '${reaction.id}', '${reaction.value.replace(/'/g, "\\'").replace(/"/g, "&quot;")}')"> <!-- Escaping single and double quotes -->
                 ${reaction.value}  <!-- Make sure this outputs the correct HTML or icon -->
@@ -1499,7 +1518,7 @@ class ReactionManager {
 
   // Initialize ReactionManager for a given message.
   init(messageId) {
-    const container = document.getElementById(`reaction-container-${messageId}`);
+    const container = document.getElementById(`reaction-containerrrr-${messageId}`);
     if (!container) {
       console.error(`Reaction container not found for messageId: ${messageId}`);
       return;
@@ -1556,14 +1575,14 @@ class ReactionManager {
     reactions.forEach(reaction => {
       // Use react_value[0] if available; otherwise fallback to reaction_id as a string.
       const displayReaction = (reaction.react_value && reaction.react_value[0]) || String(reaction.reaction_id);
-      
+
       let usersArray = [];
       if (Array.isArray(reaction.reacted_by)) {
         usersArray = reaction.reacted_by;
       } else if (reaction.reacted_by !== undefined && reaction.reacted_by !== null) {
         usersArray = [reaction.reacted_by];
       }
-      
+
       // Also gather names and photos if provided.
       let namesArray = [];
       if (Array.isArray(reaction.names)) {
@@ -1573,7 +1592,7 @@ class ReactionManager {
       if (Array.isArray(reaction.photos)) {
         photosArray = reaction.photos;
       }
-      
+
       if (aggregated.hasOwnProperty(displayReaction)) {
         let currentReacted = aggregated[displayReaction].reacted_by;
         if (!Array.isArray(currentReacted)) {
@@ -1584,8 +1603,8 @@ class ReactionManager {
         aggregated[displayReaction].names = Array.from(new Set(aggregated[displayReaction].names.concat(namesArray)));
         aggregated[displayReaction].photos = Array.from(new Set(aggregated[displayReaction].photos.concat(photosArray)));
       } else {
-        aggregated[displayReaction] = { 
-          count: reaction.count, 
+        aggregated[displayReaction] = {
+          count: reaction.count,
           reacted_by: usersArray,
           names: namesArray,
           photos: photosArray
@@ -1601,8 +1620,8 @@ class ReactionManager {
     if (Array.isArray(newAggregatedReactions)) {
       newAggregatedReactions.forEach(item => {
         const displayReaction = (item.react_value && item.react_value[0]) || String(item.reaction_id);
-        aggregated[displayReaction] = { 
-          count: item.count, 
+        aggregated[displayReaction] = {
+          count: item.count,
           reacted_by: item.reacted_by,
           names: item.names || [],
           photos: item.photos || []
@@ -1710,9 +1729,9 @@ const reactionManager = new ReactionManager();
 
 document.addEventListener('DOMContentLoaded', () => {
   // Initialize ReactionManager for every message that has a reaction container.
-  const containers = document.querySelectorAll('.reaction-container');
+  const containers = document.querySelectorAll('.reaction-containerrrr');
   containers.forEach(container => {
-    // Assuming container id is in the format "reaction-container-<messageId>"
+    // Assuming container id is in the format "reaction-containerrrr-<messageId>"
     const parts = container.id.split('-');
     const messageId = parts[2];
     reactionManager.init(messageId);
@@ -1750,7 +1769,7 @@ function getUnreadReceivedMessageIds() {
 }
 
   document.addEventListener('DOMContentLoaded', () => {
-    const unreadMessageIds = getUnreadReceivedMessageIds();    
+    const unreadMessageIds = getUnreadReceivedMessageIds();
     const chatId = document.getElementById("chat_id").value;
         const payload = {
         message_id:unreadMessageIds, // The specific message ID
@@ -1758,10 +1777,10 @@ function getUnreadReceivedMessageIds() {
         action: 'mark_messages_as_read',
     };
     if (socket.readyState === WebSocket.OPEN) {
-        socket.send(JSON.stringify(payload));        
+        socket.send(JSON.stringify(payload));
     } else {
         socket.addEventListener('open', () => {
-            socket.send(JSON.stringify(payload));            
+            socket.send(JSON.stringify(payload));
         });
     }
 });
@@ -1940,11 +1959,11 @@ document.addEventListener("DOMContentLoaded", function () {
         align-items: center; /* Aligns items vertically */
         width: 100%; /* Ensures full width */
     }
-    
+
     .reaction-display {
         text-align: left; /* Ensures the reaction stays on the left */
     }
-    
+
     .seen-status {
         margin-right: 10px;
         font-size: 12px;
@@ -1954,10 +1973,10 @@ document.addEventListener("DOMContentLoaded", function () {
 .time{
     flex:1;
     color:#c4b3b3;
-}    
+}
 .message-text{
     padding:0 10px 0 10px;
-    
+
 }
 
 /* Spinner Overlay */
@@ -1993,12 +2012,12 @@ document.addEventListener("DOMContentLoaded", function () {
     font-size: 20px;
     padding-left: 10px;
     padding-right: 10px;
-}   
+}
 
 #sendDataButton{
     margin-left: 250px;
     font-size: 20px;
- } 
+ }
 
 .cancel-edit {
     float: right;
@@ -2089,15 +2108,15 @@ document.addEventListener("DOMContentLoaded", function () {
 
 /* The Modal (background) */
 .parmess-del-modal {
-  display: none; 
-  position: absolute; 
-  z-index: 1; 
+  display: none;
+  position: absolute;
+  z-index: 1;
   left: 0;
   top: 0;
   width: 100%;
-  height: 100%; 
-  overflow: auto; 
-  background-color: rgba(0,0,0,0.4); 
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0,0,0,0.4);
 }
 
 /* Modal Content */
@@ -2155,7 +2174,7 @@ document.addEventListener("DOMContentLoaded", function () {
 }
 
 
-    
+
     .edit-preview {
     display: none;
 }
@@ -2185,7 +2204,7 @@ document.addEventListener("DOMContentLoaded", function () {
     .user-info-link {
         text-decoration: none;  /* Removes underline from the anchor tag */
     }
-    
+
     .user-info-link:hover {
         text-decoration: none;  /* Ensures no underline when hovering */
     }
@@ -2215,13 +2234,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
     /* Header */
     .G-msg_chat-title {
-      
+
     }
-    .P-msg_chat-title {        
-        width: 70%;             
-        white-space: nowrap;    
-        overflow: hidden;        
-        text-overflow: ellipsis; 
+    .P-msg_chat-title {
+        width: 70%;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
     .chat-header {
     background-color: #291546;
@@ -2296,8 +2315,8 @@ document.addEventListener("DOMContentLoaded", function () {
         transition: all 0.3s ease;
         background-color: #ffffff;
         box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.1);
-        word-wrap: break-word; 
-        overflow-wrap: break-word; 
+        word-wrap: break-word;
+        overflow-wrap: break-word;
         word-break: break-word;
     }
 
@@ -2362,20 +2381,20 @@ document.addEventListener("DOMContentLoaded", function () {
         margin-left: 5px;
     }
     .message-options{
-        
+
     }
 
 /* shubhankar */
 /* start */
     .options-popup {
-    position: absolute; 
-    top: -70px;         
-    left: 50%;         
-    transform: translateX(-50%); 
-    z-index: 1000;    
-    width: 100px;     
+    position: absolute;
+    top: -70px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    width: 100px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    background: #fff;   
+    background: #fff;
     border-radius: 8px;
     padding: 16px;
     }
@@ -2405,7 +2424,7 @@ document.addEventListener("DOMContentLoaded", function () {
     /* Footer */
     .chat-footer {
         padding: 4px;
-        background-color: #00e6ff;        
+        background-color: #00e6ff;
         display: flex;
         justify-content: space-between;
         flex-direction: column;
@@ -2437,7 +2456,7 @@ document.addEventListener("DOMContentLoaded", function () {
         z-index: 10;
     }
 
-    
+
 .mention-item {
     padding: 10px;
     cursor: pointer;
@@ -2454,7 +2473,7 @@ document.addEventListener("DOMContentLoaded", function () {
         align-items: center;
     }
 
-    
+
     .bi-emoji-smile {
         padding-left:6px;
         padding-right: 6px;
@@ -2462,11 +2481,11 @@ document.addEventListener("DOMContentLoaded", function () {
         cursor: pointer;
         color: red; /*shubhankar change only color*/
     }
-    
+
     .bi-emoji-smile:hover {
         color: black;
     }
-    
+
     .reaction-popup {
         display: flex;
         position: absolute;
@@ -2479,24 +2498,24 @@ document.addEventListener("DOMContentLoaded", function () {
         padding: 5px;
         z-index: 10;
     }
-    
+
     .reaction-popup span {
         margin: 2px;
         cursor: pointer;
         font-size: 10px;
     }
-    
+
     .reaction-popup span:hover {
         transform: scale(1.2);
         transition: 0.3s;
     }
-    
+
     .reaction-display {
         display: flex;
         gap: 2px;
         font-size: 14px;
     }
-    
+
     .reaction-display span {
         margin-left:10px;
         border-radius: 10px;
@@ -2506,7 +2525,7 @@ document.addEventListener("DOMContentLoaded", function () {
         font-weight: bold;
     }
     /*end A*/
-    
+
     /*Start Partha*/
 
     .parmess-modal {
@@ -2573,7 +2592,7 @@ document.addEventListener("DOMContentLoaded", function () {
         background-color: #4da3dc69;
         border-left: 4px solid #4caf50;
         border-radius: 8px;
-        margin-bottom: 5px;  
+        margin-bottom: 5px;
         color: #333;
     }
 
@@ -2602,7 +2621,7 @@ document.addEventListener("DOMContentLoaded", function () {
         overflow-x: auto;
         margin-bottom: 5px;
         max-width: 100%;
-        background-color: rgb(32 17 55);    
+        background-color: rgb(32 17 55);
     }
 
 
@@ -2712,7 +2731,7 @@ document.addEventListener("DOMContentLoaded", function () {
         position: absolute;
         top: 82%;
         left: 50%;
-        transform: translate(-50%, -50%); /* This will center the arrow */    
+        transform: translate(-50%, -50%); /* This will center the arrow */
         color: white;
         border-radius: 50%;
         padding: 10px;
@@ -2743,8 +2762,8 @@ document.addEventListener("DOMContentLoaded", function () {
         white-space: nowrap;
         pointer-events: none; /* Prevent interference with user interaction */
     }
-    /*End Partha*/    
-    
+    /*End Partha*/
+
     .message-modal {
         display: none;
         position: absolute;
@@ -2757,7 +2776,7 @@ document.addEventListener("DOMContentLoaded", function () {
         background-color: rgba(0, 0, 0, 0.4); /* Black with opacity */
         padding-top: 60px;
     }
-    
+
     .message-modal .message-modal-content {
     position: relative;
     border-radius: 6px;
@@ -2769,21 +2788,21 @@ document.addEventListener("DOMContentLoaded", function () {
     /* margin-right: 34%; */
     max-width: 325px;
 }
-    
+
     .message-modal .close-btnn {
         color: #aaa;
         float: right;
         font-size: 28px;
         font-weight: bold;
     }
-    
+
     .message-modal .close-btnn:hover,
     .message-modal .close-btnn:focus {
         color: black;
         text-decoration: none;
         cursor: pointer;
     }
-    
+
 
     @media (max-width: 1200px) {
     .chat-container {
@@ -2829,7 +2848,7 @@ document.addEventListener("DOMContentLoaded", function () {
 }
 
 
-  
+
     @media (max-width: 768px) {
     .chat-container {
         margin-top: 2%;
@@ -2842,7 +2861,7 @@ document.addEventListener("DOMContentLoaded", function () {
     .center-bodycontent {
     display: contents;
 
-    }  
+    }
     #sendDataButton {
     margin-left: 412px;
     font-size: 20px;
@@ -2855,7 +2874,7 @@ document.addEventListener("DOMContentLoaded", function () {
     margin-top: 55%;
     width: 53%;
 }
-} 
+}
 
 
 @media (max-width: 620px){
@@ -2922,10 +2941,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 }
+.reaction-popup span{
+    margin:2px;
+    cursor:pointer;
+    font-size:10px;
+}
 
 
 
-    
 </style>
-{% endblock %} 
-add a action when i type "@" in the form 
+{% endblock %}
+add a action when i type "@" in the form

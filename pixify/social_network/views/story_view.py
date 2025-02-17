@@ -120,6 +120,7 @@ class UserActiveStories(View):
             user_stories = Post.objects.filter(posted_by_id=user_id,type=PostType.STATUS.value).order_by(
                 "created_at"
             )  # Get all stories of the user
+            print("user_stories",user_stories)
 
             all_stories[user_id] = [
                 {

@@ -16,8 +16,8 @@ class ShortListView(View):
             short.comments_count = short_service.format_count(comments)
             short.user_reacted = short_service.user_has_reacted(short, user)
         random.shuffle(shorts)  # Randomize the list
-        return render(request, 'enduser/short/index.html', {'shorts': shorts})          
-    
+        return render(request, 'enduser/short/index.html', {'shorts': shorts})
+
 
 class ShortReactionCreateView(View):
     def post(self, request, post_id):
@@ -26,7 +26,7 @@ class ShortReactionCreateView(View):
 
         reaction_count = short_service.short_reaction(post, user)
         reaction_count = short_service.format_count(reaction_count)
-        
+
         return JsonResponse({
             "success": True,
             "reaction_count": reaction_count,
@@ -50,7 +50,7 @@ class ShortReactionDeleteView(View):
 class ShortCommentListView(View):
     def get(self, request, post_id):
        user=request.user
-       comments = short_service.short_comments(post_id, user)       
+       comments = short_service.short_comments(post_id, user)
 
        return JsonResponse({"comments": list(comments)}, safe=False)
 
@@ -58,19 +58,19 @@ class ShortCommentCreateView(View):
     def post(self, request, post_id):
         user = request.user
         post = short_service.get_short(post_id)
-                
+
         data = json.loads(request.body)
-        text = data.get('text')  # Extract text from parsed JSON        
+        text = data.get('text')  # Extract text from parsed JSON
 
         # Create the comment (assume likes are set to 0 by default)
         comment = short_service.short_comment_create(text, post, user)
 
-        can_delete = comment.comment_by == user        
+        can_delete = comment.comment_by == user
 
         # Return the comment data in the response with like_count = 0 initially
         return JsonResponse({
             'success': True,
-            'comment': {                
+            'comment': {
                 'id': comment.id,
                 'comment': comment.comment,
                 'comment_by__first_name': comment.comment_by.first_name,
@@ -88,7 +88,7 @@ class ShortCommentReplyView(View):
         user = request.user
         data = json.loads(request.body)
         text = data.get('text')  # Extract text from parsed JSON
-        
+
         comment = short_service.get_short_comment(comment_id)
 
         # Create the reply (initial like_count is set to 0)
@@ -118,12 +118,12 @@ class ShortCommentDeleteView(View):
         user = request.user
         try:
             short_service.short_comment_delete(comment_id, user)
-            return JsonResponse({'success': True})       
+            return JsonResponse({'success': True})
         except Exception as e:
             return JsonResponse({'success': False, 'message': str(e)}, status=500)
 
- 
-        
+
+
 class ShortCommentReactionView(View):
     def post(self, request, comment_id):
         user = request.user
@@ -143,9 +143,9 @@ class ShortCommentReactionView(View):
 
 class ShortShareListViewApi(View):
     def get(self, request):
-        user = request.user 
+        user = request.user
         chats = chat_service.list_top_chats_api(request, user)
 
-        follow = follower_service.list_followers_api(request, user)                     
+        follow = follower_service.list_followers_api(request, user)
 
         return chats,follow

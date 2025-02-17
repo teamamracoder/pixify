@@ -8,7 +8,7 @@
         <div class="video-box {% if forloop.first %}active{% else %}hidden{% endif %}" id="videoBox{{ forloop.counter }}">
             <div class="reels-header">Shorts</div>
 
-            {% if video.media_url|length >= 1 %} 
+            {% if video.media_url|length >= 1 %}
             <video id="myVideo{{ forloop.counter }}" autoplay loop>
                 <source src="{% static video.media_url.0 %}" type="video/mp4">
                 <p>Your browser does not support the video tag.</p>
@@ -19,8 +19,8 @@
 
             <div class="video-info">
                 <div class="user-info">
-                    <img src="{{ video.posted_by.profile_photo_url|default:'/static/images/avatar.jpg' }}" 
-                         alt="{{ video.posted_by.first_name }}'s Profile Picture" 
+                    <img src="{{ video.posted_by.profile_photo_url|default:'/static/images/avatar.jpg' }}"
+                         alt="{{ video.posted_by.first_name }}'s Profile Picture"
                          class="short-profile-pic">
                     <div class="username">{{ video.posted_by.first_name }} {{ video.posted_by.last_name }} </div>
                 </div>
@@ -31,8 +31,8 @@
         <!-- Right-side icons -->
         <div class="right-icons">
             <div>
-                <i id="heartIcon{{ forloop.counter }}" 
-                   class="bi {% if video.user_reacted %}bi-heart-fill{% else %}bi-heart{% endif %}" 
+                <i id="heartIcon{{ forloop.counter }}"
+                   class="bi {% if video.user_reacted %}bi-heart-fill{% else %}bi-heart{% endif %}"
                    aria-label="Like"></i>
                 <div class="reaction-count">{{ video.reaction_count }}</div>
             </div>
@@ -78,7 +78,7 @@
                 <div class="short-modal-body">
                     <div id="shortCommentsList" class="short-comments-list">
                         <!-- Comments will be dynamically loaded here -->
-                    </div>                
+                    </div>
                 </div>
             </div>
         </div>
@@ -172,8 +172,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Handle reactions (like/dislike)
     const handleReaction = (iconElement, isDelete = false) => {
         const postId = iconElement.closest('.video-wrapper').dataset.postId;
-        const url = isDelete 
-            ? `/short/reaction/${postId}/delete` 
+        const url = isDelete
+            ? `/short/reaction/${postId}/delete`
             : `/short/${postId}/reaction/create`;
 
         fetch(url, {
@@ -589,14 +589,14 @@ function renderComment(comment, container, prepend = false, isReply = false, fla
     const likedClass = comment.user_liked ? 'liked' : '';
     const iconClass = comment.user_liked ? 'bi-heart-fill' : 'bi-heart';
 
-    commentItem.innerHTML = `        
+    commentItem.innerHTML = `
         <div class="short-comment-content">
             <div class="user-info">
                 <img src="${profilePhotoUrl}" alt="${firstName}'s Profile Picture">
                 <span class="short-username">${firstName} ${lastName}</span>
                 <span class="short-created-at">${createdAt}</span>
-            </div>                
-            <span class="short-comment-text">${comment.comment}</span>                
+            </div>
+            <span class="short-comment-text">${comment.comment}</span>
             <div class="short-comment-actions">
                 <button class="btn-like ${likedClass}" data-comment-id="${comment.id}">
                     <i class="bi ${iconClass}"></i>
@@ -930,8 +930,8 @@ document.querySelectorAll('.chat-icon').forEach(button => {
     height: 82vh !important;
     width: 95% !important;
   }
-  .right-icons {   
-    bottom: 65px !important; 
+  .right-icons {
+    bottom: 65px !important;
     right: 18px !important;
   }
   .short-modal {
@@ -953,8 +953,8 @@ document.querySelectorAll('.chat-icon').forEach(button => {
     height: 82vh !important;
     width: 95% !important;
   }
-  .right-icons {   
-    bottom: 65px !important; 
+  .right-icons {
+    bottom: 65px !important;
     right: 18px !important;
   }
   .navigation-buttons {
@@ -1038,13 +1038,13 @@ document.querySelectorAll('.chat-icon').forEach(button => {
 .short-comment-content .user-info {
     display: flex;
     align-items: center;
-    margin-bottom: 0;    
+    margin-bottom: 0;
 }
 
-    .close{        
+    .close{
         background-color: transparent; /* Background color */
         border: none; /* No border */
-        cursor: pointer; /* Pointer cursor on hover */        
+        cursor: pointer; /* Pointer cursor on hover */
         font-size: 35px; /* Font size */
         padding: 0; /* No padding */
         margin-right: 10px; /* No margin */
@@ -1064,11 +1064,11 @@ document.querySelectorAll('.chat-icon').forEach(button => {
         color:black;
     }
 
-    .show-replies-btn{        
+    .show-replies-btn{
         color: #fff; /* Text color */
         background-color: transparent; /* Background color */
         border: none; /* No border */
-        cursor: pointer; /* Pointer cursor on hover */        
+        cursor: pointer; /* Pointer cursor on hover */
         font-size: 14px; /* Font size */
         padding: 0; /* No padding */
         margin: 0; /* No margin */
@@ -1124,26 +1124,26 @@ document.querySelectorAll('.chat-icon').forEach(button => {
         margin-left: 25px;
         display:flex;
     }
-    
-    .btn-reply{            
-        margin-bottom: 8px;    
+
+    .btn-reply{
+        margin-bottom: 8px;
         font-size: 15px;
         padding-left: 10px;
         border: none;
         background: none;
-        color: #d8abff;           
+        color: #d8abff;
 
     }
     .btn-like{
         border: none;
         background: none;
-        color: red;    
+        color: red;
         font-size: 12px;
     }
 
     .short-reply-item {
         margin-left: 20px;
-        padding-left: 10px;        
+        padding-left: 10px;
         margin-top: 10px;
     }
 
@@ -1169,11 +1169,11 @@ document.querySelectorAll('.chat-icon').forEach(button => {
 
     /* Initial state of the modal, off-screen (bottom) */
 .short-modal {
-    display: none; 
+    display: none;
     position: absolute;
     bottom: -100%;
     right: 38%;
-    width: 100%;  
+    width: 100%;
     z-index: 9999;
     justify-content: flex-end;
     transition: bottom 0.3s ease-in-out; /* Smooth transition for sliding */
@@ -1183,7 +1183,7 @@ document.querySelectorAll('.chat-icon').forEach(button => {
     bottom: 12px; /* Move the modal to the visible area */
 }
 
-.short-modal-dialog {    
+.short-modal-dialog {
     width: 24%;
     margin: 0;
     transition: transform 0.3s ease-in-out;
@@ -1278,7 +1278,7 @@ document.querySelectorAll('.chat-icon').forEach(button => {
 }
 
 .short-com{
-    
+
 
 }
 
