@@ -1432,55 +1432,50 @@ function toggleReactionPopup(messageId) {
     const modal = document.getElementById("deleteModal");
 
     function openDeleteModal(messageId, senderId) {
-    // Assume currentUserId is defined (the logged-in user's ID)
-    const deleteForEveryoneContainer = document.getElementById('deleteForEveryone');
-    if (senderId === currentUserId) {
-        deleteForEveryoneContainer.style.display = 'block';
-    } else {
-        deleteForEveryoneContainer.style.display = 'none';
+        // Assume currentUserId is defined (the logged-in user's ID)
+        const deleteForEveryoneContainer = document.getElementById('deleteForEveryone');
+        if (senderId == currentUserId) {  // Consider using == or ensuring same types
+            deleteForEveryoneContainer.style.display = 'block';
+        } else {
+            deleteForEveryoneContainer.style.display = 'none';
+        }
+        // Store messageId and senderId in the modal
+        modal.setAttribute('data-message-id', messageId);
+        modal.setAttribute('data-sender-id', senderId);
+        
+        modal.style.display = 'block';
     }
-    // Store messageId in a global variable or in the modal for later use by deleteMessage()
-    // ...
-    modal.style.display = 'block';
-}
-
+    
 
     function closeModal() {
     modal.style.display = "none";
     }
 
     function deleteMessage(option) {
-    const messageId = modal.getAttribute('data-message-id');
-
-    if (messageId) {
-        if (option === 1) {
-        console.log("Delete for me: " + messageId);
-
-        socket.send(
-            JSON.stringify({
-            action: 'delete',
-            message_id: messageId,
-            sender_id: senderId,
-            del_type: 1,
-            })
-        );
-
-        } else if (option === 2) {
-        console.log("Delete for everyone: " + messageId);
-
-        socket.send(
-            JSON.stringify({
-            action: 'delete',
-            message_id: messageId,
-            sender_id: senderId,
-            del_type: 2,
-            })
-        );
-
+        const messageId = modal.getAttribute('data-message-id');
+        const senderId = modal.getAttribute('data-sender-id');
+        
+        if (messageId) {
+            if (option === 1) {
+                console.log("Delete for me: " + messageId);
+                socket.send(JSON.stringify({
+                    action: 'delete',
+                    message_id: messageId,
+                    sender_id: senderId,
+                    del_type: 1,
+                }));
+            } else if (option === 2) {
+                console.log("Delete for everyone: " + messageId);
+                socket.send(JSON.stringify({
+                    action: 'delete',
+                    message_id: messageId,
+                    sender_id: senderId,
+                    del_type: 2,
+                }));
+            }
+            closeModal();
         }
-        closeModal();
-    }
-    }
+    }    
 
     // Close modal when clicking outside it
     window.onclick = function (event) {
