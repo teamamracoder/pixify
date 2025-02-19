@@ -1440,9 +1440,7 @@ function toggleReactionPopup(messageId) {
             deleteForEveryoneContainer.style.display = 'none';
         }
         // Store messageId and senderId in the modal
-        modal.setAttribute('data-message-id', messageId);
-        modal.setAttribute('data-sender-id', senderId);
-        
+        modal.setAttribute('data-message-id', messageId);        
         modal.style.display = 'block';
     }
     
@@ -1453,15 +1451,13 @@ function toggleReactionPopup(messageId) {
 
     function deleteMessage(option) {
         const messageId = modal.getAttribute('data-message-id');
-        const senderId = modal.getAttribute('data-sender-id');
-        
         if (messageId) {
             if (option === 1) {
                 console.log("Delete for me: " + messageId);
                 socket.send(JSON.stringify({
                     action: 'delete',
                     message_id: messageId,
-                    sender_id: senderId,
+                    sender_id: currentUserId,
                     del_type: 1,
                 }));
             } else if (option === 2) {
@@ -1469,7 +1465,7 @@ function toggleReactionPopup(messageId) {
                 socket.send(JSON.stringify({
                     action: 'delete',
                     message_id: messageId,
-                    sender_id: senderId,
+                    sender_id: currentUserId,
                     del_type: 2,
                 }));
             }
