@@ -58,7 +58,7 @@
       </div>
 
      <div class=" text-info mb-4 fs-4">Profile Page</div>
-        <form method="post" id="admin_form">
+        <form method="post" id="admin_form" action="/admin/users/profile/{{ user.id }}/">
           {% csrf_token %}
           <!-- First Name and Last Name -->
           <div class="row">

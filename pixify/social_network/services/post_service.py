@@ -48,7 +48,7 @@ def manage_list_posts_filtered(search_query, sorting_order, sort_by, page_number
 
 
 def manage_list_likes_filtered(post_id):
-    return models.PostReaction.objects.filter(post_id=post_id).values_list('reacted_by_id', flat=True)
+    return PostReaction.objects.filter(post_id=post_id).values_list('reacted_by_id', flat=True)
 
 def manage__posts_user():
     return User.objects.all()
@@ -63,7 +63,7 @@ def get_post_user(post_likes):
 
 
 def manage_list_comments_filtered(post_id):
-    return models.Comment.objects.filter(post_id=post_id, reply_for__isnull=True, is_active=True)
+    return Comment.objects.filter(post_id=post_id, reply_for__isnull=True, is_active=True)
 
 
 
