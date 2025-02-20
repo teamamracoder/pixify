@@ -269,7 +269,7 @@
                         <div class="left-siteber-opt">
                             <ul class="left-siteber-opt-ul" style="padding-left: 0px;">
                                 <li class="pb-2 leftsitebarUserName"></li>
-                                <li class="pb-2"><a href="#"><i class="fa-solid fa-user-group me-2"></i>friends</a></li>
+                                <li class="pb-2"><a href="#"><i class="fa-solid fa-user-group me-2"></i>Followers</a></li>
                                 <li class="pb-2"><a href="#"><i class="fa-solid fa-clock me-2"></i>memories</a></li>
                                 <li class="pb-2"><a href="#"><i class="fa-solid fa-bookmark me-2"></i>save</a></li>
                                 <li class="pb-2"><a href="#"><i class="fa-solid fa-people-group me-2"></i>group</a></li>
@@ -308,11 +308,10 @@
                 <div class="px-3 py-3 mt-3" id="rightSidebarContainer">
                     <div class="pb-1 pt-1 rightSidebardivs">
                         <div class="d-flex">
-                            <a class="text-center text-white rightSidebardivName">Friend request</a>
-                            <a href="/friendrequest" class="text-center text-align-center ms-auto fw-semibold">See
-                                All</a>
+                            <a href="/friendrequest" class="text-center text-white rightSidebardivName">Follow Suggestion</a>
+                            <a href="/friendrequest" class="text-center text-align-center ms-auto fw-semibold">See All</a>
                         </div>
-                        <p class="ps-2">No request</p>
+                        <p class="ps-2">50+ Suggestion</p>
                     </div>
                     <div class="pb-1 pt-2 mt-3 rightSidebardivs">
                         <div class="d-flex">
@@ -321,13 +320,13 @@
                         </div>
                         <p class="ps-2">No Birthday</p>
                     </div>
-                    <div class="pb-1 pt-2 mt-3 rightSidebardivs">
+                    {% comment %} <div class="pb-1 pt-2 mt-3 rightSidebardivs">
                         <div class="d-flex">
                             <a class="text-center text-white rightSidebardivName">Contacts</a>
                             <a href="#" class="text-center text-align-center ms-auto fw-semibold">See All</a>
                         </div>
                         <p class="ps-2">No contacts</p>
-                    </div>
+                    </div> {% endcomment %}
                 </div>
             </div>
 
@@ -341,7 +340,6 @@
 </body>
 <script>
     $(document).ready(function () {
-
         function get_login_user_details() {
             $('.userImage').html = '';
             $('.userDropdownAnchor').html = '';
@@ -454,6 +452,7 @@
 
 </script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Rima For Firebase Push Notification -->
 <script>
     const firebaseConfig = {
         apiKey: "AIzaSyAGoApbXczwcRy8eRbQP7qTeJ907YRa5NA",
@@ -491,7 +490,7 @@
     // ✅ Get FCM Token
     function getFCMToken() {
         messaging.getToken({
-            vapidKey: 'BMr9yTAm799qHxIT8pLrtKvlpnthDm1kcNYERv75TMgXb3SKcEl6LK5vkGcn2tuiHM1fSBHXEc34jedewNFzJoc'
+            vapidKey: 'BMr9yTAm799qHxIT8pLrtKvlpnthDm1kcNYERv75TMgXb3SKcEl6LK5vkGcn2tuiHM1fSBHXEc34jedewNFzJoc' //get from Firebase-->Pixify--> Cloud Messaging-->Key pair
         }).then((currentToken) => {
             if (currentToken) {
                 //console.log("FCM Token:", currentToken);
