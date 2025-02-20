@@ -1,5 +1,4 @@
 
-
 {% extends "enduser/base.html" %}
 
 {% block title %}Pixify-Message{% endblock %}
@@ -7,15 +6,9 @@
 {% block content %}
 
 {% load static %}
+{% csrf_token %}
 <div class="px-3 py-3 mt-3" style="background-color: #1f0447e3; box-shadow: 0 4px 8px rgba(151, 95, 236, 0.5);font-family: serif;border-radius: 7px;" >
-
-
-
-
     <div class="card mb-sm-3 mb-md-0 contacts_card" style="background-color: #1f0447e3; ">
-
-
-
         <div class="p-2 card-header">
             <div class="input-group px-5">
                 <input type="text" placeholder="Search..." name="" class="form-control search-inp" >
@@ -24,65 +17,144 @@
                 </div>
             </div>
     </div>
-
-    <div class="card-body contacts_body " >
-
-            <ul class="request">
-                <li>
-                    <div class="d-flex bd-highlight">
-                        <div class="img_cont">
-                            <img src="{% static 'images/logo1.jpg' %}" class="rounded-circle user_img" style="border: none;" >
-                            <span class="online_icon"></span>
-                        </div>
-                        <div class="user_info">
-                            <span>Priya Mitra</span>
-                            <p>Priya is online</p>
-                            <div id="req-btn">
-                            {% comment %} <button type="button" class="btn bg-info">Confirm</button>
-                            <button type="button" class="btn btn-secondary">Delete</button> {% endcomment %}
-                            <div class="col-auto col-sm-auto d-flex" style="gap:10px">
-                                <button type="button" class="prof-btn btn btn-primary px-4" style="font-size:14px ;">Confirm</button>
-                                <button type="button" class="btn btn-primary prof-btn px-4" style="font-size:14px;">Delete</button>
-                            </div>
-                           </div>
-                        </div>
-                    </div>
-                </li>
-                <li>
-                    <div class="d-flex bd-highlight">
-                        <div class="img_cont">
-                            <img src="{% static 'images/logo1.jpg' %}" class="rounded-circle user_img"style="border: none;" >
-                            <span class="online_icon"></span>
-                        </div>
-                        <div class="user_info">
-                            <span>Subhasis Barman</span>
-                            <p>Priya is online</p>
-                            <div id="req-btn">
-                            {% comment %} <button type="button" class="btn bg-info">Confirm</button>
-                            <button type="button" class="btn btn-secondary">Delete</button> {% endcomment %}
-                            <div class="col-auto col-sm-auto d-flex" style="gap:10px">
-                                <button type="button" class="prof-btn btn btn-primary px-4" style="font-size:14px ;">Confirm</button>
-                                <button type="button" class="btn btn-primary prof-btn px-4" style="font-size:14px;">Delete</button>
-                            </div>
-                           </div>
-                        </div>
-                    </div>
-                </li>
-
-
-
-
-
-            </ul>
-
-       </div>
-
-
-   </div>
-
-
 </div>
+<form method="post">{% csrf_token %}</form>
 
+<div class="fcontainer">
+    <div class="user-list" id="usersList">
+        {% comment %} <div class="user-card">
+            <img src="https://cdn-icons-png.flaticon.com/128/201/201634.png" alt="User">
+            <div class="user-info">
+                <h4>Rima Das</h4>
+                <p>Followed by priya</p>
+            </div>
+            <button class="follow-btn" id="followUser">Follow</button>
+        </div>
+        <div class="user-card">
+            <img src=https://cdn-icons-png.flaticon.com/128/3284/3284735.png alt="User">
+            <div class="user-info">
+                <h4>Subhasis Barman</h4>
+                <p>Followed by rima and + 33 more</p>
+            </div>
+            <button class="follow-btn">Follow</button>
+        </div> {% endcomment %}
+
+    </div>
+</div>
+</div>
+{% comment %} <script>document.addEventListener("DOMContentLoaded", () => {
+    const followButtons = document.querySelectorAll(".follow-btn");
+
+    followButtons.forEach(button => {
+        button.addEventListener("click", () => {
+            window.open("followed.html", "_blank");
+        });
+    });
+});
+</script> {% endcomment %}
+
+<script>
+    $(document).ready(function () {
+        get_recommendedUsers();
+
+    });
+    //To get all Users List of Friend Request Page
+    function get_recommendedUsers() {
+        $.ajax({
+            url: "{% url 'allRecommendedUsers' %}",
+            type: "GET",
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            success: function (data) {
+               console.log(data);
+               let usersList = $("#usersList");
+                usersList.empty();
+
+                data.forEach(user => {
+                    //for default profile photo
+                    let profilePhoto = user.profile_photo_url ? user.profile_photo_url : "/images/avatar.jpg";
+                    let followersText = user.followers_text || "No followers yet";
+                    //append user card for users one by one
+                    usersList.append(`
+                        <div class="user-card" data-user-id="${user.id}">
+                            <img src="/static${profilePhoto}" alt="User">
+                            <div class="user-info">
+                                <h4 id="userName">${user.first_name} ${user.middle_name ? user.middle_name + " " : ""}${user.last_name}</h4>
+                                <p>${followersText}</p>
+                            </div>
+                            <button class="follow-btn" id="followUser">Follow</button>
+                        </div>
+                    `);
+                });
+                //After clicking Follow Button call followUser Function to  To Insert Follower table and add Following
+                $(".follow-btn").on("click", function () {
+                    let following_id = $(this).closest(".user-card").data("user-id");
+                    followUser(following_id, $(this));
+
+                    msgTitle="New Follower";
+                    // curreentUserName Declare in End User base.html
+                        //if(curreentUserName){
+                        //    msgBody=curreentUserName + "Started to Follow You !! ";
+                        //}else{
+                        //    msgBody="Started to Follow You !! ";
+                        //}
+                    msgBody="Started to Follow You !! ";
+                    //call Firebase Push Notification
+                    send_notification_to_following_user(following_id,msgTitle,msgBody)
+                });
+            }
+        });
+    }
+
+//After Click Follow Button To Insert Follower table and add Following
+    function followUser(following_id, buttonElement) {
+        $.ajax({
+            url: "{% url 'followUser' %}",
+            type: "POST",
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': getCSRFToken() // CSRF protection
+            },
+            data: { following_id: following_id },
+            success: function (response) {
+               // console.log(response);
+                buttonElement.text("Following").prop("disabled", true);
+            },
+            error: function (xhr, status, error) {
+                console.error("Error following user:", error);
+            }
+        });
+    }
+   //to get CSRF Token
+    function getCSRFToken() {
+        return document.querySelector('[name=csrfmiddlewaretoken]').value;
+    }
+//For Send Notification to following User Using Firebase Push Notification
+    function send_notification_to_following_user(following_id,msgTitle,msgBody) {
+        var data = {
+            user_id: following_id,
+            title: msgTitle,
+            body: msgBody
+        };
+
+        $.ajax({
+            url: '{% url "send_notification" %}',
+            type: 'POST',
+            data: JSON.stringify(data),
+            contentType: 'application/json',
+            success: function(response) {
+                if (response.success) {
+                    console.log("Notification sent successfully. ");
+                } else {
+                    console.error("Error sending notification:", response.error);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error("AJAX request failed:", error);
+            }
+        });
+    }
+
+</script>
 
 
 

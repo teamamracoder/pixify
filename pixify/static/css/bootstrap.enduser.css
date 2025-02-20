@@ -9508,7 +9508,7 @@ fieldset:disabled .btn {
 
 .text-light {
   --bs-text-opacity: 1;
-  color: rgba(var(--bs-light-rgb), var(--bs-text-opacity)) !important;
+  color: rgb(255 255 255) !important;
 }
 
 .text-dark {
@@ -9812,8 +9812,8 @@ fieldset:disabled .btn {
 
 .bg-light {
   --bs-bg-opacity: 1;
-  background-color: rgba(var(--bs-light-rgb), var(--bs-bg-opacity)) !important;
-}
+  background-color: rgb(255 255 255) !important;
+} 
 
 .bg-dark {
   --bs-bg-opacity: 1;
@@ -13961,9 +13961,9 @@ h6,
   text-shadow: 0 0 1px rgba(228, 76, 85, 0.3), 0 0 2px rgba(228, 76, 85, 0.3), 0 0 5px rgba(228, 76, 85, 0.2);
 }
 
-.text-light {
+ .text-light {
   text-shadow: 0 0 1px rgba(68, 217, 232, 0.3), 0 0 2px rgba(68, 217, 232, 0.3), 0 0 5px rgba(68, 217, 232, 0.2);
-}
+} 
 
 .text-dark {
   text-shadow: 0 0 1px rgba(23, 2, 41, 0.3), 0 0 2px rgba(23, 2, 41, 0.3), 0 0 5px rgba(23, 2, 41, 0.2);
@@ -14474,3 +14474,4 @@ legend {
 .card .h6 {
   text-shadow: 0 0 1px rgba(255, 255, 255, 0.6), 0 0 3px rgba(255, 255, 255, 0.5), 0 0 0.5rem rgba(255, 255, 255, 0.3), 0 0 2rem rgba(255, 255, 255, 0.2);
 }
+
