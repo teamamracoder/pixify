@@ -95,6 +95,8 @@ urlpatterns = [
 
 
     path('friendrequest/', views.FriendRequestView.as_view(), name='friendrequest'),
+    path('allRecommendedUsers/', views.AllRecommendedUsersView.as_view(), name='allRecommendedUsers'),
+    path('follow-user/', views.FollowUserView.as_view(), name="followUser"),
 
     path('friends/', views.FriendsView.as_view(), name='friends'),
 

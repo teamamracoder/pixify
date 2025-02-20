@@ -840,7 +840,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
 socket.onmessage = function (event) {
-  console.log('Message received from WebSocket:', event.data);
+  //console.log('Message received from WebSocket:', event.data);
   const data = JSON.parse(event.data);
 
   // Update read status
@@ -1428,8 +1428,8 @@ function toggleReactionPopup(messageId) {
 }
 
 
-    // Get the modal
-    const modal = document.getElementById("deleteModal");
+ // Get the modal
+ const modal = document.getElementById("deleteModal");
 
     function openDeleteModal(messageId, senderId) {
         // Assume currentUserId is defined (the logged-in user's ID)
@@ -1439,15 +1439,15 @@ function toggleReactionPopup(messageId) {
         } else {
             deleteForEveryoneContainer.style.display = 'none';
         }
-        // Store messageId and senderId in the modal
-        modal.setAttribute('data-message-id', messageId);        
+        // Store messageId in the modal
+        modal.setAttribute('data-message-id', messageId);
         modal.style.display = 'block';
     }
     
 
-    function closeModal() {
-    modal.style.display = "none";
-    }
+ function closeModal() {
+ modal.style.display = "none";
+ }
 
     function deleteMessage(option) {
         const messageId = modal.getAttribute('data-message-id');
@@ -1473,12 +1473,14 @@ function toggleReactionPopup(messageId) {
         }
     }    
 
-    // Close modal when clicking outside it
-    window.onclick = function (event) {
-    if (event.target === modal) {
-        closeModal();
-    }
-    };
+ // Close modal when clicking outside it
+ window.onclick = function (event) {
+ if (event.target === modal) {
+     closeModal();
+ }
+ };
+
+
 
     // Function to generate the reaction popup content
 function generateReactionPopupContent(reactions, messageId) {
