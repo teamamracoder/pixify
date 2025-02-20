@@ -27,41 +27,14 @@ def FirebaseMessagingSwFile(request):
         return HttpResponse("File not found", status=404)
 
 
-# def Firebasenotify (request):
-#     # Replace this with the actual token that you've retrieved from the frontend
-#     token = 'ezXkUn5eFVk-i4aRmL92Ij:APA91bEgcLOLnaW_FpSOdwu2dqfPEtEb9akpKEvHHGBmR8fkHvew4Ji6l4YZ0jM_hNZpuY22KJbNtkkCIRKJwWvit4lqRR1rrSVBo5zlXO15p5co-n2SG_8'
-#     # Create a message
-#     message = messaging.Message(
-#         notification=messaging.Notification(
-#             title='New Notification',
-#             body=' Rima You have new notification',
-#         ),
-#         token=token
-#         user =request.user
-#         user.fcm_token=token
-#         user.save()
-#     )
-
-#     try:
-#         # Send the message
-#         response = messaging.send(message)
-#         print('Successfully sent message:', response)
-
-#         return JsonResponse({'status': 'success', 'message': 'Notification sent successfully.'})
-
-#     except Exception as e:
-#         print('Error sending message:', e)
-#         return JsonResponse({'status': 'error', 'message': str(e)})
-
-
 def Firebasenotify(request):
     # Replace this with the actual token retrieved from the frontend
-    token = 'ezXkUn5eFVk-i4aRmL92Ij:APA91bEgcLOLnaW_FpSOdwu2dqfPEtEb9akpKEvHHGBmR8fkHvew4Ji6l4YZ0jM_hNZpuY22KJbNtkkCIRKJwWvit4lqRR1rrSVBo5zlXO15p5co-n2SG_8'
-    user_id=request.user.id
+    token = 'f3bmH8QRpmj3551wYsiG49:APA91bHPGxJEnfim2GHGT7tEeiqBxxPDo62Y1egqS9DPLOlSgCQZg7SY-hb0g854dkg5TI_vPmiHQT9-JrwPfUyhk83Uhv_B3Zesto1QIBmi_85UZmzgJdE'
+    # user_id=request.user.id
     # Get the user from the request
-    user = request.user  # Ensure request.user is available
-    user.fcm_token = token  # Save the token to the user model
-    user.save()
+    # user = request.user
+    # user.fcm_token = token
+    # user.save()
 
     # Create a notification message
     message = messaging.Message(
@@ -74,7 +47,7 @@ def Firebasenotify(request):
         token=token  # Missing comma issue is fixed
     )
     print( message.notification.title,  message.notification.body)
-    notifications=services.user_Notification_service.create_notification( message.notification.title,user_id)
+    #notifications=services.user_Notification_service.create_notification( message.notification.title,user_id)
 
     try:
         # Send the message
@@ -101,7 +74,6 @@ def save_fcm_token(request):
         try:
             data = json.loads(request.body)
             user_id = request.user.id
-            user_id=6
             fcm_token = data.get("fcm_token")
 
             if not user_id or not fcm_token:
@@ -121,41 +93,44 @@ def save_fcm_token(request):
 
 from firebase_admin import messaging
 
+
+
+
+@csrf_exempt
 def send_notification(request):
     if request.method == "POST":
-        data = json.loads(request.body)
-        user_id = data.get("user_id")
-        title = data.get("title")
-        body = data.get("body")
-
-        if not user_id or not title or not body:
-            return JsonResponse({"status": "error", "message": "Missing parameters"})
-
-        #  Retrieve FCM token from database
-        token=services.user_service.getFCMtoken(user_id)
-        # try:
-        #     user_fcm = User.objects.get(user_id=user_id)
-        #     token = user_fcm.fcm_token
-        # except User.DoesNotExist:
-        #     return JsonResponse({"status": "error", "message": "User not found or FCM token missing"})
-
-        #  Create FCM message
-        message = messaging.Message(
-            notification=messaging.Notification(
-                title=title,
-                body=body,
-            ),
-            token=token,
-        )
-
         try:
-            # ✅ Send the message via Firebase
-            response = messaging.send(message)
-            return JsonResponse({"status": "success", "message": "Notification sent successfully", "response": response})
+            # Get data from the request (You can also use data from request.POST if not using JSON)
+            data = json.loads(request.body)
+
+            user_id = data.get("user_id")
+            title = data.get("title")
+            body = data.get("body")
+
+            # Fetch token dynamically
+            token = services.user_service.getFCMtoken(user_id)
+
+            if not token:
+                return JsonResponse({"success": False, "error": "FCM token not found"})
+
+            # Create message
+            message = messaging.Message(
+                notification=messaging.Notification(title=title, body=body),
+                token=token
+            )
+
+            # Send message
+            try:
+                response = messaging.send(message)
+                 #For add Notification table
+                following_id=user_id
+                current_user_id=request.user.id
+                services.user_Notification_service.createNotification(body,current_user_id,following_id)
+                return JsonResponse({"success": True, "message_id": response})
+            except Exception as e:
+                return JsonResponse({"success": False, "error": str(e)})
+
         except Exception as e:
-            return JsonResponse({"status": "error", "message": str(e)})
+            return JsonResponse({"success": False, "error": "Invalid data"})
 
-    return JsonResponse({"status": "error", "message": "Invalid request"})
-
-
-
+    return JsonResponse({"success": False, "error": "Invalid request method"})

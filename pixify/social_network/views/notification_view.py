@@ -1,11 +1,19 @@
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.views import View
+
+from social_network.constants.default_values import Role
+from social_network.decorators.auth_decorators import auth_required, role_required
+from social_network.decorators.exception_decorators import catch_error
 from .. import services
 
 class NotificationView(View):
+    @catch_error
+    @auth_required
+    @role_required(Role.ADMIN.value, Role.END_USER.value)
     def get(self, request):
-        notifications_fetch = services.user_Notification_service.count_notification()
+        user_id=request.user.id
+        notifications_fetch = services.user_Notification_service.count_notification(user_id)
         notification_list = list(notifications_fetch.values())
 
         # Sort notifications by created_at in descending order (newest first)
