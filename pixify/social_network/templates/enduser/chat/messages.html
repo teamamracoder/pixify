@@ -122,6 +122,16 @@
         {% endfor %}
         {% endfor %}
     </div>
+            <!-- Delete Modal -->
+            <div id="deleteModal" class="parmess-del-modal">
+                <div class="parmess-del-modal-content">
+                    <div class="parmess-del-close" onclick="closeModal()"><i class="bi bi-x-circle"></i></div>
+                    <div style="margin-right: 20px;">Are you sure you want to delete this message?</div>
+                    <div class="parmess-del-options">
+                        <!-- comming option from js-->
+                    </div>
+                </div>
+            </div>
     <div id="mentionModal" class="parmess-modal">
         <div class="parmess-modal-content" id="mention-suggestions"></div>
     </div>
@@ -146,19 +156,6 @@
                 <span class="close-reply" onclick="cancelReply()">✖</span>
                 <span class="reply-username"></span><span style="color:black">:</span>
                 <span class="reply-text"></span>
-            </div>
-        </div>
-
-        <!-- Delete Modal -->
-        <div id="deleteModal" class="parmess-del-modal">
-            <div class="parmess-del-modal-content">
-                <span class="parmess-del-close" onclick="closeModal()"><i class="bi bi-x-circle"></i></span>
-                <p style="margin-right: 20px;">Are you sure you want to delete this message?</p>
-                <ul class="parmess-del-options">
-                    <li><button id="deleteForMe" onclick="deleteMessage(1)">Delete for Me</button></li>
-                    <li><button id="deleteForEveryone" onclick="deleteMessage(2)">Delete for Everyone</button></li>
-                    <li><button id="cancelDelete" onclick="closeModal()">Cancel</button></li>
-                </ul>
             </div>
         </div>
 
@@ -1429,21 +1426,36 @@ function toggleReactionPopup(messageId) {
 
 
  // Get the modal
- const modal = document.getElementById("deleteModal");
+const modal = document.getElementById("deleteModal");
 
-    function openDeleteModal(messageId, senderId) {
-        // Assume currentUserId is defined (the logged-in user's ID)
-        const deleteForEveryoneContainer = document.getElementById('deleteForEveryone');
-        if (senderId == currentUserId) {  // Consider using == or ensuring same types
-            deleteForEveryoneContainer.style.display = 'block';
-        } else {
-            deleteForEveryoneContainer.style.display = 'none';
-        }
-        // Store messageId in the modal
-        modal.setAttribute('data-message-id', messageId);
-        modal.style.display = 'block';
+function openDeleteModal(messageId, senderId) {
+    const deleteOptions = document.querySelector('.parmess-del-options');
+
+    // Clear existing options
+    deleteOptions.innerHTML = '';
+
+    // Add "Delete for Me" option
+    const deleteForMe = document.createElement('div');
+    deleteForMe.innerHTML = `<button onclick="deleteMessage(1)">Delete for Me</button>`;
+    deleteOptions.appendChild(deleteForMe);
+
+    // Add "Delete for Everyone" only if the sender is the current user
+    if (senderId == currentUserId) {  
+        const deleteForEveryone = document.createElement('div');
+        deleteForEveryone.innerHTML = `<button onclick="deleteMessage(2)">Delete for Everyone</button>`;
+        deleteOptions.appendChild(deleteForEveryone);
     }
-    
+
+    // Add "Cancel" button
+    const cancelOption = document.createElement('div');
+    cancelOption.innerHTML = `<button onclick="closeModal()">Cancel</button>`;
+    deleteOptions.appendChild(cancelOption);
+
+    // Store messageId in the modal
+    modal.setAttribute('data-message-id', messageId);
+    modal.style.display = 'block';
+}
+
 
  function closeModal() {
  modal.style.display = "none";
@@ -2100,27 +2112,20 @@ document.addEventListener("DOMContentLoaded", function () {
 
 /* The Modal (background) */
 .parmess-del-modal {
-  display: none;
-  position: absolute;
-  z-index: 1;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  overflow: auto;
-  background-color: rgba(0,0,0,0.4);
+    top: 40%;
+    left: 57%;
+    transform: translate(-50%, -50%);
+    display: none;
+    position: absolute;
+    width: 35%;
 }
 
 /* Modal Content */
 .parmess-del-modal-content {
     position: absolute;
     background-color: #1A0933;
-    margin-left: 38%;
-    margin-top: 20%;
     padding: 20px;
-    /* border: 1px solid #888; */
-    width: 25%;
-    max-width: 400px;
+    width: 50%;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
     border-radius: 10px;
 }
@@ -2129,7 +2134,7 @@ document.addEventListener("DOMContentLoaded", function () {
 .parmess-del-close {
   color: #aaa;
   float: right;
-  font-size: 28px;
+  font-size: 16px;
   font-weight: bold;
 }
 
@@ -2147,14 +2152,11 @@ document.addEventListener("DOMContentLoaded", function () {
   margin: 20px 0 0 0;
 }
 
-.parmess-del-options li {
-  margin: 10px 0;
-}
-
 .parmess-del-options button {
+margin:6px;
   color:red;
+  height:30px;
   width: 100%;
-  /* padding: 10px; */
   border: none;
   border-radius: 5px;
   cursor: pointer;
@@ -2824,7 +2826,9 @@ document.addEventListener("DOMContentLoaded", function () {
     .chat-container {
         max-width: 100%;
     }
-
+    .parmess-del-modal{
+        width: 40%;
+    }
     .username {
         width:100%;
         font-size: 1.3rem;
@@ -2869,17 +2873,20 @@ document.addEventListener("DOMContentLoaded", function () {
         width: 50%;
         bottom: 6.5%;
     }
+    .parmess-del-modal{
+        width: 70%;
+    }
+    .parmess-del-options button{
+        margin: 5px;
+        height: 30px;
+        font-size: 14px;
+    }
     #sendDataButton {
     font-size: 20px;
-}
-.message-modal .message-modal-content{
-    margin-top: 50%;
-}
-.parmess-del-modal-content {
-    margin-left: 22%;
-    margin-top: 55%;
-    width: 53%;
-}
+    }
+    .message-modal .message-modal-content{
+        margin-top: 50%;
+    }
 }
 
 
@@ -2912,7 +2919,9 @@ document.addEventListener("DOMContentLoaded", function () {
         width: 30px;
         height: 30px;
     }
+    .parmess-del-options{
 
+    }
     .username {
         font-size: 1rem;
     }
@@ -2940,11 +2949,9 @@ document.addEventListener("DOMContentLoaded", function () {
     ;
         align-items: center;
     }
-    .parmess-del-modal-content {
-            margin-left: 24%;
-            margin-top: 88%;
-            width: 53%;
-        }
+    .parmess-del-options button{
+        font-size:10px;
+    }
     .message-modal .message-modal-content{
         margin-top: 80%;
     }
@@ -2956,6 +2963,9 @@ document.addEventListener("DOMContentLoaded", function () {
     margin:2px;
     cursor:pointer;
     font-size:10px;
+}
+.del-opt-msg{
+    margin:10px;
 }
 
 
