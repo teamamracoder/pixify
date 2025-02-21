@@ -162,12 +162,12 @@
         </div>
 
         <!-- Edit Preview -->
-        <div id="edit-preview" style="display: none;">
+        <div id="edit-preview" style="display:none;">
             <div class="edit-message-bar">
                 <span style="color:black; font-weight: bold;">Edit message:</span>
                 <span class="edit-text"style="color:black;"></span>
-                <div class="cancel-edit" style="color:red; margin-left: 135px;" onclick="cancelEdit()">✖</div>
             </div>
+            <div class="cancel-edit" style="color:red;margin-left:10px;" onclick="cancelEdit()">✖</div>
         </div>
 
         <!-- Message Input Form -->
@@ -1234,7 +1234,7 @@ function updateMessageInChat(updatedMessage, messageId, messageTime, senderName,
 
         // Display the "edit-preview" section
         const editPreview = document.getElementById("edit-preview");
-        editPreview.style.display = "block";
+        editPreview.style.display = "flex";
         editPreview.querySelector(".edit-text").textContent = messageTextElement.textContent;
 
         // Store the message ID being edited
@@ -1291,7 +1291,7 @@ function updateMessageInChat(updatedMessage, messageId, messageTime, senderName,
     // Reply message
     function replyMessage(messageId, senderName) {
         // If edit mode is active, cancel it
-        if (document.getElementById('edit-preview').style.display === 'block') {
+        if (document.getElementById('edit-preview').style.display === 'flex') {
             cancelEdit();
         }
         // Also cancel any existing reply
@@ -2181,15 +2181,7 @@ document.addEventListener("DOMContentLoaded", function () {
         .edit-preview {
         display: none;
     }
-    
-    .edit-preview .edit-message-bar {
-        background-color:#533b79;
-        padding: 10px;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-        margin-bottom: 10px;
-    }
-    
+        
     .edit-preview .message-input {
         display: flex;
         align-items: center;
@@ -2968,10 +2960,26 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     .reply-container{
         border-radius: 10px;
-        background: #0fff74cc;
+        background:#4dbbea;
         font-size: 13px;
         padding: 9px;
         display: flex;
+    }
+    .edit-message-bar{
+        width: 90%;
+        border-radius: 10px;
+        background:#4dbbea;
+        font-size: 13px;
+        padding: 9px;
+        display: flex;
+    }
+    .edit-text{
+        width:60%;
+        color:black;
+        display: block;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
     
     </style>
