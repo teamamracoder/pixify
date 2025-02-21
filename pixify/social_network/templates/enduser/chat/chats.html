@@ -75,13 +75,13 @@
 
             <!-- Middle Section -->
             <div class="content-div">
-                <p class="chat-title">
+                <p class="chat-title" style="font-size:20px;">
                     <a href="{% url 'message' chat_id=chat.id %}" id="hyperlink-text" class="chat_title">
                         {{ chat.title }}
                     </a>
                 </p>
-                <div style="display:flex">
-                    <span class="chat-message">
+                <div style="display:flex; height:20px;font-size:15px;">
+                    <span class="chat-lts-message">
                        {% if chat.latest_message_sender_id == user.id and chat.latest_message_time >= chat.latest_reaction_time %}
                         {% if chat.is_group %}
 
@@ -115,12 +115,12 @@
                     <span>
                     {% if chat.latest_message %}
                         {% if chat.latest_reaction_time == '' or chat.latest_message_time >= chat.latest_reaction_time %}
-                            <p class="chat-message chat_title">{{ chat.latest_message }}</p>
+                            <p class="chat-lts-message">{{ chat.latest_message }}</p>
                         {% else %}
-                            <p class="chat-message chat_title"> Reacted {{ chat.latest_reaction|safe }} on "{{ chat.latest_message }}"</p>
+                            <p class="chat-lts-message"> Reacted {{ chat.latest_reaction|safe }} on "{{ chat.latest_message }}"</p>
                         {% endif %}
                     {% else %}
-                        <p class="chat-message chat_title">No messages yet</p>
+                        <p class="chat-lts-message">No messages yet</p>
                     {% endif %}
 
                     </span>
@@ -139,7 +139,7 @@
 {% endfor %}
 {% else %}
 <hr>
-<p class="chat-message chat_title">No chats available yet</p>
+<p class="chat-lts-message">No chats available yet</p>
 {% endif %}
 
 <!-- Auto-Reload Logic -->
@@ -688,19 +688,11 @@ function fetchFollowersAndFollowings(searchQuery = '') {
 /* Title and Message Styling */
 .chat-title {
     margin: 0;
-    color: #000;
-    overflow: hidden;
-    width:100%;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    color: gray;
 }
 
-.chat-message {
-    margin: 0;
-    font-size: 0.9em;
-    color: gray;
-    overflow: hidden;
-    text-overflow: ellipsis;
+.chat-lts-message {
+    color: #aca5a7d6;
 }
 
 /* Right-aligned Section (Fixed) */
@@ -742,8 +734,7 @@ function fetchFollowersAndFollowings(searchQuery = '') {
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-
-        font-size: 17px;
+        font-size: 20px;
     }
 }
 
