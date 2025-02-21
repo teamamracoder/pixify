@@ -52,7 +52,7 @@
                 {% if message.reply_for_message_id %}
                 <div class="parent-message">
                     <span>{{ message.reply_for_message_id.sender_id.first_name }}: </span>
-                    <div style="font-size:10px;display: block;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;width: 50px;">
+                    <div class="reply-message-text">
                         {{ message.reply_for_message_id.text }}
                     </div>
                     {% if message.reply_for_message_id.media_url %}
@@ -154,8 +154,10 @@
         <div id="reply-preview" style="display: none;">
             <div class="reply-message">
                 <span class="close-reply" onclick="cancelReply()">✖</span>
-                <span class="reply-username"></span><span style="color:black">:</span>
-                <span class="reply-text"></span>
+                <div class="reply-container">
+                    <span class="reply-username"></span><span style="color:black">:</span>
+                    <span class="reply-text"></span>
+                </div>
             </div>
         </div>
 
@@ -1023,7 +1025,7 @@ function appendMessageToChat(message, messageId, messageTime, senderId, senderNa
         parentMessageHtml = `
             <div class="parent-message">
                 <span>${reply_username} </span>
-                <div>${replyText}</div>
+                <div class="reply-message-text">${replyText}</div>
                 ${reply.media_url ? `<span>${reply.media_url}</span>` : ""}
             </div>
         `;
@@ -2644,7 +2646,12 @@ document.addEventListener("DOMContentLoaded", function () {
             font-weight:bold;
         }
         .reply-text{
+            width:80%;
             color:black;
+            display: block;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
     
         .close-reply{
@@ -2945,7 +2952,21 @@ document.addEventListener("DOMContentLoaded", function () {
         margin:10px;
     }
     
-    
+    .reply-message-text{
+        font-size:10px;
+        display: block;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        width: 50px;
+    }
+    .reply-container{
+        border-radius: 10px;
+        background: #0fff74cc;
+        font-size: 13px;
+        padding: 9px;
+        display: flex;
+    }
     
     </style>
     {% endblock %}
