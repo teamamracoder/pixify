@@ -39,7 +39,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         call_id = text_data_json.get('call_id')
         caller_id= text_data_json.get('caller_id')
 
-        # print(f"The Received Data: {text_data_json}")
+        print(f"The Received Data: {text_data_json}")
 
         if action == 'create':
             await self.create_message(text_data_json, user)

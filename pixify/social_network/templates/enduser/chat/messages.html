@@ -184,7 +184,7 @@
                 <button type="button" id="parmess-button" class="parmess-button">
                     <i class="fa fa-paperclip"></i>
                 </button>
-                <input type="text" name="message" id="message-input" placeholder="Type your message here...">
+                <input type="text" name="message" id="message-input" maxlength="200" placeholder="Type your message here...">
                 <button class="parmess-button" type="submit">➤</button>
             </div>
         </form>
@@ -633,46 +633,48 @@ $(document).ready(function () {
             console.error('Element with id "chat-body" not found');
             return;
         }
-
+    
         // Remove any existing Unread Messages tag to avoid duplicates.
-        const existingTag = chatBody.querySelector('.message-timestamp');
+        const existingTag = chatBody.querySelector('.unread-messages-tag');
         if (existingTag) {
             existingTag.remove();
         }
-
-        // Select unread messages:
-        // Unread messages are assumed to be those with the 'received' class and without the 'read' class.
+    
+        // Select unread messages: messages with the 'received' class that do not have the 'read' class.
         const unreadMessages = chatBody.querySelectorAll('.message.received:not(.read)');
-
+    
         if (unreadMessages.length === 0) {
+            console.log("No unread messages found. Tag will not be displayed.");
             return;
         }
-
+    
         // Get the first unread message.
         const firstUnreadMessage = unreadMessages[0];
-
+    
         // Create the tag element.
         const tagElement = document.createElement('div');
-        tagElement.className = 'message-timestamp';
+        tagElement.className = 'unread-messages-tag';
         tagElement.innerText = 'Unread Messages';
-
+    
         // Insert the tag before the first unread message.
         firstUnreadMessage.parentNode.insertBefore(tagElement, firstUnreadMessage);
-
-        // After 3 seconds, add the hidden class to fade out the tag.
+    
+        // Ensure the tag is visible by scrolling it into view.
+        tagElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    
+        // After 3 seconds, fade out and remove the tag.
         setTimeout(() => {
             tagElement.classList.add('hidden');
-            // Optionally remove the element from the DOM after the fade-out transition (500ms).
             setTimeout(() => {
-            tagElement.remove();
-            }, 500);
+                tagElement.remove();
+            }, 500); // matches the CSS transition duration
         }, 3000);
-        }
-
-        // Call the function when the DOM content is loaded.
-        document.addEventListener('DOMContentLoaded', () => {
+    }
+    
+    document.addEventListener('DOMContentLoaded', () => {
         insertUnreadMessagesTag();
     });
+    
 
 
 </script>
@@ -1890,30 +1892,33 @@ document.getElementById('sendDataButton').addEventListener('click', function() {
     }));
 });
 
+
 // Typing Indicator
 document.addEventListener("DOMContentLoaded", function () {
     const messageInput = document.getElementById("message-input");
     const chatId = document.getElementById("chat_id").value;
     const senderId = "{{ user.id }}"; // Ensure this is dynamically populated
     let typingTimeout;
+    let lastTypingSent = 0;
+    const typingInterval = 300; // Only allow a new "typing" message every 3000ms
 
-    // Ensure WebSocket is open before sending
     function sendTypingStatus() {
-        if (socket.readyState === WebSocket.OPEN) {
+        const now = Date.now();
+        if (socket.readyState === WebSocket.OPEN && (now - lastTypingSent > typingInterval)) {
             socket.send(JSON.stringify({
                 chat_id: chatId,
                 sender_id: senderId,
                 action: 'typing',
             }));
+            lastTypingSent = now;
         }
     }
 
-    // Listen for input events
     messageInput.addEventListener("input", function () {
-        clearTimeout(typingTimeout);
         sendTypingStatus();
+        clearTimeout(typingTimeout);
 
-        // Stop sending "typing" after a delay
+        // If there's no activity for 3 seconds, send a stop_typing notification.
         typingTimeout = setTimeout(() => {
             if (socket.readyState === WebSocket.OPEN) {
                 socket.send(JSON.stringify({
@@ -1922,9 +1927,10 @@ document.addEventListener("DOMContentLoaded", function () {
                     action: 'stop_typing',
                 }));
             }
-        }, 300); // Stop typing status after 3 seconds of inactivity
+        }, 300);
     });
 });
+
     
 </script>
 
@@ -1942,8 +1948,8 @@ document.addEventListener("DOMContentLoaded", function () {
     .unread-messages-tag {
         padding: 8px;
         text-align: center;
-        background-color: #f0f0f0;
-        color: #333;
+        background: rgba(0, 0, 0, 0.7);
+        color: #fff;
         font-weight: bold;
         margin: 10px 0;
         border-radius: 4px;

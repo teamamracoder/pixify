@@ -29,7 +29,9 @@ class MessageListView(View):
         # Process each message.
         for message in messages:
             message.is_editable = message_service.is_editable(message)
-            message.seen_by_all = chat_service.is_message_seen_by_all(message)
+            # message.seen_by_all = chat_service.is_message_seen_by_all(message)
+            message.seen_by_all = chat_service.is_message_seen_by_user(message, user)
+
             message.formatted_timestamp = message_service.format_timestamp(message.created_at)
             
             # Retrieve the reaction data for this message.

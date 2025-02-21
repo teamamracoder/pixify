@@ -319,3 +319,7 @@ def list_top_chats_api(request, user):
     return top_chats
 
 
+def is_message_seen_by_user(message, user):
+    seen = MessageReadStatus.objects.filter(message_id=message, read_by=user, is_active=True).exists()
+    
+    return seen
