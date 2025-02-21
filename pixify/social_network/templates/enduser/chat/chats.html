@@ -692,6 +692,9 @@ function fetchFollowersAndFollowings(searchQuery = '') {
 }
 
 .chat-lts-message {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    max-width: 290px;
     color: #aca5a7d6;
 }
 
@@ -778,12 +781,6 @@ function fetchFollowersAndFollowings(searchQuery = '') {
         }
     }
 
-    /* Hide the element on screens smaller than 768px (or your desired breakpoint) */
-    @media only screen and (max-width: 768px) {
-        .mobile-hide {
-
-        }
-    }
 
     @media (max-width: 768px) {
         .users {
@@ -839,9 +836,6 @@ function fetchFollowersAndFollowings(searchQuery = '') {
         .sticky-icon {
             right: 92px;
             bottom: 50px;
-        }
-        .count_aling{
-
         }
         #hyperlink-text {
             display: block;
