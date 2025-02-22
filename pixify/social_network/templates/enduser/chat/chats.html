@@ -42,9 +42,11 @@
                                     res.forEach(chat => {
 
                                         $("#fill").append(`
-                                        <div class="modal-list">
-                                        <img src="${chat.chat_cover}" id="profile-photo">
-                                            <a href="${chat.id}/message/" class="chats-item" id="hyperlink-text">${chat.title}</a><br>
+                                        <div class="modal-list" onclick="window.location.href='${chat.id}/message/'" style="cursor: pointer;">
+                                            <div class="src-profile-photo">
+                                                <img src="${chat.chat_cover}" id="profile-photo">
+                                            </div>
+                                            <div class="chats-item">${chat.title}</div>
                                         </div>
                                         `);
                                     });
@@ -522,6 +524,7 @@ function fetchFollowersAndFollowings(searchQuery = '') {
 
 
     .modal-list{
+        align-items: center;
         margin:10px;
         border-radius:5px;
         border:10px white;
@@ -1080,6 +1083,18 @@ function fetchFollowersAndFollowings(searchQuery = '') {
     .msg_sender{
       color: #4f8892;
       padding-right:5px;
+    }
+    .src-profile-photo{
+        width: 40px;
+        height: 40px;
+    }
+    .chats-item{
+        padding-left: 10px;
+        width: 80%;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        display: block;
     }
 
 
