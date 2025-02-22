@@ -151,23 +151,23 @@
         </div>
 
         <!-- Reply Preview -->
-        <div id="reply-preview" style="display: none;">
-            <div class="reply-message">
-                <span class="close-reply" onclick="cancelReply()">✖</span>
+        <div id="reply-preview" style="display: none;padding-left: 5%;">
+            <div class="reply-message" style="display:flex">
                 <div class="reply-container">
-                    <span class="reply-username"></span><span style="color:black">:</span>
+                    <span class="reply-username"></span>:
                     <span class="reply-text"></span>
+                    <div class="close-reply" onclick="cancelReply()">✖</div>
                 </div>
             </div>
         </div>
 
         <!-- Edit Preview -->
-        <div id="edit-preview" style="display:none;">
+        <div id="edit-preview" style="display:none;padding-left: 5%;">
             <div class="edit-message-bar">
-                <span style="color:black; font-weight: bold;">Edit message:</span>
-                <span class="edit-text"style="color:black;"></span>
+                <span>Edit message</span> :
+                <span class="edit-text"></span>
+                <div class="close-reply"  onclick="cancelEdit()">✖</div>
             </div>
-            <div class="cancel-edit" style="color:red;margin-left:10px;" onclick="cancelEdit()">✖</div>
         </div>
 
         <!-- Message Input Form -->
@@ -2030,12 +2030,7 @@ document.addEventListener("DOMContentLoaded", function () {
         font-size: 20px;
      }
     
-    .cancel-edit {
-        float: right;
-        color: red;
-        cursor: pointer;
-    }
-    
+  
     
     
     /* Chat bubble container */
@@ -2418,7 +2413,7 @@ document.addEventListener("DOMContentLoaded", function () {
         /* Footer */
         .chat-footer {
             padding: 4px;
-            background-color: #00e6ff;
+            background-color: #291546;
             display: flex;
             justify-content: space-between;
             flex-direction: column;
@@ -2579,8 +2574,8 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     
         .parent-message div:last-child {
-            font-size: 14px;
-            color: #fff;
+            font-size: 12px;
+            color:#ffffffb5;
         }
     
     
@@ -2638,12 +2633,13 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     
         .reply-username{
-            color:black;
             font-weight:bold;
+            padding-right:5px;
         }
         .reply-text{
-            width:80%;
-            color:black;
+            padding-left:5px;
+            width: 80%;
+            color: #958686;
             display: block;
             white-space: nowrap;
             overflow: hidden;
@@ -2651,8 +2647,8 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     
         .close-reply{
+            font-size:12px;
             float: right;
-            color:red;
             cursor: pointer;
         }
         .edited-message{
@@ -2957,8 +2953,9 @@ document.addEventListener("DOMContentLoaded", function () {
         width: 50px;
     }
     .reply-container{
+        width: 85%;
         border-radius: 10px;
-        background:#4dbbea;
+        background:#201137ab;
         font-size: 13px;
         padding: 9px;
         display: flex;
@@ -2966,14 +2963,15 @@ document.addEventListener("DOMContentLoaded", function () {
     .edit-message-bar{
         width: 90%;
         border-radius: 10px;
-        background:#4dbbea;
-        font-size: 13px;
+        background:#201137;
+        font-size: 12px;
         padding: 9px;
         display: flex;
     }
     .edit-text{
-        width:60%;
-        color:black;
+        color:#958686;
+        padding-left:5px;
+        width:74%;
         display: block;
         white-space: nowrap;
         overflow: hidden;
