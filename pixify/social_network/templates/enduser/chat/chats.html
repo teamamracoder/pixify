@@ -82,7 +82,7 @@
                 </p>
                 <div style="display:flex; height:20px;font-size:15px;">
                     <span class="chat-lts-message">
-                       {% if chat.latest_message_sender_id == user.id and chat.latest_message_time >= chat.latest_reaction_time %}
+                    {% if chat.latest_message_sender_id == user.id and chat.latest_message_time >= chat.latest_reaction_time %}
                         {% if chat.is_group %}
 
                             {% if chat.seen_by_all %}
@@ -102,22 +102,14 @@
                             {% endif %}
 
                         {% endif %}
-                        {% else %}
-                         {% if chat.is_group %}
-                         <span class="msg_sender">
-                            {{chat.latest_message_sender_name}}:
-                         </span>
-                         {% comment %} {% else %}
-                           {{chat.latest_message_sender_name}}: {% endcomment %}
-                        {% endif %}
-                      {% endif %}
+                    {% endif %}
                     </span>
                     <span>
                     {% if chat.latest_message %}
                         {% if chat.latest_reaction_time == '' or chat.latest_message_time >= chat.latest_reaction_time %}
                             <p class="chat-lts-message">{{ chat.latest_message }}</p>
                         {% else %}
-                            <p class="chat-lts-message"> Reacted {{ chat.latest_reaction|safe }} on "{{ chat.latest_message }}"</p>
+                            <p class="chat-lts-message">'{{chat.latest_reaction_message_reacted_by}}' Reacted {{ chat.latest_reaction|safe }} on "{{ chat.latest_message }}"</p>
                         {% endif %}
                     {% else %}
                         <p class="chat-lts-message">No messages yet</p>
