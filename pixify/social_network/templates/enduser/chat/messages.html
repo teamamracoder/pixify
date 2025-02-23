@@ -29,7 +29,7 @@
             <div class="username ">{{ data.chat.title }}</div>
             {% endif %}
         </div>
-        <div id="sendDataButton"><i class="fa-solid fa-phone"></i></div>    
+        {% comment %} <div id="sendDataButton"><i class="fa-solid fa-phone"></i></div>     {% endcomment %}
     </div>
 
   <!-- Loading Spinner (placed as an overlay) -->
@@ -931,6 +931,7 @@ if (data.seen_by_all) {
     }
 }
 
+/*
 // Handel Calling
 if (data.action === "ringing") {
     const callId = data.call_id;
@@ -950,7 +951,7 @@ if (data.action === "ringing") {
         window.location.href = `/call/calling/${callId}/${chatId}/`;
         
     }
-}
+}*/
 
 
      // Handle typing indicator.
@@ -1872,7 +1873,7 @@ if (chatBody) {
 }
 
 
-
+{% comment %} 
 // Call Handel
 function generateCallId() {
     return 'call_' + Math.random().toString(36).substr(2, 9); // Generates a random call ID
@@ -1890,7 +1891,7 @@ document.getElementById('sendDataButton').addEventListener('click', function() {
         chat_id: chatId,
         caller_id: callerId // Include caller ID
     }));
-});
+}); {% endcomment %}
 
 
 // Typing Indicator
@@ -2025,10 +2026,10 @@ document.addEventListener("DOMContentLoaded", function () {
         padding-right: 10px;
     }
     
-    #sendDataButton{
+    {% comment %} #sendDataButton{
         margin-left: 20px;
         font-size: 20px;
-     }
+    } {% endcomment %}
     
   
     
@@ -2792,14 +2793,14 @@ document.addEventListener("DOMContentLoaded", function () {
         .chat-footer form{
             display: flex;
         }
-        #sendDataButton {
+        {% comment %} #sendDataButton {
             justify-content: end;
             align-items: center;
             display: flex;
             position:relative;
             padding-top: 4px;
             font-size: 20px;
-        }
+        } {% endcomment %}
         .parmess-modal-content{
             width: 32%;
             left: 28%;
@@ -2861,17 +2862,17 @@ document.addEventListener("DOMContentLoaded", function () {
             height: 30px;
             font-size: 14px;
         }
-        #sendDataButton {
+        {% comment %} #sendDataButton {
         font-size: 20px;
-        }
+        } {% endcomment %}
     }
     
     
     @media (max-width: 620px){
-        #sendDataButton {
+        {% comment %} #sendDataButton {
         padding-top: 12px;
         font-size: 20px;
-    }
+    } {% endcomment %}
     .message-modal .message-modal-content{
         margin-top: 50%;
     }
@@ -2915,10 +2916,10 @@ document.addEventListener("DOMContentLoaded", function () {
             font-size: 0.8rem;
             /* padding: 6px; */
         }
-        #sendDataButton {
+        {% comment %} #sendDataButton {
         padding-top: 12px;
         font-size: 20px;
-        }
+        } {% endcomment %}
         .user-info {
             padding-top: 12px;
             display: flex
