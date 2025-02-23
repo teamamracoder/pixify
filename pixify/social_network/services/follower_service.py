@@ -82,14 +82,32 @@ def list_followers_birthday(user):
 
 def list_follow_api(request, user):
     search_query = request.GET.get('search', '')
+
+    other_member_subquery = ChatMember.objects.filter(
+        chat_id=OuterRef('pk'),
+        is_active=True
+    ).exclude(member_id=user.id).values('member_id')[:1]
+
+    # Filter personal chats and annotate them with the other member's ID.
+    chats = Chat.objects.filter(
+        members=user,
+        is_active=True,
+        type=ChatType.PERSONAL.value
+    ).annotate(
+        other_member=Subquery(other_member_subquery)
+    )
+
+    # Now you can easily retrieve a list of other member IDs:
+    mem1 = list(chats.values_list('other_member', flat=True))
+
     if search_query:
         followers = Follower.objects.filter(following=user, is_active=True).filter(
             Q(user_id__first_name__icontains=search_query) | Q(user_id__last_name__icontains=search_query)
-        ).values('user_id', 'user_id__first_name', 'user_id__last_name', 'user_id__email', 'user_id__profile_photo_url')
+        ).exclude(user_id__in=mem1).values('user_id', 'user_id__first_name', 'user_id__last_name', 'user_id__email', 'user_id__profile_photo_url')
 
         followings = Follower.objects.filter(follower=user, is_active=True).filter(
             Q(user_id__first_name__icontains=search_query) | Q(user_id__last_name__icontains=search_query)
-        ).values('user_id', 'user_id__first_name', 'user_id__last_name', 'user_id__email', 'user_id__profile_photo_url')
+        ).exclude(user_id__in=mem1).values('user_id', 'user_id__first_name', 'user_id__last_name', 'user_id__email', 'user_id__profile_photo_url')
 
     else:
 
@@ -106,23 +124,6 @@ def list_follow_api(request, user):
         # print(mem1)        
 
         # Define a subquery to get the other member for a given chat.
-        other_member_subquery = ChatMember.objects.filter(
-            chat_id=OuterRef('pk'),
-            is_active=True
-        ).exclude(member_id=user.id).values('member_id')[:1]
-
-        # Filter personal chats and annotate them with the other member's ID.
-        chats = Chat.objects.filter(
-            members=user,
-            is_active=True,
-            type=ChatType.PERSONAL.value
-        ).annotate(
-            other_member=Subquery(other_member_subquery)
-        )
-
-        # Now you can easily retrieve a list of other member IDs:
-        mem1 = list(chats.values_list('other_member', flat=True))
-
 
         followers = Follower.objects.filter(following=user, is_active=True).exclude(user_id__in=mem1).values('user_id', 'user_id__first_name', 'user_id__last_name', 'user_id__email', 'user_id__profile_photo_url')
         followings = Follower.objects.filter(follower=user, is_active=True).exclude(user_id__in=mem1).values('user_id', 'user_id__first_name', 'user_id__last_name', 'user_id__email', 'user_id__profile_photo_url')

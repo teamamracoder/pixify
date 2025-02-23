@@ -120,14 +120,29 @@
         // Display the modal
         $('#short-create-modal').show();
         
-        // Clear any previous content
-        $('#short-filled').html('');
+        // Initial results load
+        updateShareResults(videoId);
         
-        // Make the AJAX call to fetch share data
+        // Attach a real-time search event listener (with debouncing if needed)
+        $('#short-search').off('input').on('input', function() {
+            updateShareResults(videoId);
+        });
+    }
+    
+    function updateShareResults(videoId) {
+        var $container = $('#short-filled');
+        
+        // Optionally fade the container to indicate loading (set opacity to 0.5)
+        $container.fadeTo(100, 0.5);
+        
+        // Get the current search query
+        var searchQuery = $('#short-search').val();
+        
+        // Make the AJAX call to fetch share data including the search query
         $.ajax({
             url: '/short/share/api',
             type: 'GET',
-            data: { video_id: videoId },
+            data: { video_id: videoId, search: searchQuery },
             dataType: 'json',
             success: function(data) {
                 let combinedHtml = '';
@@ -184,8 +199,10 @@
                     `;
                 }
                 
-                // Insert the generated HTML into the modal container
-                $('#short-filled').html(combinedHtml);
+                // Update the container with a fade effect: fade out, update content, then fade in to full opacity
+                $container.fadeOut(100, function(){
+                    $(this).html(combinedHtml).fadeTo(100, 1);
+                });
                 
                 // Attach event handler to the Send button
                 $('#send-button').off('click').on('click', function() {
@@ -219,12 +236,12 @@
             },
             error: function(xhr, status, error) {
                 console.error('Error fetching share data:', error);
-                $('#short-filled').html('<p>Error loading data. Please try again.</p>');
+                $container.fadeOut(100, function(){
+                    $(this).html('<p>Error loading data. Please try again.</p>').fadeTo(100, 1);
+                });
             }
         });
     }
-    
-    
     
 </script>
 
