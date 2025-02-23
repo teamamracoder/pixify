@@ -1,7 +1,7 @@
 from ..constants import ChatType,MessageDeleteType
 from ..models import Chat, User, ChatMember,Follower,Message,MessageReadStatus
 from django.shortcuts import get_object_or_404
-from django.db.models import Max,Q,Subquery,OuterRef,F
+from django.db.models import Max,Q,Subquery,OuterRef,F,Exists
 from django.db.models.functions import Coalesce
 from social_network.utils.common_utils import print_log
 from datetime import date
@@ -11,6 +11,15 @@ def list_chats_by_user(user):
     user_chats = Chat.objects.filter(
         members=user,
         is_active=True,
+    ).annotate(
+        is_member_active=Exists(
+            ChatMember.objects.filter(
+                chat_id=OuterRef('id'),
+                member_id=user,
+                is_active=True
+            )
+        )
+    ).filter(is_member_active=True
     ).annotate(
         latest_message_timestamp=Coalesce(
             Max(
