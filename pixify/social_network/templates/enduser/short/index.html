@@ -26,6 +26,27 @@
                 </div>
                 <div class="description">{{ video.description }}</div>
             </div>
+                        
+            <!-- Modal for Comments and Delete Confirmation -->
+            <div>
+                <!-- Modal for Comments -->
+                <div class="short-modal" id="shortCommentsModal" tabindex="-1" aria-hidden="true">
+                    <div class="short-modal-dialog">
+                        <div class="short-modal-content">
+                            <div class="short-modal-header">
+                                <h5 class="modal-title">Comments</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="short-modal-body">
+                                <div id="shortCommentsList" class="short-comments-list">
+                                    <!-- Comments will be dynamically loaded here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
         </div>
 
         <!-- Right-side icons -->
@@ -63,26 +84,6 @@
     {% endfor %}
 </div>
 
-<!-- Modal for Comments and Delete Confirmation -->
-<div>
-    <!-- Modal for Comments -->
-    <div class="short-modal" id="shortCommentsModal" tabindex="-1" aria-hidden="true">
-        <div class="short-modal-dialog">
-            <div class="short-modal-content">
-                <div class="short-modal-header">
-                    <h5 class="modal-title">Comments</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="short-modal-body">
-                    <div id="shortCommentsList" class="short-comments-list">
-                        <!-- Comments will be dynamically loaded here -->
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <!-- Delete Confirmation Modal -->
     <div id="deleteModal" class="short-delete-modal" style="display: none;">
@@ -962,16 +963,6 @@ document.querySelectorAll('.chat-icon').forEach(button => {
   }
 }
 
-
-
-/* .short-modal-header,
-.short-modal-body {
-  {% comment %} padding: 12px; {% endcomment %}
-}
-} */
-
-
-
 .modal-title{
     font-size:24px;
     padding-left:15px
@@ -1172,7 +1163,6 @@ document.querySelectorAll('.chat-icon').forEach(button => {
     display: none;
     position: absolute;
     bottom: -100%;
-    right: 38%;
     width: 100%;
     z-index: 9999;
     justify-content: flex-end;
@@ -1180,11 +1170,11 @@ document.querySelectorAll('.chat-icon').forEach(button => {
 }
 
 .short-modal.show {
-    bottom: 12px; /* Move the modal to the visible area */
+    bottom: 0%; /* Move the modal to the visible area */
 }
 
 .short-modal-dialog {
-    width: 24%;
+    width: 100%;
     margin: 0;
     transition: transform 0.3s ease-in-out;
 }
