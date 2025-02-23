@@ -47,7 +47,7 @@
         </div>
 
         {% for message in date_group.1 %}
-        <div class="message {% if message.sender_id.id == user.id %}sent{% else %}received{% endif %} {% if message.seen_by_all %}read{% endif %}" id="message-{{ message.id }}">
+        <div class="message {% if message.sender_id.id == user.id %}sent{% else %}received{% endif %} {% if message.seen_by_user %}user_read{% endif %}" id="message-{{ message.id }}">
             <div class="message-content">
                 {% if message.reply_for_message_id %}
                 <div class="parent-message">
@@ -642,8 +642,8 @@ $(document).ready(function () {
             existingTag.remove();
         }
     
-        // Select unread messages: messages with the 'received' class that do not have the 'read' class.
-        const unreadMessages = chatBody.querySelectorAll('.message.received:not(.read)');
+        // Select unread messages: messages with the 'received' class that do not have the 'user_read' class.
+        const unreadMessages = chatBody.querySelectorAll('.message.received:not(.user_read)');
     
         if (unreadMessages.length === 0) {
             console.log("No unread messages found. Tag will not be displayed.");
@@ -840,151 +840,152 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-socket.onmessage = function (event) {
-  //console.log('Message received from WebSocket:', event.data);
-  const data = JSON.parse(event.data);
-
-  // Update read status
-if (data.seen_by_all) {
-    const messageId = data.message_id;
-    const messageElement = document.getElementById(`message-${messageId}`);
-    if (messageElement) {
-        // Find the container that holds reactions and seen status.
-        const reactionAndSeen = messageElement.querySelector('.reactionandseen');
-        if (reactionAndSeen) {
-            // Look for the existing seen-status container.
-            let seenStatusElement = reactionAndSeen.querySelector('.seen-status');
-            if (!seenStatusElement) {
-                // If not found, create one.
-                seenStatusElement = document.createElement('div');
-                seenStatusElement.classList.add('seen-status');
-                reactionAndSeen.appendChild(seenStatusElement);
-            }
-            // Update the seen-status element with the "seen" icon if the user is the current user.
-            if (data.user === currentUser) {
-                seenStatusElement.innerHTML = `<i class="bi bi-check2-all"></i>`;
-            } else {
-                seenStatusElement.innerHTML = "";
-            }
-        } else {
-            // Fallback: if .reactionandseen isn't found, insert at the end of messageElement.
-            const seenStatusHtml = data.user === currentUser
-                ? `<div class="seen-status"><i class="bi bi-check2-all"></i></div>`
-                : "";
-            messageElement.insertAdjacentHTML('beforeend', seenStatusHtml);
+    socket.onmessage = function(event) {
+        console.log('Message received from WebSocket:', event.data);
+        const data = JSON.parse(event.data);      
+      
+        // Handle new or updated messages
+        if (data.message_new) {
+          appendMessageToChat(
+            data.message,
+            data.message_id,
+            data.messageTime,
+            data.user_id,
+            data.user || 'Unknown',
+            data.ProfilePic || '/static/images/avatar.jpg',
+            data.reply,
+            data.replyText,
+            data.reply_username,
+            data.reply_userPic,
+            data.media_urls || [],
+            data.user === currentUser,
+            data.reactions || []
+          );
+        } else if (data.update) {
+          // Handle message update
+          updateMessageInChat(
+            data.message,
+            data.message_id,
+            data.messageTime,
+            data.user || 'Unknown',
+            data.ProfilePic || '/static/images/avatar.jpg',
+            data.reply,
+            data.replyText,
+            data.reply_username,
+            data.reply_userPic,
+            data.media_urls || [],
+            data.user === currentUser,
+            data.seen_by_all,
+            data.reactions || []
+          );
         }
-    }
-}
+      
+        // Handle deletion first if the message is flagged as deleted.
+        if (data.deleted === true && data.message_id) {
+            const messageId = data.message_id;
+            const messageElement = document.getElementById(`message-${messageId}`);
+            if (!messageElement) {
+            console.warn(`Message with ID ${messageId} not found.`);
+            } else {
+            if (data.del_type == 1) {
+                // "Delete for me" - Hide message only for the current user.
+                console.log('Delete for me:', data.del_type);
+                if (data.del_by.includes(currentUserId)) {
+                messageElement.style.display = "none";
+                }
+            } else if (data.del_type == 2) {
+                // "Delete for everyone" - Remove from DOM entirely.
+                messageElement.remove();
+            }
+            }
+            // Stop further processing if the message is deleted.
+            return;
+        }
 
-
-  // Handle new or updated messages
-  if (data.message_new) {
-    appendMessageToChat(
-      data.message,
-      data.message_id,
-      data.messageTime,
-      data.user_id,
-      data.user || 'Unknown',
-      data.ProfilePic || '/static/images/avatar.jpg',
-      data.reply,
-      data.replyText,
-      data.reply_username,
-      data.reply_userPic,
-      data.media_urls || [],
-      data.user === currentUser,
-      data.reactions || [],
-    );
-  } else if (data.update) {
-    // Handle message update
-    updateMessageInChat(
-      data.message,
-      data.message_id,
-      data.messageTime,
-      data.user || 'Unknown',
-      data.ProfilePic || '/static/images/avatar.jpg',
-      data.reply,
-      data.replyText,
-      data.reply_username,
-      data.reply_userPic,
-      data.media_urls || [],
-      data.user === currentUser,
-      data.seen_by_all,
-      data.reactions || []
-    );
-  } else if (data.deleted === true && data.message_id) {
-    const messageId = data.message_id;
-    const messageElement = document.getElementById(`message-${messageId}`);
-    if (!messageElement) {
-      console.warn(`Message with ID ${messageId} not found.`);
-      return;
-    }
-
-    if (data.del_type == 1) {
-      // "Delete for me" - Hide message only for current user
-      console.log(data.del_type);
-       if (data.del_by.includes(currentUserId)) {
-      messageElement.style.display = "none";
-      }
-    } else if (data.del_type == 2) {
-      // "Delete for everyone" - Remove from DOM entirely
-      messageElement.remove();
-    }
-}
-
-// Handel Calling
-if (data.action === "ringing") {
-    const callId = data.call_id;
-    const members = data.members;
-    const callerId = data.caller_id;
-    const currentUserId = "{{ user.id }}";// Get logged-in user ID
-
-    console.log("Caller ID:", callerId);
-    console.log("Current User ID:", currentUserId);
-
-    if (currentUserId === callerId) {
-        console.log("Redirecting to ringing.html...");
-        window.location.href = `/call/ringing/${callId}/${chatId}/`;
-                    
-    } else {
-        console.log("Redirecting to calling.html...");
-        window.location.href = `/call/calling/${callId}/${chatId}/`;
+        // Handle Calling
+        if (data.action === "ringing") {
+          const callId = data.call_id;
+          const members = data.members;
+          const callerId = data.caller_id;
+          const currentUserId = "{{ user.id }}"; // Get logged-in user ID
+      
+          console.log("Caller ID:", callerId);
+          console.log("Current User ID:", currentUserId);
+      
+          if (currentUserId === callerId) {
+            console.log("Redirecting to ringing.html...");
+            window.location.href = `/call/ringing/${callId}/${chatId}/`;
+          } else {
+            console.log("Redirecting to calling.html...");
+            window.location.href = `/call/calling/${callId}/${chatId}/`;
+          }
+        }
+      
+        // Handle typing indicator.
+        const typingIndicator = document.querySelector('.chat-bubble');
+        if (data.typing && data.user !== currentUser) {
+          // Update the inner HTML using template literals.
+          typingIndicator.innerHTML = `
+            <div class="typing-indicator">
+              <img src="${data.user_pic}" alt="User typing" class="typing-user-pic">
+              <div class="typing">
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+              </div>
+            </div>
+          `;
+          typingIndicator.removeAttribute('hidden');
+        } else {
+          typingIndicator.setAttribute('hidden', '');
+        }
+      
+        // Handle Message Reaction
+        if (data.react && data.aggregated_reactions) {
+          const messageId = data.message_id;
+          reactionManager.updateReactions(messageId, data.aggregated_reactions);
+          return;
+        } else if (data.rac_deleted) {
+          const messageId = data.message_id;
+          reactionManager.loadReactions(messageId);
+          return;
+        }
         
-    }
-}
+        // Update read status
+        if (data.seen_by_all) {
+            const messageId = data.message_id;
+            const messageElement = document.getElementById(`message-${messageId}`);
+            if (messageElement) {
+              // Find the container that holds reactions and seen status.
+              const reactionAndSeen = messageElement.querySelector('.reactionandseen');
+              if (reactionAndSeen) {
+                // Look for the existing seen-status container.
+                let seenStatusElement = reactionAndSeen.querySelector('.seen-status');
+                if (!seenStatusElement) {
+                  // If not found, create one.
+                  seenStatusElement = document.createElement('div');
+                  seenStatusElement.classList.add('seen-status');
+                  reactionAndSeen.appendChild(seenStatusElement);
+                }
+                // Update the seen-status element with the "seen" icon if the user is the current user.
+                if (data.user === currentUser) {
+                  seenStatusElement.innerHTML = `<i class="bi bi-check2-all"></i>`;
+                } else {
+                  seenStatusElement.innerHTML = "";
+                }
+              } else {
+                // Fallback: if .reactionandseen isn't found, insert at the end of messageElement.
+                const seenStatusHtml =
+                  data.user === currentUser
+                    ? `<div class="seen-status"><i class="bi bi-check2-all"></i></div>`
+                    : "";
+                messageElement.insertAdjacentHTML('beforeend', seenStatusHtml);
+              }
+            }
+          }        
 
-
-     // Handle typing indicator.
-    const typingIndicator = document.querySelector('.chat-bubble');
-    if (data.typing && data.user !== currentUser) {
-    // Update the inner HTML using template literals.
-    typingIndicator.innerHTML = `
-        <div class="typing-indicator">
-        <img src="${data.user_pic}" alt="User typing" class="typing-user-pic">
-        <div class="typing">
-            <div class="dot"></div>
-            <div class="dot"></div>
-            <div class="dot"></div>
-        </div>
-        </div>
-    `;
-    typingIndicator.removeAttribute('hidden');
-    } else {
-    typingIndicator.setAttribute('hidden', '');
-    }
-
-
-// Handel Message Reaction
-  if (data.react && data.aggregated_reactions) {
-    const messageId = data.message_id;
-    reactionManager.updateReactions(messageId, data.aggregated_reactions);
-    return;
-  } else if (data.rac_deleted) {
-    const messageId = data.message_id;
-    reactionManager.loadReactions(messageId);
-    return;
-  }
-
-};
+      };
+      
 
 function appendMessageToChat(message, messageId, messageTime, senderId, senderName, profilePic, reply, replyText, reply_username, reply_userPic, mediaUrls, isSent, reactions) {
     const chatBody = document.querySelector(".chat-body");
@@ -1095,7 +1096,7 @@ function updateMessageInChat(updatedMessage, messageId, messageTime, senderName,
     mediaPreviewHtml = mediaUrls
       .map(
         (url) =>
-          `<div class="message-media"><img src="${url}" alt="media"></div>`
+          `<div class="media-item"><img src="${url}" alt="media"></div>`
       )
       .join("");
   }
@@ -1104,9 +1105,9 @@ function updateMessageInChat(updatedMessage, messageId, messageTime, senderName,
   let parentMessageHtml = "";
   if (reply) {
     parentMessageHtml = `
-      <span>${reply_username} </span>
-      <div>${replyText}</div>
-      ${reply.media_url ? `<span>${reply.media_url}</span>` : ""}
+      <span>${reply_username}: </span>
+      <div class="reply-message-text">${replyText}</div>
+      ${reply.media_url ? `<span class="reply-media">${reply.media_url}</span>` : ""}
     `;
   }
 
@@ -1150,20 +1151,23 @@ function updateMessageInChat(updatedMessage, messageId, messageTime, senderName,
     }
 
     // Update media preview.
-    let mediaContainer = contentDiv.querySelector(".message-media-container");
-    if (!mediaContainer) {
-      mediaContainer = document.createElement("div");
-      mediaContainer.classList.add("message-media-container");
-      contentDiv.appendChild(mediaContainer);
+    let mediaElement = contentDiv.querySelector(".message-media");
+    if (mediaPreviewHtml) {
+      if (!mediaElement) {
+        mediaElement = document.createElement("div");
+        mediaElement.classList.add("message-media");
+        contentDiv.appendChild(mediaElement);
+      }
+      mediaElement.innerHTML = mediaPreviewHtml;
+    } else if (mediaElement) {
+      mediaElement.remove();
     }
-    mediaContainer.innerHTML = mediaPreviewHtml;
 
-    // Corrected position: update or create the edited tag within message-content.
+    // Update or create the edited tag.
     let editedMessagesDiv = contentDiv.querySelector(".edited-messages");
     if (!editedMessagesDiv) {
       editedMessagesDiv = document.createElement("div");
       editedMessagesDiv.classList.add("edited-messages");
-      // Insert it right after the message text element if it exists.
       if (messageTextElement) {
         messageTextElement.insertAdjacentElement("afterend", editedMessagesDiv);
       } else {
@@ -1176,32 +1180,27 @@ function updateMessageInChat(updatedMessage, messageId, messageTime, senderName,
       editedTag.classList.add("edited-tag");
       editedMessagesDiv.appendChild(editedTag);
     }
+    // Set the edited tag text to indicate the message was edited.
+    editedTag.textContent = "(Edited)";
   }
 
-  // Update the footer.
+  // Update the footer time.
   const footerDiv = messageDiv.querySelector(".message-footer");
   if (footerDiv) {
-    // Update the time.
     const timeSpan = footerDiv.querySelector(".time");
     if (timeSpan) {
       timeSpan.textContent = messageTime;
     }
-    // Optionally update seen-status if provided.
-    if (seen_by_all) {
-      let seenStatusDiv = footerDiv.querySelector(".seen-status");
-      if (!seenStatusDiv) {
-        seenStatusDiv = document.createElement("div");
-        seenStatusDiv.classList.add("seen-status");
-        footerDiv.appendChild(seenStatusDiv);
-      }
-      seenStatusDiv.innerHTML =
-        senderName === currentUser ? `<i class="bi bi-check2-all"></i>` : "";
-    }
   } else {
     console.error(`Message footer not found for message ID: ${messageId}`);
   }
-}
 
+  // Update the reaction popup.
+  const reactionPopup = messageDiv.querySelector(`#reaction-popup-${messageId}`);
+  if (reactionPopup) {
+    reactionPopup.innerHTML = reactionPopupContent;
+  }
+}
 
 
 // Global variable to track the message being edited
@@ -1762,7 +1761,7 @@ function getUnreadReceivedMessageIds() {
 
   receivedMessages.forEach(message => {
     // Check if the message does not have the "read" class.
-    if (!message.classList.contains('read')) {
+    if (!message.classList.contains('user_read')) {
       const idAttr = message.getAttribute('id'); // Expects format "message-<id>"
       if (idAttr && idAttr.startsWith('message-')) {
         const messageId = idAttr.split('-')[1];
