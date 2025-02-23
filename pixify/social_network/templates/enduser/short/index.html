@@ -96,6 +96,144 @@
     </div>
 </div>
 
+<!--Modal for Sharing -->
+
+<div id="short-create-modal" class="short-create-modal">
+    <div class="short-create-modal-content">
+        <div class="short-close" onclick="document.getElementById('short-create-modal').style.display='none'">✖</div>
+        <h5 class="short-create-modal-title">Lest's Share</h5>
+        <input type="text" id="short-search" class="short-form-control" placeholder="Search Name..." aria-label="Search Name">
+        <div id="short-filled" class="short-profile-grid">
+            <!-- Profile items go here -->
+        </div>
+        <div class="short-modal-footer">
+            <div class="short-send-button" id="send-button"> Send </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<script>
+    function shareShort(videoId) {
+        // Display the modal
+        $('#short-create-modal').show();
+        
+        // Clear any previous content
+        $('#short-filled').html('');
+        
+        // Make the AJAX call to fetch share data
+        $.ajax({
+            url: '/short/share/api',
+            type: 'GET',
+            data: { video_id: videoId },
+            dataType: 'json',
+            success: function(data) {
+                let combinedHtml = '';
+                const fallbackImage = '/static/images/avatar.jpg';
+                
+                // Generate Chats Section
+                if (data.chats && data.chats.length > 0) {
+                    combinedHtml += `
+                        <div class="short-chats-section">
+                            <h6>Chats</h6>
+                            <div class="short-chat-grid">
+                    `;
+                    data.chats.forEach(function(chat) {
+                        combinedHtml += `
+                            <div class="short-chat-item" id="chat-${chat.id}" data-chat-id="${chat.id}">
+                                <img src="${chat.chat_cover}" alt="${chat.title}" class="short-chat-cover">
+                                <div class="short-chat-title">${chat.title}</div>
+                            </div>
+                        `;
+                    });
+                    combinedHtml += `
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                // Generate Members Section
+                let members = [];
+                if (data.follow && data.follow.members) {
+                    members = data.follow.members;
+                }
+                
+                if (!members || members.length === 0) {
+                    combinedHtml += '<div class="no-members-message">No Followers And Followings to Display</div>';
+                } else {
+                    combinedHtml += `
+                        <div class="short-members-section">
+                            <h6>Members</h6>
+                            <div class="short-profile-grid">
+                    `;
+                    members.forEach(function(member) {
+                        const profileImage = member.user_id__profile_photo_url || fallbackImage;
+                        combinedHtml += `
+                            <div class="short-selection-body" id="user-${member.user_id}" data-user-id="${member.user_id}">
+                                <img src="${profileImage}" alt="${member.user_id__first_name}'s profile photo" class="short-profile-photo">
+                                <input type="checkbox" class="short-checkbox" id="checkbox-${member.user_id}" onchange="checkSelection(${member.user_id})" onclick="event.stopPropagation();">
+                                <div class="short-profile-text">${member.user_id__first_name} ${member.user_id__last_name}</div>
+                            </div>
+                        `;
+                    });
+                    combinedHtml += `
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                // Insert the generated HTML into the modal container
+                $('#short-filled').html(combinedHtml);
+                
+                // Attach event handler to the Send button
+                $('#send-button').off('click').on('click', function() {
+                    // Gather all selected member IDs
+                    let selectedIds = [];
+                    $('.short-checkbox:checked').each(function() {
+                        let userId = $(this).closest('.short-selection-body').data('user-id');
+                        selectedIds.push(userId);
+                    });
+                    
+                    if (selectedIds.length > 0) {
+                        // Make an AJAX call to send the share request
+                        $.ajax({
+                            url: '/short/send', // Replace with your send endpoint
+                            type: 'POST',
+                            data: { video_id: videoId, members: selectedIds },
+                            dataType: 'json',
+                            success: function(response) {
+                                alert('Share successful!');
+                                $('#short-create-modal').hide();
+                            },
+                            error: function(xhr, status, error) {
+                                console.error('Error sending share:', error);
+                                alert('Error sending share. Please try again.');
+                            }
+                        });
+                    } else {
+                        alert('Please select at least one member to share with.');
+                    }
+                });
+            },
+            error: function(xhr, status, error) {
+                console.error('Error fetching share data:', error);
+                $('#short-filled').html('<p>Error loading data. Please try again.</p>');
+            }
+        });
+    }
+    
+    
+    
+</script>
+
+
+
+
+
+
+
 <script>
 // Function to update the URL using the History API.
 function updateReelURL(videoId) {
@@ -1462,6 +1600,237 @@ margin-top: 16px;
 }
 
 
+/* Modal Overlay */
+.short-create-modal {
+    display: none; /* Hidden by default */
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+}
 
+/* Modal Content */
+.short-create-modal-content {
+    background-color: #220b46;
+    margin: 15% auto; /* 15% from the top and centered */
+    padding: 20px;
+    border: 1px solid #888;
+    width: 25%;
+    max-width: 600px;
+    height: 400px;
+    overflow-y: auto;
+    position: relative;
+}
+
+/* Close Button */
+.short-close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+.short-close:hover,
+.short-close:focus {
+    color: black;
+    text-decoration: none;
+}
+
+/* Modal Title */
+.short-create-modal-title {
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+/* Search Input */
+.short-form-control {
+    width: 100%;
+    background: none;
+    padding: 10px;
+    flex-grow: 1;
+    border: none;
+    outline: none;
+    font-size: 16px;
+}
+.short-form-control::placeholder {
+    color: #aaa;
+}
+
+/* Profile Grid */
+.short-profile-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+}
+
+/* Profile Item */
+.short-selection-body {
+    height: 85px;
+    width: 85px;
+    position: relative;
+    display: inline-block;
+    margin: 10px;
+    cursor: pointer;
+    border: 2px solid transparent;
+    border-radius: 50%;
+    padding: 10px;
+    transition: transform 0.2s, border-color 0.2s;
+}
+.short-selection-body.selected {
+    border-color: #007BFF;
+    background-color: rgba(0, 123, 255, 0.1);
+}
+
+/* Profile Photo */
+.short-profile-photo {
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+}
+
+/* Checkbox */
+.short-checkbox {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 15px;
+    height: 15px;
+    background-color: white;
+    border-radius: 50%;
+    border: 2px solid #333;
+    display: none;
+}
+
+
+/* Modal Footer */
+.short-modal-footer {
+    text-align: center;
+    margin-top: 20px;
+}
+
+
+/* Profile Item Container */
+.short-selection-body {
+    height: 85px;
+    width: 85px;
+    position: relative;
+    display: inline-block;
+    margin: 10px;
+    cursor: pointer;
+    border: 2px solid transparent;
+    border-radius: 50%;
+    padding: 10px;
+    transition: transform 0.2s, border-color 0.2s;
+}
+
+.short-selection-body.selected {
+    border-color: #007BFF;
+    background-color: rgba(0, 123, 255, 0.1);
+}
+
+/* Profile Photo */
+.short-profile-photo {
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    display: block;
+    margin: 0 auto;
+}
+
+/* Checkbox */
+.short-checkbox {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 15px;
+    height: 15px;
+    background-color: white;
+    border-radius: 50%;
+    border: 2px solid #333;
+    display: none;
+}
+
+/* Profile Text */
+.short-profile-text {
+    text-align: center;
+    margin-top: 10px;
+    font-size: 14px;
+    color: #fff;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;      /* Limit to 2 lines */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+
+/* Chat Item Container */
+.short-chat-item {
+    height: 85px;
+    width: 85px;
+    position: relative;
+    display: inline-block;
+    margin: 10px;
+    cursor: pointer;
+    border: 2px solid transparent;
+    border-radius: 50%;
+    padding: 10px;
+    transition: transform 0.2s, border-color 0.2s;
+}
+
+.short-chat-item.selected {
+    border-color: #007BFF;
+    background-color: rgba(0, 123, 255, 0.1);
+}
+
+/* Chat Cover Image */
+.short-chat-cover {
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    display: block;
+    margin: 0 auto;
+}
+
+/* Chat Title */
+.short-chat-title {
+    text-align: center;
+    margin-top: 10px;
+    font-size: 14px;
+    color: #fff;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;      /* Limit to 2 lines */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.short-chat-grid{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+
+}
+
+/* Message Count */
+.short-message-count {
+    text-align: center;
+    font-size: 12px;
+    color: #777;
+}
+
+
+.short-send-button{
+    margin-top: 35px;
+    width: 100%;
+    height: 30px;
+    background-color: #007BFF;
+
+}
 </style>
 {% endblock %}

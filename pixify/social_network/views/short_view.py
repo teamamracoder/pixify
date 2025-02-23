@@ -141,11 +141,17 @@ class ShortCommentReactionView(View):
         })
 
 
+
+
 class ShortShareListViewApi(View):
     def get(self, request):
         user = request.user
         chats = chat_service.list_top_chats_api(request, user)
+        follow = follower_service.list_follow_api(request, user)
+        
+        data = {
+            "chats": chats,
+            "follow": follow
+        }
+        return JsonResponse(data)
 
-        follow = follower_service.list_followers_api(request, user)
-
-        return chats,follow

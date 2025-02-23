@@ -290,42 +290,42 @@ def list_followings(user, offset=0, limit=5):
 def list_top_chats_api(request, user):
     search_query = request.GET.get('search', '')
     chats = Chat.objects.filter(members=user, is_active=True)
-
+    
+    # Filter chats if a search query is provided
+    if search_query:
+        chats = chats.filter(
+            Q(members__first_name__icontains=search_query) |
+            Q(members__last_name__icontains=search_query)
+        )
+    
     chat_data_list = []
+    
     for chat in chats:
+        # Get the message count for each chat
+        message_count = Message.objects.filter(chat_id=chat).count()
+        
         if chat.type == ChatType.PERSONAL.value:
             member = get_recipient_for_personal(chat.id, user)
             title = f"{member.first_name} {member.last_name}"
             chat_cover = member.profile_photo_url or '/static/images/avatar.jpg'
-            chat_info = {
-                'id': chat.id,
-                'title': title,
-                'chat_cover': chat_cover,
-            }
         elif chat.type == ChatType.GROUP.value:
             title = chat.title or get_recipients_for_group(chat.id, user)
             chat_cover = chat.chat_cover or '/static/images/group_pic.png'
-            chat_info = {
-                'id': chat.id,
-                'title': title,
-                'chat_cover': chat_cover,
-            }
+        
+        # Build a dictionary with all needed info
+        chat_info = {
+            'id': chat.id,
+            'title': title,
+            'chat_cover': chat_cover,
+            'message_count': message_count,
+        }
         chat_data_list.append(chat_info)
+    
+    # Sort the list by message count in descending order and return only the top 3
+    chat_data_list.sort(key=lambda c: c['message_count'], reverse=True)
+    return chat_data_list[:3]
 
-    user_chats = chats
-    if search_query:
-        user_chats = chats.filter(
-            Q(members__first_name__icontains=search_query) |
-            Q(members__last_name__icontains=search_query)
-        )
 
-    for chat in user_chats:
-        chat.meg = Message.objects.filter(chat_id=chat).count()
-
-    top_chats = list(user_chats)
-    top_chats.sort(key=lambda chat: chat.meg, reverse=True)
-
-    return top_chats
 
 
 def is_message_seen_by_user(message, user):
