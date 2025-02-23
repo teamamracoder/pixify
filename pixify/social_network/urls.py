@@ -204,6 +204,7 @@ urlpatterns = [
 
     # Short Share List Api
     path('short/share/api', views.ShortShareListViewApi.as_view(), name='short_share_api'),
+    path('short/send', views.ShortSendView.as_view(), name='short_send'),
 
 ]
 

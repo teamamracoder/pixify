@@ -155,3 +155,14 @@ class ShortShareListViewApi(View):
         }
         return JsonResponse(data)
 
+
+
+class ShortSendView(View):
+    def post(self, request, post_id):
+        user = request.user
+        data = json.loads(request.body)
+        chat_id = data.get('chat_id')
+        chat = chat_service.get_chat(chat_id)
+        post = short_service.get_short(post_id)
+        short_service.short_send(post, chat, user)
+        return JsonResponse({"success": True})
