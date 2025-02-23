@@ -47,7 +47,7 @@
         </div>
 
         {% for message in date_group.1 %}
-        <div class="message {% if message.sender_id.id == user.id %}sent{% else %}received{% endif %} {% if message.seen_by_all %}read{% endif %}" id="message-{{ message.id }}">
+        <div class="message {% if message.sender_id.id == user.id %}sent{% else %}received{% endif %} {% if message.seen_by_all %}read{% endif %} {% if message.seen_by_user %}user_read{% endif %}" id="message-{{ message.id }}">
             <div class="message-content">
                 {% if message.reply_for_message_id %}
                 <div class="parent-message">
@@ -642,8 +642,8 @@ $(document).ready(function () {
             existingTag.remove();
         }
     
-        // Select unread messages: messages with the 'received' class that do not have the 'read' class.
-        const unreadMessages = chatBody.querySelectorAll('.message.received:not(.read)');
+        // Select unread messages: messages with the 'received' class that do not have the 'user_read' class.
+        const unreadMessages = chatBody.querySelectorAll('.message.received:not(.user_read)');
     
         if (unreadMessages.length === 0) {
             console.log("No unread messages found. Tag will not be displayed.");
@@ -841,7 +841,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
 socket.onmessage = function (event) {
-  //console.log('Message received from WebSocket:', event.data);
+  console.log('Message received from WebSocket:', event.data);
   const data = JSON.parse(event.data);
 
   // Update read status
@@ -1762,7 +1762,7 @@ function getUnreadReceivedMessageIds() {
 
   receivedMessages.forEach(message => {
     // Check if the message does not have the "read" class.
-    if (!message.classList.contains('read')) {
+    if (!message.classList.contains('user_read')) {
       const idAttr = message.getAttribute('id'); // Expects format "message-<id>"
       if (idAttr && idAttr.startsWith('message-')) {
         const messageId = idAttr.split('-')[1];
