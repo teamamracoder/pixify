@@ -47,7 +47,7 @@
         </div>
 
         {% for message in date_group.1 %}
-        <div class="message {% if message.sender_id.id == user.id %}sent{% else %}received{% endif %} {% if message.seen_by_all %}read{% endif %} {% if message.seen_by_user %}user_read{% endif %}" id="message-{{ message.id }}">
+        <div class="message {% if message.sender_id.id == user.id %}sent{% else %}received{% endif %} {% if message.seen_by_user %}user_read{% endif %}" id="message-{{ message.id }}">
             <div class="message-content">
                 {% if message.reply_for_message_id %}
                 <div class="parent-message">
