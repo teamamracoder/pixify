@@ -109,6 +109,10 @@
                             {% endif %}
 
                         {% endif %}
+                    {% else %}
+                        {% if chat.is_group and chat.latest_message_time >= chat.latest_reaction_time %}
+                        <span class="msg_sender">{{ chat.latest_message_sender_name}} :</span>
+                        {% endif %}
                     {% endif %}
                     </span>
                     <span>
