@@ -157,7 +157,11 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <div class="input-group mb-3">
+                    <div class="input-group mb-3 " style="display:flow; height:60vh; ">
+                    
+                        <button class="parchat-arrow-button" id="arrow-button">
+                            <i class='far fa-hand-point-right'></i>
+                        </button>
 
                     <div class="parchat-container">
                         <div class="parchat-trend-text">Make A Conversation</div>
@@ -167,9 +171,6 @@
                         <div id="parchat-filled" class="parchat-profile-grid">
                             <!-- Profile items go here -->
                         </div>
-                        <button class="parchat-arrow-button" id="arrow-button">
-                            <i class='far fa-hand-point-right'></i>
-                        </button>
                     </div>
 
                     <!-- Modal for displaying user details -->
@@ -927,10 +928,12 @@ function fetchFollowersAndFollowings(searchQuery = '') {
     }
 
     .parchat-profile-grid {
+        height:300px;
         display: flex;
         flex-wrap: wrap;
         justify-content: center;
         gap: 20px;
+        overflow-y:scroll;
     }
 
     .parchat-selection-body {
@@ -1033,9 +1036,9 @@ function fetchFollowersAndFollowings(searchQuery = '') {
 
     #arrow-button {
         display: none; /* Hide by default */
-        top: 4%;
-        left: 88%;
-        position: relative;
+        bottom:0%;
+        right:0%;
+        position: absolute;
 
     }
 
@@ -1043,7 +1046,7 @@ function fetchFollowersAndFollowings(searchQuery = '') {
         display: none; /* Hide by default */
         position: absolute; /* Position inside parent */
         bottom: 26%; /* Adjust based on parent height */
-        right: 35%;
+        right: %;
         background-color: #007BFF;
         color: white;
         border: none;
