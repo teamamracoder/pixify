@@ -55,7 +55,12 @@
                             console.log(xhr)
                         },
                     });
-                })
+                });
+                // Reset input field and search results when modal is closed
+                $(".modal").on('hidden.bs.modal', function () {
+                    $("#search_chats").val(""); // Clear input field
+                    $("#fill").html(""); // Clear search results
+                });
             });
         </script>
     </div>
