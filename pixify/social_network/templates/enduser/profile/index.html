@@ -37,13 +37,13 @@
                                 class="text-t fw-medium">({{user.age}})</span></a></li>
                     <li class="pb-2"><a href="#" class="text-white"><i class="bi bi-people-fill"></i> Following <span
                                 class="text-t fw-medium">({{user.friends}})</span></a></li>
-                    <li class="pb-2"><a href="#" class="text-white"><i class="bi bi-chat-dots"></i> Messages <span
-                                class="text-t fw-medium">(10)</span></a></li>
+                    <li class="pb-2"><a href="#" class="text-white"><i class="bi bi-chat-dots"></i> Messages 
+                      <span class="text-t fw-medium" id= "message-count">( )</span></a></li>
                                  {% endfor %}
                                  <li class="pb-2">
                                   <a href="#" class="text-white">
                                       <i class="bi bi-bell"></i> Notifications
-                                      <span id="notification-count" class="text-t fw-medium">(0)</span>
+                                      <span id="notification-count" class="text-t fw-medium">( )</span>
                                   </a>
                               </li>
                          </ul>
@@ -314,6 +314,22 @@ document.getElementById('load-more-btn').addEventListener('click', function () {
   }
 
   document.addEventListener('DOMContentLoaded', fetchUnreadNotificationsCount);
+
+  async function fetchUnreadMessagesCount() {
+    try {
+        const response = await fetch('/messages/unread_msg_count/');
+        if (response.ok) {
+            const data = await response.json();
+            document.getElementById('message-count').textContent = `(${data.unread_msg_count})`;
+        } else {
+            console.error('Failed to fetch unread messages count');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', fetchUnreadMessagesCount);
 
 </script>
 
