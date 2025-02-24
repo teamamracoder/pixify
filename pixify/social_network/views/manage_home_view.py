@@ -15,21 +15,13 @@ from social_network import services
 class ManageAdminHomeView(View):#
     def get(self, request):
         countUser  = services.manage_home_service.manage_user_count()
-        # countMonthlyUser  = services.manage_home_service.manage_user_monthly_count(date,interval)
-        # print(f"============{countUser}")
-
         countPost = services.manage_home_service.manage_post_count()
-        # print(f"============{countPost}")
-
         countAdmin = services.manage_home_service.manage_admin_user_count()
-        # print(f"::::::::::::::::::{countAdmin}")
-
         data = {
             'countUser':countUser,
             'countPost':countPost,
             'countAdmin':countAdmin
         }
-        
         return render(request, 'adminuser/home/index.html',{'data':data})
 
 
@@ -65,10 +57,9 @@ class ManageAdminHomeView(View):#
                     "start_date": interval_start.strftime("%Y-%m-%d"),  
                     "end_date": interval_end.strftime("%Y-%m-%d"),
                     "count_month_2intervel": count_month_2intervel,
-                    # "count_month_2intervel1": count_month_2intervel1
                 })
 
-            print(f"Interval Data: {interval_data}")
+            # print(f"Interval Data: {interval_data}")
 
 
                     # **🔹 Second Loop - Pie Chart Data (4-Month Intervals, Admin Count)**
@@ -127,8 +118,5 @@ class ManageAdminHomeView(View):#
 
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)
-        
-
-        #------------------------------------------------------------------
 
         

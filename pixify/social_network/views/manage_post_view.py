@@ -99,7 +99,7 @@ class ManagePostUpdateView(View):
             post.treat_as = form.cleaned_data['treat_as']
             post.save()  
             return redirect('manage_post_list')
-        # return render(request, 'adminuser/post/update.html', {"form": form, "post_id": post.id})
+        
         return render(request, 'adminuser/post/create.html',   success_response(
                 message=messages),
                 {"form": form,"post_id": post.id})
@@ -121,7 +121,6 @@ class ManageTogglePostActiveView(View):
         post.save()
         return JsonResponse({'is_active': post.is_active})
     
-
 class ManageToggleCommentActiveView(View):
      def post(self, request, comment_id):
         comment = services.post_service.manage_get_comment(comment_id)

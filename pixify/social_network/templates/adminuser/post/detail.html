@@ -4,6 +4,7 @@
 
 {% block content %}
 {%load static %}
+
 <h1 class="text-center">Post Details</h1>
 <div class="row">
     <div class="col-md-4 ">
@@ -32,7 +33,7 @@
 
 
 <div class="col-md-8">
-    <div class="card shadow p-3 mb-3 bg-body-tertiary rounded-4">
+    <div class="card shadow shadow-lg shadow-sm p-3 mb-3 bg-body-tertiary rounded-4">
         <h5>Activity Feed</h5>
         <div class="row">
             <!-- <a href="https://www.timeanddate.com/calendar/">14Nov2024</a> -->
@@ -173,8 +174,8 @@
 
             </div>
             <div class="text-start">
-                <a href="{% url 'manage_post_list' %}" class="btn btn-sm btn-outline-secondary">Back</a>
-                <a href="{% url 'admin_home' %}" class="btn btn-sm btn-outline-secondary">Home</a>
+                <a href="{% url 'manage_post_list' %}" class="btn btn-sm btn-outline-secondary mt-2">Back</a>
+                <a href="{% url 'admin_home' %}" class="btn btn-sm btn-outline-secondary mt-2">Home</a>
                 
             </div>
         </div>

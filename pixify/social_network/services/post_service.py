@@ -60,7 +60,6 @@ def manage_list_posts_filtered(search_query, sorting_order, sort_by, page_number
         .paginate(limit=10, page=page_number)
         .execute()
     )
-    # return data
     return data
 
 
