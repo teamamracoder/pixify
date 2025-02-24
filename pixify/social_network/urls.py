@@ -35,6 +35,8 @@ urlpatterns = [
     path('admin/notifications/<int:notification_id>/detail/', views.ManageNotificationDetailView.as_view(), name='manage_notification_detail'),
     path('admin/notifications/<int:notification_id>/update/', views.ManageNotificationUpdateView.as_view(), name='manage_notification_update'),
     path('notifications/unread_count/', views.unread_notifications_count, name='unread_notifications_count'),
+    path('messages/unread_msg_count/', views.unread_messages_count, name='unread_messages_count'),
+
 
     # admin message
     path('admin/messages/', views.ManageMessageListView.as_view(), name='manage_message_list'),
@@ -85,6 +87,8 @@ urlpatterns = [
     # profile
     path('profile/', views.EnduserprofileView.as_view(), name='userprofile'),
     path('editprofile/<int:user_id>/', views.EnduserprofileUpdateView.as_view(),name='enduser_edit_profile'),
+    path('profile/<int:user_id>/', views.EnduserprofileListView.as_view(),name='profile'),
+
 
     # aboutus
     path('aboutus/', views.AboutUsView.as_view(), name='aboutus'),

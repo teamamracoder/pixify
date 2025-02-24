@@ -71,9 +71,9 @@
 
                         <li class="nav-item" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Chat">
                             <a class="nav-link" href="/chat/">
-                                <span
+                                <span id="message-counts"
                                     class="position-absolute top-0 start-30 translate-middle badge rounded-pill bg-danger"
-                                    style="margin-left:27px; margin-top:7px;">2+</span>
+                                    style="margin-left:27px; margin-top:7px;">{{unread_count}}</span>
                                 <i class="bi bi-messenger"></i>
                             </a>
                         </li>
@@ -377,6 +377,9 @@
                     //For Notification count
                     let count = response.user_details.unreadNotification;
                     $('#notification-counts').text(count > 0 ? count + "+" : '');
+                    //For message count
+                    let msg_count = response.user_details.unreadMessage;
+                    $('#message-counts').text(msg_count);
                     //For Home Page Upload Section user Profile
                     const userProfileUploadSection = document.getElementById("userProfileUploadSection");
                     if (userProfileUploadSection) {

@@ -97,14 +97,18 @@ class MessageListView(View):
             if member:
                 title = f"{member.first_name} {member.last_name}"
                 chat_cover = member.profile_photo_url
+                member_id=member.id
             else:
                 title = ''
                 chat_cover = ''
+                member_id=None
+
         elif chat.type == ChatType.GROUP.value:
             title = chat_service.get_recipients_for_group(chat.id, user)
             if chat.title:
                 title = chat.title
             chat_cover = chat.chat_cover if chat.chat_cover else ''
+            member_id = None  # No member_id for groups
 
         chat_info = {
             'id': chat.id,
@@ -113,7 +117,11 @@ class MessageListView(View):
             'chat_cover': chat_cover,
             'is_group': chat.type == ChatType.GROUP.value,
             'seen_by_all': seen_by_all,
+            'member_id':member_id
         }
+        # Only include member_id if it's a personal chat
+        if chat.type == ChatType.PERSONAL.value:
+            chat_info['member_id'] = member_id
 
         # --- AJAX branch for older messages ---
         if request.headers.get('x-requested-with') == 'XMLHttpRequest':

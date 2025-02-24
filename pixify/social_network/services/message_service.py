@@ -135,6 +135,15 @@ def user_unread_message(chat, user):
 def get_message(message_id):
     return Message.objects.get(id=message_id)
 
+def unread_msg_count(userid):
+    unread_message=Message.objects.filter(
+        is_active=True, 
+        delete_type=MessageDeleteType.NOT_DELETED.value
+        ).exclude(
+            fk_message_msg_status_messages_id__read_by=userid
+        ).count()
+    return unread_message
+
 
 def send_video_to_chat(chat, short_id, user):
     return Message.objects.create(        
