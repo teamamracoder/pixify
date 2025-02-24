@@ -70,6 +70,33 @@
                 <span class="message-media">{{ message.media_url }}</span>
                 {% endif %}
 
+
+
+                {% if message.post_id %}
+                <div class="message-post">
+                  <video id="message-short" class="message-short-video" autoplay loop muted playsinline>
+                    <source src="{% static message.post.media_url.0 %}" type="video/mp4">
+                  </video>
+                  <div class="message-short-info">
+                    <div class="message-short-user-info">
+                      <img src="{{ message.post.posted_by.profile_photo_url|default:'/static/images/avatar.jpg' }}"
+                           alt="{{ message.post.posted_by.first_name }}'s Profile Picture"
+                           class="message-short-profile-pic">
+                      <div class="message-short-username">
+                        {{ message.post.posted_by.first_name }} {{ message.post.posted_by.last_name }}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                {% endif %}
+                
+               
+
+                
+                
+
+
+
                 {% if message.updated_by %}
                     <div class="edited-messages">
                     <span class="edited-tag">(Edited)</span>
@@ -2984,7 +3011,66 @@ document.addEventListener("DOMContentLoaded", function () {
         display: flex;
         font-size: 8px;
     }
+
+
     
+
+    /* Container for the entire message post */
+    .message-post {
+      max-width: 100%;
+      margin: 0 auto;
+      padding: 10px;
+      box-sizing: border-box;
+    }
+    
+    /* Responsive video styling */
+    .message-short-video {
+      width: 100%;
+      height: auto;
+      border-radius: 8px;
+      display: block;
+    }
+    
+    /* Container for video info */
+    .message-short-info {
+      margin-top: 10px;
+      padding: 5px 10px;
+      background-color: #f9f9f9;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+    
+    /* User info flex container */
+    .message-short-user-info {
+      display: flex;
+      align-items: center;
+    }
+    
+    /* Profile picture styling */
+    .message-short-profile-pic {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-right: 10px;
+    }
+    
+    /* Username styling */
+    .message-short-username {
+      font-size: 1rem;
+      font-weight: bold;
+      color: #333;
+    }
+    
+    /* Media query for larger screens */
+    @media (min-width: 768px) {
+      .message-post {
+        max-width: 600px;
+      }
+    }
+    
+
+
     </style>
     {% endblock %}
 add a action when i type "@" in the form

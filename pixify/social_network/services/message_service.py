@@ -134,3 +134,12 @@ def user_unread_message(chat, user):
 
 def get_message(message_id):
     return Message.objects.get(id=message_id)
+
+
+def send_video_to_chat(chat, short_id, user):
+    return Message.objects.create(        
+        post_id=short_id,
+        sender_id=user,
+        chat_id=chat,
+        created_by=user
+    )

@@ -119,10 +119,10 @@
     function shareShort(videoId) {
         // Display the modal
         $('#short-create-modal').show();
-        
+    
         // Initial results load
         updateShareResults(videoId);
-        
+    
         // Attach a real-time search event listener (with debouncing if needed)
         $('#short-search').off('input').on('input', function() {
             updateShareResults(videoId);
@@ -131,13 +131,13 @@
     
     function updateShareResults(videoId) {
         var $container = $('#short-filled');
-        
+    
         // Optionally fade the container to indicate loading (set opacity to 0.5)
         $container.fadeTo(100, 0.5);
-        
+    
         // Get the current search query
         var searchQuery = $('#short-search').val();
-        
+    
         // Make the AJAX call to fetch share data including the search query
         $.ajax({
             url: '/short/share/api',
@@ -147,7 +147,7 @@
             success: function(data) {
                 let combinedHtml = '';
                 const fallbackImage = '/static/images/avatar.jpg';
-                
+    
                 // Generate Chats Section
                 if (data.chats && data.chats.length > 0) {
                     combinedHtml += `
@@ -168,13 +168,13 @@
                         </div>
                     `;
                 }
-                
+    
                 // Generate Members Section
                 let members = [];
                 if (data.follow && data.follow.members) {
                     members = data.follow.members;
                 }
-                
+    
                 if (!members || members.length === 0) {
                     combinedHtml += '<div class="no-members-message">No Followers And Followings to Display</div>';
                 } else {
@@ -188,7 +188,6 @@
                         combinedHtml += `
                             <div class="short-selection-body" id="user-${member.user_id}" data-user-id="${member.user_id}">
                                 <img src="${profileImage}" alt="${member.user_id__first_name}'s profile photo" class="short-profile-photo">
-                                <input type="checkbox" class="short-checkbox" id="checkbox-${member.user_id}" onchange="checkSelection(${member.user_id})" onclick="event.stopPropagation();">
                                 <div class="short-profile-text">${member.user_id__first_name} ${member.user_id__last_name}</div>
                             </div>
                         `;
@@ -198,40 +197,66 @@
                         </div>
                     `;
                 }
-                
+    
                 // Update the container with a fade effect: fade out, update content, then fade in to full opacity
                 $container.fadeOut(100, function(){
                     $(this).html(combinedHtml).fadeTo(100, 1);
+    
+                    // Attach click event handler for chats so that clicking the entire item toggles selection
+                    $('.short-chat-item').off('click').on('click', function() {
+                        $(this).toggleClass('selected');
+                    });
+    
+                    // Attach click event handler for member profiles so that clicking the container toggles selection
+                    $('.short-selection-body').off('click').on('click', function() {
+                        $(this).toggleClass('selected');
+                    });
                 });
-                
+    
                 // Attach event handler to the Send button
                 $('#send-button').off('click').on('click', function() {
-                    // Gather all selected member IDs
-                    let selectedIds = [];
-                    $('.short-checkbox:checked').each(function() {
-                        let userId = $(this).closest('.short-selection-body').data('user-id');
-                        selectedIds.push(userId);
+                    // Gather selected chat IDs from elements with the 'selected' class
+                    let selectedChatIds = [];
+                    $('.short-chat-item.selected').each(function() {
+                        let chatId = $(this).data('chat-id');
+                        selectedChatIds.push(chatId);
                     });
-                    
-                    if (selectedIds.length > 0) {
-                        // Make an AJAX call to send the share request
-                        $.ajax({
-                            url: '/short/send', // Replace with your send endpoint
-                            type: 'POST',
-                            data: { video_id: videoId, members: selectedIds },
-                            dataType: 'json',
-                            success: function(response) {
-                                alert('Share successful!');
-                                $('#short-create-modal').hide();
-                            },
-                            error: function(xhr, status, error) {
-                                console.error('Error sending share:', error);
-                                alert('Error sending share. Please try again.');
-                            }
-                        });
-                    } else {
-                        alert('Please select at least one member to share with.');
+    
+                    // Gather selected member IDs from elements with the 'selected' class
+                    let selectedMemberIds = [];
+                    $('.short-selection-body.selected').each(function() {
+                        let userId = $(this).data('user-id');
+                        selectedMemberIds.push(userId);
+                    });
+    
+                    if (selectedChatIds.length === 0 && selectedMemberIds.length === 0) {
+                        alert('Please select at least one chat or member to share with.');
+                        return;
                     }
+    
+                    // Make an AJAX call to send the share request with both chats and members, including the CSRF token
+                    $.ajax({
+                        url: '/short/send', // Replace with your send endpoint
+                        type: 'POST',
+                        headers: {
+                            'X-CSRFToken': getCookie('csrftoken')
+                        },
+                        contentType: 'application/json', // Ensure the request is sent as JSON
+                        data: JSON.stringify({ 
+                            short_id: videoId, 
+                            chats: selectedChatIds, 
+                            members: selectedMemberIds 
+                        }),
+                        dataType: 'json',
+                        success: function(response) {
+                            alert('Share successful!');
+                            $('#short-create-modal').hide();
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('Error sending share:', error);
+                            alert('Error sending share. Please try again.');
+                        }
+                    });
                 });
             },
             error: function(xhr, status, error) {
@@ -242,6 +267,7 @@
             }
         });
     }
+    
     
 </script>
 

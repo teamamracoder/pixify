@@ -1,9 +1,10 @@
 from django.views import View
 from django.shortcuts import render, redirect
-from ..services import short_service, chat_service, follower_service
+from ..services import short_service, chat_service, follower_service, message_service, chat_member_service
 import random
 from django.http import JsonResponse
 import json
+from ..constants import ChatType
 
 class ShortListView(View):
     def get(self, request):
@@ -157,12 +158,39 @@ class ShortShareListViewApi(View):
 
 
 
+
 class ShortSendView(View):
-    def post(self, request, post_id):
+    def post(self, request):
         user = request.user
-        data = json.loads(request.body)
-        chat_id = data.get('chat_id')
-        chat = chat_service.get_chat(chat_id)
-        post = short_service.get_short(post_id)
-        short_service.short_send(post, chat, user)
+        try:
+            data = json.loads(request.body)
+        except json.JSONDecodeError:
+            return JsonResponse({"success": False, "error": "Invalid JSON"}, status=400)
+        
+        short_id = data.get("short_id")
+        chats = data.get("chats", [])
+        members = data.get("members", [])
+
+        # Log the received data for debugging
+        print("Video :", short_id)
+        print("Selected Chats:", chats)
+        print("Selected Members:", members)
+        
+        # Send the video to the selected chats and members
+        for chat_id in chats:
+            chat = chat_service.get_chat_by_id(chat_id)
+            message_service.send_video_to_chat(chat, short_id, user)
+
+        # Send the video to the selected members            
+        for member_id in members:
+            chat = chat_service.create_chat(user, None, None, ChatType.PERSONAL.value)
+            chat_member_service.add_chat_member(chat.id, user.id, user)
+            chat_member_service.add_chat_member(chat.id, member_id, user)
+
+            print(chat)
+
+            message_service.send_video_to_chat(chat_id, short_id, user)
+            
+            message_service.send_video_to_user(member_id, short_id, user)
+
         return JsonResponse({"success": True})
