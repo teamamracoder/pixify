@@ -969,7 +969,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 // Update the seen-status element with the "seen" icon if the user is the current user.
                 if (data.user === currentUser) {
-                  seenStatusElement.innerHTML = `<i class="bi bi-check2-all"></i>`;
+                  seenStatusElement.innerHTML = `<i class="bi bi-check2-all" style="color:#2ef3e4"></i>`;
                 } else {
                   seenStatusElement.innerHTML = "";
                 }
@@ -977,7 +977,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Fallback: if .reactionandseen isn't found, insert at the end of messageElement.
                 const seenStatusHtml =
                   data.user === currentUser
-                    ? `<div class="seen-status"><i class="bi bi-check2-all"></i></div>`
+                    ? `<div class="seen-status"><i class="bi bi-check2-all" style="color:#2ef3e4"></i></div>`
                     : "";
                 messageElement.insertAdjacentHTML('beforeend', seenStatusHtml);
               }

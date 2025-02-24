@@ -55,6 +55,13 @@ class HomeView(View):
 
         random.shuffle(shorts)  # Randomize the list
 
+        #unread message show
+        unread_count=services.message_service.unread_msg_count(user.id)
+        if unread_count > 10:
+            unread_count = '10+'
+        elif unread_count== 0:
+            unread_count = ''
+
         # Merge everything into a single context
         context = success_response(message=message, message_type=message_type)
         context.update({
@@ -62,6 +69,7 @@ class HomeView(View):
             'story_dict': story_dict,
             'shorts':shorts,
             'userid':userid,
+            'unread_count':unread_count,
         })
 
         return render(request, "enduser/home/index.html", context)
