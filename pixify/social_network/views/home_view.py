@@ -45,6 +45,8 @@ class HomeView(View):
             'storys': storys,
             #'name': 'sribash',
         }
+
+        # shorts fetching
         shorts = services.short_service.get_shorts()
         for short in shorts:
             count = services.short_service.reaction_count(short.id)
