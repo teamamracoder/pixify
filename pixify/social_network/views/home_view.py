@@ -93,6 +93,12 @@ class LoginUserDetailsView(View):
     def get(self, request):
         user_id = request.user.id
         user_details = services.user_service.get_user(user_id)
+                #unread message show
+        unread_count=services.message_service.unread_msg_count(user_id)
+        if unread_count > 10:
+            unread_count = '10+'
+        elif unread_count== 0:
+            unread_count = ''
 
         user_details_dict = model_to_dict(user_details)
         totalUnreadNotification=services.user_Notification_service.count_unread_notifications(user_id)
@@ -104,7 +110,7 @@ class LoginUserDetailsView(View):
             "country":user_details.country,
             "profile_image_url":user_details.profile_photo_url,
             "unreadNotification":totalUnreadNotification,
-            "unreadMessage":0
+            "unreadMessage":unread_count,
 
         }
 
