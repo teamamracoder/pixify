@@ -113,6 +113,7 @@ class MessageListView(View):
             'chat_cover': chat_cover,
             'is_group': chat.type == ChatType.GROUP.value,
             'seen_by_all': seen_by_all,
+            'member_id':member.id
         }
 
         # --- AJAX branch for older messages ---

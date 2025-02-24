@@ -85,6 +85,8 @@ urlpatterns = [
     # profile
     path('profile/', views.EnduserprofileView.as_view(), name='userprofile'),
     path('editprofile/<int:user_id>/', views.EnduserprofileUpdateView.as_view(),name='enduser_edit_profile'),
+    path('profile/<int:user_id>/', views.EnduserprofileListView.as_view(),name='profile'),
+
 
     # aboutus
     path('aboutus/', views.AboutUsView.as_view(), name='aboutus'),

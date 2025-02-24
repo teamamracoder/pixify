@@ -24,9 +24,9 @@
             </div>
             {% else %}
             <div class="profile-pic">
-                <img src="{{ data.chat.chat_cover|default:'\static\images\avatar.jpg' }}" alt="Profile Picture" class="profile-pic"onclick="window.location.href='{% url 'userprofile' %}';">
+                <img src="{{ data.chat.chat_cover|default:'\static\images\avatar.jpg' }}" alt="Profile Picture" class="profile-pic">
             </div>
-            <div class="username ">{{ data.chat.title }}</div>
+            <div class="username " onclick="window.location.href='{% url 'profile' data.chat.member_id %}'">{{ data.chat.title }}</div>
             {% endif %}
         </div>
         <!-- <div id="sendDataButton"><i class="fa-solid fa-phone"></i></div>  -->
