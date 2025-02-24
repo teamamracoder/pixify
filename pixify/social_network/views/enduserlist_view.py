@@ -1,22 +1,11 @@
-import os
-from pyexpat.errors import messages
-from django.shortcuts import render, redirect
+from django.shortcuts import render
 from django.views import View
 
-from pixify import settings
 from ..services import user_service
-from ..constants import Gender
-from ..constants import RelationShipStatus
 from ..services import chat_service
-from django.http import JsonResponse
-from ..services import manage_notification_service
-from django.http import JsonResponse
-from django.contrib.auth.decorators import login_required
-from ..models import Notification
 
 class EnduserprofileListView(View):
     def get(self,request,user_id):
-        user = user_id
         data = chat_service.list_followings(user_id, 0, 5)
         user_details = [user_service.get_user_details(user_id)]
         friends = user_service.friends_count(user_id)
