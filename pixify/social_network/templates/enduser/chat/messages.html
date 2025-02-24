@@ -65,7 +65,11 @@
                     <img src="{{ message.sender_id.profile_photo_url|default:'\static\images\avatar.jpg' }}" alt="{{ message.sender_id.first_name }}'s Profile Picture" class="message-profile-pic">
                     <span class="message-username">{{ message.sender_id.first_name }}</span>
                 </div>
-                <div class="message-text">{{ message.text }}</div>
+
+                {% if message.text %}
+                    <div class="message-text">{{ message.text }}</div>
+                {% endif %}
+
                 {% if message.media_url %}
                 <span class="message-media">{{ message.media_url }}</span>
                 {% endif %}
@@ -74,23 +78,22 @@
 
                 {% if message.post_id %}
                 <div class="message-post">
-                  <video id="message-short" class="message-short-video" autoplay loop muted playsinline>
-                    <source src="{% static message.post.media_url.0 %}" type="video/mp4">
+                  <video id="message-short" class="message-short-video" loop muted>
+                    <source src="{% static message.post_id.media_url.0 %}" type="video/mp4">
                   </video>
                   <div class="message-short-info">
                     <div class="message-short-user-info">
-                      <img src="{{ message.post.posted_by.profile_photo_url|default:'/static/images/avatar.jpg' }}"
-                           alt="{{ message.post.posted_by.first_name }}'s Profile Picture"
+                      <img src="{{ message.post_id.posted_by.profile_photo_url|default:'/static/images/avatar.jpg' }}"
+                           alt="{{ message.post_id.posted_by.first_name }}'s Profile Picture"
                            class="message-short-profile-pic">
                       <div class="message-short-username">
-                        {{ message.post.posted_by.first_name }} {{ message.post.posted_by.last_name }}
+                        {{ message.post_id.posted_by.first_name }} {{ message.post_id.posted_by.last_name }}
                       </div>
                     </div>
                   </div>
                 </div>
                 {% endif %}
-                
-               
+
 
                 
                 

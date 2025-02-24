@@ -186,3 +186,6 @@ def toggle_like(comment, user):
 def comment_reaction_count(comment):
     return CommentReaction.objects.filter(comment_id = comment, is_active = True).count()
 
+
+def get_short_media(post_id):
+    return Post.objects.filter(id=post_id, is_active=True).values('media_url')
