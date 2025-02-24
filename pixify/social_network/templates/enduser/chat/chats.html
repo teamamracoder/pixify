@@ -159,342 +159,297 @@
 
 
 
-
-    <!-- Modal -->
-    <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog"
-        aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <div class="input-group mb-3 " style="display:flow; height:60vh; ">
-                    
-                        <button class="parchat-arrow-button" id="arrow-button">
-                            <i class='far fa-hand-point-right'></i>
-                        </button>
-
-                    <div class="parchat-container">
-                        <div class="parchat-trend-text">Make A Conversation</div>
-                        <div class="parchat-input-wrapper">
-                            <input type="text" id="parchat-searchin" class="parchat-form-control" placeholder="Search Name" aria-label="Search Name">
-                        </div>
-                        <div id="parchat-filled" class="parchat-profile-grid">
-                            <!-- Profile items go here -->
-                        </div>
-                    </div>
-
-                    <!-- Modal for displaying user details -->
-                    <div id="parchat-userModal" class="parchat-modal">
-                        <div class="parchat-modal-content">
-                            <span class="parchat-close">&times;</span>
-                            <div id="parchat-user-details"></div>
-                        </div>
-                    </div>
-                </div>
-
+    <!-- Chat Create Modal -->
+<div id="chat-create-modal" class="chat-create-modal">
+    <div class="chat-create-modal-content">
+        <!-- Updated close button calls closeChatModal() -->
+        <div class="chat-close" onclick="closeChatModal()">✖</div>
+        <h5 class="chat-create-modal-title">Make A Conversation</h5>
+        <input type="text" id="chat-search" class="chat-form-control" placeholder="Search Name..." aria-label="Search Name">
+        <div id="chat-filled" class="chat-profile-grid">
+            <!-- Profile items go here -->
+        </div>
+        <div class="chat-modal-footer">
+            <div class="chat-arrow-button" id="arrow-button">
+                <i class="bi bi-arrow-right-circle"></i>
             </div>
-            </a>
         </div>
     </div>
 </div>
 
 <script>
-function focusSearchBar() {
-    setTimeout(function() {
-        document.getElementById('search_chats').focus();
-    }, 500); // Adjust delay if needed
-}
-$(document).ready(function () {
-    let selectedItems = []; // Array to store selected item IDs
-    let holdTimer;
-    let holdTriggered = false;
-    let redirectEnabled = true;  // Flag to determine if redirection is enabled
+    // Focus on the new modal’s search bar
+    function focusSearchBar() {
+        setTimeout(function() {
+            document.getElementById('chat-search').focus();
+        }, 500); // Adjust delay if needed
+    }
 
-    console.log('Initial selectedItems:', selectedItems);
+    $(document).ready(function () {
+        // Define selectedItems in this scope for global access via window.
+        let selectedItems = [];
 
-// Function to fetch followers and followings based on the search query
-function fetchFollowersAndFollowings(searchQuery = '') {
-    $.ajax({
-        url: '/chat/followers/api?search=' + searchQuery,
-        type: 'GET',
-        success: function (res) {
-            let combinedHtml = '';
-            const fallbackImage = '/static/images/avatar.jpg';
+        let holdTimer;
+        let holdTriggered = false;
+        let redirectEnabled = true;  // Flag to determine if redirection is enabled
 
-            if (res.members.length === 0) {
-                // If no members are found, display a message
-                combinedHtml = '<div class="no-members-message">No Followers And Followings to Display</div>';
-            } else {
-                // Render followers
-                res.members.forEach(function (member) {
-                    const profileImage = member.user_id__profile_photo_url || fallbackImage;
-                    combinedHtml += `
-                        <div class="parchat-selection-body" id="user-${member.user_id}" data-user-id="${member.user_id}">
-                            <img src="${profileImage}" alt="${member.user_id__first_name}'s profile photo" class="parchat-profile-photo">
-                            <input type="checkbox" class="parchat-checkbox" id="checkbox-${member.user_id}" onchange="checkSelection(${member.user_id})" onclick="event.stopPropagation();">
-                            <div class="parchat-profile-text">${member.user_id__first_name} ${member.user_id__last_name}</div>
-                        </div>
-                    `;
-                });
+        console.log('Initial selectedItems:', selectedItems);
 
-                // Update profiles in the DOM
-                $("#parchat-filled").html(combinedHtml);
+        // Function to clear all selections and update UI elements
+        window.clearSelections = function () {
+            selectedItems = [];
+            $(".chat-selection-body").removeClass('selected');
+            $(".chat-checkbox").prop("checked", false).hide();
+            updateArrowButtonVisibility();
+            updateRedirectState();
+        };
 
-                // Reapply selected class to previously selected items
-                selectedItems.forEach(function (itemId) {
-                    $(`#user-${itemId}`).addClass('selected');
-                    $(`#checkbox-${itemId}`).prop('checked', true);
-                });
+        // Function to close the modal and clear selections
+        window.closeChatModal = function () {
+            document.getElementById('chat-create-modal').style.display = 'none';
+            window.clearSelections();
+        };
 
-                updateArrowButtonVisibility();
-                applyPressHoldFunctionality();
-            }
-        },
-        error: function (xhr, status, error) {
-            console.log(xhr);
-        },
-    });
-}
+        // Function to fetch followers and followings based on the search query
+        function fetchFollowersAndFollowings(searchQuery = '') {
+            $.ajax({
+                url: '/chat/followers/api?search=' + searchQuery,
+                type: 'GET',
+                success: function (res) {
+                    let combinedHtml = '';
+                    const fallbackImage = '/static/images/avatar.jpg';
 
+                    if (res.members.length === 0) {
+                        combinedHtml = '<div class="no-members-message">No Followers And Followings to Display</div>';
+                    } else {
+                        res.members.forEach(function (member) {
+                            const profileImage = member.user_id__profile_photo_url || fallbackImage;
+                            combinedHtml += `
+                                <div class="chat-selection-body" id="user-${member.user_id}" data-user-id="${member.user_id}">
+                                    <img src="${profileImage}" alt="${member.user_id__first_name}'s profile photo" class="chat-profile-photo">
+                                    <input type="checkbox" class="chat-checkbox" id="checkbox-${member.user_id}" onchange="checkSelection(${member.user_id})" onclick="event.stopPropagation();">
+                                    <div class="chat-profile-text">${member.user_id__first_name} ${member.user_id__last_name}</div>
+                                </div>
+                            `;
+                        });
+                    }
 
-    // Apply press-and-hold functionality for selecting profiles
-    function applyPressHoldFunctionality() {
-        $(".parchat-selection-body").mousedown(function (event) {
-            let userId = $(this).data('user-id');
-            if (event.target.classList.contains('parchat-checkbox')) {
-                return; // Ignore mousedown on checkbox
-            }
-            holdTimer = setTimeout(function () {
-                selectProfile(userId);
-                holdTriggered = true; // Mark the hold as triggered
-                showUserDetails(userId); // Show the user details in the modal
-            }, 1000); // 1 second hold
-        }).mouseup(function (event) {
-            clearTimeout(holdTimer);
+                    // Update profiles in the DOM
+                    $("#chat-filled").html(combinedHtml);
 
-            // Only trigger the regular click if hold was NOT triggered
-            if (!holdTriggered && !$(event.target).hasClass('parchat-checkbox')) {
-                if (redirectEnabled) {
-                    let userId = $(this).data('user-id');
-                    redirectToChat(userId);  // Handle the regular click event here
+                    // Reapply selected class to previously selected items and check their checkboxes
+                    selectedItems.forEach(function (itemId) {
+                        $(`#user-${itemId}`).addClass('selected');
+                        $(`#checkbox-${itemId}`).prop('checked', true);
+                    });
+
+                    updateArrowButtonVisibility();
+                    updateCheckboxVisibility();
+                    applyPressHoldFunctionality();
+                },
+                error: function (xhr, status, error) {
+                    console.log(xhr);
+                },
+            });
+        }
+
+        // Apply press-and-hold functionality for selecting profiles
+        function applyPressHoldFunctionality() {
+            $(".chat-selection-body").mousedown(function (event) {
+                let userId = $(this).data('user-id');
+                if (event.target.classList.contains('chat-checkbox')) {
+                    return; // Ignore mousedown on checkbox
                 }
+                holdTimer = setTimeout(function () {
+                    selectProfile(userId);
+                    holdTriggered = true; // Mark the hold as triggered
+                }, 1000); // 1 second hold
+            }).mouseup(function (event) {
+                clearTimeout(holdTimer);
+                if (!holdTriggered && !$(event.target).hasClass('chat-checkbox')) {
+                    let userId = $(this).data('user-id');
+                    // If no profile is yet selected, then redirect on click.
+                    // Otherwise, toggle the selection.
+                    if (redirectEnabled) {
+                        redirectToChat(userId);
+                    } else {
+                        selectProfile(userId);
+                    }
+                }
+                holdTriggered = false;
+            }).mouseleave(function () {
+                clearTimeout(holdTimer);
+                holdTriggered = false;
+            });
+        }
+
+        // Select the profile when pressed or clicked
+        window.selectProfile = function (userId) {
+            $(`#user-${userId}`).toggleClass('selected');
+            // Ensure checkboxes are visible if there is any selection
+            if (selectedItems.length === 0 || !$(`#user-${userId}`).hasClass('selected')) {
+                // When deselecting, check if no items remain selected
+                updateCheckboxVisibility();
+            } else {
+                $('.chat-checkbox').css('display', 'block');
             }
-            holdTriggered = false; // Reset holdTriggered after mouseup
-        }).mouseleave(function () {
-            clearTimeout(holdTimer);
-            holdTriggered = false; // Reset on mouse leave
-        });
-    }
 
-    // Select the profile when pressed or clicked
-    window.selectProfile = function (userId) {
-        $(`#user-${userId}`).toggleClass('selected');
-
-        // Show checkboxes on all profiles
-        $('.parchat-checkbox').css('display', 'block');
-
-        // Automatically check the selected profile's checkbox
-        if ($(`#user-${userId}`).hasClass('selected')) {
-            $(`#checkbox-${userId}`).prop('checked', true);
-            if (!selectedItems.includes(userId)) {
-                selectedItems.push(userId);
+            if ($(`#user-${userId}`).hasClass('selected')) {
+                $(`#checkbox-${userId}`).prop('checked', true);
+                if (!selectedItems.includes(userId)) {
+                    selectedItems.push(userId);
+                }
+            } else {
+                $(`#checkbox-${userId}`).prop('checked', false);
+                selectedItems = selectedItems.filter(id => id !== userId);
             }
-        } else {
-            $(`#checkbox-${userId}`).prop('checked', false);
-            selectedItems = selectedItems.filter(id => id !== userId);
-        }
 
-        console.log('Selected items after toggle:', selectedItems);
+            console.log('Selected items after toggle:', selectedItems);
+            updateArrowButtonVisibility();
+            updateRedirectState();
+            updateCheckboxVisibility();
+        };
 
-        updateArrowButtonVisibility();
-        updateRedirectState();
-        updateCheckboxVisibility();
-    }
-
-    // Handle changes in the checkbox (selection)
-    window.checkSelection = function (userId) {
-        const element = $(`#user-${userId}`);
-
-        if ($(`#checkbox-${userId}`).is(':checked')) {
-            element.addClass('selected');
-            if (!selectedItems.includes(userId)) {
-                selectedItems.push(userId);
+        // Handle changes in the checkbox (selection)
+        window.checkSelection = function (userId) {
+            const element = $(`#user-${userId}`);
+            if ($(`#checkbox-${userId}`).is(':checked')) {
+                element.addClass('selected');
+                if (!selectedItems.includes(userId)) {
+                    selectedItems.push(userId);
+                }
+            } else {
+                element.removeClass('selected');
+                selectedItems = selectedItems.filter(id => id !== userId);
             }
-        } else {
-            element.removeClass('selected');
-            selectedItems = selectedItems.filter(id => id !== userId);
-        }
 
-        console.log('Selected items after checkbox change:', selectedItems);
+            console.log('Selected items after checkbox change:', selectedItems);
+            updateArrowButtonVisibility();
+            updateRedirectState();
+            updateCheckboxVisibility();
+        };
 
-        updateArrowButtonVisibility();
-        updateRedirectState();
-        updateCheckboxVisibility();
-    }
-
-    // Update the visibility of the arrow button based on the number of selected items
-    function updateArrowButtonVisibility() {
-        console.log('Selected items length:', selectedItems.length);
-        if (selectedItems.length > 1) {
-            $('#arrow-button').css('display', 'block');
-            console.log('Arrow button shown');
-        } else {
-            $('#arrow-button').css('display', 'none');
-            console.log('Arrow button hidden');
-        }
-    }
-
-    // Update the redirect state (if no items are selected, enable redirection)
-    function updateRedirectState() {
-        if (selectedItems.length === 0) {
-            redirectEnabled = true; // Allow redirect when no checkboxes are selected
-        } else {
-            redirectEnabled = false; // Prevent redirect when any checkbox is selected
-        }
-    }
-
-    // Update the checkbox visibility based on selected items
-    function updateCheckboxVisibility() {
-        if (selectedItems.length === 0) {
-            // Hide checkboxes when no items are selected
-            $('.parchat-checkbox').hide();
-        } else if (selectedItems.length > 1) {
-            // Show checkboxes when more than 1 item is selected
-            $('.parchat-checkbox').show();
-        }
-    }
-
-    let arrowButton = document.getElementById('arrow-button');
-    if (arrowButton) {
-        arrowButton.addEventListener('click', function() {
-            console.log('Arrow button clicked. Selected items:', selectedItems);
-
-            if (selectedItems.length === 1) {
-                createChat(1, selectedItems); // Convert type to integer and pass array
-            } else if (selectedItems.length > 1) {
-                createChat(2, selectedItems); // Convert type to integer
+        // Update the visibility of the arrow button based on the number of selected items
+        function updateArrowButtonVisibility() {
+            console.log('Selected items length:', selectedItems.length);
+            if (selectedItems.length > 1) {
+                $('#arrow-button').css('display', 'block');
+                console.log('Arrow button shown');
+            } else {
+                $('#arrow-button').css('display', 'none');
+                console.log('Arrow button hidden');
             }
-        });
-    } else {
-        console.error("Arrow button element not found!");
-    }
+        }
 
-    // Redirect to chat with the selected user
-    window.redirectToChat = function (userId) {
-        if (redirectEnabled) {
-            checkExistingChat(userId, function (existingChat) {
-                if (existingChat && existingChat.chat_id) {
-                    // Redirect to the existing chat
-                    window.location.href = '/chat/' + existingChat.chat_id + '/message/?message=' + encodeURIComponent(existingChat.message || '');
-                } else {
-                    // Create a new chat if no existing chat is found
-                    createChat(1, [userId]);
+        // Update the redirect state (if no items are selected, enable redirection)
+        function updateRedirectState() {
+            redirectEnabled = selectedItems.length === 0;
+        }
+
+        // Update the checkbox visibility based on selected items
+        // Now: if at least one item is selected, show all checkboxes; otherwise hide them.
+        function updateCheckboxVisibility() {
+            if (selectedItems.length > 0) {
+                $('.chat-checkbox').show();
+            } else {
+                $('.chat-checkbox').hide();
+            }
+        }
+
+        let arrowButton = document.getElementById('arrow-button');
+        if (arrowButton) {
+            arrowButton.addEventListener('click', function() {
+                console.log('Arrow button clicked. Selected items:', selectedItems);
+                if (selectedItems.length === 1) {
+                    createChat(1, selectedItems);
+                } else if (selectedItems.length > 1) {
+                    createChat(2, selectedItems);
+                }
+            });
+        } else {
+            console.error("Arrow button element not found!");
+        }
+
+        // Redirect to chat with the selected user
+        window.redirectToChat = function (userId) {
+            if (redirectEnabled) {
+                checkExistingChat(userId, function (existingChat) {
+                    if (existingChat && existingChat.chat_id) {
+                        window.location.href = '/chat/' + existingChat.chat_id + '/message/?message=' + encodeURIComponent(existingChat.message || '');
+                    } else {
+                        createChat(1, [userId]);
+                    }
+                });
+            }
+        };
+
+        // Function to check if a chat already exists
+        function checkExistingChat(userId, callback) {
+            $.ajax({
+                url: '/chat/create/',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    type: 1,
+                    members: [userId],
+                    _token: $('meta[name="csrf-token"]').attr('content')
+                }),
+                success: function (res) {
+                    callback(res);
+                },
+                error: function (xhr, status, error) {
+                    console.log('Error:', xhr, status, error);
+                    callback(null);
                 }
             });
         }
-    };
 
-    // Function to check if a chat already exists
-    function checkExistingChat(userId, callback) {
-        $.ajax({
-            url: '/chat/create/', // Endpoint to check or create chat
-            type: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify({
-                type: 1, // Chat type (personal chat)
-                members: [userId], // User ID to check chat with
-                _token: $('meta[name="csrf-token"]').attr('content') // CSRF token for security
-            }),
-            success: function (res) {
-                // Pass the response to the callback function
-                callback(res);
-            },
-            error: function (xhr, status, error) {
-                console.log('Error:', xhr, status, error);
-                // Call callback with null on error
-                callback(null);
+        $.ajaxSetup({
+            headers: {
+                'X-CSRFToken': $('meta[name="csrf-token"]').attr('content')
             }
         });
-    }
 
-
-    $.ajaxSetup({
-        headers: {
-            'X-CSRFToken': $('meta[name="csrf-token"]').attr('content') // Set CSRF token in the headers
+        // Function to create a chat with the selected members
+        function createChat(type, members) {
+            $.ajax({
+                url: '/chat/create/',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    type: type,
+                    members: members,
+                    _token: $('meta[name="csrf-token"]').attr('content')
+                }),
+                success: function (res) {
+                    window.location.href = '/chat/' + res.chat_id + '/message/?message=' + encodeURIComponent(res.message);
+                },
+                error: function (xhr, status, error) {
+                    console.log('Error:', xhr, status, error);
+                }
+            });
         }
-    });
 
-    // Function to create a chat with the selected members
-    function createChat(type, members) {
-        $.ajax({
-            url: '/chat/create/',
-            type: 'POST',
-            contentType: 'application/json', // Set content type to JSON
-            data: JSON.stringify({
-                type: type,
-                members: members,
-                _token: $('meta[name="csrf-token"]').attr('content') // CSRF token for security
-            }),
-           success: function (res) {
-            window.location.href = '/chat/' + res.chat_id + '/message/?message=' + encodeURIComponent(res.message);
-            },
-            error: function (xhr, status, error) {
-                console.log('Error:', xhr, status, error);
-            }
+        // Dynamic search listener for the new modal input
+        $('#chat-search').on('input', function () {
+            const searchQuery = $(this).val();
+            fetchFollowersAndFollowings(searchQuery);
         });
-    }
 
-    // Show user details in a modal
-    function showUserDetails(userId) {
-        $.ajax({
-            url: `/chat/user/details/${userId}`,
-            type: 'GET',
-            success: function (data) {
-                // Populate the modal with user details
-                $('#parchat-user-details').html(`
-                    <h3>${data.name}</h3>
-                    <p>${data.bio}</p>
-                    <p>Email: ${data.email}</p>
-                `);
-
-                // Show the modal
-                $('#parchat-userModal').show();
-            },
-            error: function (xhr, status, error) {
-                console.log('Error fetching user details:', error);
-            }
-        });
-    }
-
-    // Close modal on clicking the close button
-    $('#parchat-userModal .parchat-close').click(function() {
-        $('#parchat-userModal').hide();
+        // Fetch all followers and followings on page load
+        fetchFollowersAndFollowings();
     });
-
-    // Event listener for dynamic search
-    $('#parchat-searchin').on('input', function () {
-        const searchQuery = $(this).val();
-        fetchFollowersAndFollowings(searchQuery); // Fetch followers and followings based on the search query
-    });
-
-    // Event listener for search button click
-    $('#parchat-searchbtn').click(function () {
-        const searchQuery = $('#parchat-searchin').val();
-        fetchFollowersAndFollowings(searchQuery); // Trigger search when button is clicked
-    });
-
-    // Fetch all followers and followings on page load
-    fetchFollowersAndFollowings();
-});
-
 </script>
 
+
+
 </div>
-<div class="plus-modal">
-    <button data-toggle="modal" data-target="#exampleModalCenter" class="border-0 bg-transparent">
-        <i class="text-light bi bi-plus-circle"></i>
-    </button>
+    <div class="plus-modal" onclick="document.getElementById('chat-create-modal').style.display='block'">
+        <div> <i class="text-light bi bi-plus-circle"></i> </div>
+    </div>
 </div>
-</div>
+
+
 <style>
     .chats-list-box{
         background-color: #1f0447e3;
@@ -507,8 +462,9 @@ function fetchFollowersAndFollowings(searchQuery = '') {
     .plus-modal{
         font-size: 24px;
         position: absolute;
-        bottom: 33px;right:
-        28px;background-color:  #6a0b7d;
+        bottom: 33px;
+        right: 28px;
+        background-color:  #6a0b7d;
         height: 40px;
         width: 40px;
         border-radius: 50%;
@@ -925,137 +881,133 @@ function fetchFollowersAndFollowings(searchQuery = '') {
         border-bottom-right-radius:0px;
     }
 
-    .parchat-container {
-        /* width: 90%; */
-        padding: 20px;
-        position: relative; /* Ensure relative positioning for children */
+/* Modal Changes: Renamed from "parchat-" to "chat-" */
+
+    /* Modal Overlay */
+    .chat-create-modal {
+    display: none; /* Hidden by default */
+    position: fixed;
+    z-index: 1000;
+    left: 120px;
+    top: 0;
+    width: 80%;
+    height: 100%;
     }
 
-    .parchat-trend-text {
-        font-size: 24px;
-        margin-bottom: 20px;
+    /* Modal Content */
+    .chat-create-modal-content {
+    background-color: #301756;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 40%;
+    max-width: 600px;
+    height: 400px;
+    position: relative;
     }
 
-    .parchat-profile-grid {
-        height:300px;
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 20px;
-        overflow-y:scroll;
+    /* Close Button */
+    .chat-close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    }
+    .chat-close:hover,
+    .chat-close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
     }
 
-    .parchat-selection-body {
-        height: 85px;
-        width: 85px;
-        position: relative;
-        display: inline-block;
-        margin: 10px;
-        cursor: pointer;
-        border: 2px solid transparent;
-        border-radius: 50%;
-        padding: 10px;
-        transition: transform 0.2s, border-color 0.2s;
+    /* Modal Title */
+    .chat-create-modal-title {
+    font-size: 24px;
+    margin-bottom: 20px;
     }
 
-    .parchat-selection-body.selected {
-        border-color: #007BFF;
-        background-color: rgba(0, 123, 255, 0.1); /* Light blue background for selected profiles */
+    /* Search Input */
+    .chat-form-control {
+    width: 100%;
+    background: #3d3d6b;
+    padding: 10px;
+    flex-grow: 1;
+    border: none;
+    outline: none;
+    font-size: 16px;
+    border-color: #007BFF;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+    }
+    .chat-form-control::placeholder {
+    color: #aaa;
     }
 
-    .parchat-profile-photo {
-        border-radius: 50%;
-        width: 60px;
-        height: 60px;
+    /* Profile Grid */
+    .chat-profile-grid {
+    overflow-y: auto;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
     }
 
-    .parchat-checkbox {
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        width: 15px;
-        height: 15px;
-        background-color: white;
-        border-radius: 50%;
-        border: 2px solid #333;
-        display: none;
+    /* Profile Item */
+    .chat-selection-body {
+    height: 85px;
+    width: 85px;
+    position: relative;
+    display: inline-block;
+    margin: 10px;
+    cursor: pointer;
+    border: 2px solid transparent;
+    border-radius: 50%;
+    padding: 10px;
+    transition: transform 0.2s, border-color 0.2s;
+    }
+    .chat-selection-body.selected {
+    border-color: #007BFF;
+    background-color: rgba(0, 123, 255, 0.1);
     }
 
-    .parchat-profile-text {
-        text-align: center;
-        margin-top: 10px;
+    /* Profile Photo */
+    .chat-profile-photo {
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
     }
 
-    .parchat-btn,
-    .parchat-btn-outline-secondary {
-        background:none;
-        margin-top: 10px;
-        padding: 10px;
-        font-size: 16px;
+    /* Checkbox */
+    .chat-checkbox {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 15px;
+    height: 15px;
+    background-color: white;
+    border-radius: 50%;
+    border: 2px solid #333;
+    display: none;
     }
 
-    .parchat-form-control {
-        background:none;
-        padding:10px;
-        flex-grow: 1;
+    /* Profile Text */
+    .chat-profile-text {
+    text-align: center;
+    margin-top: 10px;
     }
 
-    .parchat-btn-outline-secondary {
-        background-color: black;
-        color: #333;
-    }
-
-    .parchat-modal {
-        display: none; /* Hidden by default */
-        position: fixed; /* Stay in place */
-        z-index: 1000; /* Sit on top */
-        left: 0;
-        top: 0;
-        width: 100%; /* Full width */
-        height: 100%; /* Full height */
-        overflow: auto; /* Enable scroll if needed */
-        background-color: rgba(0, 0, 0, 0.4); /* Black with opacity */
-    }
-
-    .parchat-modal-content {
-        background-color: #fefefe;
-        margin: 15% auto; /* 15% from the top and centered */
-        padding: 20px;
-        border: 1px solid #888;
-        width: 80%; /* Fixed width */
-        max-width: 600px; /* Add a max-width to limit expansion */
-        height: 400px; /* Fixed height */
-        overflow-y: auto; /* Make the modal content scrollable */
-        position: relative;
-    }
-
-    .parchat-close {
-        color: #aaa;
-        float: right;
-        font-size: 28px;
-        font-weight: bold;
-    }
-
-    .parchat-close:hover,
-    .parchat-close:focus {
-        color: black;
-        text-decoration: none;
-        cursor: pointer;
-    }
-
+    /* Arrow Button */
     #arrow-button {
-        display: none; /* Hide by default */
-        bottom:0%;
-        right:0%;
-        position: absolute;
-
+        display: none;
+        top: 4%;
+        left: 88%;
+        position: relative;
     }
-
-    .parchat-arrow-button {
-        display: none; /* Hide by default */
-        position: absolute; /* Position inside parent */
-        bottom: 26%; /* Adjust based on parent height */
-        right: %;
+    .chat-arrow-button {
+        width:68px;
+        display: none;
+        position: absolute;
+        bottom: 26%;
+        right: 35%;
         background-color: #007BFF;
         color: white;
         border: none;
@@ -1065,30 +1017,7 @@ function fetchFollowersAndFollowings(searchQuery = '') {
         font-size: 20px;
     }
 
-    .parchat-input-wrapper {
-        display: flex;
-        align-items: center;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        padding: 5px;
-        max-width: 300px;
-        margin: 0 auto;
-        margin-bottom: 20px;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    }
-
-    .parchat-form-control {
-        background: none;
-        padding: 10px;
-        flex-grow: 1;
-        border: none;
-        outline: none;
-        font-size: 16px;
-    }
-
-    .parchat-form-control::placeholder {
-        color: #aaa;
-    }
+    /* End of Modal Changes */
 
     .parchat-input-wrapper:focus-within {
         border-color: #007BFF;
