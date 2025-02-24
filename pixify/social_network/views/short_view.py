@@ -170,27 +170,19 @@ class ShortSendView(View):
         short_id = data.get("short_id")
         chats = data.get("chats", [])
         members = data.get("members", [])
-
-        # Log the received data for debugging
-        print("Video :", short_id)
-        print("Selected Chats:", chats)
-        print("Selected Members:", members)
         
+        short = short_service.get_short(short_id)        
         # Send the video to the selected chats and members
         for chat_id in chats:
             chat = chat_service.get_chat_by_id(chat_id)
-            message_service.send_video_to_chat(chat, short_id, user)
+            message_service.send_video_to_chat(chat, short, user)
 
         # Send the video to the selected members            
         for member_id in members:
             chat = chat_service.create_chat(user, None, None, ChatType.PERSONAL.value)
             chat_member_service.add_chat_member(chat.id, user.id, user)
-            chat_member_service.add_chat_member(chat.id, member_id, user)
+            chat_member_service.add_chat_member(chat.id, member_id, user)            
 
-            print(chat)
-
-            message_service.send_video_to_chat(chat_id, short_id, user)
-            
-            message_service.send_video_to_user(member_id, short_id, user)
+            message_service.send_video_to_chat(chat, short, user)
 
         return JsonResponse({"success": True})
