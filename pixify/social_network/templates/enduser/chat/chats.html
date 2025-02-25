@@ -884,14 +884,12 @@
 /* Modal Changes: Renamed from "parchat-" to "chat-" */
 
     /* Modal Overlay */
-    .chat-create-modal {
+    .chat-create-modal {  
+    height:60vh ;
     display: none; /* Hidden by default */
-    position: fixed;
+    position: absolute;
     z-index: 1000;
-    left: 120px;
     top: 0;
-    width: 80%;
-    height: 100%;
     }
 
     /* Modal Content */
@@ -899,10 +897,8 @@
     background-color: #301756;
     margin: 15% auto;
     padding: 20px;
-    border: 1px solid #888;
-    width: 40%;
-    max-width: 600px;
-    height: 400px;
+    width: 70%;
+    height: 100%;
     position: relative;
     }
 
@@ -944,7 +940,9 @@
 
     /* Profile Grid */
     .chat-profile-grid {
-    overflow-y: auto;
+    margin-top: 11px;
+    height: 42vh;
+    overflow-y: scroll;
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
@@ -997,10 +995,10 @@
 
     /* Arrow Button */
     #arrow-button {
-        display: none;
-        top: 4%;
-        left: 88%;
-        position: relative;
+    bottom: 2%;
+    display: none;
+    left: 80%;
+    position: absolute;
     }
     .chat-arrow-button {
         width:68px;
