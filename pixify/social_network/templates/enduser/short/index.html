@@ -1445,14 +1445,6 @@ document.querySelectorAll('.chat-icon').forEach(button => {
     flex-direction: column;
 }
 
-.short-com{
-
-
-}
-
-
-
-/* Each Video Wrapper */
 
 /* Wrapper for each individual video with snap alignment */
 .video-wrapper {
@@ -1802,7 +1794,6 @@ margin-top: 16px;
     width: 50px;
     position: relative;
     display: flex;
-    margin: 10px;
     cursor: pointer;
     border: 2px solid transparent;
     border-radius: 50%;
@@ -1832,21 +1823,19 @@ margin-top: 16px;
     justify-content: center;
     align-items: center;
     width: 70%;
-    /* margin-top: 10px; */
-    /* margin-top: 10px; */
-    font-size: 14px;
+    font-size: 10px;
     color: #fff;
     display: flex;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
-    /* text-overflow: ellipsis;
+    text-overflow: ellipsis;
 }
 
 .short-chat-grid{
     flex-wrap: wrap;
     display: flex;
-    gap: 10%;
+    gap: 2%;
     align-items: center;
     justify-content: center;
     width: 100%;
@@ -1868,21 +1857,31 @@ margin-top: 16px;
 
 }
 .short-chats-section{
-    overflow-y:scroll;
+    overflow-y: scroll;
     width: 100%;
-    height: 30vh;
+    height: 42vh;
 }
 .xyz{
-    background: red;
-    width: 78px;
+    width: 32%;
     justify-content: center;
     align-items: center;
     display: flex;
     flex-direction: column;
+    margin-top: 15px;
+    padding-top: 10px;
 }
 
 .xyz-title{
+    white-space: nowrap;
+    height: 4vh;
+    justify-content: flex-start;
+    align-items: center;
     width: 100%;
+    font-size: 10px;
+    color: #fff;
+    display: flex;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
     overflow: hidden;
     text-overflow: ellipsis;
 }
