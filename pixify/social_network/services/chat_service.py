@@ -44,7 +44,8 @@ def list_chats_by_user(user):
             .annotate(
                 message_content=Coalesce(
                     F('text'),  # If text exists, use it.
-                    Value('[Post]')  # If no text, indicate it's a post.
+                    Value('[Post]'),  # If no text, but it's a post.
+                    Value('[Media]')  # If no text or post, but has media.
                 )
             )
             .values('message_content')[:1]  
