@@ -71,8 +71,45 @@
                 {% endif %}
 
                 {% if message.media_url %}
-                <span class="message-media">{{ message.media_url }}</span>
+                {% if message.media_url|length == 1 %}
+                  <!-- Single media: display full-width -->
+                  <div class="single-media">
+                    {% with media=message.media_url.0 %}
+                      {% if media|slice:"-4:" == ".mp4" %}
+                        <!-- Render video if file ends with .mp4 -->
+                        <video src="{% static media %}" controls></video>
+                      {% else %}
+                        <!-- Render image for non-.mp4 files -->
+                        <img src="{% static media %}" alt="Media">
+                      {% endif %}
+                    {% endwith %}
+                  </div>
+                {% else %}
+                  <!-- Multiple media: display grid (show only first 4) -->
+                  <div class="media-grid">
+                    {% for media in message.media_url|slice:":4" %}
+                      <div class="media-grid-item">
+                        {% if media|slice:"-4:" == ".mp4" %}
+                          <video src="{% static media %}" controls></video>
+                        {% else %}
+                          <img src="{% static media %}" alt="Media">
+                        {% endif %}
+                
+                        {% if forloop.last and message.media_url|length > 4 %}
+                          <!-- Overlay to indicate additional media count -->
+                          <div class="overlay">
+                            <span>+{{ message.media_url|length|add:"-4" }}</span>
+                          </div>
+                        {% endif %}
+                      </div>
+                    {% endfor %}
+                  </div>
                 {% endif %}
+              {% endif %}
+              
+              
+              
+              
 
 
                 <!-- Short  Section -->                
@@ -3071,6 +3108,67 @@ document.addEventListener("DOMContentLoaded", function () {
         max-width: 600px;
       }
     }
+
+
+
+
+    /* Single media styling */
+.single-media {
+  width: 100%;
+  margin: 0 auto;
+}
+
+.single-media img,
+.single-media video {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
+}
+
+/* Media grid container for multiple media items */
+.media-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* 2 columns */
+  grid-gap: 5px; /* Gap between grid items */
+  margin: 10px 0;
+}
+
+/* Each grid item with a square aspect ratio */
+.media-grid-item {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  padding-top: 100%; /* 1:1 aspect ratio */
+}
+
+/* Ensure images/videos cover the grid item */
+.media-grid-item img,
+.media-grid-item video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Overlay for additional media count */
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5); /* semi-transparent black */
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 2rem;
+  font-weight: bold;
+}
+
     
 
 
