@@ -1,6 +1,6 @@
 from django.views import View
 from django.shortcuts import render, redirect
-from ..services import short_service, chat_service, follower_service, message_service, chat_member_service
+from ..services import short_service, chat_service, follower_service, message_service, chat_member_service, message_read_status_service
 import random
 from django.http import JsonResponse
 import json
@@ -175,7 +175,8 @@ class ShortSendView(View):
         # Send the video to the selected chats and members
         for chat_id in chats:
             chat = chat_service.get_chat_by_id(chat_id)
-            message_service.send_video_to_chat(chat, short, user)
+            message = message_service.send_video_to_chat(chat, short, user)
+            message_read_status_service.create_message_read_status(message, user)
 
         # Send the video to the selected members            
         for member_id in members:
@@ -183,6 +184,7 @@ class ShortSendView(View):
             chat_member_service.add_chat_member(chat.id, user.id, user)
             chat_member_service.add_chat_member(chat.id, member_id, user)            
 
-            message_service.send_video_to_chat(chat, short, user)
+            message = message_service.send_video_to_chat(chat, short, user)
+            message_read_status_service.create_message_read_status(message, user)
 
         return JsonResponse({"success": True})
