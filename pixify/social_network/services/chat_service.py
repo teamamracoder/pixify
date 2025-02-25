@@ -1,14 +1,17 @@
-from ..constants import ChatType,MessageDeleteType
-from ..models import Chat, User, ChatMember,Follower,Message,MessageReadStatus
+from ..constants import ChatType, MessageDeleteType
+from ..models import Chat, User, ChatMember, Follower, Message, MessageReadStatus
 from django.shortcuts import get_object_or_404
-from django.db.models import Max,Q,Subquery,OuterRef,F,Exists,Value
 from django.db.models.functions import Coalesce
 from social_network.utils.common_utils import print_log
 from datetime import date
-
+from django.db.models import (
+    CharField, Case, When, Value, F, Q, Max, Exists, Subquery, OuterRef, Func
+)
+from django.db.models.functions import Coalesce, Cast
 
 
 def list_chats_by_user(user):
+    # Get the chats for the user that are active and in which the user is an active member.
     user_chats = Chat.objects.filter(
         members=user,
         is_active=True,
@@ -26,31 +29,50 @@ def list_chats_by_user(user):
             Max(
                 'fk_chat_messages_chats_id__send_at',
                 filter=Q(
-                    ~Q(fk_chat_messages_chats_id__delete_type=MessageDeleteType.DELETED_FOR_EVERYONE.value) & 
+                    ~Q(fk_chat_messages_chats_id__delete_type=MessageDeleteType.DELETED_FOR_EVERYONE.value) &
                     ~Q(fk_chat_messages_chats_id__deleted_by__contains=[user.id])
                 )
             ),
             F('created_at')
         )
     ).annotate(
+        # Subquery to get the latest valid message’s content from the Message table.
         latest_message=Subquery(
             Message.objects.filter(
                 Q(chat_id=OuterRef('pk')),
                 Q(is_active=True),
                 ~Q(delete_type=MessageDeleteType.DELETED_FOR_EVERYONE.value),
                 ~Q(deleted_by__contains=[user.id]),
-                (Q(text__isnull=False) & ~Q(text="")) | Q(post_id__isnull=False)  
+                # Check that at least one of these fields has a value.
+                (
+                    (Q(text__isnull=False) & ~Q(text="")) |
+                    (Q(media_url__isnull=False) & ~Q(media_url=[])) |
+                    Q(post_id__isnull=False)
+                )
             ).order_by('-send_at')
             .annotate(
-                message_content=Coalesce(
-                    F('text'),  # If text exists, use it.
-                    Value('[Post]'),  # If no text, but it's a post.
-                    Value('[Media]')  # If no text or post, but has media.
+                message_content=Case(
+                    # If text is available, use it.
+                    When(~Q(text="") & Q(text__isnull=False), then=F('text')),
+                    # If media_url is available, extract the first element.
+                    When(
+                        ~Q(media_url=[]) & Q(media_url__isnull=False),
+                        then=Func(
+                            F('media_url'),
+                            template='%(expressions)s[1]',
+                            output_field=CharField()
+                        )
+                    ),
+                    # If post_id is available, cast it to a string.
+                    When(Q(post_id__isnull=False), then=Cast(F('post_id'), CharField())),
+                    default=Value(""),
+                    output_field=CharField()
                 )
             )
-            .values('message_content')[:1]  
+            .values('message_content')[:1]
         )
     ).annotate(
+        # This subquery retrieves the sender_id for the latest valid message.
         latest_message_sender_id=Subquery(
             Message.objects.filter(
                 Q(chat_id=OuterRef('pk')),
@@ -62,15 +84,16 @@ def list_chats_by_user(user):
         )
     ).order_by('-latest_message_timestamp')
 
-    # **Filter out chats with no valid messages (text or post)**
+    # Filter out chats with no valid messages unless it's a group chat.
     user_chats = user_chats.filter(
         Q(latest_message__isnull=False) | Q(type=ChatType.GROUP.value)
     )
 
     chat_data = []
+    # Iterate over the chats to further compute per-chat data.
     for chat in user_chats:
         latest_message = Message.objects.filter(
-            chat_id=chat.id, 
+            chat_id=chat.id,
             is_active=True
         ).exclude(
             delete_type=MessageDeleteType.DELETED_FOR_EVERYONE.value,
@@ -87,6 +110,10 @@ def list_chats_by_user(user):
         })
 
     return chat_data
+
+
+
+
 
 
 def is_message_seen_by_all(message):
