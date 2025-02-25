@@ -5,6 +5,11 @@ from .services import message_service, message_mention_service, user_service,mes
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from asgiref.sync import sync_to_async
+import base64
+from django.core.files.base import ContentFile
+import hashlib
+import os
+from django.core.files.base import ContentFile
 
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -114,6 +119,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
         else:
             return
 
+
+
     async def create_message(self, text_data_json, user):
         text = text_data_json.get('message', '')
         media_files = text_data_json.get('mediaFiles', [])
@@ -124,13 +131,29 @@ class ChatConsumer(AsyncWebsocketConsumer):
         # Save media files if any
         media_urls = []
         for file in media_files:
-            file_name = default_storage.save(file['name'], ContentFile(file['content']))
-            media_url = default_storage.url(file_name)
-            media_urls.append(media_url)
+            # Get the file's original name and its Base64 content
+            original_filename = file.get('filename')
+            content = file.get('content')
+            if original_filename and content:
+                # Decode the Base64 content to binary data
+                decoded_content = base64.b64decode(content)
+                # Compute an MD5 hash from the binary content
+                file_hash = hashlib.md5(decoded_content).hexdigest()
+                # Extract the file extension (if any)
+                _, ext = os.path.splitext(original_filename)
+                new_filename = f"{file_hash}{ext.lower()}"
+
+                # Check if the file already exists in storage
+                if default_storage.exists(new_filename):
+                    saved_name = new_filename
+                else:
+                    saved_name = default_storage.save(new_filename, ContentFile(decoded_content))
+                media_url = default_storage.url(saved_name)
+                media_urls.append(media_url)
 
         # Create the message
-        message = await sync_to_async(message_service.create_message)( text, media_urls, user, chat)
-        await sync_to_async (message_read_status_service.create_message_read_status)(message, user)
+        message = await sync_to_async(message_service.create_message)(text, media_urls, user, chat)
+        await sync_to_async(message_read_status_service.create_message_read_status)(message, user)
 
         # Handle mentions
         mention_ids = []
@@ -139,7 +162,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
         for mention in mentions:
             if 'all' in mention:
-                chat_members = await sync_to_async(lambda: list(ChatMember.objects.filter(chat_id=chat.id, is_active=True).exclude(member_id=user).values_list('member_id', flat=True)))()
+                chat_members = await sync_to_async(lambda: list(
+                    ChatMember.objects.filter(chat_id=chat.id, is_active=True)
+                    .exclude(member_id=user)
+                    .values_list('member_id', flat=True)
+                ))()
                 mention_ids.extend(chat_members)
             else:
                 user_obj = await sync_to_async(lambda: User.objects.filter(first_name__iexact=mention).first())()
@@ -153,6 +180,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
         # Send the message to the WebSocket group
         await self.send_message_to_group(message, message_new=True)
 
+
+
     async def edit_message(self, message_id, text_data_json, user):
         message = await sync_to_async(message_service.get_message_by_id)(message_id)
         new_text = text_data_json.get('message', '')
@@ -161,12 +190,28 @@ class ChatConsumer(AsyncWebsocketConsumer):
         media_files = text_data_json.get('mediaFiles', [])
         chat = await sync_to_async(Chat.objects.get)(id=chat_id)
 
-        # Update media files
+       # Save media files if any
         media_urls = []
         for file in media_files:
-            file_name = default_storage.save(file['name'], ContentFile(file['content']))
-            media_url = default_storage.url(file_name)
-            media_urls.append(media_url)
+            # Get the file's original name and its Base64 content
+            original_filename = file.get('filename')
+            content = file.get('content')
+            if original_filename and content:
+                # Decode the Base64 content to binary data
+                decoded_content = base64.b64decode(content)
+                # Compute an MD5 hash from the binary content
+                file_hash = hashlib.md5(decoded_content).hexdigest()
+                # Extract the file extension (if any)
+                _, ext = os.path.splitext(original_filename)
+                new_filename = f"{file_hash}{ext.lower()}"
+
+                # Check if the file already exists in storage
+                if default_storage.exists(new_filename):
+                    saved_name = new_filename
+                else:
+                    saved_name = default_storage.save(new_filename, ContentFile(decoded_content))
+                media_url = default_storage.url(saved_name)
+                media_urls.append(media_url)
 
         # Edit the message
         updated_message = await sync_to_async(message_service.update_message)(message, new_text, media_urls, user)
@@ -220,9 +265,25 @@ class ChatConsumer(AsyncWebsocketConsumer):
         # Save media files if any
         media_urls = []
         for file in media_files:
-            file_name = default_storage.save(file['name'], ContentFile(file['content']))
-            media_url = default_storage.url(file_name)
-            media_urls.append(media_url)
+            # Get the file's original name and its Base64 content
+            original_filename = file.get('filename')
+            content = file.get('content')
+            if original_filename and content:
+                # Decode the Base64 content to binary data
+                decoded_content = base64.b64decode(content)
+                # Compute an MD5 hash from the binary content
+                file_hash = hashlib.md5(decoded_content).hexdigest()
+                # Extract the file extension (if any)
+                _, ext = os.path.splitext(original_filename)
+                new_filename = f"{file_hash}{ext.lower()}"
+
+                # Check if the file already exists in storage
+                if default_storage.exists(new_filename):
+                    saved_name = new_filename
+                else:
+                    saved_name = default_storage.save(new_filename, ContentFile(decoded_content))
+                media_url = default_storage.url(saved_name)
+                media_urls.append(media_url)
 
         # Create the reply message
         reply_message = await sync_to_async(message_service.reply_message)(user, text, media_urls, user, chat, original_message)
