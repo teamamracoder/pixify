@@ -55,7 +55,7 @@ def list_chats_by_user(user):
                         Q(post_id__isnull=False),
                         then=Case(
                             # If the sender of the post is the user, show "You sent a reels"
-                            When(sender_id=user.id, then=Value("You sent a reels")),
+                            When(sender_id=user.id, then=Value("You sent a posts")),
                             # Otherwise, show "Sender's First Name sent a reels"
                             default=Concat(
                                 Subquery(
