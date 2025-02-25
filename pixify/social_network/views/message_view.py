@@ -36,6 +36,16 @@ class MessageListView(View):
             
             # Retrieve the reaction data for this message.
             msg_reaction = message_reaction_service.reaction_by_message_id(message.id)
+            
+            print(type(message.media_url), message.media_url)
+
+            # Flatten media_url if needed.
+            if message.media_url:
+                if isinstance(message.media_url, list):
+                    # If it's a nested list (list with one element that is a list), flatten it.
+                    if len(message.media_url) == 1 and isinstance(message.media_url[0], list):
+                        message.media_url = message.media_url[0]
+
 
             if msg_reaction:
                 # Create a dictionary keyed by reaction_id for counts.

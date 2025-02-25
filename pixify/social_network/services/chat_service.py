@@ -331,7 +331,7 @@ def list_top_chats_api(request, user):
     
     # Sort the list by message count in descending order and return only the top 3
     chat_data_list.sort(key=lambda c: c['message_count'], reverse=True)
-    return chat_data_list[:3]
+    return chat_data_list[:6]
 
 
 
