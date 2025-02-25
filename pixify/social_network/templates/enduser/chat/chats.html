@@ -723,12 +723,23 @@
 
             font-size: 17px;
         }
+        .chat-create-modal-content{
+            width:100% !important;
+        }
+        .chat-create-modal{
+            left: 0% !important;
+            width: 100% !important;
+        }
     }
 
     @media (max-width: 992px) {
         .users {
             padding: 20px;
             box-shadow: 0 4px 8px rgba(151, 95, 236, 0.5);
+        }
+        .chat-profile-grid {
+            gap: 5% !important;
+            padding: 10px !important;
         }
 
         .sticky-icon {
@@ -743,6 +754,14 @@
             text-overflow: ellipsis;
 
             font-size: 13px;
+        }
+        .chat-create-modal-content{
+            width:90% !important;
+        }
+        .chat-create-modal{
+            top: 0% !important;
+            left: 6% !important;
+            width: 90% !important;
         }
     }
 
@@ -846,7 +865,6 @@
             bottom: 90px;
         }
 
-
     }
     .user-item {
         display: flex;
@@ -900,10 +918,11 @@
 
     /* Modal Content */
     .chat-create-modal-content {
+        height:85%;
         background-color: #301756;
         margin: 15% auto;
         padding: 30px;
-        width: 100%;
+        width:80%;
         position: relative;
     }
 
@@ -946,6 +965,7 @@
 
     /* Profile Grid */
     .chat-profile-grid {
+        padding:30px;
         flex-wrap: wrap;
         display: flex;
         gap: 2%;
@@ -958,8 +978,8 @@
     .chat-selection-body {
         justify-content: center;
         align-items: center;
-        height: 50px;
-        width: 50px;
+        height: 70px;
+        width: 70px;
         position: relative;
         display: flex;
         cursor: pointer;
@@ -979,8 +999,8 @@
         align-items: center;
         display: flex;
         border-radius: 50%;
-        width: 40px;
-        height: 40px;
+        width: 60px;
+        height: 60px;
         margin: 0 auto;
     }
 
@@ -1060,19 +1080,15 @@
     .xyz1-title{
         white-space: nowrap;
         height: 4vh;
-        justify-content: center;
         align-items: center;
         width: 100%;
-        font-size: 10px;
+        font-size: 13px;
         color: #fff;
         display: flex;
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
         overflow: hidden;
         text-overflow: ellipsis;
-    }
-    .xyz1-wrapper{
-
     }
 
 </style>
