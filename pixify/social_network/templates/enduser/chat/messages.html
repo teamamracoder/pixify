@@ -70,34 +70,33 @@
                     <div class="message-text">{{ message.text }}</div>
                 {% endif %}
 
+
+
                 {% if message.media_url %}
                 {% if message.media_url|length == 1 %}
                   <!-- Single media: display full-width -->
-                  <div class="single-media">
+                  <div class="messageMedia-single-media" data-media-list="{{ message.media_url|join:',' }}">
                     {% with media=message.media_url.0 %}
                       {% if media|slice:"-4:" == ".mp4" %}
-                        <!-- Render video if file ends with .mp4 -->
                         <video src="{% static media %}" controls></video>
                       {% else %}
-                        <!-- Render image for non-.mp4 files -->
                         <img src="{% static media %}" alt="Media">
                       {% endif %}
                     {% endwith %}
                   </div>
                 {% else %}
                   <!-- Multiple media: display grid (show only first 4) -->
-                  <div class="media-grid">
+                  <div class="messageMedia-grid" data-media-list="{{ message.media_url|join:',' }}">
                     {% for media in message.media_url|slice:":4" %}
-                      <div class="media-grid-item">
+                      <div class="messageMedia-grid-item" data-index="{{ forloop.counter0 }}">
                         {% if media|slice:"-4:" == ".mp4" %}
                           <video src="{% static media %}" controls></video>
                         {% else %}
                           <img src="{% static media %}" alt="Media">
                         {% endif %}
-                
                         {% if forloop.last and message.media_url|length > 4 %}
                           <!-- Overlay to indicate additional media count -->
-                          <div class="overlay">
+                          <div class="messageMedia-overlay">
                             <span>+{{ message.media_url|length|add:"-4" }}</span>
                           </div>
                         {% endif %}
@@ -106,6 +105,28 @@
                   </div>
                 {% endif %}
               {% endif %}
+              
+              <!-- Modal for full view of media (carousel) -->
+              <div id="messageMediaModal">
+                <div class="messageMedia-modal-content">
+                  <div class="messageMedia-close">✖</div>
+                  <div class="messageMedia-carousel">
+                    <div class="messageMedia-carousel-item"></div>
+                    <div class="messageMedia-carousel-controls">
+                      <div class="messageMedia-prev">
+                        <i class="bi bi-arrow-left-circle-fill"></i>
+                      </div>
+                      <div class="messageMedia-next">
+                        <i class="bi bi-arrow-right-circle-fill"></i>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+
+
+              
               
               
               
@@ -266,6 +287,100 @@
         </div>
     </div>
 </div>
+
+
+
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+      var modal = document.getElementById("messageMediaModal");
+      var carouselItem = modal.querySelector('.messageMedia-carousel-item');
+      var prevBtn = modal.querySelector('.messageMedia-prev');
+      var nextBtn = modal.querySelector('.messageMedia-next');
+      var closeBtn = modal.querySelector('.messageMedia-close');
+    
+      var currentMediaList = [];
+      var currentIndex = 0;
+    
+      // Display the media at the given index in the carousel.
+      function showMedia(index) {
+        if (index < 0 || index >= currentMediaList.length) return;
+        currentIndex = index;
+        var media = currentMediaList[currentIndex];
+        // Render media based on file extension.
+        if (media.slice(-4).toLowerCase() === '.mp4') {
+          carouselItem.innerHTML = '<video src="' + media + '" controls autoplay></video>';
+        } else {
+          carouselItem.innerHTML = '<img src="' + media + '" alt="Media">';
+        }
+      }
+    
+      // Open the modal carousel with the media list and starting index.
+      function openModal(mediaList, index) {
+        currentMediaList = mediaList;
+        currentIndex = index;
+        showMedia(currentIndex);
+        modal.style.display = "block";
+      }
+    
+      // Attach click listeners to the single media container.
+      var singleMediaContainers = document.querySelectorAll('.messageMedia-single-media');
+      singleMediaContainers.forEach(function(container) {
+        container.addEventListener('click', function() {
+          var mediaListStr = container.getAttribute('data-media-list');
+          if (mediaListStr) {
+            var mediaList = mediaListStr.split(',').map(function(url) { return url.trim(); });
+            openModal(mediaList, 0);
+          }
+        });
+      });
+    
+      // Attach click listeners to each grid item.
+      var gridItems = document.querySelectorAll('.messageMedia-grid-item');
+      gridItems.forEach(function(item) {
+        item.addEventListener('click', function() {
+          // Get the full media list from the parent container.
+          var parent = item.closest('.messageMedia-grid');
+          var mediaListStr = parent.getAttribute('data-media-list');
+          if (mediaListStr) {
+            var mediaList = mediaListStr.split(',').map(function(url) { return url.trim(); });
+            var index = parseInt(item.getAttribute('data-index'), 10) || 0;
+            openModal(mediaList, index);
+          }
+        });
+      });
+    
+      // Previous and next controls.
+      prevBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        if (currentIndex > 0) {
+          showMedia(currentIndex - 1);
+        }
+      });
+    
+      nextBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        if (currentIndex < currentMediaList.length - 1) {
+          showMedia(currentIndex + 1);
+        }
+      });
+    
+      // Close the modal.
+      closeBtn.addEventListener('click', function() {
+        modal.style.display = "none";
+      });
+    
+      window.addEventListener('click', function(event) {
+        if (event.target === modal) {
+          modal.style.display = "none";
+        }
+      });
+    });
+    </script>
+    
+    
+    
 
 
 <script>
@@ -3112,39 +3227,40 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 
-    /* Single media styling */
-.single-media {
+/*new*/
+/* Single media styling */
+.messageMedia-single-media {
   width: 100%;
   margin: 0 auto;
+  cursor: pointer;
 }
 
-.single-media img,
-.single-media video {
+.messageMedia-single-media img,
+.messageMedia-single-media video {
   width: 100%;
   height: auto;
   display: block;
   object-fit: cover;
 }
 
-/* Media grid container for multiple media items */
-.media-grid {
+/* Media grid for multiple media */
+.messageMedia-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr); /* 2 columns */
-  grid-gap: 5px; /* Gap between grid items */
+  grid-template-columns: repeat(2, 1fr);
+  grid-gap: 5px;
   margin: 10px 0;
+  cursor: pointer;
 }
 
-/* Each grid item with a square aspect ratio */
-.media-grid-item {
+.messageMedia-grid-item {
   position: relative;
   overflow: hidden;
   width: 100%;
   padding-top: 100%; /* 1:1 aspect ratio */
 }
 
-/* Ensure images/videos cover the grid item */
-.media-grid-item img,
-.media-grid-item video {
+.messageMedia-grid-item img,
+.messageMedia-grid-item video {
   position: absolute;
   top: 0;
   left: 0;
@@ -3154,13 +3270,13 @@ document.addEventListener("DOMContentLoaded", function () {
 }
 
 /* Overlay for additional media count */
-.overlay {
+.messageMedia-overlay {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5); /* semi-transparent black */
+  background: rgba(0, 0, 0, 0.5);
   color: #fff;
   display: flex;
   justify-content: center;
@@ -3169,8 +3285,93 @@ document.addEventListener("DOMContentLoaded", function () {
   font-weight: bold;
 }
 
-    
+/* Modal styles */
+#messageMediaModal {
+  display: none; /* Hidden by default */
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0,0,0,0.8);
+}
 
+.messageMedia-modal-content {
+  position: relative;
+  background-color: #fefefe;
+  margin: 5% auto;
+  padding: 20px;
+  width: 90%;
+  max-width: 800px;
+  border-radius: 8px;
+}
+
+.messageMedia-close {
+  position: absolute;
+  top: 10px;
+  right: 20px;
+  color: #aaa;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.messageMedia-close:hover,
+.messageMedia-close:focus {
+  color: #000;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+/* Carousel styles in modal */
+.messageMedia-carousel {
+  position: relative;
+  text-align: center;
+}
+
+.messageMedia-carousel-item {
+  margin: 20px 0;
+}
+
+.messageMedia-carousel-controls {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  transform: translateY(-50%);
+  display: flex;
+  justify-content: space-between;
+  padding: 0 20px;
+}
+
+.messageMedia-prev,
+.messageMedia-next {
+  pointer-events: all;
+  color: #fff;
+  font-size: 2.5rem;
+  cursor: pointer;
+  padding: 10px;
+}
+
+/* Modal media item styling */
+.messageMedia-modal-media-item {
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  padding-top: 75%; /* Adjust aspect ratio as needed */
+}
+
+.messageMedia-modal-media-item img,
+.messageMedia-modal-media-item video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
 
     </style>
     {% endblock %}
