@@ -663,11 +663,17 @@ $(document).ready(function () {
         };
 
         updatePreviews(fileArray);
+
+        console.log(fileArray);
     }
+
+        
 
         // After file selection, focus back to the message input
         document.getElementById('message-input').focus();
     });
+
+
 
     // Function to scroll the chat body to the bottom
     document.addEventListener('DOMContentLoaded', function () {
@@ -999,44 +1005,67 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Sending message function
-    async function sendMessage() {
-        const input = document.getElementById("message-input");
-        const message = input.value.trim();
-        const chatId = document.getElementById("chat_id").value;
-        const senderName = "{{ user.first_name }}"; // User's name from the context
-        const mentionsInput = document.getElementById("mentions").value.trim();
+   // Helper function to convert a File to a Base64 string
+function getBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = error => reject(error);
+  });
+}
 
-        // Split the mentions string by comma and trim each mention
-        const mentions = mentionsInput ? mentionsInput.split(',').map(name => name.trim()) : [];
+async function sendMessage() {
+  const input = document.getElementById("message-input");
+  const message = input.value.trim();
+  const chatId = document.getElementById("chat_id").value;
+  const senderName = "{{ user.first_name }}"; // User's name from the context
+  const mentionsInput = document.getElementById("mentions").value.trim();
 
-        const files = document.getElementById("file-input").files;
-        const mediaFiles = [];
-        if (files.length > 0) {
-            for (const file of files) {
-                const base64File = await convertFileToBase64(file);
-                mediaFiles.push({
-                    filename: file.name,
-                    content: base64File.split(",")[1],
-                });
-            }
-        }
+  // Split the mentions string by comma and trim each mention
+  const mentions = mentionsInput ? mentionsInput.split(',').map(name => name.trim()) : [];
 
-        if (message || mediaFiles.length > 0) {
-            socket.send(JSON.stringify({
-                chat_id: chatId,
-                message: message,
-                sender_id: senderId,
-                mentions: mentions, // Correctly passing mentions
-                mediaFiles: mediaFiles,
-                action: 'create',
-            }));
-
-            input.value = "";
-            document.getElementById("file-input").value = "";
-            clearFilePreviews();
-        }
+  // Use fileArray (which is maintained globally) instead of reading the file input.
+  const mediaFiles = [];
+  if (fileArray.length > 0) {
+    for (const file of fileArray) {
+      try {
+        // Convert the file to a Base64 string
+        const base64Content = await getBase64(file);
+        // Optionally, remove the Data URI prefix (everything before the comma)
+        const content = base64Content.split(',')[1];
+        mediaFiles.push({
+          filename: file.name,
+          content: content,
+        });
+      } catch (error) {
+        console.error("Error converting file to Base64:", error);
+      }
     }
+  }
+
+  // Only send if there is a message or at least one media file
+  if (message || mediaFiles.length > 0) {
+    socket.send(JSON.stringify({
+      chat_id: chatId,
+      message: message,
+      sender_id: senderId,
+      mentions: mentions, // Correctly passing mentions
+      mediaFiles: mediaFiles,
+      action: 'create',
+    }));
+
+    // Clear the message input
+    input.value = "";
+    // Clear fileArray and selectedFiles since the files have been sent
+    fileArray = [];
+    selectedFiles.clear();
+    // Optionally clear any file previews from the UI
+    clearFilePreviews();
+  }
+}
+
+
 
     socket.onmessage = function(event) {
         console.log('Message received from WebSocket:', event.data);
@@ -1562,16 +1591,6 @@ function updateMessageInChat(updatedMessage, messageId, messageTime, senderName,
         messageInput.value = ""; // Clear the input
         const saveButton = document.getElementById("reply-preview");
         saveButton.style.display = "none"; // Hide the save button
-    }
-
-    // Convert file to base64
-    function convertFileToBase64(file) {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onloadend = () => resolve(reader.result);
-            reader.onerror = reject;
-            reader.readAsDataURL(file);
-        });
     }
 
     // Clear file previews
