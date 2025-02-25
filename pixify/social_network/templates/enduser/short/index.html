@@ -148,16 +148,19 @@
                 // Generate Chats Section
                 if (data.chats && data.chats.length > 0) {
                     combinedHtml += `
-                        <div class="short-chats-section" style="height:30vh;">
+                        <div class="short-chats-section">
                             <h6 style="margin-top: 18px;">Chats</h6>
                             <div class="short-chat-grid">
                     `;
                     data.chats.forEach(function(chat) {
                         combinedHtml += `
+                        <div class="xyz">
                             <div class="short-chat-item" id="chat-${chat.id}" data-chat-id="${chat.id}">
                                 <img src="${chat.chat_cover}" alt="${chat.title}" class="short-chat-cover">
-                                <div class="short-chat-title">${chat.title}</div>
+                               
                             </div>
+                             <div class="short-chat-title"><div class="xyz-title">${chat.title}</div></div>
+                        </div>
                         `;
                     });
                     combinedHtml += `
@@ -1713,12 +1716,7 @@ margin-top: 16px;
     background-color: rgba(0, 123, 255, 0.1);
 }
 
-/* Profile Photo */
-.short-profile-photo {
-    border-radius: 50%;
-    width: 60px;
-    height: 60px;
-}
+
 
 /* Checkbox */
 .short-checkbox {
@@ -1763,8 +1761,8 @@ margin-top: 16px;
 /* Profile Photo */
 .short-profile-photo {
     border-radius: 50%;
-    width: 60px;
-    height: 60px;
+    width: 40px;
+    height: 40px;
     display: block;
     margin: 0 auto;
 }
@@ -1798,10 +1796,12 @@ margin-top: 16px;
 
 /* Chat Item Container */
 .short-chat-item {
-    height: 85px;
-    width: 85px;
+    justify-content: center;
+    align-items: center;
+    height: 50px;
+    width: 50px;
     position: relative;
-    display: inline-block;
+    display: flex;
     margin: 10px;
     cursor: pointer;
     border: 2px solid transparent;
@@ -1817,34 +1817,39 @@ margin-top: 16px;
 
 /* Chat Cover Image */
 .short-chat-cover {
+    justify-content: center;
+    align-items: center;
+    display: flex;
     border-radius: 50%;
-    width: 60px;
-    height: 60px;
-    display: block;
+    width: 40px;
+    height: 40px;
     margin: 0 auto;
 }
 
 /* Chat Title */
 .short-chat-title {
-    text-align: center;
-    margin-top: 10px;
+    height: 4vh;
+    justify-content: center;
+    align-items: center;
+    width: 70%;
+    /* margin-top: 10px; */
+    /* margin-top: 10px; */
     font-size: 14px;
     color: #fff;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;      /* Limit to 2 lines */
+    display: flex;
+    -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
-    text-overflow: ellipsis;
+    /* text-overflow: ellipsis;
 }
 
 .short-chat-grid{
-    overflow-y: scroll;
-    align-items: center;
+    flex-wrap: wrap;
     display: flex;
-    /* flex-wrap: wrap; */
+    gap: 10%;
+    align-items: center;
     justify-content: center;
-    /* gap: 23px;
-
+    width: 100%;
 }
 
 /* Message Count */
@@ -1861,6 +1866,25 @@ margin-top: 16px;
     height: 30px;
     background-color: #007BFF;
 
+}
+.short-chats-section{
+    overflow-y:scroll;
+    width: 100%;
+    height: 30vh;
+}
+.xyz{
+    background: red;
+    width: 78px;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+}
+
+.xyz-title{
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 </style>
 {% endblock %}
