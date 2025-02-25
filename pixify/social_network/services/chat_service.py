@@ -1,11 +1,13 @@
-from ..constants import ChatType,MessageDeleteType
-from ..models import Chat, User, ChatMember,Follower,Message,MessageReadStatus
+from ..constants import ChatType, MessageDeleteType
+from ..models import Chat, User, ChatMember, Follower, Message, MessageReadStatus
 from django.shortcuts import get_object_or_404
-from django.db.models import Max,Q,Subquery,OuterRef,F,Exists,Value
 from django.db.models.functions import Coalesce
-from social_network.utils.common_utils import print_log
+from django.db.models.functions import Coalesce, Concat
 from datetime import date
-
+from django.db.models import (
+    CharField, Case, When, Value, F, Q, Max, Exists, Subquery, OuterRef
+)
+from django.db.models.functions import Coalesce, Concat
 
 
 def list_chats_by_user(user):
@@ -26,7 +28,7 @@ def list_chats_by_user(user):
             Max(
                 'fk_chat_messages_chats_id__send_at',
                 filter=Q(
-                    ~Q(fk_chat_messages_chats_id__delete_type=MessageDeleteType.DELETED_FOR_EVERYONE.value) & 
+                    ~Q(fk_chat_messages_chats_id__delete_type=MessageDeleteType.DELETED_FOR_EVERYONE.value) &
                     ~Q(fk_chat_messages_chats_id__deleted_by__contains=[user.id])
                 )
             ),
@@ -39,16 +41,38 @@ def list_chats_by_user(user):
                 Q(is_active=True),
                 ~Q(delete_type=MessageDeleteType.DELETED_FOR_EVERYONE.value),
                 ~Q(deleted_by__contains=[user.id]),
-                (Q(text__isnull=False) & ~Q(text="")) | Q(post_id__isnull=False)  
+                (
+                    (Q(text__isnull=False) & ~Q(text="")) |
+                    (Q(media_url__isnull=False) & ~Q(media_url=[])) |
+                    Q(post_id__isnull=False)
+                )
             ).order_by('-send_at')
             .annotate(
-                message_content=Coalesce(
-                    F('text'),  # If text exists, use it.
-                    Value('[Post]'),  # If no text, but it's a post.
-                    Value('[Media]')  # If no text or post, but has media.
+                message_content=Case(
+                    When(~Q(text="") & Q(text__isnull=False), then=F('text')),
+                    When(~Q(media_url=[]) & Q(media_url__isnull=False), then=Value("📷 Image")),
+                    When(
+                        Q(post_id__isnull=False),
+                        then=Case(
+                            # If the sender of the post is the user, show "You sent a reels"
+                            When(sender_id=user.id, then=Value("You sent a posts")),
+                            # Otherwise, show "Sender's First Name sent a reels"
+                            default=Concat(
+                                Subquery(
+                                    Message.objects.filter(id=OuterRef('id'))
+                                    .values('sender_id__first_name')[:1]
+                                ),
+                                Value(" sent a reels"),
+                                output_field=CharField()
+                            ),
+                            output_field=CharField()
+                        )
+                    ),
+                    default=Value(""),
+                    output_field=CharField()
                 )
             )
-            .values('message_content')[:1]  
+            .values('message_content')[:1]
         )
     ).annotate(
         latest_message_sender_id=Subquery(
@@ -62,7 +86,6 @@ def list_chats_by_user(user):
         )
     ).order_by('-latest_message_timestamp')
 
-    # **Filter out chats with no valid messages (text or post)**
     user_chats = user_chats.filter(
         Q(latest_message__isnull=False) | Q(type=ChatType.GROUP.value)
     )
@@ -70,7 +93,7 @@ def list_chats_by_user(user):
     chat_data = []
     for chat in user_chats:
         latest_message = Message.objects.filter(
-            chat_id=chat.id, 
+            chat_id=chat.id,
             is_active=True
         ).exclude(
             delete_type=MessageDeleteType.DELETED_FOR_EVERYONE.value,
@@ -87,6 +110,8 @@ def list_chats_by_user(user):
         })
 
     return chat_data
+
+
 
 
 def is_message_seen_by_all(message):
