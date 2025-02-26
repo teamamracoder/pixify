@@ -36,7 +36,7 @@
       <!-- Modal Header -->
       <div class="short-modal-header">
         <h5 class="modal-title">Comments</h5>
-        <div class="close" role="button" tabindex="0" data-dismiss="modal" aria-label="Close" onclick="closeModal('shortCommentsModal-{{ video.id }}')">
+        <div class="close" role="button" tabindex="0" data-dismiss="modal" aria-label="Close" onclick="closeShortCommentsModal('shortCommentsModal-{{ video.id }}')">
           <span aria-hidden="true">&times;</span>
         </div>
       </div>
@@ -64,7 +64,7 @@
         <!-- Modal for Sharing (Unique IDs using video.id) -->
         <div id="short-create-modal-{{ video.id }}" class="short-create-modal" style="display: none;">
           <div class="short-create-modal-content">
-            <div class="short-close" onclick="closeModal('short-create-modal-{{ video.id }}')">✖</div>
+            <div class="short-close" onclick="closeShortShareModal('short-create-modal-{{ video.id }}')">✖</div>
             <h5 class="short-create-modal-title">Let's Share</h5>
             <input type="text" id="short-search-{{ video.id }}" class="short-form-control" placeholder="Search Name..." aria-label="Search Name">
             <div id="short-filled-{{ video.id }}" class="short-profile-grid">
@@ -163,16 +163,30 @@ function clearCommentModal(modal) {
 function closeShortCommentsModal(modalId) {
   const modal = document.getElementById(modalId);
   if (!modal) return;
-
   clearCommentModal(modal);
-
   modal.classList.remove("show");
-  
   modal.dataset.loading = "false";
-
   setTimeout(() => {
     modal.style.display = "none";
   }, 300);
+}
+
+function closeAllModals() {
+
+  const modals = document.querySelectorAll(
+    ".short-modal, .short-create-modal, .short-delete-modal"
+  );
+
+  modals.forEach((modal) => {
+    if (modal.id && modal.id.startsWith("shortCommentsModal-")) {
+      clearCommentModal(modal);
+      modal.dataset.loading = "false";
+    }
+
+    modal.classList.remove("show");
+    modal.style.display = "none";
+
+  });
 }
 
 function openShortCommentsModal(postId) {
@@ -192,7 +206,7 @@ function openShortCommentsModal(postId) {
   commentsList.innerHTML = "";
   modal.style.display = "flex";
   setTimeout(() => modal.classList.add("show"), 10);
-  
+
   if (!document.getElementById("shortCommentInput-" + postId)) {
     const commentInputContainer = document.createElement("div");
     commentInputContainer.classList.add("short-comment-input");
@@ -634,12 +648,20 @@ document.querySelectorAll(".short-modal .close").forEach((closeBtn) => {
   });
 });
 
+
 document.querySelectorAll(".chat-icon").forEach((button) => {
   button.addEventListener("click", function () {
     const postId = button.dataset.videoId;
+    const shareModalId = "short-create-modal-" + postId;
+    const shareModal = document.getElementById(shareModalId);
+    // If the share modal is open (display is not "none"), close it.
+    if (shareModal && shareModal.style.display !== "none") {
+      closeShortShareModal(shareModalId);
+    }
     openShortCommentsModal(postId);
   });
 });
+
 
   
     </script>
@@ -667,15 +689,18 @@ document.querySelectorAll(".chat-icon").forEach((button) => {
     console.log('Main WebSocket connection closed:', e);
     };
 
-    // Function to open the share modal for a given video ID
+
+    // It first closes any other open modals.
     const shareShort = (videoId) => {
-    // Show the modal for the specific video
+      closeAllModals();
+
+    // Show the share modal for this video.
     $(`#short-create-modal-${videoId}`).show();
 
-    // Load initial share results for this video
+    // Load initial share results for this video.
     updateShareResults(videoId);
 
-    // Attach a real-time search event listener for this modal only
+    // Attach a real-time search event listener for this modal only.
     $(`#short-search-${videoId}`)
         .off('input')
         .on('input', () => {
@@ -888,6 +913,24 @@ document.querySelectorAll(".chat-icon").forEach((button) => {
 
     function cleanMediaPath(media) {
       return media.startsWith('/') ? media.slice(1) : media;
+    }
+    
+
+    function closeShortShareModal(modalId) {
+      const modal = document.getElementById(modalId);
+      if (!modal) return;
+    
+      // Optionally clear the search input field.
+      const searchInput = modal.querySelector('input[id^="short-search-"]');
+      if (searchInput) {
+        searchInput.value = "";
+      }
+    
+      // Remove the "show" class.
+      modal.classList.remove("show");
+    
+      // Immediately hide the modal.
+      modal.style.display = "none";
     }
     
 </script>
@@ -1175,6 +1218,8 @@ function getCookie(name) {
             if (entry.isIntersecting) {
                 const index = Array.from(videoWrappers).indexOf(entry.target);
                 if (index !== currentIndex) {
+            // Close all modals of the previous short before updating active video.
+                    closeAllModals();
                     updateActiveVideo(index);
                     currentIndex = index;
                     updateButtonVisibility();
