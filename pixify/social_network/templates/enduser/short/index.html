@@ -1178,6 +1178,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // If Delete is confirmed, delete the comment and close the modal.
     newBtnDeleteConfirm.addEventListener("click", function () {
       deleteComment(commentId, container, isReply);
+      console.log("delete")
       closeDeleteModal();
     });
   
@@ -1191,7 +1192,8 @@ document.addEventListener('DOMContentLoaded', () => {
     deleteModal.style.display = "none";
   }
   
-  function deleteComment(commentId, container, isReply = false) {
+ // Handle comment deletion (for both top-level and replies)
+ function deleteComment(commentId, container, isReply = false) {
     fetch(`/short/comment/${commentId}/delete/`, {
         method: "POST",
         headers: {
@@ -1202,16 +1204,17 @@ document.addEventListener('DOMContentLoaded', () => {
     .then((response) => response.json())
     .then((data) => {
         if (data.success) {
-            // Remove the comment from the UI
+            // Remove the comment from UI
             const commentItem = container.querySelector(`[data-comment-id="${commentId}"]`);
-            
             if (commentItem) {
                 commentItem.remove();
             }
 
-            // Update the comment count
+            // Get the post ID from the closest video wrapper
             const videoWrapper = container.closest('.video-wrapper');
             const postId = videoWrapper ? videoWrapper.dataset.postId : null;
+
+            // Update the comment count
             const commentIcon = document.querySelector(`.chat-icon[data-video-id="${postId}"]`);
             const countElement = commentIcon?.nextElementSibling;
 
@@ -1221,8 +1224,19 @@ document.addEventListener('DOMContentLoaded', () => {
                     Math.max(0, parseInt(countElement.textContent) - (data.deleted_count || 1));
             }
 
-            // Call renderComment to refresh the comment section
-            refreshComments(container, postId);
+            // 🔥 Fetch updated comments and re-render them
+            fetch(`/short/${postId}/comments/`)
+            .then(response => response.json())
+            .then(data => {
+                // Clear existing comments
+                container.innerHTML = "";
+
+                // Re-render each comment
+                data.comments.forEach(comment => {
+                    renderComment(comment, container);
+                });
+            })
+            .catch(error => console.error("Error refreshing comments:", error));
 
         } else {
             alert("Error deleting comment");
@@ -1235,21 +1249,6 @@ document.addEventListener('DOMContentLoaded', () => {
 }
 
 
-
-function refreshComments(container, postId) {
-    fetch(`/short/${postId}/comments/`)
-    .then(response => response.json())
-    .then(data => {
-        // Clear the existing comments container
-        container.innerHTML = "";
-
-        // Render the updated list of comments
-        data.comments.forEach(comment => {
-            renderComment(comment, container);
-        });
-    })
-    .catch(error => console.error("Error refreshing comments:", error));
-}
 
   
   // ========================================
