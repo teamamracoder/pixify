@@ -1191,45 +1191,64 @@ document.addEventListener('DOMContentLoaded', () => {
     deleteModal.style.display = "none";
   }
   
-  // Handle comment deletion (for both top-level and replies)
   function deleteComment(commentId, container, isReply = false) {
-    // Find the closest parent with the video/post ID
-    const videoWrapper = container.closest('.video-wrapper');
-    const postId = videoWrapper ? videoWrapper.dataset.postId : null;
-    
     fetch(`/short/comment/${commentId}/delete/`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-CSRFToken": getCSRFToken(),
-      },
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": getCSRFToken(),
+        },
     })
-      .then((response) => response.json())
-      .then((data) => {
+    .then((response) => response.json())
+    .then((data) => {
         if (data.success) {
-          const commentItem = container.querySelector(
-            `[data-comment-id="${commentId}"]`
-          );
-          if (commentItem) {
-            commentItem.remove();
-          }
-          const commentIcon = document.querySelector(
-            `.chat-icon[data-video-id="${postId}"]`
-          );
-          const countElement = commentIcon?.nextElementSibling;
-          if (countElement) {
-            countElement.textContent =
-              data.comment_count ||
-              parseInt(countElement.textContent) - 1;
-          }
+            // Remove the comment from the UI
+            const commentItem = container.querySelector(`[data-comment-id="${commentId}"]`);
+            
+            if (commentItem) {
+                commentItem.remove();
+            }
+
+            // Update the comment count
+            const videoWrapper = container.closest('.video-wrapper');
+            const postId = videoWrapper ? videoWrapper.dataset.postId : null;
+            const commentIcon = document.querySelector(`.chat-icon[data-video-id="${postId}"]`);
+            const countElement = commentIcon?.nextElementSibling;
+
+            if (countElement) {
+                countElement.textContent =
+                    data.comment_count ||
+                    Math.max(0, parseInt(countElement.textContent) - (data.deleted_count || 1));
+            }
+
+            // Call renderComment to refresh the comment section
+            refreshComments(container, postId);
+
         } else {
-          alert("Error deleting comment");
-          console.error("Deletion error:", data.message);
+            alert("Error deleting comment");
+            console.error("Deletion error:", data.message);
         }
-      })
-      .catch((error) => {
+    })
+    .catch((error) => {
         console.error("Error deleting comment:", error);
-      });
+    });
+}
+
+
+
+function refreshComments(container, postId) {
+    fetch(`/short/${postId}/comments/`)
+    .then(response => response.json())
+    .then(data => {
+        // Clear the existing comments container
+        container.innerHTML = "";
+
+        // Render the updated list of comments
+        data.comments.forEach(comment => {
+            renderComment(comment, container);
+        });
+    })
+    .catch(error => console.error("Error refreshing comments:", error));
 }
 
   
