@@ -3,70 +3,66 @@
 {% block content %}
 {% load static %}
 <div class="short-content" id="shortContent">
-    {% for video in shorts %}
+  {% for video in shorts %}
     <div class="video-wrapper" id="video{{ video.id }}" data-post-id="{{ video.id }}">
       <div class="video-box {% if forloop.first %}active{% else %}hidden{% endif %}" id="videoBox{{ forloop.counter }}">
         <div class="reels-header">Shorts</div>
-  
+
         {% if video.media_url|length >= 1 %}
-        <video id="myVideo{{ forloop.counter }}" autoplay loop>
-          <source src="{% static video.media_url.0 %}" type="video/mp4">
-          <p>Your browser does not support the video tag.</p>
-        </video>
+          <video id="myVideo{{ forloop.counter }}" autoplay loop>
+            <source src="{% static video.media_url.0 %}" type="video/mp4">
+            <p>Your browser does not support the video tag.</p>
+          </video>
         {% else %}
-        <p>No video available.</p>
+          <p>No video available.</p>
         {% endif %}
-  
+
         <div class="video-info">
           <div class="user-info">
-            <img src="{%  static video.posted_by.profile_photo_url|default:'/images/avatar.jpg' %}"
+            <img src="{% static video.posted_by.profile_photo_url|default:'/images/avatar.jpg' %}"
                  alt="{{ video.posted_by.first_name }}'s Profile Picture"
                  class="short-profile-pic">
             <div class="username">{{ video.posted_by.first_name }} {{ video.posted_by.last_name }}</div>
           </div>
           <div class="description">{{ video.description }}</div>
         </div>
-  
 
-      <!-- Modal for Comments (unique for each video) -->
-<div class="short-modal" id="shortCommentsModal-{{ video.id }}" tabindex="-1" aria-hidden="true">
-  <div class="short-modal-dialog">
-    <div class="short-modal-content">
-      
-      <!-- Modal Header -->
-      <div class="short-modal-header">
-        <h5 class="modal-title">Comments</h5>
-        <div class="close" role="button" tabindex="0" data-dismiss="modal" aria-label="Close" onclick="closeShortCommentsModal('shortCommentsModal-{{ video.id }}')">
-          <span aria-hidden="true">&times;</span>
+        <!-- Modal for Comments (unique for each video) -->
+        <div class="short-modal" id="shortCommentsModal-{{ video.id }}" tabindex="-1" aria-hidden="true">
+          <div class="short-modal-dialog">
+            <div class="short-modal-content">
+              <!-- Modal Header -->
+              <div class="short-modal-header">
+                <h5 class="modal-title">Comments</h5>
+                <div class="close" role="button" tabindex="0" data-dismiss="modal" aria-label="Close"
+                     onclick="closeShortCommentsModal('shortCommentsModal-{{ video.id }}')">
+                  <span aria-hidden="true">&times;</span>
+                </div>
+              </div>
+              <!-- Modal Body (Contains Only Comments) -->
+              <div class="short-modal-body">
+                <div id="shortCommentsList-{{ video.id }}" class="short-comments-list">
+                  <!-- Comments will be dynamically loaded here -->
+                </div>
+              </div>
+              <!-- Comment Input (Now Outside .short-modal-body) -->
+              <div id="shortCommentInputContainer-{{ video.id }}" class="short-comment-input-container">
+                <input type="text" id="shortCommentInput-{{ video.id }}" placeholder="Add a comment..."
+                       class="short-comment-input">
+                <div id="shortSubmitComment-{{ video.id }}" class="btn btn-primary" style="height:90%;"
+                     role="button" tabindex="0">Post</div>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
-  
-      <!-- Modal Body (Contains Only Comments) -->
-      <div class="short-modal-body">
-        <div id="shortCommentsList-{{ video.id }}" class="short-comments-list">
-          <!-- Comments will be dynamically loaded here -->
-        </div>
-      </div>
-  
-      <!-- Comment Input (Now Outside .short-modal-body) -->
-      <div id="shortCommentInputContainer-{{ video.id }}" class="short-comment-input-container">
-        <input type="text" id="shortCommentInput-{{ video.id }}" placeholder="Add a comment..." class="short-comment-input">
-        <div id="shortSubmitComment-{{ video.id }}" class="btn btn-primary" style="height:90%;" role="button" tabindex="0">Post</div>
-      </div>
-  
-    </div>
-  </div>
-</div>
 
-
-
-  
         <!-- Modal for Sharing (Unique IDs using video.id) -->
         <div id="short-create-modal-{{ video.id }}" class="short-create-modal" style="display: none;">
           <div class="short-create-modal-content">
             <div class="short-close" onclick="closeShortShareModal('short-create-modal-{{ video.id }}')">✖</div>
             <h5 class="short-create-modal-title">Let's Share</h5>
-            <input type="text" id="short-search-{{ video.id }}" class="short-form-control" placeholder="Search Name..." aria-label="Search Name">
+            <input type="text" id="short-search-{{ video.id }}" class="short-form-control"
+                   placeholder="Search Name..." aria-label="Search Name">
             <div id="short-filled-{{ video.id }}" class="short-profile-grid">
               <!-- Profile items go here -->
             </div>
@@ -76,7 +72,7 @@
           </div>
         </div>
       </div> <!-- End of video-box -->
-  
+
       <!-- Right-side icons -->
       <div class="right-icons">
         <div>
@@ -87,7 +83,8 @@
         </div>
         <!-- Chat Icon (to open comments modal) -->
         <div>
-          <span class="chat-icon" style="font-size: 24px;" aria-label="Comments" data-video-id="{{ video.id }}" onclick="openShortCommentsModal('{{ video.id }}')">
+          <span class="chat-icon" style="font-size: 24px;" aria-label="Comments" data-video-id="{{ video.id }}"
+                onclick="openShortCommentsModal('{{ video.id }}')">
             <i class="bi bi-chat"></i>
           </span>
           <div class="reaction-count">{{ video.comments_count }}</div>
@@ -99,7 +96,7 @@
           <span class="icon" aria-label="More options">⋮</span>
         </div>
       </div>
-  
+
       <!-- Navigation buttons -->
       <div class="navigation-buttons">
         <button class="nav-button prev-button" data-index="{{ forloop.counter0 }}" aria-label="Previous Video">
@@ -110,11 +107,8 @@
         </button>
       </div>
     </div> <!-- End of video-wrapper -->
-    {% endfor %}
-  </div> <!-- End of short-content -->
-  
-
-
+  {% endfor %}
+</div> <!-- End of short-content -->
 
 <!-- Delete Confirmation Modal -->
 <div id="deleteModal" class="short-delete-modal" style="display: none;">
@@ -128,20 +122,331 @@
 </div>
 
 
-
-
-  <script>
-
-
-function getCSRFToken() {
-  const cookies = document.cookie.split(';');
-  for (let cookie of cookies) {
-    const [name, value] = cookie.trim().split('=');
-    if (name === 'csrftoken') return decodeURIComponent(value);
-  }
-  return null;
+<script>
+// Function to update the URL using the History API.
+function updateReelURL(videoId) {
+  const newUrl = window.location.pathname + '?video_id=' + videoId;
+  history.replaceState(null, null, newUrl); // Use replaceState to avoid creating history stack entries
 }
 
+// IntersectionObserver to detect when a short becomes active.
+const reelObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      // Get the video ID from a data attribute (data-post-id).
+      const videoId = entry.target.getAttribute('data-post-id');
+      if (videoId) {
+        updateReelURL(videoId);
+      }
+    }
+  });
+}, {
+  root: null,       // Viewport
+  threshold: 0.5    // When 50% of the element is visible
+});
+
+// Helper function to parse query parameters.
+function getQueryParams() {
+  const params = {};
+  const queryString = window.location.search.substring(1);
+  queryString.split("&").forEach(function(pair) {
+    if (pair) {
+      const [key, value] = pair.split("=");
+      params[decodeURIComponent(key)] = decodeURIComponent(value);
+    }
+  });
+  return params;
+}
+
+// Function to scroll to a specific short (reel) when it becomes available.
+function scrollToReel(videoId) {
+  // Poll until the target element is in the DOM.
+  const checkExist = setInterval(() => {
+    const target = document.querySelector(`.video-wrapper[data-post-id="${videoId}"]`);
+    if (target) {
+      clearInterval(checkExist);
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      // Optionally highlight the short.
+      target.classList.add('highlight');
+      setTimeout(() => target.classList.remove('highlight'), 2000);
+    }
+  }, 100); // check every 100ms
+}
+
+// Flag to detect if the page was loaded due to a refresh.
+const isPageRefreshed = performance.navigation.type === performance.navigation.TYPE_RELOAD;
+
+// Start observing all video wrappers.
+document.addEventListener('DOMContentLoaded', function() {
+  const wrappers = document.querySelectorAll('.video-wrapper');
+  wrappers.forEach(wrapper => {
+    reelObserver.observe(wrapper);
+  });
+
+  // Check if the URL contains a video_id parameter.
+  const params = getQueryParams();
+  if (params.video_id && !isPageRefreshed) {
+    scrollToReel(params.video_id);
+  }
+});
+</script>
+
+
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Handle reactions (like/dislike)
+    const handleReaction = (iconElement, isDelete = false) => {
+        const postId = iconElement.closest('.video-wrapper').dataset.postId;
+        const url = isDelete
+            ? `/short/reaction/${postId}/delete`
+            : `/short/${postId}/reaction/create`;
+
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken'), // Ensure CSRF token is handled
+            },
+            body: JSON.stringify({ post_id: postId }),
+        })
+        .then((response) => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then((data) => {
+            if (data.success) {
+                console.log('Reaction updated:', data);
+
+                // Update the reaction count
+                const likeCountSpan = iconElement.closest('.right-icons').querySelector('.reaction-count');
+                if (likeCountSpan) {
+                    likeCountSpan.textContent = data.reaction_count;
+                }
+
+                // Toggle the heart icon class
+                if (isDelete) {
+                    iconElement.classList.remove('bi-heart-fill');
+                    iconElement.classList.add('bi-heart');
+                } else {
+                    iconElement.classList.remove('bi-heart');
+                    iconElement.classList.add('bi-heart-fill');
+                }
+            } else {
+                console.error('Failed to update reaction:', data);
+            }
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+        });
+    };
+
+    // Add double-tap functionality to video screen
+    let lastTap = 0;
+    const bindVideoDoubleTapListeners = () => {
+        document.querySelectorAll('video').forEach((videoElement) => {
+            videoElement.addEventListener('click', function () {
+                const currentTime = new Date().getTime();
+                const tapGap = currentTime - lastTap;
+
+                if (tapGap < 300 && tapGap > 0) {
+                    // Double-tap detected
+                    const heartIcon = this.closest('.video-wrapper').querySelector('.bi-heart');
+                    if (heartIcon && !heartIcon.classList.contains('bi-heart-fill')) {
+                        handleReaction(heartIcon, false); // Like on double-tap
+                    }
+                }
+
+                lastTap = currentTime;
+            });
+        });
+    };
+
+    // Bind heart icon listeners for like/dislike
+    const bindHeartIconListeners = () => {
+        document.querySelectorAll('.bi-heart, .bi-heart-fill').forEach((heartIcon) => {
+            heartIcon.addEventListener('click', function () {
+                const isLiked = this.classList.contains('bi-heart-fill');
+                if (isLiked) {
+                    handleReaction(this, true); // Dislike
+                } else {
+                    handleReaction(this, false); // Like
+                }
+            });
+        });
+    };
+
+    // Bind listeners on page load
+    bindVideoDoubleTapListeners();
+    bindHeartIconListeners();
+});
+
+
+function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.substring(0, name.length + 1) === `${name}=`) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
+
+    document.addEventListener("DOMContentLoaded", function () {
+    const videoWrappers = document.querySelectorAll(".video-wrapper");
+    let currentIndex = 0;
+
+    // Scroll to a specific video
+    function scrollToVideo(index) {
+        if (index >= 0 && index < videoWrappers.length) {
+            const targetVideo = videoWrappers[index];
+            targetVideo.scrollIntoView({ behavior: "smooth", block: "center" });
+            updateActiveVideo(index);
+            currentIndex = index;
+            updateButtonVisibility();
+        }
+    }
+
+    // Update the active video
+    function updateActiveVideo(index) {
+        videoWrappers.forEach((wrapper, i) => {
+            const videoBox = wrapper.querySelector(".video-box");
+            const video = videoBox.querySelector("video");
+            if (i === index) {
+                videoBox.classList.add("active");
+                videoBox.classList.remove("hidden");
+                if (video) {
+                    video.currentTime = 0;
+                    video.play();
+                }
+            } else {
+                videoBox.classList.remove("active");
+                videoBox.classList.add("hidden");
+                video.pause();
+            }
+        });
+    }
+
+    // Update button visibility
+    function updateButtonVisibility() {
+        // If there are no video wrappers, hide all navigation icons.
+        if (videoWrappers.length === 0) {
+          // Assuming there might be wrappers in the DOM even if empty,
+          // hide the buttons for each wrapper.
+          document.querySelectorAll(".prev-button, .next-button").forEach((btn) => {
+            btn.style.display = "none";
+          });
+          return;
+        }
+      
+        // Hide buttons for all wrappers first.
+        videoWrappers.forEach((wrapper) => {
+          const prevButton = wrapper.querySelector(".prev-button");
+          const nextButton = wrapper.querySelector(".next-button");
+          if (prevButton) prevButton.style.display = "none";
+          if (nextButton) nextButton.style.display = "none";
+        });
+      
+        // Get the current wrapper.
+        const currentWrapper = videoWrappers[currentIndex];
+        const prevButton = currentWrapper.querySelector(".prev-button");
+        const nextButton = currentWrapper.querySelector(".next-button");
+      
+        // Show previous icon if there is a video before the current one.
+        if (currentIndex > 0) {
+          prevButton.style.display = "block";
+        } else {
+          prevButton.style.display = "none";
+        }
+      
+        // Show next icon if there is a video after the current one.
+        if (currentIndex < videoWrappers.length - 1) {
+          nextButton.style.display = "block";
+        } else {
+          nextButton.style.display = "none";
+        }
+      }
+      
+
+    // Navigation button event handlers
+    videoWrappers.forEach((wrapper, index) => {
+        const prevButton = wrapper.querySelector(".prev-button");
+        const nextButton = wrapper.querySelector(".next-button");
+
+        prevButton.addEventListener("click", () => {
+            const newIndex = currentIndex > 0 ? currentIndex - 1 : currentIndex;
+            scrollToVideo(newIndex);
+        });
+
+        nextButton.addEventListener("click", () => {
+            const newIndex = currentIndex < videoWrappers.length - 1 ? currentIndex + 1 : currentIndex;
+            scrollToVideo(newIndex);
+        });
+    });
+
+    // Intersection Observer for manual scrolling
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+                const index = Array.from(videoWrappers).indexOf(entry.target);
+                if (index !== currentIndex) {
+            // Close all modals of the previous short before updating active video.
+                    closeAllModals();
+                    updateActiveVideo(index);
+                    currentIndex = index;
+                    updateButtonVisibility();
+                }
+            }
+        });
+    }, { threshold: 0.5 });
+
+    videoWrappers.forEach((wrapper) => {
+        observer.observe(wrapper);
+    });
+
+    // Initialize the first video
+    scrollToVideo(currentIndex);
+    updateButtonVisibility();
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  const videoElements = document.querySelectorAll('video');
+
+  videoElements.forEach(video => {
+    let timeoutId = null;
+    let isPaused = false;
+
+    video.addEventListener('mousedown', () => {
+      timeoutId = setTimeout(() => {
+        video.pause();
+        isPaused = true;
+      }, 500);
+    });
+
+    video.addEventListener('mouseup', () => {
+      if (isPaused) {
+        video.play();
+      }
+      clearTimeout(timeoutId);
+      isPaused = false;
+    });
+
+    video.addEventListener('mouseleave', () => {
+      if (isPaused) {
+        video.play();
+      }
+      clearTimeout(timeoutId);
+      isPaused = false;
+    });
+  });
+});
 
 let replyingToCommentId = null;
 
@@ -306,7 +611,7 @@ function handleCommentSubmit(postId, commentInput, commentsList, replyingToComme
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "X-CSRFToken": getCSRFToken(),
+      "X-CSRFToken": getCookie('csrftoken'),
     },
     body: JSON.stringify({ text: commentText }),
   })
@@ -368,7 +673,7 @@ function handleCommentSubmit(postId, commentInput, commentsList, replyingToComme
 
 
 function renderComment(comment, container, prepend = false, isReply = false, flatReplyContainer = null) {
-  const profilePhotoUrl = comment.comment_by__profile_photo_url || "/static/images/avatar.jpg";
+  const profilePhotoUrl = comment.comment_by__profile_photo_url || "/images/avatar.jpg";
   const firstName = comment.comment_by__first_name || "Anonymous";
   const lastName = comment.comment_by__last_name || "";
   const createdAt = comment.created_at || "";
@@ -387,7 +692,7 @@ function renderComment(comment, container, prepend = false, isReply = false, fla
   commentItem.innerHTML = `
     <div class="short-comment-content">
       <div class="user-info">
-        <img src="${profilePhotoUrl}" alt="${firstName}'s Profile Picture">
+        <img src="${staticUrl}${cleanMediaPath(profilePhotoUrl)}" alt="${firstName}'s Profile Picture">
         <span class="short-username">${firstName} ${lastName}</span>
         <span class="short-created-at">${createdAt}</span>
       </div>
@@ -411,7 +716,7 @@ function renderComment(comment, container, prepend = false, isReply = false, fla
     fetch(`/short/comment/${commentId}/reaction/`, {
       method: "POST",
       headers: {
-        "X-CSRFToken": getCSRFToken(),
+        "X-CSRFToken": getCookie('csrftoken'),
       },
     })
       .then((response) => response.json())
@@ -590,7 +895,7 @@ function openDeleteModal(commentId, container, isReply) {
     closeDeleteModal();
     const commentModal = container.closest(".short-modal");
     if (commentModal) {
-      closeModal(commentModal.id);
+      closeShortCommentsModal(commentModal.id);
     }
   });
   
@@ -611,7 +916,7 @@ function deleteComment(commentId, container, isReply = false) {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "X-CSRFToken": getCSRFToken(),
+      "X-CSRFToken": getCookie('csrftoken'),
     },
   })
     .then((response) => response.json())
@@ -663,614 +968,256 @@ document.querySelectorAll(".chat-icon").forEach((button) => {
 });
 
 
-  
-    </script>
-
-
-
-
-
-<script>
-
-    // Main WebSocket (used for other real-time events, if needed)
-    const socket = new WebSocket(`ws://${window.location.host}/ws/chat/`);
-    const senderId = "{{ user.id }}"; // Rendered from your template
-    const staticUrl = "{% static '' %}"; // This usually returns "/static/"
-
-    socket.onopen = (e) => {
-    console.log('Main WebSocket connection established.');
-    };
-
-    socket.onerror = (error) => {
-    console.error('Main WebSocket error:', error);
-    };
-
-    socket.onclose = (e) => {
-    console.log('Main WebSocket connection closed:', e);
-    };
-
-
-    // It first closes any other open modals.
-    const shareShort = (videoId) => {
-      closeAllModals();
-
-    // Show the share modal for this video.
-    $(`#short-create-modal-${videoId}`).show();
-
-    // Load initial share results for this video.
-    updateShareResults(videoId);
-
-    // Attach a real-time search event listener for this modal only.
-    $(`#short-search-${videoId}`)
-        .off('input')
-        .on('input', () => {
-        updateShareResults(videoId);
-        });
-    };
-
-    // Function to update share results using AJAX
-    const updateShareResults = (videoId) => {
-    const $container = $(`#short-filled-${videoId}`);
-    // Fade container to indicate loading
-    $container.fadeTo(100, 0.5);
-    // Get current search query
-    const searchQuery = $(`#short-search-${videoId}`).val();
-
-    // AJAX call to fetch share data (chats and members)
-    $.ajax({
-        url: '/short/share/api',
-        type: 'GET',
-        data: { video_id: videoId, search: searchQuery },
-        dataType: 'json',
-        success: (data) => {
-        let combinedHtml = '';
-        const fallbackImage = '/images/avatar.jpg';
-
-        // Generate Chats Section
-        if (data.chats && data.chats.length > 0) {
-            combinedHtml += `
-            <div class="short-chats-section">
-                <h6 style="margin-top: 18px;">Chats</h6>
-                <div class="short-chat-grid">
-            `;
-            data.chats.forEach((chat) => {
-            combinedHtml += `
-                <div class="xyz">
-                <div class="short-chat-item" data-chat-id="${chat.id}">
-                    <img src="${staticUrl}${cleanMediaPath(chat.chat_cover)}" alt="${chat.title}" class="short-chat-cover">
-                </div>
-                <div class="short-chat-title">
-                    <div class="xyz-title">${chat.title}</div>
-                </div>
-                </div>
-            `;
-            });
-            combinedHtml += `
-                </div>
-            </div>
-            `;
-        }
-
-        // Generate Members Section
-        if (data.follow && data.follow.members && data.follow.members.length > 0) {
-            combinedHtml += `
-            <div class="short-members-section">
-                <h6 style="margin-top: 18px;">Members</h6>
-                <div class="short-profile-grid">
-            `;
-            data.follow.members.forEach((member) => {
-            const profileImage = member.user_id__profile_photo_url || fallbackImage;
-            combinedHtml += `
-                <div class="xyz">
-                <div class="short-selection-body" data-user-id="${member.user_id}">
-                    <img src="${staticUrl}${cleanMediaPath(profileImage)}" alt="${member.user_id__first_name}'s profile photo" class="short-profile-photo">
-                </div>
-                <div class="short-profile-text">
-                    <div class="xyz-title">${member.user_id__first_name} ${member.user_id__last_name}</div>
-                </div>
-                </div>
-            `;
-            });
-            combinedHtml += `
-                </div>
-            </div>
-            `;
-        } else {
-            combinedHtml += '<div class="no-members-message">No Followers And Followings to Display</div>';
-        }
-
-        // Update the container with new content
-        $container.fadeOut(100, function () {
-            $(this).html(combinedHtml).fadeTo(100, 1);
-
-            // Attach click handlers to toggle selection for chats and members
-            $(`#short-filled-${videoId} .short-chat-item`)
-            .off('click')
-            .on('click', function () {
-                $(this).toggleClass('selected');
-            });
-            $(`#short-filled-${videoId} .short-selection-body`)
-            .off('click')
-            .on('click', function () {
-                $(this).toggleClass('selected');
-            });
-        });
-
-        // Attach event handler to the Send button for this modal
-        $(`#send-button-${videoId}`)
-            .off('click')
-            .on('click', () => {
-            // Gather selected chat IDs
-            const selectedChatIds = [];
-            $(`#short-filled-${videoId} .short-chat-item.selected`).each(function () {
-                selectedChatIds.push($(this).data('chat-id'));
-            });
-
-            // Gather selected member IDs
-            const selectedMemberIds = [];
-            $(`#short-filled-${videoId} .short-selection-body.selected`).each(function () {
-                selectedMemberIds.push($(this).data('user-id'));
-            });
-
-            if (selectedChatIds.length === 0 && selectedMemberIds.length === 0) {
-                alert('Please select at least one chat or member to share with.');
-                return;
-            }
-
-            // Send the share request via AJAX
-            $.ajax({
-                url: '/short/send', // Your send endpoint
-                type: 'POST',
-                headers: { 'X-CSRFToken': getCookie('csrftoken') },
-                contentType: 'application/json',
-                data: JSON.stringify({
-                short_id: videoId,
-                chats: selectedChatIds,
-                members: selectedMemberIds,
-                }),
-                dataType: 'json',
-                success: (response) => {
-                console.log('Share response:', response);
-                $(`#short-create-modal-${videoId}`).hide();
-
-                // For each chat in the response, open a separate WebSocket connection to share the short
-                if (response.chat && response.chat.length > 0) {
-                    response.chat.forEach((chatId) => {
-                    sendShareToChat(chatId, videoId, senderId);
-                    });
-                }
-                },
-                error: (xhr, status, error) => {
-                console.error('Error sending share:', error);
-                alert('Error sending share. Please try again.');
-                },
-            });
-            });
-        },
-        error: (xhr, status, error) => {
-        console.error('Error fetching share data:', error);
-        $container.fadeOut(100, function () {
-            $(this).html('<p>Error loading data. Please try again.</p>').fadeTo(100, 1);
-        });
-        },
-    });
-    };
-
-    // Function to send share data to a specific chat via a dedicated WebSocket connection
-    const sendShareToChat = (chatId, videoId, senderId) => {
-    const ws = new WebSocket(`ws://${window.location.host}/ws/chat/`);
-
-    ws.onopen = () => {
-        // First, join the chat group
-        ws.send(
-        JSON.stringify({
-            action: 'join',
-            chat_id: chatId,
-        })
-        );
-
-        // After a brief delay, send the create request
-        setTimeout(() => {
-        ws.send(
-            JSON.stringify({
-            chat_id: chatId,
-            sender_id: senderId,
-            post_id: videoId,
-            action: 'create',
-            })
-        );
-        // Optionally, close the connection after sending
-        ws.close();
-        }, 200); // Adjust delay as necessary
-    };
-
-    ws.onerror = (error) => {
-        console.error(`WebSocket error for chatId ${chatId}:`, error);
-    };
-
-    ws.onclose = (e) => {
-        console.log(`WebSocket connection for chatId ${chatId} closed:`, e);
-    };
-    };
-
-    // Utility function to get cookie value (used for CSRF token)
-    function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== "") {
-        const cookies = document.cookie.split(";");
-        for (let i = 0; i < cookies.length; i++) {
-        const cookie = cookies[i].trim();
-        // Check if this cookie string begins with the name we want
-        if (cookie.substring(0, name.length + 1) === name + "=") {
-            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-            break;
-        }
-        }
-    }
-    return cookieValue;
-    }
-
-
-    function cleanMediaPath(media) {
-      return media.startsWith('/') ? media.slice(1) : media;
-    }
-    
-
-    function closeShortShareModal(modalId) {
-      const modal = document.getElementById(modalId);
-      if (!modal) return;
-    
-      // Optionally clear the search input field.
-      const searchInput = modal.querySelector('input[id^="short-search-"]');
-      if (searchInput) {
-        searchInput.value = "";
-      }
-    
-      // Remove the "show" class.
-      modal.classList.remove("show");
-    
-      // Immediately hide the modal.
-      modal.style.display = "none";
-    }
-    
 </script>
 
 
-
-
-
-
-
 <script>
-// Function to update the URL using the History API.
-function updateReelURL(videoId) {
-  const newUrl = window.location.pathname + '?video_id=' + videoId;
-  history.replaceState(null, null, newUrl); // Use replaceState to avoid creating history stack entries
-}
 
-// IntersectionObserver to detect when a short becomes active.
-const reelObserver = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      // Get the video ID from a data attribute (data-post-id).
-      const videoId = entry.target.getAttribute('data-post-id');
-      if (videoId) {
-        updateReelURL(videoId);
-      }
-    }
-  });
-}, {
-  root: null,       // Viewport
-  threshold: 0.5    // When 50% of the element is visible
-});
+  // Main WebSocket (used for other real-time events, if needed)
+  const socket = new WebSocket(`ws://${window.location.host}/ws/chat/`);
+  const senderId = "{{ user.id }}"; // Rendered from your template
+  const staticUrl = "{% static '' %}"; // This usually returns "/static/"
 
-// Helper function to parse query parameters.
-function getQueryParams() {
-  const params = {};
-  const queryString = window.location.search.substring(1);
-  queryString.split("&").forEach(function(pair) {
-    if (pair) {
-      const [key, value] = pair.split("=");
-      params[decodeURIComponent(key)] = decodeURIComponent(value);
-    }
-  });
-  return params;
-}
+  socket.onopen = (e) => {
+  console.log('Main WebSocket connection established.');
+  };
 
-// Function to scroll to a specific short (reel) when it becomes available.
-function scrollToReel(videoId) {
-  // Poll until the target element is in the DOM.
-  const checkExist = setInterval(() => {
-    const target = document.querySelector(`.video-wrapper[data-post-id="${videoId}"]`);
-    if (target) {
-      clearInterval(checkExist);
-      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      // Optionally highlight the short.
-      target.classList.add('highlight');
-      setTimeout(() => target.classList.remove('highlight'), 2000);
-    }
-  }, 100); // check every 100ms
-}
+  socket.onerror = (error) => {
+  console.error('Main WebSocket error:', error);
+  };
 
-// Flag to detect if the page was loaded due to a refresh.
-const isPageRefreshed = performance.navigation.type === performance.navigation.TYPE_RELOAD;
-
-// Start observing all video wrappers.
-document.addEventListener('DOMContentLoaded', function() {
-  const wrappers = document.querySelectorAll('.video-wrapper');
-  wrappers.forEach(wrapper => {
-    reelObserver.observe(wrapper);
-  });
-
-  // Check if the URL contains a video_id parameter.
-  const params = getQueryParams();
-  if (params.video_id && !isPageRefreshed) {
-    scrollToReel(params.video_id);
-  }
-});
-</script>
+  socket.onclose = (e) => {
+  console.log('Main WebSocket connection closed:', e);
+  };
 
 
+  // It first closes any other open modals.
+  const shareShort = (videoId) => {
+    closeAllModals();
 
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    // Handle reactions (like/dislike)
-    const handleReaction = (iconElement, isDelete = false) => {
-        const postId = iconElement.closest('.video-wrapper').dataset.postId;
-        const url = isDelete
-            ? `/short/reaction/${postId}/delete`
-            : `/short/${postId}/reaction/create`;
+  // Show the share modal for this video.
+  $(`#short-create-modal-${videoId}`).show();
 
-        fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': getCookie('csrftoken'), // Ensure CSRF token is handled
-            },
-            body: JSON.stringify({ post_id: postId }),
-        })
-        .then((response) => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
-        })
-        .then((data) => {
-            if (data.success) {
-                console.log('Reaction updated:', data);
+  // Load initial share results for this video.
+  updateShareResults(videoId);
 
-                // Update the reaction count
-                const likeCountSpan = iconElement.closest('.right-icons').querySelector('.reaction-count');
-                if (likeCountSpan) {
-                    likeCountSpan.textContent = data.reaction_count;
-                }
+  // Attach a real-time search event listener for this modal only.
+  $(`#short-search-${videoId}`)
+      .off('input')
+      .on('input', () => {
+      updateShareResults(videoId);
+      });
+  };
 
-                // Toggle the heart icon class
-                if (isDelete) {
-                    iconElement.classList.remove('bi-heart-fill');
-                    iconElement.classList.add('bi-heart');
-                } else {
-                    iconElement.classList.remove('bi-heart');
-                    iconElement.classList.add('bi-heart-fill');
-                }
-            } else {
-                console.error('Failed to update reaction:', data);
-            }
-        })
-        .catch((error) => {
-            console.error('Error:', error);
-        });
-    };
+  // Function to update share results using AJAX
+  const updateShareResults = (videoId) => {
+  const $container = $(`#short-filled-${videoId}`);
+  // Fade container to indicate loading
+  $container.fadeTo(100, 0.5);
+  // Get current search query
+  const searchQuery = $(`#short-search-${videoId}`).val();
 
-    // Add double-tap functionality to video screen
-    let lastTap = 0;
-    const bindVideoDoubleTapListeners = () => {
-        document.querySelectorAll('video').forEach((videoElement) => {
-            videoElement.addEventListener('click', function () {
-                const currentTime = new Date().getTime();
-                const tapGap = currentTime - lastTap;
+  // AJAX call to fetch share data (chats and members)
+  $.ajax({
+      url: '/short/share/api',
+      type: 'GET',
+      data: { video_id: videoId, search: searchQuery },
+      dataType: 'json',
+      success: (data) => {
+      let combinedHtml = '';
+      const fallbackImage = '/images/avatar.jpg';
 
-                if (tapGap < 300 && tapGap > 0) {
-                    // Double-tap detected
-                    const heartIcon = this.closest('.video-wrapper').querySelector('.bi-heart');
-                    if (heartIcon && !heartIcon.classList.contains('bi-heart-fill')) {
-                        handleReaction(heartIcon, false); // Like on double-tap
-                    }
-                }
-
-                lastTap = currentTime;
-            });
-        });
-    };
-
-    // Bind heart icon listeners for like/dislike
-    const bindHeartIconListeners = () => {
-        document.querySelectorAll('.bi-heart, .bi-heart-fill').forEach((heartIcon) => {
-            heartIcon.addEventListener('click', function () {
-                const isLiked = this.classList.contains('bi-heart-fill');
-                if (isLiked) {
-                    handleReaction(this, true); // Dislike
-                } else {
-                    handleReaction(this, false); // Like
-                }
-            });
-        });
-    };
-
-    // Bind listeners on page load
-    bindVideoDoubleTapListeners();
-    bindHeartIconListeners();
-});
-
-// Helper function to get CSRF token
-function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === `${name}=`) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
-    }
-    return cookieValue;
-}
-
-
-
-    document.addEventListener("DOMContentLoaded", function () {
-    const videoWrappers = document.querySelectorAll(".video-wrapper");
-    let currentIndex = 0;
-
-    // Scroll to a specific video
-    function scrollToVideo(index) {
-        if (index >= 0 && index < videoWrappers.length) {
-            const targetVideo = videoWrappers[index];
-            targetVideo.scrollIntoView({ behavior: "smooth", block: "center" });
-            updateActiveVideo(index);
-            currentIndex = index;
-            updateButtonVisibility();
-        }
-    }
-
-    // Update the active video
-    function updateActiveVideo(index) {
-        videoWrappers.forEach((wrapper, i) => {
-            const videoBox = wrapper.querySelector(".video-box");
-            const video = videoBox.querySelector("video");
-            if (i === index) {
-                videoBox.classList.add("active");
-                videoBox.classList.remove("hidden");
-                if (video) {
-                    video.currentTime = 0;
-                    video.play();
-                }
-            } else {
-                videoBox.classList.remove("active");
-                videoBox.classList.add("hidden");
-                video.pause();
-            }
-        });
-    }
-
-    // Update button visibility
-    function updateButtonVisibility() {
-        // If there are no video wrappers, hide all navigation icons.
-        if (videoWrappers.length === 0) {
-          // Assuming there might be wrappers in the DOM even if empty,
-          // hide the buttons for each wrapper.
-          document.querySelectorAll(".prev-button, .next-button").forEach((btn) => {
-            btn.style.display = "none";
+      // Generate Chats Section
+      if (data.chats && data.chats.length > 0) {
+          combinedHtml += `
+          <div class="short-chats-section">
+              <h6 style="margin-top: 18px;">Chats</h6>
+              <div class="short-chat-grid">
+          `;
+          data.chats.forEach((chat) => {
+          combinedHtml += `
+              <div class="xyz">
+              <div class="short-chat-item" data-chat-id="${chat.id}">
+                  <img src="${staticUrl}${cleanMediaPath(chat.chat_cover)}" alt="${chat.title}" class="short-chat-cover">
+              </div>
+              <div class="short-chat-title">
+                  <div class="xyz-title">${chat.title}</div>
+              </div>
+              </div>
+          `;
           });
-          return;
-        }
-      
-        // Hide buttons for all wrappers first.
-        videoWrappers.forEach((wrapper) => {
-          const prevButton = wrapper.querySelector(".prev-button");
-          const nextButton = wrapper.querySelector(".next-button");
-          if (prevButton) prevButton.style.display = "none";
-          if (nextButton) nextButton.style.display = "none";
-        });
-      
-        // Get the current wrapper.
-        const currentWrapper = videoWrappers[currentIndex];
-        const prevButton = currentWrapper.querySelector(".prev-button");
-        const nextButton = currentWrapper.querySelector(".next-button");
-      
-        // Show previous icon if there is a video before the current one.
-        if (currentIndex > 0) {
-          prevButton.style.display = "block";
-        } else {
-          prevButton.style.display = "none";
-        }
-      
-        // Show next icon if there is a video after the current one.
-        if (currentIndex < videoWrappers.length - 1) {
-          nextButton.style.display = "block";
-        } else {
-          nextButton.style.display = "none";
-        }
+          combinedHtml += `
+              </div>
+          </div>
+          `;
       }
-      
 
-    // Navigation button event handlers
-    videoWrappers.forEach((wrapper, index) => {
-        const prevButton = wrapper.querySelector(".prev-button");
-        const nextButton = wrapper.querySelector(".next-button");
-
-        prevButton.addEventListener("click", () => {
-            const newIndex = currentIndex > 0 ? currentIndex - 1 : currentIndex;
-            scrollToVideo(newIndex);
-        });
-
-        nextButton.addEventListener("click", () => {
-            const newIndex = currentIndex < videoWrappers.length - 1 ? currentIndex + 1 : currentIndex;
-            scrollToVideo(newIndex);
-        });
-    });
-
-    // Intersection Observer for manual scrolling
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-                const index = Array.from(videoWrappers).indexOf(entry.target);
-                if (index !== currentIndex) {
-            // Close all modals of the previous short before updating active video.
-                    closeAllModals();
-                    updateActiveVideo(index);
-                    currentIndex = index;
-                    updateButtonVisibility();
-                }
-            }
-        });
-    }, { threshold: 0.5 });
-
-    videoWrappers.forEach((wrapper) => {
-        observer.observe(wrapper);
-    });
-
-    // Initialize the first video
-    scrollToVideo(currentIndex);
-    updateButtonVisibility();
-});
-
-document.addEventListener('DOMContentLoaded', () => {
-  const videoElements = document.querySelectorAll('video');
-
-  videoElements.forEach(video => {
-    let timeoutId = null;
-    let isPaused = false;
-
-    video.addEventListener('mousedown', () => {
-      timeoutId = setTimeout(() => {
-        video.pause();
-        isPaused = true;
-      }, 500);
-    });
-
-    video.addEventListener('mouseup', () => {
-      if (isPaused) {
-        video.play();
+      // Generate Members Section
+      if (data.follow && data.follow.members && data.follow.members.length > 0) {
+          combinedHtml += `
+          <div class="short-members-section">
+              <h6 style="margin-top: 18px;">Members</h6>
+              <div class="short-profile-grid">
+          `;
+          data.follow.members.forEach((member) => {
+          const profileImage = member.user_id__profile_photo_url || fallbackImage;
+          combinedHtml += `
+              <div class="xyz">
+              <div class="short-selection-body" data-user-id="${member.user_id}">
+                  <img src="${staticUrl}${cleanMediaPath(profileImage)}" alt="${member.user_id__first_name}'s profile photo" class="short-profile-photo">
+              </div>
+              <div class="short-profile-text">
+                  <div class="xyz-title">${member.user_id__first_name} ${member.user_id__last_name}</div>
+              </div>
+              </div>
+          `;
+          });
+          combinedHtml += `
+              </div>
+          </div>
+          `;
+      } else {
+          combinedHtml += '<div class="no-members-message">No Followers And Followings to Display</div>';
       }
-      clearTimeout(timeoutId);
-      isPaused = false;
-    });
 
-    video.addEventListener('mouseleave', () => {
-      if (isPaused) {
-        video.play();
-      }
-      clearTimeout(timeoutId);
-      isPaused = false;
-    });
+      // Update the container with new content
+      $container.fadeOut(100, function () {
+          $(this).html(combinedHtml).fadeTo(100, 1);
+
+          // Attach click handlers to toggle selection for chats and members
+          $(`#short-filled-${videoId} .short-chat-item`)
+          .off('click')
+          .on('click', function () {
+              $(this).toggleClass('selected');
+          });
+          $(`#short-filled-${videoId} .short-selection-body`)
+          .off('click')
+          .on('click', function () {
+              $(this).toggleClass('selected');
+          });
+      });
+
+      // Attach event handler to the Send button for this modal
+      $(`#send-button-${videoId}`)
+          .off('click')
+          .on('click', () => {
+          // Gather selected chat IDs
+          const selectedChatIds = [];
+          $(`#short-filled-${videoId} .short-chat-item.selected`).each(function () {
+              selectedChatIds.push($(this).data('chat-id'));
+          });
+
+          // Gather selected member IDs
+          const selectedMemberIds = [];
+          $(`#short-filled-${videoId} .short-selection-body.selected`).each(function () {
+              selectedMemberIds.push($(this).data('user-id'));
+          });
+
+          if (selectedChatIds.length === 0 && selectedMemberIds.length === 0) {
+              alert('Please select at least one chat or member to share with.');
+              return;
+          }
+
+          // Send the share request via AJAX
+          $.ajax({
+              url: '/short/send', // Your send endpoint
+              type: 'POST',
+              headers: { 'X-CSRFToken': getCookie('csrftoken') },
+              contentType: 'application/json',
+              data: JSON.stringify({
+              short_id: videoId,
+              chats: selectedChatIds,
+              members: selectedMemberIds,
+              }),
+              dataType: 'json',
+              success: (response) => {
+              console.log('Share response:', response);
+              $(`#short-create-modal-${videoId}`).hide();
+
+              // For each chat in the response, open a separate WebSocket connection to share the short
+              if (response.chat && response.chat.length > 0) {
+                  response.chat.forEach((chatId) => {
+                  sendShareToChat(chatId, videoId, senderId);
+                  });
+              }
+              },
+              error: (xhr, status, error) => {
+              console.error('Error sending share:', error);
+              alert('Error sending share. Please try again.');
+              },
+          });
+          });
+      },
+      error: (xhr, status, error) => {
+      console.error('Error fetching share data:', error);
+      $container.fadeOut(100, function () {
+          $(this).html('<p>Error loading data. Please try again.</p>').fadeTo(100, 1);
+      });
+      },
   });
-});
+  };
 
+  // Function to send share data to a specific chat via a dedicated WebSocket connection
+  const sendShareToChat = (chatId, videoId, senderId) => {
+  const ws = new WebSocket(`ws://${window.location.host}/ws/chat/`);
+
+  ws.onopen = () => {
+      // First, join the chat group
+      ws.send(
+      JSON.stringify({
+          action: 'join',
+          chat_id: chatId,
+      })
+      );
+
+      // After a brief delay, send the create request
+      setTimeout(() => {
+      ws.send(
+          JSON.stringify({
+          chat_id: chatId,
+          sender_id: senderId,
+          post_id: videoId,
+          action: 'create',
+          })
+      );
+      // Optionally, close the connection after sending
+      ws.close();
+      }, 200); // Adjust delay as necessary
+  };
+
+  ws.onerror = (error) => {
+      console.error(`WebSocket error for chatId ${chatId}:`, error);
+  };
+
+  ws.onclose = (e) => {
+      console.log(`WebSocket connection for chatId ${chatId} closed:`, e);
+  };
+  };
+
+
+  function cleanMediaPath(media) {
+    return media.startsWith('/') ? media.slice(1) : media;
+  }
+  
+
+  function closeShortShareModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (!modal) return;
+  
+    // Optionally clear the search input field.
+    const searchInput = modal.querySelector('input[id^="short-search-"]');
+    if (searchInput) {
+      searchInput.value = "";
+    }
+  
+    // Remove the "show" class.
+    modal.classList.remove("show");
+  
+    // Immediately hide the modal.
+    modal.style.display = "none";
+  }
+  
 </script>
-
 
 <style>
 
