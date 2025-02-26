@@ -29,22 +29,34 @@
   
         <!-- Modal for Comments (unique for each video) -->
         <div class="short-modal" id="shortCommentsModal-{{ video.id }}" tabindex="-1" aria-hidden="true">
-          <div class="short-modal-dialog">
-            <div class="short-modal-content">
-              <div class="short-modal-header">
-                <h5 class="modal-title">Comments</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="closeModal('shortCommentsModal-{{ video.id }}')">
-                  <span aria-hidden="true">&times;</span>
-                </button>
-              </div>
-              <div class="short-modal-body">
-                <div id="shortCommentsList-{{ video.id }}" class="short-comments-list">
-                  <!-- Comments will be dynamically loaded here -->
+            <div class="short-modal-dialog">
+              <div class="short-modal-content">
+                
+                <!-- Modal Header -->
+                <div class="short-modal-header">
+                  <h5 class="modal-title">Comments</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="closeModal('shortCommentsModal-{{ video.id }}')">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
                 </div>
+          
+                <!-- Modal Body (Contains Only Comments) -->
+                <div class="short-modal-body">
+                  <div id="shortCommentsList-{{ video.id }}" class="short-comments-list">
+                    <!-- Comments will be dynamically loaded here -->
+                  </div>
+                </div>
+          
+                <!-- Comment Input (Now Outside .short-modal-body) -->
+                <div id="shortCommentInputContainer-{{ video.id }}" class="short-comment-input-container">
+                  <input type="text" id="shortCommentInput-{{ video.id }}" placeholder="Add a comment..." class="short-comment-input">
+                  <button id="shortSubmitComment-{{ video.id }}" class="btn btn-primary" style="height:90%;">Post</button>
+                </div>
+          
               </div>
             </div>
           </div>
-        </div>
+          
   
         <!-- Modal for Sharing (Unique IDs using video.id) -->
         <div id="short-create-modal-{{ video.id }}" class="short-create-modal" style="display: none;">
@@ -734,122 +746,121 @@ document.addEventListener('DOMContentLoaded', () => {
   function openShortCommentsModal(postId) {
     const modal = document.getElementById("shortCommentsModal-" + postId);
     const commentsList = document.getElementById("shortCommentsList-" + postId);
-  
+
     if (!modal || !commentsList) {
-      console.error("Modal or comments list not found for postId:", postId);
-      return;
+        console.error("Modal or comments list not found for postId:", postId);
+        return;
     }
-  
-    // Guard: if this modal is already loading, return.
+
+    // Guard: Prevent multiple loads
     if (modal.dataset.loading === "true") {
-      return;
+        return;
     }
     modal.dataset.loading = "true";
-  
+
     // Clear previous comments and show the modal
     commentsList.innerHTML = "";
     modal.style.display = "flex";
     setTimeout(() => modal.classList.add("show"), 10);
-  
+
     // Fetch comments for the specific post
     fetch(`/short/${postId}/comments/`)
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.comments && data.comments.length > 0) {
-          // Render only top-level comments (those with no parent_comment_id)
-          const topLevelComments = data.comments.filter(
-            (comment) => !comment.parent_comment_id
-          );
-          topLevelComments.forEach((comment) => {
-            renderComment(comment, commentsList);
-          });
-        } else {
-          commentsList.innerHTML =
-            '<p class="no-comments">No comments yet. Be the first to comment!</p>';
-        }
-  
-        // Append the comment input container only if it isn't already present
-        if (!commentsList.querySelector(`#shortCommentInput-${postId}`)) {
-          const commentInputContainer = document.createElement("div");
-          commentInputContainer.classList.add("short-comment-input");
-          commentInputContainer.innerHTML = `
-            <input type="text" id="shortCommentInput-${postId}" placeholder="Add a comment...">
-            <button id="shortSubmitComment-${postId}" class="btn btn-primary">Post</button>
-          `;
-          commentsList.appendChild(commentInputContainer);
-  
-          const submitButton = document.getElementById(
-            "shortSubmitComment-" + postId
-          );
-          const commentInput = document.getElementById(
-            "shortCommentInput-" + postId
-          );
-  
-          // Bind event listeners for posting a comment
-          submitButton.addEventListener("click", function () {
-            if (replyingToCommentId) {
-              handleCommentSubmit(
-                postId,
-                commentInput,
-                commentsList,
-                replyingToCommentId,
-                () => {
-                  replyingToCommentId = null;
-                  commentInput.placeholder = "Add a comment...";
-                }
-              );
+        .then((response) => response.json())
+        .then((data) => {
+            if (data.comments && data.comments.length > 0) {
+                // Render only top-level comments (those with no parent_comment_id)
+                const topLevelComments = data.comments.filter(
+                    (comment) => !comment.parent_comment_id
+                );
+                topLevelComments.forEach((comment) => {
+                    renderComment(comment, commentsList);
+                });
             } else {
-              handleCommentSubmit(
-                postId,
-                commentInput,
-                commentsList,
-                null,
-                () => {
-                  commentInput.placeholder = "Add a comment...";
+                commentsList.innerHTML =
+                    '<p class="no-comments">No comments yet. Be the first to comment!</p>';
+            }
+
+            // Move the comment input container outside `.short-modal-body`
+            let commentInputContainer = document.getElementById(`shortCommentInputContainer-${postId}`);
+            if (!commentInputContainer) {
+                commentInputContainer = document.createElement("div");
+                commentInputContainer.classList.add("short-comment-input-container");
+                commentInputContainer.id = `shortCommentInputContainer-${postId}`;
+                commentInputContainer.innerHTML = `
+                    <input type="text" id="shortCommentInput-${postId}" placeholder="Add a comment...">
+                    <button id="shortSubmitComment-${postId}" class="btn btn-primary" style="height:90%;">Post</button>
+                `;
+
+                // Append it just after `.short-modal-body`
+                modal.querySelector(".short-modal-content").appendChild(commentInputContainer);
+            }
+
+            const submitButton = document.getElementById("shortSubmitComment-" + postId);
+            const commentInput = document.getElementById("shortCommentInput-" + postId);
+
+            // Bind event listeners for posting a comment
+            submitButton.addEventListener("click", function () {
+                if (replyingToCommentId) {
+                    handleCommentSubmit(
+                        postId,
+                        commentInput,
+                        commentsList,
+                        replyingToCommentId,
+                        () => {
+                            replyingToCommentId = null;
+                            commentInput.placeholder = "Add a comment...";
+                        }
+                    );
+                } else {
+                    handleCommentSubmit(
+                        postId,
+                        commentInput,
+                        commentsList,
+                        null,
+                        () => {
+                            commentInput.placeholder = "Add a comment...";
+                        }
+                    );
                 }
-              );
-            }
-          });
-  
-          commentInput.addEventListener("keydown", function (event) {
-            if (event.key === "Enter") {
-              if (replyingToCommentId) {
-                handleCommentSubmit(
-                  postId,
-                  commentInput,
-                  commentsList,
-                  replyingToCommentId,
-                  () => {
-                    replyingToCommentId = null;
-                    commentInput.placeholder = "Add a comment...";
-                  }
-                );
-              } else {
-                handleCommentSubmit(
-                  postId,
-                  commentInput,
-                  commentsList,
-                  null,
-                  () => {
-                    commentInput.placeholder = "Add a comment...";
-                  }
-                );
-              }
-            }
-          });
-        }
-      })
-      .catch((error) => {
-        console.error("Error fetching comments:", error);
-        commentsList.innerHTML =
-          '<p class="error-message">Failed to load comments. Please try again later.</p>';
-      })
-      .finally(() => {
-        // Remove the loading guard so future calls can reinitialize if needed.
-        modal.dataset.loading = "false";
-      });
-  }
-  
+            });
+
+            commentInput.addEventListener("keydown", function (event) {
+                if (event.key === "Enter") {
+                    if (replyingToCommentId) {
+                        handleCommentSubmit(
+                            postId,
+                            commentInput,
+                            commentsList,
+                            replyingToCommentId,
+                            () => {
+                                replyingToCommentId = null;
+                                commentInput.placeholder = "Add a comment...";
+                            }
+                        );
+                    } else {
+                        handleCommentSubmit(
+                            postId,
+                            commentInput,
+                            commentsList,
+                            null,
+                            () => {
+                                commentInput.placeholder = "Add a comment...";
+                            }
+                        );
+                    }
+                }
+            });
+        })
+        .catch((error) => {
+            console.error("Error fetching comments:", error);
+            commentsList.innerHTML =
+                '<p class="error-message">Failed to load comments. Please try again later.</p>';
+        })
+        .finally(() => {
+            modal.dataset.loading = "false";
+        });
+}
+
   // Handle submitting a new comment or reply
   function handleCommentSubmit(postId, commentInput, commentsList, replyingToCommentId, callback) {
     const commentText = commentInput.value.trim();
@@ -1178,7 +1189,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // If Delete is confirmed, delete the comment and close the modal.
     newBtnDeleteConfirm.addEventListener("click", function () {
       deleteComment(commentId, container, isReply);
-      console.log("delete")
       closeDeleteModal();
     });
   
@@ -1453,6 +1463,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     .btn-cancel-reply{
         color:black;
+        height: 90%;
+        padding: 7px;
+        border-radius: 10px;
+        background: #ffffff;
     }
 
     .show-replies-btn{
@@ -1625,6 +1639,8 @@ document.addEventListener('DOMContentLoaded', () => {
     font-size: 15px;
 }
 .short-comment-input {
+    width: auto;
+    padding-bottom: 28px;
     display: flex;
     align-items: center;
 }
@@ -2117,6 +2133,22 @@ margin-top: 16px;
     margin-top: 20px;
     color: #1fffe5;
     font-size: 12px;
+}
+.short-comment-input{
+    color: black;
+    padding: 10px;
+    box-shadow: 0 4px 8px rgba(151, 95, 236, 0.5);
+    background-color: rgb(240 240 240);
+    border-radius: 10px;
+    height: 90%;
+    width: 80%;
+}
+.short-comment-input-container{
+    gap: 10px;
+    display: flex;
+    padding: 10px;
+    width: 100%;
+    height: 65px;
 }
 </style>
 {% endblock %}
