@@ -19,7 +19,7 @@
   
         <div class="video-info">
           <div class="user-info">
-            <img src="{{ video.posted_by.profile_photo_url|default:'/static/images/avatar.jpg' }}"
+            <img src="{%  static video.posted_by.profile_photo_url|default:'/images/avatar.jpg' %}"
                  alt="{{ video.posted_by.first_name }}'s Profile Picture"
                  class="short-profile-pic">
             <div class="username">{{ video.posted_by.first_name }} {{ video.posted_by.last_name }}</div>
@@ -128,6 +128,7 @@
     // Main WebSocket (used for other real-time events, if needed)
     const socket = new WebSocket(`ws://${window.location.host}/ws/chat/`);
     const senderId = "{{ user.id }}"; // Rendered from your template
+    const staticUrl = "{% static '' %}"; // This usually returns "/static/"
 
     socket.onopen = (e) => {
     console.log('Main WebSocket connection established.');
@@ -173,7 +174,7 @@
         dataType: 'json',
         success: (data) => {
         let combinedHtml = '';
-        const fallbackImage = '/static/images/avatar.jpg';
+        const fallbackImage = '/images/avatar.jpg';
 
         // Generate Chats Section
         if (data.chats && data.chats.length > 0) {
@@ -186,7 +187,7 @@
             combinedHtml += `
                 <div class="xyz">
                 <div class="short-chat-item" data-chat-id="${chat.id}">
-                    <img src="${chat.chat_cover}" alt="${chat.title}" class="short-chat-cover">
+                    <img src="${staticUrl}${cleanMediaPath(chat.chat_cover)}" alt="${chat.title}" class="short-chat-cover">
                 </div>
                 <div class="short-chat-title">
                     <div class="xyz-title">${chat.title}</div>
@@ -212,7 +213,7 @@
             combinedHtml += `
                 <div class="xyz">
                 <div class="short-selection-body" data-user-id="${member.user_id}">
-                    <img src="${profileImage}" alt="${member.user_id__first_name}'s profile photo" class="short-profile-photo">
+                    <img src="${staticUrl}${cleanMediaPath(profileImage)}" alt="${member.user_id__first_name}'s profile photo" class="short-profile-photo">
                 </div>
                 <div class="short-profile-text">
                     <div class="xyz-title">${member.user_id__first_name} ${member.user_id__last_name}</div>
@@ -359,9 +360,10 @@
     return cookieValue;
     }
 
-          
-          
-      
+
+    function cleanMediaPath(media) {
+      return media.startsWith('/') ? media.slice(1) : media;
+    }
     
 </script>
 
@@ -952,7 +954,7 @@ document.addEventListener('DOMContentLoaded', () => {
    */
   function renderComment(comment, container, prepend = false, isReply = false, flatReplyContainer = null) {
     // Create the main comment element
-    const profilePhotoUrl = comment.comment_by__profile_photo_url || "/static/images/avatar.jpg";
+    const profilePhotoUrl = comment.comment_by__profile_photo_url || "/images/avatar.jpg";
     const firstName = comment.comment_by__first_name || "Anonymous";
     const lastName = comment.comment_by__last_name || "";
     const createdAt = comment.created_at || "";
@@ -971,7 +973,7 @@ document.addEventListener('DOMContentLoaded', () => {
     commentItem.innerHTML = `
       <div class="short-comment-content">
         <div class="user-info">
-          <img src="${profilePhotoUrl}" alt="${firstName}'s Profile Picture">
+          <img src="${staticUrl}${cleanMediaPath(profilePhotoUrl)}" alt="${firstName}'s Profile Picture">
           <span class="short-username">${firstName} ${lastName}</span>
           <span class="short-created-at">${createdAt}</span>
         </div>

@@ -460,8 +460,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
         )
 
     async def chat_message(self, event):
-
-        print(f"Event: {event}")
     # Check if the event contains a reaction
         if 'reaction' in event:
             reaction = event['reaction']

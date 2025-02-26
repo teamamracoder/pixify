@@ -341,10 +341,10 @@ def list_top_chats_api(request, user):
         if chat.type == ChatType.PERSONAL.value:
             member = get_recipient_for_personal(chat.id, user)
             title = f"{member.first_name} {member.last_name}"
-            chat_cover = member.profile_photo_url or '/static/images/avatar.jpg'
+            chat_cover = member.profile_photo_url or '/images/avatar.jpg'
         elif chat.type == ChatType.GROUP.value:
             title = chat.title or get_recipients_for_group(chat.id, user)
-            chat_cover = chat.chat_cover or '/static/images/group_pic.png'
+            chat_cover = chat.chat_cover or '/images/group_pic.png'
         
         # Build a dictionary with all needed info
         chat_info = {

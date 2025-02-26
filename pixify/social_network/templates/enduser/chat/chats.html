@@ -44,7 +44,7 @@
                                         $("#fill").append(`
                                         <div class="modal-list" onclick="window.location.href='${chat.id}/message/'" style="cursor: pointer;">
                                             <div class="src-profile-photo">
-                                                <img src="${chat.chat_cover}" id="profile-photo">
+                                                <img src="${staticUrl}${cleanMediaPath(chat.chat_cover)}" id="profile-photo">
                                             </div>
                                             <div class="chats-item">${chat.title}</div>
                                         </div>
@@ -74,9 +74,9 @@
             <!-- Image Section -->
             <div class="image-div">
                 {% if chat.is_group %}
-                    <img src="{{ chat.chat_cover|default:'/static/images/group_pic.png' }}" alt="Chat Cover" class="profile-photo">
+                    <img src="{% static  chat.chat_cover|default:'/images/group_pic.png' %}" alt="Chat Cover" class="profile-photo">
                 {% else %}
-                    <img src="{{ chat.chat_cover|default:'/static/images/avatar.jpg' }}" alt="Chat Cover" class="profile-photo">
+                    <img src="{% static  chat.chat_cover|default:'/images/avatar.jpg' %}" alt="Chat Cover" class="profile-photo">
                 {% endif %}
             </div>
 
@@ -178,6 +178,13 @@
 </div>
 
 <script>
+
+    const staticUrl = "{% static '' %}"; // This usually returns "/static/"
+
+    function cleanMediaPath(media) {
+        return media.startsWith('/') ? media.slice(1) : media;
+      }
+
     // Focus on the new modal’s search bar
     function focusSearchBar() {
         setTimeout(function() {
@@ -217,7 +224,7 @@
                 type: 'GET',
                 success: function (res) {
                     let combinedHtml = '';
-                    const fallbackImage = '/static/images/avatar.jpg';
+                    const fallbackImage = '/images/avatar.jpg';
 
                     if (res.members.length === 0) {
                         combinedHtml = '<div class="no-members-message">No Followers And Followings to Display</div>';
@@ -228,7 +235,7 @@
                             <div class="xyz1">
                                 <div class="xyz1-wrapper">
                                     <div class="chat-selection-body" id="user-${member.user_id}" data-user-id="${member.user_id}">
-                                        <img src="${profileImage}" alt="${member.user_id__first_name}'s profile photo" class="chat-profile-photo">
+                                        <img src="${staticUrl}${cleanMediaPath(profileImage)}" alt="${member.user_id__first_name}'s profile photo" class="chat-profile-photo">
                                     </div>
                                     <input type="checkbox" class="chat-checkbox" id="checkbox-${member.user_id}" onchange="checkSelection(${member.user_id})" onclick="event.stopPropagation();">
                                 </div>
