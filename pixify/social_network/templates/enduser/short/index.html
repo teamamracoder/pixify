@@ -27,36 +27,26 @@
           <div class="description">{{ video.description }}</div>
         </div>
   
+
         <!-- Modal for Comments (unique for each video) -->
         <div class="short-modal" id="shortCommentsModal-{{ video.id }}" tabindex="-1" aria-hidden="true">
-            <div class="short-modal-dialog">
-              <div class="short-modal-content">
-                
-                <!-- Modal Header -->
-                <div class="short-modal-header">
-                  <h5 class="modal-title">Comments</h5>
-                  <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="closeModal('shortCommentsModal-{{ video.id }}')">
-                    <span aria-hidden="true">&times;</span>
-                  </button>
+          <div class="short-modal-dialog">
+            <div class="short-modal-content">
+              <div class="short-modal-header">
+                <h5 class="modal-title">Comments</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="closeModal('shortCommentsModal-{{ video.id }}')">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="short-modal-body">
+                <div id="shortCommentsList-{{ video.id }}" class="short-comments-list">
+                  <!-- Comments will be dynamically loaded here -->
                 </div>
-          
-                <!-- Modal Body (Contains Only Comments) -->
-                <div class="short-modal-body">
-                  <div id="shortCommentsList-{{ video.id }}" class="short-comments-list">
-                    <!-- Comments will be dynamically loaded here -->
-                  </div>
-                </div>
-          
-                <!-- Comment Input (Now Outside .short-modal-body) -->
-                <div id="shortCommentInputContainer-{{ video.id }}" class="short-comment-input-container">
-                  <input type="text" id="shortCommentInput-{{ video.id }}" placeholder="Add a comment..." class="short-comment-input">
-                  <button id="shortSubmitComment-{{ video.id }}" class="btn btn-primary" style="height:90%;">Post</button>
-                </div>
-          
               </div>
             </div>
           </div>
-          
+        </div>
+
   
         <!-- Modal for Sharing (Unique IDs using video.id) -->
         <div id="short-create-modal-{{ video.id }}" class="short-create-modal" style="display: none;">
@@ -82,6 +72,7 @@
              aria-label="Like"></i>
           <div class="reaction-count">{{ video.reaction_count }}</div>
         </div>
+        <!-- Chat Icon (to open comments modal) -->
         <div>
           <span class="chat-icon" style="font-size: 24px;" aria-label="Comments" data-video-id="{{ video.id }}" onclick="openShortCommentsModal('{{ video.id }}')">
             <i class="bi bi-chat"></i>
@@ -109,6 +100,9 @@
     {% endfor %}
   </div> <!-- End of short-content -->
   
+
+
+
   <!-- Delete Confirmation Modal -->
   <div id="deleteModal" class="short-delete-modal" style="display: none;">
     <div class="short-delete-modal-content">
@@ -119,7 +113,12 @@
       </div>
     </div>
   </div>
-  
+
+
+
+
+
+
 
 
 
@@ -699,591 +698,572 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
-
-
     // Get CSRF token from cookies
     function getCSRFToken() {
-    const cookies = document.cookie.split(';');
-    for (let cookie of cookies) {
-        const [name, value] = cookie.trim().split('=');
-        if (name === 'csrftoken') return decodeURIComponent(value);
+      const cookies = document.cookie.split(';');
+      for (let cookie of cookies) {
+          const [name, value] = cookie.trim().split('=');
+          if (name === 'csrftoken') return decodeURIComponent(value);
+      }
+      return null;
+      }
+  
+   
+    // ========================================
+    // Global Variables
+    // ========================================
+    let replyingToCommentId = null;
+    
+    // ========================================
+    // Utility Functions
+    // ========================================
+    
+    // Closes a modal by its id
+    function closeModal(modalId) {
+      const modal = document.getElementById(modalId);
+      if (modal) {
+        modal.style.display = "none";
+        modal.classList.remove("show");
+      }
     }
-    return null;
+    
+    // Close the comments modal (with fade-out)
+    function closeShortCommentsModal(modalId) {
+      const modal = document.getElementById(modalId);
+      if (modal) {
+        modal.classList.remove("show");
+        setTimeout(() => (modal.style.display = "none"), 300);
+      }
     }
-
- 
-  // ========================================
-  // Global Variables
-  // ========================================
-  let replyingToCommentId = null;
-  
-  // ========================================
-  // Utility Functions
-  // ========================================
-  
-  // Closes a modal by its id
-  function closeModal(modalId) {
-    const modal = document.getElementById(modalId);
-    if (modal) {
-      modal.style.display = "none";
-      modal.classList.remove("show");
-    }
-  }
-  
-  // Close the comments modal (with fade-out)
-  function closeShortCommentsModal(modalId) {
-    const modal = document.getElementById(modalId);
-    if (modal) {
-      modal.classList.remove("show");
-      setTimeout(() => (modal.style.display = "none"), 300);
-    }
-  }
-  
-  // ========================================
-  // Comments Modal & Comment Functions
-  // ========================================
-  
-  // Open the comments modal for a given post (each short has its unique modal)
-  // This function uses a data attribute "loading" as a guard to prevent duplicate initialization.
-  function openShortCommentsModal(postId) {
-    const modal = document.getElementById("shortCommentsModal-" + postId);
-    const commentsList = document.getElementById("shortCommentsList-" + postId);
-
-    if (!modal || !commentsList) {
+    
+    // ========================================
+    // Comments Modal & Comment Functions
+    // ========================================
+    
+    // Open the comments modal for a given post (each short has its unique modal)
+    // This function uses a data attribute "loading" as a guard to prevent duplicate initialization.
+    function openShortCommentsModal(postId) {
+      const modal = document.getElementById("shortCommentsModal-" + postId);
+      const commentsList = document.getElementById("shortCommentsList-" + postId);
+    
+      if (!modal || !commentsList) {
         console.error("Modal or comments list not found for postId:", postId);
         return;
-    }
-
-    // Guard: Prevent multiple loads
-    if (modal.dataset.loading === "true") {
+      }
+    
+      // Guard: if this modal is already loading, return.
+      if (modal.dataset.loading === "true") {
         return;
-    }
-    modal.dataset.loading = "true";
-
-    // Clear previous comments and show the modal
-    commentsList.innerHTML = "";
-    modal.style.display = "flex";
-    setTimeout(() => modal.classList.add("show"), 10);
-
-    // Fetch comments for the specific post
-    fetch(`/short/${postId}/comments/`)
+      }
+      modal.dataset.loading = "true";
+    
+      // Clear previous comments and show the modal
+      commentsList.innerHTML = "";
+      modal.style.display = "flex";
+      setTimeout(() => modal.classList.add("show"), 10);
+    
+      // Fetch comments for the specific post
+      fetch(`/short/${postId}/comments/`)
         .then((response) => response.json())
         .then((data) => {
-            if (data.comments && data.comments.length > 0) {
-                // Render only top-level comments (those with no parent_comment_id)
-                const topLevelComments = data.comments.filter(
-                    (comment) => !comment.parent_comment_id
-                );
-                topLevelComments.forEach((comment) => {
-                    renderComment(comment, commentsList);
-                });
-            } else {
-                commentsList.innerHTML =
-                    '<p class="no-comments">No comments yet. Be the first to comment!</p>';
-            }
-
-            // Move the comment input container outside `.short-modal-body`
-            let commentInputContainer = document.getElementById(`shortCommentInputContainer-${postId}`);
-            if (!commentInputContainer) {
-                commentInputContainer = document.createElement("div");
-                commentInputContainer.classList.add("short-comment-input-container");
-                commentInputContainer.id = `shortCommentInputContainer-${postId}`;
-                commentInputContainer.innerHTML = `
-                    <input type="text" id="shortCommentInput-${postId}" placeholder="Add a comment...">
-                    <button id="shortSubmitComment-${postId}" class="btn btn-primary" style="height:90%;">Post</button>
-                `;
-
-                // Append it just after `.short-modal-body`
-                modal.querySelector(".short-modal-content").appendChild(commentInputContainer);
-            }
-
-            const submitButton = document.getElementById("shortSubmitComment-" + postId);
-            const commentInput = document.getElementById("shortCommentInput-" + postId);
-
+          if (data.comments && data.comments.length > 0) {
+            // Render only top-level comments (those with no parent_comment_id)
+            const topLevelComments = data.comments.filter(
+              (comment) => !comment.parent_comment_id
+            );
+            topLevelComments.forEach((comment) => {
+              renderComment(comment, commentsList);
+            });
+          } else {
+            commentsList.innerHTML =
+              '<p class="no-comments">No comments yet. Be the first to comment!</p>';
+          }
+    
+          // Append the comment input container only if it isn't already present
+          if (!commentsList.querySelector(`#shortCommentInput-${postId}`)) {
+            const commentInputContainer = document.createElement("div");
+            commentInputContainer.classList.add("short-comment-input");
+            commentInputContainer.innerHTML = `
+              <input type="text" id="shortCommentInput-${postId}" placeholder="Add a comment...">
+              <button id="shortSubmitComment-${postId}" class="btn btn-primary">Post</button>
+            `;
+            commentsList.appendChild(commentInputContainer);
+    
+            const submitButton = document.getElementById(
+              "shortSubmitComment-" + postId
+            );
+            const commentInput = document.getElementById(
+              "shortCommentInput-" + postId
+            );
+    
             // Bind event listeners for posting a comment
             submitButton.addEventListener("click", function () {
-                if (replyingToCommentId) {
-                    handleCommentSubmit(
-                        postId,
-                        commentInput,
-                        commentsList,
-                        replyingToCommentId,
-                        () => {
-                            replyingToCommentId = null;
-                            commentInput.placeholder = "Add a comment...";
-                        }
-                    );
-                } else {
-                    handleCommentSubmit(
-                        postId,
-                        commentInput,
-                        commentsList,
-                        null,
-                        () => {
-                            commentInput.placeholder = "Add a comment...";
-                        }
-                    );
-                }
+              if (replyingToCommentId) {
+                handleCommentSubmit(
+                  postId,
+                  commentInput,
+                  commentsList,
+                  replyingToCommentId,
+                  () => {
+                    replyingToCommentId = null;
+                    commentInput.placeholder = "Add a comment...";
+                  }
+                );
+              } else {
+                handleCommentSubmit(
+                  postId,
+                  commentInput,
+                  commentsList,
+                  null,
+                  () => {
+                    commentInput.placeholder = "Add a comment...";
+                  }
+                );
+              }
             });
-
+    
             commentInput.addEventListener("keydown", function (event) {
-                if (event.key === "Enter") {
-                    if (replyingToCommentId) {
-                        handleCommentSubmit(
-                            postId,
-                            commentInput,
-                            commentsList,
-                            replyingToCommentId,
-                            () => {
-                                replyingToCommentId = null;
-                                commentInput.placeholder = "Add a comment...";
-                            }
-                        );
-                    } else {
-                        handleCommentSubmit(
-                            postId,
-                            commentInput,
-                            commentsList,
-                            null,
-                            () => {
-                                commentInput.placeholder = "Add a comment...";
-                            }
-                        );
+              if (event.key === "Enter") {
+                if (replyingToCommentId) {
+                  handleCommentSubmit(
+                    postId,
+                    commentInput,
+                    commentsList,
+                    replyingToCommentId,
+                    () => {
+                      replyingToCommentId = null;
+                      commentInput.placeholder = "Add a comment...";
                     }
+                  );
+                } else {
+                  handleCommentSubmit(
+                    postId,
+                    commentInput,
+                    commentsList,
+                    null,
+                    () => {
+                      commentInput.placeholder = "Add a comment...";
+                    }
+                  );
                 }
+              }
             });
+          }
         })
         .catch((error) => {
-            console.error("Error fetching comments:", error);
-            commentsList.innerHTML =
-                '<p class="error-message">Failed to load comments. Please try again later.</p>';
+          console.error("Error fetching comments:", error);
+          commentsList.innerHTML =
+            '<p class="error-message">Failed to load comments. Please try again later.</p>';
         })
         .finally(() => {
-            modal.dataset.loading = "false";
+          // Remove the loading guard so future calls can reinitialize if needed.
+          modal.dataset.loading = "false";
         });
-}
-
-  // Handle submitting a new comment or reply
-  function handleCommentSubmit(postId, commentInput, commentsList, replyingToCommentId, callback) {
-    const commentText = commentInput.value.trim();
-    if (!commentText) {
-      alert("Please enter a comment!");
-      return;
     }
-  
-    const url = replyingToCommentId
-      ? `/short/comment/${replyingToCommentId}/reply/`
-      : `/short/${postId}/comment/create/`;
-  
-    fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-CSRFToken": getCSRFToken(),
-      },
-      body: JSON.stringify({ text: commentText }),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.success) {
-          // Remove any "no comments" message if present
-          const noCommentsMessage = commentsList.querySelector(".no-comments");
-          if (noCommentsMessage) {
-            noCommentsMessage.remove();
-          }
-  
-          if (replyingToCommentId) {
-            // Find the parent comment element within this modal
-            const parentComment = commentsList.querySelector(
-              `[data-comment-id="${replyingToCommentId}"]`
-            );
-            let replyContainer;
-            if (parentComment.classList.contains("short-reply-item")) {
-              replyContainer = parentComment.parentElement;
-            } else {
-              replyContainer = parentComment.querySelector(".reply-list");
-              if (!replyContainer) {
-                replyContainer = document.createElement("div");
-                replyContainer.classList.add("reply-list");
-                replyContainer.style.marginLeft = "20px";
-                replyContainer.style.display = "block";
-                parentComment.appendChild(replyContainer);
-              }
-            }
-            renderComment(data.reply, replyContainer, false, true, replyContainer);
-          } else {
-            renderComment(data.comment, commentsList, true);
-          }
-  
-          // Update the comment count near the comment icon (if it exists)
-          const commentIcon = document.querySelector(
-            `.chat-icon[data-video-id="${postId}"]`
-          );
-          const countElement = commentIcon?.nextElementSibling;
-          if (countElement) {
-            countElement.textContent =
-              data.comment_count || parseInt(countElement.textContent) + 1;
-          }
-  
-          // Clear the input and remove any Cancel Reply button if it exists
-          commentInput.value = "";
-          const commentInputContainer = commentInput.parentElement;
-          const cancelReplyButton = commentInputContainer.querySelector(".btn-cancel-reply");
-          if (cancelReplyButton) {
-            cancelReplyButton.remove();
-          }
-  
-          callback();
-        } else {
-          console.error("Error:", data.message || "Unknown error");
-        }
-      })
-      .catch((error) => {
-        console.error("Error posting comment:", error);
-      });
-  }
-  
-  /**
-   * Render a comment (or reply) into a given container.
-   *
-   * @param {Object} comment - The comment data.
-   * @param {HTMLElement} container - The DOM container where the comment should be appended.
-   * @param {Boolean} prepend - If true, the comment is inserted at the top.
-   * @param {Boolean} isReply - If true, the comment is rendered as a reply.
-   * @param {HTMLElement} flatReplyContainer - (Optional) Container for nested replies.
-   */
-  function renderComment(comment, container, prepend = false, isReply = false, flatReplyContainer = null) {
-    // Create the main comment element
-    const profilePhotoUrl = comment.comment_by__profile_photo_url || "/images/avatar.jpg";
-    const firstName = comment.comment_by__first_name || "Anonymous";
-    const lastName = comment.comment_by__last_name || "";
-    const createdAt = comment.created_at || "";
-  
-    const commentItem = document.createElement("div");
-    commentItem.classList.add("short-comment-item");
-    if (isReply) {
-      commentItem.classList.add("short-reply-item");
-      commentItem.style.marginLeft = "20px";
-    }
-    commentItem.setAttribute("data-comment-id", comment.id);
-  
-    const likedClass = comment.user_liked ? "liked" : "";
-    const iconClass = comment.user_liked ? "bi-heart-fill" : "bi-heart";
-  
-    commentItem.innerHTML = `
-      <div class="short-comment-content">
-        <div class="user-info">
-          <img src="${staticUrl}${cleanMediaPath(profilePhotoUrl)}" alt="${firstName}'s Profile Picture">
-          <span class="short-username">${firstName} ${lastName}</span>
-          <span class="short-created-at">${createdAt}</span>
-        </div>
-        <span class="short-comment-text">${comment.comment}</span>
-        <div class="short-comment-actions">
-          <button class="btn-like ${likedClass}" data-comment-id="${comment.id}">
-            <i class="bi ${iconClass}"></i>
-            <span class="like-count">${comment.like_count || 0}</span>
-          </button>
-          <button class="btn-reply" data-comment-id="${comment.id}">Reply</button>
-          <button class="btn-delete" data-comment-id="${comment.id}" style="display: none;">Delete</button>
-        </div>
-      </div>
-    `;
-  
-    // -------------------------------
-    // Attach the Like (Reaction) Listener
-    // -------------------------------
-    const likeButton = commentItem.querySelector(".btn-like");
-    likeButton.addEventListener("click", function () {
-      const commentId = this.dataset.commentId;
-      const likeCountSpan = this.querySelector(".like-count");
-  
-      fetch(`/short/comment/${commentId}/reaction/`, {
+    
+    // Handle submitting a new comment or reply
+    function handleCommentSubmit(postId, commentInput, commentsList, replyingToCommentId, callback) {
+      const commentText = commentInput.value.trim();
+      if (!commentText) {
+        alert("Please enter a comment!");
+        return;
+      }
+    
+      const url = replyingToCommentId
+        ? `/short/comment/${replyingToCommentId}/reply/`
+        : `/short/${postId}/comment/create/`;
+    
+      fetch(url, {
         method: "POST",
         headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": getCSRFToken(),
+        },
+        body: JSON.stringify({ text: commentText }),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.success) {
+            // Remove any "no comments" message if present
+            const noCommentsMessage = commentsList.querySelector(".no-comments");
+            if (noCommentsMessage) {
+              noCommentsMessage.remove();
+            }
+    
+            if (replyingToCommentId) {
+              // Find the parent comment element within this modal
+              const parentComment = commentsList.querySelector(
+                `[data-comment-id="${replyingToCommentId}"]`
+              );
+              let replyContainer;
+              if (parentComment.classList.contains("short-reply-item")) {
+                replyContainer = parentComment.parentElement;
+              } else {
+                replyContainer = parentComment.querySelector(".reply-list");
+                if (!replyContainer) {
+                  replyContainer = document.createElement("div");
+                  replyContainer.classList.add("reply-list");
+                  replyContainer.style.marginLeft = "20px";
+                  replyContainer.style.display = "block";
+                  parentComment.appendChild(replyContainer);
+                }
+              }
+              renderComment(data.reply, replyContainer, false, true, replyContainer);
+            } else {
+              renderComment(data.comment, commentsList, true);
+            }
+    
+            // Update the comment count near the comment icon (if it exists)
+            const commentIcon = document.querySelector(
+              `.chat-icon[data-video-id="${postId}"]`
+            );
+            const countElement = commentIcon?.nextElementSibling;
+            if (countElement) {
+              countElement.textContent =
+                data.comment_count || parseInt(countElement.textContent) + 1;
+            }
+    
+            // Clear the input and remove any Cancel Reply button if it exists
+            commentInput.value = "";
+            const commentInputContainer = commentInput.parentElement;
+            const cancelReplyButton = commentInputContainer.querySelector(".btn-cancel-reply");
+            if (cancelReplyButton) {
+              cancelReplyButton.remove();
+            }
+    
+            callback();
+          } else {
+            console.error("Error:", data.message || "Unknown error");
+          }
+        })
+        .catch((error) => {
+          console.error("Error posting comment:", error);
+        });
+    }
+    
+    /**
+     * Render a comment (or reply) into a given container.
+     *
+     * @param {Object} comment - The comment data.
+     * @param {HTMLElement} container - The DOM container where the comment should be appended.
+     * @param {Boolean} prepend - If true, the comment is inserted at the top.
+     * @param {Boolean} isReply - If true, the comment is rendered as a reply.
+     * @param {HTMLElement} flatReplyContainer - (Optional) Container for nested replies.
+     */
+    function renderComment(comment, container, prepend = false, isReply = false, flatReplyContainer = null) {
+      // Create the main comment element
+      const profilePhotoUrl = comment.comment_by__profile_photo_url || "/static/images/avatar.jpg";
+      const firstName = comment.comment_by__first_name || "Anonymous";
+      const lastName = comment.comment_by__last_name || "";
+      const createdAt = comment.created_at || "";
+    
+      const commentItem = document.createElement("div");
+      commentItem.classList.add("short-comment-item");
+      if (isReply) {
+        commentItem.classList.add("short-reply-item");
+        commentItem.style.marginLeft = "20px";
+      }
+      commentItem.setAttribute("data-comment-id", comment.id);
+    
+      const likedClass = comment.user_liked ? "liked" : "";
+      const iconClass = comment.user_liked ? "bi-heart-fill" : "bi-heart";
+    
+      commentItem.innerHTML = `
+        <div class="short-comment-content">
+          <div class="user-info">
+            <img src="${profilePhotoUrl}" alt="${firstName}'s Profile Picture">
+            <span class="short-username">${firstName} ${lastName}</span>
+            <span class="short-created-at">${createdAt}</span>
+          </div>
+          <span class="short-comment-text">${comment.comment}</span>
+          <div class="short-comment-actions">
+            <button class="btn-like ${likedClass}" data-comment-id="${comment.id}">
+              <i class="bi ${iconClass}"></i>
+              <span class="like-count">${comment.like_count || 0}</span>
+            </button>
+            <button class="btn-reply" data-comment-id="${comment.id}">Reply</button>
+            <button class="btn-delete" data-comment-id="${comment.id}" style="display: none;">Delete</button>
+          </div>
+        </div>
+      `;
+    
+      // -------------------------------
+      // Attach the Like (Reaction) Listener
+      // -------------------------------
+      const likeButton = commentItem.querySelector(".btn-like");
+      likeButton.addEventListener("click", function () {
+        const commentId = this.dataset.commentId;
+        const likeCountSpan = this.querySelector(".like-count");
+    
+        fetch(`/short/comment/${commentId}/reaction/`, {
+          method: "POST",
+          headers: {
+            "X-CSRFToken": getCSRFToken(),
+          },
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.success) {
+              likeCountSpan.textContent = data.like_count;
+              this.classList.toggle("liked", data.user_liked);
+              const icon = this.querySelector("i");
+              if (data.user_liked) {
+                icon.classList.replace("bi-heart", "bi-heart-fill");
+              } else {
+                icon.classList.replace("bi-heart-fill", "bi-heart");
+              }
+            }
+          })
+          .catch((error) =>
+            console.error("Error reacting to comment:", error)
+          );
+      });
+    
+      // -------------------------------
+      // Attach long-press deletion for user-created comments
+      // -------------------------------
+      let pressTimer;
+      const longPressDelay = 500; // Adjust delay as needed
+    
+      const handlePressStart = () => {
+        if (pressTimer) clearTimeout(pressTimer);
+        pressTimer = setTimeout(() => {
+          if (comment.can_delete) {
+            openDeleteModal(comment.id, container, isReply);
+          } else {
+            console.log("User is not allowed to delete comment", comment.id);
+          }
+        }, longPressDelay);
+      };
+    
+      const handlePressEnd = () => {
+        if (pressTimer) {
+          clearTimeout(pressTimer);
+          pressTimer = null;
+        }
+      };
+    
+      // Stop propagation so the event doesn't bubble up
+      commentItem.addEventListener("mousedown", function (e) {
+        e.stopPropagation();
+        handlePressStart();
+      });
+      commentItem.addEventListener("touchstart", function (e) {
+        e.stopPropagation();
+        handlePressStart();
+      });
+      commentItem.addEventListener("mouseup", function (e) {
+        e.stopPropagation();
+        handlePressEnd();
+      });
+      commentItem.addEventListener("touchend", function (e) {
+        e.stopPropagation();
+        handlePressEnd();
+      });
+      commentItem.addEventListener("mouseleave", function (e) {
+        e.stopPropagation();
+        handlePressEnd();
+      });
+    
+      // -------------------------------
+      // Delete Button (Manual Deletion)
+      // -------------------------------
+      const deleteButton = commentItem.querySelector(".btn-delete");
+      deleteButton.addEventListener("click", function (e) {
+        e.stopPropagation();
+        const commentId = commentItem.getAttribute("data-comment-id");
+        openDeleteModal(commentId, container, isReply);
+      });
+    
+      // -------------------------------
+      // Reply Button Listener
+      // -------------------------------
+      const replyButton = commentItem.querySelector(".btn-reply");
+      replyButton.addEventListener("click", function (e) {
+        e.stopPropagation();
+        const commentId = this.dataset.commentId;
+        replyToComment(commentId, firstName, commentItem);
+      });
+    
+      // -------------------------------
+      // Handling Replies (Flattened)
+      // -------------------------------
+      // For top-level comments with replies, create a reply container and a Show Replies button.
+      if (!isReply && comment.replies && comment.replies.length > 0) {
+        const replyContainer = document.createElement("div");
+        replyContainer.classList.add("reply-list");
+        replyContainer.style.marginLeft = "20px";
+        replyContainer.style.display = "none";
+        commentItem.appendChild(replyContainer);
+    
+        const showRepliesButton = document.createElement("button");
+        showRepliesButton.classList.add("show-replies-btn");
+        showRepliesButton.textContent = "~ Show Replies";
+        commentItem.appendChild(showRepliesButton);
+    
+        showRepliesButton.addEventListener("click", function (e) {
+          e.stopPropagation();
+          if (replyContainer.style.display === "none") {
+            replyContainer.style.display = "block";
+            this.textContent = "~ Hide Replies";
+          } else {
+            replyContainer.style.display = "none";
+            this.textContent = "~ Show Replies";
+          }
+        });
+        // Save the container for later nested replies.
+        comment._replyContainer = replyContainer;
+      }
+    
+      // Append the comment element to the container
+      if (prepend) {
+        container.insertBefore(commentItem, container.firstChild);
+      } else {
+        container.appendChild(commentItem);
+      }
+    
+      // Render nested replies after the parent is in the DOM.
+      if (!isReply && comment.replies && comment.replies.length > 0 && comment._replyContainer) {
+        comment.replies.forEach((reply) => {
+          renderComment(reply, comment._replyContainer, false, true, comment._replyContainer);
+        });
+      } else if (isReply && comment.replies && comment.replies.length > 0 && flatReplyContainer) {
+        comment.replies.forEach((reply) => {
+          renderComment(reply, flatReplyContainer, false, true, flatReplyContainer);
+        });
+      }
+    }
+    
+    // Function to handle reply input; it finds the unique input within the modal containing the comment.
+    function replyToComment(commentId, parentUsername, commentItem) {
+      const modal = commentItem.closest(".short-modal");
+      const commentInput = modal.querySelector('input[id^="shortCommentInput-"]');
+      const commentInputContainer = commentInput.parentElement;
+    
+      // Cancel any previous reply if replying to a different comment.
+      if (replyingToCommentId && replyingToCommentId !== commentId) {
+        const existingCancelButton = commentInputContainer.querySelector(".btn-cancel-reply");
+        if (existingCancelButton) {
+          existingCancelButton.remove();
+        }
+        commentInput.value = "";
+        commentInput.placeholder = "Add a comment...";
+      }
+    
+      // Create a Cancel Reply button if one doesn't exist.
+      if (!commentInputContainer.querySelector(".btn-cancel-reply")) {
+        const cancelReplyButton = document.createElement("button");
+        cancelReplyButton.textContent = "Cancel";
+        cancelReplyButton.classList.add("btn-cancel-reply");
+        commentInputContainer.appendChild(cancelReplyButton);
+        cancelReplyButton.addEventListener("click", function () {
+          commentInput.value = "";
+          commentInput.placeholder = "Add a comment...";
+          cancelReplyButton.remove();
+          replyingToCommentId = null;
+        });
+      }
+    
+      // Pre-fill with an @mention and update the placeholder.
+      commentInput.value = `@${parentUsername} `;
+      commentInput.focus();
+      replyingToCommentId = commentId;
+      commentInput.placeholder = `Replying to @${parentUsername}...`;
+    }
+    
+    // Function to open the delete confirmation modal.
+    function openDeleteModal(commentId, container, isReply) {
+      const deleteModal = document.getElementById("deleteModal");
+      let btnDeleteConfirm = document.getElementById("btnDeleteConfirm");
+      let btnDeleteCancel = document.getElementById("btnDeleteCancel");
+    
+      // Show the modal (with a high z-index so it appears above the comment modal)
+      deleteModal.style.display = "block";
+    
+      // Remove previous event listeners by replacing the buttons with clones.
+      const newBtnDeleteConfirm = btnDeleteConfirm.cloneNode(true);
+      btnDeleteConfirm.parentNode.replaceChild(newBtnDeleteConfirm, btnDeleteConfirm);
+      const newBtnDeleteCancel = btnDeleteCancel.cloneNode(true);
+      btnDeleteCancel.parentNode.replaceChild(newBtnDeleteCancel, btnDeleteCancel);
+    
+      // If Delete is confirmed, delete the comment and close the modal.
+      newBtnDeleteConfirm.addEventListener("click", function () {
+        deleteComment(commentId, container, isReply);
+        closeDeleteModal();
+      });
+    
+      // If Cancel is clicked, simply close the modal.
+      newBtnDeleteCancel.addEventListener("click", closeDeleteModal);
+    }
+    
+    // Function to close the delete modal.
+    function closeDeleteModal() {
+      const deleteModal = document.getElementById("deleteModal");
+      deleteModal.style.display = "none";
+    }
+    
+    // Handle comment deletion (for both top-level and replies)
+    function deleteComment(commentId, container, isReply = false) {
+      // Find the closest parent with the video/post ID
+      const videoWrapper = container.closest('.video-wrapper');
+      const postId = videoWrapper ? videoWrapper.dataset.postId : null;
+      
+      fetch(`/short/comment/${commentId}/delete/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
           "X-CSRFToken": getCSRFToken(),
         },
       })
         .then((response) => response.json())
         .then((data) => {
           if (data.success) {
-            likeCountSpan.textContent = data.like_count;
-            this.classList.toggle("liked", data.user_liked);
-            const icon = this.querySelector("i");
-            if (data.user_liked) {
-              icon.classList.replace("bi-heart", "bi-heart-fill");
-            } else {
-              icon.classList.replace("bi-heart-fill", "bi-heart");
-            }
-          }
-        })
-        .catch((error) =>
-          console.error("Error reacting to comment:", error)
-        );
-    });
-  
-    // -------------------------------
-    // Attach long-press deletion for user-created comments
-    // -------------------------------
-    let pressTimer;
-    const longPressDelay = 500; // Adjust delay as needed
-  
-    const handlePressStart = () => {
-      if (pressTimer) clearTimeout(pressTimer);
-      pressTimer = setTimeout(() => {
-        if (comment.can_delete) {
-          openDeleteModal(comment.id, container, isReply);
-        } else {
-          console.log("User is not allowed to delete comment", comment.id);
-        }
-      }, longPressDelay);
-    };
-  
-    const handlePressEnd = () => {
-      if (pressTimer) {
-        clearTimeout(pressTimer);
-        pressTimer = null;
-      }
-    };
-  
-    // Stop propagation so the event doesn't bubble up
-    commentItem.addEventListener("mousedown", function (e) {
-      e.stopPropagation();
-      handlePressStart();
-    });
-    commentItem.addEventListener("touchstart", function (e) {
-      e.stopPropagation();
-      handlePressStart();
-    });
-    commentItem.addEventListener("mouseup", function (e) {
-      e.stopPropagation();
-      handlePressEnd();
-    });
-    commentItem.addEventListener("touchend", function (e) {
-      e.stopPropagation();
-      handlePressEnd();
-    });
-    commentItem.addEventListener("mouseleave", function (e) {
-      e.stopPropagation();
-      handlePressEnd();
-    });
-  
-    // -------------------------------
-    // Delete Button (Manual Deletion)
-    // -------------------------------
-    const deleteButton = commentItem.querySelector(".btn-delete");
-    deleteButton.addEventListener("click", function (e) {
-      e.stopPropagation();
-      const commentId = commentItem.getAttribute("data-comment-id");
-      openDeleteModal(commentId, container, isReply);
-    });
-  
-    // -------------------------------
-    // Reply Button Listener
-    // -------------------------------
-    const replyButton = commentItem.querySelector(".btn-reply");
-    replyButton.addEventListener("click", function (e) {
-      e.stopPropagation();
-      const commentId = this.dataset.commentId;
-      replyToComment(commentId, firstName, commentItem);
-    });
-  
-    // -------------------------------
-    // Handling Replies (Flattened)
-    // -------------------------------
-    // For top-level comments with replies, create a reply container and a Show Replies button.
-    if (!isReply && comment.replies && comment.replies.length > 0) {
-      const replyContainer = document.createElement("div");
-      replyContainer.classList.add("reply-list");
-      replyContainer.style.marginLeft = "20px";
-      replyContainer.style.display = "none";
-      commentItem.appendChild(replyContainer);
-  
-      const showRepliesButton = document.createElement("button");
-      showRepliesButton.classList.add("show-replies-btn");
-      showRepliesButton.textContent = "~ Show Replies";
-      commentItem.appendChild(showRepliesButton);
-  
-      showRepliesButton.addEventListener("click", function (e) {
-        e.stopPropagation();
-        if (replyContainer.style.display === "none") {
-          replyContainer.style.display = "block";
-          this.textContent = "~ Hide Replies";
-        } else {
-          replyContainer.style.display = "none";
-          this.textContent = "~ Show Replies";
-        }
-      });
-      // Save the container for later nested replies.
-      comment._replyContainer = replyContainer;
-    }
-  
-    // Append the comment element to the container
-    if (prepend) {
-      container.insertBefore(commentItem, container.firstChild);
-    } else {
-      container.appendChild(commentItem);
-    }
-  
-    // Render nested replies after the parent is in the DOM.
-    if (!isReply && comment.replies && comment.replies.length > 0 && comment._replyContainer) {
-      comment.replies.forEach((reply) => {
-        renderComment(reply, comment._replyContainer, false, true, comment._replyContainer);
-      });
-    } else if (isReply && comment.replies && comment.replies.length > 0 && flatReplyContainer) {
-      comment.replies.forEach((reply) => {
-        renderComment(reply, flatReplyContainer, false, true, flatReplyContainer);
-      });
-    }
-  }
-  
-  // Function to handle reply input; it finds the unique input within the modal containing the comment.
-  function replyToComment(commentId, parentUsername, commentItem) {
-    const modal = commentItem.closest(".short-modal");
-    const commentInput = modal.querySelector('input[id^="shortCommentInput-"]');
-    const commentInputContainer = commentInput.parentElement;
-  
-    // Cancel any previous reply if replying to a different comment.
-    if (replyingToCommentId && replyingToCommentId !== commentId) {
-      const existingCancelButton = commentInputContainer.querySelector(".btn-cancel-reply");
-      if (existingCancelButton) {
-        existingCancelButton.remove();
-      }
-      commentInput.value = "";
-      commentInput.placeholder = "Add a comment...";
-    }
-  
-    // Create a Cancel Reply button if one doesn't exist.
-    if (!commentInputContainer.querySelector(".btn-cancel-reply")) {
-      const cancelReplyButton = document.createElement("button");
-      cancelReplyButton.textContent = "Cancel";
-      cancelReplyButton.classList.add("btn-cancel-reply");
-      commentInputContainer.appendChild(cancelReplyButton);
-      cancelReplyButton.addEventListener("click", function () {
-        commentInput.value = "";
-        commentInput.placeholder = "Add a comment...";
-        cancelReplyButton.remove();
-        replyingToCommentId = null;
-      });
-    }
-  
-    // Pre-fill with an @mention and update the placeholder.
-    commentInput.value = `@${parentUsername} `;
-    commentInput.focus();
-    replyingToCommentId = commentId;
-    commentInput.placeholder = `Replying to @${parentUsername}...`;
-  }
-  
-  // Function to open the delete confirmation modal.
-  function openDeleteModal(commentId, container, isReply) {
-    const deleteModal = document.getElementById("deleteModal");
-    let btnDeleteConfirm = document.getElementById("btnDeleteConfirm");
-    let btnDeleteCancel = document.getElementById("btnDeleteCancel");
-  
-    // Show the modal (with a high z-index so it appears above the comment modal)
-    deleteModal.style.display = "block";
-  
-    // Remove previous event listeners by replacing the buttons with clones.
-    const newBtnDeleteConfirm = btnDeleteConfirm.cloneNode(true);
-    btnDeleteConfirm.parentNode.replaceChild(newBtnDeleteConfirm, btnDeleteConfirm);
-    const newBtnDeleteCancel = btnDeleteCancel.cloneNode(true);
-    btnDeleteCancel.parentNode.replaceChild(newBtnDeleteCancel, btnDeleteCancel);
-  
-    // If Delete is confirmed, delete the comment and close the modal.
-    newBtnDeleteConfirm.addEventListener("click", function () {
-      deleteComment(commentId, container, isReply);
-      closeDeleteModal();
-    });
-  
-    // If Cancel is clicked, simply close the modal.
-    newBtnDeleteCancel.addEventListener("click", closeDeleteModal);
-  }
-  
-  // Function to close the delete modal.
-  function closeDeleteModal() {
-    const deleteModal = document.getElementById("deleteModal");
-    deleteModal.style.display = "none";
-  }
-  
- // Handle comment deletion (for both top-level and replies)
- function deleteComment(commentId, container, isReply = false) {
-    fetch(`/short/comment/${commentId}/delete/`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "X-CSRFToken": getCSRFToken(),
-        },
-    })
-    .then((response) => response.json())
-    .then((data) => {
-        if (data.success) {
-            // Remove the comment from UI
-            const commentItem = container.querySelector(`[data-comment-id="${commentId}"]`);
+            const commentItem = container.querySelector(
+              `[data-comment-id="${commentId}"]`
+            );
             if (commentItem) {
-                commentItem.remove();
+              commentItem.remove();
             }
-
-            // Get the post ID from the closest video wrapper
-            const videoWrapper = container.closest('.video-wrapper');
-            const postId = videoWrapper ? videoWrapper.dataset.postId : null;
-
-            // Update the comment count
-            const commentIcon = document.querySelector(`.chat-icon[data-video-id="${postId}"]`);
+            const commentIcon = document.querySelector(
+              `.chat-icon[data-video-id="${postId}"]`
+            );
             const countElement = commentIcon?.nextElementSibling;
-
             if (countElement) {
-                countElement.textContent =
-                    data.comment_count ||
-                    Math.max(0, parseInt(countElement.textContent) - (data.deleted_count || 1));
+              countElement.textContent =
+                data.comment_count ||
+                parseInt(countElement.textContent) - 1;
             }
-
-            // 🔥 Fetch updated comments and re-render them
-            fetch(`/short/${postId}/comments/`)
-            .then(response => response.json())
-            .then(data => {
-                // Clear existing comments
-                container.innerHTML = "";
-
-                // Re-render each comment
-                data.comments.forEach(comment => {
-                    renderComment(comment, container);
-                });
-            })
-            .catch(error => console.error("Error refreshing comments:", error));
-
-        } else {
+          } else {
             alert("Error deleting comment");
             console.error("Deletion error:", data.message);
-        }
-    })
-    .catch((error) => {
-        console.error("Error deleting comment:", error);
+          }
+        })
+        .catch((error) => {
+          console.error("Error deleting comment:", error);
+        });
+  }
+  
+    
+    // ========================================
+    // Event Listeners for Modal Controls
+    // ========================================
+    
+    // Attach event listeners to each modal's close button.
+    document.querySelectorAll(".short-modal .close").forEach((closeBtn) => {
+      closeBtn.addEventListener("click", function () {
+        const modal = this.closest(".short-modal");
+        closeShortCommentsModal(modal.id);
+      });
     });
-}
-
-
-
-  
-  // ========================================
-  // Event Listeners for Modal Controls
-  // ========================================
-  
-  // Attach event listeners to each modal's close button.
-  document.querySelectorAll(".short-modal .close").forEach((closeBtn) => {
-    closeBtn.addEventListener("click", function () {
-      const modal = this.closest(".short-modal");
-      closeShortCommentsModal(modal.id);
+    
+    // Open the comments modal when clicking the chat icon.
+    document.querySelectorAll(".chat-icon").forEach((button) => {
+      button.addEventListener("click", function () {
+        const postId = button.dataset.videoId; // Get the associated video ID
+        openShortCommentsModal(postId); // Load and display comments for this video
+      });
     });
-  });
-  
-  // Open the comments modal when clicking the chat icon.
-  document.querySelectorAll(".chat-icon").forEach((button) => {
-    button.addEventListener("click", function () {
-      const postId = button.dataset.videoId; // Get the associated video ID
-      openShortCommentsModal(postId); // Load and display comments for this video
-    });
-  });
-  
-
+    
 </script>
 
 

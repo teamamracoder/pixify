@@ -53,6 +53,8 @@ class ShortCommentListView(View):
        user=request.user
        comments = short_service.short_comments(post_id, user)
 
+       print(comments)
+
        return JsonResponse({"comments": list(comments)}, safe=False)
 
 class ShortCommentCreateView(View):
