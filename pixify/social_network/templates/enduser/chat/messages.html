@@ -3223,9 +3223,11 @@ document.addEventListener("DOMContentLoaded", function () {
     
     /* Container for video info */
     .message-short-info {
+      bottom: 4%;
+      position: absolute;
       margin-top: 10px;
       padding: 5px 10px;
-      background-color: #f9f9f9;
+      background-color: transparent;
       border-radius: 4px;
       box-sizing: border-box;
     }
@@ -3238,8 +3240,8 @@ document.addEventListener("DOMContentLoaded", function () {
     
     /* Profile picture styling */
     .message-short-profile-pic {
-      width: 40px;
-      height: 40px;
+      width: 20px;
+      height: 20px;
       border-radius: 50%;
       object-fit: cover;
       margin-right: 10px;
@@ -3247,9 +3249,8 @@ document.addEventListener("DOMContentLoaded", function () {
     
     /* Username styling */
     .message-short-username {
-      font-size: 1rem;
-      font-weight: bold;
-      color: #333;
+      font-size: 10px;
+      color: #c4b3b3;
     }
     
     /* Media query for larger screens */
@@ -3280,6 +3281,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 /* Media grid for multiple media */
 .messageMedia-grid {
+  width: 230px;
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   grid-gap: 5px;
@@ -3329,17 +3331,16 @@ document.addEventListener("DOMContentLoaded", function () {
   top: 0;
   width: 100%;
   height: 100%;
-  overflow: auto;
   background-color: rgba(0,0,0,0.8);
 }
 
 .messageMedia-modal-content {
+  height: 75vh;
   position: relative;
-  background-color: #fefefe;
-  margin: 5% auto;
+  background-color: #031252;
+  margin: 10% auto;
   padding: 20px;
-  width: 90%;
-  max-width: 800px;
+  width: 50%;
   border-radius: 8px;
 }
 
@@ -3367,7 +3368,7 @@ document.addEventListener("DOMContentLoaded", function () {
 }
 
 .messageMedia-carousel-item {
-  margin: 20px 0;
+  margin: 280px 0;
 }
 
 .messageMedia-carousel-controls {
