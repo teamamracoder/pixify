@@ -357,8 +357,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
 
     async def send_message_to_group(self, message, deleted=False, message_new=False, seen_by_all=False):
+        # Retrieve the sender
         sender = await sync_to_async(User.objects.get)(id=message.sender_id_id)
-
         updated = bool(message.updated_by_id)
 
         reply = False
@@ -377,12 +377,34 @@ class ChatConsumer(AsyncWebsocketConsumer):
             except Message.DoesNotExist:
                 pass
 
-        # Convert datetime to string using a format for h:m AM/PM
+        # Format message time.
         message_time_str = message.created_at.strftime('%I:%M %p')  # 12-hour format with AM/PM
         reactions = await self.fetch_reactions()  # fetch emoji from masterlist table
+
+        # Instead of checking message.post_id (which triggers a DB lookup),
+        # check the underlying id field.
+        if getattr(message, "post_id_id", None):
+            # Retrieve the full post details safely in an async context.
+            post_obj = await sync_to_async(short_service.get_post_by_id)(message.post_id_id)
+            # Retrieve the user who posted.
+            posted_by_obj = await sync_to_async(user_service.get_user)(post_obj.posted_by_id)
+            post_value = {
+                'id': post_obj.id,
+                'media_url': post_obj.media_url,
+                'posted_by': {
+                    'first_name': posted_by_obj.first_name,
+                    'last_name': posted_by_obj.last_name,
+                    'profile_photo_url': posted_by_obj.profile_photo_url or "/images/avatar.jpg",
+                }
+            }
+        else:
+            post_value = None
+
         message_data = {
             'message_id': message.id,
-            'message': message.text,
+            'message': message.text if message.text else None,
+            'media_url': message.media_url if message.media_url else None,
+            'post': post_value,
             'messageTime': message_time_str,
             'update': updated,
             'reply': reply,
@@ -410,6 +432,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
         )
 
 
+
+
+
     async def send_reaction_details(self, reaction_instance):
         react = bool(reaction_instance.reaction_id_id)
         deleted = not reaction_instance.is_active
@@ -435,6 +460,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
         )
 
     async def chat_message(self, event):
+
+        print(f"Event: {event}")
     # Check if the event contains a reaction
         if 'reaction' in event:
             reaction = event['reaction']
@@ -450,6 +477,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
             await self.send(text_data=json.dumps({
                 'type': 'message',
                 'message': message['message'],
+                'media_url': message['media_url'],
+                'post': message['post'],
                 'messageTime': message['messageTime'],
                 'update': message['update'],
                 'reply': message['reply'],
