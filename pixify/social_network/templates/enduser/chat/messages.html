@@ -78,9 +78,9 @@
                   <div class="messageMedia-single-media" data-media-list="{{ message.media_url|join:',' }}">
                     {% with media=message.media_url.0 %}
                       {% if media|slice:"-4:" == ".mp4" %}
-                        <video src="{% static media %}" controls></video>
+                        <video src="{% static media %}" controls style="width: 100%;height: 100%;"></video>
                       {% else %}
-                        <img src="{% static media %}" alt="Media">
+                        <img src="{% static media %}" alt="Media" style="width: 100%;height: 100%;">
                       {% endif %}
                     {% endwith %}
                   </div>
@@ -90,9 +90,9 @@
                     {% for media in message.media_url|slice:":4" %}
                       <div class="messageMedia-grid-item" data-index="{{ forloop.counter0 }}">
                         {% if media|slice:"-4:" == ".mp4" %}
-                          <video src="{% static media %}" controls></video>
+                          <video src="{% static media %}" controls class="media_size"></video>
                         {% else %}
-                          <img src="{% static media %}" alt="Media">
+                          <img src="{% static media %}" alt="Media" class="media_size">
                         {% endif %}
                         {% if forloop.last and message.media_url|length > 4 %}
                           <!-- Overlay to indicate additional media count -->
@@ -323,9 +323,9 @@
       const cleanedMedia = media.startsWith('/') ? media.slice(1) : media;
       
       if (media.slice(-4).toLowerCase() === '.mp4') {
-        carouselItem.innerHTML = `<video src="${staticUrl}${cleanedMedia}" controls autoplay></video>`;
+        carouselItem.innerHTML = `<video src="${staticUrl}${cleanedMedia}" controls autoplay class="media_size"></video>`;
       } else {
-        carouselItem.innerHTML = `<img src="${staticUrl}${cleanedMedia}" alt="Media">`;
+        carouselItem.innerHTML = `<img src="${staticUrl}${cleanedMedia}" alt="Media" class="media_size">`;
       }
       updateNavButtons();
     }
@@ -1255,7 +1255,7 @@ function appendMessageToChat(message, messageId, messageTime, senderId, senderNa
     let mediaPreviewHtml = "";
     if (mediaUrls && mediaUrls.length > 0) {
         mediaPreviewHtml = mediaUrls
-            .map(url => `<div class="message-media"><img src="${url}" alt="media"></div>`)
+            .map(url => `<div class="message-media"><img src="${url}" alt="media" class="media_size"></div>`)
             .join("");
     }
 
@@ -1333,7 +1333,7 @@ function updateMessageInChat(updatedMessage, messageId, messageTime, senderName,
     mediaPreviewHtml = mediaUrls
       .map(
         (url) =>
-          `<div class="media-item"><img src="${url}" alt="media"></div>`
+          `<div class="media-item"><img src="${url}" alt="media" class="media_size"></div>`
       )
       .join("");
   }
@@ -3225,6 +3225,8 @@ document.addEventListener("DOMContentLoaded", function () {
     
     /* Responsive video styling */
     .message-short-video {
+      max-height: 400px;
+      max-width: 233px;
       width: 100%;
       height: auto;
       border-radius: 8px;
@@ -3233,9 +3235,11 @@ document.addEventListener("DOMContentLoaded", function () {
     
     /* Container for video info */
     .message-short-info {
+      bottom: 4%;
+      position: absolute;
       margin-top: 10px;
       padding: 5px 10px;
-      background-color: #f9f9f9;
+      background-color: transparent;
       border-radius: 4px;
       box-sizing: border-box;
     }
@@ -3248,8 +3252,8 @@ document.addEventListener("DOMContentLoaded", function () {
     
     /* Profile picture styling */
     .message-short-profile-pic {
-      width: 40px;
-      height: 40px;
+      width: 20px;
+      height: 20px;
       border-radius: 50%;
       object-fit: cover;
       margin-right: 10px;
@@ -3257,9 +3261,8 @@ document.addEventListener("DOMContentLoaded", function () {
     
     /* Username styling */
     .message-short-username {
-      font-size: 1rem;
-      font-weight: bold;
-      color: #333;
+      font-size: 10px;
+      color: #c4b3b3;
     }
     
     /* Media query for larger screens */
@@ -3275,9 +3278,11 @@ document.addEventListener("DOMContentLoaded", function () {
 /*new*/
 /* Single media styling */
 .messageMedia-single-media {
-  width: 100%;
-  margin: 0 auto;
-  cursor: pointer;
+    max-height: 300px;
+    max-width: 250px;
+    width: fit-content;
+    margin: 0 auto;
+    cursor: pointer;
 }
 
 .messageMedia-single-media img,
@@ -3290,11 +3295,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
 /* Media grid for multiple media */
 .messageMedia-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  grid-gap: 5px;
-  margin: 10px 0;
-  cursor: pointer;
+  max-height: 244px;
+    width: 250px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-gap: 5px;
+    margin: 10px 0;
+    cursor: pointer;
 }
 
 .messageMedia-grid-item {
@@ -3339,17 +3346,15 @@ document.addEventListener("DOMContentLoaded", function () {
   top: 0;
   width: 100%;
   height: 100%;
-  overflow: auto;
   background-color: rgba(0,0,0,0.8);
 }
 
 .messageMedia-modal-content {
+  height: fit-content;
   position: relative;
-  background-color: #fefefe;
-  margin: 5% auto;
-  padding: 20px;
-  width: 90%;
-  max-width: 800px;
+  background-color: #031252;
+  margin: 7% auto;
+  width: fit-content;
   border-radius: 8px;
 }
 
@@ -3372,12 +3377,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
 /* Carousel styles in modal */
 .messageMedia-carousel {
+  width: fit-content;
+  height: fit-content;
+  align-items: center;
+  justify-content: center;
+  display: flex;
   position: relative;
-  text-align: center;
 }
 
 .messageMedia-carousel-item {
-  margin: 20px 0;
+    width: fit-content;
+    height: fit-content;
 }
 
 .messageMedia-carousel-controls {
@@ -3416,6 +3426,12 @@ document.addEventListener("DOMContentLoaded", function () {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+.media_size{
+    max-width: 700px;
+    max-height: 550px;
+    width: fit-content;
+    height: fit-content;
 }
 
     </style>
