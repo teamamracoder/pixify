@@ -1,7 +1,7 @@
 from channels.generic.websocket import AsyncWebsocketConsumer
 import json
 from .models import Message, Chat, ChatMember,User
-from .services import message_service, message_mention_service, user_service,message_read_status_service,chat_service,message_reaction_service
+from .services import message_service, message_mention_service, user_service,message_read_status_service,chat_service,message_reaction_service, short_service
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from asgiref.sync import sync_to_async
@@ -13,24 +13,17 @@ from django.core.files.base import ContentFile
 
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        self.chat_id = self.scope['url_route']['kwargs']['chat_id']
-        self.chat_group_name = f'chat_{self.chat_id}'
-
-        # Join room group
-        await self.channel_layer.group_add(
-            self.chat_group_name,
-            self.channel_name
-        )
-
-        # Accept WebSocket connection
+        # Initially, we don't know which chat this connection is for.
+        # We'll use a default group or simply hold off joining any group.
+        self.chat_group_name = None
         await self.accept()
 
     async def disconnect(self, close_code):
-        # Leave room group
-        await self.channel_layer.group_discard(
-            self.chat_group_name,
-            self.channel_name
-        )
+        if self.chat_group_name:
+            await self.channel_layer.group_discard(
+                self.chat_group_name,
+                self.channel_name
+            )
 
     async def receive(self, text_data):
         text_data_json = json.loads(text_data)
@@ -45,6 +38,16 @@ class ChatConsumer(AsyncWebsocketConsumer):
         caller_id= text_data_json.get('caller_id')
 
         print(f"The Received Data: {text_data_json}")
+
+        if action == 'join':
+            # User sends a join message with a chat_id
+            self.chat_id = text_data_json.get('chat_id')
+            self.chat_group_name = f'chat_{self.chat_id}'
+            # Add this connection to the correct chat group
+            await self.channel_layer.group_add(
+                self.chat_group_name,
+                self.channel_name
+            )
 
         if action == 'create':
             await self.create_message(text_data_json, user)
@@ -126,7 +129,13 @@ class ChatConsumer(AsyncWebsocketConsumer):
         media_files = text_data_json.get('mediaFiles', [])
         mentions = text_data_json.get('mentions', [])
         chat_id = text_data_json.get('chat_id')
+        post_id = text_data_json.get('post_id')
         chat = await sync_to_async(Chat.objects.get)(id=chat_id)
+
+        if post_id:
+            post = await sync_to_async(short_service.get_post_by_id)(post_id)
+        else:
+            post = None            
 
         # Save media files if any
         media_urls = []
@@ -152,7 +161,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 media_urls.append(media_url)
 
         # Create the message
-        message = await sync_to_async(message_service.create_message)(text, media_urls, user, chat)
+        message = await sync_to_async(message_service.create_message)(text, media_urls, post, user, chat)
         await sync_to_async(message_read_status_service.create_message_read_status)(message, user)
 
         # Handle mentions
@@ -214,7 +223,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 media_urls.append(media_url)
 
         # Edit the message
-        updated_message = await sync_to_async(message_service.update_message)(message, new_text, media_urls, user)
+        updated_message = await sync_to_async(message_service.update_message)(message, new_text, user)
 
         mention_ids = []
         numeric_ids = [id for id in mentions if id.isdigit()]

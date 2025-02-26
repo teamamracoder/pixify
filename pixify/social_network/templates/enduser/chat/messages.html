@@ -983,7 +983,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // WebSocket connection and initialization
     const chatId = $('#chat_id').val();  // Get chat_id dynamically
-    const socket = new WebSocket('ws://' + window.location.host + '/ws/chat/' + chatId + '/');
+    const socket = new WebSocket('ws://' + window.location.host + '/ws/chat/');
     const currentUser = "{{ user.first_name }}"; // Django context variable for current user's name
     const currentUserId = "{{ user.id }}";
     const senderId = "{{ user.id }}"; // Django context variable
@@ -992,6 +992,16 @@ document.addEventListener('DOMContentLoaded', function() {
     socket.onopen = function(e) {
         console.log('WebSocket connection established.');
     };
+
+    // After connection, join a specific chat
+    socket.onopen = function () {
+      // Assume chatId is defined on the client side
+      socket.send(JSON.stringify({
+        action: 'join',
+        chat_id: chatId
+      }));
+    };
+
 
     // Handle sending of message (when user submits or presses enter)
     document.getElementById("messageForm").addEventListener("submit", function (event) {

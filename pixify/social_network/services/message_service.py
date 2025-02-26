@@ -12,10 +12,11 @@ def list_messages_by_chat_id(chat_id, user_id):
     return messages
 
 
-def create_message(text, media_url,sender_id, chat):
+def create_message(text, media_url, post, sender_id, chat):
     return Message.objects.create(
         text=text,
         media_url=media_url,
+        post_id=post,
         sender_id=sender_id,
         chat_id=chat,
         created_by=sender_id
@@ -24,9 +25,8 @@ def create_message(text, media_url,sender_id, chat):
 def get_message_by_id(message_id):
     return get_object_or_404(Message, id=message_id,is_active=True)
 
-def update_message(message, text, media_url,user):
+def update_message(message, text, user):
     message.text = text
-    message.media_url = media_url
     message.updated_by=user
     message.save()
     return message
