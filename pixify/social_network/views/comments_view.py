@@ -99,6 +99,7 @@ class CommentsListView(View):
         comment_list = services.comment_service.comment_list(post_id)
 
         comment_count = services.comment_service.comment_count(post_id)
+        
 
         # Ensure proper naming and data structure
         for comment in comment_list:
@@ -156,12 +157,13 @@ class CommentReplyView(View):
               reply_list = []
 
             comment_list = services.comment_service.comment_list(post_id)
-
+           
 
             return JsonResponse({
                 "status": "success",
                 "comments":list(comment_list),
                 "replies": list(reply_list),
+              
 
 
             })
@@ -196,16 +198,46 @@ class DeleteCommentView(View):
 #         return JsonResponse(comment_likes)
 
 
+# class fetch_comment_likes(View):
+#     def get(self, request, *args, **kwargs):
+#         user_id = request.user.id  # Get logged-in user's ID
+#         comment_id = request.GET.get("comment_id")  # Use GET instead of POST
+#         print(comment_id)
+
+
+#         if comment_id:
+#             # Fetch like count for a specific comment
+#             like_count = CommentReaction.objects.filter(comment_id_id=comment_id).count()
+#             user_liked = CommentReaction.objects.filter(comment_id_id=comment_id, user_id=user_id).exists()
+
+#             return JsonResponse({
+#                 "comment_id": comment_id,
+#                 "like_count": like_count,
+#                 "user_liked": user_liked
+#             })
+
+#         # Fetch likes for all comments if no specific comment_id is given
+#         comment_likes = {}
+#         all_comments = CommentReaction.objects.values("comment_id_id").distinct()
+
+#         for comment in all_comments:
+#             c_id = comment["comment_id_id"]
+#             like_count = CommentReaction.objects.filter(comment_id_id=c_id).count()
+#             user_liked = CommentReaction.objects.filter(comment_id_id=c_id, user_id=user_id).exists()
+
+#             comment_likes[c_id] = {"like_count": like_count, "user_liked": user_liked}
+
+#         return JsonResponse(comment_likes)
+
 class fetch_comment_likes(View):
     def get(self, request, *args, **kwargs):
-        user_id = request.user.id  # Get logged-in user's ID
-        comment_id = request.GET.get("comment_id")  # Use GET instead of POST
-
+        user_id = request.user.id
+        comment_id = request.GET.get("comment_id")
+        print("ca",comment_id,user_id)
 
         if comment_id:
-            # Fetch like count for a specific comment
             like_count = CommentReaction.objects.filter(comment_id_id=comment_id).count()
-            user_liked = CommentReaction.objects.filter(comment_id_id=comment_id, user_id=user_id).exists()
+            user_liked =CommentReaction.objects.filter(comment_id_id=comment_id, user_id=user_id)
 
             return JsonResponse({
                 "comment_id": comment_id,
@@ -213,14 +245,14 @@ class fetch_comment_likes(View):
                 "user_liked": user_liked
             })
 
-        # Fetch likes for all comments if no specific comment_id is given
+        # Fetch likes for all comments
         comment_likes = {}
         all_comments = CommentReaction.objects.values("comment_id_id").distinct()
 
         for comment in all_comments:
             c_id = comment["comment_id_id"]
             like_count = CommentReaction.objects.filter(comment_id_id=c_id).count()
-            user_liked = CommentReaction.objects.filter(comment_id_id=c_id, user_id=user_id).exists()
+            user_liked =CommentReaction.objects.filter(comment_id_id=c_id, user_id=user_id)
 
             comment_likes[c_id] = {"like_count": like_count, "user_liked": user_liked}
 
@@ -235,12 +267,13 @@ class ToggleLikeView(View):
         user_id = request.user.id  # Assuming user is logged in
 
         comment = get_object_or_404(Comment, id=comment_id)
-        like_count = CommentReaction.objects.filter(comment_id_id=comment_id).count()
+        
+  
         like, created = CommentReaction.objects.get_or_create(comment_id_id=comment_id, reacted_by_id=user_id,created_by_id=user_id, is_active=True)
-
         if not created:
             like.delete()  # Unlike if already liked
             return JsonResponse({"liked": False})
+        like_count = CommentReaction.objects.filter(comment_id_id=comment_id).count()
 
         return JsonResponse({"liked": True,"like_count":like_count})
 
@@ -262,3 +295,22 @@ class GetRepliesView(View):
 
 
 
+
+class FetchCommentLikes(View):
+    def get(self, request, *args, **kwargs):
+        user_id = request.user.id if request.user.is_authenticated else None
+        comment_id = request.GET.get("comment_id")
+
+        print("Received comment_id:", comment_id, "User ID:", user_id)  # Debugging
+
+        if comment_id:
+            like_count = CommentReaction.objects.filter(comment_id_id=comment_id).count()
+            user_liked = CommentReaction.objects.filter(comment_id_id=comment_id, user_id=user_id).exists()
+
+            return JsonResponse({
+                "comment_id": comment_id,
+                "like_count": like_count,
+                "user_liked": user_liked  # ✅ Ensuring this is boolean
+            })
+
+        return JsonResponse({"error": "Invalid request"}, status=400)

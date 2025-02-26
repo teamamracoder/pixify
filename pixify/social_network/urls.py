@@ -162,6 +162,7 @@ urlpatterns = [
     path('toggle-like/', views.ToggleLikeView.as_view(), name='toggle-like'),
     path("remove_reaction/", views.remove_reaction.as_view(), name="remove_reaction"),
     path("fetch-comment-likes/", views.fetch_comment_likes.as_view(), name="fetch_comment_likes"),
+    path("fetch-comment-likess/", views.FetchCommentLikes.as_view(), name="fetch_comment_likes"),
 
 
 
