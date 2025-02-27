@@ -1,10 +1,13 @@
-from ..constants import ChatType,MessageDeleteType
-from ..models import Chat, User, ChatMember,Follower,Message,MessageReadStatus
+from ..constants import ChatType, MessageDeleteType
+from ..models import Chat, User, ChatMember, Follower, Message, MessageReadStatus
 from django.shortcuts import get_object_or_404
-from django.db.models import Max,Q,Subquery,OuterRef,F
 from django.db.models.functions import Coalesce
-from social_network.utils.common_utils import print_log
-from datetime import date
+from django.db.models.functions import Coalesce, Concat
+from datetime import date, datetime
+from django.db.models import (
+    CharField, Case, When, Value, F, Q, Max, Exists, Subquery, OuterRef, Count
+)
+from django.db.models.functions import Coalesce, Concat
 
 
 def list_chats_by_user(user):
@@ -12,11 +15,19 @@ def list_chats_by_user(user):
         members=user,
         is_active=True,
     ).annotate(
+        is_member_active=Exists(
+            ChatMember.objects.filter(
+                chat_id=OuterRef('id'),
+                member_id=user,
+                is_active=True
+            )
+        )
+    ).filter(is_member_active=True
+    ).annotate(
         latest_message_timestamp=Coalesce(
             Max(
                 'fk_chat_messages_chats_id__send_at',
                 filter=Q(
-                    # Exclude messages that are deleted for everyone or deleted by the user
                     ~Q(fk_chat_messages_chats_id__delete_type=MessageDeleteType.DELETED_FOR_EVERYONE.value) &
                     ~Q(fk_chat_messages_chats_id__deleted_by__contains=[user.id])
                 )
@@ -26,36 +37,65 @@ def list_chats_by_user(user):
     ).annotate(
         latest_message=Subquery(
             Message.objects.filter(
-                Q(chat_id=OuterRef('pk')),  # Keyword argument
-                Q(is_active=True),          # Keyword argument
-            # Exclude deleted messages
-                ~Q(delete_type=MessageDeleteType.DELETED_FOR_EVERYONE.value),  # Keyword argument
-                ~Q(deleted_by__contains=[user.id])  # Keyword argument
+                Q(chat_id=OuterRef('pk')),
+                Q(is_active=True),
+                ~Q(delete_type=MessageDeleteType.DELETED_FOR_EVERYONE.value),
+                ~Q(deleted_by__contains=[user.id]),
+                (
+                    (Q(text__isnull=False) & ~Q(text="")) |
+                    (Q(media_url__isnull=False) & ~Q(media_url=[])) |
+                    Q(post_id__isnull=False)
+                )
             ).order_by('-send_at')
-            .values('text')[:1]
+            .annotate(
+                message_content=Case(
+                    When(~Q(text="") & Q(text__isnull=False), then=F('text')),
+                    When(~Q(media_url=[]) & Q(media_url__isnull=False), then=Value("📷 Image")),
+                    When(
+                        Q(post_id__isnull=False),
+                        then=Case(
+                            # If the sender of the post is the user, show "You sent a reels"
+                            When(sender_id=user.id, then=Value("You sent a posts")),
+                            # Otherwise, show "Sender's First Name sent a reels"
+                            default=Concat(
+                                Subquery(
+                                    Message.objects.filter(id=OuterRef('id'))
+                                    .values('sender_id__first_name')[:1]
+                                ),
+                                Value(" sent a reels"),
+                                output_field=CharField()
+                            ),
+                            output_field=CharField()
+                        )
+                    ),
+                    default=Value(""),
+                    output_field=CharField()
+                )
+            )
+            .values('message_content')[:1]
         )
     ).annotate(
         latest_message_sender_id=Subquery(
             Message.objects.filter(
                 Q(chat_id=OuterRef('pk')),
                 Q(is_active=True),
-                # Exclude deleted messages
-                ~Q(delete_type=MessageDeleteType.DELETED_FOR_EVERYONE.value) &
+                ~Q(delete_type=MessageDeleteType.DELETED_FOR_EVERYONE.value),
                 ~Q(deleted_by__contains=[user.id])
             ).order_by('-send_at')
             .values('sender_id')[:1]
         )
     ).order_by('-latest_message_timestamp')
 
-    # Filter out chats with no visible messages or only deleted ones
     user_chats = user_chats.filter(
         Q(latest_message__isnull=False) | Q(type=ChatType.GROUP.value)
     )
 
     chat_data = []
     for chat in user_chats:
-        # Retrieve the last message, ensuring it is not deleted by the user or marked as deleted
-        latest_message = Message.objects.filter(chat_id=chat.id, is_active=True).exclude(
+        latest_message = Message.objects.filter(
+            chat_id=chat.id,
+            is_active=True
+        ).exclude(
             delete_type=MessageDeleteType.DELETED_FOR_EVERYONE.value,
             deleted_by__contains=[user.id]
         ).last()
@@ -70,6 +110,9 @@ def list_chats_by_user(user):
         })
 
     return chat_data
+
+
+
 
 def is_message_seen_by_all(message):
     members = User.objects.filter(
@@ -279,43 +322,60 @@ def list_followings(user, offset=0, limit=5):
 
 
 def list_top_chats_api(request, user):
-    search_query = request.GET.get('search', '')
-    chats = Chat.objects.filter(members=user, is_active=True)
+    search_query = request.GET.get('search', '').strip()
 
-    chat_data_list = []
-    for chat in chats:
-        if chat.type == ChatType.PERSONAL.value:
-            member = get_recipient_for_personal(chat.id, user)
-            title = f"{member.first_name} {member.last_name}"
-            chat_cover = member.profile_photo_url or '/static/images/avatar.jpg'
-            chat_info = {
-                'id': chat.id,
-                'title': title,
-                'chat_cover': chat_cover,
-            }
-        elif chat.type == ChatType.GROUP.value:
-            title = chat.title or get_recipients_for_group(chat.id, user)
-            chat_cover = chat.chat_cover or '/static/images/group_pic.png'
-            chat_info = {
-                'id': chat.id,
-                'title': title,
-                'chat_cover': chat_cover,
-            }
-        chat_data_list.append(chat_info)
+    chats = Chat.objects.filter(
+        is_active=True,
+        id__in=ChatMember.objects.filter(
+            member_id=user,
+            is_active=True
+        ).values_list('chat_id', flat=True)
+    ).annotate(
+        active_members_count=Count('chatmember', filter=Q(chatmember__is_active=True)),
+        message_count=Count(
+            'fk_chat_messages_chats_id', 
+            filter=Q(fk_chat_messages_chats_id__is_active=True) &
+                   ~Q(fk_chat_messages_chats_id__delete_type=MessageDeleteType.DELETED_FOR_EVERYONE.value) &
+                   ~Q(fk_chat_messages_chats_id__deleted_by__contains=[user.id])
+        )
+    ).filter(
+        active_members_count__gte=2
+    )
 
-    user_chats = chats
     if search_query:
-        user_chats = chats.filter(
+        chats = chats.filter(
             Q(members__first_name__icontains=search_query) |
             Q(members__last_name__icontains=search_query)
-        )
+        ).distinct()
 
-    for chat in user_chats:
-        chat.meg = Message.objects.filter(chat_id=chat).count()
+    chat_data_list = []
+    for c in chats:
+        # Retrieve chat-specific title and cover.
+        if c.type == ChatType.PERSONAL.value:
+            member = get_recipient_for_personal(c.id, user)
+            title = f"{member.first_name} {member.last_name}"
+            chat_cover = member.profile_photo_url or '/images/avatar.jpg'
+        elif c.type == ChatType.GROUP.value:
+            title = c.title or get_recipients_for_group(c.id, user)
+            chat_cover = c.chat_cover or '/images/group_pic.png'
+        else:
+            title = "Unknown Chat"
+            chat_cover = '/images/default_chat.jpg'
+               
+        chat_info = {
+            'id': c.id,
+            'title': title,
+            'chat_cover': chat_cover,
+            'message_count': c.message_count,
+        }
+        chat_data_list.append(chat_info)
 
-    top_chats = list(user_chats)
-    top_chats.sort(key=lambda chat: chat.meg, reverse=True)
+    chat_data_list.sort(key=lambda c: c['message_count'], reverse=True)
+    
+    return chat_data_list[:6]
 
-    return top_chats
 
-
+def is_message_seen_by_user(message, user):
+    seen = MessageReadStatus.objects.filter(message_id=message, read_by=user, is_active=True).exists()
+    
+    return seen

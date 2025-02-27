@@ -1,31 +1,29 @@
 from channels.generic.websocket import AsyncWebsocketConsumer
 import json
 from .models import Message, Chat, ChatMember,User
-from .services import message_service, message_mention_service, user_service,message_read_status_service,chat_service,message_reaction_service
+from .services import message_service, message_mention_service, user_service,message_read_status_service,chat_service,message_reaction_service, short_service
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from asgiref.sync import sync_to_async
+import base64
+from django.core.files.base import ContentFile
+import hashlib
+import os
+from django.core.files.base import ContentFile
 
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        self.chat_id = self.scope['url_route']['kwargs']['chat_id']
-        self.chat_group_name = f'chat_{self.chat_id}'
-
-        # Join room group
-        await self.channel_layer.group_add(
-            self.chat_group_name,
-            self.channel_name
-        )
-
-        # Accept WebSocket connection
+        # Initially, we don't know which chat this connection is for.
+        # We'll use a default group or simply hold off joining any group.
+        self.chat_group_name = None
         await self.accept()
 
     async def disconnect(self, close_code):
-        # Leave room group
-        await self.channel_layer.group_discard(
-            self.chat_group_name,
-            self.channel_name
-        )
+        if self.chat_group_name:
+            await self.channel_layer.group_discard(
+                self.chat_group_name,
+                self.channel_name
+            )
 
     async def receive(self, text_data):
         text_data_json = json.loads(text_data)
@@ -39,7 +37,17 @@ class ChatConsumer(AsyncWebsocketConsumer):
         call_id = text_data_json.get('call_id')
         caller_id= text_data_json.get('caller_id')
 
-        # print(f"The Received Data: {text_data_json}")
+        print(f"The Received Data: {text_data_json}")
+
+        if action == 'join':
+            # User sends a join message with a chat_id
+            self.chat_id = text_data_json.get('chat_id')
+            self.chat_group_name = f'chat_{self.chat_id}'
+            # Add this connection to the correct chat group
+            await self.channel_layer.group_add(
+                self.chat_group_name,
+                self.channel_name
+            )
 
         if action == 'create':
             await self.create_message(text_data_json, user)
@@ -114,23 +122,47 @@ class ChatConsumer(AsyncWebsocketConsumer):
         else:
             return
 
+
+
     async def create_message(self, text_data_json, user):
         text = text_data_json.get('message', '')
         media_files = text_data_json.get('mediaFiles', [])
         mentions = text_data_json.get('mentions', [])
         chat_id = text_data_json.get('chat_id')
+        post_id = text_data_json.get('post_id')
         chat = await sync_to_async(Chat.objects.get)(id=chat_id)
+
+        if post_id:
+            post = await sync_to_async(short_service.get_post_by_id)(post_id)
+        else:
+            post = None            
 
         # Save media files if any
         media_urls = []
         for file in media_files:
-            file_name = default_storage.save(file['name'], ContentFile(file['content']))
-            media_url = default_storage.url(file_name)
-            media_urls.append(media_url)
+            # Get the file's original name and its Base64 content
+            original_filename = file.get('filename')
+            content = file.get('content')
+            if original_filename and content:
+                # Decode the Base64 content to binary data
+                decoded_content = base64.b64decode(content)
+                # Compute an MD5 hash from the binary content
+                file_hash = hashlib.md5(decoded_content).hexdigest()
+                # Extract the file extension (if any)
+                _, ext = os.path.splitext(original_filename)
+                new_filename = f"{file_hash}{ext.lower()}"
+
+                # Check if the file already exists in storage
+                if default_storage.exists(new_filename):
+                    saved_name = new_filename
+                else:
+                    saved_name = default_storage.save(new_filename, ContentFile(decoded_content))
+                media_url = default_storage.url(saved_name)
+                media_urls.append(media_url)
 
         # Create the message
-        message = await sync_to_async(message_service.create_message)( text, media_urls, user, chat)
-        await sync_to_async (message_read_status_service.create_message_read_status)(message, user)
+        message = await sync_to_async(message_service.create_message)(text, media_urls, post, user, chat)
+        await sync_to_async(message_read_status_service.create_message_read_status)(message, user)
 
         # Handle mentions
         mention_ids = []
@@ -139,7 +171,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
         for mention in mentions:
             if 'all' in mention:
-                chat_members = await sync_to_async(lambda: list(ChatMember.objects.filter(chat_id=chat.id, is_active=True).exclude(member_id=user).values_list('member_id', flat=True)))()
+                chat_members = await sync_to_async(lambda: list(
+                    ChatMember.objects.filter(chat_id=chat.id, is_active=True)
+                    .exclude(member_id=user)
+                    .values_list('member_id', flat=True)
+                ))()
                 mention_ids.extend(chat_members)
             else:
                 user_obj = await sync_to_async(lambda: User.objects.filter(first_name__iexact=mention).first())()
@@ -153,6 +189,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
         # Send the message to the WebSocket group
         await self.send_message_to_group(message, message_new=True)
 
+
+
     async def edit_message(self, message_id, text_data_json, user):
         message = await sync_to_async(message_service.get_message_by_id)(message_id)
         new_text = text_data_json.get('message', '')
@@ -161,15 +199,31 @@ class ChatConsumer(AsyncWebsocketConsumer):
         media_files = text_data_json.get('mediaFiles', [])
         chat = await sync_to_async(Chat.objects.get)(id=chat_id)
 
-        # Update media files
+       # Save media files if any
         media_urls = []
         for file in media_files:
-            file_name = default_storage.save(file['name'], ContentFile(file['content']))
-            media_url = default_storage.url(file_name)
-            media_urls.append(media_url)
+            # Get the file's original name and its Base64 content
+            original_filename = file.get('filename')
+            content = file.get('content')
+            if original_filename and content:
+                # Decode the Base64 content to binary data
+                decoded_content = base64.b64decode(content)
+                # Compute an MD5 hash from the binary content
+                file_hash = hashlib.md5(decoded_content).hexdigest()
+                # Extract the file extension (if any)
+                _, ext = os.path.splitext(original_filename)
+                new_filename = f"{file_hash}{ext.lower()}"
+
+                # Check if the file already exists in storage
+                if default_storage.exists(new_filename):
+                    saved_name = new_filename
+                else:
+                    saved_name = default_storage.save(new_filename, ContentFile(decoded_content))
+                media_url = default_storage.url(saved_name)
+                media_urls.append(media_url)
 
         # Edit the message
-        updated_message = await sync_to_async(message_service.update_message)(message, new_text, media_urls, user)
+        updated_message = await sync_to_async(message_service.update_message)(message, new_text, user)
 
         mention_ids = []
         numeric_ids = [id for id in mentions if id.isdigit()]
@@ -220,9 +274,25 @@ class ChatConsumer(AsyncWebsocketConsumer):
         # Save media files if any
         media_urls = []
         for file in media_files:
-            file_name = default_storage.save(file['name'], ContentFile(file['content']))
-            media_url = default_storage.url(file_name)
-            media_urls.append(media_url)
+            # Get the file's original name and its Base64 content
+            original_filename = file.get('filename')
+            content = file.get('content')
+            if original_filename and content:
+                # Decode the Base64 content to binary data
+                decoded_content = base64.b64decode(content)
+                # Compute an MD5 hash from the binary content
+                file_hash = hashlib.md5(decoded_content).hexdigest()
+                # Extract the file extension (if any)
+                _, ext = os.path.splitext(original_filename)
+                new_filename = f"{file_hash}{ext.lower()}"
+
+                # Check if the file already exists in storage
+                if default_storage.exists(new_filename):
+                    saved_name = new_filename
+                else:
+                    saved_name = default_storage.save(new_filename, ContentFile(decoded_content))
+                media_url = default_storage.url(saved_name)
+                media_urls.append(media_url)
 
         # Create the reply message
         reply_message = await sync_to_async(message_service.reply_message)(user, text, media_urls, user, chat, original_message)
@@ -287,8 +357,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
 
     async def send_message_to_group(self, message, deleted=False, message_new=False, seen_by_all=False):
+        # Retrieve the sender
         sender = await sync_to_async(User.objects.get)(id=message.sender_id_id)
-
         updated = bool(message.updated_by_id)
 
         reply = False
@@ -307,12 +377,34 @@ class ChatConsumer(AsyncWebsocketConsumer):
             except Message.DoesNotExist:
                 pass
 
-        # Convert datetime to string using a format for h:m AM/PM
+        # Format message time.
         message_time_str = message.created_at.strftime('%I:%M %p')  # 12-hour format with AM/PM
         reactions = await self.fetch_reactions()  # fetch emoji from masterlist table
+
+        # Instead of checking message.post_id (which triggers a DB lookup),
+        # check the underlying id field.
+        if getattr(message, "post_id_id", None):
+            # Retrieve the full post details safely in an async context.
+            post_obj = await sync_to_async(short_service.get_post_by_id)(message.post_id_id)
+            # Retrieve the user who posted.
+            posted_by_obj = await sync_to_async(user_service.get_user)(post_obj.posted_by_id)
+            post_value = {
+                'id': post_obj.id,
+                'media_url': post_obj.media_url,
+                'posted_by': {
+                    'first_name': posted_by_obj.first_name,
+                    'last_name': posted_by_obj.last_name,
+                    'profile_photo_url': posted_by_obj.profile_photo_url or "/images/avatar.jpg",
+                }
+            }
+        else:
+            post_value = None
+
         message_data = {
             'message_id': message.id,
-            'message': message.text,
+            'message': message.text if message.text else None,
+            'media_url': message.media_url if message.media_url else None,
+            'post': post_value,
             'messageTime': message_time_str,
             'update': updated,
             'reply': reply,
@@ -338,6 +430,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 'message': message_data,
             }
         )
+
+
+
 
 
     async def send_reaction_details(self, reaction_instance):
@@ -380,6 +475,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
             await self.send(text_data=json.dumps({
                 'type': 'message',
                 'message': message['message'],
+                'media_url': message['media_url'],
+                'post': message['post'],
                 'messageTime': message['messageTime'],
                 'update': message['update'],
                 'reply': message['reply'],
@@ -440,3 +537,149 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
 
 
+# class CallConsumer(AsyncWebsocketConsumer):
+#     active_users = {}  # Dictionary to track active users in each call
+
+#     async def connect(self):
+#         self.chat_id = self.scope['url_route']['kwargs']['chat_id']
+#         self.call_group_name = f"call_{self.chat_id}"
+
+#         # Add user to active users list
+#         if self.call_group_name not in self.active_users:
+#             self.active_users[self.call_group_name] = 0
+#         self.active_users[self.call_group_name] += 1
+
+#         # Join room group
+#         await self.channel_layer.group_add(self.call_group_name, self.channel_name)
+#         await self.accept()
+
+#         # Notify others about user joining
+#         await self.channel_layer.group_send(
+#             self.call_group_name,
+#             {
+#                 "type": "user.joined",
+#                 "chat_id": self.chat_id,
+#                 "active_users": self.active_users[self.call_group_name]
+#             }
+#         )
+
+#         print(f"[WebSocket] User connected to chat {self.chat_id}, Active users: {self.active_users[self.call_group_name]}")
+
+#     async def disconnect(self, close_code):
+#         # Remove user from active users list
+#         if self.call_group_name in self.active_users:
+#             self.active_users[self.call_group_name] -= 1
+#             if self.active_users[self.call_group_name] <= 0:
+#                 del self.active_users[self.call_group_name]
+
+#         # Leave room group
+#         await self.channel_layer.group_discard(self.call_group_name, self.channel_name)
+
+#         # Notify others about user leaving
+#         await self.channel_layer.group_send(
+#             self.call_group_name,
+#             {
+#                 "type": "user.left",
+#                 "chat_id": self.chat_id,
+#                 "active_users": self.active_users.get(self.call_group_name, 0)
+#             }
+#         )
+
+#         print(f"[WebSocket] User disconnected from chat {self.chat_id}, Remaining users: {self.active_users.get(self.call_group_name, 0)}")
+
+#     async def receive(self, text_data):
+#         try:
+#             data = json.loads(text_data)
+#             action = data.get("action")
+
+#             if action == "call_started":
+#                 await self.channel_layer.group_send(
+#                     self.call_group_name,
+#                     {
+#                         "type": "call.started",
+#                         "call_id": data["call_id"],
+#                         "chat_id": self.chat_id
+#                     }
+#                 )
+
+#             elif action == "call_accepted":
+#                 await self.channel_layer.group_send(
+#                     self.call_group_name,
+#                     {
+#                         "type": "call.accepted",
+#                         "call_id": data["call_id"],
+#                         "chat_id": self.chat_id
+#                     }
+#                 )
+
+#             elif action == "webrtc_signal":
+#                 await self.channel_layer.group_send(
+#                     self.call_group_name,
+#                     {
+#                         "type": "webrtc.signal",
+#                         "signal": data["signal"],
+#                         "from": data["from"],
+#                         "chat_id": self.chat_id
+#                     }
+#                 )
+
+#             elif action == "user_joined":
+#                 await self.channel_layer.group_send(
+#                     self.call_group_name,
+#                     {
+#                         "type": "user.joined",
+#                         "chat_id": self.chat_id,
+#                         "active_users": self.active_users[self.call_group_name]
+#                     }
+#                 )
+
+#             elif action == "user_left":
+#                 await self.channel_layer.group_send(
+#                     self.call_group_name,
+#                     {
+#                         "type": "user.left",
+#                         "chat_id": self.chat_id,
+#                         "active_users": self.active_users.get(self.call_group_name, 0)
+#                     }
+#                 )
+
+#         except Exception as e:
+#             print(f"[WebSocket Error] Failed to process message: {e}")
+
+#     # Event Handlers
+
+#     async def call_started(self, event):
+#         await self.send(text_data=json.dumps({
+#             "action": "call_started",
+#             "call_id": event["call_id"],
+#             "chat_id": event["chat_id"]
+#         }))
+
+#     async def call_accepted(self, event):
+#         await self.send(text_data=json.dumps({
+#             "action": "call_accepted",
+#             "call_id": event["call_id"],
+#             "chat_id": event["chat_id"]
+#         }))
+
+#     async def webrtc_signal(self, event):
+#         await self.send(text_data=json.dumps({
+#             "action": "webrtc_signal",
+#             "signal": event["signal"],
+#             "from": event["from"],
+#             "chat_id": event["chat_id"]
+#         }))
+
+#     async def user_joined(self, event):
+#         await self.send(text_data=json.dumps({
+#             "action": "user_joined",
+#             "chat_id": event["chat_id"],
+#             "active_users": event["active_users"]
+#         }))
+
+#     async def user_left(self, event):
+#         await self.send(text_data=json.dumps({
+#             "action": "user_left",
+#             "chat_id": event["chat_id"],
+#             "active_users": event["active_users"]
+#         }))

@@ -28,6 +28,7 @@ class Message(models.Model):
         blank=True,
         default=list
     )
+    post_id = models.ForeignKey('Post', on_delete=models.CASCADE, blank=True, null=True, related_name='fk_post_messages')
     is_active = models.BooleanField(db_default=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True, blank=True)
     updated_at = models.DateTimeField(auto_now=True, blank=True)

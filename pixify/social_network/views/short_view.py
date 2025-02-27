@@ -1,9 +1,10 @@
 from django.views import View
 from django.shortcuts import render, redirect
-from ..services import short_service, chat_service, follower_service
+from ..services import short_service, chat_service, follower_service, message_service, chat_member_service, message_read_status_service
 import random
 from django.http import JsonResponse
 import json
+from ..constants import ChatType
 
 class ShortListView(View):
     def get(self, request):
@@ -16,7 +17,40 @@ class ShortListView(View):
             short.comments_count = short_service.format_count(comments)
             short.user_reacted = short_service.user_has_reacted(short, user)
         random.shuffle(shorts)  # Randomize the list
-        return render(request, 'enduser/short/index.html', {'shorts': shorts})
+        return render(request, 'enduser/short/index.html', {'shorts': shorts,'user':user})
+    
+    
+class ShortDetailView(View):
+    def get(self, request, post_id):
+        user = request.user
+        
+        selected_short = short_service.get_short(post_id)
+        count = short_service.reaction_count(selected_short.id)
+        selected_short.reaction_count = short_service.format_count(count)
+        comments = short_service.comment_count(selected_short.id)
+        selected_short.comments_count = short_service.format_count(comments)
+        selected_short.user_reacted = short_service.user_has_reacted(selected_short, user)
+        
+
+        shorts = short_service.get_shorts()
+        
+        for s in shorts:
+            if s.id != selected_short.id:
+                cnt = short_service.reaction_count(s.id)
+                s.reaction_count = short_service.format_count(cnt)
+                comm = short_service.comment_count(s.id)
+                s.comments_count = short_service.format_count(comm)
+                s.user_reacted = short_service.user_has_reacted(s, user)
+        
+        
+        shorts = [s for s in shorts if s.id != selected_short.id]
+        
+        random.shuffle(shorts)
+
+        shorts.insert(0, selected_short)
+                
+        return render(request, 'enduser/short/index.html', {'shorts': shorts, 'user': user})
+
 
 
 class ShortReactionCreateView(View):
@@ -65,6 +99,9 @@ class ShortCommentCreateView(View):
         # Create the comment (assume likes are set to 0 by default)
         comment = short_service.short_comment_create(text, post, user)
 
+        comments = short_service.comment_count(post.id)
+        comment.comments_count = short_service.format_count(comments)
+
         can_delete = comment.comment_by == user
 
         # Return the comment data in the response with like_count = 0 initially
@@ -79,6 +116,7 @@ class ShortCommentCreateView(View):
                 'created_at': 'Just now', #predefine string
                 'can_delete':can_delete,
                 'like_count': 0,  # Initialize like_count as 0
+                'comment_count': comment.comments_count,
                 'replies': []  # Empty replies for new comments
             }
         })
@@ -93,6 +131,9 @@ class ShortCommentReplyView(View):
 
         # Create the reply (initial like_count is set to 0)
         reply = short_service.short_comment_reply(text, comment.post_id, comment, user)
+
+        comments = short_service.comment_count(reply.post_id)
+        reply.comments_count = short_service.format_count(comments)
 
         can_delete = reply.comment_by == user  # Only allow deletion if it's the current user's reply
 
@@ -109,6 +150,7 @@ class ShortCommentReplyView(View):
                 'can_delete':can_delete,
                 'created_at': 'Just now', #predefine string
                 'like_count': 0,  # Initialize like_count as 0
+                'comment_count': reply.comments_count,
                 'replies': []  # Replies to a reply are not supported
             }
         })
@@ -117,8 +159,13 @@ class ShortCommentDeleteView(View):
     def post(self, request, comment_id):
         user = request.user
         try:
+            short =short_service.get_short_comment(comment_id)
             short_service.short_comment_delete(comment_id, user)
-            return JsonResponse({'success': True})
+
+            comments = short_service.comment_count(short.post_id)
+            comments_count = short_service.format_count(comments)
+
+            return JsonResponse({'success': True, 'comment_count': comments_count})
         except Exception as e:
             return JsonResponse({'success': False, 'message': str(e)}, status=500)
 
@@ -132,7 +179,8 @@ class ShortCommentReactionView(View):
         # Toggle the like status
         user_liked = short_service.toggle_like(comment, user)
 
-        comment.likes=short_service.comment_reaction_count(comment)
+        count = short_service.comment_reaction_count(comment)
+        comment.likes = short_service.format_count(count)
 
         return JsonResponse({
             'success': True,
@@ -141,11 +189,47 @@ class ShortCommentReactionView(View):
         })
 
 
+
+
 class ShortShareListViewApi(View):
     def get(self, request):
         user = request.user
         chats = chat_service.list_top_chats_api(request, user)
+        follow = follower_service.list_follow_api(request, user)
+        
+        data = {
+            "chats": chats,
+            "follow": follow
+        }
+        return JsonResponse(data)
 
-        follow = follower_service.list_followers_api(request, user)
 
-        return chats,follow
+
+
+class ShortSendView(View):
+    def post(self, request):
+        user = request.user
+        try:
+            data = json.loads(request.body)
+        except json.JSONDecodeError:
+            return JsonResponse({"success": False, "error": "Invalid JSON"}, status=400)
+
+        chats = data.get("chats", [])
+        members = data.get("members", [])
+
+        chat_ids = []  # List to collect chat ids
+        
+        # Send the video to the selected chats
+        for chat_id in chats:
+            chat = chat_service.get_chat_by_id(chat_id)
+            chat_ids.append(chat.id)
+
+        # Send the video to the selected members (create a personal chat for each)
+        for member_id in members:
+            chat = chat_service.create_chat(user, None, None, ChatType.PERSONAL.value)
+            chat_member_service.add_chat_member(chat.id, user.id, user)
+            chat_member_service.add_chat_member(chat.id, member_id, user)
+            chat_ids.append(chat.id)
+
+        return JsonResponse({"success": True, "chat": chat_ids})
+
