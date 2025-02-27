@@ -96,8 +96,7 @@ class ChatListView(View):
                 'latest_message_sender_id':chat.latest_message_sender_id,
                 'latest_message_sender_name':sender_name['sender_name']
             })
-            print(chat_data)
-
+            
         return render(
             request,
             'enduser/chat/chats.html',
