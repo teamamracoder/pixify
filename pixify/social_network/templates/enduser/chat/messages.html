@@ -49,18 +49,72 @@
         {% for message in date_group.1 %}
         <div class="message {% if message.sender_id.id == user.id %}sent{% else %}received{% endif %} {% if message.seen_by_user %}user_read{% endif %}" id="message-{{ message.id }}">
             <div class="message-content">
-                {% if message.reply_for_message_id %}
-                <div class="parent-message">
-                    <span>{{ message.reply_for_message_id.sender_id.first_name }}: </span>
-                    <div class="reply-message-text">
-                        {{ message.reply_for_message_id.text }}
-                    </div>
-                    {% if message.reply_for_message_id.media_url %}
-                    <span>{{ message.reply_for_message_id.media_url }}</span>
-                    {% endif %}
-                </div>
-                {% endif %}
 
+
+
+                    {% if message.reply_for_message_id %}
+                    <div class="parent-message">
+                      <span>{{ message.reply_for_message_id.sender_id.first_name }}: </span>
+                      <div class="reply-message-text">
+                        {{ message.reply_for_message_id.text }}
+                      </div>
+                  
+                      {% if message.reply_for_message_id.media_url %}
+                        <div class="reply-media-container">
+                          {% if message.reply_for_message_id.media_url|length == 1 %}
+                            <!-- Single media: display full-width -->
+                            <div class="messageMedia-single-media reply-media-single" data-media-list="{{ message.reply_for_message_id.media_url|join:',' }}">
+                              {% with media=message.reply_for_message_id.media_url.0 %}
+                                {% if media|slice:"-4:" == ".mp4" %}
+                                  <video src="{% static media %}" controls class="media_size"></video>
+                                {% else %}
+                                  <img src="{% static media %}" alt="Media" style="width: 100%; height: 100%;">
+                                {% endif %}
+                              {% endwith %}
+                            </div>
+                          {% else %}
+                            <!-- Multiple media: display grid (show only first 4) -->
+                            <div class="messageMedia-grid reply-media-grid" data-media-list="{{ message.reply_for_message_id.media_url|join:',' }}">
+                              {% for media in message.reply_for_message_id.media_url|slice:":4" %}
+                                <div class="messageMedia-grid-item reply-media-grid-item" data-index="{{ forloop.counter0 }}">
+                                  {% if media|slice:"-4:" == ".mp4" %}
+                                    <video src="{% static media %}" controls class="media_size"></video>
+                                  {% else %}
+                                    <img src="{% static media %}" alt="Media" style="width: 100%; height: 100%;">
+                                  {% endif %}
+                                  {% if forloop.last and message.reply_for_message_id.media_url|length > 4 %}
+                                    <!-- Overlay to indicate additional media count -->
+                                    <div class="messageMedia-overlay reply-media-overlay">
+                                      <span>+{{ message.reply_for_message_id.media_url|length|add:"-4" }}</span>
+                                    </div>
+                                  {% endif %}
+                                </div>
+                              {% endfor %}
+                            </div>
+                          {% endif %}
+                        </div>
+                      {% endif %}
+                    
+                    {% if message.reply_for_message_id.post_id %}
+                    <div class="message-reply-post">
+                      <video id="message-short" class="message-reply-short-video" muted>
+                        <source src="{% static message.reply_for_message_id.post_id.media_url.0 %}" type="video/mp4">
+                      </video>
+                      <div class="message-reply-short-info">
+                        <div class="message-reply-short-user-info">
+                          <img src="{% static  message.reply_for_message_id.post_id.posted_by.profile_photo_url|default:'/images/avatar.jpg' %}"
+                               alt="{{ message.reply_for_message_id.post_id.posted_by.first_name }}'s Profile Picture"
+                               class="message-reply-short-profile-pic">
+                          <div class="message-reply-short-username">
+                            {{ message.reply_for_message_id.post_id.posted_by.first_name }} {{ message.reply_for_message_id.post_id.posted_by.last_name }}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    {% endif %}
+                  </div>
+                  {% endif %}
+                  
                 <div class="message-header">
                     <img src="{% static  message.sender_id.profile_photo_url|default:'\images\avatar.jpg' %}" alt="{{ message.sender_id.first_name }}'s Profile Picture" class="message-profile-pic">
                     <span class="message-username">{{ message.sender_id.first_name }}</span>
@@ -227,6 +281,7 @@
                 <div class="reply-container">
                     <span class="reply-username"></span>:
                     <span class="reply-text"></span>
+                    <span class="reply-media-preview"></span>
                     <div class="close-reply" onclick="cancelReply()">✖</div>
                 </div>
             </div>
@@ -274,7 +329,7 @@
 
 <script>
 
-  
+
 // Message Mention JS
 $(document).ready(function () {
 
@@ -1273,7 +1328,7 @@ function updateMessageInChat(updatedMessage, messageId, messageTime, senderName,
     mediaPreviewHtml = mediaUrls
       .map(
         (url) =>
-          `<div class="media-item"><img src="${url}" alt="media" class="media_size"></div>`
+          `<div class="media-item"><img src="${staticUrl}${url}" alt="media" class="media_size"></div>`
       )
       .join("");
   }
@@ -1397,22 +1452,26 @@ function updateMessageInChat(updatedMessage, messageId, messageTime, senderName,
         }
 
         const messageTextElement = messageDiv.querySelector(".message-text");
-        if (!messageTextElement) {
-            console.error(`Message text not found for message ID: ${messageId}`);
-            return;
-        }
-
         const messageInput = document.getElementById("message-input");
-        messageInput.value = messageTextElement.textContent; // Pre-fill input with current message content
-        messageInput.focus();
 
-        // Display the "edit-preview" section
+        if (messageTextElement) {
+          messageInput.value = messageTextElement.textContent; // Pre-fill input with current message content
+          messageInput.focus();
+
         const editPreview = document.getElementById("edit-preview");
         editPreview.style.display = "flex";
         editPreview.querySelector(".edit-text").textContent = messageTextElement.textContent;
 
-        // Store the message ID being edited
         editingMessageId = messageId;
+        }else{
+          messageInput.value = ''; // Pre-fill input with current message content
+          messageInput.focus();
+
+          const editPreview = document.getElementById("edit-preview");
+          editPreview.style.display = "flex";
+
+          editingMessageId = messageId;          
+        }
     }
 
     // Cancel edit
@@ -1462,37 +1521,55 @@ function updateMessageInChat(updatedMessage, messageId, messageTime, senderName,
     // Global variables to store current reply message IDs
     let ReplyMessageId = null;
 
-    // Reply message
     function replyMessage(messageId, senderName) {
-        // If edit mode is active, cancel it
-        if (document.getElementById('edit-preview').style.display === 'flex') {
-            cancelEdit();
-        }
-        // Also cancel any existing reply
-        cancelReply();
-
-        const messageDiv = document.getElementById(`message-${messageId}`);
-        if (!messageDiv) {
-            console.error(`Message with ID ${messageId} not found for reply.`);
-            return;
-        }
-
-        const messageTextElement = messageDiv.querySelector(".message-text");
-        if (!messageTextElement) {
-            console.error(`Message text not found for message ID: ${messageId}`);
-            return;
-        }
-
-        const replyPreview = document.getElementById("reply-preview");
-        replyPreview.style.display = "block";
-        replyPreview.querySelector(".reply-username").textContent = senderName;
-        replyPreview.querySelector(".reply-text").textContent = messageTextElement.textContent;
-
-        const messageInput = document.getElementById("message-input");
-        messageInput.focus();
-
-        ReplyMessageId = messageId;
-    }
+      // If edit mode is active, cancel it
+      if (document.getElementById('edit-preview').style.display === 'flex') {
+          cancelEdit();
+      }
+      // Also cancel any existing reply
+      cancelReply();
+  
+      const messageDiv = document.getElementById(`message-${messageId}`);
+      if (!messageDiv) {
+          console.error(`Message with ID ${messageId} not found for reply.`);
+          return;
+      }
+  
+      const messageTextElement = messageDiv.querySelector(".message-text");
+      const singleMediaElement = messageDiv.querySelector(".messageMedia-single-media");
+      const mediaGridElement = messageDiv.querySelector(".messageMedia-grid");
+      const replyPreview = document.getElementById("reply-preview");
+  
+      replyPreview.style.display = "block";
+      replyPreview.querySelector(".reply-username").textContent = senderName;
+  
+      if (messageTextElement) {            
+          replyPreview.querySelector(".reply-text").textContent = messageTextElement.textContent;
+      } else {          
+          replyPreview.querySelector(".reply-text").textContent = '';
+      }
+  
+      const replyMediaContainer = replyPreview.querySelector(".reply-media-preview");
+      replyMediaContainer.innerHTML = ''; // Clear previous content
+      if (singleMediaElement) {
+          replyMediaContainer.innerHTML = singleMediaElement.innerHTML;
+      } else if (mediaGridElement) {
+          // Clone the entire grid container
+          const gridClone = mediaGridElement.cloneNode(true);
+          // Optionally, add a class to adjust grid styling in the reply preview context.
+          gridClone.classList.add('reply-media-preview-grid');
+          replyMediaContainer.appendChild(gridClone);
+      } else {
+          replyMediaContainer.innerHTML = '';
+      }
+  
+      const messageInput = document.getElementById("message-input");
+      messageInput.focus();
+    
+      ReplyMessageId = messageId;
+  }
+  
+  
 
     // Cancel reply
     function cancelReply() {
@@ -2143,9 +2220,13 @@ document.addEventListener('DOMContentLoaded', function() {
     modal.style.display = "block";
   }
 
-  // Use event delegation to attach click listeners for both single media and grid items.
   document.addEventListener('click', function(e) {
-    // Check if the clicked element is inside a single-media container
+    // Prevent the carousel from triggering for reply media containers or reply messages.
+    if (e.target.closest('.reply-media-container') || e.target.closest('.reply-message')) {
+      return;
+    }
+    
+    // Check if the clicked element is inside a single-media container.
     const singleMediaContainer = e.target.closest('.messageMedia-single-media');
     if (singleMediaContainer) {
       const mediaListStr = singleMediaContainer.getAttribute('data-media-list');
@@ -2153,10 +2234,10 @@ document.addEventListener('DOMContentLoaded', function() {
         const mediaList = mediaListStr.split(',').map(url => url.trim());
         openModal(mediaList, 0);
       }
-      return; // Stop further processing if a match is found
+      return; // Stop further processing if a match is found.
     }
-
-    // Check if the clicked element is inside a grid item
+    
+    // Check if the clicked element is inside a grid item.
     const gridItem = e.target.closest('.messageMedia-grid-item');
     if (gridItem) {
       const parent = gridItem.closest('.messageMedia-grid');
@@ -2169,6 +2250,7 @@ document.addEventListener('DOMContentLoaded', function() {
       return;
     }
   });
+  
 
   // Previous control.
   prevBtn.addEventListener('click', e => {
@@ -2845,10 +2927,10 @@ document.addEventListener('DOMContentLoaded', function() {
             margin-right: 5px;
         }
     
-        .parent-message div:last-child {
+        {% comment %} .parent-message div:last-child {
             font-size: 12px;
             color:#ffffffb5;
-        }
+        } {% endcomment %}
     
     
         .parmess-file-preview {
@@ -3475,6 +3557,150 @@ document.addEventListener('DOMContentLoaded', function() {
     width: fit-content;
     height: fit-content;
 }
+
+
+.reply-media-container{
+  position: relative;
+  max-width: 35px;
+  max-height: 50px;
+  width: fit-content;
+  height: fit-content;
+  right: 5px !important;
+}
+
+.reply-media-grid {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 4px;
+  width: 50px;
+  right: 19px;
+  bottom: 6px;
+
+}
+
+.reply-media-grid-item {
+    position: relative;
+}
+
+.reply-media-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    color: #fff;
+    font-size: 14px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+
+
+
+.reply-media-preview{    
+  position: relative;
+  top: 5px;
+  right: 5px;
+  max-width: 40px;
+  max-height: 50px;
+  width: fit-content;
+  height: fit-content;
+}
+
+
+
+/* Example CSS for reply preview grid */
+.reply-media-preview-grid {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 4px;
+  width: 50px;
+  bottom: 10px;
+  right: 10px;
+}
+.reply-media-grid img,
+.reply-media-grid video {
+    width: 100%;
+    height: auto;
+}
+.reply-media-preview-grid .messageMedia-overlay {
+  font-size: 0.5rem;
+}
+
+
+
+
+.message-reply-post {
+  background-color: #7d7878;  
+  border-radius: 4px;
+}
+
+
+.message-reply-short-video {
+  width: 80px;
+  height: 60px;
+  object-fit: cover;
+  margin-right: 6px;
+  border-radius: 2px;
+}
+
+
+.message-reply-short-info {
+  display: flex;
+  flex-direction: column;
+  font-size: 10px;
+  color: #333;
+}
+
+
+.message-reply-short-user-info {
+  display: flex;
+  align-items: center;
+}
+
+
+.message-reply-short-profile-pic {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 4px;
+}
+
+
+.message-reply-short-username {
+  font-size: 10px;
+  font-weight: bold;
+}
+
+
+@media (max-width: 600px) {
+  .message-reply-post {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .message-reply-short-video {
+    width: 100%;
+    height: auto;
+    border-right: none;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  .message-reply-short-info {
+    padding: 8px;
+  }
+  
+  .message-reply-short-username {
+    font-size: 14px;
+  }
+}
+
+
 
     </style>
     {% endblock %}
