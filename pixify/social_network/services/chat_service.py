@@ -35,7 +35,17 @@ def list_chats_by_user(user):
             F('created_at')
         )
     ).annotate(
-        latest_message=Subquery(
+        latest_message_id=Subquery(
+            Message.objects.filter(
+                Q(chat_id=OuterRef('pk')),
+                Q(is_active=True),
+                ~Q(delete_type=MessageDeleteType.DELETED_FOR_EVERYONE.value),
+                ~Q(deleted_by__contains=[user.id])
+            ).order_by('-send_at')
+            .values('id')[:1]  # Fetch only the ID of the latest message
+        )
+    ).annotate(
+        latest_message_content=Subquery(
             Message.objects.filter(
                 Q(chat_id=OuterRef('pk')),
                 Q(is_active=True),
@@ -84,10 +94,12 @@ def list_chats_by_user(user):
             ).order_by('-send_at')
             .values('sender_id')[:1]
         )
+    ).annotate(
+        latest_message=F('latest_message_content')  # ✅ Fix: Add this annotation so that chat.latest_message works
     ).order_by('-latest_message_timestamp')
 
     user_chats = user_chats.filter(
-        Q(latest_message__isnull=False) | Q(type=ChatType.GROUP.value)
+        Q(latest_message_id__isnull=False) | Q(type=ChatType.GROUP.value)
     )
 
     chat_data = []
@@ -101,17 +113,22 @@ def list_chats_by_user(user):
         ).last()
 
         seen_by_all = False
+        seen_by_user = False
         if latest_message:
             seen_by_all = is_message_seen_by_all(latest_message)
-
+            seen_by_user = is_seen_by_user(latest_message,user)
         chat_data.append({
             'chat': chat,
+            'latest_message_id': chat.latest_message_id,  # ✅ Fixed latest message ID
+            'latest_message': chat.latest_message,  # ✅ Now `latest_message` exists
             'seen_by_all': seen_by_all,
+            'seen_by_user':seen_by_user,
         })
 
     return chat_data
 
-
+def is_seen_by_user(message_id, user):
+    return MessageReadStatus.objects.filter(message_id=message_id, read_by=user).exists()
 
 
 def is_message_seen_by_all(message):
