@@ -120,7 +120,7 @@
                                                       
                 <!-- Short  Section -->                
                 {% if message.post_id %}
-                <div class="message-post">
+                <div class="message-post" onclick="window.location.href='{% url 'short' %}?post_id={{ message.post_id }}'">
                   <video id="message-short" class="message-short-video" loop muted>
                     <source src="{% static message.post_id.media_url.0 %}" type="video/mp4">
                   </video>
