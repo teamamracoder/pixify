@@ -118,7 +118,10 @@
                     <span>
                     {% if chat.latest_message %}
                         {% if chat.latest_reaction_time == '' or chat.latest_message_time >= chat.latest_reaction_time %}
-                            <p class="chat-lts-message">{{ chat.latest_message }}</p>
+                             <!-- ✅ If message is unread, apply bold styling -->
+                            <p class="chat-lts-message {% if not chat.seen_by_user %}unread{% endif %}">
+                                {{ chat.latest_message }}
+                            </p>
                         {% else %}
                             <p class="chat-lts-message">'{{chat.latest_reaction_message_reacted_by}}' Reacted {{ chat.latest_reaction|safe }} on "{{ chat.latest_message }}"</p>
                         {% endif %}
@@ -520,9 +523,12 @@
     }
 
     #hyperlink-text{
-        text-decoration:none;
-        color:white;
-        font-size:17px;
+        justify-content: flex-start;
+        align-items: center;
+        display: flex;
+        text-decoration: none;
+        color: white;
+        font-size: 17px;
     }
     #p-pic img {
         padding: 15px 20px;
@@ -650,8 +656,8 @@
 
 /* Middle Section (Dynamic) */
 .content-div {
-    margin-left: 70px; /* Leaves space for the fixed image section */
-    margin-right: 100px; /* Leaves space for the fixed right-aligned section */
+    width: 70%;
+    margin-left: 60px;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
@@ -759,8 +765,7 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-
-            font-size: 13px;
+            font-size: 20px;
         }
         .chat-create-modal-content{
             width:90% !important;
@@ -1096,6 +1101,9 @@
         -webkit-box-orient: vertical;
         overflow: hidden;
         text-overflow: ellipsis;
+    }
+    .unread {
+        font-weight: bold;
     }
 
 </style>

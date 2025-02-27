@@ -72,7 +72,7 @@
                   <div class="messageMedia-single-media" data-media-list="{{ message.media_url|join:',' }}">
                     {% with media=message.media_url.0 %}
                       {% if media|slice:"-4:" == ".mp4" %}
-                        <video src="{% static media %}" controls style="width: 100%;height: 100%;"></video>
+                        <video src="{% static media %}" controls  class="media_size"></video>
                       {% else %}
                         <img src="{% static media %}" alt="Media" style="width: 100%;height: 100%;">
                       {% endif %}
@@ -86,7 +86,7 @@
                         {% if media|slice:"-4:" == ".mp4" %}
                           <video src="{% static media %}" controls class="media_size"></video>
                         {% else %}
-                          <img src="{% static media %}" alt="Media" class="media_size">
+                          <img src="{% static media %}" alt="Media" style="width: 100%;height: 100%;">
                         {% endif %}
                         {% if forloop.last and message.media_url|length > 4 %}
                           <!-- Overlay to indicate additional media count -->
@@ -102,8 +102,8 @@
               
               <!-- Modal for full view of media (carousel) -->
               <div id="messageMediaModal">
+                <div class="messageMedia-close">✖</div>
                 <div class="messageMedia-modal-content">
-                  <div class="messageMedia-close">✖</div>
                   <div class="messageMedia-carousel">
                     <div class="messageMedia-carousel-item"></div>
                     <div class="messageMedia-carousel-controls">
@@ -120,7 +120,7 @@
                                                       
                 <!-- Short  Section -->                
                 {% if message.post_id %}
-                <div class="message-post">
+                <div class="message-post" onclick="window.location.href='{% url 'short' %}?post_id={{ message.post_id }}'">
                   <video id="message-short" class="message-short-video" loop muted>
                     <source src="{% static message.post_id.media_url.0 %}" type="video/mp4">
                   </video>
@@ -1262,7 +1262,7 @@ async function sendMessage() {
                 const media = media_url[0];
                 if (media.slice(-4) === ".mp4") {
                     mediaHtml = `<div class="messageMedia-single-media" data-media-list="${media_url.join(',')}">
-                                    <video src="${staticUrl}${media}" controls style="width: 100%; height: 100%;"></video>
+                                    <video src="${staticUrl}${media}" controls ></video>
                                  </div>`;
                 } else {
                     mediaHtml = `<div class="messageMedia-single-media" data-media-list="${media_url.join(',')}">
@@ -1278,7 +1278,7 @@ async function sendMessage() {
                     if (media.slice(-4) === ".mp4") {
                         mediaHtml += `<video src="${staticUrl}${media}" controls class="media_size"></video>`;
                     } else {
-                        mediaHtml += `<img src="${staticUrl}${media}" alt="Media" class="media_size">`;
+                        mediaHtml += `<img src="${staticUrl}${media}" alt="Media" style="width: 100%;height: 100%;">`;
                     }
                     if (i === limit - 1 && media_url.length > 4) {
                         mediaHtml += `<div class="messageMedia-overlay">
@@ -3324,19 +3324,17 @@ document.addEventListener("DOMContentLoaded", function () {
 /*new*/
 /* Single media styling */
 .messageMedia-single-media {
-    max-height: 300px;
-    max-width: 250px;
-    width: fit-content;
     margin: 0 auto;
     cursor: pointer;
 }
 
 .messageMedia-single-media img,
 .messageMedia-single-media video {
-  width: 100%;
-  height: auto;
-  display: block;
-  object-fit: cover;
+  max-height: 300px;
+    max-width: 250px;
+    width: fit-content;
+    display: block;
+    object-fit: cover;
 }
 
 /* Media grid for multiple media */
@@ -3406,8 +3404,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
 .messageMedia-close {
   position: absolute;
-  top: 10px;
-  right: 20px;
+  top: 10%;
+  right: 5%;
   color: #aaa;
   font-size: 28px;
   font-weight: bold;
@@ -3416,7 +3414,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
 .messageMedia-close:hover,
 .messageMedia-close:focus {
-  color: #000;
   text-decoration: none;
   cursor: pointer;
 }

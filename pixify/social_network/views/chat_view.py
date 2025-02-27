@@ -45,6 +45,7 @@ class ChatListView(View):
                 continue
 
             seen_by_all = chat_info['seen_by_all']
+            seen_by_user = chat_info['seen_by_user']
             member = chat_service.members(chat.id)
             latest_reaction = message_reaction_service.latest_reaction(chat, user)
             if member.count() < 2:
@@ -87,6 +88,7 @@ class ChatListView(View):
                 'unread_messages': unread_messages_display,
                 'is_group': chat.type == ChatType.GROUP.value,
                 'seen_by_all': seen_by_all,
+                'seen_by_user':seen_by_user,
                 'latest_reaction_time': latest_reaction['created_at'],
                 'latest_reaction': latest_reaction_type,
                 'latest_message_time':chat.latest_message_timestamp,
@@ -94,7 +96,7 @@ class ChatListView(View):
                 'latest_message_sender_id':chat.latest_message_sender_id,
                 'latest_message_sender_name':sender_name['sender_name']
             })
-
+            
         return render(
             request,
             'enduser/chat/chats.html',
