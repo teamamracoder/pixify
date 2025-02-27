@@ -126,7 +126,7 @@
                   </video>
                   <div class="message-short-info">
                     <div class="message-short-user-info">
-                      <img src="{% static  message.post_id.posted_by.profile_photo_url|default:'/static/images/avatar.jpg' %}"
+                      <img src="{% static  message.post_id.posted_by.profile_photo_url|default:'/images/avatar.jpg' %}"
                            alt="{{ message.post_id.posted_by.first_name }}'s Profile Picture"
                            class="message-short-profile-pic">
                       <div class="message-short-username">
@@ -286,6 +286,10 @@
     // Django static URL prefix. Make sure {% load static %} is declared at the top.
     const staticUrl = "{% static '' %}"; // This usually returns "/static/"
 
+    function cleanMediaPath(media) {
+      return media.startsWith('/') ? media.slice(1) : media;
+    }
+
     let currentMediaList = [];
     let currentIndex = 0;
 
@@ -392,7 +396,7 @@ $(document).ready(function () {
   let mentionTriggered = false;
   let typingTimer;
   const debounceDelay = 100;
-  const fallbackImage = '/static/images/avatar.jpg';
+  const fallbackImage = '/images/avatar.jpg';
 
   function initializeMentionedUsers() {
     mentionedUsers.clear();
@@ -430,7 +434,7 @@ $(document).ready(function () {
     }
     return `
       <div class="mention-item" data-member-id="${mention.member_id}">
-        <img src="${profileImage}" alt="${mention.member_id__first_name} ${mention.member_id__last_name}" class="profile-photo" />
+        <img src="${staticUrl}${cleanMediaPath(profileImage)}" alt="${mention.member_id__first_name} ${mention.member_id__last_name}" class="profile-photo" />
         ${mention.member_id__first_name} ${mention.member_id__last_name}
       </div>`;
   }
@@ -1149,7 +1153,7 @@ async function sendMessage() {
           // Update the inner HTML using template literals.
           typingIndicator.innerHTML = `
             <div class="typing-indicator">
-              <img src="${data.user_pic}" alt="User typing" class="typing-user-pic">
+              <img src="${staticUrl}${cleanMediaPath(data.user_pic)}" alt="User typing" class="typing-user-pic">
               <div class="typing">
                 <div class="dot"></div>
                 <div class="dot"></div>
@@ -1301,7 +1305,7 @@ async function sendMessage() {
                   </video>
                   <div class="message-short-info">
                     <div class="message-short-user-info">
-                      <img src="${staticUrl}${post.posted_by?.profile_photo_url || '/static/images/avatar.jpg'}" alt="${post.posted_by?.first_name || 'User'}'s Profile Picture" class="message-short-profile-pic">
+                      <img src="${staticUrl}${post.posted_by?.profile_photo_url || '/images/avatar.jpg'}" alt="${post.posted_by?.first_name || 'User'}'s Profile Picture" class="message-short-profile-pic">
                       <div class="message-short-username">
                         ${post.posted_by?.first_name || 'User'} ${post.posted_by?.last_name || ''}
                       </div>
@@ -1966,7 +1970,7 @@ Object.keys(aggregated).forEach((reactionType) => {
     <li style="margin-bottom:10px;align-items: center;justify-content: space-between;display: flex;list-style: none;">
         <ul style="list-style:none; padding-left:0;">`;
   for (let i = 0; i < data.names.length; i++) {
-    const photo = data.photos[i] ? data.photos[i] : '/static/images/default-avatar.jpg';
+    const photo = data.photos[i] ? data.photos[i] : '/images/default-avatar.jpg';
     const name = data.names[i] || 'Unknown';
     listItems += `
       <li style="display:flex; align-items:center; margin-bottom:5px;">

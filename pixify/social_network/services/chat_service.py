@@ -3,9 +3,9 @@ from ..models import Chat, User, ChatMember, Follower, Message, MessageReadStatu
 from django.shortcuts import get_object_or_404
 from django.db.models.functions import Coalesce
 from django.db.models.functions import Coalesce, Concat
-from datetime import date
+from datetime import date, datetime
 from django.db.models import (
-    CharField, Case, When, Value, F, Q, Max, Exists, Subquery, OuterRef
+    CharField, Case, When, Value, F, Q, Max, Exists, Subquery, OuterRef, Count
 )
 from django.db.models.functions import Coalesce, Concat
 
@@ -322,44 +322,57 @@ def list_followings(user, offset=0, limit=5):
 
 
 def list_top_chats_api(request, user):
-    search_query = request.GET.get('search', '')
-    chats = Chat.objects.filter(members=user, is_active=True)
-    
-    # Filter chats if a search query is provided
+    search_query = request.GET.get('search', '').strip()
+
+    chats = Chat.objects.filter(
+        is_active=True,
+        id__in=ChatMember.objects.filter(
+            member_id=user,
+            is_active=True
+        ).values_list('chat_id', flat=True)
+    ).annotate(
+        active_members_count=Count('chatmember', filter=Q(chatmember__is_active=True)),
+        message_count=Count(
+            'fk_chat_messages_chats_id', 
+            filter=Q(fk_chat_messages_chats_id__is_active=True) &
+                   ~Q(fk_chat_messages_chats_id__delete_type=MessageDeleteType.DELETED_FOR_EVERYONE.value) &
+                   ~Q(fk_chat_messages_chats_id__deleted_by__contains=[user.id])
+        )
+    ).filter(
+        active_members_count__gte=2
+    )
+
     if search_query:
         chats = chats.filter(
             Q(members__first_name__icontains=search_query) |
             Q(members__last_name__icontains=search_query)
-        )
-    
+        ).distinct()
+
     chat_data_list = []
-    
-    for chat in chats:
-        # Get the message count for each chat
-        message_count = Message.objects.filter(chat_id=chat).count()
-        
-        if chat.type == ChatType.PERSONAL.value:
-            member = get_recipient_for_personal(chat.id, user)
+    for c in chats:
+        # Retrieve chat-specific title and cover.
+        if c.type == ChatType.PERSONAL.value:
+            member = get_recipient_for_personal(c.id, user)
             title = f"{member.first_name} {member.last_name}"
             chat_cover = member.profile_photo_url or '/images/avatar.jpg'
-        elif chat.type == ChatType.GROUP.value:
-            title = chat.title or get_recipients_for_group(chat.id, user)
-            chat_cover = chat.chat_cover or '/images/group_pic.png'
-        
-        # Build a dictionary with all needed info
+        elif c.type == ChatType.GROUP.value:
+            title = c.title or get_recipients_for_group(c.id, user)
+            chat_cover = c.chat_cover or '/images/group_pic.png'
+        else:
+            title = "Unknown Chat"
+            chat_cover = '/images/default_chat.jpg'
+               
         chat_info = {
-            'id': chat.id,
+            'id': c.id,
             'title': title,
             'chat_cover': chat_cover,
-            'message_count': message_count,
+            'message_count': c.message_count,
         }
         chat_data_list.append(chat_info)
-    
-    # Sort the list by message count in descending order and return only the top 3
+
     chat_data_list.sort(key=lambda c: c['message_count'], reverse=True)
+    
     return chat_data_list[:6]
-
-
 
 
 def is_message_seen_by_user(message, user):
