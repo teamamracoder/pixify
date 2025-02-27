@@ -1,132 +1,195 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Work</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</head>
+{% extends "enduser/base.html" %} {% block title %}Profile Page{% endblock %}
+{% block content %} {% load static %}
 <body>
-
-    <div class="container w-100 mx-auto p-3" style="max-width: 800px; border: solid; margin-top: 50px;">
-
-        <div class="container mt-4">
-            <div class="card p-3">
-                <div class="d-flex align-items-start">
-
-                    <img src="https://plus.unsplash.com/premium_photo-1728657016169-a425d4b5f813?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3"
-                         alt="Profile Picture" class="rounded-circle me-3 img-fluid" style="width: 100px; height: 100px; object-fit: cover;">
-
-                    <div class="flex-grow-1">
-                        <h4 class="mb-1">Ms. Fighter</h4>
-                        <p class="text-muted mb-1">39 friends + 2 mutual</p>
-                    </div>
-
-
-                    <div class="d-flex flex-wrap gap-2 mt-2">
-                        <button class="btn btn-primary">Respond</button>
-                        <button class="btn btn-outline-secondary">Message</button>
-
-                        <div class="dropdown">
-                            <button class="btn btn-outline-secondary dropdown-toggle" type="button"
-                                    id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-                                More
-                            </button>
-                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                <li><a class="dropdown-item" href="#">Report</a></li>
-                                <li><a class="dropdown-item" href="#">Block</a></li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="mt-3 d-flex justify-content-between align-items-center flex-wrap">
-                    <p class="mb-0"><strong>Mr. XX</strong> sent you a friend request!</p>
-                    <div class="d-flex">
-                        <button class="btn btn-success me-2">Confirm Request</button>
-                        <button class="btn btn-danger">Delete Request</button>
-                    </div>
-                </div>
+    {% if user_details %}
+    <div class="profile-container">
+        <div class="profile-card">
+            <div class="profile-header">
+                <img src="{{ user_details.profile_photo }}" alt="Profile Picture" class="profile-img">
+                <p class="user_title">{{ user_details.user_name }}</p>
+            </div>
+            <div class="profile-info">
+                <p><strong>Status:</strong> <span class="active">{{ user_details.status }}</span></p>
+                <p><strong>Age:</strong> {{ user_details.age }}</p>
+                <p><strong>Followers:</strong> {{ user_details.followers_count }}</p>
+                <p><strong>Followings:</strong> {{ user_details.following_count }}</p>
             </div>
         </div>
-
-
-        <nav class="navbar navbar-expand-lg bg-body-tertiary mt-3 px-1 mx-2">
-            <div class="container-fluid">
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="navbarNavDropdown">
-                    <ul class="navbar-nav w-100 d-flex justify-content-around">
-                        <li class="nav-item"><a class="nav-link active" href="#">Posts</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#">About</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#">Friends</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#">Photos</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#">Videos</a></li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">More</a>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="#">View</a></li>
-                                <li><a class="dropdown-item" href="#">Trend</a></li>
-                                <li><a class="dropdown-item" href="#">Groups</a></li>
-                                <li><a class="dropdown-item" href="#">Events</a></li>
-                            </ul>
-                        </li>
-                    </ul>
+      
+        <!-- Followers Section -->
+        <div class="friends-section">
+            <h3>Followers</h3>
+            {% if user_details.followers %}
+            <div class="friend-list" id="followers-list">
+                {% for friend in user_details.followers %}
+                <div class="friend-card hidden-follower">
+                    <img src="{{ friend.profile_pic |default:"/static/images/avatar.jpg" }}" alt="Follower" class="friend-img">
+                    <div>{{ friend.first_name }}</div>
                 </div>
+                {% endfor %}
             </div>
-        </nav>
-
-
-        <div class="container">
-            <div class="card">
-                <div class="d-flex ps-3 align-items-center mt-2">
-                    <img src="https://plus.unsplash.com/premium_photo-1728657016169-a425d4b5f813?w=500&auto=format&fit=crop&q=60" class="rounded-circle img-fluid" style="width: 45px; height: 45px;">
-                    <span class="ms-2">Mr. xyz Abc</span>
-                </div>
-                <div class="card-header">Wow, this is good!</div>
-                <div class="card-body">
-                    <img src="https://images.unsplash.com/photo-1729691692870-a957012d616a?w=500&auto=format&fit=crop&q=60" class="card-img-top img-fluid" style="height:400px;">
-                </div>
-            </div>
+            <button class="see-all-btn" onclick="toggleFriends('followers-list', this)">See All</button>
+            {% else %}
+            <p class="no-friends">No followers found.</p>
+            {% endif %}
         </div>
-
-        <div class="container mt-4">
-            <div class="card p-3">
-                <div class="d-flex align-items-center mb-3">
-                    <img src="https://plus.unsplash.com/premium_photo-1728657016169-a425d4b5f813?w=500&auto=format&fit=crop&q=60" class="rounded-circle img-fluid" style="width: 40px; height: 40px;">
-                    <div class="ms-2">
-                        <h6 class="mb-0">Ms. Fighter</h6>
-                        <small>20 May <i class="bi bi-lock-fill"></i></small>
-                    </div>
-                    <a href="#" class="ms-auto"><i class="bi bi-three-dots"></i></a>
+        
+        <!-- Followings Section -->
+        <div class="friends-section">
+            <h3>Following</h3>
+            {% if user_details.followings %}
+            <div class="friend-list" id="following-list">
+                {% for friend in user_details.followings %}
+                <div class="friend-card hidden-following">
+                    <img src="{{ friend.profile_pic |default:"/static/images/avatar.jpg"}}" alt="Following" class="friend-img">
+                    <div>{{ friend.first_name }}</div>
                 </div>
-
-                <div class="border p-2 mb-3">
-                    <div class="d-flex align-items-center mb-2">
-                        <img src="https://plus.unsplash.com/premium_photo-1728657016169-a425d4b5f813?w=500&auto=format&fit=crop&q=60" class="rounded-circle img-fluid" style="width: 40px; height: 40px;">
-                        <div>
-                            <h6 class="mb-0">XXXXXXXX</h6>
-                            <small>1m ago <i class="bi bi-people-fill"></i></small>
-                        </div>
-                    </div>
-                    <p>hello</p>
-                </div>
-
-                <div class="d-flex justify-content-between">
-                    <button class="btn btn-light flex-fill"><i class="bi bi-hand-thumbs-up"></i> Like</button>
-                    <button class="btn btn-light flex-fill"><i class="bi bi-chat"></i> Comment</button>
-                    <button class="btn btn-light flex-fill"><i class="bi bi-send"></i> Send</button>
-                    <button class="btn btn-light flex-fill"><i class="bi bi-share"></i> Share</button>
-                </div>
+                {% endfor %}
             </div>
+            <button class="see-all-btn" onclick="toggleFriends('following-list', this)">See All</button>
+            {% else %}
+            <p class="no-friends">Not following anyone.</p>
+            {% endif %}
         </div>
-
+        {% endif %}
     </div>
+        
+        <script>
+            function toggleFriends(listId, btn) {
+                let list = document.getElementById(listId);
+                let hiddenItems = list.querySelectorAll('.friend-card.hidden-follower, .friend-card.hidden-following');
+        
+                if (btn.innerText === "See All") {
+                    hiddenItems.forEach(item => item.style.display = "flex"); // Show all items
+                    btn.innerText = "Show Less";
+                } else {
+                    hiddenItems.forEach((item, index) => {
+                        if (index >= 4) item.style.display = "none"; // Hide extra items
+                    });
+                    btn.innerText = "See All";
+                }
+            }
+        
+            // Initially hide extra followers/followings beyond 4
+            document.addEventListener("DOMContentLoaded", function () {
+                document.querySelectorAll('.friend-card.hidden-follower, .friend-card.hidden-following').forEach((item, index) => {
+                    if (index >= 4) item.style.display = "none";
+                });
+            });
+        </script>
+        
 
+    <script>
+        function toggleFriends(listId, btn) {
+            let list = document.getElementById(listId);
+            list.classList.toggle("expanded");
+            btn.textContent = list.classList.contains("expanded") ? "See Less" : "See All";
+        }
+    </script>
+
+    <style>
+        .profile-container {
+            height: 100%;
+            overflow-y: auto;
+            max-height: 90vh;
+            width: 90%;
+            margin: auto;
+            padding: 20px;
+            background-color: #25004d;
+            border-radius: 10px;
+            box-shadow: 0px 0px 15px rgba(255, 255, 255, 0.2);
+        }
+
+        .profile-card {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            padding: 20px;
+            border: 1px solid black;
+        }
+
+        .profile-header {
+            flex-direction: column;
+            align-items: center;
+            display: flex;
+            width: 50%;
+        }
+
+        .profile-img {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+        }
+
+        .user_title {
+            margin-top: 10px;
+            white-space: nowrap;
+            text-align: center;
+        }
+
+        .profile-info p {
+            margin: 5px 0;
+        }
+
+        .active {
+            color: lightgreen;
+        }
+
+        .friends-section {
+            overflow-y: scroll;
+            margin-top: 20px;
+        }
+
+        .friend-list {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow: hidden;
+            max-height: 150px;
+            transition: max-height 0.3s ease-in-out;
+        }
+
+        .friend-list.expanded {
+            max-height: none;
+        }
+
+        .friend-card {
+            border: 2px solid #7474c1;
+            gap: 10px;
+            justify-content: flex-start;
+            display: flex        ;
+            align-items: center;
+            background-color: #25004d;
+            padding: 10px;
+            margin: 5px;
+            border-radius: 5px;
+            width: 100%;
+        }
+
+        .friend-img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .see-all-btn {
+            margin-top: 10px;
+            display: block;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .see-all-btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
 </body>
-</html>
 
-////
+    
+</style>
+{% endblock %}

@@ -203,9 +203,19 @@ def get_recipients_for_group(chat_id,user):
         return " , ".join(first_names)
 
 def get_all_user_follow(user):
-    followers = Follower.objects.filter(follower=user, is_active=True).select_related('following')
-    followings = Follower.objects.filter(following=user, is_active=True).select_related('follower')
-    return followers, followings
+    follower_list = Follower.objects.filter(follower=user, is_active=True).select_related('following')
+    following_list = Follower.objects.filter(following=user, is_active=True).select_related('follower')
+    followers_data = [
+            {"id": user.id, "first_name": f"{user.first_name}{user.last_name}", "profile_pic": user.profile_photo_url} 
+            for user in User.objects.filter(id__in=[f.id for f in follower_list])
+        ]
+
+        # Using list comprehension to retrieve following details
+    followings_data = [
+        {"id": user.id, "first_name": f"{user.first_name}{user.last_name}", "profile_pic": user.profile_photo_url} 
+        for user in User.objects.filter(id__in=[f.id for f in following_list])
+        ]
+    return followers_data, followings_data
 
 def list_chats_api(request,chat_data_list):
     search_query =request.GET.get('search', '')
