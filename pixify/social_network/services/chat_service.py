@@ -351,22 +351,27 @@ def list_followings(user, offset=0, limit=5):
 def list_top_chats_api(request, user):
     search_query = request.GET.get('search', '').strip()
 
+    # Subquery for chats where the total active members are at least 2.
+    active_chat_ids = ChatMember.objects.filter(
+        is_active=True
+    ).values('chat_id').annotate(
+        active_count=Count('id')
+    ).filter(
+        active_count__gte=2
+    ).values_list('chat_id', flat=True)
+
+    # Subquery for chats where the user is an active member.
+    user_chat_ids = ChatMember.objects.filter(
+        member_id=user,
+        is_active=True
+    ).values_list('chat_id', flat=True)
+
+    # Filter chats: first by the ones the user is in, then by those with at least 2 active members.
     chats = Chat.objects.filter(
         is_active=True,
-        id__in=ChatMember.objects.filter(
-            member_id=user,
-            is_active=True
-        ).values_list('chat_id', flat=True)
-    ).annotate(
-        active_members_count=Count('chatmember', filter=Q(chatmember__is_active=True)),
-        message_count=Count(
-            'fk_chat_messages_chats_id', 
-            filter=Q(fk_chat_messages_chats_id__is_active=True) &
-                   ~Q(fk_chat_messages_chats_id__delete_type=MessageDeleteType.DELETED_FOR_EVERYONE.value) &
-                   ~Q(fk_chat_messages_chats_id__deleted_by__contains=[user.id])
-        )
+        id__in=user_chat_ids
     ).filter(
-        active_members_count__gte=2
+        id__in=active_chat_ids
     )
 
     if search_query:
@@ -375,9 +380,18 @@ def list_top_chats_api(request, user):
             Q(members__last_name__icontains=search_query)
         ).distinct()
 
+    # Annotate message_count directly.
+    chats = chats.annotate(
+        message_count=Count(
+            'fk_chat_messages_chats_id', 
+            filter=Q(fk_chat_messages_chats_id__is_active=True) &
+                   ~Q(fk_chat_messages_chats_id__delete_type=MessageDeleteType.DELETED_FOR_EVERYONE.value) &
+                   ~Q(fk_chat_messages_chats_id__deleted_by__contains=[user.id])
+        )
+    ).order_by('-message_count')
+
     chat_data_list = []
-    for c in chats:
-        # Retrieve chat-specific title and cover.
+    for c in chats[:6]:
         if c.type == ChatType.PERSONAL.value:
             member = get_recipient_for_personal(c.id, user)
             title = f"{member.first_name} {member.last_name}"
@@ -388,7 +402,7 @@ def list_top_chats_api(request, user):
         else:
             title = "Unknown Chat"
             chat_cover = '/images/default_chat.jpg'
-               
+                
         chat_info = {
             'id': c.id,
             'title': title,
@@ -397,9 +411,8 @@ def list_top_chats_api(request, user):
         }
         chat_data_list.append(chat_info)
 
-    chat_data_list.sort(key=lambda c: c['message_count'], reverse=True)
-    
-    return chat_data_list[:6]
+    return chat_data_list
+
 
 
 def is_message_seen_by_user(message, user):
