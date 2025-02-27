@@ -18,17 +18,19 @@
       
         <!-- Followers Section -->
         <div class="friends-section">
+            <div class="heading-part">
             <h3>Followers</h3>
+            <div class="see-all-btn" onclick="toggleFriends('followers-list', this)">See more</div>
+            </div>
             {% if user_details.followers %}
             <div class="friend-list" id="followers-list">
                 {% for friend in user_details.followers %}
-                <div class="friend-card hidden-follower">
+                <div class="friend-card hidden-follower" onclick="window.location.href='{% url 'profile' friend.id %}'">
                     <img src="{{ friend.profile_pic |default:"/static/images/avatar.jpg" }}" alt="Follower" class="friend-img">
                     <div>{{ friend.first_name }}</div>
                 </div>
                 {% endfor %}
             </div>
-            <button class="see-all-btn" onclick="toggleFriends('followers-list', this)">See All</button>
             {% else %}
             <p class="no-friends">No followers found.</p>
             {% endif %}
@@ -36,21 +38,52 @@
         
         <!-- Followings Section -->
         <div class="friends-section">
+            <div class="heading-part">
             <h3>Following</h3>
+            <div class="see-all-btn" onclick="toggleFriends('following-list', this)">See more</div>
+            </div>
             {% if user_details.followings %}
             <div class="friend-list" id="following-list">
                 {% for friend in user_details.followings %}
-                <div class="friend-card hidden-following">
+                <div class="friend-card hidden-following"onclick="window.location.href='{% url 'profile' friend.id %}'">
                     <img src="{{ friend.profile_pic |default:"/static/images/avatar.jpg"}}" alt="Following" class="friend-img">
                     <div>{{ friend.first_name }}</div>
                 </div>
                 {% endfor %}
             </div>
-            <button class="see-all-btn" onclick="toggleFriends('following-list', this)">See All</button>
             {% else %}
             <p class="no-friends">Not following anyone.</p>
             {% endif %}
         </div>
+        <!-- posts part-->
+
+        <div class="user-post-container">
+            {% if user_details.posts %}
+                {% for post in user_details.posts %}
+                    <div class="user-post">
+                        <h3>{{ post.title }}</h3>
+                        <p>{{ post.description }}</p>
+                        
+                        {% if post.media_url %}
+                            {% for media in post.media_url %}
+                                {% if media|slice:"-4:" == ".mp4" %}
+                                    <video class="post_video" controls>
+                                        <source src="{% static post.media_url.0 %}" type="video/mp4">
+                                        Your browser does not support the video tag.
+                                    </video>
+                                {% else %}
+                                    <img src="{{ media }}" alt="Post Image">
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p>No posts available.</p>
+            {% endif %}
+        </div>
+        
+        
         {% endif %}
     </div>
         
@@ -59,14 +92,14 @@
                 let list = document.getElementById(listId);
                 let hiddenItems = list.querySelectorAll('.friend-card.hidden-follower, .friend-card.hidden-following');
         
-                if (btn.innerText === "See All") {
+                if (btn.innerText === "See more") {
                     hiddenItems.forEach(item => item.style.display = "flex"); // Show all items
-                    btn.innerText = "Show Less";
+                    btn.innerText = "See Less";
                 } else {
                     hiddenItems.forEach((item, index) => {
                         if (index >= 4) item.style.display = "none"; // Hide extra items
                     });
-                    btn.innerText = "See All";
+                    btn.innerText = "See more";
                 }
             }
         
@@ -83,11 +116,29 @@
         function toggleFriends(listId, btn) {
             let list = document.getElementById(listId);
             list.classList.toggle("expanded");
-            btn.textContent = list.classList.contains("expanded") ? "See Less" : "See All";
+            btn.textContent = list.classList.contains("expanded") ? "See Less" : "See more";
         }
     </script>
 
     <style>
+        .user-post-container{
+            align-items: center;
+            justify-content: center;
+            display: flex;
+        }
+        .user-post{
+            width: 90%;
+            height: 80vh;
+            background: #1a0933;
+        }
+        .post_video{
+            object-fit: cover;
+            justify-content: center;
+            align-items: center;
+            display: flex;
+            height: 100%;
+            width: 100%;
+        }
         .profile-container {
             height: 100%;
             overflow-y: auto;
@@ -136,6 +187,8 @@
         }
 
         .friends-section {
+            border-bottom: 1px solid;
+            margin-bottom: 10px;
             overflow-y: scroll;
             margin-top: 20px;
         }
@@ -174,18 +227,25 @@
         }
 
         .see-all-btn {
-            margin-top: 10px;
-            display: block;
-            background-color: #007bff;
-            color: white;
+            justify-content: end;
+            display: flex;
+            color: #2be8e2;
             border: none;
             padding: 5px 10px;
             cursor: pointer;
             border-radius: 5px;
         }
 
-        .see-all-btn:hover {
-            background-color: #0056b3;
+        .no-friends{
+            align-items: center;
+            justify-content: center;
+            display: flex;
+            font-size: 12px;
+        }
+        .heading-part{
+            justify-content: space-between;
+            align-items: center;
+            display: flex;
         }
     </style>
 </body>

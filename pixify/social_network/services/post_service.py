@@ -101,3 +101,8 @@ def update_post(user_id,post_id,post_titile):
 # comment
 def reaction_name(post_id):
    return PostReaction.objects.filter( post_id_id=post_id, is_active=True).first()
+
+
+def get_user_posts(user_id):
+    user_posts=Post.objects.filter(posted_by=user_id).values('media_url','title','description')
+    return list(user_posts)
