@@ -18,6 +18,39 @@ class ShortListView(View):
             short.user_reacted = short_service.user_has_reacted(short, user)
         random.shuffle(shorts)  # Randomize the list
         return render(request, 'enduser/short/index.html', {'shorts': shorts,'user':user})
+    
+    
+class ShortDetailView(View):
+    def get(self, request, post_id):
+        user = request.user
+        
+        selected_short = short_service.get_short(post_id)
+        count = short_service.reaction_count(selected_short.id)
+        selected_short.reaction_count = short_service.format_count(count)
+        comments = short_service.comment_count(selected_short.id)
+        selected_short.comments_count = short_service.format_count(comments)
+        selected_short.user_reacted = short_service.user_has_reacted(selected_short, user)
+        
+
+        shorts = short_service.get_shorts()
+        
+        for s in shorts:
+            if s.id != selected_short.id:
+                cnt = short_service.reaction_count(s.id)
+                s.reaction_count = short_service.format_count(cnt)
+                comm = short_service.comment_count(s.id)
+                s.comments_count = short_service.format_count(comm)
+                s.user_reacted = short_service.user_has_reacted(s, user)
+        
+        
+        shorts = [s for s in shorts if s.id != selected_short.id]
+        
+        random.shuffle(shorts)
+
+        shorts.insert(0, selected_short)
+                
+        return render(request, 'enduser/short/index.html', {'shorts': shorts, 'user': user})
+
 
 
 class ShortReactionCreateView(View):
