@@ -325,7 +325,7 @@
       if (media.slice(-4).toLowerCase() === '.mp4') {
         carouselItem.innerHTML = `<video src="${staticUrl}${cleanedMedia}" controls autoplay></video>`;
       } else {
-        carouselItem.innerHTML = `<img src="${staticUrl}${cleanedMedia}" alt="Media">`;
+        carouselItem.innerHTML = `<img src="${staticUrl}${cleanedMedia}" alt="Media" style="height: 80vh;width: 798px;object-fit:cover;">`;
       }
       updateNavButtons();
     }
@@ -3312,17 +3312,20 @@ document.addEventListener("DOMContentLoaded", function () {
   top: 0;
   width: 100%;
   height: 100%;
+  overflow: auto;
   background-color: rgba(0,0,0,0.8);
 }
 
 .messageMedia-modal-content {
-  height: 75vh;
-  position: relative;
-  background-color: #031252;
-  margin: 10% auto;
-  padding: 20px;
-  width: 50%;
-  border-radius: 8px;
+    top: 5%;
+    margin-top: 10%;
+    height: 80vh;
+    position: relative;
+    background-color: #252525;
+    margin: 5% auto;
+    width: 90%;
+    max-width: 800px;
+    border-radius: 8px;
 }
 
 .messageMedia-close {
@@ -3344,13 +3347,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
 /* Carousel styles in modal */
 .messageMedia-carousel {
+  height: 100%;
+  width: 100%;
   position: relative;
   text-align: center;
 }
 
-.messageMedia-carousel-item {
-  margin: 280px 0;
-}
+
 
 .messageMedia-carousel-controls {
   position: absolute;
