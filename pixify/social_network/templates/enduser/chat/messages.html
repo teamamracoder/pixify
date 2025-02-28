@@ -156,10 +156,10 @@
               
               <!-- Modal for full view of media (carousel) -->
               <div id="messageMediaModal">
-                <div class="messageMedia-close">✖</div>
                 <div class="messageMedia-modal-content">
                   <div class="messageMedia-carousel">
                     <div class="messageMedia-carousel-item"></div>
+                    <div class="messageMedia-close">✖</div>
                     <div class="messageMedia-carousel-controls">
                       <div class="messageMedia-prev">
                         <i class="bi bi-arrow-left-circle-fill"></i>
@@ -307,6 +307,7 @@
             <input type="hidden" name="mentions" id="mentions">
             <input type="file" id="file-input" name="media_files" style="display: none;" accept="image/*,video/*" multiple>
 
+            <div class="combo-image-chat-section">
             <div id="file-previews" class="parmess-file-previews"></div>
 
             <div class="message-input-wrapper">
@@ -315,6 +316,7 @@
                 </button>
                 <input type="text" name="message" id="message-input" maxlength="200" placeholder="Type your message here...">
                 <button class="parmess-button" type="submit">➤</button>
+            </div>
             </div>
         </form>
 
@@ -502,9 +504,12 @@ $(document).ready(function () {
 
     // Handle file button click
     document.getElementById('parmess-button').addEventListener('click', function () {
-        document.getElementById('file-input').click();
+      if (document.getElementById('edit-preview').style.display === 'flex') {          
+          return; // Prevent file input click if in edit mode
+      }
+      document.getElementById('file-input').click();
     });
-
+  
     // Declare fileArray and selectedFiles outside the event listener to ensure they persist
     let fileArray = [];
     let selectedFiles = new Set();
@@ -559,9 +564,10 @@ $(document).ready(function () {
                     previewDiv.className = 'parmess-file-preview';
 
                     const removeButton = document.createElement('button');
+                    removeButton.setAttribute('type', 'button'); // Prevents default submit behavior
                     removeButton.innerHTML = '&times;';
                     removeButton.className = 'remove-button';
-                    
+
                     removeButton.onclick = function () {
                         previewDiv.remove();
                         selectedFiles.delete(file.name);
@@ -598,10 +604,7 @@ $(document).ready(function () {
         updatePreviews(fileArray);
 
         console.log(fileArray);
-    }
-
-        
-
+    }      
         // After file selection, focus back to the message input
         document.getElementById('message-input').focus();
     });
@@ -922,6 +925,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const currentUserId = "{{ user.id }}";
     const senderId = "{{ user.id }}"; // Django context variable
 
+    const staticUrl = "{% static '' %}"; // This usually returns "/static/"
+
+    function cleanMediaPath(media) {
+      return media.startsWith('/') ? media.slice(1) : media;
+    }
+
     // When WebSocket connection is established
     socket.onopen = function(e) {
         console.log('WebSocket connection established.');
@@ -1163,7 +1172,6 @@ async function sendMessage() {
 
       };
       
-
       function appendMessageToChat(message, media_url, post, messageId, messageTime, senderId, senderName, profilePic, reply, replyText, reply_media_url, replyPost, reply_username, reply_userPic, mediaUrls, isSent, reactions) {
         // Define the static URL prefix using the Django static tag and remove the trailing slash.
         const staticUrl = "{% static '' %}".replace(/\/$/, '');
@@ -1205,8 +1213,8 @@ async function sendMessage() {
             }
             parentMessageHtml = `
             <div class="parent-message">
-            <span>${reply_username}:</span>
-            <div class="reply-message-text">${replyText}</div>
+              <span>${reply_username}:</span>
+              <div class="reply-message-text">${replyText}</div>
               <div class="message-reply-post">
                 ${postMedia ? `
                   <video id="message-short" class="message-reply-short-video" muted>
@@ -1224,7 +1232,7 @@ async function sendMessage() {
                   </div>
                 </div>
               </div>
-             </div> 
+            </div>
             `;
           } else {
             // Otherwise, generate a regular reply with text and possible media.
@@ -1269,11 +1277,12 @@ async function sendMessage() {
               }
             }
             
+            // Wrap the reply media HTML within the reply-media-container if any media exists.
             parentMessageHtml = `
               <div class="parent-message">
                 <span>${reply_username}:</span>
                 <div class="reply-message-text">${replyText}</div>
-                ${replyMediaHtml}
+                ${replyMediaHtml ? `<div class="reply-media-container">${replyMediaHtml}</div>` : ""}
               </div>
             `;
           }
@@ -1388,129 +1397,57 @@ async function sendMessage() {
         chatBody.scrollTop = chatBody.scrollHeight;
         window.updateScrollIndicator();
       }
+      
           
     
-
-
-function updateMessageInChat(updatedMessage, messageId, messageTime, senderName, profilePic, reply, replyText, reply_media_url, replyPost, reply_username, reply_userPic, mediaUrls, isSent, seen_by_all, reactions) {
-  const messageDiv = document.getElementById(`message-${messageId}`);
-  if (!messageDiv) {
-    console.error(`Message not found for message ID: ${messageId}`);
-    return;
-  }
-
-  // Prepare media preview if provided.
-  let mediaPreviewHtml = "";
-  if (mediaUrls && mediaUrls.length > 0) {
-    mediaPreviewHtml = mediaUrls
-      .map(
-        (url) =>
-          `<div class="media-item"><img src="${staticUrl}${url}" alt="media" class="media_size"></div>`
-      )
-      .join("");
-  }
-
-  // Prepare reply preview if there is a reply.
-  let parentMessageHtml = "";
-  if (reply) {
-    parentMessageHtml = `
-      <span>${reply_username}: </span>
-      <div class="reply-message-text">${replyText}</div>
-      ${reply.media_url ? `<span class="reply-media">${reply.media_url}</span>` : ""}
-    `;
-  }
-
-  // Generate updated reaction popup content.
-  const reactionPopupContent = generateReactionPopupContent(reactions, messageId);
-
-  // Update the message-content.
-  const contentDiv = messageDiv.querySelector(".message-content");
-  if (contentDiv) {
-    // Update or insert the parent-message block at the top of contentDiv.
-    let parentMessageDiv = contentDiv.querySelector(".parent-message");
-    if (reply) {
-      if (!parentMessageDiv) {
-        parentMessageDiv = document.createElement("div");
-        parentMessageDiv.classList.add("parent-message");
-        contentDiv.insertBefore(parentMessageDiv, contentDiv.firstChild);
+      function updateMessageInChat(updatedMessage, messageId, messageTime) {
+        // Locate the existing message element by its ID.
+        const messageDiv = document.getElementById(`message-${messageId}`);
+        if (!messageDiv) {
+          console.error(`Message not found for message ID: ${messageId}`);
+          return;
+        }
+      
+        // Find the container for the message content.
+        const contentDiv = messageDiv.querySelector('.message-content');
+        if (!contentDiv) {
+          console.error(`Message content not found for message ID: ${messageId}`);
+          return;
+        }
+      
+        // Update or create the message text element.
+        let messageTextEl = contentDiv.querySelector('.message-text');
+        if (!messageTextEl) {
+          messageTextEl = document.createElement('div');
+          messageTextEl.className = 'message-text';
+          contentDiv.appendChild(messageTextEl);
+        }
+        messageTextEl.textContent = updatedMessage;
+      
+        // Update or create the edited tag.
+        let editedMessagesDiv = contentDiv.querySelector('.edited-messages');
+        if (!editedMessagesDiv) {
+          editedMessagesDiv = document.createElement('div');
+          editedMessagesDiv.className = 'edited-messages';
+          // Insert it right after the message text.
+          messageTextEl.insertAdjacentElement('afterend', editedMessagesDiv);
+        }
+        let editedTag = editedMessagesDiv.querySelector('.edited-tag');
+        if (!editedTag) {
+          editedTag = document.createElement('span');
+          editedTag.className = 'edited-tag';
+          editedMessagesDiv.appendChild(editedTag);
+        }
+        editedTag.textContent = "(Edited)";
+      
+        // Update the time in the footer.
+        const timeSpan = messageDiv.querySelector('.message-footer .time');
+        if (timeSpan) {
+          timeSpan.textContent = messageTime;
+        }
       }
-      parentMessageDiv.innerHTML = parentMessageHtml;
-    } else if (parentMessageDiv) {
-      parentMessageDiv.remove();
-    }
-
-    // Update message-header.
-    const headerDiv = contentDiv.querySelector(".message-header");
-    if (headerDiv) {
-      const profileImg = headerDiv.querySelector("img");
-      if (profileImg) {
-        profileImg.src = profilePic;
-        profileImg.alt = `${senderName}'s Profile Picture`;
-      }
-      const usernameSpan = headerDiv.querySelector(".message-username");
-      if (usernameSpan) {
-        usernameSpan.textContent = senderName;
-      }
-    }
-
-    // Update the message text.
-    const messageTextElement = contentDiv.querySelector(".message-text");
-    if (messageTextElement) {
-      messageTextElement.textContent = updatedMessage;
-    }
-
-    // Update media preview.
-    let mediaElement = contentDiv.querySelector(".message-media");
-    if (mediaPreviewHtml) {
-      if (!mediaElement) {
-        mediaElement = document.createElement("div");
-        mediaElement.classList.add("message-media");
-        contentDiv.appendChild(mediaElement);
-      }
-      mediaElement.innerHTML = mediaPreviewHtml;
-    } else if (mediaElement) {
-      mediaElement.remove();
-    }
-
-    // Update or create the edited tag.
-    let editedMessagesDiv = contentDiv.querySelector(".edited-messages");
-    if (!editedMessagesDiv) {
-      editedMessagesDiv = document.createElement("div");
-      editedMessagesDiv.classList.add("edited-messages");
-      if (messageTextElement) {
-        messageTextElement.insertAdjacentElement("afterend", editedMessagesDiv);
-      } else {
-        contentDiv.appendChild(editedMessagesDiv);
-      }
-    }
-    let editedTag = editedMessagesDiv.querySelector(".edited-tag");
-    if (!editedTag) {
-      editedTag = document.createElement("span");
-      editedTag.classList.add("edited-tag");
-      editedMessagesDiv.appendChild(editedTag);
-    }
-    // Set the edited tag text to indicate the message was edited.
-    editedTag.textContent = "(Edited)";
-  }
-
-  // Update the footer time.
-  const footerDiv = messageDiv.querySelector(".message-footer");
-  if (footerDiv) {
-    const timeSpan = footerDiv.querySelector(".time");
-    if (timeSpan) {
-      timeSpan.textContent = messageTime;
-    }
-  } else {
-    console.error(`Message footer not found for message ID: ${messageId}`);
-  }
-
-  // Update the reaction popup.
-  const reactionPopup = messageDiv.querySelector(`#reaction-popup-${messageId}`);
-  if (reactionPopup) {
-    reactionPopup.innerHTML = reactionPopupContent;
-  }
-}
-
+      
+      
 
 // Global variable to track the message being edited
     let editingMessageId = null;
@@ -2295,7 +2232,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (media.slice(-4).toLowerCase() === '.mp4') {
       carouselItem.innerHTML = `<video src="${staticUrl}${cleanedMedia}" controls autoplay class="media_size"></video>`;
     } else {
-      carouselItem.innerHTML = `<img src="${staticUrl}${cleanedMedia}" alt="Media" class="media_size">`;
+      carouselItem.innerHTML = `<img src="${staticUrl}${cleanedMedia}" alt="Media" class="combo-image" style="height: 80vh;width: 100%;object-fit:cover;">`;
     }
     updateNavButtons();
   }
@@ -3037,11 +2974,13 @@ document.querySelectorAll('.media-stop').forEach(video => {
         }
     
         .parmess-file-previews {
-            display: flex;
-            overflow-x: auto;
-            margin-bottom: 5px;
-            max-width: 100%;
-            background-color: rgb(32 17 55);
+          cursor: pointer;
+          scrollbar-width: none;
+          scroll-behavior: smooth;
+          display: flex;
+          overflow-x: scroll;
+          margin-bottom: 5px;
+          max-width: 100%;
         }
     
     
@@ -3314,6 +3253,24 @@ document.querySelectorAll('.media-stop').forEach(video => {
         {% comment %} #sendDataButton {
         font-size: 20px;
         } {% endcomment %}
+
+        .messageMedia-modal-content {
+          top: 15% !important;
+          margin-top: 0% !important;
+          height: 75vh !important;
+          position: relative !important;
+          background-color: #252525 !important;
+          width: 96% !important;
+          max-width: 800px !important;
+          border-radius: 8px !important;
+      }
+      .combo-image{
+        height: 75vh !important;
+        width: 100% !important;
+        object-fit: cover !important;
+
+      }
+
     }
     
     
@@ -3381,7 +3338,21 @@ document.querySelectorAll('.media-stop').forEach(video => {
         .message-modal .message-modal-content{
             margin-top: 80%;
         }
-    
+        .messageMedia-modal-content {
+        top: 32% !important;
+        margin-top: 0% !important;
+        height: 45vh !important;
+        position: relative !important;
+        background-color: #252525 !important;
+        width: 98% !important;
+        max-width: 800px !important;
+        border-radius: 8px !important;
+        }
+        .combo-image{
+          height: 45vh !important;
+          width: 100% !important;
+          object-fit: cover !important;
+        }
     
     
     }
@@ -3571,18 +3542,21 @@ document.querySelectorAll('.media-stop').forEach(video => {
 }
 
 .messageMedia-modal-content {
-  height: fit-content;
-  position: relative;
-  background-color: #031252;
-  margin: 7% auto;
-  width: fit-content;
-  border-radius: 8px;
+    top: 5%;
+    margin-top: 10%;
+    height: 80vh;
+    position: relative;
+    background-color: #252525;
+    margin: 5% auto;
+    width: 90%;
+    max-width: 800px;
+    border-radius: 8px;
 }
 
 .messageMedia-close {
   position: absolute;
-  top: 10%;
-  right: 5%;
+  top: 10px;
+  right: 20px;
   color: #aaa;
   font-size: 28px;
   font-weight: bold;
@@ -3597,18 +3571,13 @@ document.querySelectorAll('.media-stop').forEach(video => {
 
 /* Carousel styles in modal */
 .messageMedia-carousel {
-  width: fit-content;
-  height: fit-content;
-  align-items: center;
-  justify-content: center;
-  display: flex;
+  height: 100%;
+  width: 100%;
   position: relative;
+  text-align: center;
 }
 
-.messageMedia-carousel-item {
-    width: fit-content;
-    height: fit-content;
-}
+
 
 .messageMedia-carousel-controls {
   position: absolute;
@@ -3821,6 +3790,14 @@ document.querySelectorAll('.media-stop').forEach(video => {
   border-radius: 50%;
   object-fit: cover;
   margin-right: 2px;
+}
+
+.combo-image-chat-section{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
 }
 
     </style>
