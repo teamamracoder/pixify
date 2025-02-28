@@ -109,18 +109,23 @@ def latest_reaction(chat, user):
             id=reaction_instance.reaction_id.id,
             type=MasterType.REACTION.value,
             is_active=True
-        ).values('value')
+        ).values('value') 
         
         if reaction.exists():
             reaction_value = reaction.first()['value']
-            message_text = reaction_instance.message_id.text
+            message_text = reaction_instance.message_id.text or reaction_instance.message_id.post_id or reaction_instance.message_id.media_url 
             reacted_by = "You" if reaction_instance.created_by == user else str(reaction_instance.created_by.first_name)
             reaction_time = (
                 reaction_instance.updated_at
                 if reaction_instance.created_at != reaction_instance.updated_at
                 else reaction_instance.created_at
             )
-            
+            if message_text == reaction_instance.message_id.text:
+                message_text=message_text
+            elif message_text==reaction_instance.message_id.post_id:
+                    message_text="🔗post"
+            elif reaction_instance.message_id.media_url:
+                message_text="📷 Image" 
             latest_reaction_message.update({
                 'reaction': reaction_value,
                 'reacted_message': message_text,

@@ -1,25 +1,36 @@
 from django.shortcuts import render
 from django.views import View
 
-from ..services import user_service
-from ..services import chat_service
+from ..models import User
+from ..services import user_service,chat_service,post_service,message_reaction_service
 
 class EnduserprofileListView(View):
-    def get(self,request,user_id):
-        data = chat_service.list_followings(user_id, 0, 5)
-        user_details = [user_service.get_user_details(user_id)]
-        friends = user_service.friends_count(user_id)
-        user_data = []
+    def get(self, request, user_id):
+        detail = user_service.get_user_details(user_id)
+        if not detail:
+            return render(request, 'enduser/profile/userprofile.html', {'user_details': None})
 
-        for detail in user_details:
-            dob = detail.dob
-            age = user_service.calculate_age(dob)
-            user_data.append({
-                'first_name': detail.first_name,
-                'last_name': detail.last_name,
-                'profile_photo': detail.profile_photo_url,
-                'age': age,
-                'status': detail.is_active,
-                'friends': friends,
-            })
-        return render(request,'enduser/profile/index.html',{'followings': data['followings'], 'user_data': user_data})
+        follower_list, following_list = chat_service.get_all_user_follow(user_id)
+        dob = detail.dob
+        age = user_service.calculate_age(dob)
+        user_posts = post_service.get_user_posts(user_id)
+        reactions = message_reaction_service.show_reactions()
+
+        # Attach available reactions to each post
+        for post in user_posts:
+            post["reactions"] = reactions  # Ensure every post gets the same reactions
+
+        user_details = {
+            'user_name': f"{detail.first_name} {detail.last_name}",
+            'profile_photo': detail.profile_photo_url if detail.profile_photo_url else '/static/images/avatar.jpg',
+            'age': age,
+            'status': "Active" if detail.is_active else "Inactive",
+            'following_count': len(following_list),
+            'followers_count': len(follower_list),
+            'followers': follower_list,
+            'followings': following_list,
+            'posts': user_posts,
+        }
+
+        return render(request, 'enduser/profile/userprofile.html', {'user_details': user_details})
+
