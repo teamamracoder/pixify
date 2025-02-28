@@ -203,8 +203,8 @@ def get_recipients_for_group(chat_id,user):
         return " , ".join(first_names)
 
 def get_all_user_follow(user):
-    follower_list = Follower.objects.filter(follower=user, is_active=True).select_related('following')
-    following_list = Follower.objects.filter(following=user, is_active=True).select_related('follower')
+    follower_list = Follower.objects.filter(following=user, is_active=True).select_related('created_by')
+    following_list = Follower.objects.filter(user_id=user, is_active=True).select_related('following')
     followers_data = [
             {"id": user.id, "first_name": f"{user.first_name}{user.last_name}", "profile_pic": user.profile_photo_url} 
             for user in User.objects.filter(id__in=[f.id for f in follower_list])
