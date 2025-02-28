@@ -5,7 +5,7 @@
     <div class="profile-container">
         <div class="profile-card">
             <div class="profile-header">
-                <img src="{% static user_details.profile_photo %}" alt="Profile Picture" class="profile-img">
+                <img src="{% static user_details.profile_photo |default:'/images/avatar.jpg' %}" alt="Profile Picture" class="profile-img">
                 <p class="user_title">{{ user_details.user_name }}</p>
             </div>
             <div class="profile-info">
@@ -26,7 +26,7 @@
             <div class="friend-list" id="followers-list">
                 {% for friend in user_details.followers %}
                 <div class="friend-card hidden-follower" onclick="window.location.href='{% url 'profile' friend.id %}'">
-                    <img src="{% static friend.profile_pic|default:'/static/images/avatar.jpg' %}" alt="Follower" class="friend-img">
+                    <img src="{% static friend.profile_pic|default:'/images/avatar.jpg' %}" alt="Follower" class="friend-img">
                     <div>{{ friend.first_name }}</div>
                 </div>
                 {% endfor %}
