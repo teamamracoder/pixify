@@ -97,7 +97,7 @@
                                 </div>
                             </div>
                         <!-- Reaction Display Container (Inside Loop) -->
-                        <div class="post-reactions" id="post-reactions-{{ post.id }}">
+                        <div class="post-reactions"  id="post-reactions-{{ post.id }}">
                             <!-- Reactions will be dynamically loaded here -->
                         </div>
                     </div>
@@ -112,104 +112,98 @@
 
 
 <script>
-        function toggleFriends(listId, btn) {
-            let list = document.getElementById(listId);
-            let hiddenItems = list.querySelectorAll('.friend-card.hidden-follower, .friend-card.hidden-following');
-    
-            if (btn.innerText === "See more") {
-                hiddenItems.forEach(item => item.style.display = "flex"); // Show all items
-                btn.innerText = "See Less";
-            } else {
-                hiddenItems.forEach((item, index) => {
-                    if (index >= 4) item.style.display = "none"; // Hide extra items
-                });
-                btn.innerText = "See more";
-            }
-        }
-    
-        document.addEventListener("DOMContentLoaded", function () {
-            // Hide extra followers/followings beyond 4 initially
-            document.querySelectorAll('.friend-card.hidden-follower, .friend-card.hidden-following').forEach((item, index) => {
+    document.addEventListener("DOMContentLoaded", function () {
+        // Hide extra followers/followings beyond 4 initially
+        document.querySelectorAll('.friend-card.hidden-follower, .friend-card.hidden-following')
+            .forEach((item, index) => {
                 if (index >= 4) item.style.display = "none";
             });
+
+        // Load reactions for each post on page load
+        document.querySelectorAll(".user-post").forEach(post => {
+            const postId = post.getAttribute("data-post-id");
+            if (postId) {
+                loadReactions(postId);
+            }
         });
-        
-        // Function to Toggle Reaction Popup
-        function toggleReactionPopup(postId) {
-            const popup = document.getElementById(`reaction-popup-${postId}`);
-            if (!popup) return;
-        
-            const isVisible = popup.style.display === "block";
-            document.querySelectorAll(".reaction-popup").forEach(p => p.style.display = "none");
-            popup.style.display = isVisible ? "none" : "block";
+    });
+
+    
+    
+    function toggleFriends(listId, btn) {
+        let list = document.getElementById(listId);
+        let hiddenItems = list.querySelectorAll('.friend-card.hidden-follower, .friend-card.hidden-following');
+    
+        if (btn.innerText === "See more") {
+            hiddenItems.forEach(item => (item.style.display = "flex")); 
+            btn.innerText = "See Less";
+        } else {
+            hiddenItems.forEach((item, index) => {
+                if (index >= 4) item.style.display = "none"; 
+            });
+            btn.innerText = "See more";
         }
-        
-        // Function to Handle Reactions (Add/Update Reaction)
-        function handleReaction(postId, reactionId) {
-            fetch(`/create_update_post_reactions/`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-CSRFToken": getCSRFToken()
-                },
-                body: JSON.stringify({ post_id: postId, reaction_id: reactionId }) // Ensure post_id is sent
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    console.log("Reaction updated successfully!");
-                    loadReactions(postId);
-                } else {
-                    console.error("Failed to update reaction:", data.error || "Unknown error");
-                }
-            })
-            .catch(error => console.error("Error:", error));
-        }
-        
-        
-        // Function to Load Reactions for a Post
-        function loadReactions(postId) {
-            console.log("Fetching reactions for post:", postId);
-            fetch(`/fetch_post_reactions/${postId}/`)
-              .then(response => {
-                if (!response.ok) {
-                  return response.text().then(text => {
-                    throw new Error(`Server Error ${response.status}: ${text}`);
-                  });
-                }
-                return response.json();
-              })
-              .then(data => {
-                console.log("Fetch response:", data);
-                const reactionContainer = document.getElementById(`post-reactions-${postId}`);
-                if (!reactionContainer) return;
-          
-                // Clear previous reactions
-                reactionContainer.innerHTML = "";
-          
-                // If the response indicates failure or there are no reactions, display a message
-                if (!data.success || !data.reactions || data.reactions.length === 0) {
-                  reactionContainer.innerHTML = "<p>No reactions yet.</p>";
-                  return;
-                }
-          
-                // Build HTML string for reactions
-                let reactionsHTML = "";
-                data.reactions.forEach(reaction => {
-                  reactionsHTML += `
-                    <span class="reaction-display" onclick="removeReaction('${postId}', '${reaction.id}')">
-                      ${reaction.value}
+    }
+    
+    // Function to Toggle Reaction Popup
+    function toggleReactionPopup(postId) {
+        const popup = document.getElementById(`reaction-popup-${postId}`);
+        if (!popup) return;
+    
+        const isVisible = popup.style.display === "block";
+        document.querySelectorAll(".reaction-popup").forEach(p => p.style.display = "none");
+        popup.style.display = isVisible ? "none" : "block";
+    }
+    
+    // Function to Handle Reactions (Add/Update)
+    function handleReaction(postId, reactionId) {
+        fetch(`/create_update_post_reactions/`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": getCSRFToken()
+            },
+            body: JSON.stringify({ post_id: postId, reaction_id: reactionId })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                console.log("Reaction updated successfully!");
+                loadReactions(postId);
+            } else {
+                console.error("Failed to update reaction:", data.error || "Unknown error");
+            }
+        })
+        .catch(error => console.error("Error:", error));
+    }
+    
+    // Function to Load Reactions
+    function loadReactions(postId) {
+        fetch(`/fetch_post_reactions/${postId}/`)
+        .then(response => response.json())
+        .then(data => {
+            const reactionContainer = document.getElementById(`post-reactions-${postId}`);
+            if (!reactionContainer) return;
+    
+            reactionContainer.innerHTML = "";
+            if (!data.reactions || data.reactions.length === 0) {
+                reactionContainer.innerHTML = "<p>No reactions yet.</p>";
+                return;
+            }
+    
+            data.reactions.forEach(reaction => {
+                const reactionHTML = `
+                    <span class="reaction-display" onclick="removeReaction('${postId}')">
+                        ${reaction.value}
                     </span>
-                  `;
-                });
-                reactionContainer.innerHTML = reactionsHTML;
-              })
-              .catch(error => console.error("Error fetching reactions:", error));
-          }
-          
-        
-        
-      // Function to Remove Reaction from a Post
+                `;
+                reactionContainer.innerHTML += reactionHTML;
+            });
+        })
+        .catch(error => console.error("Error fetching reactions:", error));
+    }
+    
+    // Function to Remove Reaction
     function removeReaction(postId) {
         fetch(`/delete_post_reactions/`, {
             method: "POST",
@@ -222,11 +216,11 @@
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                console.log(data.message);  // Log success message
-                loadReactions(postId);  // Refresh reactions display
+                console.log("Reaction removed successfully!");
+                loadReactions(postId);
             } else {
                 console.error("Failed to delete reaction:", data.error);
-                alert("Error: " + data.error);  // Show error to the user
+                alert("Error: " + data.error);
             }
         })
         .catch(error => {
@@ -234,13 +228,13 @@
             alert("Failed to remove reaction. Please try again.");
         });
     }
-
-    // Function to Get CSRF Token Safely
+    
+    // Function to Get CSRF Token
     function getCSRFToken() {
         const tokenElement = document.querySelector('[name=csrfmiddlewaretoken]');
         return tokenElement ? tokenElement.value : "";
     }
-
+    
 </script>
     
          
