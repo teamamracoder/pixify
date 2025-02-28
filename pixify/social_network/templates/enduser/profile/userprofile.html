@@ -83,6 +83,10 @@
                         <div class="post-opt-icons" style="height: 4vh;">
                             <div class="post-reaction" style="cursor: pointer;">
                                 <i class="bi bi-emoji-smile" onclick="toggleReactionPopup('{{ post.id }}')"></i>
+                                <span data-toggle="modal" class="load-comments">
+                                    <i class="fa-regular fa-comment"></i>
+                                </span>
+                                <i class="fa-solid fa-share-nodes" data-bs-toggle="modal" data-bs-target="#shareModal"></i>
                             </div>                         
                                 <!-- Ensure CSRF Token is Included -->
                                 <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
@@ -247,13 +251,13 @@
 
     <style>
         .post-reaction{
-            font-size: 20px;
-            justify-content: flex-start;
-            align-items: flex-end;
-            display: flex;
-            height: 100%;
-            gap: 20px;
-            cursor: pointer;
+        font-size: 20px;
+        justify-content: flex-start;
+        align-items: center;
+        display: flex;
+        height: 100%;
+        gap: 20px;
+        cursor: pointer;
         
         }
         .reaction-popup span{
