@@ -37,7 +37,7 @@ class MessageListView(View):
             # Retrieve the reaction data for this message.
             msg_reaction = message_reaction_service.reaction_by_message_id(message.id)
             
-            print(type(message.media_url), message.media_url)
+            # print(type(message.media_url), message.media_url)
 
             # Flatten media_url if needed.
             if message.media_url:

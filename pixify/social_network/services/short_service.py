@@ -189,3 +189,7 @@ def comment_reaction_count(comment):
 
 def get_short_media(post_id):
     return Post.objects.filter(id=post_id, is_active=True).values('media_url')
+
+
+def get_post_by_id(post_id):
+    return Post.objects.get(id=post_id)  # Ensure this is `.get()` and NOT `.filter()`

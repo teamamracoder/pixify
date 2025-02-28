@@ -1,132 +1,436 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Work</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</head>
+{% extends "enduser/base.html" %} {% block title %}Profile Page{% endblock %}
+{% block content %} {% load static %}
 <body>
-
-    <div class="container w-100 mx-auto p-3" style="max-width: 800px; border: solid; margin-top: 50px;">
-
-        <div class="container mt-4">
-            <div class="card p-3">
-                <div class="d-flex align-items-start">
-
-                    <img src="https://plus.unsplash.com/premium_photo-1728657016169-a425d4b5f813?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3"
-                         alt="Profile Picture" class="rounded-circle me-3 img-fluid" style="width: 100px; height: 100px; object-fit: cover;">
-
-                    <div class="flex-grow-1">
-                        <h4 class="mb-1">Ms. Fighter</h4>
-                        <p class="text-muted mb-1">39 friends + 2 mutual</p>
-                    </div>
-
-
-                    <div class="d-flex flex-wrap gap-2 mt-2">
-                        <button class="btn btn-primary">Respond</button>
-                        <button class="btn btn-outline-secondary">Message</button>
-
-                        <div class="dropdown">
-                            <button class="btn btn-outline-secondary dropdown-toggle" type="button"
-                                    id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-                                More
-                            </button>
-                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                <li><a class="dropdown-item" href="#">Report</a></li>
-                                <li><a class="dropdown-item" href="#">Block</a></li>
-                            </ul>
+    {% if user_details %}
+    <div class="profile-container">
+        <div class="profile-card">
+            <div class="profile-header">
+                <img src="{{ user_details.profile_photo }}" alt="Profile Picture" class="profile-img">
+                <p class="user_title">{{ user_details.user_name }}</p>
+            </div>
+            <div class="profile-info">
+                <p><strong>Status:</strong> <span class="active">{{ user_details.status }}</span></p>
+                <p><strong>Age:</strong> {{ user_details.age }}</p>
+                <p><strong>Followers:</strong> {{ user_details.followers_count }}</p>
+                <p><strong>Followings:</strong> {{ user_details.following_count }}</p>
+            </div>
+        </div>
+    
+        <!-- Followers Section -->
+        <div class="friends-section">
+            <div class="heading-part">
+                <h3>Followers</h3>
+                <div class="see-all-btn" onclick="toggleFriends('followers-list', this)">See more</div>
+            </div>
+            {% if user_details.followers %}
+            <div class="friend-list" id="followers-list">
+                {% for friend in user_details.followers %}
+                <div class="friend-card hidden-follower" onclick="window.location.href='{% url 'profile' friend.id %}'">
+                    <img src="{{ friend.profile_pic|default:'/static/images/avatar.jpg' }}" alt="Follower" class="friend-img">
+                    <div>{{ friend.first_name }}</div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="no-friends">No followers found.</p>
+            {% endif %}
+        </div>
+    
+        <!-- Following Section -->
+        <div class="friends-section">
+            <div class="heading-part">
+                <h3>Following</h3>
+                <div class="see-all-btn" onclick="toggleFriends('following-list', this)">See more</div>
+            </div>
+            {% if user_details.followings %}
+            <div class="friend-list" id="following-list">
+                {% for friend in user_details.followings %}
+                <div class="friend-card hidden-following" onclick="window.location.href='{% url 'profile' friend.id %}'">
+                    <img src="{{ friend.profile_pic|default:'/static/images/avatar.jpg' }}" alt="Following" class="friend-img">
+                    <div>{{ friend.first_name }}</div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="no-friends">Not following anyone.</p>
+            {% endif %}
+        </div>
+    
+        <!-- Posts Section -->
+        <h4>Posts</h4>
+        <div class="user-post-container">
+            {% if user_details.posts %}
+                {% for post in user_details.posts %}
+                    <div class="user-post">
+                        <div class="post-title-wrapper">
+                            <img src="{{ user_details.profile_photo|default:'/static/images/avatar.jpg' }}" class="photo-of-post">
+                            <div class="post-title">{{ user_details.user_name }}</div>
+                        </div>
+    
+                        {% if post.media_url %}
+                            {% for media in post.media_url %}
+                                {% if media|slice:"-4:" == ".mp4" %}
+                                    <video class="post_video" muted>
+                                        <source src="{% static post.media_url.0 %}" type="video/mp4">
+                                        Your browser does not support the video tag.
+                                    </video>
+                                {% else %}
+                                    <img src="{% static media %}" alt="Post Image" class="post-image">
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
+    
+                        <div class="post-opt-icons">
+                            <div class="post-reaction" style="cursor: pointer;">
+                                <i class="bi bi-emoji-smile" onclick="toggleReactionPopup('{{ post.id }}')"></i>
+                                <!-- Reaction Popup -->
+                                <div class="reaction-popup" id="reaction-popup-{{ post.id }}" style="display: none;">
+                                    {% for reaction in post.reactions %}
+                                    <span class="reaction-emoji" onclick="reactionManager.addReaction('{{ post.id }}', '{{ reaction.id }}', '{{ reaction.value|escapejs }}')">
+                                        {{ reaction.value|safe }}
+                                    </span>
+                                    {% endfor %}
+                                </div>
+    
+                                <span data-toggle="modal" class="load-comments">
+                                    <i class="fa-regular fa-comment"></i>
+                                </span>
+                                <i class="fa-solid fa-share-nodes" data-bs-toggle="modal" data-bs-target="#shareModal"></i>
+                            </div>
                         </div>
                     </div>
-                </div>
-
-                <div class="mt-3 d-flex justify-content-between align-items-center flex-wrap">
-                    <p class="mb-0"><strong>Mr. XX</strong> sent you a friend request!</p>
-                    <div class="d-flex">
-                        <button class="btn btn-success me-2">Confirm Request</button>
-                        <button class="btn btn-danger">Delete Request</button>
-                    </div>
-                </div>
-            </div>
+                {% endfor %}
+            {% else %}
+                <p>No posts available.</p>
+            {% endif %}
         </div>
+    {% endif %}
+    
+    <div class="footer">Nothing to show</div>
+    
+    <script>
+        function toggleFriends(listId, btn) {
+            let list = document.getElementById(listId);
+            let hiddenItems = list.querySelectorAll('.friend-card.hidden-follower, .friend-card.hidden-following');
+    
+            if (btn.innerText === "See more") {
+                hiddenItems.forEach(item => item.style.display = "flex"); // Show all items
+                btn.innerText = "See Less";
+            } else {
+                hiddenItems.forEach((item, index) => {
+                    if (index >= 4) item.style.display = "none"; // Hide extra items
+                });
+                btn.innerText = "See more";
+            }
+        }
+    
+        // Initially hide extra followers/followings beyond 4
+        document.addEventListener("DOMContentLoaded", function () {
+            document.querySelectorAll('.friend-card.hidden-follower, .friend-card.hidden-following').forEach((item, index) => {
+                if (index >= 4) item.style.display = "none";
+            });
+        });
+    
+        function toggleReactionPopup(postId) {
+            const popup = document.getElementById(`reaction-popup-${postId}`);
+            if (!popup) return;
+    
+            const isVisible = popup.style.display === "block";
+    
+            // Hide all other popups before showing the new one
+            document.querySelectorAll(".reaction-popup").forEach(p => p.style.display = "none");
+    
+            // Toggle visibility
+            popup.style.display = isVisible ? "none" : "block";
+    
+            // If showing, add event listener to detect outside click
+            if (!isVisible) {
+                setTimeout(() => {
+                    document.addEventListener("click", outsideClickListener);
+                }, 0);
+            }
+    
+            // Function to detect click outside the popup
+            function outsideClickListener(event) {
+                if (!popup.contains(event.target) && !event.target.classList.contains("bi-emoji-smile")) {
+                    popup.style.display = "none"; // Hide the popup
+                    document.removeEventListener("click", outsideClickListener); // Remove event listener
+                }
+            }
+        }
+    
+        const reactionManager = {
+            addReaction: function(postId, reactionId, reactionValue) {
+                fetch(`/add-reaction/`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": "{{ csrf_token }}"
+                    },
+                    body: JSON.stringify({ post_id: postId, reaction_id: reactionId })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(`Reaction added: ${reactionValue}`);
+                    } else {
+                        alert("Failed to add reaction.");
+                    }
+                })
+                .catch(error => console.error("Error:", error));
+            }
+        };
+    </script>
+    
 
+    <style>
+        .post-reaction{
+            align-items: center;
+            display: flex;
+            height: 100%;
+            width: 100%;
+            gap: 20px;
+            cursor: pointer;
+        
+        }
+        .reaction-popup span{
+            margin:2px;
+            cursor:pointer;
+            font-size:10px;
+        }
+        .post-opt-icons{
+            padding-left: 20px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+        }
+        .reaction-popup {
+            display: none;
+            bottom: 30px;
+            left: 0;
+            background: white;                              
+            border: 1px solid #ddd;
+            padding: 8px 12px;
+            border-radius: 8px;                               
+            box-shadow: 0px 0px 8px rgba(0,0,0,0.2);
+            z-index: 10
+        
+        }
+    
+        .reaction-popup span {
+            margin: 2px;
+            cursor: pointer;
+            font-size: 10px;
+        }
+    
+        .reaction-popup span:hover {
+            transform: scale(1.2);
+            transition: 0.3s;
+        }
+    
+        .reaction-display {
+            display: flex;
+            gap: 2px;
+            font-size: 14px;
+        }
+    
+        .reaction-display span {
+            margin-left:10px;
+            border-radius: 10px;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            font-weight: bold;
+        }
+        .user-post-container{
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            display: flex;
+        }
+        .user-post{
+            margin: 20px 0px 20px 0px;
+            border-radius: 15px;
+            border: 2px solid;
+            width: 100%;
+            background: #1a0933;
+        }
+        .post_video{
+            object-fit: cover;
+            justify-content: center;
+            align-items: center;
+            display: flex;
+            height: 50%;
+            width: 100%;
+        }
+        .profile-container {
+            height: 100%;
+            overflow-y: auto;
+            max-height: 90vh;
+            width: 75%;
+            margin: auto;
+            padding: 20px;
+            background-color: #25004d;
+            border-radius: 10px;
+            box-shadow: 0px 0px 15px rgba(255, 255, 255, 0.2);
+        }
 
-        <nav class="navbar navbar-expand-lg bg-body-tertiary mt-3 px-1 mx-2">
-            <div class="container-fluid">
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="navbarNavDropdown">
-                    <ul class="navbar-nav w-100 d-flex justify-content-around">
-                        <li class="nav-item"><a class="nav-link active" href="#">Posts</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#">About</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#">Friends</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#">Photos</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#">Videos</a></li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">More</a>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="#">View</a></li>
-                                <li><a class="dropdown-item" href="#">Trend</a></li>
-                                <li><a class="dropdown-item" href="#">Groups</a></li>
-                                <li><a class="dropdown-item" href="#">Events</a></li>
-                            </ul>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </nav>
+        .profile-card {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            padding: 20px;
+            border: 1px solid black;
+        }
 
+        .profile-header {
+            flex-direction: column;
+            align-items: center;
+            display: flex;
+            width: 50%;
+        }
 
-        <div class="container">
-            <div class="card">
-                <div class="d-flex ps-3 align-items-center mt-2">
-                    <img src="https://plus.unsplash.com/premium_photo-1728657016169-a425d4b5f813?w=500&auto=format&fit=crop&q=60" class="rounded-circle img-fluid" style="width: 45px; height: 45px;">
-                    <span class="ms-2">Mr. xyz Abc</span>
-                </div>
-                <div class="card-header">Wow, this is good!</div>
-                <div class="card-body">
-                    <img src="https://images.unsplash.com/photo-1729691692870-a957012d616a?w=500&auto=format&fit=crop&q=60" class="card-img-top img-fluid" style="height:400px;">
-                </div>
-            </div>
-        </div>
+        .profile-img {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+        }
 
-        <div class="container mt-4">
-            <div class="card p-3">
-                <div class="d-flex align-items-center mb-3">
-                    <img src="https://plus.unsplash.com/premium_photo-1728657016169-a425d4b5f813?w=500&auto=format&fit=crop&q=60" class="rounded-circle img-fluid" style="width: 40px; height: 40px;">
-                    <div class="ms-2">
-                        <h6 class="mb-0">Ms. Fighter</h6>
-                        <small>20 May <i class="bi bi-lock-fill"></i></small>
-                    </div>
-                    <a href="#" class="ms-auto"><i class="bi bi-three-dots"></i></a>
-                </div>
+        .user_title {
+            margin-top: 10px;
+            white-space: nowrap;
+            text-align: center;
+        }
 
-                <div class="border p-2 mb-3">
-                    <div class="d-flex align-items-center mb-2">
-                        <img src="https://plus.unsplash.com/premium_photo-1728657016169-a425d4b5f813?w=500&auto=format&fit=crop&q=60" class="rounded-circle img-fluid" style="width: 40px; height: 40px;">
-                        <div>
-                            <h6 class="mb-0">XXXXXXXX</h6>
-                            <small>1m ago <i class="bi bi-people-fill"></i></small>
-                        </div>
-                    </div>
-                    <p>hello</p>
-                </div>
+        .profile-info p {
+            margin: 5px 0;
+        }
 
-                <div class="d-flex justify-content-between">
-                    <button class="btn btn-light flex-fill"><i class="bi bi-hand-thumbs-up"></i> Like</button>
-                    <button class="btn btn-light flex-fill"><i class="bi bi-chat"></i> Comment</button>
-                    <button class="btn btn-light flex-fill"><i class="bi bi-send"></i> Send</button>
-                    <button class="btn btn-light flex-fill"><i class="bi bi-share"></i> Share</button>
-                </div>
-            </div>
-        </div>
+        .active {
+            color: lightgreen;
+        }
 
-    </div>
+        .friends-section {
+            border-bottom: 1px solid;
+            margin-bottom: 10px;
+            overflow-y: scroll;
+            margin-top: 20px;
+        }
 
+        .friend-list {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow: hidden;
+            max-height: 150px;
+            transition: max-height 0.3s ease-in-out;
+        }
+
+        .friend-list.expanded {
+            max-height: none;
+        }
+
+        .friend-card {
+            border: 2px solid #7474c1;
+            gap: 10px;
+            justify-content: flex-start;
+            display: flex        ;
+            align-items: center;
+            background-color: #25004d;
+            padding: 10px;
+            margin: 5px;
+            border-radius: 5px;
+            width: 100%;
+        }
+
+        .friend-img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .see-all-btn {
+            justify-content: end;
+            display: flex;
+            color: #2be8e2;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .no-friends{
+            align-items: center;
+            justify-content: center;
+            display: flex;
+            font-size: 12px;
+        }
+        .heading-part{
+            justify-content: space-between;
+            align-items: center;
+            display: flex;
+        }
+        .footer{
+            padding: 30px;
+            align-items: end;
+            justify-content: center;
+            display: flex;
+            font-size:larger;
+            height: 30px;
+        }
+        .post0title{
+            display: flex;
+            align-items: center;
+            font-size: 20px;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            white-space: nowrap;
+            background: transparent;
+            height: 60px;
+        }
+        .photo-of-post{
+            align-items: center;
+            justify-content: center;
+            display: flex;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+        }
+        .post-title-wrapper{
+            padding: 10px;
+            gap: 10px;
+            display: flex;;
+            align-items: center;
+            justify-content: flex-start;
+        }
+        .post-descript{
+            padding: 10px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-size: 22px;
+            display: flex;
+            align-items: center;
+            height:70px;
+        }
+        .post-immage{
+            object-fit: cover;
+            justify-content: center;
+            align-items: center;
+            display: flex;
+            height: 50%;
+            width: 100%;
+        }
+
+        @media (max-width: 1200px) {
+            .profile-container{
+                width:100%;  
+            }
+        }
+    </style>
 </body>
-</html>
 
-////
+    
+</style>
+{% endblock %}

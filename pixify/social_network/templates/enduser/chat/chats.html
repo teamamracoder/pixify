@@ -1,4 +1,4 @@
-{% extends "enduser/base.html" %} {% block title %}Pixify-Message{% endblock %}
+{% extends "enduser/base.html" %} {% block title %}Pixify-Chats{% endblock %}
 {% block content %} {% load static %}
 
 <div class="maindiv">
@@ -44,7 +44,7 @@
                                         $("#fill").append(`
                                         <div class="modal-list" onclick="window.location.href='${chat.id}/message/'" style="cursor: pointer;">
                                             <div class="src-profile-photo">
-                                                <img src="${chat.chat_cover}" id="profile-photo">
+                                                <img src="${staticUrl}${cleanMediaPath(chat.chat_cover)}" id="profile-photo">
                                             </div>
                                             <div class="chats-item">${chat.title}</div>
                                         </div>
@@ -74,9 +74,9 @@
             <!-- Image Section -->
             <div class="image-div">
                 {% if chat.is_group %}
-                    <img src="{{ chat.chat_cover|default:'/static/images/group_pic.png' }}" alt="Chat Cover" class="profile-photo">
+                    <img src="{% static  chat.chat_cover|default:'/images/group_pic.png' %}" alt="Chat Cover" class="profile-photo">
                 {% else %}
-                    <img src="{{ chat.chat_cover|default:'/static/images/avatar.jpg' }}" alt="Chat Cover" class="profile-photo">
+                    <img src="{% static  chat.chat_cover|default:'/images/avatar.jpg' %}" alt="Chat Cover" class="profile-photo">
                 {% endif %}
             </div>
 
@@ -118,7 +118,10 @@
                     <span>
                     {% if chat.latest_message %}
                         {% if chat.latest_reaction_time == '' or chat.latest_message_time >= chat.latest_reaction_time %}
-                            <p class="chat-lts-message">{{ chat.latest_message }}</p>
+                             <!-- ✅ If message is unread, apply bold styling -->
+                            <p class="chat-lts-message {% if not chat.seen_by_user %}unread{% endif %}">
+                                {{ chat.latest_message }}
+                            </p>
                         {% else %}
                             <p class="chat-lts-message">'{{chat.latest_reaction_message_reacted_by}}' Reacted {{ chat.latest_reaction|safe }} on "{{ chat.latest_message }}"</p>
                         {% endif %}
@@ -178,6 +181,13 @@
 </div>
 
 <script>
+
+    const staticUrl = "{% static '' %}"; // This usually returns "/static/"
+
+    function cleanMediaPath(media) {
+        return media.startsWith('/') ? media.slice(1) : media;
+      }
+
     // Focus on the new modal’s search bar
     function focusSearchBar() {
         setTimeout(function() {
@@ -217,7 +227,7 @@
                 type: 'GET',
                 success: function (res) {
                     let combinedHtml = '';
-                    const fallbackImage = '/static/images/avatar.jpg';
+                    const fallbackImage = '/images/avatar.jpg';
 
                     if (res.members.length === 0) {
                         combinedHtml = '<div class="no-members-message">No Followers And Followings to Display</div>';
@@ -228,7 +238,7 @@
                             <div class="xyz1">
                                 <div class="xyz1-wrapper">
                                     <div class="chat-selection-body" id="user-${member.user_id}" data-user-id="${member.user_id}">
-                                        <img src="${profileImage}" alt="${member.user_id__first_name}'s profile photo" class="chat-profile-photo">
+                                        <img src="${staticUrl}${cleanMediaPath(profileImage)}" alt="${member.user_id__first_name}'s profile photo" class="chat-profile-photo">
                                     </div>
                                     <input type="checkbox" class="chat-checkbox" id="checkbox-${member.user_id}" onchange="checkSelection(${member.user_id})" onclick="event.stopPropagation();">
                                 </div>
@@ -513,9 +523,12 @@
     }
 
     #hyperlink-text{
-        text-decoration:none;
-        color:white;
-        font-size:17px;
+        justify-content: flex-start;
+        align-items: center;
+        display: flex;
+        text-decoration: none;
+        color: white;
+        font-size: 17px;
     }
     #p-pic img {
         padding: 15px 20px;
@@ -643,8 +656,8 @@
 
 /* Middle Section (Dynamic) */
 .content-div {
-    margin-left: 70px; /* Leaves space for the fixed image section */
-    margin-right: 100px; /* Leaves space for the fixed right-aligned section */
+    width: 70%;
+    margin-left: 60px;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
@@ -752,8 +765,7 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-
-            font-size: 13px;
+            font-size: 20px;
         }
         .chat-create-modal-content{
             width:90% !important;
@@ -1089,6 +1101,9 @@
         -webkit-box-orient: vertical;
         overflow: hidden;
         text-overflow: ellipsis;
+    }
+    .unread {
+        font-weight: bold;
     }
 
 </style>
