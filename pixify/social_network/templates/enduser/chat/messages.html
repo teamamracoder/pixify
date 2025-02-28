@@ -628,6 +628,7 @@ $(document).ready(function () {
                     const removeButton = document.createElement('button');
                     removeButton.innerHTML = '&times;';
                     removeButton.className = 'remove-button';
+                    
                     removeButton.onclick = function () {
                         previewDiv.remove();
                         selectedFiles.delete(file.name);

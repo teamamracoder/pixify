@@ -170,6 +170,10 @@
             if (data.success) {
                 console.log("Reaction updated successfully!");
                 loadReactions(postId);
+                const popup = document.getElementById(`reaction-popup-${postId}`);
+                if (popup) {
+                    popup.style.display = "none";
+                }
             } else {
                 console.error("Failed to update reaction:", data.error || "Unknown error");
             }
