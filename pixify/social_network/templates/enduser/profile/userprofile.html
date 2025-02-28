@@ -95,11 +95,11 @@
                                         </span>
                                     {% endfor %}
                                 </div>
+                                <!-- Reaction Display Container (Inside Loop) -->
+                                <div class="post-reactions"  id="post-reactions-{{ post.id }}">
+                                    <!-- Reactions will be dynamically loaded here -->
+                                </div>
                             </div>
-                        <!-- Reaction Display Container (Inside Loop) -->
-                        <div class="post-reactions"  id="post-reactions-{{ post.id }}">
-                            <!-- Reactions will be dynamically loaded here -->
-                        </div>
                     </div>
                 {% endfor %}
             {% else %}
@@ -251,7 +251,6 @@
             align-items: flex-end;
             display: flex;
             height: 100%;
-            width: 100%;
             gap: 20px;
             cursor: pointer;
         
@@ -262,22 +261,23 @@
             font-size:10px;
         }
         .post-opt-icons{
+            margin-top: 10px;
+            margin-bottom: 10px;
             padding-left: 20px;
-            height: 36px;
             display: flex;
             align-items: center;
             justify-content: flex-start;
         }
         .reaction-popup {
-            position: relative;
-            display: none;
-            bottom: 50px;
-            background: white;
-            border: 1px solid #ddd;
-            padding: 8px 8px;
-            border-radius: 8px;
-            box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.2);
-            z-index: 10;
+        right: 6%;
+        position: relative;
+        display: none;
+        background: white;
+        border: 1px solid #ddd;
+        padding: 8px 8px;
+        border-radius: 8px;
+        box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.2);
+        z-index: 10;
         }
     
         .reaction-popup span {
@@ -292,6 +292,7 @@
         }
     
         .reaction-display {
+            margin-left: 10px;
             display: flex;
             gap: 2px;
             font-size: 14px;
