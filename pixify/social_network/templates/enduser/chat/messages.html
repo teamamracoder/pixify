@@ -109,9 +109,12 @@
               <!-- Modal for full view of media (carousel) -->
               <div id="messageMediaModal">
                 <div class="messageMedia-modal-content">
-                  <div class="messageMedia-close">✖</div>
                   <div class="messageMedia-carousel">
-                    <div class="messageMedia-carousel-item"></div>
+                    <div class="messageMedia-carousel-item">
+
+                      
+                    </div>
+                    <div class="messageMedia-close">✖</div>
                     <div class="messageMedia-carousel-controls">
                       <div class="messageMedia-prev">
                         <i class="bi bi-arrow-left-circle-fill"></i>
@@ -260,22 +263,23 @@
 
         <!-- Message Input Form -->
         <form id="messageForm" enctype="multipart/form-data">
-            {% csrf_token %}
-            <input type="hidden" id="action" name="action" value="create">
-            <input type="hidden" id="chat_id" name="chat_id" value="{{ data.chat.id }}">
-            <input type="hidden" id="chat_type" name="chat_type" value="{{ data.chat.type }}">
-            <input type="hidden" id="message_id" name="message_id" value="">
+          {% csrf_token %}
+          <input type="hidden" id="action" name="action" value="create">
+          <input type="hidden" id="chat_id" name="chat_id" value="{{ data.chat.id }}">
+          <input type="hidden" id="chat_type" name="chat_type" value="{{ data.chat.type }}">
+          <input type="hidden" id="message_id" name="message_id" value="">
             <input type="hidden" name="mentions" id="mentions">
             <input type="file" id="file-input" name="media_files" style="display: none;" accept="image/*,video/*" multiple>
-
+            
+            <div class="combo-image-chat-section">
             <div id="file-previews" class="parmess-file-previews"></div>
-
             <div class="message-input-wrapper">
-                <button type="button" id="parmess-button" class="parmess-button">
-                    <i class="fa fa-paperclip"></i>
+              <button type="button" id="parmess-button" class="parmess-button">
+                <i class="fa fa-paperclip"></i>
                 </button>
                 <input type="text" name="message" id="message-input" maxlength="200" placeholder="Type your message here...">
                 <button class="parmess-button" type="submit">➤</button>
+            </div>
             </div>
         </form>
 
@@ -325,7 +329,7 @@
       if (media.slice(-4).toLowerCase() === '.mp4') {
         carouselItem.innerHTML = `<video src="${staticUrl}${cleanedMedia}" controls autoplay></video>`;
       } else {
-        carouselItem.innerHTML = `<img src="${staticUrl}${cleanedMedia}" alt="Media" style="height: 80vh;width: 798px;object-fit:cover;">`;
+        carouselItem.innerHTML = `<img src="${staticUrl}${cleanedMedia}" alt="Media" class="combo-image" style="height: 80vh;width: 798px;object-fit:cover;">`;
       }
       updateNavButtons();
     }
@@ -2785,11 +2789,13 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     
         .parmess-file-previews {
+            cursor: pointer;
+            scrollbar-width: none;
+            scroll-behavior: smooth;
             display: flex;
-            overflow-x: auto;
+            overflow-x: scroll;
             margin-bottom: 5px;
             max-width: 100%;
-            background-color: rgb(32 17 55);
         }
     
     
@@ -2990,14 +2996,14 @@ document.addEventListener("DOMContentLoaded", function () {
         .chat-footer form{
             display: flex;
         }
-        {% comment %} #sendDataButton {
+        /* {% comment %} #sendDataButton {
             justify-content: end;
             align-items: center;
             display: flex;
             position:relative;
             padding-top: 4px;
             font-size: 20px;
-        } {% endcomment %}
+        } {% endcomment %} */
         .parmess-modal-content{
             width: 32%;
             left: 28%;
@@ -3059,17 +3065,39 @@ document.addEventListener("DOMContentLoaded", function () {
             height: 30px;
             font-size: 14px;
         }
-        {% comment %} #sendDataButton {
+        /* {% comment %} #sendDataButton {
         font-size: 20px;
-        } {% endcomment %}
+        } {% endcomment %} */
+
+
+
+    .messageMedia-modal-content {
+      top: 5% !important;
+      margin-top: 0% !important;
+      height: 95vh !important;
+      position: relative !important;
+      background-color: #252525 !important;
+      width: 100% !important;
+      max-width: 800px !important;
+      border-radius: 8px !important;
+  }
+  .combo-image{
+    height: 95vh !important;
+    width: 100% !important;
+    object-fit: cover !important;
+
+  }
+
+
+
     }
     
     
     @media (max-width: 620px){
-        {% comment %} #sendDataButton {
+        /* {% comment %} #sendDataButton {
         padding-top: 12px;
         font-size: 20px;
-    } {% endcomment %}
+    } {% endcomment %} */
     .message-modal .message-modal-content{
         margin-top: 50%;
     }
@@ -3113,14 +3141,13 @@ document.addEventListener("DOMContentLoaded", function () {
             font-size: 0.8rem;
             /* padding: 6px; */
         }
-        {% comment %} #sendDataButton {
+        /* {% comment %} #sendDataButton {
         padding-top: 12px;
         font-size: 20px;
-        } {% endcomment %}
+        } {% endcomment %} */
         .user-info {
             padding-top: 12px;
-            display: flex
-        ;
+            display: flex;
             align-items: center;
         }
         .parmess-del-options button{
@@ -3130,6 +3157,21 @@ document.addEventListener("DOMContentLoaded", function () {
             margin-top: 80%;
         }
     
+  .messageMedia-modal-content {
+    top: 13% !important;
+    margin-top: 0% !important;
+    height: 86vh !important;
+    position: relative !important;
+    background-color: #252525 !important;
+    width: 100% !important;
+    max-width: 800px !important;
+    border-radius: 8px !important;
+  }
+  .combo-image{
+    height: 86vh !important;
+    width: 100% !important;
+    object-fit: cover !important;
+  }
     
     
     }
@@ -3393,6 +3435,17 @@ document.addEventListener("DOMContentLoaded", function () {
   object-fit: cover;
 }
 
-    </style>
+
+.combo-image-chat-section{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+}
+
+
+
+</style>
     {% endblock %}
 add a action when i type "@" in the form
