@@ -522,7 +522,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         sender = await sync_to_async(User.objects.get)(id=user)
 
          # Set default image if user_pic is None
-        user_pic = sender.profile_photo_url or "/static/images/avatar.jpg"
+        user_pic = sender.profile_photo_url or "/images/avatar.jpg"
 
         typer = {
             'user': sender.first_name,
