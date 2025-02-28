@@ -66,7 +66,7 @@
                             <div class="messageMedia-single-media reply-media-single" data-media-list="{{ message.reply_for_message_id.media_url|join:',' }}">
                               {% with media=message.reply_for_message_id.media_url.0 %}
                                 {% if media|slice:"-4:" == ".mp4" %}
-                                  <video src="{% static media %}" muted class="media_size"></video>
+                                  <video src="{% static media %}"></video>
                                 {% else %}
                                   <img src="{% static media %}" alt="Media" style="width: 100%; height: 100%;">
                                 {% endif %}
@@ -97,7 +97,7 @@
                     
                     {% if message.reply_for_message_id.post_id %}
                     <div class="message-reply-post">
-                      <video id="message-short" class="message-reply-short-video" muted>
+                      <video id="message-short" class="message-reply-short-video media-stop" muted>
                         <source src="{% static message.reply_for_message_id.post_id.media_url.0 %}" type="video/mp4">
                       </video>
                       <div class="message-reply-short-info">
@@ -499,6 +499,7 @@ $(document).ready(function () {
 });
 
 
+
     // Handle file button click
     document.getElementById('parmess-button').addEventListener('click', function () {
         document.getElementById('file-input').click();
@@ -508,12 +509,6 @@ $(document).ready(function () {
     let fileArray = [];
     let selectedFiles = new Set();
 
-    // Prevent "Enter" from submitting the form unintentionally during file input or previews
-    document.getElementById('file-input').addEventListener('keydown', function (event) {
-        if (event.key === 'Enter') {
-            event.preventDefault(); // Prevent default action on the file input
-        }
-    });
 
     document.getElementById('file-input').addEventListener('change', function () {
         const fileInput = document.getElementById('file-input');
@@ -633,15 +628,16 @@ $(document).ready(function () {
 
     // Prevent empty message on form submission (via button)
     document.getElementById('messageForm').addEventListener('submit', function (event) {
-        const messageInput = document.getElementById('message-input');
-        const message = messageInput.value.trim(); // Trim whitespace to check if it's empty
-
-        if (!message) {
-            event.preventDefault(); // Prevent form submission
-
-            messageInput.focus(); // Set focus back to the input field
-        }
-    });
+      const messageInput = document.getElementById('message-input');
+      const message = messageInput.value.trim();
+      const fileInput = document.getElementById('file-input');
+    
+      // Allow submission if there's text OR if there are files selected.
+      if (!message && fileInput.files.length === 0) {
+        event.preventDefault();
+        messageInput.focus();
+      }
+    });    
 
     //Show the scroll-to-bottom button based on scroll
     document.addEventListener("DOMContentLoaded", function () {
@@ -2373,6 +2369,14 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 
+document.querySelectorAll('.media-stop').forEach(video => {
+  video.addEventListener('click', function(event) {
+    event.preventDefault();
+    event.stopPropagation();
+    // Optionally, explicitly pause the video if it has started.
+    this.pause();
+  });
+});
 
     
 </script>
