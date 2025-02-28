@@ -15,18 +15,18 @@
                 <p><strong>Followings:</strong> {{ user_details.following_count }}</p>
             </div>
         </div>
-      
+    
         <!-- Followers Section -->
         <div class="friends-section">
             <div class="heading-part">
-            <h3>Followers</h3>
-            <div class="see-all-btn" onclick="toggleFriends('followers-list', this)">See more</div>
+                <h3>Followers</h3>
+                <div class="see-all-btn" onclick="toggleFriends('followers-list', this)">See more</div>
             </div>
             {% if user_details.followers %}
             <div class="friend-list" id="followers-list">
                 {% for friend in user_details.followers %}
                 <div class="friend-card hidden-follower" onclick="window.location.href='{% url 'profile' friend.id %}'">
-                    <img src="{{ friend.profile_pic |default:"/static/images/avatar.jpg" }}" alt="Follower" class="friend-img">
+                    <img src="{{ friend.profile_pic|default:'/static/images/avatar.jpg' }}" alt="Follower" class="friend-img">
                     <div>{{ friend.first_name }}</div>
                 </div>
                 {% endfor %}
@@ -35,18 +35,18 @@
             <p class="no-friends">No followers found.</p>
             {% endif %}
         </div>
-        
-        <!-- Followings Section -->
+    
+        <!-- Following Section -->
         <div class="friends-section">
             <div class="heading-part">
-            <h3>Following</h3>
-            <div class="see-all-btn" onclick="toggleFriends('following-list', this)">See more</div>
+                <h3>Following</h3>
+                <div class="see-all-btn" onclick="toggleFriends('following-list', this)">See more</div>
             </div>
             {% if user_details.followings %}
             <div class="friend-list" id="following-list">
                 {% for friend in user_details.followings %}
-                <div class="friend-card hidden-following"onclick="window.location.href='{% url 'profile' friend.id %}'">
-                    <img src="{{ friend.profile_pic |default:"/static/images/avatar.jpg"}}" alt="Following" class="friend-img">
+                <div class="friend-card hidden-following" onclick="window.location.href='{% url 'profile' friend.id %}'">
+                    <img src="{{ friend.profile_pic|default:'/static/images/avatar.jpg' }}" alt="Following" class="friend-img">
                     <div>{{ friend.first_name }}</div>
                 </div>
                 {% endfor %}
@@ -55,83 +55,262 @@
             <p class="no-friends">Not following anyone.</p>
             {% endif %}
         </div>
-        <!-- posts part-->
-
+    
+        <!-- Posts Section -->
+        <h4>Posts</h4>
         <div class="user-post-container">
             {% if user_details.posts %}
                 {% for post in user_details.posts %}
-                    <div class="user-post">
-                        <h3>{{ post.title }}</h3>
-                        <p>{{ post.description }}</p>
-                        
+                    <div class="user-post" data-post-id="{{ post.id }}">
+                        <div class="post-title-wrapper">
+                            <img src="{{ user_details.profile_photo|default:'/static/images/avatar.jpg' }}" class="photo-of-post">
+                            <div class="post-title">{{ user_details.user_name }}</div>
+                        </div>
+
                         {% if post.media_url %}
                             {% for media in post.media_url %}
                                 {% if media|slice:"-4:" == ".mp4" %}
-                                    <video class="post_video" controls>
+                                    <video class="post_video" muted>
                                         <source src="{% static post.media_url.0 %}" type="video/mp4">
                                         Your browser does not support the video tag.
                                     </video>
                                 {% else %}
-                                    <img src="{{ media }}" alt="Post Image">
+                                    <img src="{% static media %}" alt="Post Image" class="post-image">
                                 {% endif %}
                             {% endfor %}
                         {% endif %}
+
+                        <div class="post-opt-icons">
+                            <div class="post-reaction" style="cursor: pointer;">
+                                <i class="bi bi-emoji-smile" onclick="toggleReactionPopup('{{ post.id }}')"></i>
+                            </div>                         
+                                <!-- Ensure CSRF Token is Included -->
+                                <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+
+                                <!-- Reaction Popup (Inside Loop) -->
+                                <div class="reaction-popup" id="reaction-popup-{{ post.id }}" style="display: none;">
+                                    {% for reaction in user_details.reactions %}
+                                        <span class="reaction-emoji" onclick="handleReaction('{{ post.id }}', '{{ reaction.id }}')">
+                                            {{ reaction.value|safe }}
+                                        </span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        <!-- Reaction Display Container (Inside Loop) -->
+                        <div class="post-reactions" id="post-reactions-{{ post.id }}">
+                            <!-- Reactions will be dynamically loaded here -->
+                        </div>
                     </div>
                 {% endfor %}
             {% else %}
                 <p>No posts available.</p>
             {% endif %}
         </div>
-        
-        
-        {% endif %}
-        <div class="footer">
-            Nothing to show
-        </div>
-    </div>
-        
-        <script>
-            function toggleFriends(listId, btn) {
-                let list = document.getElementById(listId);
-                let hiddenItems = list.querySelectorAll('.friend-card.hidden-follower, .friend-card.hidden-following');
-        
-                if (btn.innerText === "See more") {
-                    hiddenItems.forEach(item => item.style.display = "flex"); // Show all items
-                    btn.innerText = "See Less";
-                } else {
-                    hiddenItems.forEach((item, index) => {
-                        if (index >= 4) item.style.display = "none"; // Hide extra items
-                    });
-                    btn.innerText = "See more";
-                }
-            }
-        
-            // Initially hide extra followers/followings beyond 4
-            document.addEventListener("DOMContentLoaded", function () {
-                document.querySelectorAll('.friend-card.hidden-follower, .friend-card.hidden-following').forEach((item, index) => {
-                    if (index >= 4) item.style.display = "none";
-                });
-            });
-        </script>
-        
+{% endif %}
+<div class="footer">Nothing to show</div>
+</div>
 
-    <script>
+
+<script>
         function toggleFriends(listId, btn) {
             let list = document.getElementById(listId);
-            list.classList.toggle("expanded");
-            btn.textContent = list.classList.contains("expanded") ? "See Less" : "See more";
+            let hiddenItems = list.querySelectorAll('.friend-card.hidden-follower, .friend-card.hidden-following');
+    
+            if (btn.innerText === "See more") {
+                hiddenItems.forEach(item => item.style.display = "flex"); // Show all items
+                btn.innerText = "See Less";
+            } else {
+                hiddenItems.forEach((item, index) => {
+                    if (index >= 4) item.style.display = "none"; // Hide extra items
+                });
+                btn.innerText = "See more";
+            }
         }
-    </script>
+    
+        document.addEventListener("DOMContentLoaded", function () {
+            // Hide extra followers/followings beyond 4 initially
+            document.querySelectorAll('.friend-card.hidden-follower, .friend-card.hidden-following').forEach((item, index) => {
+                if (index >= 4) item.style.display = "none";
+            });
+        });
+        
+        // Function to Toggle Reaction Popup
+        function toggleReactionPopup(postId) {
+            const popup = document.getElementById(`reaction-popup-${postId}`);
+            if (!popup) return;
+        
+            const isVisible = popup.style.display === "block";
+            document.querySelectorAll(".reaction-popup").forEach(p => p.style.display = "none");
+            popup.style.display = isVisible ? "none" : "block";
+        }
+        
+        // Function to Handle Reactions (Add/Update Reaction)
+        function handleReaction(postId, reactionId) {
+            fetch(`/create_update_post_reactions/`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": getCSRFToken()
+                },
+                body: JSON.stringify({ post_id: postId, reaction_id: reactionId }) // Ensure post_id is sent
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log("Reaction updated successfully!");
+                    loadReactions(postId);
+                } else {
+                    console.error("Failed to update reaction:", data.error || "Unknown error");
+                }
+            })
+            .catch(error => console.error("Error:", error));
+        }
+        
+        
+        // Function to Load Reactions for a Post
+        function loadReactions(postId) {
+            console.log("Fetching reactions for post:", postId);
+            fetch(`/fetch_post_reactions/${postId}/`)
+            .then(response => {
+                if (!response.ok) {
+                    return response.text().then(text => { throw new Error(`Server Error ${response.status}: ${text}`); });
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log("Fetch response:", data);
+                const reactionContainer = document.getElementById(`post-reactions-${postId}`);
+                if (!reactionContainer) return;
+        
+                reactionContainer.innerHTML = ""; // Clear previous reactions
+        
+                if (!data.reactions || data.reactions.length === 0) {
+                    reactionContainer.innerHTML = "<p>No reactions yet.</p>";
+                    return;
+                }
+        
+                data.reactions.forEach(reaction => {
+                    const reactionHTML = `
+                        <span class="reaction-display" onclick="removeReaction('${postId}', '${reaction.id}')">
+                            ${reaction.value}
+                        </span>
+                    `;
+                    reactionContainer.innerHTML += reactionHTML;
+                });
+            })
+            .catch(error => console.error("Error fetching reactions:", error));
+        }
+        
+        
+      // Function to Remove Reaction from a Post
+    function removeReaction(postId) {
+        fetch(`/delete_post_reactions/`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": getCSRFToken()
+            },
+            body: JSON.stringify({ post_id: postId })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                console.log(data.message);  // Log success message
+                loadReactions(postId);  // Refresh reactions display
+            } else {
+                console.error("Failed to delete reaction:", data.error);
+                alert("Error: " + data.error);  // Show error to the user
+            }
+        })
+        .catch(error => {
+            console.error("Network error:", error);
+            alert("Failed to remove reaction. Please try again.");
+        });
+    }
+
+    // Function to Get CSRF Token Safely
+    function getCSRFToken() {
+        const tokenElement = document.querySelector('[name=csrfmiddlewaretoken]');
+        return tokenElement ? tokenElement.value : "";
+    }
+
+</script>
+    
+         
+        
+    
 
     <style>
+        .post-reaction{
+            justify-content: flex-start;
+            align-items: flex-end;
+            display: flex;
+            height: 100%;
+            width: 100%;
+            gap: 20px;
+            cursor: pointer;
+        
+        }
+        .reaction-popup span{
+            margin:2px;
+            cursor:pointer;
+            font-size:10px;
+        }
+        .post-opt-icons{
+            padding-left: 20px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+        }
+        .reaction-popup {
+            position: relative;
+            display: none;
+            bottom: 50px;
+            background: white;
+            border: 1px solid #ddd;
+            padding: 8px 8px;
+            border-radius: 8px;
+            box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.2);
+            z-index: 10;
+        }
+    
+        .reaction-popup span {
+            margin: 2px;
+            cursor: pointer;
+            font-size: 20px;
+        }
+    
+        .reaction-popup span:hover {
+            transform: scale(1.2);
+            transition: 0.3s;
+        }
+    
+        .reaction-display {
+            display: flex;
+            gap: 2px;
+            font-size: 14px;
+        }
+    
+        .reaction-display span {
+            margin-left:10px;
+            border-radius: 10px;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            font-weight: bold;
+        }
         .user-post-container{
+            flex-direction: column;
             align-items: center;
             justify-content: center;
             display: flex;
         }
         .user-post{
-            width: 90%;
-            height: 80vh;
+            margin: 20px 0px 20px 0px;
+            border-radius: 15px;
+            border: 2px solid;
+            width: 100%;
             background: #1a0933;
         }
         .post_video{
@@ -139,7 +318,7 @@
             justify-content: center;
             align-items: center;
             display: flex;
-            height: 100%;
+            height: 50%;
             width: 100%;
         }
         .profile-container {
@@ -251,12 +430,56 @@
             display: flex;
         }
         .footer{
-            padding: 30px;
+            color: #9858dd;
+            border-top: 2px solid black;
+            padding-top: 30px;
             align-items: end;
             justify-content: center;
             display: flex;
-            font-size: small;
+            font-size: larger;
             height: 30px;
+        }
+        .post0title{
+            display: flex;
+            align-items: center;
+            font-size: 20px;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            white-space: nowrap;
+            background: transparent;
+            height: 60px;
+        }
+        .photo-of-post{
+            align-items: center;
+            justify-content: center;
+            display: flex;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+        }
+        .post-title-wrapper{
+            padding: 10px;
+            gap: 10px;
+            display: flex;;
+            align-items: center;
+            justify-content: flex-start;
+        }
+        .post-descript{
+            padding: 10px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-size: 22px;
+            display: flex;
+            align-items: center;
+            height:70px;
+        }
+        .post-immage{
+            object-fit: cover;
+            justify-content: center;
+            align-items: center;
+            display: flex;
+            height: 50%;
+            width: 100%;
         }
 
         @media (max-width: 1200px) {
@@ -266,7 +489,4 @@
         }
     </style>
 </body>
-
-    
-</style>
 {% endblock %}

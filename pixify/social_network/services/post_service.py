@@ -1,10 +1,11 @@
 from ..models.user_model import User
 from . import GetData
-from ..models import Post,Comment,PostReaction,PostReaction
+from ..models import Post,Comment,PostReaction,PostReaction,MasterList
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
 from ..constants.default_values import PostType
 from ..models import models
+from django.contrib.postgres.aggregates import ArrayAgg
 
 def manage_list_posts():
     return Post.objects.all()
@@ -104,5 +105,43 @@ def reaction_name(post_id):
 
 
 def get_user_posts(user_id):
-    user_posts=Post.objects.filter(posted_by=user_id).values('media_url','title','description')
+    user_posts=Post.objects.filter(posted_by=user_id).values('id','media_url','title','description')
     return list(user_posts)
+
+
+def get_active_post_reactions(post_id):
+    if not Post.objects.filter(id=post_id).exists():
+        raise ValueError("Post does not exist")  # Will be caught in FetchPostReactions
+
+    return PostReaction.objects.filter(post_id=post_id, is_active=True)
+
+
+
+def create_or_update_post_reaction(post_id, user, reaction):
+    post = Post.objects.get(id=post_id)
+    
+    # Ensure user is saved in the reaction
+    post_reaction, created = PostReaction.objects.update_or_create(
+        post_id=post,
+        created_by=user, 
+        reacted_by= user, # This should not be None
+        defaults={'master_list_id': reaction}
+    )
+    return post_reaction
+
+
+
+def get_active_reaction(post_id, user):
+    return PostReaction.objects.filter(
+        post_id=post_id,
+        reacted_by=user,
+        is_active=True
+    ).first()
+
+
+def deactivate_reaction(reaction_instance):
+    reaction_instance.is_active = False
+    reaction_instance.save()
+    return reaction_instance
+def get_reaction_by_name(post_id):
+    return MasterList.objects.filter(id=post_id).first()
