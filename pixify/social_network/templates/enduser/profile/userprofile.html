@@ -119,9 +119,6 @@
     document.addEventListener("DOMContentLoaded", function () {
         // Hide extra followers/followings beyond 4 initially
         document.querySelectorAll('.friend-card.hidden-follower, .friend-card.hidden-following')
-            .forEach((item, index) => {
-                if (index >= 4) item.style.display = "none";
-            });
 
         // Load reactions for each post on page load
         document.querySelectorAll(".user-post").forEach(post => {
@@ -136,11 +133,11 @@
     
     function toggleFriends(listId, btn) {
         let list = document.getElementById(listId);
-        let hiddenItems = list.querySelectorAll('.friend-card.hidden-follower, .friend-card.hidden-following');
         
         if (list.style.display === "none" || list.style.display === "") {
             list.style.display = "flex"; // Show full friend list
-            list.style.overflowY = "scroll"; // Corrected property
+            list.style.overflowY = "auto"; // Allow scrolling
+            list.style.maxHeight = "305px"; // Fixed property name
             btn.innerText = "~hide";
         } else {
             list.style.display = "none"; // Hide full friend list
@@ -404,13 +401,14 @@
             margin-top: 20px;
         }
 
-        .friend-list {            
-            overflow-y: scroll;
-            display: none;  /* Hide by default */
+        .friend-list {
+            display: none; /* Initially hidden */
+            max-height: 305px; /* Limit height */
+            overflow-y: auto; /* Enable scrolling */
             flex-direction: column;
             align-items: center;
-            max-height: 305px;
         }
+        
 
         .friend-list.expanded {
             max-height: none;
