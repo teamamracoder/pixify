@@ -80,9 +80,13 @@
                             {% endfor %}
                         {% endif %}
 
-                        <div class="post-opt-icons">
+                        <div class="post-opt-icons" style="height: 4vh;">
                             <div class="post-reaction" style="cursor: pointer;">
                                 <i class="bi bi-emoji-smile" onclick="toggleReactionPopup('{{ post.id }}')"></i>
+                                <span data-toggle="modal" class="load-comments">
+                                    <i class="fa-regular fa-comment"></i>
+                                </span>
+                                <i class="fa-solid fa-share-nodes" data-bs-toggle="modal" data-bs-target="#shareModal"></i>
                             </div>                         
                                 <!-- Ensure CSRF Token is Included -->
                                 <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
@@ -95,11 +99,11 @@
                                         </span>
                                     {% endfor %}
                                 </div>
+                                <!-- Reaction Display Container (Inside Loop) -->
+                                <div class="post-reactions"  id="post-reactions-{{ post.id }}">
+                                    <!-- Reactions will be dynamically loaded here -->
+                                </div>
                             </div>
-                        <!-- Reaction Display Container (Inside Loop) -->
-                        <div class="post-reactions"  id="post-reactions-{{ post.id }}">
-                            <!-- Reactions will be dynamically loaded here -->
-                        </div>
                     </div>
                 {% endfor %}
             {% else %}
@@ -181,7 +185,6 @@
         .catch(error => console.error("Error:", error));
     }
     
-    // Function to Load Reactions
     function loadReactions(postId) {
         fetch(`/fetch_post_reactions/${postId}/`)
         .then(response => response.json())
@@ -190,15 +193,28 @@
             if (!reactionContainer) return;
     
             reactionContainer.innerHTML = "";
+    
             if (!data.reactions || data.reactions.length === 0) {
                 reactionContainer.innerHTML = " ";
                 return;
             }
     
+            // Create a map to store unique reactions with their counts
+            const reactionMap = {};
+    
             data.reactions.forEach(reaction => {
+                if (reactionMap[reaction.value]) {
+                    reactionMap[reaction.value]++; // Increment count if reaction already exists
+                } else {
+                    reactionMap[reaction.value] = 1; // Initialize count
+                }
+            });
+    
+            // Append reactions without duplicates but with counts
+            Object.keys(reactionMap).forEach(reaction => {
                 const reactionHTML = `
                     <span class="reaction-display" onclick="removeReaction('${postId}')">
-                        ${reaction.value}
+                        ${reaction} <sup class="react-count">${reactionMap[reaction]}</sup>
                     </span>
                 `;
                 reactionContainer.innerHTML += reactionHTML;
@@ -246,14 +262,19 @@
     
 
     <style>
-        .post-reaction{
-            justify-content: flex-start;
-            align-items: flex-end;
+        .post-reactions{
+            justify-content: center;
+            align-items: center;
             display: flex;
-            height: 100%;
-            width: 100%;
-            gap: 20px;
-            cursor: pointer;
+        }
+        .post-reaction{
+        font-size: 20px;
+        justify-content: flex-start;
+        align-items: center;
+        display: flex;
+        height: 100%;
+        gap: 20px;
+        cursor: pointer;
         
         }
         .reaction-popup span{
@@ -262,22 +283,24 @@
             font-size:10px;
         }
         .post-opt-icons{
+            margin-top: 10px;
+            margin-bottom: 10px;
             padding-left: 20px;
-            height: 36px;
             display: flex;
             align-items: center;
-            justify-content: flex-start;
+            justify-content: space-between;
         }
         .reaction-popup {
-            position: relative;
-            display: none;
-            bottom: 50px;
-            background: white;
-            border: 1px solid #ddd;
-            padding: 8px 8px;
-            border-radius: 8px;
-            box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.2);
-            z-index: 10;
+        bottom: 130%;
+        right: 32%;
+        position: relative;
+        display: none;
+        background: white;
+        border: 1px solid #ddd;
+        padding: 8px 8px;
+        border-radius: 8px;
+        box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.2);
+        z-index: 10;
         }
     
         .reaction-popup span {
@@ -292,9 +315,11 @@
         }
     
         .reaction-display {
+            align-items: end;
+            margin-right: 20px;
             display: flex;
             gap: 2px;
-            font-size: 14px;
+            font-size: 20px;
         }
     
         .reaction-display span {
