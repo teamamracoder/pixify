@@ -46,7 +46,7 @@
             <div class="friend-list" id="following-list">
                 {% for friend in user_details.followings %}
                 <div class="friend-card hidden-following" onclick="window.location.href='{% url 'profile' friend.id %}'">
-                    <img src="{% static friend.profile_pic|default:'/static/images/avatar.jpg' %}" alt="Following" class="friend-img">
+                    <img src="{% static friend.profile_pic|default:'/images/avatar.jpg' %}" alt="Following" class="friend-img">
                     <div>{{ friend.first_name }}</div>
                 </div>
                 {% endfor %}
@@ -63,7 +63,7 @@
                 {% for post in user_details.posts %}
                     <div class="user-post" data-post-id="{{ post.id }}">
                         <div class="post-title-wrapper">
-                            <img src="{% static user_details.profile_photo|default:'/static/images/avatar.jpg' %}" class="photo-of-post">
+                            <img src="{% static user_details.profile_photo|default:'/images/avatar.jpg' %}" class="photo-of-post">
                             <div class="post-title">{{ user_details.user_name }}</div>
                         </div>
 
@@ -406,12 +406,12 @@
         }
 
         .friend-list {
+            overflow-y: scroll;
             display: flex;
             flex-direction: column;
             align-items: center;
-            overflow: hidden;
-            max-height: 150px;
-            transition: max-height 0.3s ease-in-out;
+            max-height: 164px;
+            transition: max-height 0.3sease-in-out;
         }
 
         .friend-list.expanded {
@@ -466,7 +466,7 @@
             align-items: end;
             justify-content: center;
             display: flex;
-            font-size: larger;
+            font-size: small;
             height: 30px;
         }
         .post0title{
