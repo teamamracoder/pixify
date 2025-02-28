@@ -282,6 +282,7 @@
                     <span class="reply-username"></span>:
                     <span class="reply-text"></span>
                     <span class="reply-media-preview"></span>
+                    <span class="reply-short-preview"></span>
                     <div class="close-reply" onclick="cancelReply()">✖</div>
                 </div>
             </div>
@@ -1538,6 +1539,8 @@ function updateMessageInChat(updatedMessage, messageId, messageTime, senderName,
       const messageTextElement = messageDiv.querySelector(".message-text");
       const singleMediaElement = messageDiv.querySelector(".messageMedia-single-media");
       const mediaGridElement = messageDiv.querySelector(".messageMedia-grid");
+      const messageShortElement = messageDiv.querySelector(".message-post");
+
       const replyPreview = document.getElementById("reply-preview");
   
       replyPreview.style.display = "block";
@@ -1562,7 +1565,16 @@ function updateMessageInChat(updatedMessage, messageId, messageTime, senderName,
       } else {
           replyMediaContainer.innerHTML = '';
       }
-  
+      
+      const replyShortContainer = replyPreview.querySelector(".reply-short-preview");
+      replyShortContainer.innerHTML = '';
+
+      if(messageShortElement){
+        replyShortContainer.innerHTML = messageShortElement.innerHTML;
+      }else{
+        replyShortContainer.innerHTML = '';
+      }
+
       const messageInput = document.getElementById("message-input");
       messageInput.focus();
     
@@ -3687,6 +3699,45 @@ document.addEventListener('DOMContentLoaded', function() {
 }
 
 
+
+
+.reply-short-preview {
+  position: relative;
+  right: 9px;
+  width: 39px;
+}
+
+
+.reply-short-preview .message-short-info {
+  top: 42px;
+
+}
+
+
+.reply-short-preview .message-short-user-info {
+  
+}
+
+
+.reply-short-preview .message-short-username {
+  display: inline-block !important;
+  white-space: nowrap !important;
+  font-size: 3px;
+  margin-top: 2px;
+}
+
+.reply-short-preview .message-short-video {
+  border-radius: 3px;  
+}
+
+.reply-short-preview .message-short-profile-pic {
+  margin-left: -8px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 2px;
+}
 
     </style>
     {% endblock %}
