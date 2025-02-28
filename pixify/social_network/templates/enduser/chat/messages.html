@@ -66,7 +66,7 @@
                             <div class="messageMedia-single-media reply-media-single" data-media-list="{{ message.reply_for_message_id.media_url|join:',' }}">
                               {% with media=message.reply_for_message_id.media_url.0 %}
                                 {% if media|slice:"-4:" == ".mp4" %}
-                                  <video src="{% static media %}" controls class="media_size"></video>
+                                  <video src="{% static media %}" muted class="media_size"></video>
                                 {% else %}
                                   <img src="{% static media %}" alt="Media" style="width: 100%; height: 100%;">
                                 {% endif %}
@@ -78,7 +78,7 @@
                               {% for media in message.reply_for_message_id.media_url|slice:":4" %}
                                 <div class="messageMedia-grid-item reply-media-grid-item" data-index="{{ forloop.counter0 }}">
                                   {% if media|slice:"-4:" == ".mp4" %}
-                                    <video src="{% static media %}" controls class="media_size"></video>
+                                    <video src="{% static media %}" muted class="media_size"></video>
                                   {% else %}
                                     <img src="{% static media %}" alt="Media" style="width: 100%; height: 100%;">
                                   {% endif %}
@@ -175,7 +175,7 @@
                 <!-- Short  Section -->                
                 {% if message.post_id %}
                 <div class="message-post" onclick="window.location.href='{% url 'short' %}{{ message.post_id.id }}'">
-                  <video id="message-short" class="message-short-video" loop muted>
+                  <video id="message-short" class="message-short-video" muted>
                     <source src="{% static message.post_id.media_url.0 %}" type="video/mp4">
                   </video>
                   <div class="message-short-info">
@@ -1031,6 +1031,8 @@ async function sendMessage() {
             data.ProfilePic || '/images/avatar.jpg',
             data.reply,
             data.replyText,
+            data.reply_media_url,
+            data.replyPost,
             data.reply_username,
             data.reply_userPic,
             data.media_urls || [],
@@ -1046,7 +1048,9 @@ async function sendMessage() {
             data.user || 'Unknown',
             data.ProfilePic || '/images/avatar.jpg',
             data.reply,
-            data.replyText,
+            data.replyText,            
+            data.reply_media_url,
+            data.replyPost,
             data.reply_username,
             data.reply_userPic,
             data.media_urls || [],
@@ -1163,160 +1167,235 @@ async function sendMessage() {
       };
       
 
-      function appendMessageToChat(message, media_url, post, messageId, messageTime, senderId, senderName, profilePic, reply, replyText, reply_username, reply_userPic, mediaUrls, isSent, reactions) {
+      function appendMessageToChat(message, media_url, post, messageId, messageTime, senderId, senderName, profilePic, reply, replyText, reply_media_url, replyPost, reply_username, reply_userPic, mediaUrls, isSent, reactions) {
         // Define the static URL prefix using the Django static tag and remove the trailing slash.
         const staticUrl = "{% static '' %}".replace(/\/$/, '');
-    
+        
         const chatBody = document.querySelector(".chat-body");
         const today = "Today";
-    
+        
         // Check if today's timestamp header is already present.
         const timestamps = chatBody.querySelectorAll(".message-timestamp span");
         let todayExists = false;
         timestamps.forEach(timestamp => {
-            if (timestamp.innerText.trim() === today) {
-                todayExists = true;
-            }
+          if (timestamp.innerText.trim() === today) {
+            todayExists = true;
+          }
         });
-    
+        
         // If not, add the timestamp header.
         if (!todayExists) {
-            const timestampDiv = document.createElement("div");
-            timestampDiv.classList.add("message-timestamp");
-            timestampDiv.setAttribute("id", "message-timestamp");
-            timestampDiv.innerHTML = `<span>${today}</span>`;
-            chatBody.appendChild(timestampDiv);
+          const timestampDiv = document.createElement("div");
+          timestampDiv.classList.add("message-timestamp");
+          timestampDiv.setAttribute("id", "message-timestamp");
+          timestampDiv.innerHTML = `<span>${today}</span>`;
+          chatBody.appendChild(timestampDiv);
         }
-    
+        
         // Create the main message container.
         const messageDiv = document.createElement("div");
         messageDiv.classList.add("message", isSent ? "sent" : "received");
         messageDiv.setAttribute("id", `message-${messageId}`);
-    
+        
         // Build reply preview if a reply exists.
         let parentMessageHtml = "";
         if (reply) {
-            parentMessageHtml = `
-                <div class="parent-message">
-                    <span>${reply_username} </span>
-                    <div class="reply-message-text">${replyText}</div>
-                    ${reply.media_url ? `<span>${reply.media_url}</span>` : ""}
-                </div>
-            `;
-        }
-    
-        // Generate media HTML using the media_url parameter.
-        let mediaHtml = "";
-        if (media_url && media_url.length > 0) {
-            if (media_url.length === 1) {
-                const media = media_url[0];
-                if (media.slice(-4) === ".mp4") {
-                    mediaHtml = `<div class="messageMedia-single-media" data-media-list="${media_url.join(',')}">
-                                    <video src="${staticUrl}${media}" controls ></video>
-                                 </div>`;
-                } else {
-                    mediaHtml = `<div class="messageMedia-single-media" data-media-list="${media_url.join(',')}">
-                                    <img src="${staticUrl}${media}" alt="Media" style="width: 100%; height: 100%;">
-                                 </div>`;
-                }
-            } else {
-                mediaHtml = `<div class="messageMedia-grid" data-media-list="${media_url.join(',')}">`;
-                const limit = Math.min(media_url.length, 4);
-                for (let i = 0; i < limit; i++) {
-                    const media = media_url[i];
-                    mediaHtml += `<div class="messageMedia-grid-item" data-index="${i}">`;
-                    if (media.slice(-4) === ".mp4") {
-                        mediaHtml += `<video src="${staticUrl}${media}" controls class="media_size"></video>`;
-                    } else {
-                        mediaHtml += `<img src="${staticUrl}${media}" alt="Media" style="width: 100%;height: 100%;">`;
-                    }
-                    if (i === limit - 1 && media_url.length > 4) {
-                        mediaHtml += `<div class="messageMedia-overlay">
-                                        <span>+${media_url.length - 4}</span>
-                                      </div>`;
-                    }
-                    mediaHtml += `</div>`;
-                }
-                mediaHtml += `</div>`;
-            }
-        }
-    
-        // Generate post HTML using the post parameter.
-        let postHtml = "";
-        if (post) {
+          // If the reply is for a post
+          if (replyPost) {
             let postMedia = "";
-            if (post.media_url && post.media_url.length > 0) {
-                postMedia = post.media_url[0];
+            if (replyPost.media_url && replyPost.media_url.length > 0) {
+              postMedia = replyPost.media_url[0];
             }
-            postHtml = `
-                <div class="message-post">
-                  <video id="message-short" class="message-short-video" loop muted>
+            parentMessageHtml = `
+            <div class="parent-message">
+            <span>${reply_username}:</span>
+            <div class="reply-message-text">${replyText}</div>
+              <div class="message-reply-post">
+                ${postMedia ? `
+                  <video id="message-short" class="message-reply-short-video" muted>
                     <source src="${staticUrl}${postMedia}" type="video/mp4">
                   </video>
-                  <div class="message-short-info">
-                    <div class="message-short-user-info">
-                      <img src="${staticUrl}${post.posted_by?.profile_photo_url || '/images/avatar.jpg'}" alt="${post.posted_by?.first_name || 'User'}'s Profile Picture" class="message-short-profile-pic">
-                      <div class="message-short-username">
-                        ${post.posted_by?.first_name || 'User'} ${post.posted_by?.last_name || ''}
-                      </div>
+                ` : ''}
+                <div class="message-reply-short-info">
+                  <div class="message-reply-short-user-info">
+                    <img src="${staticUrl}${replyPost.posted_by.profile_photo_url || '/images/avatar.jpg'}" 
+                         alt="${replyPost.posted_by.first_name} ${replyPost.posted_by.last_name}'s Profile Picture" 
+                         class="message-reply-short-profile-pic">
+                    <div class="message-reply-short-username">
+                      ${replyPost.posted_by.first_name} ${replyPost.posted_by.last_name}
                     </div>
                   </div>
                 </div>
+              </div>
+             </div> 
             `;
+          } else {
+            // Otherwise, generate a regular reply with text and possible media.
+            let replyMediaHtml = "";
+            if (reply_media_url && reply_media_url.length > 0) {
+              if (reply_media_url.length === 1) {
+                const media = reply_media_url[0];
+                if (media.slice(-4) === ".mp4") {
+                  replyMediaHtml = `
+                    <div class="messageMedia-single-media reply-media-single" data-media-list="${reply_media_url.join(',')}">
+                      <video src="${staticUrl}${media}" controls class="media_size"></video>
+                    </div>
+                  `;
+                } else {
+                  replyMediaHtml = `
+                    <div class="messageMedia-single-media reply-media-single" data-media-list="${reply_media_url.join(',')}">
+                      <img src="${staticUrl}${media}" alt="Media" style="width: 100%; height: 100%;">
+                    </div>
+                  `;
+                }
+              } else {
+                replyMediaHtml = `<div class="messageMedia-grid reply-media-grid" data-media-list="${reply_media_url.join(',')}">`;
+                const limit = Math.min(reply_media_url.length, 4);
+                for (let i = 0; i < limit; i++) {
+                  const media = reply_media_url[i];
+                  replyMediaHtml += `<div class="messageMedia-grid-item reply-media-grid-item" data-index="${i}">`;
+                  if (media.slice(-4) === ".mp4") {
+                    replyMediaHtml += `<video src="${staticUrl}${media}" controls class="media_size"></video>`;
+                  } else {
+                    replyMediaHtml += `<img src="${staticUrl}${media}" alt="Media" style="width: 100%; height: 100%;">`;
+                  }
+                  if (i === limit - 1 && reply_media_url.length > 4) {
+                    replyMediaHtml += `
+                      <div class="messageMedia-overlay reply-media-overlay">
+                        <span>+${reply_media_url.length - 4}</span>
+                      </div>
+                    `;
+                  }
+                  replyMediaHtml += `</div>`;
+                }
+                replyMediaHtml += `</div>`;
+              }
+            }
+            
+            parentMessageHtml = `
+              <div class="parent-message">
+                <span>${reply_username}:</span>
+                <div class="reply-message-text">${replyText}</div>
+                ${replyMediaHtml}
+              </div>
+            `;
+          }
         }
-    
+        
+        // Generate media HTML using the media_url parameter.
+        let mediaHtml = "";
+        if (media_url && media_url.length > 0) {
+          if (media_url.length === 1) {
+            const media = media_url[0];
+            if (media.slice(-4) === ".mp4") {
+              mediaHtml = `<div class="messageMedia-single-media" data-media-list="${media_url.join(',')}">
+                              <video src="${staticUrl}${media}" controls></video>
+                           </div>`;
+            } else {
+              mediaHtml = `<div class="messageMedia-single-media" data-media-list="${media_url.join(',')}">
+                              <img src="${staticUrl}${media}" alt="Media" style="width: 100%; height: 100%;">
+                           </div>`;
+            }
+          } else {
+            mediaHtml = `<div class="messageMedia-grid" data-media-list="${media_url.join(',')}">`;
+            const limit = Math.min(media_url.length, 4);
+            for (let i = 0; i < limit; i++) {
+              const media = media_url[i];
+              mediaHtml += `<div class="messageMedia-grid-item" data-index="${i}">`;
+              if (media.slice(-4) === ".mp4") {
+                mediaHtml += `<video src="${staticUrl}${media}" controls class="media_size"></video>`;
+              } else {
+                mediaHtml += `<img src="${staticUrl}${media}" alt="Media" style="width: 100%; height: 100%;">`;
+              }
+              if (i === limit - 1 && media_url.length > 4) {
+                mediaHtml += `<div class="messageMedia-overlay">
+                                <span>+${media_url.length - 4}</span>
+                              </div>`;
+              }
+              mediaHtml += `</div>`;
+            }
+            mediaHtml += `</div>`;
+          }
+        }
+        
+        // Generate post HTML using the post parameter.
+        let postHtml = "";
+        if (post) {
+          let postMedia = "";
+          if (post.media_url && post.media_url.length > 0) {
+            postMedia = post.media_url[0];
+          }
+          postHtml = `
+            <div class="message-post">
+              <video id="message-short" class="message-short-video" loop muted>
+                <source src="${staticUrl}${postMedia}" type="video/mp4">
+              </video>
+              <div class="message-short-info">
+                <div class="message-short-user-info">
+                  <img src="${staticUrl}${post.posted_by?.profile_photo_url || '/images/avatar.jpg'}" 
+                       alt="${post.posted_by?.first_name || 'User'}'s Profile Picture" 
+                       class="message-short-profile-pic">
+                  <div class="message-short-username">
+                    ${post.posted_by?.first_name || 'User'} ${post.posted_by?.last_name || ''}
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+        }
+        
         // Generate reaction popup content.
         const reactionPopupContent = generateReactionPopupContent(reactions, messageId);
-    
-        // Build the message content HTML.
+        
+        // Build the final message HTML.
         const messageContentHtml = `
-            <div class="message-content">
-                ${parentMessageHtml}
-                <div class="message-header">
-                    <img src="${staticUrl}${profilePic}" alt="${senderName}'s Profile Picture" class="message-profile-pic">
-                    <span class="message-username">${senderName}</span>
-                </div>
-                ${mediaHtml}
-                ${postHtml}
-                ${message ? `<div class="message-text">${message}</div>` : ""}
+          <div class="message-content">
+            ${parentMessageHtml}
+            <div class="message-header">
+              <img src="${staticUrl}${profilePic}" alt="${senderName}'s Profile Picture" class="message-profile-pic">
+              <span class="message-username">${senderName}</span>
             </div>
-            <div class="message-footer">
-                <div class="time">${messageTime}</div>
-                <div class="message-options">
-                    <i class="bi bi-three-dots-vertical" onclick="toggleOptions('${messageId}')"></i>
-                    <i class="bi bi-emoji-smile" onclick="toggleReactionPopup('${messageId}')"></i>
-                </div>
-                <div class="options-popup" id="options-${messageId}" style="display: none;">
-                    ${isSent ? `<a href="#" onclick="editMessage('${messageId}'); closeOptions('${messageId}');">Edit</a>` : ""}
-                    <a href="#" onclick="replyMessage('${messageId}', '${senderName}'); closeOptions('${messageId}');">Reply</a>
-                    <a href="#" onclick="openDeleteModal('${messageId}', '${senderId}'); closeOptions('${messageId}');">Delete</a>
-                </div>
-                <div class="reaction-containerrrr" id="reaction-containerrrr-${messageId}">
-                    <div class="reaction-popup" id="reaction-popup-${messageId}" style="display: none;">
-                        ${reactionPopupContent}
-                    </div>
-                </div>
+            ${mediaHtml}
+            ${postHtml}
+            ${message ? `<div class="message-text">${message}</div>` : ""}
+          </div>
+          <div class="message-footer">
+            <div class="time">${messageTime}</div>
+            <div class="message-options">
+              <i class="bi bi-three-dots-vertical" onclick="toggleOptions('${messageId}')"></i>
+              <i class="bi bi-emoji-smile" onclick="toggleReactionPopup('${messageId}')"></i>
             </div>
-            <div class="reactionandseen">
-                <div class="reaction-display" id="reaction-display-${messageId}"></div>
-                <div class="seen-status">
-                    ${senderName === currentUser ? `<i class="bi bi-check2"></i>` : ""}
-                </div>
+            <div class="options-popup" id="options-${messageId}" style="display: none;">
+              ${isSent ? `<a href="#" onclick="editMessage('${messageId}'); closeOptions('${messageId}');">Edit</a>` : ""}
+              <a href="#" onclick="replyMessage('${messageId}', '${senderName}'); closeOptions('${messageId}');">Reply</a>
+              <a href="#" onclick="openDeleteModal('${messageId}', '${senderId}'); closeOptions('${messageId}');">Delete</a>
             </div>
+            <div class="reaction-containerrrr" id="reaction-containerrrr-${messageId}">
+              <div class="reaction-popup" id="reaction-popup-${messageId}" style="display: none;">
+                ${reactionPopupContent}
+              </div>
+            </div>
+          </div>
+          <div class="reactionandseen">
+            <div class="reaction-display" id="reaction-display-${messageId}"></div>
+            <div class="seen-status">
+              ${senderName === currentUser ? `<i class="bi bi-check2"></i>` : ""}
+            </div>
+          </div>
         `;
-    
+        
         messageDiv.innerHTML = messageContentHtml;
         chatBody.appendChild(messageDiv);
-    
+        
         // Scroll to bottom and update scroll indicator.
         chatBody.scrollTop = chatBody.scrollHeight;
         window.updateScrollIndicator();
-    }
-    
+      }
+          
     
 
 
-function updateMessageInChat(updatedMessage, messageId, messageTime, senderName, profilePic, reply, replyText, reply_username, reply_userPic, mediaUrls, isSent, seen_by_all, reactions) {
+function updateMessageInChat(updatedMessage, messageId, messageTime, senderName, profilePic, reply, replyText, reply_media_url, replyPost, reply_username, reply_userPic, mediaUrls, isSent, seen_by_all, reactions) {
   const messageDiv = document.getElementById(`message-${messageId}`);
   if (!messageDiv) {
     console.error(`Message not found for message ID: ${messageId}`);
