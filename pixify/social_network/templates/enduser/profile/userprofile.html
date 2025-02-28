@@ -80,7 +80,7 @@
                             {% endfor %}
                         {% endif %}
 
-                        <div class="post-opt-icons">
+                        <div class="post-opt-icons" style="height: 4vh;">
                             <div class="post-reaction" style="cursor: pointer;">
                                 <i class="bi bi-emoji-smile" onclick="toggleReactionPopup('{{ post.id }}')"></i>
                             </div>                         
@@ -247,6 +247,7 @@
 
     <style>
         .post-reaction{
+            font-size: 20px;
             justify-content: flex-start;
             align-items: flex-end;
             display: flex;
@@ -266,10 +267,11 @@
             padding-left: 20px;
             display: flex;
             align-items: center;
-            justify-content: flex-start;
+            justify-content: space-between;
         }
         .reaction-popup {
-        right: 6%;
+        bottom: 130%;
+        right: 32%;
         position: relative;
         display: none;
         background: white;
@@ -292,10 +294,10 @@
         }
     
         .reaction-display {
-            margin-left: 10px;
-            display: flex;
-            gap: 2px;
-            font-size: 14px;
+        margin-right: 20px;
+        display: flex;
+        gap: 2px;
+        font-size: 20px;
         }
     
         .reaction-display span {
