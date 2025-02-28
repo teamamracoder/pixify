@@ -104,5 +104,5 @@ def reaction_name(post_id):
 
 
 def get_user_posts(user_id):
-    user_posts=Post.objects.filter(posted_by=user_id).values('media_url','title','description')
+    user_posts=Post.objects.filter(posted_by=user_id).values('id','media_url','title','description')
     return list(user_posts)
