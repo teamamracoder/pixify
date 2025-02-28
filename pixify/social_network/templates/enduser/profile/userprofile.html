@@ -185,7 +185,6 @@
         .catch(error => console.error("Error:", error));
     }
     
-    // Function to Load Reactions
     function loadReactions(postId) {
         fetch(`/fetch_post_reactions/${postId}/`)
         .then(response => response.json())
@@ -194,15 +193,28 @@
             if (!reactionContainer) return;
     
             reactionContainer.innerHTML = "";
+    
             if (!data.reactions || data.reactions.length === 0) {
                 reactionContainer.innerHTML = " ";
                 return;
             }
     
+            // Create a map to store unique reactions with their counts
+            const reactionMap = {};
+    
             data.reactions.forEach(reaction => {
+                if (reactionMap[reaction.value]) {
+                    reactionMap[reaction.value]++; // Increment count if reaction already exists
+                } else {
+                    reactionMap[reaction.value] = 1; // Initialize count
+                }
+            });
+    
+            // Append reactions without duplicates but with counts
+            Object.keys(reactionMap).forEach(reaction => {
                 const reactionHTML = `
                     <span class="reaction-display" onclick="removeReaction('${postId}')">
-                        ${reaction.value}
+                        ${reaction} <sup>${reactionMap[reaction]}</sup>
                     </span>
                 `;
                 reactionContainer.innerHTML += reactionHTML;
