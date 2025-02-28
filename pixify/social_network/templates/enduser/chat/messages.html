@@ -156,10 +156,10 @@
               
               <!-- Modal for full view of media (carousel) -->
               <div id="messageMediaModal">
-                <div class="messageMedia-close">✖</div>
                 <div class="messageMedia-modal-content">
                   <div class="messageMedia-carousel">
                     <div class="messageMedia-carousel-item"></div>
+                    <div class="messageMedia-close">✖</div>
                     <div class="messageMedia-carousel-controls">
                       <div class="messageMedia-prev">
                         <i class="bi bi-arrow-left-circle-fill"></i>
@@ -307,6 +307,7 @@
             <input type="hidden" name="mentions" id="mentions">
             <input type="file" id="file-input" name="media_files" style="display: none;" accept="image/*,video/*" multiple>
 
+            <div class="combo-image-chat-section">
             <div id="file-previews" class="parmess-file-previews"></div>
 
             <div class="message-input-wrapper">
@@ -315,6 +316,7 @@
                 </button>
                 <input type="text" name="message" id="message-input" maxlength="200" placeholder="Type your message here...">
                 <button class="parmess-button" type="submit">➤</button>
+            </div>
             </div>
         </form>
 
@@ -2230,7 +2232,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (media.slice(-4).toLowerCase() === '.mp4') {
       carouselItem.innerHTML = `<video src="${staticUrl}${cleanedMedia}" controls autoplay class="media_size"></video>`;
     } else {
-      carouselItem.innerHTML = `<img src="${staticUrl}${cleanedMedia}" alt="Media" class="media_size">`;
+      carouselItem.innerHTML = `<img src="${staticUrl}${cleanedMedia}" alt="Media" class="combo-image" style="height: 80vh;width: 100%;object-fit:cover;">`;
     }
     updateNavButtons();
   }
@@ -2972,11 +2974,13 @@ document.querySelectorAll('.media-stop').forEach(video => {
         }
     
         .parmess-file-previews {
-            display: flex;
-            overflow-x: auto;
-            margin-bottom: 5px;
-            max-width: 100%;
-            background-color: rgb(32 17 55);
+          cursor: pointer;
+          scrollbar-width: none;
+          scroll-behavior: smooth;
+          display: flex;
+          overflow-x: scroll;
+          margin-bottom: 5px;
+          max-width: 100%;
         }
     
     
@@ -3249,6 +3253,24 @@ document.querySelectorAll('.media-stop').forEach(video => {
         {% comment %} #sendDataButton {
         font-size: 20px;
         } {% endcomment %}
+
+        .messageMedia-modal-content {
+          top: 15% !important;
+          margin-top: 0% !important;
+          height: 75vh !important;
+          position: relative !important;
+          background-color: #252525 !important;
+          width: 96% !important;
+          max-width: 800px !important;
+          border-radius: 8px !important;
+      }
+      .combo-image{
+        height: 75vh !important;
+        width: 100% !important;
+        object-fit: cover !important;
+
+      }
+
     }
     
     
@@ -3316,7 +3338,21 @@ document.querySelectorAll('.media-stop').forEach(video => {
         .message-modal .message-modal-content{
             margin-top: 80%;
         }
-    
+        .messageMedia-modal-content {
+        top: 32% !important;
+        margin-top: 0% !important;
+        height: 45vh !important;
+        position: relative !important;
+        background-color: #252525 !important;
+        width: 98% !important;
+        max-width: 800px !important;
+        border-radius: 8px !important;
+        }
+        .combo-image{
+          height: 45vh !important;
+          width: 100% !important;
+          object-fit: cover !important;
+        }
     
     
     }
@@ -3506,18 +3542,21 @@ document.querySelectorAll('.media-stop').forEach(video => {
 }
 
 .messageMedia-modal-content {
-  height: fit-content;
-  position: relative;
-  background-color: #031252;
-  margin: 7% auto;
-  width: fit-content;
-  border-radius: 8px;
+    top: 5%;
+    margin-top: 10%;
+    height: 80vh;
+    position: relative;
+    background-color: #252525;
+    margin: 5% auto;
+    width: 90%;
+    max-width: 800px;
+    border-radius: 8px;
 }
 
 .messageMedia-close {
   position: absolute;
-  top: 10%;
-  right: 5%;
+  top: 10px;
+  right: 20px;
   color: #aaa;
   font-size: 28px;
   font-weight: bold;
@@ -3532,18 +3571,13 @@ document.querySelectorAll('.media-stop').forEach(video => {
 
 /* Carousel styles in modal */
 .messageMedia-carousel {
-  width: fit-content;
-  height: fit-content;
-  align-items: center;
-  justify-content: center;
-  display: flex;
+  height: 100%;
+  width: 100%;
   position: relative;
+  text-align: center;
 }
 
-.messageMedia-carousel-item {
-    width: fit-content;
-    height: fit-content;
-}
+
 
 .messageMedia-carousel-controls {
   position: absolute;
@@ -3756,6 +3790,14 @@ document.querySelectorAll('.media-stop').forEach(video => {
   border-radius: 50%;
   object-fit: cover;
   margin-right: 2px;
+}
+
+.combo-image-chat-section{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
 }
 
     </style>
