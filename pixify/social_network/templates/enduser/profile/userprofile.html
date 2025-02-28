@@ -61,12 +61,12 @@
         <div class="user-post-container">
             {% if user_details.posts %}
                 {% for post in user_details.posts %}
-                    <div class="user-post">
+                    <div class="user-post" data-post-id="{{ post.id }}">
                         <div class="post-title-wrapper">
                             <img src="{{ user_details.profile_photo|default:'/static/images/avatar.jpg' }}" class="photo-of-post">
                             <div class="post-title">{{ user_details.user_name }}</div>
                         </div>
-    
+
                         {% if post.media_url %}
                             {% for media in post.media_url %}
                                 {% if media|slice:"-4:" == ".mp4" %}
@@ -79,24 +79,26 @@
                                 {% endif %}
                             {% endfor %}
                         {% endif %}
-    
+
                         <div class="post-opt-icons">
                             <div class="post-reaction" style="cursor: pointer;">
                                 <i class="bi bi-emoji-smile" onclick="toggleReactionPopup('{{ post.id }}')"></i>
-                                <!-- Reaction Popup -->
+                            </div>                         
+                                <!-- Ensure CSRF Token is Included -->
+                                <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+
+                                <!-- Reaction Popup (Inside Loop) -->
                                 <div class="reaction-popup" id="reaction-popup-{{ post.id }}" style="display: none;">
-                                    {% for reaction in post.reactions %}
-                                    <span class="reaction-emoji" onclick="reactionManager.addReaction('{{ post.id }}', '{{ reaction.id }}', '{{ reaction.value|escapejs }}')">
-                                        {{ reaction.value|safe }}
-                                    </span>
+                                    {% for reaction in user_details.reactions %}
+                                        <span class="reaction-emoji" onclick="handleReaction('{{ post.id }}', '{{ reaction.id }}')">
+                                            {{ reaction.value|safe }}
+                                        </span>
                                     {% endfor %}
                                 </div>
-    
-                                <span data-toggle="modal" class="load-comments">
-                                    <i class="fa-regular fa-comment"></i>
-                                </span>
-                                <i class="fa-solid fa-share-nodes" data-bs-toggle="modal" data-bs-target="#shareModal"></i>
                             </div>
+                        <!-- Reaction Display Container (Inside Loop) -->
+                        <div class="post-reactions" id="post-reactions-{{ post.id }}">
+                            <!-- Reactions will be dynamically loaded here -->
                         </div>
                     </div>
                 {% endfor %}
@@ -104,11 +106,12 @@
                 <p>No posts available.</p>
             {% endif %}
         </div>
-    {% endif %}
-    
-    <div class="footer">Nothing to show</div>
-    
-    <script>
+{% endif %}
+<div class="footer">Nothing to show</div>
+</div>
+
+
+<script>
         function toggleFriends(listId, btn) {
             let list = document.getElementById(listId);
             let hiddenItems = list.querySelectorAll('.friend-card.hidden-follower, .friend-card.hidden-following');
@@ -124,68 +127,123 @@
             }
         }
     
-        // Initially hide extra followers/followings beyond 4
         document.addEventListener("DOMContentLoaded", function () {
+            // Hide extra followers/followings beyond 4 initially
             document.querySelectorAll('.friend-card.hidden-follower, .friend-card.hidden-following').forEach((item, index) => {
                 if (index >= 4) item.style.display = "none";
             });
         });
-    
+        
+        // Function to Toggle Reaction Popup
         function toggleReactionPopup(postId) {
             const popup = document.getElementById(`reaction-popup-${postId}`);
             if (!popup) return;
-    
+        
             const isVisible = popup.style.display === "block";
-    
-            // Hide all other popups before showing the new one
             document.querySelectorAll(".reaction-popup").forEach(p => p.style.display = "none");
-    
-            // Toggle visibility
             popup.style.display = isVisible ? "none" : "block";
-    
-            // If showing, add event listener to detect outside click
-            if (!isVisible) {
-                setTimeout(() => {
-                    document.addEventListener("click", outsideClickListener);
-                }, 0);
-            }
-    
-            // Function to detect click outside the popup
-            function outsideClickListener(event) {
-                if (!popup.contains(event.target) && !event.target.classList.contains("bi-emoji-smile")) {
-                    popup.style.display = "none"; // Hide the popup
-                    document.removeEventListener("click", outsideClickListener); // Remove event listener
-                }
-            }
         }
-    
-        const reactionManager = {
-            addReaction: function(postId, reactionId, reactionValue) {
-                fetch(`/add-reaction/`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-CSRFToken": "{{ csrf_token }}"
-                    },
-                    body: JSON.stringify({ post_id: postId, reaction_id: reactionId })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert(`Reaction added: ${reactionValue}`);
-                    } else {
-                        alert("Failed to add reaction.");
-                    }
-                })
-                .catch(error => console.error("Error:", error));
+        
+        // Function to Handle Reactions (Add/Update Reaction)
+        function handleReaction(postId, reactionId) {
+            fetch(`/create_update_post_reactions/`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": getCSRFToken()
+                },
+                body: JSON.stringify({ post_id: postId, reaction_id: reactionId }) // Ensure post_id is sent
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log("Reaction updated successfully!");
+                    loadReactions(postId);
+                } else {
+                    console.error("Failed to update reaction:", data.error || "Unknown error");
+                }
+            })
+            .catch(error => console.error("Error:", error));
+        }
+        
+        
+        // Function to Load Reactions for a Post
+        function loadReactions(postId) {
+            console.log("Fetching reactions for post:", postId);
+            fetch(`/fetch_post_reactions/${postId}/`)
+            .then(response => {
+                if (!response.ok) {
+                    return response.text().then(text => { throw new Error(`Server Error ${response.status}: ${text}`); });
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log("Fetch response:", data);
+                const reactionContainer = document.getElementById(`post-reactions-${postId}`);
+                if (!reactionContainer) return;
+        
+                reactionContainer.innerHTML = ""; // Clear previous reactions
+        
+                if (!data.reactions || data.reactions.length === 0) {
+                    reactionContainer.innerHTML = "<p>No reactions yet.</p>";
+                    return;
+                }
+        
+                data.reactions.forEach(reaction => {
+                    const reactionHTML = `
+                        <span class="reaction-display" onclick="removeReaction('${postId}', '${reaction.id}')">
+                            ${reaction.value}
+                        </span>
+                    `;
+                    reactionContainer.innerHTML += reactionHTML;
+                });
+            })
+            .catch(error => console.error("Error fetching reactions:", error));
+        }
+        
+        
+      // Function to Remove Reaction from a Post
+    function removeReaction(postId) {
+        fetch(`/delete_post_reactions/`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": getCSRFToken()
+            },
+            body: JSON.stringify({ post_id: postId })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                console.log(data.message);  // Log success message
+                loadReactions(postId);  // Refresh reactions display
+            } else {
+                console.error("Failed to delete reaction:", data.error);
+                alert("Error: " + data.error);  // Show error to the user
             }
-        };
-    </script>
+        })
+        .catch(error => {
+            console.error("Network error:", error);
+            alert("Failed to remove reaction. Please try again.");
+        });
+    }
+
+    // Function to Get CSRF Token Safely
+    function getCSRFToken() {
+        const tokenElement = document.querySelector('[name=csrfmiddlewaretoken]');
+        return tokenElement ? tokenElement.value : "";
+    }
+
+</script>
+    
+         
+        
     
 
     <style>
         .post-reaction{
-            align-items: center;
+            justify-content: flex-start;
+            align-items: flex-end;
             display: flex;
             height: 100%;
             width: 100%;
@@ -206,22 +264,21 @@
             justify-content: flex-start;
         }
         .reaction-popup {
+            position: relative;
             display: none;
-            bottom: 30px;
-            left: 0;
-            background: white;                              
+            bottom: 50px;
+            background: white;
             border: 1px solid #ddd;
-            padding: 8px 12px;
-            border-radius: 8px;                               
-            box-shadow: 0px 0px 8px rgba(0,0,0,0.2);
-            z-index: 10
-        
+            padding: 8px 8px;
+            border-radius: 8px;
+            box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.2);
+            z-index: 10;
         }
     
         .reaction-popup span {
             margin: 2px;
             cursor: pointer;
-            font-size: 10px;
+            font-size: 20px;
         }
     
         .reaction-popup span:hover {
@@ -373,11 +430,13 @@
             display: flex;
         }
         .footer{
-            padding: 30px;
+            color: #9858dd;
+            border-top: 2px solid black;
+            padding-top: 30px;
             align-items: end;
             justify-content: center;
             display: flex;
-            font-size:larger;
+            font-size: larger;
             height: 30px;
         }
         .post0title{
@@ -430,7 +489,4 @@
         }
     </style>
 </body>
-
-    
-</style>
 {% endblock %}
