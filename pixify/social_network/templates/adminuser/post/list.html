@@ -19,17 +19,17 @@
                     <!-- <a href="{% url 'manage_post_create' %}" class="text-white text-decoration-none"><button class="btn btn-primary btn-sm">Add Post</button></a> -->
                 </div>
                 <form method="get" action="{% url 'manage_post_list' %}">
-                    <div class="input-group" style="max-width: 300px;"> 
+                    <div class="input-group" style="max-width: 300px;">
                         <input type="text" class="form-control border-secondary" placeholder="Search here"
                                aria-label="Search" name="search" value="{{ search_query }}">
                         <button class="btn btn-outline-secondary">Search</button>
                     </div>
                 </form>
             </div>
-            
+
             <div class="table-responsive">
                 <table class="table table-bordered">
-                    <thead class="table-info text-white"> 
+                    <thead class="table-info text-white">
                         <tr>
                             <th>
                                 <a class="text-decoration-none " href="?sort_by=posted_by&sort_order={% if data.applied_options.sort.order == 'asc' %}desc{% else %}asc{% endif %}">Posted by</a>
@@ -56,7 +56,7 @@
                             <td>
                                 {{ post.description }}
                             </td>
-                            
+
                                 <td>
                                     <button class="btn btn-sm toggle-status" data-post-id="{{ post.id }}">
                                         {% if post.is_active %}
@@ -66,13 +66,13 @@
                                         {% endif %}
                                     </button>
                                 </td>
-                                
-                            
+
+
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
-            
+
                 <div class="container">
                     <div class="d-flex justify-content-between align-items-center">
                         <div class="current mr-auto">

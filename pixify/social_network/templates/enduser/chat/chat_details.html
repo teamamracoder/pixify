@@ -1,63 +1,67 @@
 {% extends "enduser/base.html" %}
 
+{% load static %}
+
+
 {% block title %}Group Chat Details{% endblock %}
 
 {% block content %}
 {% load static %}
 
 <div class="group-chat-container">
-  <div class="header">
-    <!-- Group Name with Edit Button -->
-    <h1 class="group-name">
-      <span id="group-name-text">{{ data.chat.title }}</span>  <!-- Display the chat title dynamically -->
-      <button class="edit-btn" onclick="editChatdetGroupName()">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pen-fill" viewBox="0 0 16 16">
-          <path d="m13.498.795.149-.149a1.207 1.207 0 1 1 1.707 1.708l-.149.148a1.5 1.5 0 0 1-.059 2.059L4.854 14.854a.5.5 0 0 1-.233.131l-4 1a.5.5 0 0 1-.606-.606l1-4a.5.5 0 0 1 .131-.232l9.642-9.642a.5.5 0 0 0-.642.056L6.854 4.854a.5.5 0 1 1-.708-.708L9.44.854A1.5 1.5 0 0 1 11.5.796a1.5 1.5 0 0 1 1.998-.001"/>
-        </svg>
+    <div class="header">
+      <div class="parent-g-name">
+      <div style="margin-right:20px;font-size:16px;" onclick="window.location.href='{% url 'message' chat_id=data.chat.id %}';">
+        <i class="fas fa-arrow-left text-gray-700 hover:text-black text-xl"></i>
+      </div>
+      <!-- Group Name with Edit Button -->
+      <h1 class="group-name ">
+        <span id="group-name-text">{{ data.chat.title }}</span>
+      </h1>
+    </div>
+      <div class="g-name">
+      <button class="edit-btn gp-name" onclick="editGroupNameInline()">
+        <i class="fa-solid fa-pen"></i>
       </button>
-    </h1>
-    <button class="exit-btn" onclick="removeChat()">Exit Group</button>
-  </div>
-
-    <!-- Modal Structure -->
-    <div id="chatdet-editGroupNameModal" class="chatdet-modal">
-        <div class="chatdet-modal-content">
-            <span class="chatdet-close" onclick="closeChatdetModal()">&times;</span>
-            <h2>Edit Group Name</h2>
-            {% csrf_token %}
-            <input type="hidden" id="chat_id" name="chat_id" value="{{ data.chat.id }}">
-            <input type="text" class="chatdet_search" id="chatdet-newGroupNameInput" placeholder="Enter new group name">
-            <button onclick="saveChatdetGroupName()">Save</button>
-        </div>
+      {% csrf_token %}
+      <input type="hidden" id="chat_id" name="chat_id" value="{{ data.chat.id }}">
+      <button class="exit-btn" onclick="removeChat()">
+        <i class="fa-sharp fa-solid fa-right-from-bracket"></i>Exit
+      </button>
+    </div>
     </div>
 
   <!-- Group Details Section -->
   <div class="group-details">
     <!-- Group Photo with Edit Button -->
     <div class="group-photo-container">
-        <img src="{{ data.chat.chat_cover }}" alt="Group Photo" class="group-photo">
+      <div class="gp_dp_image">
+        <img src="{% static data.chat.chat_cover %}" alt=" " class="group-photo">
+      </div>
+      <div class="gp_name_btn">
         <button class="edit-btn" onclick="document.getElementById('group-photo-input').click();">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-image" viewBox="0 0 16 16">
                 <path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0"/>
                 <path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1z"/>
             </svg>
         </button>
+      </div>
         <input type="file" id="group-photo-input" style="display:none;" accept="image/*" onchange="uploadImage(event)">
     </div>
 
     <p class="group-description">
-      {{ data.chat.description }}  <!-- Display group description dynamically -->
-      <button class="edit-btn" onclick="editGroupDescription()">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pen-fill" viewBox="0 0 16 16">
-          <path d="m13.498.795.149-.149a1.207 1.207 0 1 1 1.707 1.708l-.149.148a1.5 1.5 0 0 1-.059 2.059L4.854 14.854a.5.5 0 0 1-.233.131l-4 1a.5.5 0 0 1-.606-.606l1-4a.5.5 0 0 1 .131-.232l9.642-9.642a.5.5 0 0 0-.642.056L6.854 4.854a.5.5 0 1 1-.708-.708L9.44.854A1.5 1.5 0 0 1 11.5.796a1.5 1.5 0 0 1 1.998-.001"/>
-        </svg>
+      {% if data.chat.chat_bio %}
+      {{ data.chat.chat_bio }} <!-- Display group description dynamically -->
+      {% endif %}
+      <button class="edit-btn" onclick="editGroupBio()">
+        <i class="fa-solid fa-pen"></i>
       </button>
     </p>
   </div>
 
   <!-- Member List Section -->
   <div class="member-list">
-    <h3>Members(<span style="color:black;">{{ data.chat.members|length }}</span>)</h3>
+    <h3>Members(<span style="color:#ffff;">{{ data.chat.members|length }}</span>)</h3>
     <ul id="member-list">
       {% for member in data.chat.members %}
         {% if member.id == data.user %}
@@ -82,7 +86,7 @@
           </li>
         {% endif %}
       {% endfor %}
-      
+
       {% for member in data.chat.members %}
         {% if member.id != data.user and  member.id != data.chat.created_by %}
           <li>
@@ -90,23 +94,23 @@
               <img src="{{ member.profile }}" class="profile-pic">
               {{ member.first_name }}
             </div>
-            {% if member.id == data.chat.created_by %}<span class="group-admin-badge">Group admin</span>{% endif %}     
-            
+            {% if member.id == data.chat.created_by %}<span class="group-admin-badge">Group admin</span>{% endif %}
+
             {% if data.user == data.chat.created_by %}
               <div class="member-actions">
-                {% if member.id != data.chat.created_by %}              
-                  <button class="remove-btn" onclick="removeMember('{{ member.id }}')">Remove</button>
+                {% if member.id != data.chat.created_by %}
+                  <button class="remove-btn" onclick="removeMember('{{ member.id }}')"><i class="bi bi-person-dash-fill"></i></button>
                 {% endif %}
               </div>
             {% endif %}
           </li>
         {% endif %}
       {% endfor %}
-      
+
       {% if data.chat.members|length == 0 %}
         <li>No members in this chat.</li>
       {% endif %}
-    </ul>   
+    </ul>
     {% if data.user == data.chat.created_by %}
       <button class="add-member-btn" onclick="openAddMemberModal()"><i class="bi bi-person-fill-add"></i></button>
     {% endif %}
@@ -117,14 +121,14 @@
 <div id="parchat-addMemberModal" class="parchat-modal">
   <div class="parchat-modal-content">
     <span class="parchat-modal-close">&times;</span>
-    <h2>Add New Member</h2>
+    <h6>Add New Member</h6>
     <input type="text" id="parchat-searchin" class="parchat-form-control" placeholder="Search Name" aria-label="Search Name">
-    
+
     <!-- Scrollable grid of profiles -->
     <div id="parchat-profile-list" class="parchat-profile-list">
       <!-- Profiles will be dynamically added here -->
     </div>
-    
+
     <button onclick="addMember()">Add</button>
   </div>
 </div>
@@ -136,15 +140,13 @@ $(document).ready(function () {
     let selectedItems = []; // Array to store selected item IDs
     let chatId = "{{ data.chat.id }}"; // Ensure chatId is safely handled as a string
 
-    console.log('Initial selectedItems:', selectedItems);
-
     // Function to fetch followers and followings based on the search query
     function fetchFollowersAndFollowings(searchQuery = '') {
         $.ajax({
             url: `/chat/${chatId}/members/api?search=${searchQuery}`,
             type: 'GET',
             success: function (res) {
-                var combinedHtml = '';
+                let combinedHtml = '';
                 const fallbackImage = '/static/images/avatar.jpg';
 
                 if (res.members.length === 0) {
@@ -165,7 +167,7 @@ $(document).ready(function () {
 
                 // Update profiles in the DOM
                 $("#parchat-profile-list").html(combinedHtml);
-                
+
                 // Reapply selected class to previously selected items
                 selectedItems.forEach(function (itemId) {
                     $(`#user-${itemId}`).addClass('selected');
@@ -187,7 +189,6 @@ $(document).ready(function () {
             selectedItems.splice(index, 1);
         }
         $(`#user-${userId}`).toggleClass('selected');
-        console.log('Selected items:', selectedItems);
     };
 
     // Function to open the add member modal
@@ -211,9 +212,7 @@ $(document).ready(function () {
 
     // Function to add selected members to the chat
     window.addMember = function () {
-        console.log('Selected items to add:', selectedItems);
         if (selectedItems.length === 0) {
-            console.log('Please select at least one member to add.');
             return;
         }
 
@@ -234,19 +233,15 @@ $(document).ready(function () {
             return response.json(); // Parse the JSON response
         })
         .then(data => {
-            console.log('Success:', data);
             if (data.success) {
                 // Handle successful addition of members
                 location.reload();
                 $('#parchat-addMemberModal').hide(); // Hide the modal
                 // Optionally reload the chat or update the UI to reflect the changes
-            } else {
-                console.log(data.message || 'An error occurred.');
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            console.log('An unexpected error occurred.');
         });
     };
 
@@ -255,48 +250,45 @@ $(document).ready(function () {
 });
 
 
-// Function to show the modal and focus on the input field
-    function editChatdetGroupName() {
-        const modal = document.getElementById('chatdet-editGroupNameModal');
-        modal.style.display = 'block'; // Show the modal
+// Function to transform the group name into an inline input field.
+function editGroupNameInline() {
+    const groupNameSpan = document.getElementById('group-name-text');
+    if (!groupNameSpan) return;
+    const currentValue = groupNameSpan.textContent.trim();
 
-        const groupTitleElement = document.getElementById("group-name-text"); // Fetch the group name text element 
-        const inputElement = document.getElementById('chatdet-newGroupNameInput'); // Fetch the input element 
+    // Create an input field pre-filled with the current group name.
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.id = 'group-name-input';
+    input.className = 'group-name-input';
+    input.value = currentValue;
 
-        inputElement.value = groupTitleElement.textContent; // Pre-fill input with the current group name
-        
-        document.getElementById('chatdet-newGroupNameInput').focus(); // Focus on the input field
+    // Replace the span with the input field.
+    groupNameSpan.parentNode.replaceChild(input, groupNameSpan);
+
+    // Hide the edit button while editing.
+    const editButton = document.querySelector('.g-name .edit-btn');
+    if (editButton) {
+        editButton.style.display = 'none';
     }
 
+    // Focus on the input field.
+    input.focus();
 
-    // Function to close the modal
-    function closeChatdetModal() {
-        const modal = document.getElementById('chatdet-editGroupNameModal');
-        modal.style.display = 'none'; // Hide the modal
-    }
-
-    // Add an event listener for the Enter key press
-    document.getElementById('chatdet-newGroupNameInput').addEventListener('keypress', function(event) {
-        // Check if the key pressed is "Enter"
+    // Listen for Enter key press to trigger save.
+    input.addEventListener('keypress', function(event) {
         if (event.key === 'Enter') {
-            event.preventDefault(); // Prevent default form submit (if inside a form)
-            saveChatdetGroupName();  // Call the function to save the group name
+            event.preventDefault();
+            saveGroupNameInline();
         }
     });
+}
 
-
-
-    // Close the modal if the user clicks outside of it
-    window.onclick = function(event) {
-        const modal = document.getElementById('chatdet-editGroupNameModal');
-        if (event.target === modal) {
-            closeChatdetModal();
-        }
-    }
-
-
-function saveChatdetGroupName() {
-    const title = document.getElementById('chatdet-newGroupNameInput').value;
+// Function to save the new group name via AJAX.
+function saveGroupNameInline() {
+    const input = document.getElementById('group-name-input');
+    if (!input) return;
+    const newName = input.value.trim();
     const chatId = document.getElementById('chat_id').value;
 
     fetch(`/chat/${chatId}/update/`, {
@@ -305,16 +297,31 @@ function saveChatdetGroupName() {
             'Content-Type': 'application/json',
             'X-CSRFToken': getCSRFToken(),
         },
-        body: JSON.stringify({ title: title }),
+        body: JSON.stringify({ title: newName })
     })
     .then(response => response.json())
     .then(data => {
-        if (data.success) {            
-            location.reload();
+        if (data.success) {
+            // Create a new span with the updated group name.
+            const newSpan = document.createElement('span');
+            newSpan.id = 'group-name-text';
+            newSpan.textContent = newName;
+
+            // Replace the input field with the new span.
+            const groupNameHeading = document.querySelector('.group-name');
+            const inputElem = document.getElementById('group-name-input');
+            groupNameHeading.replaceChild(newSpan, inputElem);
+
+            // Show the edit button (with the pen icon).
+            const editButton = groupNameHeading.querySelector('.edit-btn');
+            if (editButton) {
+                editButton.style.display = 'inline-block';
+            }
         } else {
-            console.log('Error updating title: ' + data.error);
+            console.error('Error updating group name:', data.error);
         }
-    });
+    })
+    .catch(error => console.error('Error:', error));
 }
 
 function uploadImage(event) {
@@ -332,10 +339,8 @@ function uploadImage(event) {
     })
     .then(response => response.json())
     .then(data => {
-        if (data.success) {            
+        if (data.success) {
             location.reload();
-        } else {
-            console.log('Error updating photo: ' + data.error);
         }
     });
 }
@@ -348,8 +353,6 @@ function getCSRFToken() {
 function removeMember(memberId) {
     const chatId = "{{ data.chat.id }}"; // Get the chat ID
     const url = `/chat/${chatId}/delete-members`; // Endpoint for deleting members
-    console.log(memberId);
-    console.log(chatId);
 
     fetch(url, {
         method: 'POST',
@@ -366,23 +369,19 @@ function removeMember(memberId) {
         return response.json(); // Parse the JSON response
     })
     .then(data => {
-        console.log('Success:', data);
         if (data.success) {
             // Remove the member's element from the DOM
-            
+
             location.reload();
-        } else {
-            console.log(data.message || 'An error occurred.');
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        console.log('An unexpected error occurred.');
     });
 }
 
-var memberId = {{ data.user.id }}; // Assuming data.user is an object and you need the id attribute
-var createdById = {{ data.chat.created_by.id }}; // Ensure that you are accessing the correct id attribute
+const memberId = {{ data.user.id }}; // Assuming data.user is an object and you need the id attribute
+const createdById = {{ data.chat.created_by.id }}; // Ensure that you are accessing the correct id attribute
 
 function removeChat() {
     let chatId = "{{ data.chat.id }}"; // Ensure chatId is safely handled as a string
@@ -403,19 +402,13 @@ function removeChat() {
             return response.json(); // Parse the JSON response
         })
         .then(data => {
-            console.log('Success:', data);
             if (data.success) {
-                // Handle successful deletion
-                console.log('Chat deleted successfully');
                 // Redirect to another page or update the UI
                window.location.href = '/chat'; // Redirect to the specified URL
-            } else {
-                console.log(data.message || 'An error occurred.');
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            console.log('An unexpected error occurred.');
         });
     } else {
         // Trigger the member delete view for other members
@@ -434,21 +427,82 @@ function removeChat() {
             return response.json(); // Parse the JSON response
         })
         .then(data => {
-            console.log('Success:', data);
             if (data.success) {
-                // Handle successful deletion
-                console.log('You have left the group');
                 // Redirect to another page or update the UI
                 window.location.href = '/chat'; // Redirect to the chats page
-            } else {
-                console.log(data.message || 'An error occurred.');
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            console.log('An unexpected error occurred.');
         });
     }
+}
+
+// Function to transform the group bio into an inline input field.
+function editGroupBio() {
+    const groupDescEl = document.querySelector('.group-description');
+    if (!groupDescEl) return;
+
+    // Get the current bio text (assumes the first child text node holds the bio).
+    const currentBio = groupDescEl.childNodes[0].textContent.trim();
+
+    // Create an input field for editing.
+    const inputField = document.createElement('input');
+    inputField.type = 'text';
+    inputField.className = 'group-description-input';
+    inputField.value = currentBio;
+
+    // Replace the current bio text with the input field.
+    groupDescEl.innerHTML = '';
+    groupDescEl.appendChild(inputField);
+
+    // Hide the edit button while editing.
+    const editButton = document.querySelector('.group-description .edit-btn');
+    if (editButton) {
+        editButton.style.display = 'none';
+    }
+
+    // Focus on the input field.
+    inputField.focus();
+
+    // Listen for Enter key press to trigger save.
+    inputField.addEventListener('keypress', function(event) {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            saveGroupBio(inputField.value);
+        }
+    });
+}
+
+// Function to save the new group bio via AJAX.
+function saveGroupBio(newBio) {
+    const groupDescEl = document.querySelector('.group-description');
+    const chatId = document.getElementById('chat_id').value;
+
+    fetch(`/chat/${chatId}/update/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCSRFToken(),
+        },
+        body: JSON.stringify({ chat_bio: newBio })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Replace the input with the updated bio text.
+            groupDescEl.innerHTML = newBio + ' ';
+            // Re-add the edit button.
+            const editButton = document.createElement('button');
+            editButton.className = 'edit-btn';
+            editButton.onclick = editGroupBio;
+            editButton.innerHTML = '<i class="fa-solid fa-pen"></i>';
+            groupDescEl.appendChild(editButton);
+        } else {
+            console.error('Error updating group bio:', data.error);
+        }
+    })
+    .catch(error => console.error('Error:', error));
 }
 
 
@@ -456,12 +510,11 @@ function removeChat() {
 
 <style>
 
-  .parchat-profile-text{
-    color:black;
-  }
+
 
 
 .parchat-selection-body {
+  margin-bottom: 2px;
     display: flex;
     align-items: center;
     padding: 10px;
@@ -475,7 +528,7 @@ function removeChat() {
 }
 
 .parchat-selection-body.selected {
-    background-color: #d3f9d8; /* Light green background for selected members */
+    background-color: #3a15ec4a; /* Light green background for selected members */
     border: 2px solid #28a745; /* Darker green border for emphasis */
 }
 
@@ -487,64 +540,78 @@ function removeChat() {
 }
 
 .parchat-profile-text {
-    font-size: 16px;
-    color: #333;
+    font-size: 14px;
+    color: #ffffff;
 }
 
 
 
 
 .remove-btn {
-    background-color: red;    
-    color: white;             
-    border: none;             
-    padding: 10px 20px;      
+   font-size: 20px;
+    background-color: transparent;
+    color: white;
+    border: none;
+    padding: 10px 20px;
     cursor: pointer;          /* Change cursor to pointer on hover */
-    font-weight: bold;        
-    border-radius: 5px;       
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
-    transition: background-color 0.3s, box-shadow 0.3s; 
+    font-weight: bold;
+    border-radius: 5px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s, box-shadow 0.3s;
 }
 
 .remove-btn:hover {
-    background-color: darkred; 
-    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15); 
+    background-color: transparent;
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
 }
 
 
 .group-admin-badge {
-    background-color: #3cf281;
-    color: black;              
-    padding: 2px 5px;          
-    border-radius: 3px;        
-    font-weight: bold;         
-    margin-left: 10px;         
+    background-color: #3cf28121;
+    color: #bbc4b9;
+    padding: 2px 5px;
+    border-radius: 3px;
+    margin-left: 10px;
 }
 
 .parchat-selection-body:hover {
-    background-color: #f1f1f1;  
+    background-color: #3a15ec4a;
 }
 
 
   .no-members-message {
     text-align: center;
-    color: fff;          
-    font-weight: bold;   
-    box-shadow: none;    
-    border: none;        
-    padding: 45px;          
-    margin: 0;           
-    font-size: larger;
+    color: #aca7a7;
+    /* font-weight: bold;    */
+    box-shadow: none;
+    border: none;
+    padding: 45px;
+    margin: 0;
+    font-size: 11px;
 }
 
-
-  .chatdet_search{
-    color:black;
-    display: flex;    
-    border: 1px solid #ddd;
+ #group-name-input{
+    font-size: 16px;
+    background-color: #3D3D6B;
+    border: var(--bs-border-width) solid var(--bs-border-color);
+    color: #ffff;
+    display: flex;
     border-radius: 4px;
-    padding: 20px;
-    width: 333px;
+    padding: 8px;
+    width: 301px;
+    margin: 0 auto;
+    margin-bottom: 0px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  }
+  .group-description-input{
+    font-size: 16px;
+    background-color: #3D3D6B;
+    border: var(--bs-border-width) solid var(--bs-border-color);
+    color: #ffff;
+    display: flex;
+    border-radius: 4px;
+    padding: 8px;
+    width: 360px;
     margin: 0 auto;
     margin-bottom: 20px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
@@ -560,15 +627,15 @@ function removeChat() {
     width: 100%;
     height: 100%;
     overflow: auto;
-    background-color: rgb(0,0,0);
     background-color: rgba(0,0,0,0.4);
 }
 
 .chatdet-modal-content {
-    background-color: #6a4c9c;
+    background-color: #1F0545;
+    border-radius: 8px;
     margin: 15% auto;
     padding: 20px;
-    border: 1px solid #888;
+    /* border: 1px solid #888; */
     width: 80%;
     max-width: 400px;
 }
@@ -604,7 +671,7 @@ function removeChat() {
 
 /* Modal content box */
 .parchat-modal-content {
-  background-color: #6a4c9c;
+  background-color: #1F0545;
   margin: 10% auto; /* Centered */
   padding: 15px;
   border-radius: 8px;
@@ -629,11 +696,13 @@ function removeChat() {
 
 /* Search input styling */
 #parchat-searchin {
-  color: black;
+  font-size: 10px;
+  background-color: #3D3D6B;
+  color: #ffff;
   width: 100%;
   padding: 8px;
   margin-bottom: 10px;
-  border: 1px solid #ccc;
+  border: var(--bs-border-width) solid var(--bs-border-color);
   border-radius: 4px;
 }
 
@@ -641,7 +710,7 @@ function removeChat() {
 .parchat-profile-list {
   max-height: 200px;
   overflow-y: auto;
-  border: 1px solid #ccc;
+  border: 1px solid #5c5959;
   padding: 8px;
   border-radius: 4px;
   margin-bottom: 10px;
@@ -649,8 +718,8 @@ function removeChat() {
 
 /* Profile photo styling */
 .parchat-profile-photo {
-  width: 40px;
-  height: 40px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
   object-fit: cover;
   margin-right: 10px;
@@ -658,18 +727,15 @@ function removeChat() {
 
 /* Add button styling */
 button {
-  background-color: #4CAF50; /* Green */
+  background-color: #662bbf6b;
   color: white;
-  padding: 8px 16px;
+  padding: 4px 8px;
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 12px;
 }
 
-button:hover {
-  background-color: #45a049;
-}
 
 /* Fade-in animation */
 @keyframes fadeIn {
@@ -679,8 +745,9 @@ button:hover {
 
 
 
+
   .member-title{
-    color:rgb(1, 8, 13);
+    color:#ffff;
   }
   body {
     font-family: 'Arial', sans-serif;
@@ -691,6 +758,7 @@ button:hover {
 
   /* Group Chat Container */
   .group-chat-container {
+    position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -700,7 +768,8 @@ button:hover {
 
   /* Header Section */
   .header {
-    background-color: #6a4c9c; /* Purple Background */
+    /* border:1px solid #827b7b70; */
+    background-color: #1F0545; /* Purple Background */
     color: white;
     padding: 25px 30px;
     border-radius: 10px;
@@ -713,10 +782,12 @@ button:hover {
   }
 
   .group-name {
-    font-size: 28px;
-    margin: 0;
-    display: inline-flex;
-    align-items: center;
+    font-size:28px;
+    /* white-space: nowrap;  */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 360px; /* Adjust width as needed */
+    display: inline-block;
   }
 
   .edit-btn {
@@ -725,6 +796,11 @@ button:hover {
     margin-left: 10px;
     cursor: pointer;
   }
+  .g-name{
+    display:flex;
+
+  }
+
 
   .edit-icon {
     width: 20px;
@@ -733,10 +809,9 @@ button:hover {
   }
 
   .exit-btn {
-    background-color: #7a5fb1;
+    background-color: transparent;
     color: white;
     border: none;
-    padding: 10px 20px;
     font-size: 16px;
     border-radius: 5px;
     cursor: pointer;
@@ -750,7 +825,8 @@ button:hover {
 
   /* Group Details Section */
   .group-details {
-    background-color:#6a4c9c;
+    background-color:#1F0545;
+    /* border: 1px solid #827b7b70; */
     text-align: center;
     margin-top: 30px;
     padding: 20px;
@@ -761,19 +837,24 @@ button:hover {
   }
 
   .group-photo {
-    width: 120px;
-    height: 120px;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    object-fit: cover;
+    width: 100%;
+    height: 100%;
     border-radius: 50%;
     border: 4px solid #6a4c9c;
-    margin-bottom: 20px;
   }
 
   .group-description {
-    font-size: 16px;
-    color: black;
+    font-size: 20px;
+    color: #ebe1c6;
     margin: 5px 0;
-    display: inline-flex;
+    display: flex;
     align-items: center;
+    justify-content:center;
+    font-weight: lighter
   }
 
   .total-members {
@@ -783,18 +864,21 @@ button:hover {
 
   /* Member List Section */
   .member-list {
-    background-color: white;
+    overflow-y: scroll;
+    height: calc(-348.966px + 100vh);
+    /* border: 1px solid #827b7b70; */
+    background-color: #1F0545;
     margin-top: 20px;
     padding: 20px;
     width: 100%;
     max-width: 650px;
     border-radius: 8px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  }
+}
 
   .member-list h3 {
     font-size: 20px;
-    color: #6a4c9c;
+    color: #ffff;
     margin-bottom: 15px;
   }
 
@@ -808,7 +892,7 @@ button:hover {
     justify-content: space-between;
     align-items: center;
     padding: 10px 0;
-    border-bottom: 1px solid #f0f0f0;
+    /* border-bottom: 1px solid #f0f0f0; */
     color: #333;
   }
 
@@ -823,6 +907,9 @@ button:hover {
 
   /* Add Member Button */
   .add-member-btn {
+    position: absolute;
+    bottom: 33px;
+    right: 46px;
     width: 40px; /* Adjust width */
     height: 40px; /* Adjust height */
     background-color: #6a4c9c;
@@ -837,11 +924,11 @@ button:hover {
     justify-content: center;
     align-items: center;
   }
-  
+
   .add-member-btn i {
     font-size: 20px; /* Adjust the icon size to fit inside the smaller button */
   }
-  
+
   .add-member-btn:hover {
     background-color: #5a3b89;
   }
@@ -941,6 +1028,124 @@ button:hover {
   .modal-close:hover {
     color: #333;
   }
+
+  @media (max-width: 768px){
+    .parchat-modal-content{
+      margin: 46% auto;
+      width: 83%;
+    }
+    .member-list{
+    height: calc(-448.966px + 100vh);
+    }
+    .add-member-btn{
+    bottom: 100px;
+    right: 62px;
+    }
+  }
+  @media (min-width: 768px) and (max-width: 991px){
+    #group-name-input{
+      font-size: 15px;
+    background-color: #3D3D6B;
+    border: var(--bs-border-width) solid var(--bs-border-color);
+    color: #ffff;
+    display: flex;
+    border-radius: 4px;
+    padding: 8px;
+    width: 196px;
+    margin: 0 auto;
+    margin-bottom: 0px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    .group-name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-size: 20px;
+      margin: 0;
+      display: inline-block;
+  }}
+  @media (max-width: 480px){
+    .parchat-modal-content{
+      margin: 80% auto;
+      width: 88%;
+    }
+    .chatdet-modal-content{
+      margin: 36% auto;
+      width: 89%;
+    }
+    .chatdet_search{
+      padding: 7px;
+      width: 295px;
+    }
+    .group-name{
+      font-size: 16px;
+    }
+    .exit-btn{
+      font-size: 12px;
+    }
+    .edit-btn{
+      font-size: 12px;
+    }
+    .group-chat-container{
+      padding: 6px;
+      padding-top:20px ;
+    }
+    .group-photo{
+      margin-left:18%;
+      width: 85px;
+      height: 85px;
+    }
+    .group-details{
+      margin-top: 8px;
+    }
+    .header {
+      padding: 14px 14px;
+    }
+    .group-admin-badge{
+      font-size: 8px;
+    }
+    .member-list h3{
+      font-size: 16px;
+    }
+    .profile-pic{
+      width: 30px;
+      height: 30px;
+    }
+    .member-title{
+      font-size: 12px;
+    }
+    .remove-btn{
+      font-size: 8px;
+    }
+    .add-member-btn {
+      position: absolute;
+      bottom: 33px;
+      right: 28px;
+    }
+    .member-list {
+      height: calc(-408.966px + 100vh);
+    }
+}
+
+.group-photo-container{
+  justify-content: center;
+  align-items: center;
+  display: flex;
+}
+.gp_dp_image{
+  justify-content: center;
+  align-items: center;
+  display: flex;
+  height: 120px;
+  width: 120px;
+  border-radius: 50%;
+
+}
+.parent-g-name{
+  display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 </style>
 
 {% endblock %}

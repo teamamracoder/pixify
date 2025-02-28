@@ -50,7 +50,7 @@ def list_messages_mention_Api(chat, user, search_query, exclude_ids, mentioned_a
             if user_obj:
                 user_ids_to_exclude.append(str(user_obj.id))
 
-    mention = ChatMember.objects.filter(chat_id=chat).exclude(member_id=user)
+    mention = ChatMember.objects.filter(chat_id=chat, is_active=True).exclude(member_id=user)
 
     if user_ids_to_exclude:
         mention = mention.exclude(member_id__in=user_ids_to_exclude)

@@ -22,7 +22,7 @@ class ChatListView(View):
     @role_required(Role.ADMIN.value, Role.END_USER.value)
     def get(self, request):
         user = request.user
-        chats = chat_service.list_chats_by_user(user)              
+        chats = chat_service.list_chats_by_user(user)
         followers, followings = chat_service.get_all_user_follow(user)
         chat_data = []
         if not chats:
@@ -45,10 +45,10 @@ class ChatListView(View):
                 continue
 
             seen_by_all = chat_info['seen_by_all']
-            member = chat_service.count_members(chat.id)
+            member = chat_service.members(chat.id)
             latest_reaction = message_reaction_service.latest_reaction(chat, user)
             if member.count() < 2:
-                continue  
+                continue
             latest_reaction_type = ''
             if latest_reaction:
                 latest_reaction_type = latest_reaction['reaction']
@@ -56,7 +56,7 @@ class ChatListView(View):
                 latest_reaction_message_reacted_by=latest_reaction['reacted_by']
             if not latest_reaction['created_at']:
                 latest_reaction['created_at']=chat.latest_message_timestamp - timedelta(hours=1)
-                
+
             unread_messages = message_service.unread_count(chat, user)
             unread_messages_display = '' if unread_messages == 0 else '10+' if unread_messages > 10 else str(unread_messages)
             if chat.type == ChatType.PERSONAL.value:
@@ -94,7 +94,7 @@ class ChatListView(View):
                 'latest_message_sender_id':chat.latest_message_sender_id,
                 'latest_message_sender_name':sender_name['sender_name']
             })
-            
+
         return render(
             request,
             'enduser/chat/chats.html',
@@ -121,14 +121,14 @@ class ChatListView(View):
             return timestamp.strftime('%d/%m/%Y')
 
 
-class ChatCreateView(View): 
+class ChatCreateView(View):
     @catch_error
     @auth_required
     @role_required(Role.ADMIN.value, Role.END_USER.value)
-    def get(self, request): 
+    def get(self, request):
         user = user_service.get_user(request)
         return render(request, 'enduser/chat/chats.html',{'user':user})
- 
+
     def post(self, request):
         user = request.user
         data = json.loads(request.body.decode('utf-8'))
@@ -144,18 +144,18 @@ class ChatCreateView(View):
                 return JsonResponse({
                     'chat_id': existing_chat.id,
                     'message':SuccessMessage.S000008.value
-                    }                
-                )                
+                    }
+                )
 
-            chat = chat_service.create_chat(user, None, None, ChatType.PERSONAL.value)            
+            chat = chat_service.create_chat(user, None, None, ChatType.PERSONAL.value)
             chat_member_service.add_chat_member(chat.id, user.id, user)
             chat_member_service.add_chat_member(chat.id, member, user)
 
             return JsonResponse({
                 'chat_id': chat.id,
                 'message':SuccessMessage.S000007.value
-                }                
-            )            
+                }
+            )
 
         elif chat_type == ChatType.GROUP.value:
 
@@ -170,7 +170,7 @@ class ChatCreateView(View):
             return JsonResponse({
                 'chat_id': chat.id,
                 'message':SuccessMessage.S000007.value
-                }                
+                }
             )
 
 class ChatDetailsView(View):
@@ -179,7 +179,7 @@ class ChatDetailsView(View):
     @role_required(Role.ADMIN.value, Role.END_USER.value)
     def get(self, request, chat_id):
         user = request.user
-        chat = chat_service.chat_details(chat_id,user.id)    
+        chat = chat_service.chat_details(chat_id,user.id)
         return render(
             request,
             'enduser/chat/chat_details.html',
@@ -194,7 +194,7 @@ class ChatDetailsView(View):
         )
 
 
-class ChatUpdateView(View):   
+class ChatUpdateView(View):
     @catch_error
     @auth_required
     @role_required(Role.ADMIN.value, Role.END_USER.value)
@@ -209,6 +209,8 @@ class ChatUpdateView(View):
                 title = data.get('title', None)  # Safely get the title
                 if title:
                     chat_service.update_chat_title(chat, title, user)
+                if 'chat_bio' in data:
+                    chat_service.update_chat_bio(chat, data['chat_bio'], user)
 
             # Handle file upload separately
             if 'multipart/form-data' in request.content_type:
@@ -223,12 +225,15 @@ class ChatUpdateView(View):
             return JsonResponse({"success": False, "error": str(e)}, status=400)
 
 
-class ChatDeleteView(View):  
+class ChatDeleteView(View):
     @catch_error
     @auth_required
     @role_required(Role.ADMIN.value, Role.END_USER.value)
     def post(self, request, chat_id):
-        chat = chat_service.get_chat_by_id(chat_id)
+        user = request.user
+        members = chat_member_service.get_chat_members(chat_id)
+        for member in members:
+            chat_member_service.delete_chat_member(chat_id, member, user)
         chat_service.delete_chat(chat_id)
         return JsonResponse({"success": True})
 
@@ -236,41 +241,28 @@ class ChatListViewApi(View):
     def get(self, request):
         user = request.user
         chats = chat_service.list_chats_by_user_api(user)
-        chat_data_list = []  
+        chat_data_list = []
         for chat in chats:
             if chat.type == ChatType.PERSONAL.value:
                 member = chat_service.get_recipient_for_personal(chat.id, user)
                 title = f"{member.first_name} {member.last_name}"
                 chat_cover = member.profile_photo_url or '/static/images/avatar.jpg'
-                if chat_cover:
-                    chat_info = {
-                        'id': chat.id,
-                        'title': title,
-                        'chat_cover': chat_cover,
-                    }
-                else:
-                    chat_info = {
-                        'id': chat.id,
-                        'title': title,
-                        'chat_cover': '/static/images/avatar.jpg',
-                    } 
+                chat_info = {
+                    'id': chat.id,
+                    'title': title,
+                    'chat_cover': chat_cover,
+                }
             elif chat.type == ChatType.GROUP.value:
                 title = chat.title or chat_service.get_recipients_for_group(chat.id, user)
                 chat_cover = chat.chat_cover or '/static/images/group_pic.png'
-                if chat_cover:
-                    chat_info = {
-                        'id': chat.id,
-                        'title': title,
-                        'chat_cover': chat_cover,
-                    }
-                else:
-                    chat_info = {
-                        'id': chat.id,
-                        'title': title,
-                        'chat_cover':'/static/images/group_pic.png',
-                    } 
+                chat_info = {
+                    'id': chat.id,
+                    'title': title,
+                    'chat_cover': chat_cover,
+                }
             chat_data_list.append(chat_info)
-        chats = chat_service.list_chats_api(request,chat_data_list)
-        return JsonResponse(chats, safe=False)
-    
-  
+
+            filtered_chats = chat_service.list_chats_api(request,chat_data_list)
+        # Return the (filtered) list of chats.
+        return JsonResponse(filtered_chats, safe=False)
+

@@ -7,18 +7,18 @@
 /* Prevent button hover from changing background */
 .orders .users:hover a:hover, .users a:hover {
     background-color: #a8dfc0 !important;
-    color: #155724 !important; 
+    color: #155724 !important;
 }
 
 .orders:hover a:hover {
-    background-color: #99ccff !important; 
-    color: #004085 !important; 
+    background-color: #99ccff !important;
+    color: #004085 !important;
 }
 
 /* Prevent button hover from changing background */
 .posts:hover a:hover {
-    background-color: #ffeb99 !important; 
-    color: #856404 !important; 
+    background-color: #ffeb99 !important;
+    color: #856404 !important;
 }
 
 </style>
@@ -89,9 +89,9 @@
                         response.linechart_data,
                     ];
                     console.log(post_data_list);
-                    
+
                     barchart_data_for_user(user_data_list,admit_data_list,post_data_list);
-  
+
                 },
                 error: function (error) {
                     console.log("Error:", error);
@@ -159,7 +159,7 @@
                 </a>
             </div>
         </div>
-        
+
 
     </div>
 </div>
@@ -223,7 +223,7 @@
     </div>
 
     <script>
-        
+
 var barChartInstance = null;
 var pieChartInstance = null;
 var lineChartInstance = null;
@@ -251,7 +251,7 @@ function barchart_data_for_user(user_data_list, admin_data_list,post_data_list) 
     }
     if (lineChartInstance !== null) {
         lineChartInstance.destroy();
-    }                 
+    }
 
     // Create Bar Chart
     barChartInstance = new Chart(barCtx, {

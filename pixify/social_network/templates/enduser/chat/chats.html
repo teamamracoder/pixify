@@ -1,15 +1,15 @@
 {% extends "enduser/base.html" %} {% block title %}Pixify-Message{% endblock %}
 {% block content %} {% load static %}
 
-<div class="px-3 py-3 mt-3 users chats-list-box"
-    style="background-color: #1f0447e3;box-shadow: 0 4px 8px rgba(151, 95, 236, 0.5);font-family: serif;border-radius: 7px;position:relative;">
+<div class="maindiv">
+<div class="px-3 py-3 mt-3 users chats-list-box" style="height: calc(-84px + 100vh);">
     <!-- heading -->
     <div class="m-2">
         <div class="p-3 fnd-pic" style="justify-content: space-between; display: flex">
             <h2 class="mobile-hide">Chats</h2>
             <div class="input-wrapper">
-                <button data-toggle="modal" data-target="#example" class="border-0 bg-transparent">
-                    <i class="bi bi-search" style="font-size:30px" ></i>
+                <button type="button" class="border-0 bg-transparent" data-bs-toggle="modal" data-bs-target="#example" onclick="focusSearchBar()">
+                    <i class="bi bi-search" style="font-size: 30px;"></i>
                 </button>
             </div>
             <!-- Modal -->
@@ -23,7 +23,7 @@
                                 aria-label="Example text with button addon" aria-describedby="button-addon1" />
                             </div>
                         </div>
-                        <div id="fill" >       
+                        <div id="fill" >
                         </div>
                     </div>
                 </div>
@@ -37,10 +37,10 @@
                                 success: function (res) {
                                     // Clear previous results
                                     $("#fill").html('');
-                    
+
                                     // Append each chat to the DOM
                                     res.forEach(chat => {
-                                        
+
                                         $("#fill").append(`
                                         <div class="modal-list">
                                         <img src="${chat.chat_cover}" id="profile-photo">
@@ -55,7 +55,7 @@
                     });
                 })
             });
-        </script>        
+        </script>
     </div>
 </div>
 
@@ -63,7 +63,7 @@
     <!-- Peoples -->
     {% for chat in data.chats %}
     <div style="border: 1px solid black; border-radius: 3px" class="m-2">
-        <div class="chat-item">
+       <div class="chat-item" onclick="window.location.href='{% url 'message' chat_id=chat.id %}';">
             <!-- Image Section -->
             <div class="image-div">
                 {% if chat.is_group %}
@@ -72,7 +72,7 @@
                     <img src="{{ chat.chat_cover|default:'/static/images/avatar.jpg' }}" alt="Chat Cover" class="profile-photo">
                 {% endif %}
             </div>
-        
+
             <!-- Middle Section -->
             <div class="content-div">
                 <p class="chat-title">
@@ -84,29 +84,32 @@
                     <span class="chat-message">
                        {% if chat.latest_message_sender_id == user.id and chat.latest_message_time >= chat.latest_reaction_time %}
                         {% if chat.is_group %}
-                        
+
                             {% if chat.seen_by_all %}
                             <i class="bi bi-check2-all"></i>
                             {% else %}
                             <i class="bi bi-check2"></i>
                             {% endif %}
-                            You : 
-                        
+                            <span class="msg_sender">
+                            You:
+                            </span>
                         {% else %}
-                       
+
                             {% if chat.seen_by_all %}
                                 <i class="bi bi-check2-all"></i>
                             {% else %}
                                 <i class="bi bi-check2"></i>
                             {% endif %}
-                     
-                        {% endif %} 
-                        {% else %}   
-                         {% if chat.is_group %} 
-                            {{chat.latest_message_sender_name}}: 
+
+                        {% endif %}
+                        {% else %}
+                         {% if chat.is_group %}
+                         <span class="msg_sender">
+                            {{chat.latest_message_sender_name}}:
+                         </span>
                          {% comment %} {% else %}
                            {{chat.latest_message_sender_name}}: {% endcomment %}
-                        {% endif %} 
+                        {% endif %}
                       {% endif %}
                     </span>
                     <span>
@@ -114,21 +117,21 @@
                         {% if chat.latest_reaction_time == '' or chat.latest_message_time >= chat.latest_reaction_time %}
                             <p class="chat-message chat_title">{{ chat.latest_message }}</p>
                         {% else %}
-                            <p class="chat-message chat_title">{{ chat.latest_reaction_message_reacted_by }} : Reacted {{ chat.latest_reaction|safe }} on "{{ chat.latest_message }}"</p>
+                            <p class="chat-message chat_title"> Reacted {{ chat.latest_reaction|safe }} on "{{ chat.latest_message }}"</p>
                         {% endif %}
                     {% else %}
                         <p class="chat-message chat_title">No messages yet</p>
                     {% endif %}
-                    
+
                     </span>
                 </div>
             </div>
-        
+
             <!-- Right-aligned Section -->
             <div class="badge-div">
                 <span class="badge unread-messages">{{ chat.unread_messages }}</span>
                 <span class="timestamp">
-                        <span class="timestamp">{{ chat.latest_message_timestamp }}</span>                                  
+                        <span class="timestamp">{{ chat.latest_message_timestamp }}</span>
                 </span>
             </div>
         </div>
@@ -152,11 +155,7 @@
 
 
 
-    <div style="position: absolute;bottom: 33px;right: 28px;background-color: #1f0647;height: 40px;width: 40px;border-radius: 50%;display: flex;justify-content: center;align-content: center;align-items: center;">
-        <button data-toggle="modal" data-target="#exampleModalCenter" class="border-0 bg-transparent">
-            <i class="text-light bi bi-plus-circle fs-1"></i>
-        </button>
-    </div>
+
 
     <!-- Modal -->
     <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog"
@@ -165,7 +164,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <div class="input-group mb-3">
-                                                                    
+
                     <div class="parchat-container">
                         <div class="parchat-trend-text">Make A Conversation</div>
                         <div class="parchat-input-wrapper">
@@ -195,6 +194,11 @@
 </div>
 
 <script>
+function focusSearchBar() {
+    setTimeout(function() {
+        document.getElementById('search_chats').focus();
+    }, 500); // Adjust delay if needed
+}
 $(document).ready(function () {
     let selectedItems = []; // Array to store selected item IDs
     let holdTimer;
@@ -209,7 +213,7 @@ function fetchFollowersAndFollowings(searchQuery = '') {
         url: '/chat/followers/api?search=' + searchQuery,
         type: 'GET',
         success: function (res) {
-            var combinedHtml = '';
+            let combinedHtml = '';
             const fallbackImage = '/static/images/avatar.jpg';
 
             if (res.members.length === 0) {
@@ -369,14 +373,14 @@ function fetchFollowersAndFollowings(searchQuery = '') {
     } else {
         console.error("Arrow button element not found!");
     }
-    
+
     // Redirect to chat with the selected user
     window.redirectToChat = function (userId) {
         if (redirectEnabled) {
             checkExistingChat(userId, function (existingChat) {
                 if (existingChat && existingChat.chat_id) {
                     // Redirect to the existing chat
-                    window.location.href = '/chat/' + existingChat.chat_id + '/message/?message=' + encodeURIComponent(existingChat.message || ''); 
+                    window.location.href = '/chat/' + existingChat.chat_id + '/message/?message=' + encodeURIComponent(existingChat.message || '');
                 } else {
                     // Create a new chat if no existing chat is found
                     createChat(1, [userId]);
@@ -426,8 +430,8 @@ function fetchFollowersAndFollowings(searchQuery = '') {
                 members: members,
                 _token: $('meta[name="csrf-token"]').attr('content') // CSRF token for security
             }),
-           success: function (res) { 
-            window.location.href = '/chat/' + res.chat_id + '/message/?message=' + encodeURIComponent(res.message); 
+           success: function (res) {
+            window.location.href = '/chat/' + res.chat_id + '/message/?message=' + encodeURIComponent(res.message);
             },
             error: function (xhr, status, error) {
                 console.log('Error:', xhr, status, error);
@@ -475,30 +479,56 @@ function fetchFollowersAndFollowings(searchQuery = '') {
     });
 
     // Fetch all followers and followings on page load
-    fetchFollowersAndFollowings();    
-});
-
-$(document).ready(function() {
-    var navbarHeight = $('#navbar').outerHeight();
-    $('.chats-list-box').css('height', 'calc(100vh - ' + (navbarHeight * 2) + 'px)');    
+    fetchFollowersAndFollowings();
 });
 
 </script>
 
+</div>
+<div class="plus-modal">
+    <button data-toggle="modal" data-target="#exampleModalCenter" class="border-0 bg-transparent">
+        <i class="text-light bi bi-plus-circle"></i>
+    </button>
+</div>
+</div>
 <style>
+    .chats-list-box{
+        background-color: #1f0447e3;
+        box-shadow: 0 4px 8px rgba(151, 95, 236, 0.5);
+        font-family: serif;
+        border-radius: 7px;
+        overflow-y: scroll;
 
-  .no-members-message {
+    }
+    .plus-modal{
+        font-size: 24px;
+        position: absolute;
+        bottom: 33px;right:
+        28px;background-color:  #6a0b7d;
+        height: 40px;
+        width: 40px;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-content: center;
+        align-items: center;
+    }
+    .maindiv{
+        position: relative;
+    }
+
+    .no-members-message {
     text-align: center;
-    color: fff;          
-    font-weight: bold;   
-    box-shadow: none;    
-    border: none;        
-    padding: 45px;          
-    margin: 0;           
+    color: fff;
+    font-weight: bold;
+    box-shadow: none;
+    border: none;
+    padding: 45px;
+    margin: 0;
     font-size: larger;
 }
 
-    
+
     .modal-list{
         margin:10px;
         border-radius:5px;
@@ -506,7 +536,7 @@ $(document).ready(function() {
         padding:10px;
         display:flex;
         border: 2px solid #7474c1;
-    
+
     }
     #unread_color{
         background-color:#ffffff63 !important;
@@ -515,9 +545,8 @@ $(document).ready(function() {
         width: 40px;
         height: 40px;
         border-radius:50%;
-        margin-right: 10px;
     }
-    
+
     #hyperlink-text{
         text-decoration:none;
         color:white;
@@ -620,7 +649,7 @@ $(document).ready(function() {
 
 
 
-    
+
     /* General Container */
 .chat-item {
     display: flex;
@@ -708,12 +737,12 @@ $(document).ready(function() {
         width: 70px; /* Adjust for smaller screens */
     }
     #hyperlink-text {
-        display: block;         
-        width: 100%;             
-        white-space: nowrap;    
-        overflow: hidden;        
+        display: block;
+        width: 100%;
+        white-space: nowrap;
+        overflow: hidden;
         text-overflow: ellipsis;
-       
+
         font-size: 17px;
     }
 }
@@ -727,12 +756,12 @@ $(document).ready(function() {
             bottom: 100px;
         }
         #hyperlink-text {
-            display: block;         
-            width: 100%;             
-            white-space: nowrap;    
-            overflow: hidden;        
+            display: block;
+            width: 100%;
+            white-space: nowrap;
+            overflow: hidden;
             text-overflow: ellipsis;
-           
+
             font-size: 17px;
         }
     }
@@ -748,12 +777,12 @@ $(document).ready(function() {
             bottom: 85px;
         }
         #hyperlink-text {
-            display: block;         
-            width: 100%;             
-            white-space: nowrap;    
-            overflow: hidden;        
+            display: block;
+            width: 100%;
+            white-space: nowrap;
+            overflow: hidden;
             text-overflow: ellipsis;
-           
+
             font-size: 13px;
         }
     }
@@ -761,7 +790,7 @@ $(document).ready(function() {
     /* Hide the element on screens smaller than 768px (or your desired breakpoint) */
     @media only screen and (max-width: 768px) {
         .mobile-hide {
-            
+
         }
     }
 
@@ -787,12 +816,12 @@ $(document).ready(function() {
             bottom: 55px;
         }
         #hyperlink-text {
-            display: block;         
-            width: 100%;             
-            white-space: nowrap;    
-            overflow: hidden;        
+            display: block;
+            width: 100%;
+            white-space: nowrap;
+            overflow: hidden;
             text-overflow: ellipsis;
-           
+
             font-size: 17px;
         }
     }
@@ -824,12 +853,12 @@ $(document).ready(function() {
 
         }
         #hyperlink-text {
-            display: block;         
-            width: 100%;             
-            white-space: nowrap;    
-            overflow: hidden;        
+            display: block;
+            width: 100%;
+            white-space: nowrap;
+            overflow: hidden;
             text-overflow: ellipsis;
-           
+
             font-size: 17px;
         }
     }
@@ -855,27 +884,20 @@ $(document).ready(function() {
             font-size: 0.9rem;
         }
         #hyperlink-text {
-            display: block;         
-            width: 100%;             
-            white-space: nowrap;    
-            overflow: hidden;        
+            display: block;
+            width: 100%;
+            white-space: nowrap;
+            overflow: hidden;
             text-overflow: ellipsis;
-           
+
             font-size: 12px;
         }
-        
-      
-    }
+        .plus-modal{
+            bottom: 90px;
+        }
 
-/*Message mention */
-    
-    .profile-photo {
-        width: 50px;
-        height: 50px;
-        border-radius: 50%;
-        margin-right: 10px;
-    }
 
+    }
     .user-item {
         display: flex;
         align-items: center;
@@ -906,7 +928,7 @@ $(document).ready(function() {
 
     #searchin {
         height:40px;
-        width: 320px; 
+        width: 320px;
         border-radius:15px;
         background-color : rgb(86 185 200);
         border-top-right-radius:0px;
@@ -973,8 +995,8 @@ $(document).ready(function() {
     }
 
     .parchat-btn,
-    .parchat-btn-outline-secondary {    
-        background:none;    
+    .parchat-btn-outline-secondary {
+        background:none;
         margin-top: 10px;
         padding: 10px;
         font-size: 16px;
@@ -988,7 +1010,7 @@ $(document).ready(function() {
 
     .parchat-btn-outline-secondary {
         background-color: black;
-        color: #333;    
+        color: #333;
     }
 
     .parchat-modal {
@@ -1032,7 +1054,7 @@ $(document).ready(function() {
     #arrow-button {
         display: none; /* Hide by default */
         position: fixed;
-    
+
     }
 
     .parchat-arrow-button {
@@ -1078,8 +1100,11 @@ $(document).ready(function() {
         border-color: #007BFF;
         box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
     }
+    .msg_sender{
+      color: #4f8892;
+      padding-right:5px;
+    }
 
 
 </style>
-</div>
 {% endblock %}
