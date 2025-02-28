@@ -109,25 +109,27 @@ def get_user_posts(user_id):
     return list(user_posts)
 
 
-def get_active_post_reactions(post_id):
-    if not Post.objects.filter(id=post_id).exists():
-        raise ValueError("Post does not exist")  # Will be caught in FetchPostReactions
-
+def get_active_post_reactions(post_id):    
     return PostReaction.objects.filter(post_id=post_id, is_active=True)
 
 
 
 def create_or_update_post_reaction(post_id, user, reaction):
-    post = Post.objects.get(id=post_id)
+    post = Post.objects.get(id=post_id) 
     
-    # Ensure user is saved in the reaction
-    post_reaction, created = PostReaction.objects.update_or_create(
+    post_reaction, created = PostReaction.objects.get_or_create(
         post_id=post,
-        created_by=user, 
-        reacted_by= user, # This should not be None
+        created_by=user,
+        reacted_by=user,
         defaults={'master_list_id': reaction}
     )
-    return post_reaction
+
+    if not created:
+
+        post_reaction.master_list_id = reaction
+        post_reaction.is_active=True
+        post_reaction.updated_by =user
+        post_reaction.save()    
 
 
 

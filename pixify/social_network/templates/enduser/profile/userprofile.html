@@ -171,35 +171,42 @@
         function loadReactions(postId) {
             console.log("Fetching reactions for post:", postId);
             fetch(`/fetch_post_reactions/${postId}/`)
-            .then(response => {
+              .then(response => {
                 if (!response.ok) {
-                    return response.text().then(text => { throw new Error(`Server Error ${response.status}: ${text}`); });
+                  return response.text().then(text => {
+                    throw new Error(`Server Error ${response.status}: ${text}`);
+                  });
                 }
                 return response.json();
-            })
-            .then(data => {
+              })
+              .then(data => {
                 console.log("Fetch response:", data);
                 const reactionContainer = document.getElementById(`post-reactions-${postId}`);
                 if (!reactionContainer) return;
-        
-                reactionContainer.innerHTML = ""; // Clear previous reactions
-        
-                if (!data.reactions || data.reactions.length === 0) {
-                    reactionContainer.innerHTML = "<p>No reactions yet.</p>";
-                    return;
+          
+                // Clear previous reactions
+                reactionContainer.innerHTML = "";
+          
+                // If the response indicates failure or there are no reactions, display a message
+                if (!data.success || !data.reactions || data.reactions.length === 0) {
+                  reactionContainer.innerHTML = "<p>No reactions yet.</p>";
+                  return;
                 }
-        
+          
+                // Build HTML string for reactions
+                let reactionsHTML = "";
                 data.reactions.forEach(reaction => {
-                    const reactionHTML = `
-                        <span class="reaction-display" onclick="removeReaction('${postId}', '${reaction.id}')">
-                            ${reaction.value}
-                        </span>
-                    `;
-                    reactionContainer.innerHTML += reactionHTML;
+                  reactionsHTML += `
+                    <span class="reaction-display" onclick="removeReaction('${postId}', '${reaction.id}')">
+                      ${reaction.value}
+                    </span>
+                  `;
                 });
-            })
-            .catch(error => console.error("Error fetching reactions:", error));
-        }
+                reactionContainer.innerHTML = reactionsHTML;
+              })
+              .catch(error => console.error("Error fetching reactions:", error));
+          }
+          
         
         
       // Function to Remove Reaction from a Post

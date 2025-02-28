@@ -34,8 +34,9 @@ class EnduserprofileListView(View):
 
         return render(request, 'enduser/profile/userprofile.html', {'user_details': user_details})
 
+
 class FetchPostReactions(View):
-    """ Fetch all reactions for a given post """
+    """Fetch all reactions for a given post."""
     @catch_error
     @auth_required
     @role_required(Role.ADMIN.value, Role.END_USER.value)
@@ -43,16 +44,12 @@ class FetchPostReactions(View):
         try:
             print(f"Fetching reactions for post_id: {post_id}")  # Debugging
             reactions = post_service.get_active_post_reactions(post_id)
-            if not reactions:
-                return JsonResponse({'success': False, 'error': 'No reactions found'}, status=400)
-
+            # Build the reaction list; if no reactions exist, reaction_list will be empty.
             reaction_list = [
-                {"id": reaction.master_list_id.id, "value": reaction.master_list_id.value }  # Ensure proper attribute access
+                {"id": reaction.master_list_id.id, "value": reaction.master_list_id.value}
                 for reaction in reactions
             ]
-            print(reaction_list)
-
-            
+            print("Reactions:", reaction_list)
             return JsonResponse({'success': True, 'reactions': reaction_list}, status=200)
         except Exception as e:
             return JsonResponse({'success': False, 'error': str(e)}, status=400)
@@ -69,6 +66,8 @@ class CreateUpdatePostReactions(View):
             data = json.loads(request.body)
             post_id = data.get('post_id')
             reaction_id = data.get('reaction_id')
+
+            print("gnrnyn",data)
             
             # Ensure user is authenticated
             if not request.user or not request.user.is_authenticated:
