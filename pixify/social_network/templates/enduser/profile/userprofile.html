@@ -5,7 +5,7 @@
     <div class="profile-container">
         <div class="profile-card">
             <div class="profile-header">
-                <img src="{{ user_details.profile_photo }}" alt="Profile Picture" class="profile-img">
+                <img src="{% static user_details.profile_photo %}" alt="Profile Picture" class="profile-img">
                 <p class="user_title">{{ user_details.user_name }}</p>
             </div>
             <div class="profile-info">
@@ -26,7 +26,7 @@
             <div class="friend-list" id="followers-list">
                 {% for friend in user_details.followers %}
                 <div class="friend-card hidden-follower" onclick="window.location.href='{% url 'profile' friend.id %}'">
-                    <img src="{{ friend.profile_pic|default:'/static/images/avatar.jpg' }}" alt="Follower" class="friend-img">
+                    <img src="{% static friend.profile_pic|default:'/static/images/avatar.jpg' %}" alt="Follower" class="friend-img">
                     <div>{{ friend.first_name }}</div>
                 </div>
                 {% endfor %}
@@ -46,7 +46,7 @@
             <div class="friend-list" id="following-list">
                 {% for friend in user_details.followings %}
                 <div class="friend-card hidden-following" onclick="window.location.href='{% url 'profile' friend.id %}'">
-                    <img src="{{ friend.profile_pic|default:'/static/images/avatar.jpg' }}" alt="Following" class="friend-img">
+                    <img src="{% static friend.profile_pic|default:'/static/images/avatar.jpg' %}" alt="Following" class="friend-img">
                     <div>{{ friend.first_name }}</div>
                 </div>
                 {% endfor %}
@@ -63,7 +63,7 @@
                 {% for post in user_details.posts %}
                     <div class="user-post" data-post-id="{{ post.id }}">
                         <div class="post-title-wrapper">
-                            <img src="{{ user_details.profile_photo|default:'/static/images/avatar.jpg' }}" class="photo-of-post">
+                            <img src="{% static user_details.profile_photo|default:'/static/images/avatar.jpg' %}" class="photo-of-post">
                             <div class="post-title">{{ user_details.user_name }}</div>
                         </div>
 
