@@ -19,8 +19,8 @@
         <!-- Followers Section -->
         <div class="friends-section">
             <div class="heading-part">
-                <h3>Followers</h3>
-                <div class="see-all-btn" onclick="toggleFriends('followers-list', this)">See more</div>
+                <h4>Followers</h4>
+                <div class="see-all-btn" onclick="toggleFriends('followers-list', this)">show</div>
             </div>
             {% if user_details.followers %}
             <div class="friend-list" id="followers-list">
@@ -39,8 +39,8 @@
         <!-- Following Section -->
         <div class="friends-section">
             <div class="heading-part">
-                <h3>Following</h3>
-                <div class="see-all-btn" onclick="toggleFriends('following-list', this)">See more</div>
+                <h4>Following</h4>
+                <div class="see-all-btn" onclick="toggleFriends('following-list', this)">show</div>
             </div>
             {% if user_details.followings %}
             <div class="friend-list" id="following-list">
@@ -137,17 +137,17 @@
     function toggleFriends(listId, btn) {
         let list = document.getElementById(listId);
         let hiddenItems = list.querySelectorAll('.friend-card.hidden-follower, .friend-card.hidden-following');
-    
-        if (btn.innerText === "See more") {
-            hiddenItems.forEach(item => (item.style.display = "flex")); 
-            btn.innerText = "See Less";
+        
+        if (list.style.display === "none" || list.style.display === "") {
+            list.style.display = "flex"; // Show full friend list
+            list.style.overflowY = "scroll"; // Corrected property
+            btn.innerText = "~hide";
         } else {
-            hiddenItems.forEach((item, index) => {
-                if (index >= 4) item.style.display = "none"; 
-            });
-            btn.innerText = "See more";
+            list.style.display = "none"; // Hide full friend list
+            btn.innerText = "show";
         }
     }
+    
     
     // Function to Toggle Reaction Popup
     function toggleReactionPopup(postId) {
@@ -355,7 +355,6 @@
             height: 100%;
             overflow-y: auto;
             max-height: 90vh;
-            width: 75%;
             margin: auto;
             padding: 20px;
             background-color: #25004d;
@@ -405,13 +404,12 @@
             margin-top: 20px;
         }
 
-        .friend-list {
+        .friend-list {            
             overflow-y: scroll;
-            display: flex;
+            display: none;  /* Hide by default */
             flex-direction: column;
             align-items: center;
-            max-height: 164px;
-            transition: max-height 0.3sease-in-out;
+            max-height: 305px;
         }
 
         .friend-list.expanded {

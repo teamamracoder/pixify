@@ -203,19 +203,30 @@ def get_recipients_for_group(chat_id,user):
         return " , ".join(first_names)
 
 def get_all_user_follow(user):
-    follower_list = Follower.objects.filter(following=user, is_active=True).select_related('created_by')
-    following_list = Follower.objects.filter(user_id=user, is_active=True).select_related('following')
-    followers_data = [
-            {"id": user.id, "first_name": f"{user.first_name}{user.last_name}", "profile_pic": user.profile_photo_url} 
-            for user in User.objects.filter(id__in=[f.id for f in follower_list])
-        ]
+    follower_list = Follower.objects.filter(following=user, is_active=True).exclude(created_by=user).select_related('created_by')
+    following_list = Follower.objects.filter(user_id=user, is_active=True).exclude(following=user).select_related('following')
 
-        # Using list comprehension to retrieve following details
+    # Correcting ID extraction from Follower objects
+    followers_data = [
+        {
+            "id": f.created_by.id,  # Extracting correct user ID
+            "first_name": f"{f.created_by.first_name} {f.created_by.last_name}",
+            "profile_pic": f.created_by.profile_photo_url
+        }
+        for f in follower_list
+    ]
+
     followings_data = [
-        {"id": user.id, "first_name": f"{user.first_name}{user.last_name}", "profile_pic": user.profile_photo_url} 
-        for user in User.objects.filter(id__in=[f.id for f in following_list])
-        ]
+        {
+            "id": f.following.id,  # Extracting correct user ID
+            "first_name": f"{f.following.first_name} {f.following.last_name}",
+            "profile_pic": f.following.profile_photo_url
+        }
+        for f in following_list
+    ]
+
     return followers_data, followings_data
+
 
 def list_chats_api(request,chat_data_list):
     search_query =request.GET.get('search', '')
