@@ -407,9 +407,11 @@ def list_top_chats_api(request, user):
             member = get_recipient_for_personal(c.id, user)
             title = f"{member.first_name} {member.last_name}"
             chat_cover = member.profile_photo_url or '/images/avatar.jpg'
+            bio = member.bio
         elif c.type == ChatType.GROUP.value:
             title = c.title or get_recipients_for_group(c.id, user)
             chat_cover = c.chat_cover or '/images/group_pic.png'
+            bio = c.chat_bio
         else:
             title = "Unknown Chat"
             chat_cover = '/images/default_chat.jpg'
@@ -419,6 +421,7 @@ def list_top_chats_api(request, user):
             'title': title,
             'chat_cover': chat_cover,
             'message_count': c.message_count,
+            'bio':bio
         }
         chat_data_list.append(chat_info)
 

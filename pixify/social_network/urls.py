@@ -192,7 +192,6 @@ urlpatterns = [
 
     #short
     path('short/', views.ShortListView.as_view(),name='short'),
-    path('short/<int:post_id>/', views.ShortDetailView.as_view(), name='short_detail'),
     path('short/<int:post_id>/reaction/create', views.ShortReactionCreateView.as_view(),name='short_reaction_create'),
     path('short/reaction/<int:post_id>/delete', views.ShortReactionDeleteView.as_view(),name='short_reaction_delete'),
     path('short/<int:post_id>/comments/', views.ShortCommentListView.as_view(),name='short_comments'),
@@ -207,9 +206,11 @@ urlpatterns = [
     path('save_fcm_token/', views.save_fcm_token, name="save_fcm_token"),
     path('send_notification/',views.send_notification, name="send_notification"),
 
-    # Short Share List Api
-    path('short/share/api', views.ShortShareListViewApi.as_view(), name='short_share_api'),
-    path('short/send', views.ShortSendView.as_view(), name='short_send'),
+    # post Share List Api
+    path('post/share/api', views.PostShareListViewApi.as_view(), name='short_share_api'),
+    path('post/send', views.PostSendView.as_view(), name='short_send'),
+    
+    path('post/<int:post_id>/', views.PostDetailView.as_view(), name='short_detail'),
     
     
     path('fetch_post_reactions/<int:post_id>/', views.FetchPostReactions.as_view(), name='fetch_post_reactions'),

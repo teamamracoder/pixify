@@ -356,7 +356,7 @@
                         </div>
 
                         <span data-toggle="modal" class="load-comments"><i class="fa-regular fa-comment"></i></span>
-                        <i class="fa-solid fa-share-nodes" data-bs-toggle="modal" data-bs-target="#shareModal"></i>
+                        <i class="fa-solid fa-share-nodes share-post-btn" data-post-id="{{ post.id }}" data-bs-toggle="modal" data-bs-target="#shareModal"></i>
 
                         {% if post.posted_by_id == userid %}
                             <span data-bs-toggle="modal" class="editmodal"><i class="fa-solid fa-pen post-pe-icon"></i></span>
@@ -548,123 +548,281 @@
 
 
 
-
-    <!--Share Modal-->
-    <div class="modal fade" id="shareModal" tabindex="-1" aria-labelledby="shareModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog">
-            <div class="modal-content bg-purple text-light">
-                <div class="modal-header">
-                  <h5 class="modal-title mx-auto" id="shareModalLabel">Share Post</h5>
-                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="margin-left: 0px;"></button>
-                </div>
-
-
-                <div class="share-container">
-                    <h5><img src="https://cdn-icons-png.flaticon.com/128/6997/6997662.png" alt="Profile Picture"
-                            class="profile-pic">Rima Das </h5>
-                    <input type="text" class="form-control mb-3" id="shareModalInput" placeholder="Type a name">
-
-                    <div class="profile-item">
-                        <img src="https://cdn-icons-png.flaticon.com/128/4140/4140047.png" alt="Profile Picture"
-                            class="profile-pic">
-                        <div>
-                            <strong>Priya Mitra</strong><br>
-                            <small>About user self</small>
-                        </div>
-                        <div class="custom-checkbox">
-                            <input type="checkbox" id="user1" onclick="toggleShareButton()">
-                        </div>
-                    </div>
-                    <div class="profile-item">
-                        <img src="https://cdn-icons-png.flaticon.com/128/3135/3135715.png" alt="Profile Picture"
-                            class="profile-pic">
-                        <div>
-                            <strong>Subhasis Barman</strong><br>
-                            <small>About user self</small>
-                        </div>
-                        <div class="custom-checkbox">
-                            <input type="checkbox" id="user2" onclick="toggleShareButton()">
-                        </div>
-                    </div>
-                    <div class="profile-item">
-                        <img src="https://cdn-icons-png.flaticon.com/128/3135/3135715.png" alt="Profile Picture"
-                            class="profile-pic">
-                        <div>
-                            <strong>Sribash Sarkar</strong><br>
-                            <small>About user self</small>
-                        </div>
-                        <div class="custom-checkbox">
-                            <input type="checkbox" id="user3" onclick="toggleShareButton()">
-                        </div>
-                    </div>
-
-                    <div class="profile-item mb-4">
-                        <img src="https://cdn-icons-png.flaticon.com/128/3135/3135715.png" alt="Profile Picture"
-                            class="profile-pic">
-                        <div>
-                            <strong>Badhan Sarkar</strong><br>
-                            <small>About user self</small>
-                        </div>
-                        <div class="custom-checkbox">
-                            <input type="checkbox" id="user4" onclick="toggleShareButton()">
-                        </div>
-                    </div>
-
-
-                    <div class="share-button-container" id="shareButtonContainer">
-                            <button class="btn btn-primary">
-                                <i class="bi bi-send-fill"></i>
-                            </button>
-                    </div>
-                    <div class="d-flex justify-content-center align-item-center">
-                            <div class="icon-item px-2">
-                                <i class="bi bi-chat-dots-fill text-light" ></i>
-                            </div>
-
-                            <div class="icon-item px-2">
-                                <i class="bi bi-whatsapp text-light"></i>
-                            </div>
-
-                            <div class="icon-item px-2">
-                                <i class="bi bi-person-lines-fill text-light"></i>
-                            </div>
-
-                            <div class="icon-item px-2">
-                                <i class="bi bi-link-45deg text-light"></i>
-                            </div>
-
-                            <div class="icon-item px-2">
-                                <i class="bi bi-people-fill text-light"></i>
-                            </div>
-
-                            <div class="icon-item px-2">
-                                <i class="bi bi-file-earmark-text-fill text-light"></i>
-                            </div>
-                    </div>
-                </div>
-            </div>
+<!-- Share Modal -->
+<div class="modal fade" id="shareModal" tabindex="-1" aria-labelledby="shareModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content bg-purple text-light">
+        <div class="modal-header">
+          <h5 class="modal-title mx-auto" id="shareModalLabel">Share Post</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-    </div>
-
-
-    <div class="modal fade" id="shareModal" tabindex="-1" aria-labelledby="shareModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content bg-purple text-light">
-                <div class="modal-header border-0">
-                    <h5 class="modal-title" id="shareModalLabel" style="padding: 20px;">Share</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body d-flex  black-box">
-                    <a href="#" class="icon whatsapp"><i class="fab fa-whatsapp"></i></a>
-                    <a href="#" class="icon facebook"><i class="fab fa-facebook-f"></i></a>
-                    <a href="#" class="icon twitter"><i class="fab fa-twitter"></i></a>
-                    <a href="#" class="icon linkedin"><i class="fab fa-linkedin-in"></i></a>
-                    <a href="#" class="icon instagram"><i class="fab fa-instagram"></i></a>
-                    <a href="#" class="icon link"><i class="fas fa-link"></i></a>
-                </div>
-            </div>
+        <div class="modal-body">
+          <!-- Hidden input for post id -->
+          <input type="hidden" id="sharePostId" value="">
+          <!-- Search input -->
+          <input type="text" class="form-control mb-3" id="shareModalInput" placeholder="Type a name">
+          <!-- Container to load profile items dynamically -->
+          <div id="profileContainer">
+            <!-- Dynamic profiles will be injected here -->
+          </div>
+          <!-- Social icons for sharing -->
+          <div class="share-social-icons d-flex justify-content-around my-3">
+            <div class="icon whatsapp"><i class="fab fa-whatsapp"></i></div>
+            <div class="icon facebook"><i class="fab fa-facebook-f"></i></div>
+            <div class="icon twitter"><i class="fab fa-twitter"></i></div>
+            <div class="icon linkedin"><i class="fab fa-linkedin-in"></i></div>
+            <div class="icon instagram"><i class="fab fa-instagram"></i></div>
+            <div class="icon link"><i class="fas fa-link"></i></div>
+          </div>
+          <!-- Share button container: hidden until at least one profile is selected -->
+          <div class="share-button-container" id="shareButtonContainer" style="display: none;">
+            <button class="btn btn-primary" id="sendShareButton">
+              <i class="bi bi-send-fill"></i> Share
+            </button>
+          </div>
         </div>
+      </div>
     </div>
+  </div>
+  
+
+<script>
+
+    $(document).on("click", ".share-post-btn", function () {
+        // Read the post id from the data attribute
+        let postId = $(this).data("post-id");
+        // Set the hidden input value so it's available for later logic
+        $("#sharePostId").val(postId);
+        // Optionally, update your share modal content based on this post id
+        updateShareResults(postId);
+        // Show the modal (if not already triggered by data attributes)
+        $("#shareModal").modal("show");
+      });
+      
+
+const senderId = "{{ user.id }}"; // Rendered from your template
+const staticUrl = "{% static '' %}"; // This usually returns "/static/"
+
+function cleanMediaPath(media) {
+  return media.startsWith('/') ? media.slice(1) : media;
+}
+
+// Global variable to store the current post id
+let currentPostId = null;
+
+// Function to update the share results (chats and profiles) via AJAX
+function updateShareResults(postId) {
+  const $container = $("#profileContainer");
+  // Fade out container to indicate loading
+  $container.fadeTo(100, 0.5);
+
+  // Get current search query
+  const searchQuery = $("#shareModalInput").val();
+
+  // AJAX call to fetch chats and profiles
+  $.ajax({
+    url: '/post/share/api',
+    type: 'GET',
+    data: { post_id: postId, search: searchQuery },
+    dataType: 'json',
+    success: function (data) {
+      console.log("AJAX data:", data);
+      let html = '';
+      const fallbackImage = "/images/avatar.jpg";
+
+      // Render Chats Section
+      if (data.chats && data.chats.length > 0) {
+        html += `<div class="section chats-section"><h6>Chats</h6>`;
+        data.chats.forEach(chat => {
+          const chatImage = chat.chat_cover ? chat.chat_cover : fallbackImage;
+          const chatBio = chat.bio ? chat.bio : "No bio available";
+          html += `
+            <div class="profile-item">
+              <img src="${staticUrl}${cleanMediaPath(chatImage)}" alt="Chat Cover" class="profile-pic">
+              <div>
+                <strong>${chat.title}</strong><br>
+                <small>${chatBio}</small>
+              </div>
+              <div class="custom-checkbox">
+                <input type="checkbox" class="share-checkbox" id="chat-${chat.id}" onclick="toggleShareButton()">
+              </div>
+            </div>
+          `;
+        });
+        html += `</div>`;
+      }
+
+      // Render Follower & Following Section
+      if (data.follow && data.follow.members && data.follow.members.length > 0) {
+        html += `<div class="section members-section"><h6>follower &amp; following</h6>`;
+        data.follow.members.forEach(member => {
+          const profilePhoto = member.user_id__profile_photo_url ? member.user_id__profile_photo_url : fallbackImage;
+          const bioText = member.user_id__bio ? member.user_id__bio : "No bio available";
+          html += `
+            <div class="profile-item">
+              <img src="${staticUrl}${cleanMediaPath(profilePhoto)}" alt="Profile Picture" class="profile-pic">
+              <div>
+                <strong>${member.user_id__first_name} ${member.user_id__last_name}</strong><br>
+                <small>${bioText}</small>
+              </div>
+              <div class="custom-checkbox">
+                <input type="checkbox" class="share-checkbox" id="profile-${member.user_id}" onclick="toggleShareButton()">
+              </div>
+            </div>
+          `;
+        });
+        html += `</div>`;
+      }
+
+      // If nothing is available, show a message
+      if (!html.trim()) {
+        html = "<p>No chats or profiles found.</p>";
+      }
+
+      // Update the container with new content and restore opacity
+      $container.html(html).fadeTo(100, 1);
+      // Reset share button state based on checkboxes
+      toggleShareButton();
+    },
+    error: function () {
+      $container.html("<p>Error loading profiles.</p>").fadeTo(100, 1);
+    }
+  });
+}
+
+// Utility function to toggle the share button based on checkbox selections
+function toggleShareButton() {
+  const checkboxes = document.querySelectorAll('.share-checkbox');
+  const isAnyChecked = Array.from(checkboxes).some(checkbox => checkbox.checked);
+  document.getElementById("shareButtonContainer").style.display = isAnyChecked ? "block" : "none";
+}
+
+// Function to send share data to a specific chat via WebSocket
+const sendShareToChat = (chatId, postId, senderId) => {
+  const ws = new WebSocket(`ws://${window.location.host}/ws/chat/`);
+
+  ws.onopen = () => {
+    // Join the chat group first
+    ws.send(JSON.stringify({
+      action: 'join',
+      chat_id: chatId,
+    }));
+
+    // After a brief delay, send the create request
+    setTimeout(() => {
+      ws.send(JSON.stringify({
+        chat_id: chatId,
+        sender_id: senderId,
+        post_id: postId,
+        action: 'create',
+      }));
+      // Optionally close the connection after sending
+      ws.close();
+    }, 200);
+  };
+
+  ws.onerror = (error) => {
+    console.error(`WebSocket error for chatId ${chatId}:`, error);
+  };
+
+  ws.onclose = (e) => {
+    console.log(`WebSocket connection for chatId ${chatId} closed:`, e);
+  };
+};
+
+$(document).ready(function () {
+  // Optionally initialize currentPostId from the hidden input if it has a value
+  currentPostId = $("#sharePostId").val();
+  updateShareResults(currentPostId);
+
+  // When the search input changes, update the profile list using the current post id
+  $("#shareModalInput").on("input", function () {
+    let postIdForSearch = $("#sharePostId").val() || currentPostId;
+    updateShareResults(postIdForSearch);
+  });
+
+  // When a share button on a post is clicked,
+  // Ensure your share buttons have the class 'share-post-btn' and a data attribute 'data-post-id'
+  $(document).on("click", ".share-post-btn", function () {
+    let buttonPostId = $(this).data("post-id");
+    console.log("Share button clicked, post id from data attribute:", buttonPostId);
+    currentPostId = buttonPostId;
+    $("#sharePostId").val(currentPostId);
+    updateShareResults(currentPostId);
+    $("#shareModal").modal("show");
+  });
+
+  // When the send share button is clicked, use the global currentPostId
+  $("#sendShareButton").on("click", function () {
+    // Use currentPostId or the value from the hidden input as fallback
+    const postIdForSend = currentPostId || $("#sharePostId").val();
+    console.log("postID for sending:", postIdForSend);
+    
+    let selectedMembers = [];
+    let selectedChats = [];
+
+    // Iterate over each checked share-checkbox
+    $(".share-checkbox:checked").each(function () {
+      let idStr = $(this).attr("id");
+      if (idStr.indexOf("profile-") === 0) {
+        selectedMembers.push(idStr.replace("profile-", ""));
+      } else if (idStr.indexOf("chat-") === 0) {
+        selectedChats.push(idStr.replace("chat-", ""));
+      }
+    });
+
+    if (selectedMembers.length === 0 && selectedChats.length === 0) {
+      alert("Please select at least one profile or chat.");
+      return;
+    }
+
+    // Send both selected chats and members via AJAX using the determined post id
+    $.ajax({
+      url: '/post/send',
+      type: 'POST',
+      headers: { 'X-CSRFToken': getCookie('csrftoken') },
+      contentType: 'application/json',
+      data: JSON.stringify({
+        post_id: postIdForSend,
+        chats: selectedChats,
+        members: selectedMembers
+      }),
+      dataType: 'json',
+      success: function (response) {
+        if (response.chat && response.chat.length > 0) {
+          response.chat.forEach((chatId) => {           
+            console.log("Sending to chat with postID:", postIdForSend);
+            sendShareToChat(chatId, postIdForSend, senderId);
+          });
+        }
+        alert("Post shared successfully!");
+        $("#shareModal").modal("hide");
+      },
+      error: function () {
+        alert("Error sharing post.");
+      }
+    });
+  });
+
+  // Utility function to get a cookie by name (used for CSRF token)
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== "") {
+      const cookies = document.cookie.split(";");
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + "=")) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+});
+
+
+</script>
 
 
 

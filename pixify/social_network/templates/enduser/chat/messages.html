@@ -172,15 +172,20 @@
                 </div>
               </div>                     
                                                       
-                <!-- Short  Section -->                
+                <!-- Post  Section -->                
                 {% if message.post_id %}
-                <div class="message-post" onclick="window.location.href='{% url 'short' %}{{ message.post_id.id }}'">
-                  <video id="message-short" class="message-short-video" muted>
-                    <source src="{% static message.post_id.media_url.0 %}" type="video/mp4">
-                  </video>
+                <div class="message-post" onclick="window.location.href='{% url 'short_detail' message.post_id.id %}'">
+                  {% if message.post_id.media_url.0|lower|slice:"-4:" == ".mp4" or message.post_id.media_url.0|lower|slice:"-5:" == ".webm" %}
+                    <video id="message-short" class="message-short-video" muted>
+                      <source src="{% static message.post_id.media_url.0 %}" type="video/mp4">
+                      Your browser does not support the video tag.
+                    </video>
+                  {% else %}
+                    <img src="{% static message.post_id.media_url.0 %}" alt="Post Image" class="message-short-img">
+                  {% endif %}
                   <div class="message-short-info">
                     <div class="message-short-user-info">
-                      <img src="{% static  message.post_id.posted_by.profile_photo_url|default:'/images/avatar.jpg' %}"
+                      <img src="{% static message.post_id.posted_by.profile_photo_url|default:'/images/avatar.jpg' %}"
                            alt="{{ message.post_id.posted_by.first_name }}'s Profile Picture"
                            class="message-short-profile-pic">
                       <div class="message-short-username">
@@ -3800,6 +3805,13 @@ document.querySelectorAll('.media-stop').forEach(video => {
     width: 100%;
 }
 
+.message-short-img{
+  height: 300px !important;
+  width: 250px !important;
+  width: fit-content;
+  display: block;
+  object-fit: cover
+}
     </style>
     {% endblock %}
 add a action when i type "@" in the form
