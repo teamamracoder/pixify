@@ -116,8 +116,8 @@
 
 <!-- Comment Modal -->
 <div class="modal fade" id="commentModal" tabindex="-1" aria-labelledby="commentModalLabel" aria-hidden="true">
-    <div class="modal-dialog"style="height: 70vh; width:70%;">
-        <div class="modal-content" style="height: 100%;">
+    <div class="modal-dialog"style="height: 70vh; width:45%;">
+        <div class="modal-content" style="height: 100%; width: 96%;">
             <div class="modal-header" id="modal-comments-header">
                 <h5 class="modal-title" id="commentModalLabel">Comments</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -696,6 +696,29 @@ $(document).ready(function () {
             .profile-container{
                 width:100%;  
             }
+        }
+
+
+
+        @media (max-width: 768px) {
+            .modal-dialog{
+                margin-top: 10% !important;
+                height: 70vh !important;
+                width: 100% !important;
+            }
+            .modal-content{
+                height: 100% !important;
+                width: 100% !important;
+            }
+            
+        }
+        @media (max-width: 480px) {
+            .modal-dialog{
+                margin-top: 30% !important;
+                height: 70vh !important;
+                width: 100% !important;
+            }
+           
         }
     </style>
 </body>
