@@ -192,7 +192,6 @@ urlpatterns = [
 
     #short
     path('short/', views.ShortListView.as_view(),name='short'),
-    path('short/<int:post_id>/', views.ShortDetailView.as_view(), name='short_detail'),
     path('short/<int:post_id>/reaction/create', views.ShortReactionCreateView.as_view(),name='short_reaction_create'),
     path('short/reaction/<int:post_id>/delete', views.ShortReactionDeleteView.as_view(),name='short_reaction_delete'),
     path('short/<int:post_id>/comments/', views.ShortCommentListView.as_view(),name='short_comments'),
@@ -210,6 +209,8 @@ urlpatterns = [
     # post Share List Api
     path('post/share/api', views.PostShareListViewApi.as_view(), name='short_share_api'),
     path('post/send', views.PostSendView.as_view(), name='short_send'),
+    
+    path('post/<int:post_id>/', views.PostDetailView.as_view(), name='short_detail'),
     
     
     path('fetch_post_reactions/<int:post_id>/', views.FetchPostReactions.as_view(), name='fetch_post_reactions'),
