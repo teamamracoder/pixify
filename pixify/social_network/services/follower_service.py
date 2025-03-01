@@ -103,11 +103,11 @@ def list_follow_api(request, user):
     if search_query:
         followers = Follower.objects.filter(following=user, is_active=True).filter(
             Q(user_id__first_name__icontains=search_query) | Q(user_id__last_name__icontains=search_query)
-        ).exclude(user_id__in=mem1).values('user_id', 'user_id__first_name', 'user_id__last_name', 'user_id__email', 'user_id__profile_photo_url')
+        ).exclude(user_id__in=mem1).values('user_id', 'user_id__first_name', 'user_id__last_name', 'user_id__email', 'user_id__profile_photo_url', 'user_id__bio')
 
         followings = Follower.objects.filter(follower=user, is_active=True).filter(
             Q(user_id__first_name__icontains=search_query) | Q(user_id__last_name__icontains=search_query)
-        ).exclude(user_id__in=mem1).values('user_id', 'user_id__first_name', 'user_id__last_name', 'user_id__email', 'user_id__profile_photo_url')
+        ).exclude(user_id__in=mem1).values('user_id', 'user_id__first_name', 'user_id__last_name', 'user_id__email', 'user_id__profile_photo_url', 'user_id__bio')
 
     else:
 
@@ -125,8 +125,8 @@ def list_follow_api(request, user):
 
         # Define a subquery to get the other member for a given chat.
 
-        followers = Follower.objects.filter(following=user, is_active=True).exclude(user_id__in=mem1).values('user_id', 'user_id__first_name', 'user_id__last_name', 'user_id__email', 'user_id__profile_photo_url')
-        followings = Follower.objects.filter(follower=user, is_active=True).exclude(user_id__in=mem1).values('user_id', 'user_id__first_name', 'user_id__last_name', 'user_id__email', 'user_id__profile_photo_url')
+        followers = Follower.objects.filter(following=user, is_active=True).exclude(user_id__in=mem1).values('user_id', 'user_id__first_name', 'user_id__last_name', 'user_id__email', 'user_id__profile_photo_url', 'user_id__bio')
+        followings = Follower.objects.filter(follower=user, is_active=True).exclude(user_id__in=mem1).values('user_id', 'user_id__first_name', 'user_id__last_name', 'user_id__email', 'user_id__profile_photo_url', 'user_id__bio')
   
     combined_list = list(followers) + list(followings)
 

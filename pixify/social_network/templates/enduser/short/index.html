@@ -948,7 +948,7 @@ document.querySelectorAll(".chat-icon").forEach((button) => {
 
   // AJAX call to fetch share data (chats and members)
   $.ajax({
-      url: '/short/share/api',
+      url: '/post/share/api',
       type: 'GET',
       data: { video_id: videoId, search: searchQuery },
       dataType: 'json',
@@ -1049,7 +1049,7 @@ document.querySelectorAll(".chat-icon").forEach((button) => {
 
           // Send the share request via AJAX
           $.ajax({
-              url: '/short/send', // Your send endpoint
+              url: '/post/send', // Your send endpoint
               type: 'POST',
               headers: { 'X-CSRFToken': getCookie('csrftoken') },
               contentType: 'application/json',

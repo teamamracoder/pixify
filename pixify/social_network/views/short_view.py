@@ -191,7 +191,7 @@ class ShortCommentReactionView(View):
 
 
 
-class ShortShareListViewApi(View):
+class PostShareListViewApi(View):
     def get(self, request):
         user = request.user
         chats = chat_service.list_top_chats_api(request, user)
@@ -206,7 +206,7 @@ class ShortShareListViewApi(View):
 
 
 
-class ShortSendView(View):
+class PostSendView(View):
     def post(self, request):
         user = request.user
         try:

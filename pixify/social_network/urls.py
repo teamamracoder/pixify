@@ -207,9 +207,9 @@ urlpatterns = [
     path('save_fcm_token/', views.save_fcm_token, name="save_fcm_token"),
     path('send_notification/',views.send_notification, name="send_notification"),
 
-    # Short Share List Api
-    path('short/share/api', views.ShortShareListViewApi.as_view(), name='short_share_api'),
-    path('short/send', views.ShortSendView.as_view(), name='short_send'),
+    # post Share List Api
+    path('post/share/api', views.PostShareListViewApi.as_view(), name='short_share_api'),
+    path('post/send', views.PostSendView.as_view(), name='short_send'),
     
     
     path('fetch_post_reactions/<int:post_id>/', views.FetchPostReactions.as_view(), name='fetch_post_reactions'),
