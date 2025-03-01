@@ -1,3 +1,4 @@
+from django.http import JsonResponse
 from django.utils import timezone
 from ..models import Post,User,Comment
 from django.shortcuts import get_object_or_404
@@ -116,3 +117,40 @@ def get_comments_by_post(post_id):
         }
         for comment in comments
     ]
+
+def create_comment(user, post_id, comment_text, reply_for_id=None):
+    if not comment_text:
+        return {"error": "Comment text is required."}
+
+    post = get_object_or_404(Post, id=post_id)
+
+    if not user or not user.is_authenticated:
+        return {"error": "User must be authenticated."}
+
+    reply_for = None
+    if reply_for_id:
+        reply_for = get_object_or_404(Comment, id=reply_for_id)
+
+    # ✅ Debugging user before saving comment
+    print(f"🔍 DEBUG: Creating comment by User: {user} (ID: {user.id})")
+
+    # ✅ Save comment with `comment_by=user`
+    comment = Comment.objects.create(
+        comment_by=user,  
+        post_id=post,  
+        comment=comment_text,
+        reply_for=reply_for,
+        created_by=user,
+    )
+
+    # ✅ Debug comment saved correctly
+    print(f"✅ Comment created by: {comment.comment_by} (ID: {comment.comment_by.id if comment.comment_by else 'None'})")
+
+    return {
+        "id": comment.id,
+        "user": comment.comment_by.first_name if comment.comment_by else "Unknown",
+        "post_id": comment.post_id.id,
+        "text": comment.comment,
+        "reply_for": comment.reply_for.id if comment.reply_for else None,
+        "created_at": comment.created_at.strftime("%Y-%m-%d %H:%M:%S"),
+    }

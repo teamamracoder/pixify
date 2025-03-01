@@ -108,7 +108,29 @@ class DeletePostReactions(View):
             return JsonResponse({'success': False, 'error': 'An unexpected error occurred'}, status=500)
 
 class CommentListViewApi(View):
+    @catch_error
+    @auth_required
+    @role_required(Role.ADMIN.value, Role.END_USER.value)
     def get(self, request, post_id):
         comments = comment_service.get_comments_by_post(post_id)
         print(comments)
         return JsonResponse({"comments": comments}, safe=False)
+    
+
+
+class CommentCreate(View):
+    def post(self, request, post_id):
+        try:
+            data = json.loads(request.body)
+            comment_text = data.get("comment_text")
+            reply_for_id = data.get("reply_for_id")
+
+            response = comment_service.create_comment(request.user, post_id, comment_text, reply_for_id)
+
+            if "error" in response:
+                return JsonResponse(response, status=400)
+
+            return JsonResponse(response, status=201)
+
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON"}, status=400)
