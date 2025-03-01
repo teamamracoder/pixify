@@ -252,22 +252,26 @@
                 <input type="hidden" class="firstPostId" name="firstPostId" value="{{post.id}}">
                 <input type="hidden" class="firstUserId" name="firstUserId" value="{{post.posted_by_id}}">
 
-        <div class="post-top" style="height: 45px;">
-            <a href="">
-     <img src="{%  static post.posted_by.profile_photo_url|default:'/images/avatar.jpg' %}"
-    class="rounded-circle me-1"
-     style="width: 35px; object-fit: cover; height: 35px;">
-                <!-- <img src="{% static 'images/IMG_20240915_213320.jpg' %}" alt="avatar" class="rounded-circle me-1 " style="width: 35px; object-fit: cover; height: 35px; " > -->
-            </a>
-
-            <div class="d-flex "style="flex-direction: column;" >
-             <h6 class="u-name"> {{ post.posted_by.first_name }} {{ post.posted_by.last_name }}
-                 <span style="font-size:14px;color:#e9e6e6c7;"> </span>  </h6>
-
-             <span style="font-size:11px;margin-left: 15px;position: relative;bottom: 14px;" class="py-1">{{ post.created_at|timesince }} ago <i class="bi bi-globe-americas p-1" style="font-size:10px"></i></span>
-
-            </div>
-        </div>
+                {% if post.posted_by.id == userid %}
+                <div class="post-top" style="height: 45px;" onclick="window.location.href='{% url 'userprofile' %}'">
+              {% else %}
+                <div class="post-top" style="height: 45px;" onclick="window.location.href='{% url 'profile' post.posted_by.id %}'">
+              {% endif %}
+                  <a href="#">
+                    <img src="{% static post.posted_by.profile_photo_url|default:'/images/avatar.jpg' %}"
+                         class="rounded-circle me-1"
+                         style="width: 35px; object-fit: cover; height: 35px;">
+                  </a>
+                  <div class="d-flex" style="flex-direction: column;">
+                    <h6 class="u-name">
+                      {{ post.posted_by.first_name }} {{ post.posted_by.last_name }}
+                    </h6>
+                    <span style="font-size:11px;margin-left: 15px;position: relative;bottom: 14px;" class="py-1">
+                      {{ post.created_at|timesince }} ago <i class="bi bi-globe-americas p-1" style="font-size:10px"></i>
+                    </span>
+                  </div>
+                </div>
+              
 
                 <div class="post-des-img">
                     <p class="px-3 pt-2" id="title" style="font-size:15px; margin: 0; margin-bottom: 5px;padding-bottom:13px;">

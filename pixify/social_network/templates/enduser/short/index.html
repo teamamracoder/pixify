@@ -18,13 +18,30 @@
         {% endif %}
 
         <div class="video-info">
-          <div class="user-info">
+          
+            {% if video.posted_by.id == user.id %}
+            <div class="user-info" onclick="window.location.href='{% url 'userprofile' %}'">
+          {% else %}
+          <div class="user-info" onclick="window.location.href='{% url 'profile' video.posted_by.id %}'">
+          {% endif %}
             <img src="{% static video.posted_by.profile_photo_url|default:'/images/avatar.jpg' %}"
                  alt="{{ video.posted_by.first_name }}'s Profile Picture"
                  class="short-profile-pic">
             <div class="username">{{ video.posted_by.first_name }} {{ video.posted_by.last_name }}</div>
           </div>
-          <div class="description">{{ video.description }}</div>
+          <div class="video-description">
+            {% if video.title %}
+              <div class="description">{{ video.title }}</div>
+            {% endif %}
+            <div id="seeMore{{ video.id }}" class="description" onclick="toggleVideoDetails('{{ video.id }}')">See More</div>
+            <div id="videoDetails{{ video.id }}" style="display: none;">
+              {% if video.description %}
+                <div class="description">{{ video.description }}</div>
+              {% endif %}
+              <div class="description">{{ video.created_at }}</div>
+              <div id="seeLess{{ video.id }}" class="description" onclick="toggleVideoDetails('{{ video.id }}')">See Less</div>
+            </div>   
+          </div>         
         </div>
 
         <!-- Modal for Comments (unique for each video) -->
@@ -123,6 +140,22 @@
 
 
 <script>
+
+
+  function toggleVideoDetails(videoId) {
+    var detailsDiv = document.getElementById("videoDetails" + videoId);
+    var seeMore = document.getElementById("seeMore" + videoId);
+    
+    if (detailsDiv.style.display === "none") {
+      detailsDiv.style.display = "block";
+      seeMore.style.display = "none";
+    } else {
+      detailsDiv.style.display = "none";
+      seeMore.style.display = "block";
+    }
+  }
+  
+
 document.addEventListener('DOMContentLoaded', () => {
     // Handle reactions (like/dislike)
     const handleReaction = (iconElement, isDelete = false) => {
@@ -1641,6 +1674,12 @@ margin-top: 16px;
 /* Styling for video description */
 .description {
     font-size: 1em;
+}
+
+.video-description{
+  font-size: 1em;
+  overflow: auto;
+  max-height: 200px;  
 }
 
 /* Reels Header */

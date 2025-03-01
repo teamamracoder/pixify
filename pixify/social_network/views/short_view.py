@@ -27,6 +27,7 @@ class ShortListView(View):
             comments = short_service.comment_count(short.id)
             short.comments_count = short_service.format_count(comments)
             short.user_reacted = short_service.user_has_reacted(short, user)
+            short.created_at = short_service.format_created_time(short.created_at)
         random.shuffle(shorts)  # Randomize the list
         return render(request, 'enduser/short/index.html', {'shorts': shorts,'user':user})
     

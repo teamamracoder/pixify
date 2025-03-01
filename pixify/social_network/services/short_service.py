@@ -193,3 +193,23 @@ def get_short_media(post_id):
 
 def get_post_by_id(post_id):
     return Post.objects.get(id=post_id)  # Ensure this is `.get()` and NOT `.filter()`
+
+
+def format_created_time(timestamp):
+    if not timestamp:
+        return ''
+    now = timezone.now()
+    diff = now - timestamp
+
+    if diff.total_seconds() < 60:
+        return "Just now"
+    elif diff.total_seconds() < 3600:
+        minutes = int(diff.total_seconds() / 60)
+        return f"{minutes} minutes ago"
+    elif diff.total_seconds() < 86400:
+        hours = int(diff.total_seconds() / 3600)
+        return f"{hours} hours ago"
+    elif  diff.total_seconds() < 604800:
+        return f"{int(diff.total_seconds() // 86400)}d ago"
+    else:        
+        return timestamp.strftime('%B %d %Y').replace(' 0', ' ')    
