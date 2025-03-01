@@ -5,7 +5,7 @@ from social_network.constants.default_values import Role
 from ..decorators import auth_required, role_required
 from social_network.decorators.exception_decorators import catch_error
 from django.http import JsonResponse
-from ..services import user_service,chat_service,post_service,message_reaction_service
+from ..services import user_service,chat_service,post_service,message_reaction_service,comment_service
 
 class EnduserprofileListView(View):
     def get(self, request, user_id):
@@ -107,3 +107,8 @@ class DeletePostReactions(View):
         except Exception as e:
             return JsonResponse({'success': False, 'error': 'An unexpected error occurred'}, status=500)
 
+class CommentListViewApi(View):
+    def get(self, request, post_id):
+        comments = comment_service.get_comments_by_post(post_id)
+        print(comments)
+        return JsonResponse({"comments": comments}, safe=False)

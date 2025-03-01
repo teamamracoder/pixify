@@ -66,3 +66,15 @@ def create_reaction(comment_id,user_id):
                                               created_by_id=user_id, is_active=True)
 
         return created
+
+
+def get_comments_by_post(post_id):
+    comments = Comment.objects.filter(post_id=post_id).select_related("comment_by")
+    return [
+        {
+            "user": comment.comment_by.first_name,
+            "text": comment.comment,
+            "timestamp": comment.created_at.strftime("%Y-%m-%d %H:%M:%S"),
+        }
+        for comment in comments
+    ]

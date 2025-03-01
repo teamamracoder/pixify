@@ -83,9 +83,9 @@
                         <div class="post-opt-icons" style="height: 4vh;">
                             <div class="post-reaction" style="cursor: pointer;">
                                 <i class="bi bi-emoji-smile" onclick="toggleReactionPopup('{{ post.id }}')"></i>
-                                <span data-toggle="modal" class="load-comments">
+                                <span data-toggle="modal" class="load-comments" data-post-id={{post.id}}>
                                     <i class="fa-regular fa-comment"></i>
-                                </span>
+                                </span>                                
                                 <i class="fa-solid fa-share-nodes" data-bs-toggle="modal" data-bs-target="#shareModal"></i>
                             </div>                         
                                 <!-- Ensure CSRF Token is Included -->
@@ -129,6 +129,42 @@
         });
     });
 
+    $(document).ready(function () {
+        $(".load-comments").click(function () {
+            let postId = $(this).data("post-id"); // Get post ID
+            console.log("Post ID:", postId); // Debugging output
+    
+            if (!postId) {
+                console.error("Error: Post ID is undefined!");
+                return;
+            }
+    
+            $("#comments-container").html("<p>Loading comments...</p>");
+    
+            $.ajax({
+                url: `/api/comments/${postId}/`,
+                type: "GET",
+                dataType: "json",
+                success: function (response) {
+                    let commentsHtml = response.comments.length
+                        ? response.comments.map(comment => `
+                            <div class="comment">
+                                <strong>${comment.user}</strong>
+                                <p>${comment.text}</p>
+                                <small>${comment.timestamp}</small>
+                            </div>
+                        `).join("")
+                        : "<p>No comments yet.</p>";
+    
+                    $("#comments-container").html(commentsHtml);
+                },
+                error: function () {
+                    $("#comments-container").html("<p>Failed to load comments.</p>");
+                }
+            });
+        });
+    });
+    
     
     
     function toggleFriends(listId, btn) {
