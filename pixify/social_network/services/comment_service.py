@@ -87,7 +87,7 @@ def format_timestamp(timestamp):
         return timestamp.strftime('%A')  # Example: "Monday"
     else:
         return timestamp.strftime('%d/%m/%Y')  # Example: "01/03/2025"
-
+    
 def get_comments_by_post(post_id):
     def get_replies(parent_comment):
         """ Recursively get replies for a given comment """
@@ -95,11 +95,11 @@ def get_comments_by_post(post_id):
         return [
             {
                 "user": reply.comment_by.first_name,
-                "user_profile": reply.comment_by.profile_photo_url,
+                "user_profile": reply.comment_by.profile_photo_url if reply.comment_by.profile_photo_url else "",  # Fix here!
                 "text": reply.comment,
                 "reply_for": reply.reply_for_id,
-                "timestamp": format_timestamp(reply.created_at),  # Now it works correctly
-                "replies": get_replies(reply)  # Recursively get nested replies
+                "timestamp": format_timestamp(reply.created_at),
+                "replies": get_replies(reply)
             }
             for reply in replies
         ]
@@ -109,14 +109,15 @@ def get_comments_by_post(post_id):
     return [
         {
             "user": comment.comment_by.first_name,
-            "user_profile": comment.comment_by.profile_photo_url,
+            "user_profile": comment.comment_by.profile_photo_url if comment.comment_by.profile_photo_url else "",  # Fix here!
             "text": comment.comment,
             "reply_for": comment.reply_for_id,
-            "timestamp": format_timestamp(comment.created_at),  # Now it works correctly
-            "replies": get_replies(comment)  # Attach replies recursively
+            "timestamp": format_timestamp(comment.created_at),
+            "replies": get_replies(comment)
         }
         for comment in comments
     ]
+
 
 def create_comment(user, post_id, comment_text, reply_for_id=None):
     if not comment_text:
