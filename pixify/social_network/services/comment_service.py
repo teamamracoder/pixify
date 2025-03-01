@@ -1,3 +1,4 @@
+from django.utils import timezone
 from ..models import Post,User,Comment
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
@@ -68,13 +69,50 @@ def create_reaction(comment_id,user_id):
         return created
 
 
+
+
+def format_timestamp(timestamp):
+    """ Format timestamp as 'Today', 'Yesterday', weekday, or date """
+    if not timestamp:
+        return ''
+    now = timezone.now()
+    diff = now - timestamp
+
+    if diff.days == 0:
+        return timestamp.strftime('%I:%M %p')  # Example: "10:30 AM"
+    elif diff.days == 1:
+        return 'Yesterday'
+    elif diff.days < 7:
+        return timestamp.strftime('%A')  # Example: "Monday"
+    else:
+        return timestamp.strftime('%d/%m/%Y')  # Example: "01/03/2025"
+
 def get_comments_by_post(post_id):
-    comments = Comment.objects.filter(post_id=post_id).select_related("comment_by")
+    def get_replies(parent_comment):
+        """ Recursively get replies for a given comment """
+        replies = Comment.objects.filter(reply_for=parent_comment).select_related("comment_by")
+        return [
+            {
+                "user": reply.comment_by.first_name,
+                "user_profile": reply.comment_by.profile_photo_url,
+                "text": reply.comment,
+                "reply_for": reply.reply_for_id,
+                "timestamp": format_timestamp(reply.created_at),  # Now it works correctly
+                "replies": get_replies(reply)  # Recursively get nested replies
+            }
+            for reply in replies
+        ]
+
+    # Fetch only top-level comments (where reply_for is NULL)
+    comments = Comment.objects.filter(post_id=post_id, reply_for__isnull=True).select_related("comment_by")
     return [
         {
             "user": comment.comment_by.first_name,
+            "user_profile": comment.comment_by.profile_photo_url,
             "text": comment.comment,
-            "timestamp": comment.created_at.strftime("%Y-%m-%d %H:%M:%S"),
+            "reply_for": comment.reply_for_id,
+            "timestamp": format_timestamp(comment.created_at),  # Now it works correctly
+            "replies": get_replies(comment)  # Attach replies recursively
         }
         for comment in comments
     ]

@@ -112,6 +112,25 @@
         </div>
 {% endif %}
 <div class="footer">Nothing to show</div>
+
+
+<!-- Comment Modal -->
+<div class="modal fade" id="commentModal" tabindex="-1" aria-labelledby="commentModalLabel" aria-hidden="true">
+    <div class="modal-dialog"style="height: 70vh; width:70%;">
+        <div class="modal-content" style="height: 100%;">
+            <div class="modal-header">
+                <h5 class="modal-title" id="commentModalLabel">Comments</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="comments-container">
+                <!-- Comments will be loaded here -->
+            </div>
+        </div>
+    </div>
+</div>
+
 </div>
 
 
@@ -131,8 +150,7 @@
 
     $(document).ready(function () {
         $(".load-comments").click(function () {
-            let postId = $(this).data("post-id"); // Get post ID
-            console.log("Post ID:", postId); // Debugging output
+            let postId = $(this).data("post-id");
     
             if (!postId) {
                 console.error("Error: Post ID is undefined!");
@@ -140,6 +158,7 @@
             }
     
             $("#comments-container").html("<p>Loading comments...</p>");
+            $("#commentModal").modal("show"); // Open the modal
     
             $.ajax({
                 url: `/api/comments/${postId}/`,
@@ -147,13 +166,7 @@
                 dataType: "json",
                 success: function (response) {
                     let commentsHtml = response.comments.length
-                        ? response.comments.map(comment => `
-                            <div class="comment">
-                                <strong>${comment.user}</strong>
-                                <p>${comment.text}</p>
-                                <small>${comment.timestamp}</small>
-                            </div>
-                        `).join("")
+                        ? generateCommentTree(response.comments)
                         : "<p>No comments yet.</p>";
     
                     $("#comments-container").html(commentsHtml);
@@ -163,6 +176,24 @@
                 }
             });
         });
+    
+        // Function to recursively generate nested comments
+        function generateCommentTree(comments) {
+            return comments.map(comment => `
+                <div class="comment">
+                    <div class="comment-header">
+                        <img src="${comment.user_profile}" alt="${comment.user}" class="comment-profile-img">
+                        <strong>${comment.user}</strong>
+                    </div>
+                    <p>${comment.text}</p>
+                    <small>${comment.timestamp}</small>
+    
+                    ${comment.replies && comment.replies.length > 0
+                        ? `<div class="replies">${generateCommentTree(comment.replies)}</div>` 
+                        : ""}
+                </div>
+            `).join("");
+        }
     });
     
     
@@ -295,6 +326,30 @@
     
 
     <style>
+        .comment {
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .comment-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .comment-profile-img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        
+        .replies {
+            margin-left: 40px; /* Indent replies */
+            border-left: 2px solid #ddd;
+            padding-left: 10px;
+        }
+        
         .post-reactions{
             justify-content: center;
             align-items: center;
