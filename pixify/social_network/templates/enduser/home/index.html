@@ -557,14 +557,22 @@
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <!-- Optional: a hidden data attribute to store the post ID -->
+          <!-- Hidden input for post id -->
           <input type="hidden" id="sharePostId" value="">
-          <!-- Search input for filtering profiles -->
+          <!-- Search input -->
           <input type="text" class="form-control mb-3" id="shareModalInput" placeholder="Type a name">
           <!-- Container to load profile items dynamically -->
           <div id="profileContainer">
-            <!-- Example of a profile item (this will be generated dynamically) -->
-            
+            <!-- Dynamic profiles will be injected here -->
+          </div>
+          <!-- Social icons for sharing -->
+          <div class="share-social-icons d-flex justify-content-around my-3">
+            <div class="icon whatsapp"><i class="fab fa-whatsapp"></i></div>
+            <div class="icon facebook"><i class="fab fa-facebook-f"></i></div>
+            <div class="icon twitter"><i class="fab fa-twitter"></i></div>
+            <div class="icon linkedin"><i class="fab fa-linkedin-in"></i></div>
+            <div class="icon instagram"><i class="fab fa-instagram"></i></div>
+            <div class="icon link"><i class="fas fa-link"></i></div>
           </div>
           <!-- Share button container: hidden until at least one profile is selected -->
           <div class="share-button-container" id="shareButtonContainer" style="display: none;">
@@ -594,6 +602,10 @@
 
 const senderId = "{{ user.id }}"; // Rendered from your template
 const staticUrl = "{% static '' %}"; // This usually returns "/static/"
+
+function cleanMediaPath(media) {
+  return media.startsWith('/') ? media.slice(1) : media;
+}
 
 // Global variable to store the current post id
 let currentPostId = null;
@@ -626,7 +638,7 @@ function updateShareResults(postId) {
           const chatBio = chat.bio ? chat.bio : "No bio available";
           html += `
             <div class="profile-item">
-              <img src="${chatImage}" alt="Chat Cover" class="profile-pic">
+              <img src="${staticUrl}${cleanMediaPath(chatImage)}" alt="Chat Cover" class="profile-pic">
               <div>
                 <strong>${chat.title}</strong><br>
                 <small>${chatBio}</small>
@@ -648,7 +660,7 @@ function updateShareResults(postId) {
           const bioText = member.user_id__bio ? member.user_id__bio : "No bio available";
           html += `
             <div class="profile-item">
-              <img src="${profilePhoto}" alt="Profile Picture" class="profile-pic">
+              <img src="${staticUrl}${cleanMediaPath(profilePhoto)}" alt="Profile Picture" class="profile-pic">
               <div>
                 <strong>${member.user_id__first_name} ${member.user_id__last_name}</strong><br>
                 <small>${bioText}</small>
