@@ -179,18 +179,8 @@
 
 //comment create
 $(document).ready(function () {
-    // Ensure the post ID is correctly retrieved
-    function getPostId() {
-        const postId = $("#commentForm").attr("data-post-id");
-        if (!postId) {
-            console.error("❌ Error: Post ID is missing in the HTML!");
-            return null;
-        }
-        return postId;
-    }
-
     // Function to create a comment and reload comments
-    function submitComment() {
+    function submitComment(postId) {
         const commentText = $("#commentText").val().trim();
         const csrfToken = $("input[name=csrfmiddlewaretoken]").val();
 
@@ -217,7 +207,7 @@ $(document).ready(function () {
                 // Clear input field
                 $("#commentText").val("");
 
-                // Reload comments
+                // Call the existing load-comments function after success
                 $(`.load-comments[data-post-id="${postId}"]`).click();
             },
             error: function (xhr) {
@@ -226,13 +216,13 @@ $(document).ready(function () {
         });
     }
 
-    // Add click event listener to the new submit button
-    $("#submitCommentButton").click(function () {
-        const postId = $("#commentForm").data("post-id"); // Get post ID from form
+    // Attach event listener to submit button
+    $("#createcomment").click(function (e) {
+        e.preventDefault(); // Prevent form submission
+        const postId = $(".load-comments").data("post-id");
         submitComment(postId);
     });
 });
-
 
 
 //comments fetch
