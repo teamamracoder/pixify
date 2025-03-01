@@ -439,10 +439,15 @@
                     <source src="{% static video.media_url.0 %}" type="video/mp4">
                 </video>
                 <div class="user-info">
-                    <img src="{% static video.posted_by.profile_photo_url | default:'/static/images/avatar.jpg' %}"
-                         alt="{{ video.posted_by.first_name }}'s Profile Picture"
-                         class="short-profile-pic">
-                    <div class="username">{{ video.posted_by.first_name }} {{ video.posted_by.last_name }}</div>
+                    <div class="profile-and-name">
+                        <img src="{% static video.posted_by.profile_photo_url | default:'/static/images/avatar.jpg' %}"
+                             alt="{{ video.posted_by.first_name }}'s Profile Picture"
+                             class="short-profile-pic">
+                        <div>
+                            <div class="username" data-username="{{ video.posted_by.first_name }} {{ video.posted_by.last_name }}">{{ video.posted_by.first_name }} {{ video.posted_by.last_name }}</div>
+                        </div>
+                    </div>
+                    <div class="description">{{ video.description }}</div>
                 </div>
               {% else %}
                 <p>No video available.</p>
@@ -463,170 +468,196 @@
       <span class="visually-hidden">Next</span>
     </button>
 </div>
-
 <style>
-    .control-div {
-        position: absolute;
-        top: 1.4vh;
-        align-items: center;
-    }
+.control-div {
+    position: absolute;
+    top: 1.4vh;
+    align-items: center;
+}
 
-    #carouselExampleForShortSection {
-        max-width: 100%;
-        margin: 10px auto;
-        overflow-x: hidden;
-    }
-    .carousel-inner {
-        display: flex;
-        flex-wrap: nowrap;
-        justify-content: flex-start;
-        margin-left: 10px;
-        gap: 5px;
-    }
+#carouselExampleForShortSection {
+    max-width: 100%;
+    margin: 10px auto;
+    overflow-x: hidden;
+}
+.carousel-inner {
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    margin-left: 10px;
+    gap: 5px;
+}
+.carouselItemForShortSection {
+    flex: 0 0 auto;
+    width: 100%;
+    max-width: calc(100% / 3 - 20px);
+    margin: 5px;
+    box-sizing: border-box;
+    transition: transform 0.5s ease;
+    position: relative;
+}
+.carouselItemForShortSection video {
+    width: 100%;
+    height: auto;
+    margin: auto;
+    aspect-ratio: 9/16;
+    object-fit: cover;
+    border-radius: 10px;
+}
+.short-profile-pic {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+.username {
+    color: #fff;
+    font-size: 14px;
+    font-weight: bold;
+}
+.user-info {
+    position: absolute;
+    bottom: 12px;
+    left: 1px;
+    display: flex;
+    align-items: center;
+    padding: 5px 10px;
+    border-radius: 5px;
+    flex-direction: column;
+    text-align: left;
+}
+
+.profile-and-name {
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.description {
+    color: #fff;
+    font-size: 12px;
+    margin-top: 5px;
+    text-align: left; 
+    width: 100%;       
+}
+
+
+@media (max-width: 768px) {
     .carouselItemForShortSection {
-        flex: 0 0 auto;
-        width: 100%;
-        max-width: calc(100% / 3 - 20px);
-        margin: 5px;
-        box-sizing: border-box;
-        transition: transform 0.5s ease;
-        position: relative;
+        max-width: calc(100% / 2 - 20px);
     }
-    .carouselItemForShortSection video {
-        width: 100%;
-        height: auto;
-        margin: auto;
-        aspect-ratio: 9/16;
-        object-fit: cover;
-        border-radius: 10px;
-    }
-    .user-info {
-        position: absolute;
-        bottom: 12px;
-        left: 10px;
-        display: flex;
-        align-items: center;
-        padding: 5px 10px;
-        border-radius: 5px;
-    }
-    .short-profile-pic {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        margin-right: 10px;
-    }
-    .username {
-        color: #fff;
-        font-size: 14px;
-        font-weight: bold;
-    }
-    @media (max-width: 768px) {
-        .carouselItemForShortSection {
-            max-width: calc(100% / 2 - 20px);
-        }
-    }
-</style> 
+}
+</style>
 
 
 <script> 
-     document.addEventListener('DOMContentLoaded', function () {
-        const carousel = document.getElementById('carouselExampleForShortSection');
-        const prevButton = carousel.querySelector('.carousel-control-prev');
-        const nextButton = carousel.querySelector('.carousel-control-next');
-        const items = carousel.querySelectorAll('.carouselItemForShortSection');
-        let currentIndex = 0;
-        const videos = document.querySelectorAll('.carouselItemForShortSection video');
-    
-        const videosPerView = () => (window.innerWidth < 768 ? 2 : 3);
-    
-        function showItems() {
-            const perView = videosPerView();
-            items.forEach((item, index) => {
-                item.style.display = (index >= currentIndex && index < currentIndex + perView) ? 'block' : 'none';
-            });
-            updateButtons();
+
+    document.querySelectorAll('.username').forEach(username => {
+        const maxLength = 10; 
+        if (username.textContent.length > maxLength) {
+          username.textContent = username.textContent.substring(0, maxLength) + '...';
         }
-    
-        function showNextItem() {
-            if (currentIndex + videosPerView() < items.length) {
-                currentIndex++;
-            }
-            showItems();
-        }
-    
-        function showPrevItem() {
-            if (currentIndex > 0) {
-                currentIndex--;
-            }
-            showItems();
-        }
-    
-        function updateButtons() {
-            const isFirstItem = currentIndex === 0;
-            const isLastItem = currentIndex + videosPerView() >= items.length;
-            prevButton.style.display = isFirstItem ? 'none' : 'block';
-            nextButton.style.display = isLastItem ? 'none' : 'block';
-        }
-    
-        prevButton.addEventListener('click', showPrevItem);
-        nextButton.addEventListener('click', showNextItem);
-        window.addEventListener('resize', showItems);
-    
-        showItems();
-        updateButtons();
-    
-        function pauseAllVideos() {
-            videos.forEach(video => {
-                video.pause();
-                video.currentTime = 0;
-            });
-        }
-    
-        videos.forEach(video => {
-            // Desktop: Hover to play
-            video.addEventListener('mouseenter', function () {
-                if (!isMobileDevice()) {
-                    pauseAllVideos(); // Pause all videos before playing the new one
-                    video.play();
-                }
-            });
-    
-            video.addEventListener('mouseleave', function () {
-                if (!isMobileDevice()) {
-                    video.pause();
-                    video.currentTime = 0;
-                }
-            });
-    
-            // Mobile: Tap to play (and stop others)
-            video.addEventListener('click', function () {
-                if (isMobileDevice()) {
-                    if (video.paused) {
-                        pauseAllVideos(); // Stop all other videos
-                        video.play();
-                    } else {
-                        video.pause();
-                        video.currentTime = 0;
-                    }
-                }
-            });
-    
-            // iOS Fix: Ensure first touch enables autoplay
-            video.addEventListener('touchstart', function (event) {
-                if (isMobileDevice() && video.paused) {
-                    event.preventDefault(); // Prevent click issues
-                    pauseAllVideos(); // Stop other videos
-                    video.play();
-                }
-            });
-        });
-    
-        function isMobileDevice() {
-            return /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
-        }
-    });
-    
-</script>
+      });
+      
+    document.addEventListener('DOMContentLoaded', function () {
+       const carousel = document.getElementById('carouselExampleForShortSection');
+       const prevButton = carousel.querySelector('.carousel-control-prev');
+       const nextButton = carousel.querySelector('.carousel-control-next');
+       const items = carousel.querySelectorAll('.carouselItemForShortSection');
+       let currentIndex = 0;
+       const videos = document.querySelectorAll('.carouselItemForShortSection video');
+   
+       const videosPerView = () => (window.innerWidth < 768 ? 2 : 3);
+   
+       function showItems() {
+           const perView = videosPerView();
+           items.forEach((item, index) => {
+               item.style.display = (index >= currentIndex && index < currentIndex + perView) ? 'block' : 'none';
+           });
+           updateButtons();
+       }
+   
+       function showNextItem() {
+           if (currentIndex + videosPerView() < items.length) {
+               currentIndex++;
+           }
+           showItems();
+       }
+   
+       function showPrevItem() {
+           if (currentIndex > 0) {
+               currentIndex--;
+           }
+           showItems();
+       }
+   
+       function updateButtons() {
+           const isFirstItem = currentIndex === 0;
+           const isLastItem = currentIndex + videosPerView() >= items.length;
+           prevButton.style.display = isFirstItem ? 'none' : 'block';
+           nextButton.style.display = isLastItem ? 'none' : 'block';
+       }
+   
+       prevButton.addEventListener('click', showPrevItem);
+       nextButton.addEventListener('click', showNextItem);
+       window.addEventListener('resize', showItems);
+   
+       showItems();
+       updateButtons();
+   
+       function pauseAllVideos() {
+           videos.forEach(video => {
+               video.pause();
+               video.currentTime = 0;
+           });
+       }
+   
+       videos.forEach(video => {
+           // Desktop: Hover to play
+           video.addEventListener('mouseenter', function () {
+               if (!isMobileDevice()) {
+                   pauseAllVideos(); // Pause all videos before playing the new one
+                   video.play();
+               }
+           });
+   
+           video.addEventListener('mouseleave', function () {
+               if (!isMobileDevice()) {
+                   video.pause();
+                   video.currentTime = 0;
+               }
+           });
+   
+           // Mobile: Tap to play (and stop others)
+           video.addEventListener('click', function () {
+               if (isMobileDevice()) {
+                   if (video.paused) {
+                       pauseAllVideos(); // Stop all other videos
+                       video.play();
+                   } else {
+                       video.pause();
+                       video.currentTime = 0;
+                   }
+               }
+           });
+   
+           // iOS Fix: Ensure first touch enables autoplay
+           video.addEventListener('touchstart', function (event) {
+               if (isMobileDevice() && video.paused) {
+                   event.preventDefault(); // Prevent click issues
+                   pauseAllVideos(); // Stop other videos
+                   video.play();
+               }
+           });
+       });
+   
+       function isMobileDevice() {
+           return /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+       }
+   });
+   
+</script> 
+
 {% comment %} End by Badhan {% endcomment %}
 
 
