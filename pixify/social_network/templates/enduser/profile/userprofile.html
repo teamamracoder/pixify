@@ -121,6 +121,7 @@
             <div class="modal-header" id="modal-comments-header">
                 <h5 class="modal-title" id="commentModalLabel">Comments</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <i class="bi bi-x-lg"></i>
                 </button>
             </div>
             <div class="modal-body" id="comments-container">
@@ -172,6 +173,22 @@
 
 
 <script>
+    $(document).ready(function () {
+        // Close modal when the close button (×) is clicked
+        $(document).on("click", ".close", function () {
+            $("#commentModal").modal("hide");
+        });
+    
+        // Close modal when clicking outside the modal content
+        $(document).on("click", function (event) {
+            if ($(event.target).is("#commentModal")) {
+                $("#commentModal").modal("hide");
+            }
+        });
+    });
+    
+
+    
     document.addEventListener("DOMContentLoaded", function () {
         // Hide extra followers/followings beyond 4 initially
         document.querySelectorAll('.friend-card.hidden-follower, .friend-card.hidden-following')
@@ -544,6 +561,7 @@ $(document).ready(function () {
         }
 
         #modal-comments-header{
+            justify-content: space-between;
             display: flex;
             align-items: center;
         }     
