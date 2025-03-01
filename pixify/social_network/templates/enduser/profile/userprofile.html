@@ -270,15 +270,15 @@ $(document).ready(function () {
                             <div>${comment.user}</div>
                             <div>${comment.text}</div>  
                         </div>
-                        ${comment.replies && comment.replies.length > 0
-                            ? `<div class="replies">${generateCommentTree(comment.replies)}</div>` 
-                            : ""}
                         <div class="foot-cmt">
                             <div class="reply-btn" data-comment-id="${comment.id}" data-post-id="${comment.post_id}" style="font-size: small; cursor: pointer; color: lightblue;">
                                 Reply
                             </div>
                             <div style="font-size: 10px;">${comment.timestamp}</div>
                         </div>
+                        ${comment.replies && comment.replies.length > 0
+                            ? `<div class="replies">${generateCommentTree(comment.replies)}</div>` 
+                            : ""} 
                     </div>
                 </div>
             </div>
@@ -444,9 +444,10 @@ $(document).ready(function () {
             margin-left: 30px;
             width: 74%;
             align-items: center;
-            display: flex
-        ;
-
+            display: flex;
+        }
+        .comment{
+            margin-bottom: 10px;
         }
         .comment-content{
             width:90%;
@@ -464,8 +465,8 @@ $(document).ready(function () {
         }     
         
         .comment-profile-img {
-            width: 35px;
-            height: 35px;
+            width: 30px;
+            height: 30px;
             border-radius: 50%;
             object-fit: cover;
         }
