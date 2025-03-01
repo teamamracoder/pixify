@@ -72,28 +72,38 @@ def create_reaction(comment_id,user_id):
 
 
 
+
 def format_timestamp(timestamp):
-    """ Format timestamp as 'Today', 'Yesterday', weekday, or date """
+    """ Format timestamp as 'Just now', 'X minutes ago', 'Yesterday', or date """
     if not timestamp:
         return ''
+
     now = timezone.now()
     diff = now - timestamp
 
-    if diff.days == 0:
-        return timestamp.strftime('%I:%M %p')  # Example: "10:30 AM"
+    if diff.total_seconds() < 60:
+        return "Just now"
+    elif diff.total_seconds() < 3600:
+        minutes = int(diff.total_seconds() / 60)
+        return f"{minutes} minutes ago"
+    elif diff.total_seconds() < 86400:
+        hours = int(diff.total_seconds() / 3600)
+        return f"{hours} hours ago"
     elif diff.days == 1:
-        return 'Yesterday'
+        return "Yesterday"
     elif diff.days < 7:
-        return timestamp.strftime('%A')  # Example: "Monday"
+        return f"{diff.days} days ago"
     else:
         return timestamp.strftime('%d/%m/%Y')  # Example: "01/03/2025"
+
     
 def get_comments_by_post(post_id):
     def get_replies(parent_comment):
         """ Recursively get replies for a given comment """
-        replies = Comment.objects.filter(reply_for=parent_comment).select_related("comment_by")
+        replies = Comment.objects.filter(reply_for=parent_comment,is_active=True).select_related("comment_by")
         return [
             {
+                "id":reply.id,
                 "user": reply.comment_by.first_name,
                 "user_profile": reply.comment_by.profile_photo_url if reply.comment_by.profile_photo_url else "",  # Fix here!
                 "text": reply.comment,
@@ -105,9 +115,10 @@ def get_comments_by_post(post_id):
         ]
 
     # Fetch only top-level comments (where reply_for is NULL)
-    comments = Comment.objects.filter(post_id=post_id, reply_for__isnull=True).select_related("comment_by")
+    comments = Comment.objects.filter(post_id=post_id, reply_for__isnull=True, is_active=True).select_related("comment_by")
     return [
         {
+            "id":comment.id,
             "user": comment.comment_by.first_name,
             "user_profile": comment.comment_by.profile_photo_url if comment.comment_by.profile_photo_url else "",  # Fix here!
             "text": comment.comment,
@@ -119,7 +130,47 @@ def get_comments_by_post(post_id):
     ]
 
 
+def get_comments_by_post(post_id):
+    """
+    Fetch all top-level comments for a post along with their nested replies.
+    """
+
+    def get_replies(parent_comment):
+        """ Recursively get replies for a given comment if they are active """
+        replies = Comment.objects.filter(reply_for=parent_comment, is_active=True).select_related("comment_by")
+        return [
+            {
+                "id": reply.id,
+                "user": reply.comment_by.first_name,
+                "user_profile": reply.comment_by.profile_photo_url if reply.comment_by.profile_photo_url else "",
+                "text": reply.comment,
+                "reply_for": reply.reply_for_id,
+                "timestamp": format_timestamp(reply.created_at),
+                "replies": get_replies(reply)  # Recursively get only active replies
+            }
+            for reply in replies
+        ]
+
+    # Fetch only top-level active comments (where reply_for is NULL and is_active=True)
+    comments = Comment.objects.filter(post_id=post_id, reply_for__isnull=True, is_active=True).select_related("comment_by")
+    return [
+        {
+            "id": comment.id,
+            "user": comment.comment_by.first_name,
+            "user_profile": comment.comment_by.profile_photo_url if comment.comment_by.profile_photo_url else "",
+            "text": comment.comment,
+            "reply_for": comment.reply_for_id,
+            "timestamp": format_timestamp(comment.created_at),
+            "replies": get_replies(comment)  # Recursively fetch active replies
+        }
+        for comment in comments
+    ]
+
+
 def create_comment(user, post_id, comment_text, reply_for_id=None):
+    """
+    Create a comment or reply under a specific post.
+    """
     if not comment_text:
         return {"error": "Comment text is required."}
 
@@ -128,14 +179,18 @@ def create_comment(user, post_id, comment_text, reply_for_id=None):
     if not user or not user.is_authenticated:
         return {"error": "User must be authenticated."}
 
+    # Convert invalid reply_for_id values to None
+    if not isinstance(reply_for_id, int):  
+        reply_for_id = None  
+
     reply_for = None
     if reply_for_id:
         reply_for = get_object_or_404(Comment, id=reply_for_id)
 
-    # ✅ Debugging user before saving comment
-    print(f"🔍 DEBUG: Creating comment by User: {user} (ID: {user.id})")
+    # ✅ Debugging before saving
+    print(f"🔍 DEBUG: Creating comment by User: {user} (ID: {user.id}), Reply for: {reply_for_id}")
 
-    # ✅ Save comment with `comment_by=user`
+    # ✅ Save comment
     comment = Comment.objects.create(
         comment_by=user,  
         post_id=post,  
@@ -144,7 +199,7 @@ def create_comment(user, post_id, comment_text, reply_for_id=None):
         created_by=user,
     )
 
-    # ✅ Debug comment saved correctly
+    # ✅ Debugging saved comment
     print(f"✅ Comment created by: {comment.comment_by} (ID: {comment.comment_by.id if comment.comment_by else 'None'})")
 
     return {
@@ -155,3 +210,28 @@ def create_comment(user, post_id, comment_text, reply_for_id=None):
         "reply_for": comment.reply_for.id if comment.reply_for else None,
         "created_at": comment.created_at.strftime("%Y-%m-%d %H:%M:%S"),
     }
+
+
+
+
+def get_post_comment(comment_id):
+    return get_object_or_404(Comment, id=comment_id, is_active=True)
+
+
+def post_comment_delete(comment_id, user):
+    # Retrieve the comment object
+    comment = Comment.objects.get(id=comment_id, is_active=True)
+    # Delete the comment and its replies
+    delete_comment_and_replies(comment, user)
+
+def delete_comment_and_replies(comment, user):
+    # Retrieve all replies associated with this comment
+    replies = Comment.objects.filter(reply_for=comment, is_active=True)
+    # Mark all replies as inactive
+    for reply in replies:
+        delete_comment_and_replies(reply, user)
+    
+    # Mark the comment as inactive
+    comment.is_active = False
+    comment.updated_by = user
+    comment.save()

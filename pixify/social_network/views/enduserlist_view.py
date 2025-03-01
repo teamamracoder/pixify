@@ -113,18 +113,21 @@ class CommentListViewApi(View):
     @role_required(Role.ADMIN.value, Role.END_USER.value)
     def get(self, request, post_id):
         comments = comment_service.get_comments_by_post(post_id)
-        print(comments)
+        print("comments",comments)
         return JsonResponse({"comments": comments}, safe=False)
     
 
 
 class CommentCreate(View):
+    @catch_error
+    @auth_required
+    @role_required(Role.ADMIN.value, Role.END_USER.value)
     def post(self, request, post_id):
         try:
             data = json.loads(request.body)
             comment_text = data.get("comment_text")
-            reply_for_id = data.get("reply_for_id")
-
+            reply_for_id = data.get("reply_for")  # Get reply_for field
+            
             response = comment_service.create_comment(request.user, post_id, comment_text, reply_for_id)
 
             if "error" in response:
@@ -134,3 +137,25 @@ class CommentCreate(View):
 
         except json.JSONDecodeError:
             return JsonResponse({"error": "Invalid JSON"}, status=400)
+        
+
+class DeleteComment(View):
+    @catch_error
+    @auth_required
+    @role_required(Role.ADMIN.value, Role.END_USER.value)
+    def post(self, request, *args, **kwargs):
+        user = request.user
+        comment_id = kwargs.get('comment_id')  # Extract comment_id properly
+
+        if not comment_id:
+            return JsonResponse({'success': False, 'message': 'Comment ID is required'}, status=400)
+
+        print(f"🚀 Attempting to delete comment ID: {comment_id}")  # Debugging
+
+        try:
+            comment = comment_service.get_post_comment(comment_id)
+            comment_service.post_comment_delete(comment_id, user)
+            return JsonResponse({'success': True, 'message': 'Comment deleted successfully'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)}, status=500)
+
