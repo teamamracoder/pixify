@@ -181,7 +181,7 @@
 $(document).ready(function () {
     // Ensure the post ID is correctly retrieved
     function getPostId() {
-        const postId = $(".load-comments").attr("data-post-id");
+        const postId = $("#commentForm").attr("data-post-id");
         if (!postId) {
             console.error("❌ Error: Post ID is missing in the HTML!");
             return null;
@@ -192,10 +192,12 @@ $(document).ready(function () {
     // Function to create a comment and reload comments
     function submitComment() {
         const commentText = $("#commentText").val().trim();
-        const postId = getPostId();
         const csrfToken = $("input[name=csrfmiddlewaretoken]").val();
 
-        if (!postId) return;
+        if (!postId) {
+            console.error("❌ Error: Post ID is missing!");
+            return;
+        }
         if (!commentText.length) {
             console.warn("⚠️ Warning: Comment text is empty.");
             return;
@@ -212,37 +214,25 @@ $(document).ready(function () {
             success: function (response) {
                 console.log("✅ Comment created:", response);
 
-                if (!response.user || response.user === "Unknown") {
-                    console.warn("⚠️ Warning: User information is missing in the response.");
-                }
-
                 // Clear input field
                 $("#commentText").val("");
 
-                // Trigger the existing click event to reload comments
+                // Reload comments
                 $(`.load-comments[data-post-id="${postId}"]`).click();
             },
-            error: function (xhr, status, error) {
+            error: function (xhr) {
                 console.error("❌ Error:", xhr.responseText);
             }
         });
     }
 
-    // Event listeners for form submission
-    $("#commentForm").submit(function (event) {
-        event.preventDefault(); // Prevent traditional form submission
-        submitComment();
+    // Add click event listener to the new submit button
+    $("#submitCommentButton").click(function () {
+        const postId = $("#commentForm").data("post-id"); // Get post ID from form
+        submitComment(postId);
     });
-
-    $("#createcomment").click(function (event) {
-        event.preventDefault(); // Prevent button default action
-        submitComment();
-    });
-
-    // Debugging: Check if post ID exists on page load
-    console.log("📝 Checking if #commentForm exists:", $("#commentForm").length > 0);
-    console.log("📌 Post ID from form:", getPostId());
 });
+
 
 
 //comments fetch
