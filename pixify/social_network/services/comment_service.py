@@ -94,6 +94,7 @@ def get_comments_by_post(post_id):
         replies = Comment.objects.filter(reply_for=parent_comment).select_related("comment_by")
         return [
             {
+                "id":reply.id,
                 "user": reply.comment_by.first_name,
                 "user_profile": reply.comment_by.profile_photo_url if reply.comment_by.profile_photo_url else "",  # Fix here!
                 "text": reply.comment,
@@ -108,6 +109,7 @@ def get_comments_by_post(post_id):
     comments = Comment.objects.filter(post_id=post_id, reply_for__isnull=True).select_related("comment_by")
     return [
         {
+            "id":comment.id,
             "user": comment.comment_by.first_name,
             "user_profile": comment.comment_by.profile_photo_url if comment.comment_by.profile_photo_url else "",  # Fix here!
             "text": comment.comment,
@@ -119,7 +121,47 @@ def get_comments_by_post(post_id):
     ]
 
 
+
+def get_comments_by_post(post_id):
+    """
+    Fetch all top-level comments for a post along with their nested replies.
+    """
+
+    def get_replies(parent_comment):
+        """ Recursively get replies for a given comment """
+        replies = Comment.objects.filter(reply_for=parent_comment).select_related("comment_by")
+        return [
+            {
+                "id": reply.id,
+                "user": reply.comment_by.first_name,
+                "user_profile": reply.comment_by.profile_photo_url if reply.comment_by.profile_photo_url else "",
+                "text": reply.comment,
+                "reply_for": reply.reply_for_id,
+                "timestamp": format_timestamp(reply.created_at),
+                "replies": get_replies(reply)
+            }
+            for reply in replies
+        ]
+
+    # Fetch only top-level comments (where reply_for is NULL)
+    comments = Comment.objects.filter(post_id=post_id, reply_for__isnull=True).select_related("comment_by")
+    return [
+        {
+            "id": comment.id,
+            "user": comment.comment_by.first_name,
+            "user_profile": comment.comment_by.profile_photo_url if comment.comment_by.profile_photo_url else "",
+            "text": comment.comment,
+            "reply_for": comment.reply_for_id,
+            "timestamp": format_timestamp(comment.created_at),
+            "replies": get_replies(comment)
+        }
+        for comment in comments
+    ]
+
 def create_comment(user, post_id, comment_text, reply_for_id=None):
+    """
+    Create a comment or reply under a specific post.
+    """
     if not comment_text:
         return {"error": "Comment text is required."}
 
@@ -128,14 +170,18 @@ def create_comment(user, post_id, comment_text, reply_for_id=None):
     if not user or not user.is_authenticated:
         return {"error": "User must be authenticated."}
 
+    # Convert invalid reply_for_id values to None
+    if not isinstance(reply_for_id, int):  
+        reply_for_id = None  
+
     reply_for = None
     if reply_for_id:
         reply_for = get_object_or_404(Comment, id=reply_for_id)
 
-    # ✅ Debugging user before saving comment
-    print(f"🔍 DEBUG: Creating comment by User: {user} (ID: {user.id})")
+    # ✅ Debugging before saving
+    print(f"🔍 DEBUG: Creating comment by User: {user} (ID: {user.id}), Reply for: {reply_for_id}")
 
-    # ✅ Save comment with `comment_by=user`
+    # ✅ Save comment
     comment = Comment.objects.create(
         comment_by=user,  
         post_id=post,  
@@ -144,7 +190,7 @@ def create_comment(user, post_id, comment_text, reply_for_id=None):
         created_by=user,
     )
 
-    # ✅ Debug comment saved correctly
+    # ✅ Debugging saved comment
     print(f"✅ Comment created by: {comment.comment_by} (ID: {comment.comment_by.id if comment.comment_by else 'None'})")
 
     return {

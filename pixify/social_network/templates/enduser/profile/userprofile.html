@@ -179,8 +179,8 @@
 
 //comment create
 $(document).ready(function () {
-    // Function to create a comment and reload comments
-    function submitComment(postId) {
+    // Function to submit a comment or a reply
+    function submitComment(postId, replyFor = null) {
         const commentText = $("#commentText").val().trim();
         const csrfToken = $("input[name=csrfmiddlewaretoken]").val();
 
@@ -193,21 +193,27 @@ $(document).ready(function () {
             return;
         }
 
-        console.log("📌 Submitting comment for Post ID:", postId);
+        // Ensure replyFor is a valid number or null
+        replyFor = replyFor && !isNaN(replyFor) ? parseInt(replyFor) : null;
+
+        console.log("📌 Submitting comment for Post ID:", postId, "Reply For:", replyFor);
 
         $.ajax({
             url: `/comments/${postId}/`,
             type: "POST",
             headers: { "X-CSRFToken": csrfToken },
             contentType: "application/json",
-            data: JSON.stringify({ comment_text: commentText }),
+            data: JSON.stringify({ 
+                comment_text: commentText, 
+                reply_for: replyFor 
+            }),
             success: function (response) {
-                console.log("✅ Comment created:", response);
+                console.log("✅ Comment/Reply created:", response);
 
-                // Clear input field
-                $("#commentText").val("");
+                // Clear input field and reset reply mode
+                $("#commentText").val("").removeAttr("data-reply-for");
 
-                // Call the existing load-comments function after success
+                // Reload comments dynamically
                 $(`.load-comments[data-post-id="${postId}"]`).click();
             },
             error: function (xhr) {
@@ -220,61 +226,88 @@ $(document).ready(function () {
     $("#createcomment").click(function (e) {
         e.preventDefault(); // Prevent form submission
         const postId = $(".load-comments").data("post-id");
-        submitComment(postId);
+        const replyFor = $("#commentText").attr("data-reply-for") || null; // Ensure null if no reply
+        submitComment(postId, replyFor);
+    });
+
+    // Load comments when "View Comments" is clicked
+    $(".load-comments").click(function () {
+        let postId = $(this).data("post-id");
+
+        if (!postId) {
+            console.error("❌ Error: Post ID is undefined!");
+            return;
+        }
+
+        $("#comments-container").html("<p>Loading comments...</p>");
+        $("#commentModal").modal("show");
+
+        $.ajax({
+            url: `/api/comments/${postId}/`,
+            type: "GET",
+            dataType: "json",
+            success: function (response) {
+                let commentsHtml = response.comments.length
+                    ? generateCommentTree(response.comments)
+                    : "<p>No comments yet.</p>";
+
+                $("#comments-container").html(commentsHtml);
+            },
+            error: function () {
+                $("#comments-container").html("<p>Failed to load comments.</p>");
+            }
+        });
+    });
+
+    // Function to generate nested comments with reply button
+    function generateCommentTree(comments) {
+        return comments.map(comment => `
+            <div class="comment">
+                <div style="display: flex; gap:5px; align-items: flex-start;">
+                    <img src="${comment.user_profile}" alt="${comment.user}" class="comment-profile-img">
+                    <div class="comment-content"> 
+                        <div class="comment-header">
+                            <div>${comment.user}</div>
+                            <div>${comment.text}</div>  
+                        </div>
+                        ${comment.replies && comment.replies.length > 0
+                            ? `<div class="replies">${generateCommentTree(comment.replies)}</div>` 
+                            : ""}
+                        <div class="foot-cmt">
+                            <div class="reply-btn" data-comment-id="${comment.id}" data-post-id="${comment.post_id}" style="font-size: small; cursor: pointer; color: lightblue;">
+                                Reply
+                            </div>
+                            <div style="font-size: 10px;">${comment.timestamp}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `).join("");
+    }
+
+    // Handle reply button click
+    $(document).on("click", ".reply-btn", function () {
+        let commentId = $(this).data("comment-id");
+        let postId = $(this).data("post-id");
+
+        if (!commentId || isNaN(commentId)) {
+            console.error("❌ Error: Invalid comment ID for reply.");
+            return;
+        }
+
+        console.log("💬 Replying to Comment ID:", commentId);
+
+        // Set reply mode by storing the reply_for (parent comment ID)
+        $("#commentText").attr("data-reply-for", commentId).focus();
+
+        // Scroll to the input field for better UX
+        $('html, body').animate({
+            scrollTop: $("#commentText").offset().top - 100
+        }, 300);
     });
 });
 
 
-//comments fetch
-
-
-    $(document).ready(function () {
-        $(".load-comments").click(function () {
-            let postId = $(this).data("post-id");
-    
-            if (!postId) {
-                console.error("Error: Post ID is undefined!");
-                return;
-            }
-    
-            $("#comments-container").html("<p>Loading comments...</p>");
-            $("#commentModal").modal("show"); // Open the modal
-    
-            $.ajax({
-                url: `/api/comments/${postId}/`,
-                type: "GET",
-                dataType: "json",
-                success: function (response) {
-                    let commentsHtml = response.comments.length
-                        ? generateCommentTree(response.comments)
-                        : "<p>No comments yet.</p>";
-    
-                    $("#comments-container").html(commentsHtml);
-                },
-                error: function () {
-                    $("#comments-container").html("<p>Failed to load comments.</p>");
-                }
-            });
-        });
-    
-        // Function to recursively generate nested comments
-        function generateCommentTree(comments) {
-            return comments.map(comment => `
-                <div class="comment">
-                    <div class="comment-header">
-                        <img src="${comment.user_profile}" alt="${comment.user}" class="comment-profile-img">
-                        <div>${comment.user}</div>
-                        <div style="font-size: 10px;">${comment.timestamp}</div>
-                    </div>
-                    <p>${comment.text}</p>    
-                    ${comment.replies && comment.replies.length > 0
-                        ? `<div class="replies">${generateCommentTree(comment.replies)}</div>` 
-                        : ""}
-                </div>
-            `).join("");
-        }
-    });
-    
     
     
     function toggleFriends(listId, btn) {
@@ -406,34 +439,33 @@ $(document).ready(function () {
     
 
     <style>
-        .commt-foot{
-            border-bottom-right-radius: 15px;
-            background: #2c0862;
-            height: 70px;
-            border-bottom-left-radius: 15px;
-        }
-        #modal-comments-header{
-            justify-content: space-between;
-            display: flex;
+        .foot-cmt{
+            gap: 30px;
+            margin-left: 30px;
+            width: 74%;
             align-items: center;
+            display: flex
+        ;
+
         }
-        .comment {
+        .comment-content{
+            width:90%;
+        }
+        .comment-header{
+            padding-left: 10px;
             border-radius: 10px;
-            background: #41157c;
-            padding: 10px;
-            margin-bottom: 10px;
+            width: 90%;
+            background: #311e4ee3;
         }
-        
-        .comment-header {
-            font-size: small;
+
+        #modal-comments-header{
             display: flex;
             align-items: center;
-            gap: 10px;
-        }
+        }     
         
         .comment-profile-img {
-            width: 20px;
-            height: 20px;
+            width: 35px;
+            height: 35px;
             border-radius: 50%;
             object-fit: cover;
         }
