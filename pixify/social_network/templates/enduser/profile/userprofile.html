@@ -5,7 +5,7 @@
     <div class="profile-container">
         <div class="profile-card">
             <div class="profile-header">
-                <img src="{% static user_details.profile_photo %}" alt="Profile Picture" class="profile-img">
+                <img src="{% static user_details.profile_photo |default:'/images/avatar.jpg' %}" alt="Profile Picture" class="profile-img">
                 <p class="user_title">{{ user_details.user_name }}</p>
             </div>
             <div class="profile-info">
@@ -19,14 +19,14 @@
         <!-- Followers Section -->
         <div class="friends-section">
             <div class="heading-part">
-                <h3>Followers</h3>
-                <div class="see-all-btn" onclick="toggleFriends('followers-list', this)">See more</div>
+                <h4>Followers</h4>
+                <div class="see-all-btn" onclick="toggleFriends('followers-list', this)">show</div>
             </div>
             {% if user_details.followers %}
             <div class="friend-list" id="followers-list">
                 {% for friend in user_details.followers %}
                 <div class="friend-card hidden-follower" onclick="window.location.href='{% url 'profile' friend.id %}'">
-                    <img src="{% static friend.profile_pic|default:'/static/images/avatar.jpg' %}" alt="Follower" class="friend-img">
+                    <img src="{% static friend.profile_pic|default:'/images/avatar.jpg' %}" alt="Follower" class="friend-img">
                     <div>{{ friend.first_name }}</div>
                 </div>
                 {% endfor %}
@@ -39,14 +39,14 @@
         <!-- Following Section -->
         <div class="friends-section">
             <div class="heading-part">
-                <h3>Following</h3>
-                <div class="see-all-btn" onclick="toggleFriends('following-list', this)">See more</div>
+                <h4>Following</h4>
+                <div class="see-all-btn" onclick="toggleFriends('following-list', this)">show</div>
             </div>
             {% if user_details.followings %}
             <div class="friend-list" id="following-list">
                 {% for friend in user_details.followings %}
                 <div class="friend-card hidden-following" onclick="window.location.href='{% url 'profile' friend.id %}'">
-                    <img src="{% static friend.profile_pic|default:'/static/images/avatar.jpg' %}" alt="Following" class="friend-img">
+                    <img src="{% static friend.profile_pic|default:'/images/avatar.jpg' %}" alt="Following" class="friend-img">
                     <div>{{ friend.first_name }}</div>
                 </div>
                 {% endfor %}
@@ -63,7 +63,7 @@
                 {% for post in user_details.posts %}
                     <div class="user-post" data-post-id="{{ post.id }}">
                         <div class="post-title-wrapper">
-                            <img src="{% static user_details.profile_photo|default:'/static/images/avatar.jpg' %}" class="photo-of-post">
+                            <img src="{% static user_details.profile_photo|default:'/images/avatar.jpg' %}" class="photo-of-post">
                             <div class="post-title">{{ user_details.user_name }}</div>
                         </div>
 
@@ -83,9 +83,9 @@
                         <div class="post-opt-icons" style="height: 4vh;">
                             <div class="post-reaction" style="cursor: pointer;">
                                 <i class="bi bi-emoji-smile" onclick="toggleReactionPopup('{{ post.id }}')"></i>
-                                <span data-toggle="modal" class="load-comments">
+                                <span data-toggle="modal" class="load-comments" data-post-id={{post.id}}>
                                     <i class="fa-regular fa-comment"></i>
-                                </span>
+                                </span>                                
                                 <i class="fa-solid fa-share-nodes" data-bs-toggle="modal" data-bs-target="#shareModal"></i>
                             </div>                         
                                 <!-- Ensure CSRF Token is Included -->
@@ -112,6 +112,25 @@
         </div>
 {% endif %}
 <div class="footer">Nothing to show</div>
+
+
+<!-- Comment Modal -->
+<div class="modal fade" id="commentModal" tabindex="-1" aria-labelledby="commentModalLabel" aria-hidden="true">
+    <div class="modal-dialog"style="height: 70vh; width:70%;">
+        <div class="modal-content" style="height: 100%;">
+            <div class="modal-header" id="modal-comments-header">
+                <h5 class="modal-title" id="commentModalLabel">Comments</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="comments-container">
+                <!-- Comments will be loaded here -->
+            </div>
+        </div>
+    </div>
+</div>
+
 </div>
 
 
@@ -119,9 +138,6 @@
     document.addEventListener("DOMContentLoaded", function () {
         // Hide extra followers/followings beyond 4 initially
         document.querySelectorAll('.friend-card.hidden-follower, .friend-card.hidden-following')
-            .forEach((item, index) => {
-                if (index >= 4) item.style.display = "none";
-            });
 
         // Load reactions for each post on page load
         document.querySelectorAll(".user-post").forEach(post => {
@@ -132,22 +148,69 @@
         });
     });
 
+    $(document).ready(function () {
+        $(".load-comments").click(function () {
+            let postId = $(this).data("post-id");
+    
+            if (!postId) {
+                console.error("Error: Post ID is undefined!");
+                return;
+            }
+    
+            $("#comments-container").html("<p>Loading comments...</p>");
+            $("#commentModal").modal("show"); // Open the modal
+    
+            $.ajax({
+                url: `/api/comments/${postId}/`,
+                type: "GET",
+                dataType: "json",
+                success: function (response) {
+                    let commentsHtml = response.comments.length
+                        ? generateCommentTree(response.comments)
+                        : "<p>No comments yet.</p>";
+    
+                    $("#comments-container").html(commentsHtml);
+                },
+                error: function () {
+                    $("#comments-container").html("<p>Failed to load comments.</p>");
+                }
+            });
+        });
+    
+        // Function to recursively generate nested comments
+        function generateCommentTree(comments) {
+            return comments.map(comment => `
+                <div class="comment">
+                    <div class="comment-header">
+                        <img src="${comment.user_profile}" alt="${comment.user}" class="comment-profile-img">
+                        <div>${comment.user}</div>
+                        <div style="font-size: 10px;">${comment.timestamp}</div>
+                    </div>
+                    <p>${comment.text}</p>    
+                    ${comment.replies && comment.replies.length > 0
+                        ? `<div class="replies">${generateCommentTree(comment.replies)}</div>` 
+                        : ""}
+                </div>
+            `).join("");
+        }
+    });
+    
     
     
     function toggleFriends(listId, btn) {
         let list = document.getElementById(listId);
-        let hiddenItems = list.querySelectorAll('.friend-card.hidden-follower, .friend-card.hidden-following');
-    
-        if (btn.innerText === "See more") {
-            hiddenItems.forEach(item => (item.style.display = "flex")); 
-            btn.innerText = "See Less";
+        
+        if (list.style.display === "none" || list.style.display === "") {
+            list.style.display = "flex"; // Show full friend list
+            list.style.overflowY = "auto"; // Allow scrolling
+            list.style.maxHeight = "305px"; // Fixed property name
+            btn.innerText = "~hide";
         } else {
-            hiddenItems.forEach((item, index) => {
-                if (index >= 4) item.style.display = "none"; 
-            });
-            btn.innerText = "See more";
+            list.style.display = "none"; // Hide full friend list
+            btn.innerText = "show";
         }
     }
+    
     
     // Function to Toggle Reaction Popup
     function toggleReactionPopup(postId) {
@@ -262,6 +325,37 @@
     
 
     <style>
+        #modal-comments-header{
+            justify-content: space-between;
+            display: flex;
+            align-items: center;
+        }
+        .comment {
+            border-radius: 10px;
+            background: #41157c;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .comment-header {
+            font-size: small;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .comment-profile-img {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        
+        .replies {
+            margin-left: 40px; /* Indent replies */
+            padding-left: 10px;
+        }
+        
         .post-reactions{
             justify-content: center;
             align-items: center;
@@ -355,7 +449,6 @@
             height: 100%;
             overflow-y: auto;
             max-height: 90vh;
-            width: 75%;
             margin: auto;
             padding: 20px;
             background-color: #25004d;
@@ -406,13 +499,13 @@
         }
 
         .friend-list {
-            display: flex;
+            display: none; /* Initially hidden */
+            max-height: 305px; /* Limit height */
+            overflow-y: auto; /* Enable scrolling */
             flex-direction: column;
             align-items: center;
-            overflow: hidden;
-            max-height: 150px;
-            transition: max-height 0.3s ease-in-out;
         }
+        
 
         .friend-list.expanded {
             max-height: none;
@@ -466,7 +559,7 @@
             align-items: end;
             justify-content: center;
             display: flex;
-            font-size: larger;
+            font-size: small;
             height: 30px;
         }
         .post0title{
