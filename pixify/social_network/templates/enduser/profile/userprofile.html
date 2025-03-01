@@ -118,7 +118,7 @@
 <div class="modal fade" id="commentModal" tabindex="-1" aria-labelledby="commentModalLabel" aria-hidden="true">
     <div class="modal-dialog"style="height: 70vh; width:70%;">
         <div class="modal-content" style="height: 100%;">
-            <div class="modal-header">
+            <div class="modal-header" id="modal-comments-header">
                 <h5 class="modal-title" id="commentModalLabel">Comments</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
@@ -183,11 +183,10 @@
                 <div class="comment">
                     <div class="comment-header">
                         <img src="${comment.user_profile}" alt="${comment.user}" class="comment-profile-img">
-                        <strong>${comment.user}</strong>
+                        <div>${comment.user}</div>
+                        <div style="font-size: 10px;">${comment.timestamp}</div>
                     </div>
-                    <p>${comment.text}</p>
-                    <small>${comment.timestamp}</small>
-    
+                    <p>${comment.text}</p>    
                     ${comment.replies && comment.replies.length > 0
                         ? `<div class="replies">${generateCommentTree(comment.replies)}</div>` 
                         : ""}
@@ -326,27 +325,34 @@
     
 
     <style>
+        #modal-comments-header{
+            justify-content: space-between;
+            display: flex;
+            align-items: center;
+        }
         .comment {
+            border-radius: 10px;
+            background: #41157c;
             padding: 10px;
             margin-bottom: 10px;
         }
         
         .comment-header {
+            font-size: small;
             display: flex;
             align-items: center;
             gap: 10px;
         }
         
         .comment-profile-img {
-            width: 40px;
-            height: 40px;
+            width: 20px;
+            height: 20px;
             border-radius: 50%;
             object-fit: cover;
         }
         
         .replies {
             margin-left: 40px; /* Indent replies */
-            border-left: 2px solid #ddd;
             padding-left: 10px;
         }
         
