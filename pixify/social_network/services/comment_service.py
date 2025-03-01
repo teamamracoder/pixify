@@ -72,21 +72,30 @@ def create_reaction(comment_id,user_id):
 
 
 
+
 def format_timestamp(timestamp):
-    """ Format timestamp as 'Today', 'Yesterday', weekday, or date """
+    """ Format timestamp as 'Just now', 'X minutes ago', 'Yesterday', or date """
     if not timestamp:
         return ''
+
     now = timezone.now()
     diff = now - timestamp
 
-    if diff.days == 0:
-        return timestamp.strftime('%I:%M %p')  # Example: "10:30 AM"
+    if diff.total_seconds() < 60:
+        return "Just now"
+    elif diff.total_seconds() < 3600:
+        minutes = int(diff.total_seconds() / 60)
+        return f"{minutes} minutes ago"
+    elif diff.total_seconds() < 86400:
+        hours = int(diff.total_seconds() / 3600)
+        return f"{hours} hours ago"
     elif diff.days == 1:
-        return 'Yesterday'
+        return "Yesterday"
     elif diff.days < 7:
-        return timestamp.strftime('%A')  # Example: "Monday"
+        return f"{diff.days} days ago"
     else:
         return timestamp.strftime('%d/%m/%Y')  # Example: "01/03/2025"
+
     
 def get_comments_by_post(post_id):
     def get_replies(parent_comment):

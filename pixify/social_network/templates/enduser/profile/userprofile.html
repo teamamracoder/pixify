@@ -260,30 +260,32 @@ $(document).ready(function () {
     });
 
     // Function to generate nested comments with reply button
-    function generateCommentTree(comments) {
+    function generateCommentTree(comments, isReply = false) {
         return comments.map(comment => `
-            <div class="comment">
+            <div class="comment" style="margin-left: ${isReply ? "30px" : "0px"};">
                 <div style="display: flex; gap:5px; align-items: flex-start;">
                     <img src="${comment.user_profile}" alt="${comment.user}" class="comment-profile-img">
                     <div class="comment-content"> 
                         <div class="comment-header">
-                            <div>${comment.user}</div>
+                            <div><strong>${comment.user}</strong></div>
                             <div>${comment.text}</div>  
                         </div>
                         <div class="foot-cmt">
-                            <div class="reply-btn" data-comment-id="${comment.id}" data-post-id="${comment.post_id}" style="font-size: small; cursor: pointer; color: lightblue;">
+                            <div class="reply-btn" data-comment-id="${comment.id}" data-post-id="${comment.post_id}" 
+                                 style="font-size: small; cursor: pointer; color: lightblue;">
                                 Reply
                             </div>
                             <div style="font-size: 10px;">${comment.timestamp}</div>
                         </div>
-                        ${comment.replies && comment.replies.length > 0
-                            ? `<div class="replies">${generateCommentTree(comment.replies)}</div>` 
-                            : ""} 
                     </div>
                 </div>
             </div>
+            ${comment.replies && comment.replies.length > 0 
+            ? comment.replies.map(reply => generateCommentTree([reply], true)).join("") 
+            : ""}
         `).join("");
     }
+    
 
     // Handle reply button click
     $(document).on("click", ".reply-btn", function () {
@@ -439,6 +441,11 @@ $(document).ready(function () {
     
 
     <style>
+
+
+
+
+        
         .foot-cmt{
             gap: 30px;
             margin-left: 30px;
