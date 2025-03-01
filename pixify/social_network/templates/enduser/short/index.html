@@ -143,8 +143,8 @@
 
 
   function toggleVideoDetails(videoId) {
-    var detailsDiv = document.getElementById("videoDetails" + videoId);
-    var seeMore = document.getElementById("seeMore" + videoId);
+    const detailsDiv = document.getElementById("videoDetails" + videoId);
+    const seeMore = document.getElementById("seeMore" + videoId);
     
     if (detailsDiv.style.display === "none") {
       detailsDiv.style.display = "block";
@@ -154,6 +154,28 @@
       seeMore.style.display = "block";
     }
   }
+  
+
+  function hideVideoDetails() {
+      const detailsList = document.querySelectorAll("[id^='videoDetails']");
+      const seeMoreList = document.querySelectorAll("[id^='seeMore']");
+  
+      detailsList.forEach(function(detailsDiv) {
+        detailsDiv.style.display = "none";
+      });
+      
+      seeMoreList.forEach(function(seeMore) {
+        seeMore.style.display = "block";
+      });
+    }
+  
+    // Example: Attach the function to a click event on the document
+    document.addEventListener("click", function(event) {
+      // Only hide if the click did not occur inside an element with the "video-description" class.
+      if (!event.target.closest(".video-description")) {
+        hideVideoDetails();
+      }
+    });
   
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -361,6 +383,7 @@ function getCookie(name) {
                 if (index !== currentIndex) {
             // Close all modals of the previous short before updating active video.
                     closeAllModals();
+                    hideVideoDetails();
                     updateActiveVideo(index);
                     currentIndex = index;
                     updateButtonVisibility();
@@ -1651,10 +1674,10 @@ margin-top: 16px;
 /* User Info */
 
 /* Container for user information */
-.user-info {
-    display: flex;
-    align-items: center;
-    margin-bottom: 10px;
+.user-info {  
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
 }
 
 /* Styling for profile picture */
