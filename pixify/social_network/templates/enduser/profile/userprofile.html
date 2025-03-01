@@ -116,8 +116,8 @@
 
 <!-- Comment Modal -->
 <div class="modal fade" id="commentModal" tabindex="-1" aria-labelledby="commentModalLabel" aria-hidden="true">
-    <div class="modal-dialog"style="height: 70vh; width:70%;">
-        <div class="modal-content" style="height: 100%;">
+    <div class="modal-dialog"style="height: 70vh; width:45%;">
+        <div class="modal-content" style="height: 100%; width: 96%;">
             <div class="modal-header" id="modal-comments-header">
                 <h5 class="modal-title" id="commentModalLabel">Comments</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -126,6 +126,24 @@
             </div>
             <div class="modal-body" id="comments-container">
                 <!-- Comments will be loaded here -->
+            </div>
+            <div id="CommentsectionTextarea" class="container-fluid py-2 com_sent" style="position: absolute;bottom: 0; 0; */">
+                <div class="input-group ms-2">
+                    <!-- Left icons -->
+                    <div class="input-group-prepend d-flex gap-2 align-items-center pe-2">
+                        <i class="bi bi-emoji-smile text-light fs-6"></i>
+                    </div>
+        
+                    <!-- Comment input -->
+                    <input class="form-control" id="commentText" name="comment_text" placeholder="Write a comment..." style="border-radius: 15px; background-color: #27236e; color: white;" fdprocessedid="dq9p0f">
+        
+                    <!-- Right button -->
+                    <div class="input-group-append d-flex gap-3 align-items-center ps-2">
+                        <button id="createcomment" type="submit" class="btn btn-transparent text-info p-0">
+                            <img src="/static/images/send-message.png" alt="" style="height: 23px;">
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -609,6 +627,29 @@
             .profile-container{
                 width:100%;  
             }
+        }
+
+
+
+        @media (max-width: 768px) {
+            .modal-dialog{
+                margin-top: 10% !important;
+                height: 70vh !important;
+                width: 100% !important;
+            }
+            .modal-content{
+                height: 100% !important;
+                width: 100% !important;
+            }
+            
+        }
+        @media (max-width: 480px) {
+            .modal-dialog{
+                margin-top: 30% !important;
+                height: 70vh !important;
+                width: 100% !important;
+            }
+           
         }
     </style>
 </body>
