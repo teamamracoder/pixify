@@ -159,6 +159,14 @@
         </div>
     </div>
 </div>
+<div id="deleteModal" class="modal">
+    <div class="modal-content">
+        <p>Are you sure you want to delete this comment?</p>
+        <button id="confirmDelete">Delete</button>
+        <button id="cancelDelete">Cancel</button>
+    </div>
+</div>
+
 
 </div>
 
@@ -285,6 +293,75 @@ $(document).ready(function () {
             : ""}
         `).join("");
     }
+
+    //delete
+
+    $(document).ready(function () {
+        let holdTimeout;
+        
+        // Show delete modal on long press
+        $(document).on("mousedown touchstart", ".comment", function (event) {
+            let commentId = $(this).find(".reply-btn").data("comment-id");
+            let postId = $(this).find(".reply-btn").data("post-id");
+    
+            holdTimeout = setTimeout(() => {
+                $("#deleteModal").show().data("comment-id", commentId).data("post-id", postId);
+            }, 500); // 500ms to trigger modal
+        });
+    
+        // Cancel if user releases early
+        $(document).on("mouseup touchend", function () {
+            clearTimeout(holdTimeout);
+        });
+    
+        // Close modal on cancel
+        $("#cancelDelete").click(function () {
+            $("#deleteModal").hide();
+        });
+    
+        // Handle delete action
+    // Handle delete action
+    $("#confirmDelete").click(function () {
+        let commentId = $("#deleteModal").data("comment-id");
+        let postId = $(".load-comments").data("post-id");
+        let csrfToken = $("input[name=csrfmiddlewaretoken]").val();
+
+        console.log("🚀 Sending delete request for Comment ID:", commentId);
+
+        $.ajax({
+            url: `/comments/delete/${commentId}/`,
+            type: "POST",
+            headers: { "X-CSRFToken": csrfToken },
+            success: function (response) {
+                console.log("✅ Comment deleted:", response);
+                $("#deleteModal").hide();
+
+                // Reload comments dynamically WITHOUT clicking "View Comments"
+                $.ajax({
+                    url: `/api/comments/${postId}/`,
+                    type: "GET",
+                    dataType: "json",
+                    success: function (response) {
+                        let commentsHtml = response.comments.length
+                            ? generateCommentTree(response.comments)
+                            : "<p>No comments yet.</p>";
+
+                        $("#comments-container").html(commentsHtml); // Update comment section
+                    },
+                    error: function () {
+                        $("#comments-container").html("<p>Failed to load comments.</p>");
+                    }
+                });
+            },
+            error: function (xhr) {
+                console.error("❌ Error deleting comment:", xhr.responseText);
+            }
+        });
+    });
+    
+        
+    });
+    
     
 
     // Handle reply button click
