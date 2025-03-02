@@ -7,6 +7,7 @@ from social_network.decorators.exception_decorators import catch_error
 from django.http import JsonResponse
 from ..services import user_service,chat_service,post_service,message_reaction_service,comment_service
 
+
 class EnduserprofileListView(View):
     def get(self, request, user_id):
         detail = user_service.get_user_details(user_id)
@@ -112,8 +113,9 @@ class CommentListViewApi(View):
     @auth_required
     @role_required(Role.ADMIN.value, Role.END_USER.value)
     def get(self, request, post_id):
-        comments = comment_service.get_comments_by_post(post_id)
-        # print("comments",comments)
+        user_id=request.user.id
+        comments = comment_service.get_comments_by_post(post_id,user_id)
+        print("comments",comments)
         return JsonResponse({"comments": comments}, safe=False)
     
 
@@ -159,3 +161,26 @@ class DeleteComment(View):
         except Exception as e:
             return JsonResponse({'success': False, 'message': str(e)}, status=500)
 
+
+
+class TogglReactionView(View):
+    @catch_error
+    @auth_required
+    @role_required(Role.ADMIN.value, Role.END_USER.value)
+    def get(self, request):
+        return JsonResponse({"error": "GET method not allowed"}, status=405)
+
+    def post(self, request):
+        try:
+            data = json.loads(request.body)
+            comment_id = data.get("comment_id")
+            reacted_by = request.user.id  # Get logged-in user
+            # print("comment_id :",comment_id,"reacted_by:",reacted_by)
+            response_data = comment_service.toggle_reaction(comment_id, reacted_by)
+            return JsonResponse(response_data)
+
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON"}, status=400)
+
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)

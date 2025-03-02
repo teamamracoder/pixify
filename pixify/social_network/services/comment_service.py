@@ -6,6 +6,9 @@ from django.db.models import Q
 from ..models import User,CommentReaction
 from .. import models
 from django.utils import timezone
+from django.core.exceptions import ObjectDoesNotExist
+from django.contrib.auth import get_user_model
+
 
 
 
@@ -101,13 +104,25 @@ def format_timestamp(timestamp):
             return f"{years} years ago"
 
 
-def get_comments_by_post(post_id):
+def get_created_by_react(comment_id, user_id):
+    reacted_users = list(
+        CommentReaction.objects.filter(comment_id=comment_id, is_active=True)
+        .values_list("reacted_by", flat=True)  # Get all reacted user IDs
+    )
+
+    return {
+        "react_created_by": user_id in reacted_users,  # True if current user reacted
+        "reacted_by": reacted_users if reacted_users else []  # Ensure always an array
+    }
+
+
+def get_comments_by_post(post_id, user_id):
     """
     Fetch all top-level comments for a post along with their nested replies.
     """
 
     def get_replies(parent_comment):
-        """ Recursively get replies for a given comment if they are active """
+        """ Recursively get replies for a given comment """
         replies = Comment.objects.filter(reply_for=parent_comment, is_active=True).select_related("comment_by")
         return [
             {
@@ -117,13 +132,15 @@ def get_comments_by_post(post_id):
                 "text": reply.comment,
                 "reply_for": reply.reply_for_id,
                 "timestamp": format_timestamp(reply.created_at),
-                "replies": get_replies(reply)  # Recursively get only active replies
+                "replies": get_replies(reply),
+                "react_count": get_count_react(reply.id) or 0,
+                **get_created_by_react(reply.id, user_id)  # Ensures reacted_by is included
             }
             for reply in replies
         ]
 
-    # Fetch only top-level active comments (where reply_for is NULL and is_active=True)
     comments = Comment.objects.filter(post_id=post_id, reply_for__isnull=True, is_active=True).select_related("comment_by")
+
     return [
         {
             "id": comment.id,
@@ -132,11 +149,20 @@ def get_comments_by_post(post_id):
             "text": comment.comment,
             "reply_for": comment.reply_for_id,
             "timestamp": format_timestamp(comment.created_at),
-            "replies": get_replies(comment)  # Recursively fetch active replies
+            "replies": get_replies(comment),
+            "react_count": get_count_react(comment.id) or 0,
+            **get_created_by_react(comment.id, user_id)  # Ensures reacted_by is included
         }
         for comment in comments
     ]
 
+
+
+
+def get_count_react(comment_id):
+    cmt_count=CommentReaction.objects.filter(comment_id=comment_id, is_active=True).count()
+    print(cmt_count)
+    return cmt_count
 
 def create_comment(user, post_id, comment_text, reply_for_id=None):
     """
@@ -206,3 +232,52 @@ def delete_comment_and_replies(comment, user):
     comment.is_active = False
     comment.updated_by = user
     comment.save()
+
+
+
+User = get_user_model()  # Get the custom user model
+
+def toggle_reaction(comment_id, reacted_by):
+    try:
+        # Retrieve the comment
+        comment = Comment.objects.get(id=comment_id)
+        user = User.objects.get(id=reacted_by)  # Get the correct User model instance
+
+        # print("comment_id:", comment.id, "reacted_by:", user.id)
+
+        # Find an existing reaction
+        reaction, created = CommentReaction.objects.get_or_create(
+            comment_id=comment, reacted_by=user,
+            defaults={"created_by": user, "is_active": True}
+        )
+
+        # print("hello")
+
+        if not created:
+            # Toggle `is_active` instead of deleting the reaction
+            reaction.is_active = not reaction.is_active
+            reaction.save()
+
+            if not reaction.is_active:
+                print("Reaction removed (Unliked)")
+                return {
+                    "status": "unliked",
+                    "total_likes": CommentReaction.objects.filter(comment_id=comment, is_active=True).count()
+                }
+
+        print("Reaction added (Liked)")
+        return {
+            "status": "liked",
+            "total_likes": CommentReaction.objects.filter(comment_id=comment, is_active=True).count()
+        }
+
+    except ObjectDoesNotExist:
+        print("Error: Comment or User not found")
+        return {"error": "Comment or User not found"}
+
+    except Exception as e:
+        print("🔴 ERROR:", str(e))
+        return {"error": "Something went wrong on the server"}
+
+
+
