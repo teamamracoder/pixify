@@ -108,7 +108,7 @@ def reaction_name(post_id):
 def get_user_posts(user_id):
     user_posts = Post.objects.filter(posted_by=user_id).annotate(
         comment_count=Count('fk_post_comments_post_id', filter=Q(fk_post_comments_post_id__is_active=True))
-    ).values('id', 'media_url', 'title', 'description', 'comment_count', 'created_at')
+    ).values('id', 'type', 'media_url', 'title', 'description', 'comment_count', 'created_at')
 
 
     # Format the created_at timestamp after fetching data
