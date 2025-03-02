@@ -64,14 +64,14 @@
                     <div class="user-post" data-post-id="{{ post.id }}">
                         <div class="post-title-wrapper">
                             <img src="{% static user_details.profile_photo|default:'/images/avatar.jpg' %}" class="photo-of-post">
-                            <div class="post-title">{{ user_details.user_name }}
-                            <div>{{post.created_at}}</div>
+                            <div class="post-title"><h6>{{ user_details.user_name }}</h6>
+                            <div style="font-size: 11px;position: relative;bottom: 6px;">{{post.created_at}}</div>
                             </div>
                         </div>
 
                         {% if post.media_url|length > 1 %}
                         <div id="postCarousel{{ post.id }}" class="carousel slide" data-interval="false">
-                            <div class="carousel-inner">
+                            <div class="carousel-inner user_profile_combo-img">
                             {% for media in post.media_url %}
                                 <div class="carousel-item {% if forloop.first %}active{% endif %}">
                                 {% if media|slice:"-4:" == ".mp4" %}
@@ -85,11 +85,11 @@
                                 </div>
                             {% endfor %}
                             </div>
-                            <a class="carousel-control-prev" href="#postCarousel{{ post.id }}" role="button" data-slide="prev">
+                            <a class="carousel-control-prev user_profile_carousel_btn" href="#postCarousel{{ post.id }}" role="button" data-slide="prev">
                             <span class="carousel-control-prev-icon" aria-hidden="true"></span>
                             <span class="sr-only">Previous</span>
                             </a>
-                            <a class="carousel-control-next" href="#postCarousel{{ post.id }}" role="button" data-slide="next">
+                            <a class="carousel-control-next user_profile_carousel_btn" href="#postCarousel{{ post.id }}" role="button" data-slide="next">
                             <span class="carousel-control-next-icon" aria-hidden="true"></span>
                             <span class="sr-only">Next</span>
                             </a>
@@ -101,36 +101,37 @@
                                 <source src="{% static media %}" type="video/mp4">
                                 Your browser does not support the video tag.
                             </video>
+                            
                             {% else %}
                             <img src="{% static media %}" alt="Post Image" class="post-image w-100">
                             {% endif %}
-                        {% endfor %}
-                        {% endif %}
-                        
+                            {% endfor %}
+                            {% endif %}
+                            <div class="react-comment-wrapper">
+                            <div class="post-reactions"  id="post-reactions-{{ post.id }}"><!-- Reactions will be dynamically loaded here --></div>
+                            <div class="user_profile_comment">{{post.comment_count}} comments</div>
+                            </div>
                         <div class="post-opt-icons" style="height: 4vh;">
                             <div class="post-reaction" style="cursor: pointer;">
-                                <i class="bi bi-emoji-smile" onclick="toggleReactionPopup('{{ post.id }}')"></i>
+                                <i class="bi bi-heart pe-1" onclick="toggleReactionPopup('{{ post.id }}')"></i>
                                 <span data-toggle="modal" class="load-comments" data-post-id={{post.id}}>
                                     <i class="fa-regular fa-comment"></i>
                                 </span>                                
                                 <i class="fa-solid fa-share-nodes share-post-btn" data-post-id="{{ post.id }}" data-bs-toggle="modal" data-bs-target="#shareModal"></i>
-                            </div>                         
-                                <!-- Ensure CSRF Token is Included -->
-                                <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
-
-                                <!-- Reaction Popup (Inside Loop) -->
-                                <div class="reaction-popup" id="reaction-popup-{{ post.id }}" style="display: none;">
+                                   <!-- Reaction Popup (Inside Loop) -->
+                                   <div class="reaction-popup" id="reaction-popup-{{ post.id }}" style="display: none;">
                                     {% for reaction in user_details.reactions %}
                                         <span class="reaction-emoji" onclick="handleReaction('{{ post.id }}', '{{ reaction.id }}')">
                                             {{ reaction.value|safe }}
                                         </span>
                                     {% endfor %}
                                 </div>
-                                <div>{{post.comment_count}} comments</div>
-                                <!-- Reaction Display Container (Inside Loop) -->
-                                <div class="post-reactions"  id="post-reactions-{{ post.id }}">
-                                    <!-- Reactions will be dynamically loaded here -->
-                                </div>
+                            </div>                         
+                                <!-- Ensure CSRF Token is Included -->
+                                <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+
+                             
+
                             </div>
                     </div>
                 {% endfor %}
@@ -981,20 +982,18 @@ function toggleReaction(commentId, iconElement, likeCountElement) {
             font-size:10px;
         }
         .post-opt-icons{
-            margin-top: 10px;
-            margin-bottom: 10px;
+            background: #260557fb;
             padding-left: 20px;
             display: flex;
             align-items: center;
             justify-content: space-between;
         }
         .reaction-popup {
-        bottom: 130%;
-        right: 32%;
+        margin-bottom: 25%;
+        right: 40%;
         position: relative;
         display: none;
-        background: white;
-        border: 1px solid #ddd;
+        background: black;
         padding: 8px 8px;
         border-radius: 8px;
         box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.2);
@@ -1002,7 +1001,7 @@ function toggleReaction(commentId, iconElement, likeCountElement) {
         }
     
         .reaction-popup span {
-            margin: 2px;
+            margin-right: 10px;
             cursor: pointer;
             font-size: 20px;
         }
@@ -1013,11 +1012,12 @@ function toggleReaction(commentId, iconElement, likeCountElement) {
         }
     
         .reaction-display {
+            margin-bottom: 5px;
             align-items: end;
-            margin-right: 20px;
+            margin-left: 20px;
             display: flex;
             gap: 2px;
-            font-size: 20px;
+            font-size: 16px;
         }
     
         .reaction-display span {
@@ -1035,27 +1035,28 @@ function toggleReaction(commentId, iconElement, likeCountElement) {
             display: flex;
         }
         .user-post{
+            border: 2px solid #1a033bfb;
             margin: 20px 0px 20px 0px;
-            border-radius: 15px;
-            border: 2px solid;
             width: 100%;
-            background: #1a0933;
+            background: #1f0447fb;
         }
         .post_video{
+            margin-top: 10px;
+            padding: 8px;
             object-fit: cover;
             justify-content: center;
             align-items: center;
             display: flex;
-            height: 50%;
+            height: 60vh;
             width: 100%;
         }
         .profile-container {
             height: 100%;
             overflow-y: auto;
             max-height: 90vh;
-            margin: auto;
+            margin-top: 16px;
             padding: 20px;
-            background-color: #25004d;
+            background-color: #1f0447e3;
             border-radius: 10px;
             box-shadow: 0px 0px 15px rgba(255, 255, 255, 0.2);
         }
@@ -1181,11 +1182,13 @@ function toggleReaction(commentId, iconElement, likeCountElement) {
             justify-content: center;
             display: flex;
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
+            width: 35px;
+            height: 35px;
         }
         .post-title-wrapper{
-            padding: 10px;
+            height: 45px;
+            background: #260557fb;
+            padding: 8px;
             gap: 10px;
             display: flex;;
             align-items: center;
@@ -1237,6 +1240,43 @@ function toggleReaction(commentId, iconElement, likeCountElement) {
             }
            
         }
+
+
+        .user_profile_combo-img{
+            height: 58vh;
+        }
+        .carousel-item{
+            height: 100%;
+        }
+        .post-image{
+            height: 100%;
+            padding: 6px;
+            border-radius: none;
+        }
+        .user_profile_carousel_btn{
+            top: 42%;
+            display: flex;
+            height: 5vh;
+            align-items: end;
+        }
+        .post-title{
+            padding-left: 8px;
+            padding-top: 6px;
+        }
+        .user_profile_comment{
+        height: 30px;
+        font-size: 14px;
+        margin-right: 10px;
+        display: flex;
+        align-items: end;
+        justify-content: end;
+        }
+    .react-comment-wrapper{
+        display: flex;
+        align-items: end;
+        justify-content: space-between;
+    }
+
     </style>
 </body>
 {% endblock %}
