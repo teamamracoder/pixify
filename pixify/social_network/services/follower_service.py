@@ -104,7 +104,7 @@ def list_follow_api(request, user):
         ).exclude(user_id__in=mem1).values('user_id', 'user_id__first_name', 'user_id__last_name', 'user_id__email', 'user_id__profile_photo_url', 'user_id__bio')
 
         followings = Follower.objects.filter(user_id=user, is_active=True).filter(
-            Q(following__first_name__icontains=search_query) | Q(followingd__last_name__icontains=search_query)
+            Q(following__first_name__icontains=search_query) | Q(following__last_name__icontains=search_query)
         ).exclude(following__in=mem1).values('following', 'following__first_name', 'following__last_name', 'following__email', 'following__profile_photo_url', 'following__bio')
 
     else:
