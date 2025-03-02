@@ -582,12 +582,16 @@ $(document).ready(function () {
                             <div>${comment.text}</div>  
                         </div>
                         <div class="foot-cmt">
-                             <div class="reply-btn" 
-                                data-comment-id="${comment.id}" 
-                                data-post-id="${comment.post_id}" 
-                                data-post-creator="${comment.user}" 
-                                style="font-size: small; cursor: pointer; color: lightblue;">
-                                Reply
+                            <div class="reply-btn" data-comment-id="${comment.id}" data-post-id="${comment.post_id}" data-post-creator="${comment.user}" 
+                                style="font-size: small; cursor: pointer; color: lightblue;">Reply</div>
+                            <div>
+                                <i class="bi ${comment.react_created_by ? 'bi-heart-fill' : 'bi-heart'}" 
+                                   style="font-size:12px; ${comment.react_created_by ? 'color:red;' : ''}" 
+                                   data-comment-id="${comment.id}">
+                                </i>
+                                <span class="like-count" style="color:white;font-size:10px; ${comment.react_count > 0 ? '' : 'display:none;'}">
+                                    ${comment.react_count}
+                                </span>
                             </div>
                             <div style="font-size: 10px;">${comment.timestamp}</div>
                         </div>
@@ -599,6 +603,9 @@ $(document).ready(function () {
             : ""}
         `).join("");
     }
+    
+    
+    
     
     
       
@@ -822,11 +829,54 @@ $(document).ready(function () {
         });
     }
     
-    // Function to Get CSRF Token
-    function getCSRFToken() {
-        const tokenElement = document.querySelector('[name=csrfmiddlewaretoken]');
-        return tokenElement ? tokenElement.value : "";
+// Function to Get CSRF Token
+function getCSRFToken() {
+    const tokenElement = document.querySelector('[name=csrfmiddlewaretoken]');
+    return tokenElement ? tokenElement.value : "";
+}
+
+
+document.addEventListener("click", function (event) {
+    if (event.target.classList.contains("bi-heart") || event.target.classList.contains("bi-heart-fill")) {
+        const commentElement = event.target.closest(".comment");
+        const commentId = event.target.dataset.commentId; 
+        const likeCountElement = commentElement.querySelector(".like-count");  
+        toggleReaction(commentId, event.target, likeCountElement);
     }
+});
+
+function toggleReaction(commentId, iconElement, likeCountElement) {
+    fetch("/toggle_reaction/", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": getCSRFToken()
+        },
+        body: JSON.stringify({ comment_id: commentId })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === "liked") {
+            iconElement.classList.remove("bi-heart");
+            iconElement.classList.add("bi-heart-fill");
+            iconElement.style.color = "red"; 
+        } else {
+            iconElement.classList.remove("bi-heart-fill");
+            iconElement.classList.add("bi-heart");
+            iconElement.style.color = "";  
+        }
+
+        if (likeCountElement) {
+            if (data.total_likes > 0) {
+                likeCountElement.textContent = data.total_likes;
+                likeCountElement.style.display = "inline";
+            } else {
+                likeCountElement.style.display = "none";
+            }
+        }
+    })
+    .catch(error => console.error("Error:", error));
+}
     
 </script>
 
@@ -854,7 +904,7 @@ $(document).ready(function () {
 
         
         .foot-cmt{
-            gap: 30px;
+            gap: 10%;
             margin-left: 30px;
             width: 74%;
             align-items: center;

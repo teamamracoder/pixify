@@ -219,6 +219,7 @@ urlpatterns = [
     path("api/comments/<int:post_id>/", views.CommentListViewApi.as_view(), name="get_comments"),
     path('comments/<int:post_id>/', views.CommentCreate.as_view(), name='post_comment_create' ),
     path('comments/delete/<int:comment_id>/', views.DeleteComment.as_view(), name='post_delete_comment'),
+    path("toggle_reaction/", views.TogglReactionView.as_view(), name="toggle_reaction"),
 
 ]
 
