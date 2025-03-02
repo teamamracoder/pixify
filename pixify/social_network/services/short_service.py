@@ -67,6 +67,7 @@ def get_comment_replies(parent_comment_id, user):
         reply_dict = {
             'id': reply.id,
             'comment': reply.comment,
+            'comment_by__id': reply.comment_by.id,
             'comment_by__first_name': reply.comment_by.first_name,
             'comment_by__last_name': reply.comment_by.last_name,
             'comment_by__profile_photo_url': reply.comment_by.profile_photo_url,
@@ -89,6 +90,7 @@ def short_comments(short, user):
         comment_dict = {
             'id': comment.id,
             'comment': comment.comment,
+            'comment_by__id': comment.comment_by.id,
             'comment_by__first_name': comment.comment_by.first_name,
             'comment_by__last_name': comment.comment_by.last_name,
             'comment_by__profile_photo_url': comment.comment_by.profile_photo_url,
