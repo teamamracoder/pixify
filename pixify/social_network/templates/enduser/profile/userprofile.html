@@ -572,41 +572,40 @@ $(document).ready(function () {
 
     // Function to generate nested comments with reply button
     function generateCommentTree(comments, isReply = false) {
-        return comments.map(comment => `
-            <div class="comment" style="margin-left: ${isReply ? "30px" : "0px"};">
-                <div style="display: flex; gap:5px; align-items: flex-start;">
-                    <img src="${comment.user_profile}" alt="${comment.user}" class="comment-profile-img">
-                    <div class="comment-content"> 
-                        <div class="comment-header">
-                            <div><strong>${comment.user}</strong></div>
-                            <div>${comment.text}</div>  
-                        </div>
-                        <div class="foot-cmt">
-                            <div class="reply-btn" data-comment-id="${comment.id}" data-post-id="${comment.post_id}" data-post-creator="${comment.user}" 
-                                style="font-size: small; cursor: pointer; color: lightblue;">Reply</div>
-                            <div>
-                                <i class="bi ${comment.react_created_by ? 'bi-heart-fill' : 'bi-heart'}" 
-                                   style="font-size:12px; ${comment.react_created_by ? 'color:red;' : ''}" 
-                                   data-comment-id="${comment.id}">
-                                </i>
-                                <span class="like-count" style="color:white;font-size:10px; ${comment.react_count > 0 ? '' : 'display:none;'}">
-                                    ${comment.react_count}
-                                </span>
+        return comments
+            .slice()  // Create a shallow copy to avoid modifying the original array
+            .reverse() // Reverse the order so the latest comments appear first
+            .map(comment => `
+                <div class="comment" style="margin-left: ${isReply ? "30px" : "0px"};">
+                    <div style="display: flex; gap:5px; align-items: flex-start;">
+                        <img src="${comment.user_profile}" alt="${comment.user}" class="comment-profile-img">
+                        <div class="comment-content"> 
+                            <div class="comment-header">
+                                <div><strong>${comment.user}</strong></div>
+                                <div>${comment.text}</div>  
                             </div>
-                            <div style="font-size: 10px;">${comment.timestamp}</div>
+                            <div class="foot-cmt">
+                                <div class="reply-btn" data-comment-id="${comment.id}" data-post-id="${comment.post_id}" data-post-creator="${comment.user}" 
+                                    style="font-size: small; cursor: pointer; color: lightblue;">Reply</div>
+                                <div>
+                                    <i class="bi ${comment.react_created_by ? 'bi-heart-fill' : 'bi-heart'}" 
+                                       style="font-size:12px; ${comment.react_created_by ? 'color:red;' : ''}" 
+                                       data-comment-id="${comment.id}">
+                                    </i>
+                                    <span class="like-count" style="color:white;font-size:10px; ${comment.react_count > 0 ? '' : 'display:none;'}">
+                                        ${comment.react_count}
+                                    </span>
+                                </div>
+                                <div style="font-size: 10px;">${comment.timestamp}</div>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            ${comment.replies && comment.replies.length > 0 
-            ? comment.replies.map(reply => generateCommentTree([reply], true)).join("") 
-            : ""}
-        `).join("");
+                ${comment.replies && comment.replies.length > 0 
+                    ? generateCommentTree(comment.replies, true)  // Replies maintain their order
+                    : ""}
+            `).join("");
     }
-    
-    
-    
-    
     
       
     //delete
