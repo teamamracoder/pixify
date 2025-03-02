@@ -586,9 +586,12 @@ $(document).ready(function () {
                     <div>${comment.text}</div>  
                   </div>
                   <div class="foot-cmt">
-                    <div class="reply-btn" data-comment-id="${comment.id}" data-post-id="${comment.post_id}" 
-                         style="font-size: small; cursor: pointer; color: lightblue;">
-                      Reply
+                   <div class="reply-btn" 
+                        data-comment-id="${comment.id}" 
+                        data-post-id="${comment.post_id}" 
+                        data-post-creator="${comment.user}" 
+                        style="font-size: small; cursor: pointer; color: lightblue;">
+                        Reply
                     </div>
                     <div style="font-size: 10px;">${comment.timestamp}</div>
                   </div>
@@ -608,7 +611,7 @@ $(document).ready(function () {
         let holdTimeout;
         
         // Show delete modal on long press
-        $(document).on("mousedown touchstart", ".comment", function (event) {
+        $(document).on("mousedown touchstart", ".comment-content", function (event) {
             let commentId = $(this).find(".reply-btn").data("comment-id");
             let postId = $(this).find(".reply-btn").data("post-id");
     
@@ -676,22 +679,32 @@ $(document).ready(function () {
     $(document).on("click", ".reply-btn", function () {
         let commentId = $(this).data("comment-id");
         let postId = $(this).data("post-id");
+        let commentBy = $(this).data("post-creator");
+        console.log("💬 Replying to Comment By:", commentBy);  // Should no longer be undefined
 
+    
         if (!commentId || isNaN(commentId)) {
             console.error("❌ Error: Invalid comment ID for reply.");
             return;
         }
-
-        console.log("💬 Replying to Comment ID:", commentId);
-
+    
+        console.log("💬 Replying to Comment ID:", commentId, "Comment By:", commentBy);
+    
         // Set reply mode by storing the reply_for (parent comment ID)
         $("#commentText").attr("data-reply-for", commentId).focus();
-
+    
+        // Insert @commentBy into the input field if not already present
+        let currentText = $("#commentText").val().trim();
+        if (!currentText.startsWith(`@${commentBy}`)) {
+            $("#commentText").val(`@${commentBy}   ` + currentText).focus();
+        }
+    
         // Scroll to the input field for better UX
-        $('html, body').animate({
+        $("html, body").animate({
             scrollTop: $("#commentText").offset().top - 100
         }, 300);
     });
+    
 });
 
 
