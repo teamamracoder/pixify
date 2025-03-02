@@ -72,7 +72,7 @@
                             <div style="font-size: 11px;position: relative;bottom: 6px;">{{post.created_at}}</div>
                             </div>
                         </div>
-
+                        <div>
                         {% if post.media_url|length > 1 %}
                         <div id="postCarousel{{ post.id }}" class="carousel slide" data-interval="false">
                             <div class="carousel-inner user_profile_combo-img">
@@ -88,7 +88,7 @@
                                 {% endif %}
                                 </div>
                             {% endfor %}
-                            </div>
+                        </div>
                             <a class="carousel-control-prev user_profile_carousel_btn" href="#postCarousel{{ post.id }}" role="button" data-slide="prev">
                             <span class="carousel-control-prev-icon" aria-hidden="true"></span>
                             <span class="sr-only">Previous</span>
@@ -99,6 +99,7 @@
                             </a>
                         </div>
                         {% else %}
+                    
                         {% for media in post.media_url %}
                             {% if media|slice:"-4:" == ".mp4" %}
                             <video class="post_video w-100" muted controls>
@@ -115,6 +116,7 @@
                             <div class="post-reactions"  id="post-reactions-{{ post.id }}"><!-- Reactions will be dynamically loaded here --></div>
                             <div class="user_profile_comment">{{post.comment_count}} comments</div>
                             </div>
+                        </div>    
                         <div class="post-opt-icons" style="height: 4vh;">
                             <div class="post-reaction" style="cursor: pointer;" data-post-id="{{ post.id }}">
                                 {% with user_reaction=post.reactions.all|dictsort:"user_id"|first %}
