@@ -64,7 +64,9 @@
                     <div class="user-post" data-post-id="{{ post.id }}">
                         <div class="post-title-wrapper">
                             <img src="{% static user_details.profile_photo|default:'/images/avatar.jpg' %}" class="photo-of-post">
-                            <div class="post-title">{{ user_details.user_name }}</div>
+                            <div class="post-title">{{ user_details.user_name }}
+                            <div>{{post.created_at}}</div>
+                            </div>
                         </div>
 
                         {% if post.media_url %}
@@ -99,6 +101,7 @@
                                         </span>
                                     {% endfor %}
                                 </div>
+                                <div>{{post.comment_count}} comments</div>
                                 <!-- Reaction Display Container (Inside Loop) -->
                                 <div class="post-reactions"  id="post-reactions-{{ post.id }}">
                                     <!-- Reactions will be dynamically loaded here -->
@@ -569,38 +572,35 @@ $(document).ready(function () {
 
     // Function to generate nested comments with reply button
     function generateCommentTree(comments, isReply = false) {
-        const fallbackImage = "images/avatar.jpg";
-        return comments.map(comment => {
-          // Determine the image source: if a user profile exists, use it; otherwise, use fallback.
-          const imageSrc = comment.user_profile 
-            ? staticUrl + cleanMediaPath(comment.user_profile) 
-            : staticUrl + fallbackImage;
-            
-          return `
+        return comments.map(comment => `
             <div class="comment" style="margin-left: ${isReply ? "30px" : "0px"};">
-              <div style="display: flex; gap:5px; align-items: flex-start;">
-                <img src="${imageSrc}" alt="${comment.user}" class="comment-profile-img">
-                <div class="comment-content"> 
-                  <div class="comment-header">
-                    <div><strong>${comment.user}</strong></div>
-                    <div>${comment.text}</div>  
-                  </div>
-                  <div class="foot-cmt">
-                    <div class="reply-btn" data-comment-id="${comment.id}" data-post-id="${comment.post_id}" 
-                         style="font-size: small; cursor: pointer; color: lightblue;">
-                      Reply
+                <div style="display: flex; gap:5px; align-items: flex-start;">
+                    <img src="${comment.user_profile}" alt="${comment.user}" class="comment-profile-img">
+                    <div class="comment-content"> 
+                        <div class="comment-header">
+                            <div><strong>${comment.user}</strong></div>
+                            <div>${comment.text}</div>  
+                        </div>
+                        <div class="foot-cmt">
+                             <div class="reply-btn" 
+                                data-comment-id="${comment.id}" 
+                                data-post-id="${comment.post_id}" 
+                                data-post-creator="${comment.user}" 
+                                style="font-size: small; cursor: pointer; color: lightblue;">
+                                Reply
+                            </div>
+                            <div style="font-size: 10px;">${comment.timestamp}</div>
+                        </div>
                     </div>
-                    <div style="font-size: 10px;">${comment.timestamp}</div>
-                  </div>
                 </div>
-              </div>
-              ${ comment.replies && comment.replies.length > 0 
-                  ? generateCommentTree(comment.replies, true) 
-                  : "" }
             </div>
-          `;
-        }).join("");
-      }
+            ${comment.replies && comment.replies.length > 0 
+            ? comment.replies.map(reply => generateCommentTree([reply], true)).join("") 
+            : ""}
+        `).join("");
+    }
+    
+    
       
     //delete
 
@@ -608,7 +608,7 @@ $(document).ready(function () {
         let holdTimeout;
         
         // Show delete modal on long press
-        $(document).on("mousedown touchstart", ".comment", function (event) {
+        $(document).on("mousedown touchstart", ".comment-content", function (event) {
             let commentId = $(this).find(".reply-btn").data("comment-id");
             let postId = $(this).find(".reply-btn").data("post-id");
     
@@ -676,22 +676,32 @@ $(document).ready(function () {
     $(document).on("click", ".reply-btn", function () {
         let commentId = $(this).data("comment-id");
         let postId = $(this).data("post-id");
+        let commentBy = $(this).data("post-creator");
+        console.log("💬 Replying to Comment By:", commentBy);  // Should no longer be undefined
 
+    
         if (!commentId || isNaN(commentId)) {
             console.error("❌ Error: Invalid comment ID for reply.");
             return;
         }
-
-        console.log("💬 Replying to Comment ID:", commentId);
-
+    
+        console.log("💬 Replying to Comment ID:", commentId, "Comment By:", commentBy);
+    
         // Set reply mode by storing the reply_for (parent comment ID)
         $("#commentText").attr("data-reply-for", commentId).focus();
-
+    
+        // Insert @commentBy into the input field if not already present
+        let currentText = $("#commentText").val().trim();
+        if (!currentText.startsWith(`@${commentBy}`)) {
+            $("#commentText").val(`@${commentBy}   ` + currentText).focus();
+        }
+    
         // Scroll to the input field for better UX
-        $('html, body').animate({
+        $("html, body").animate({
             scrollTop: $("#commentText").offset().top - 100
         }, 300);
     });
+    
 });
 
 

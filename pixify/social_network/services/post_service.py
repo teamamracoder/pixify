@@ -1,3 +1,4 @@
+from django.db.models import Count
 from ..models.user_model import User
 from . import GetData
 from ..models import Post,Comment,PostReaction,PostReaction,MasterList
@@ -5,7 +6,7 @@ from django.shortcuts import get_object_or_404
 from django.db.models import Q
 from ..constants.default_values import PostType
 from ..models import models
-from django.contrib.postgres.aggregates import ArrayAgg
+from ..services import comment_service
 
 def manage_list_posts():
     return Post.objects.all()
@@ -104,9 +105,19 @@ def reaction_name(post_id):
    return PostReaction.objects.filter( post_id_id=post_id, is_active=True).first()
 
 
+
 def get_user_posts(user_id):
-    user_posts=Post.objects.filter(posted_by=user_id).values('id','media_url','title','description')
-    return list(user_posts)
+    user_posts = Post.objects.filter(posted_by=user_id).annotate(
+        comment_count=Count('fk_post_comments_post_id')  # Fixed missing comma
+    ).values('id', 'media_url', 'title', 'description', 'comment_count', 'created_at')
+
+    # Format the created_at timestamp after fetching data
+    formatted_posts = [
+        {**post, 'created_at': comment_service.format_timestamp(post['created_at'])}
+        for post in user_posts
+    ]
+
+    return formatted_posts
 
 
 def get_active_post_reactions(post_id):    

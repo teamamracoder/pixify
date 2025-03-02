@@ -42,14 +42,14 @@ class FetchPostReactions(View):
     @role_required(Role.ADMIN.value, Role.END_USER.value)
     def get(self, request, post_id):
         try:
-            print(f"Fetching reactions for post_id: {post_id}")  # Debugging
+            # print(f"Fetching reactions for post_id: {post_id}")  # Debugging
             reactions = post_service.get_active_post_reactions(post_id)
             # Build the reaction list; if no reactions exist, reaction_list will be empty.
             reaction_list = [
                 {"id": reaction.master_list_id.id, "value": reaction.master_list_id.value}
                 for reaction in reactions
             ]
-            print("Reactions:", reaction_list)
+            # print("Reactions:", reaction_list)
             return JsonResponse({'success': True, 'reactions': reaction_list}, status=200)
         except Exception as e:
             return JsonResponse({'success': False, 'error': str(e)}, status=400)
@@ -67,7 +67,7 @@ class CreateUpdatePostReactions(View):
             post_id = data.get('post_id')
             reaction_id = data.get('reaction_id')
 
-            print("gnrnyn",data)
+            # print("gnrnyn",data)
             
             # Ensure user is authenticated
             if not request.user or not request.user.is_authenticated:
@@ -113,7 +113,7 @@ class CommentListViewApi(View):
     @role_required(Role.ADMIN.value, Role.END_USER.value)
     def get(self, request, post_id):
         comments = comment_service.get_comments_by_post(post_id)
-        print("comments",comments)
+        # print("comments",comments)
         return JsonResponse({"comments": comments}, safe=False)
     
 
@@ -150,7 +150,7 @@ class DeleteComment(View):
         if not comment_id:
             return JsonResponse({'success': False, 'message': 'Comment ID is required'}, status=400)
 
-        print(f"🚀 Attempting to delete comment ID: {comment_id}")  # Debugging
+        # print(f"🚀 Attempting to delete comment ID: {comment_id}")  # Debugging
 
         try:
             comment = comment_service.get_post_comment(comment_id)

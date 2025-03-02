@@ -5,6 +5,7 @@ from django.shortcuts import get_object_or_404
 from django.db.models import Q
 from ..models import User,CommentReaction
 from .. import models
+from django.utils import timezone
 
 
 
@@ -89,45 +90,15 @@ def format_timestamp(timestamp):
     elif diff.total_seconds() < 86400:
         hours = int(diff.total_seconds() / 3600)
         return f"{hours} hours ago"
-    elif diff.days == 1:
-        return "Yesterday"
     elif diff.days < 7:
         return f"{diff.days} days ago"
     else:
-        return timestamp.strftime('%d/%m/%Y')  # Example: "01/03/2025"
-
-    
-def get_comments_by_post(post_id):
-    def get_replies(parent_comment):
-        """ Recursively get replies for a given comment """
-        replies = Comment.objects.filter(reply_for=parent_comment,is_active=True).select_related("comment_by")
-        return [
-            {
-                "id":reply.id,
-                "user": reply.comment_by.first_name,
-                "user_profile": reply.comment_by.profile_photo_url if reply.comment_by.profile_photo_url else "",  # Fix here!
-                "text": reply.comment,
-                "reply_for": reply.reply_for_id,
-                "timestamp": format_timestamp(reply.created_at),
-                "replies": get_replies(reply)
-            }
-            for reply in replies
-        ]
-
-    # Fetch only top-level comments (where reply_for is NULL)
-    comments = Comment.objects.filter(post_id=post_id, reply_for__isnull=True, is_active=True).select_related("comment_by")
-    return [
-        {
-            "id":comment.id,
-            "user": comment.comment_by.first_name,
-            "user_profile": comment.comment_by.profile_photo_url if comment.comment_by.profile_photo_url else "",  # Fix here!
-            "text": comment.comment,
-            "reply_for": comment.reply_for_id,
-            "timestamp": format_timestamp(comment.created_at),
-            "replies": get_replies(comment)
-        }
-        for comment in comments
-    ]
+        months = (now.year - timestamp.year) * 12 + now.month - timestamp.month
+        if months < 12:
+            return f"{months} months ago"
+        else:
+            years = months // 12
+            return f"{years} years ago"
 
 
 def get_comments_by_post(post_id):
