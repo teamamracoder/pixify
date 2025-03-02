@@ -5,6 +5,7 @@ from django.shortcuts import get_object_or_404
 from django.db.models import Q
 from ..models import User,CommentReaction
 from .. import models
+from django.utils import timezone
 
 
 
@@ -89,14 +90,16 @@ def format_timestamp(timestamp):
     elif diff.total_seconds() < 86400:
         hours = int(diff.total_seconds() / 3600)
         return f"{hours} hours ago"
-    elif diff.days == 1:
-        return "Yesterday"
     elif diff.days < 7:
         return f"{diff.days} days ago"
     else:
-        return timestamp.strftime('%d/%m/%Y')  # Example: "01/03/2025"
+        months = (now.year - timestamp.year) * 12 + now.month - timestamp.month
+        if months < 12:
+            return f"{months} months ago"
+        else:
+            years = months // 12
+            return f"{years} years ago"
 
-    
 
 def get_comments_by_post(post_id):
     """

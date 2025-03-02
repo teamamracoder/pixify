@@ -64,7 +64,9 @@
                     <div class="user-post" data-post-id="{{ post.id }}">
                         <div class="post-title-wrapper">
                             <img src="{% static user_details.profile_photo|default:'/images/avatar.jpg' %}" class="photo-of-post">
-                            <div class="post-title">{{ user_details.user_name }}</div>
+                            <div class="post-title">{{ user_details.user_name }}
+                            <div>{{post.created_at}}</div>
+                            </div>
                         </div>
 
                         {% if post.media_url %}
@@ -99,6 +101,7 @@
                                         </span>
                                     {% endfor %}
                                 </div>
+                                <div>{{post.comment_count}} comments</div>
                                 <!-- Reaction Display Container (Inside Loop) -->
                                 <div class="post-reactions"  id="post-reactions-{{ post.id }}">
                                     <!-- Reactions will be dynamically loaded here -->
