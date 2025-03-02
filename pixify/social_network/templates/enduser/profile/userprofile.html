@@ -569,41 +569,35 @@ $(document).ready(function () {
 
     // Function to generate nested comments with reply button
     function generateCommentTree(comments, isReply = false) {
-        const fallbackImage = "images/avatar.jpg";
-        return comments.map(comment => {
-          // Determine the image source: if a user profile exists, use it; otherwise, use fallback.
-          const imageSrc = comment.user_profile 
-            ? staticUrl + cleanMediaPath(comment.user_profile) 
-            : staticUrl + fallbackImage;
-            
-          return `
+        return comments.map(comment => `
             <div class="comment" style="margin-left: ${isReply ? "30px" : "0px"};">
-              <div style="display: flex; gap:5px; align-items: flex-start;">
-                <img src="${imageSrc}" alt="${comment.user}" class="comment-profile-img">
-                <div class="comment-content"> 
-                  <div class="comment-header">
-                    <div><strong>${comment.user}</strong></div>
-                    <div>${comment.text}</div>  
-                  </div>
-                  <div class="foot-cmt">
-                   <div class="reply-btn" 
-                        data-comment-id="${comment.id}" 
-                        data-post-id="${comment.post_id}" 
-                        data-post-creator="${comment.user}" 
-                        style="font-size: small; cursor: pointer; color: lightblue;">
-                        Reply
+                <div style="display: flex; gap:5px; align-items: flex-start;">
+                    <img src="${comment.user_profile}" alt="${comment.user}" class="comment-profile-img">
+                    <div class="comment-content"> 
+                        <div class="comment-header">
+                            <div><strong>${comment.user}</strong></div>
+                            <div>${comment.text}</div>  
+                        </div>
+                        <div class="foot-cmt">
+                             <div class="reply-btn" 
+                                data-comment-id="${comment.id}" 
+                                data-post-id="${comment.post_id}" 
+                                data-post-creator="${comment.user}" 
+                                style="font-size: small; cursor: pointer; color: lightblue;">
+                                Reply
+                            </div>
+                            <div style="font-size: 10px;">${comment.timestamp}</div>
+                        </div>
                     </div>
-                    <div style="font-size: 10px;">${comment.timestamp}</div>
-                  </div>
                 </div>
-              </div>
-              ${ comment.replies && comment.replies.length > 0 
-                  ? generateCommentTree(comment.replies, true) 
-                  : "" }
             </div>
-          `;
-        }).join("");
-      }
+            ${comment.replies && comment.replies.length > 0 
+            ? comment.replies.map(reply => generateCommentTree([reply], true)).join("") 
+            : ""}
+        `).join("");
+    }
+    
+    
       
     //delete
 
