@@ -112,25 +112,33 @@
                             <div class="user_profile_comment">{{post.comment_count}} comments</div>
                             </div>
                         <div class="post-opt-icons" style="height: 4vh;">
-                            <div class="post-reaction" style="cursor: pointer;">
-                                <i class="bi bi-heart pe-1" onclick="toggleReactionPopup('{{ post.id }}')"></i>
-                                <span data-toggle="modal" class="load-comments" data-post-id={{post.id}}>
+                            <div class="post-reaction" style="cursor: pointer;" data-post-id="{{ post.id }}">
+                                {% with user_reaction=post.reactions.all|dictsort:"user_id"|first %}
+                                    <i id="reaction-icon-{{ post.id }}" class="reaction-icon" onclick="toggleReactionPopup('{{ post.id }}')">
+                                        {% if user_reaction and user_reaction.user_id == request.user.id %}
+                                            {{ user_reaction.reaction.value|safe }}  <!-- Show user's reaction emoji -->
+                                        {% else %}
+                                            <i class="bi bi-heart"></i>  <!-- Show default heart icon -->
+                                        {% endif %}
+                                    </i>
+                                {% endwith %}
+                            
+                                <span data-toggle="modal" class="load-comments" data-post-id="{{ post.id }}">
                                     <i class="fa-regular fa-comment"></i>
-                                </span>                                
+                                </span>
                                 <i class="fa-solid fa-share-nodes share-post-btn" data-post-id="{{ post.id }}" data-bs-toggle="modal" data-bs-target="#shareModal"></i>
-                                   <!-- Reaction Popup (Inside Loop) -->
-                                   <div class="reaction-popup" id="reaction-popup-{{ post.id }}" style="display: none;">
+                            
+                                <!-- Reaction Popup -->
+                                <div class="reaction-popup" id="reaction-popup-{{ post.id }}" style="display: none;">
                                     {% for reaction in user_details.reactions %}
                                         <span class="reaction-emoji" onclick="handleReaction('{{ post.id }}', '{{ reaction.id }}')">
                                             {{ reaction.value|safe }}
                                         </span>
                                     {% endfor %}
                                 </div>
-                            </div>                         
+                            </div>                                                                                                             
                                 <!-- Ensure CSRF Token is Included -->
-                                <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
-
-                             
+                                <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">                                
 
                             </div>
                     </div>
@@ -195,6 +203,11 @@
         <button id="cancelDelete" style="background-color:gray; margin: 10px; padding: 10px 15px; border: none; cursor: pointer;">Cancel</button>
     </div>
 </div>
+<script>
+    var USER_ID = {{ request.user.id|default:0 }};
+    console.log(USER_ID);
+
+</script>
 
 
 <!-- Share Modal -->
@@ -496,18 +509,6 @@ $(document).ready(function () {
     
 
     
-    document.addEventListener("DOMContentLoaded", function () {
-        // Hide extra followers/followings beyond 4 initially
-        document.querySelectorAll('.friend-card.hidden-follower, .friend-card.hidden-following')
-
-        // Load reactions for each post on page load
-        document.querySelectorAll(".user-post").forEach(post => {
-            const postId = post.getAttribute("data-post-id");
-            if (postId) {
-                loadReactions(postId);
-            }
-        });
-    });
 
 //comment create
 $(document).ready(function () {
@@ -748,8 +749,16 @@ $(document).ready(function () {
         }
     }
     
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll(".user-post").forEach(post => {
+            const postId = post.getAttribute("data-post-id");
+            if (postId) {
+                loadReactions(postId);
+            }
+        });
+    });
     
-    // Function to Toggle Reaction Popup
+    // Toggle Reaction Popup
     function toggleReactionPopup(postId) {
         const popup = document.getElementById(`reaction-popup-${postId}`);
         if (!popup) return;
@@ -759,7 +768,7 @@ $(document).ready(function () {
         popup.style.display = isVisible ? "none" : "block";
     }
     
-    // Function to Handle Reactions (Add/Update)
+    // Handle Reactions (Add/Update)
     function handleReaction(postId, reactionId) {
         fetch(`/create_update_post_reactions/`, {
             method: "POST",
@@ -785,45 +794,71 @@ $(document).ready(function () {
         .catch(error => console.error("Error:", error));
     }
     
+    // Load Reactions and Update UI
     function loadReactions(postId) {
         fetch(`/fetch_post_reactions/${postId}/`)
-        .then(response => response.json())
-        .then(data => {
-            const reactionContainer = document.getElementById(`post-reactions-${postId}`);
-            if (!reactionContainer) return;
+            .then(response => response.json())
+            .then(data => {
+                let userReaction = null;
     
-            reactionContainer.innerHTML = "";
-    
-            if (!data.reactions || data.reactions.length === 0) {
-                reactionContainer.innerHTML = " ";
-                return;
-            }
-    
-            // Create a map to store unique reactions with their counts
-            const reactionMap = {};
-    
-            data.reactions.forEach(reaction => {
-                if (reactionMap[reaction.value]) {
-                    reactionMap[reaction.value]++; // Increment count if reaction already exists
-                } else {
-                    reactionMap[reaction.value] = 1; // Initialize count
+                if (data.reactions) {
+                    data.reactions.forEach(reaction => {
+                        if (parseInt(reaction.user_id) === parseInt(USER_ID)) {  
+                            userReaction = reaction.value; 
+                        }
+                    });
                 }
-            });
+                const reactionContainer = document.getElementById(`post-reactions-${postId}`);
+                if (!reactionContainer) return;
+        
+                reactionContainer.innerHTML = "";
+        
+                if (!data.reactions || data.reactions.length === 0) {
+                    reactionContainer.innerHTML = " ";
+                    return;
+                }
+        
+                // Create a map to store unique reactions with their counts
+                const reactionMap = {};
+        
+                data.reactions.forEach(reaction => {
+                    if (reactionMap[reaction.value]) {
+                        reactionMap[reaction.value]++; // Increment count if reaction already exists
+                    } else {
+                        reactionMap[reaction.value] = 1; // Initialize count
+                    }
+                });
+        
+                // Append reactions without duplicates but with counts
+                Object.keys(reactionMap).forEach(reaction => {
+                    const reactionHTML = `
+                        <span class="reaction-display" onclick="removeReaction('${postId}')">
+                            ${reaction} <sup class="react-count">${reactionMap[reaction]}</sup>
+                        </span>
+                    `;
+                    reactionContainer.innerHTML += reactionHTML;
+                });
     
-            // Append reactions without duplicates but with counts
-            Object.keys(reactionMap).forEach(reaction => {
-                const reactionHTML = `
-                    <span class="reaction-display" onclick="removeReaction('${postId}')">
-                        ${reaction} <sup class="react-count">${reactionMap[reaction]}</sup>
-                    </span>
-                `;
-                reactionContainer.innerHTML += reactionHTML;
-            });
-        })
-        .catch(error => console.error("Error fetching reactions:", error));
+    
+                // Update the reaction icon dynamically
+                const reactionIcon = document.getElementById(`reaction-icon-${postId}`);
+                if (reactionIcon) {
+                    if (userReaction) {
+                        reactionIcon.innerHTML = userReaction;  // Show the user's reaction emoji
+                    } else {
+                        reactionIcon.innerHTML = '<i class="bi bi-heart"></i>';  // Show default heart icon
+                    }
+                }
+            })
+            .catch(error => console.error("Error fetching reactions:", error));
     }
     
-    // Function to Remove Reaction
+    
+    
+    
+    
+    
+    // Remove Reaction
     function removeReaction(postId) {
         fetch(`/delete_post_reactions/`, {
             method: "POST",
@@ -848,6 +883,7 @@ $(document).ready(function () {
             alert("Failed to remove reaction. Please try again.");
         });
     }
+    
     
 // Function to Get CSRF Token
 function getCSRFToken() {

@@ -43,15 +43,17 @@ class FetchPostReactions(View):
     @role_required(Role.ADMIN.value, Role.END_USER.value)
     def get(self, request, post_id):
         try:
-            # print(f"Fetching reactions for post_id: {post_id}")  # Debugging
             reactions = post_service.get_active_post_reactions(post_id)
-            # Build the reaction list; if no reactions exist, reaction_list will be empty.
+            
             reaction_list = [
-                {"id": reaction.master_list_id.id, "value": reaction.master_list_id.value}
+                {"id": reaction.master_list_id.id, "value": reaction.master_list_id.value, "user_id": reaction.reacted_by.id}
                 for reaction in reactions
             ]
-            # print("Reactions:", reaction_list)
-            return JsonResponse({'success': True, 'reactions': reaction_list}, status=200)
+
+            # Identify the current user's reaction
+            user_reaction = next((r["value"] for r in reaction_list if r["user_id"] == request.user.id), None)
+
+            return JsonResponse({'success': True, 'reactions': reaction_list, 'user_reaction': user_reaction}, status=200)
         except Exception as e:
             return JsonResponse({'success': False, 'error': str(e)}, status=400)
 
