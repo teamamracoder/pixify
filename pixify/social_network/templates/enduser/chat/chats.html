@@ -228,35 +228,54 @@
                 success: function (res) {
                     let combinedHtml = '';
                     const fallbackImage = '/images/avatar.jpg';
-
+        
                     if (res.members.length === 0) {
                         combinedHtml = '<div class="no-members-message">No Followers And Followings to Display</div>';
                     } else {
                         res.members.forEach(function (member) {
-                            const profileImage = member.user_id__profile_photo_url || fallbackImage;
+                            let id, firstName, lastName, profilePhoto;
+        
+                            // Check if the member is a follower or a following.
+                            if (member.hasOwnProperty('user_id')) {
+                                id = member.user_id;
+                                firstName = member.user_id__first_name;
+                                lastName = member.user_id__last_name;
+                                profilePhoto = member.user_id__profile_photo_url || fallbackImage;
+                            } else if (member.hasOwnProperty('following')) {
+                                id = member.following;
+                                firstName = member.following__first_name;
+                                lastName = member.following__last_name;
+                                profilePhoto = member.following__profile_photo_url || fallbackImage;
+                            } else {
+                                // Skip if neither key exists.
+                                return;
+                            }
+        
                             combinedHtml += `
-                            <div class="xyz1">
-                                <div class="xyz1-wrapper">
-                                    <div class="chat-selection-body" id="user-${member.user_id}" data-user-id="${member.user_id}">
-                                        <img src="${staticUrl}${cleanMediaPath(profileImage)}" alt="${member.user_id__first_name}'s profile photo" class="chat-profile-photo">
+                                <div class="xyz1">
+                                    <div class="xyz1-wrapper">
+                                        <div class="chat-selection-body" id="user-${id}" data-user-id="${id}">
+                                            <img src="${staticUrl}${cleanMediaPath(profilePhoto)}" alt="${firstName}'s profile photo" class="chat-profile-photo">
+                                        </div>
+                                        <input type="checkbox" class="chat-checkbox" id="checkbox-${id}" onchange="checkSelection(${id})" onclick="event.stopPropagation();">
                                     </div>
-                                    <input type="checkbox" class="chat-checkbox" id="checkbox-${member.user_id}" onchange="checkSelection(${member.user_id})" onclick="event.stopPropagation();">
+                                    <div class="chat-profile-text">
+                                        <div class="xyz1-title">${firstName} ${lastName}</div>
+                                    </div>
                                 </div>
-                                <div class="chat-profile-text"><div class="xyz1-title">${member.user_id__first_name} ${member.user_id__last_name}</div></div>
-                            </div>
                             `;
                         });
                     }
-
+        
                     // Update profiles in the DOM
                     $("#chat-filled").html(combinedHtml);
-
+        
                     // Reapply selected class to previously selected items and check their checkboxes
                     selectedItems.forEach(function (itemId) {
                         $(`#user-${itemId}`).addClass('selected');
                         $(`#checkbox-${itemId}`).prop('checked', true);
                     });
-
+        
                     updateArrowButtonVisibility();
                     updateCheckboxVisibility();
                     applyPressHoldFunctionality();

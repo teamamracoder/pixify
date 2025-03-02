@@ -265,7 +265,7 @@ def chat_details(chat_id, user):
     chat_data = {
         'id': chat.id,
         'title': chat_title,
-        'chat_cover': chat.chat_cover if chat.chat_cover else '/static/images/group_pic.png',
+        'chat_cover': chat.chat_cover if chat.chat_cover else '/images/group_pic.png',
         'created_by':chat.created_by,
         'is_group': chat.type == ChatType.GROUP.value,
         'chat_bio':chat.chat_bio,
@@ -273,7 +273,7 @@ def chat_details(chat_id, user):
             {
                 'id': member.member_id,
                 'first_name': "You" if member.member_id.id == user else member.member_id.first_name +" "+ member.member_id.last_name,
-                'profile': member.member_id.profile_photo_url if member.member_id.profile_photo_url else '/static/images/avatar.jpg'
+                'profile': member.member_id.profile_photo_url if member.member_id.profile_photo_url else '/images/avatar.jpg'
             }
             for member in active_members
         ]

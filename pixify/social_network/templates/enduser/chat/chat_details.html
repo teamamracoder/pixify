@@ -141,49 +141,83 @@ $(document).ready(function () {
     let chatId = "{{ data.chat.id }}"; // Ensure chatId is safely handled as a string
     const staticUrl = "{% static '' %}"; // This usually returns "/static/"
 
+    function cleanMediaPath(media) {
+      return media.startsWith('/') ? media.slice(1) : media;
+    }
+    
     // Function to fetch followers and followings based on the search query
     function fetchFollowersAndFollowings(searchQuery = '') {
-        $.ajax({
-            url: `/chat/${chatId}/members/api?search=${searchQuery}`,
-            type: 'GET',
-            success: function (res) {
-                let combinedHtml = '';
-                const fallbackImage = 'images/avatar.jpg';
+    $.ajax({
+        url: `/chat/${chatId}/members/api?search=${searchQuery}`,
+        type: 'GET',
+        success: function (res) {
+            let combinedHtml = '';
+            const fallbackImage = 'images/avatar.jpg';
 
-                if (res.members.length === 0) {
-                    // If no members are found, display a message
-                    combinedHtml = '<div class="no-members-message">No members to add</div>';
-                } else {
-                    // Render followers
-                    res.members.forEach(function (member) {
+            if (res.members.length === 0) {
+                // If no members are found, display a message
+                combinedHtml = '<div class="no-members-message">No members to add</div>';
+            } else {
+                res.members.forEach(function (member) {
+                    let id, firstName, lastName, profilePhoto;
 
-                      const profileImage = member.user_id__profile_photo_url && member.user_id__profile_photo_url.startsWith('/')
-                      ? member.user_id__profile_photo_url.slice(1)
-                      : member.user_id__profile_photo_url || fallbackImage;
+                    // Check if the member uses "user_id" keys.
+                    if (member.hasOwnProperty('user_id')) {
+                        id = member.user_id;
+                        firstName = member.user_id__first_name;
+                        lastName = member.user_id__last_name;
+                        // Get the profile photo. If it exists and starts with '/', remove the slash.
+                        if (member.user_id__profile_photo_url) {
+                            profilePhoto = member.user_id__profile_photo_url.startsWith('/')
+                                ? member.user_id__profile_photo_url.slice(1)
+                                : member.user_id__profile_photo_url;
+                        } else {
+                            profilePhoto = fallbackImage;
+                        }
+                    }
+                    // Otherwise, check if the member uses "following" keys.
+                    else if (member.hasOwnProperty('following')) {
+                        id = member.following;
+                        firstName = member.following__first_name;
+                        lastName = member.following__last_name;
+                        if (member.following__profile_photo_url) {
+                            profilePhoto = member.following__profile_photo_url.startsWith('/')
+                                ? member.following__profile_photo_url.slice(1)
+                                : member.following__profile_photo_url;
+                        } else {
+                            profilePhoto = fallbackImage;
+                        }
+                    } else {
+                        // If neither key exists, skip this member.
+                        return;
+                    }
 
-                        combinedHtml += `
-                            <div class="parchat-selection-body" id="user-${member.user_id}" data-user-id="${member.user_id}" onclick="toggleSelection(${member.user_id})">
-                                <img src="${staticUrl}${profileImage}" alt="${member.user_id__first_name}'s profile photo" class="parchat-profile-photo">
-                                <div class="parchat-profile-text">${member.user_id__first_name} ${member.user_id__last_name}</div>
+                    combinedHtml += `
+                        <div class="parchat-selection-body" id="user-${id}" data-user-id="${id}" onclick="toggleSelection(${id})">
+                            <img src="${staticUrl}${cleanMediaPath(profilePhoto)}" alt="${firstName}'s profile photo" class="parchat-profile-photo">
+                            <div class="parchat-profile-text">
+                                <div class="xyz1-title">${firstName} ${lastName}</div>
                             </div>
-                        `;
-                    });
-                }
-
-                // Update profiles in the DOM
-                $("#parchat-profile-list").html(combinedHtml);
-
-                // Reapply selected class to previously selected items
-                selectedItems.forEach(function (itemId) {
-                    $(`#user-${itemId}`).addClass('selected');
+                        </div>
+                    `;
                 });
-            },
-            error: function (xhr, status, error) {
-                console.error('AJAX Error:', error);
-                console.error('Response:', xhr.responseText);
-            },
-        });
-    }
+            }
+
+            // Update profiles in the DOM
+            $("#parchat-profile-list").html(combinedHtml);
+
+            // Reapply selected class to previously selected items
+            selectedItems.forEach(function (itemId) {
+                $(`#user-${itemId}`).addClass('selected');
+            });
+        },
+        error: function (xhr, status, error) {
+            console.error('AJAX Error:', error);
+            console.error('Response:', xhr.responseText);
+        },
+    });
+}
+
 
     // Function to toggle selection of members
     window.toggleSelection = function (userId) {
