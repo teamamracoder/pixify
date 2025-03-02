@@ -33,7 +33,7 @@ class EnduserprofileListView(View):
             'reactions':reactions
         }
 
-        return render(request, 'enduser/profile/userprofile.html', {'user_details': user_details})
+        return render(request, 'enduser/profile/userprofile.html', {'user_details': user_details,'user':request.user})
 
 
 class FetchPostReactions(View):

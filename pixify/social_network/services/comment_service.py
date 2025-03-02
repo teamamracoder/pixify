@@ -127,6 +127,7 @@ def get_comments_by_post(post_id, user_id):
         return [
             {
                 "id": reply.id,
+                "user_id": reply.comment_by.id,
                 "user": reply.comment_by.first_name,
                 "user_profile": reply.comment_by.profile_photo_url if reply.comment_by.profile_photo_url else "",
                 "text": reply.comment,
@@ -144,6 +145,7 @@ def get_comments_by_post(post_id, user_id):
     return [
         {
             "id": comment.id,
+            "user_id": comment.comment_by.id,
             "user": comment.comment_by.first_name,
             "user_profile": comment.comment_by.profile_photo_url if comment.comment_by.profile_photo_url else "",
             "text": comment.comment,
