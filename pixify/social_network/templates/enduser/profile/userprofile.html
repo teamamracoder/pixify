@@ -9,10 +9,10 @@
                 <p class="user_title">{{ user_details.user_name }}</p>
             </div>
             <div class="profile-info">
-                <p><strong>Status:</strong> <span class="active">{{ user_details.status }}</span></p>
-                <p><strong>Age:</strong> {{ user_details.age }}</p>
-                <p><strong>Followers:</strong> {{ user_details.followers_count }}</p>
-                <p><strong>Followings:</strong> {{ user_details.following_count }}</p>
+                <p><i class="bi bi-circle  user_profile-icons"></i><strong>Status:</strong> <span class="active">{{ user_details.status }}</span></p>
+                <p><i class="bi bi-calendar3 user_profile-icons"></i><strong>Age:</strong> {{ user_details.age }}</p>
+                <p><i class="bi bi-people-fill user_profile-icons"></i><strong>Followers:</strong> {{ user_details.followers_count }}</p>
+                <p><i class="bi bi-people user_profile-icons"></i><strong>Followings:</strong> {{ user_details.following_count }}</p>
             </div>
         </div>
     
@@ -1090,7 +1090,7 @@ function toggleReaction(commentId, iconElement, likeCountElement) {
             display: flex;
         }
         .user-post{
-            border: 2px solid #1a033bfb;
+            border: 2px solid #042d58;
             margin: 20px 0px 20px 0px;
             width: 100%;
             background: #1f0447fb;
@@ -1121,7 +1121,7 @@ function toggleReaction(commentId, iconElement, likeCountElement) {
             gap: 20px;
             align-items: center;
             padding: 20px;
-            border: 1px solid black;
+            border: 2px solid #042d58;
         }
 
         .profile-header {
@@ -1152,7 +1152,7 @@ function toggleReaction(commentId, iconElement, likeCountElement) {
         }
 
         .friends-section {
-            border-bottom: 1px solid;
+            border-bottom: 2px solid #042d58;
             margin-bottom: 10px;
             overflow-y: scroll;
             margin-top: 20px;
@@ -1214,7 +1214,7 @@ function toggleReaction(commentId, iconElement, likeCountElement) {
         }
         .footer{
             color: #9858dd;
-            border-top: 2px solid black;
+            border-top: 2px solid #042d58;
             padding-top: 30px;
             align-items: end;
             justify-content: center;
@@ -1330,6 +1330,12 @@ function toggleReaction(commentId, iconElement, likeCountElement) {
         display: flex;
         align-items: end;
         justify-content: space-between;
+    }
+    .user_profile-icons{
+    color: rgba(172, 57, 147, 0.973);
+    margin-bottom: 8px;
+    padding: 5px;
+    font-size: 13px;
     }
 
     </style>
