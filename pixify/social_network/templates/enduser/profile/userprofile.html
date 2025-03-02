@@ -511,6 +511,14 @@ $(document).ready(function () {
 
 //comment create
 $(document).ready(function () {
+    const currentUserId = {{ user.id}};  // Inject current user ID from Django
+    // Added staticUrl, fallbackImage, and cleanMediaPath for proper image handling
+    const staticUrl = "{% static '' %}"; // This usually returns "/static/"
+    const fallbackImage = 'images/avatar.jpg';
+    function cleanMediaPath(media) {
+        return media.startsWith('/') ? media.slice(1) : media;
+    }
+
     // Function to submit a comment or a reply
     function submitComment(postId, replyFor = null) {
         const commentText = $("#commentText").val().trim();
@@ -596,10 +604,20 @@ $(document).ready(function () {
         return comments
             .slice()  // Create a shallow copy to avoid modifying the original array
             .reverse() // Reverse the order so the latest comments appear first
-            .map(comment => `
+            .map(comment => {
+                const imageUrl = comment.user_profile 
+                    ? staticUrl + cleanMediaPath(comment.user_profile)
+                    : staticUrl + fallbackImage;
+                const commentUserId = comment.user_id;
+                const profileUrl = (parseInt(commentUserId) === parseInt(currentUserId))
+                    ? "{% url 'userprofile' %}"
+                    : "/profile/" + commentUserId + "/";
+                return `
                 <div class="comment" style="margin-left: ${isReply ? "30px" : "0px"};">
                     <div style="display: flex; gap:5px; align-items: flex-start;">
-                        <img src="${comment.user_profile}" alt="${comment.user}" class="comment-profile-img">
+                    <a href="${profileUrl}">
+                        <img src="${imageUrl}" alt="${comment.user}" class="comment-profile-img">
+                    </a>
                         <div class="comment-content"> 
                             <div class="comment-header">
                                 <div><strong>${comment.user}</strong></div>
@@ -625,7 +643,8 @@ $(document).ready(function () {
                 ${comment.replies && comment.replies.length > 0 
                     ? generateCommentTree(comment.replies, true)  // Replies maintain their order
                     : ""}
-            `).join("");
+            `;
+            }).join("");
     }
     
       
