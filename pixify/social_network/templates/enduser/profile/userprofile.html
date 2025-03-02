@@ -69,19 +69,44 @@
                             </div>
                         </div>
 
-                        {% if post.media_url %}
+                        {% if post.media_url|length > 1 %}
+                        <div id="postCarousel{{ post.id }}" class="carousel slide" data-interval="false">
+                            <div class="carousel-inner">
                             {% for media in post.media_url %}
+                                <div class="carousel-item {% if forloop.first %}active{% endif %}">
                                 {% if media|slice:"-4:" == ".mp4" %}
-                                    <video class="post_video" muted>
-                                        <source src="{% static post.media_url.0 %}" type="video/mp4">
-                                        Your browser does not support the video tag.
+                                    <video class="post_video w-100" muted controls>
+                                    <source src="{% static media %}" type="video/mp4">
+                                    Your browser does not support the video tag.
                                     </video>
                                 {% else %}
-                                    <img src="{% static media %}" alt="Post Image" class="post-image">
+                                    <img src="{% static media %}" alt="Post Image" class="post-image w-100">
                                 {% endif %}
+                                </div>
                             {% endfor %}
+                            </div>
+                            <a class="carousel-control-prev" href="#postCarousel{{ post.id }}" role="button" data-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="sr-only">Previous</span>
+                            </a>
+                            <a class="carousel-control-next" href="#postCarousel{{ post.id }}" role="button" data-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="sr-only">Next</span>
+                            </a>
+                        </div>
+                        {% else %}
+                        {% for media in post.media_url %}
+                            {% if media|slice:"-4:" == ".mp4" %}
+                            <video class="post_video w-100" muted controls>
+                                <source src="{% static media %}" type="video/mp4">
+                                Your browser does not support the video tag.
+                            </video>
+                            {% else %}
+                            <img src="{% static media %}" alt="Post Image" class="post-image w-100">
+                            {% endif %}
+                        {% endfor %}
                         {% endif %}
-
+                        
                         <div class="post-opt-icons" style="height: 4vh;">
                             <div class="post-reaction" style="cursor: pointer;">
                                 <i class="bi bi-emoji-smile" onclick="toggleReactionPopup('{{ post.id }}')"></i>
