@@ -61,7 +61,11 @@
         <div class="user-post-container">
             {% if user_details.posts %}
                 {% for post in user_details.posts %}
+                {% if post.type == 3 %}
+                    <div class="user-post" data-post-id="{{ post.id }}" onclick="window.location.href='{% url 'short_detail' post.id %}'">
+                {% else %}        
                     <div class="user-post" data-post-id="{{ post.id }}">
+                {% endif %}        
                         <div class="post-title-wrapper">
                             <img src="{% static user_details.profile_photo|default:'/images/avatar.jpg' %}" class="photo-of-post">
                             <div class="post-title"><h6>{{ user_details.user_name }}</h6>
