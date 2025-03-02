@@ -192,7 +192,7 @@
               <div class="d-flex align-items-center mb-3" style="margin-top:10px;">
                   <img src="{% static 'images/avatar.jpg' %}" alt="User Avatar"
                       class="user-avatar me-2">
-                  <span class="fw-bold "style="color:white">Priya Mitra</span>
+                    <span class="fw-bold" style="color:white">{{ user.first_name }} {{ user.last_name }}</span>
               </div>
               <div class="mb-3  ">
                   <textarea class="form-control  " name="postTitle" placeholder="What do you want to talk about?" rows="2"
