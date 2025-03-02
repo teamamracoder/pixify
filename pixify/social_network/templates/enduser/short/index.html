@@ -433,8 +433,28 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
+// Global variables (adjust these as needed)
+const currentUserId = {{ user.id }};  // Inject current user ID from Django
 let replyingToCommentId = null;
 
+// Utility: Get a cookie by name (used for CSRF token)
+function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== "") {
+    const cookies = document.cookie.split(";");
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      // Does this cookie string begin with the name we want?
+      if (cookie.substring(0, name.length + 1) === name + "=") {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
+
+// Clear the comment modal inputs and reset reply state.
 function clearCommentModal(modal) {
   if (modal.id && modal.id.startsWith("shortCommentsModal-")) {
     const inputField = modal.querySelector('input[id^="shortCommentInput-"]');
@@ -450,6 +470,7 @@ function clearCommentModal(modal) {
   }
 }
 
+// Close a specific comments modal.
 function closeShortCommentsModal(modalId) {
   const modal = document.getElementById(modalId);
   if (!modal) return;
@@ -461,24 +482,28 @@ function closeShortCommentsModal(modalId) {
   }, 300);
 }
 
+// Close all modals (comments, share, delete, etc.)
 function closeAllModals() {
-
   const modals = document.querySelectorAll(
     ".short-modal, .short-create-modal, .short-delete-modal"
   );
-
   modals.forEach((modal) => {
     if (modal.id && modal.id.startsWith("shortCommentsModal-")) {
       clearCommentModal(modal);
       modal.dataset.loading = "false";
     }
-
     modal.classList.remove("show");
     modal.style.display = "none";
-
   });
 }
 
+// Clean a media path if needed (customize as required)
+function cleanMediaPath(media) {
+  return media.startsWith('/') ? media.slice(1) : media;
+}
+
+// --------------------------------------------------------------------
+// Open the comments modal for a given postId.
 function openShortCommentsModal(postId) {
   const modal = document.getElementById("shortCommentsModal-" + postId);
   const commentsList = document.getElementById("shortCommentsList-" + postId);
@@ -488,15 +513,14 @@ function openShortCommentsModal(postId) {
     return;
   }
   
-  if (modal.dataset.loading === "true") {
-    return;
-  }
+  if (modal.dataset.loading === "true") return;
   modal.dataset.loading = "true";
   
   commentsList.innerHTML = "";
   modal.style.display = "flex";
   setTimeout(() => modal.classList.add("show"), 10);
 
+  // Add the comment input if not already present.
   if (!document.getElementById("shortCommentInput-" + postId)) {
     const commentInputContainer = document.createElement("div");
     commentInputContainer.classList.add("short-comment-input");
@@ -535,6 +559,7 @@ function openShortCommentsModal(postId) {
     }
   };
   
+  // Bind Enter key on submitButton and commentInput (if not already bound)
   if (!submitButton.hasAttribute("data-keydown-bound")) {
     submitButton.addEventListener("keydown", function (event) {
       if (event.key === "Enter" || event.key === " ") {
@@ -555,6 +580,7 @@ function openShortCommentsModal(postId) {
     commentInput.setAttribute("data-keydown-bound", "true");
   }
   
+  // Fetch comments from the server.
   fetch(`/short/${postId}/comments/`)
     .then((response) => response.json())
     .then((data) => {
@@ -562,7 +588,7 @@ function openShortCommentsModal(postId) {
         const topLevelComments = data.comments.filter(
           (comment) => !comment.parent_comment_id
         );
-        topLevelComments.forEach((comment) => {
+        topLevelComments.forEach((comment) => {          
           renderComment(comment, commentsList);
         });
       } else {
@@ -580,7 +606,8 @@ function openShortCommentsModal(postId) {
     });
 }
 
-// Handle submitting a new comment or reply
+// --------------------------------------------------------------------
+// Handle submitting a new comment or reply.
 function handleCommentSubmit(postId, commentInput, commentsList, replyingToCommentId, callback) {
   const commentText = commentInput.value.trim();
   if (!commentText) {
@@ -596,7 +623,7 @@ function handleCommentSubmit(postId, commentInput, commentsList, replyingToComme
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "X-CSRFToken": getCookie('csrftoken'),
+      "X-CSRFToken": getCookie("csrftoken"),
     },
     body: JSON.stringify({ text: commentText }),
   })
@@ -604,9 +631,7 @@ function handleCommentSubmit(postId, commentInput, commentsList, replyingToComme
     .then((data) => {
       if (data.success) {
         const noCommentsMessage = commentsList.querySelector(".no-comments");
-        if (noCommentsMessage) {
-          noCommentsMessage.remove();
-        }
+        if (noCommentsMessage) noCommentsMessage.remove();
         
         if (replyingToCommentId) {
           const parentComment = commentsList.querySelector(
@@ -642,9 +667,7 @@ function handleCommentSubmit(postId, commentInput, commentsList, replyingToComme
         commentInput.value = "";
         const commentInputContainer = commentInput.parentElement;
         const cancelReplyControl = commentInputContainer.querySelector(".btn-cancel-reply");
-        if (cancelReplyControl) {
-          cancelReplyControl.remove();
-        }
+        if (cancelReplyControl) cancelReplyControl.remove();
         
         callback();
       } else {
@@ -656,12 +679,21 @@ function handleCommentSubmit(postId, commentInput, commentsList, replyingToComme
     });
 }
 
-
+// --------------------------------------------------------------------
+// Render a comment with clickable user info (without using an <a> tag).
 function renderComment(comment, container, prepend = false, isReply = false, flatReplyContainer = null) {
+  // Use the keys exactly as returned by the views.
   const profilePhotoUrl = comment.comment_by__profile_photo_url || "/images/avatar.jpg";
   const firstName = comment.comment_by__first_name || "Anonymous";
   const lastName = comment.comment_by__last_name || "";
   const createdAt = comment.created_at || "";
+  
+  const commentUserId = comment.comment_by__id || comment.comment_by_id || "";
+
+  const profileUrl = (parseInt(commentUserId) === parseInt(currentUserId))
+  ? "{% url 'userprofile' %}"
+  : "/profile/" + commentUserId + "/";
+
   
   const commentItem = document.createElement("div");
   commentItem.classList.add("short-comment-item");
@@ -674,9 +706,11 @@ function renderComment(comment, container, prepend = false, isReply = false, fla
   const likedClass = comment.user_liked ? "liked" : "";
   const iconClass = comment.user_liked ? "bi-heart-fill" : "bi-heart";
   
+  // Create the comment's HTML.
+  // The .user-info div has a data attribute with the profile URL.
   commentItem.innerHTML = `
     <div class="short-comment-content">
-      <div class="user-info">
+      <div class="user-info" data-profile-url="${profileUrl}">
         <img src="${staticUrl}${cleanMediaPath(profilePhotoUrl)}" alt="${firstName}'s Profile Picture">
         <span class="short-username">${firstName} ${lastName}</span>
         <span class="short-created-at">${createdAt}</span>
@@ -693,6 +727,14 @@ function renderComment(comment, container, prepend = false, isReply = false, fla
     </div>
   `;
   
+  // Make the user-info area clickable without an <a> tag.
+  const userInfoDiv = commentItem.querySelector(".user-info");
+  userInfoDiv.addEventListener("click", function () {
+    const url = this.getAttribute("data-profile-url");
+    window.location.href = url;
+  });
+  
+  // Set up the like button event listener.
   const likeButton = commentItem.querySelector(".btn-like");
   likeButton.addEventListener("click", function () {
     const commentId = this.dataset.commentId;
@@ -701,7 +743,7 @@ function renderComment(comment, container, prepend = false, isReply = false, fla
     fetch(`/short/comment/${commentId}/reaction/`, {
       method: "POST",
       headers: {
-        "X-CSRFToken": getCookie('csrftoken'),
+        "X-CSRFToken": getCookie("csrftoken"),
       },
     })
       .then((response) => response.json())
@@ -722,6 +764,7 @@ function renderComment(comment, container, prepend = false, isReply = false, fla
       );
   });
   
+  // Handling long press for deletion.
   let pressTimer;
   const longPressDelay = 500;
   
@@ -764,6 +807,7 @@ function renderComment(comment, container, prepend = false, isReply = false, fla
     handlePressEnd();
   });
   
+  // Delete button event listener.
   const deleteButton = commentItem.querySelector(".btn-delete");
   deleteButton.addEventListener("click", function (e) {
     e.stopPropagation();
@@ -771,6 +815,7 @@ function renderComment(comment, container, prepend = false, isReply = false, fla
     openDeleteModal(commentId, container, isReply);
   });
   
+  // Reply button event listener.
   const replyButton = commentItem.querySelector(".btn-reply");
   replyButton.addEventListener("click", function (e) {
     e.stopPropagation();
@@ -778,6 +823,7 @@ function renderComment(comment, container, prepend = false, isReply = false, fla
     replyToComment(commentId, firstName, commentItem);
   });
   
+  // Render replies if present.
   if (!isReply && comment.replies && comment.replies.length > 0) {
     const replyContainer = document.createElement("div");
     replyContainer.classList.add("reply-list");
@@ -811,6 +857,7 @@ function renderComment(comment, container, prepend = false, isReply = false, fla
     container.appendChild(commentItem);
   }
   
+  // Render nested replies if they exist.
   if (!isReply && comment.replies && comment.replies.length > 0 && comment._replyContainer) {
     comment.replies.forEach((reply) => {
       renderComment(reply, comment._replyContainer, false, true, comment._replyContainer);
@@ -822,6 +869,8 @@ function renderComment(comment, container, prepend = false, isReply = false, fla
   }
 }
 
+// --------------------------------------------------------------------
+// Handle replying to a comment.
 function replyToComment(commentId, parentUsername, commentItem) {
   const modal = commentItem.closest(".short-modal");
   const commentInput = modal.querySelector('input[id^="shortCommentInput-"]');
@@ -829,9 +878,7 @@ function replyToComment(commentId, parentUsername, commentItem) {
   
   if (replyingToCommentId && replyingToCommentId !== commentId) {
     const existingCancelButton = commentInputContainer.querySelector(".btn-cancel-reply");
-    if (existingCancelButton) {
-      existingCancelButton.remove();
-    }
+    if (existingCancelButton) existingCancelButton.remove();
     commentInput.value = "";
     commentInput.placeholder = "Add a comment...";
   }
@@ -863,6 +910,8 @@ function replyToComment(commentId, parentUsername, commentItem) {
   commentInput.placeholder = `Replying to @${parentUsername}...`;
 }
 
+// --------------------------------------------------------------------
+// Open the delete modal for a comment.
 function openDeleteModal(commentId, container, isReply) {
   const deleteModal = document.getElementById("deleteModal");
   let btnDeleteConfirm = document.getElementById("btnDeleteConfirm");
@@ -870,6 +919,7 @@ function openDeleteModal(commentId, container, isReply) {
   
   deleteModal.style.display = "block";
   
+  // Clone buttons to remove previous event listeners.
   const newBtnDeleteConfirm = btnDeleteConfirm.cloneNode(true);
   btnDeleteConfirm.parentNode.replaceChild(newBtnDeleteConfirm, btnDeleteConfirm);
   const newBtnDeleteCancel = btnDeleteCancel.cloneNode(true);
@@ -879,29 +929,29 @@ function openDeleteModal(commentId, container, isReply) {
     deleteComment(commentId, container, isReply);
     closeDeleteModal();
     const commentModal = container.closest(".short-modal");
-    if (commentModal) {
-      closeShortCommentsModal(commentModal.id);
-    }
+    if (commentModal) closeShortCommentsModal(commentModal.id);
   });
   
   newBtnDeleteCancel.addEventListener("click", closeDeleteModal);
 }
 
-
+// Close the delete modal.
 function closeDeleteModal() {
   const deleteModal = document.getElementById("deleteModal");
   deleteModal.style.display = "none";
 }
 
+// --------------------------------------------------------------------
+// Delete a comment.
 function deleteComment(commentId, container, isReply = false) {
-  const videoWrapper = container.closest('.video-wrapper');
+  const videoWrapper = container.closest(".video-wrapper");
   const postId = videoWrapper ? videoWrapper.dataset.postId : null;
   
   fetch(`/short/comment/${commentId}/delete/`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "X-CSRFToken": getCookie('csrftoken'),
+      "X-CSRFToken": getCookie("csrftoken"),
     },
   })
     .then((response) => response.json())
@@ -910,9 +960,7 @@ function deleteComment(commentId, container, isReply = false) {
         const commentItem = container.querySelector(
           `[data-comment-id="${commentId}"]`
         );
-        if (commentItem) {
-          commentItem.remove();
-        }
+        if (commentItem) commentItem.remove();
         const commentIcon = document.querySelector(
           `.chat-icon[data-video-id="${postId}"]`
         );
@@ -931,6 +979,10 @@ function deleteComment(commentId, container, isReply = false) {
     });
 }
 
+// --------------------------------------------------------------------
+// Global event listeners.
+
+// Close modal when clicking on any close button within a short-modal.
 document.querySelectorAll(".short-modal .close").forEach((closeBtn) => {
   closeBtn.addEventListener("click", function () {
     const modal = this.closest(".short-modal");
@@ -938,19 +990,26 @@ document.querySelectorAll(".short-modal .close").forEach((closeBtn) => {
   });
 });
 
-
+// When a chat icon is clicked, open the corresponding comments modal.
 document.querySelectorAll(".chat-icon").forEach((button) => {
   button.addEventListener("click", function () {
     const postId = button.dataset.videoId;
     const shareModalId = "short-create-modal-" + postId;
     const shareModal = document.getElementById(shareModalId);
-    // If the share modal is open (display is not "none"), close it.
+    // If the share modal is open, close it.
     if (shareModal && shareModal.style.display !== "none") {
       closeShortShareModal(shareModalId);
     }
     openShortCommentsModal(postId);
   });
 });
+
+// Helper: Close a share modal.
+function closeShortShareModal(modalId) {
+  const modal = document.getElementById(modalId);
+  if (modal) modal.style.display = "none";
+}
+
 
 
 </script>

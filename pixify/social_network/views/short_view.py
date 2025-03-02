@@ -137,6 +137,7 @@ class ShortCommentListView(View):
 
        return JsonResponse({"comments": list(comments)}, safe=False)
 
+
 class ShortCommentCreateView(View):
     def post(self, request, post_id):
         user = request.user
@@ -159,6 +160,7 @@ class ShortCommentCreateView(View):
             'comment': {
                 'id': comment.id,
                 'comment': comment.comment,
+                'comment_by__id': comment.comment_by.id,
                 'comment_by__first_name': comment.comment_by.first_name,
                 'comment_by__last_name': comment.comment_by.last_name,
                 'comment_by__profile_photo_url': comment.comment_by.profile_photo_url or None,  # Handle null cases
@@ -192,6 +194,7 @@ class ShortCommentReplyView(View):
             'reply': {
                 'id': reply.id,
                 'comment': reply.comment,
+                'comment_by__id': reply.comment_by.id,
                 'comment_by__first_name': reply.comment_by.first_name,
                 'comment_by__last_name': reply.comment_by.last_name,
                 'comment_by__profile_photo_url': reply.comment_by.profile_photo_url or None,  # Handle null cases
