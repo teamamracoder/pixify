@@ -223,6 +223,7 @@ urlpatterns = [
     path('toggle-follow/', views.ToggleFollowView.as_view(), name='toggle_follow'),
     path("check-follow-state/",views.CheckFollowState.as_view(), name="check-follow-state"),
     path("get-followers-following/",views. GetFollowersFollowing.as_view(), name="get_followers_following"),
+    path('get-user-posts-comments/<int:user_id>/',views.GetUserPostsComments.as_view(), name='get_user_posts_comments'),
 
 ]
 

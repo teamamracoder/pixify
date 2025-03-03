@@ -245,3 +245,11 @@ class GetFollowersFollowing(View):
         except Exception as e:
             logger.error(f"Error fetching followers/followings for user {user_id}: {str(e)}", exc_info=True)
             return JsonResponse({"error": "Internal server error"}, status=500)
+        
+
+
+class GetUserPostsComments(View):
+    def get(self, request, user_id):
+        posts = post_service.get_user_post_comment_count(user_id)
+        print(posts)
+        return JsonResponse({'posts': list(posts)})

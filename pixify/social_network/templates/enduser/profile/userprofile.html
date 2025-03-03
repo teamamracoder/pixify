@@ -101,7 +101,9 @@
                             {% endif %}
                             <div class="react-comment-wrapper">
                             <div class="post-reactions"  id="post-reactions-{{ post.id }}"><!-- Reactions will be dynamically loaded here --></div>
-                            <div class="user_profile_comment">{{post.comment_count}} comments</div>
+                            <div id="comment-count-{{ post.id }}" class="user_profile_comment" data-user-id="{{user_details.id}}">
+                                {{ post.comment_count }} comments
+                            </div>                           
                             </div>
                         </div>    
 
@@ -200,8 +202,6 @@
 </div>
 <script>
     var USER_ID = {{ request.user.id|default:0 }};
-    console.log(USER_ID);
-
 </script>
 
 
@@ -283,7 +283,6 @@ function updateShareResults(postId) {
     data: { post_id: postId, search: searchQuery },
     dataType: 'json',
     success: function (data) {
-      console.log("AJAX data:", data);
       let html = '';
       const fallbackImage = "/images/avatar.jpg";
 
@@ -383,7 +382,6 @@ const sendShareToChat = (chatId, postId, senderId) => {
   };
 
   ws.onclose = (e) => {
-    console.log(`WebSocket connection for chatId ${chatId} closed:`, e);
   };
 };
 
@@ -402,7 +400,6 @@ $(document).ready(function () {
   // Ensure your share buttons have the class 'share-post-btn' and a data attribute 'data-post-id'
   $(document).on("click", ".share-post-btn", function () {
     let buttonPostId = $(this).data("post-id");
-    console.log("Share button clicked, post id from data attribute:", buttonPostId);
     currentPostId = buttonPostId;
     $("#sharePostId").val(currentPostId);
     updateShareResults(currentPostId);
@@ -413,7 +410,6 @@ $(document).ready(function () {
   $("#sendShareButton").on("click", function () {
     // Use currentPostId or the value from the hidden input as fallback
     const postIdForSend = currentPostId || $("#sharePostId").val();
-    console.log("postID for sending:", postIdForSend);
     
     let selectedMembers = [];
     let selectedChats = [];
@@ -448,7 +444,6 @@ $(document).ready(function () {
       success: function (response) {
         if (response.chat && response.chat.length > 0) {
           response.chat.forEach((chatId) => {           
-            console.log("Sending to chat with postID:", postIdForSend);
             sendShareToChat(chatId, postIdForSend, senderId);
           });
         }
@@ -543,7 +538,6 @@ $(document).ready(function () {
         // Ensure replyFor is a valid number or null
         replyFor = replyFor && !isNaN(replyFor) ? parseInt(replyFor) : null;
 
-        console.log("📌 Submitting comment for Post ID:", postId, "Reply For:", replyFor);
 
         $.ajax({
             url: `/comments/${postId}/`,
@@ -555,7 +549,6 @@ $(document).ready(function () {
                 reply_for: replyFor 
             }),
             success: function (response) {
-                console.log("✅ Comment/Reply created:", response);
 
                 // Clear input field and reset reply mode
                 resetReplyMode();
@@ -579,6 +572,8 @@ $(document).ready(function () {
     // Load comments when "View Comments" is clicked
     $(".load-comments").click(function () {
         let postId = $(this).data("post-id");
+        let userId = $(".user_profile_comment").data("user-id");
+
     
         if (!postId) {
             console.error("❌ Error: Post ID is undefined!");
@@ -598,6 +593,8 @@ $(document).ready(function () {
                     : "<p>No comments yet.</p>";
 
                 $("#comments-container").html(commentsHtml);
+            loadUserPostsComments(userId);
+
             },
             error: function () {
                 $("#comments-container").html("<p>Failed to load comments.</p>");
@@ -688,14 +685,12 @@ $(document).ready(function () {
         let postId = $(".load-comments").data("post-id");
         let csrfToken = $("input[name=csrfmiddlewaretoken]").val();
 
-        console.log("🚀 Sending delete request for Comment ID:", commentId);
         
         $.ajax({
             url: `/comments/delete/${commentId}/`,
             type: "POST",
             headers: { "X-CSRFToken": csrfToken },
             success: function (response) {
-                console.log("✅ Comment deleted:", response);
                 $("#deleteModal").hide();
         
                 // Reload comments dynamically WITHOUT clicking "View Comments"
@@ -726,7 +721,6 @@ $(document).ready(function () {
     $(document).on("click", ".reply-btn", function () {
         let commentId = $(this).data("comment-id");
         let commentBy = $(this).data("post-creator");
-        console.log("💬 Replying to Comment By:", commentBy);
     
         if (!commentId || isNaN(commentId)) {
             console.error("❌ Error: Invalid comment ID for reply.");
@@ -987,12 +981,9 @@ function toggleReaction(commentId, iconElement, likeCountElement) {
     }
 
     function toggleFollow(event) {
-        console.log("toggleFollow() called");
 
         let followingId = event.target.getAttribute("data-profile-id");
         let createdBy = parseInt(USER_ID);
-        console.log("Followed ID:", followingId);
-
         fetch("/toggle-follow/", {
             method: "POST",
             headers: {
@@ -1080,16 +1071,46 @@ function toggleReaction(commentId, iconElement, likeCountElement) {
             container.appendChild(userElement);
         });
     }
-    
-    
-</script>    
 
 
 
+
+   $(document).ready(function() {
+    setTimeout(function() {
+        let userId = $(".user_profile_comment").data("user-id");
+        if (userId) {
+            loadUserPostsComments(userId);
+        } else {
+        }
+    }, 500);  // Small delay for safety
+});
+
     
-         
-        
+    function loadUserPostsComments(userId) {
     
+        $.ajax({
+            url: `/get-user-posts-comments/${userId}/`,
+            type: 'GET',
+            success: function(response) {
+                if (response.posts) {
+                    response.posts.forEach(post => {
+                        let commentElement = $(`#comment-count-${post.id}`);
+                        if (commentElement.length) {
+                            commentElement.text(post.comment_count + " comments");
+                        } else {
+                        }
+                    });
+                }
+            },
+            error: function(xhr) {
+                console.error("Error loading comment counts:", xhr.responseText);
+            }
+        });
+    }
+    
+    </script>
+     
+
 
     <style>
 

@@ -106,9 +106,7 @@ def reaction_name(post_id):
 
 
 def get_user_posts(user_id):
-    user_posts = Post.objects.filter(posted_by=user_id).annotate(
-        comment_count=Count('fk_post_comments_post_id', filter=Q(fk_post_comments_post_id__is_active=True))
-    ).values('id', 'type', 'media_url', 'title', 'description', 'comment_count', 'created_at')
+    user_posts = Post.objects.filter(posted_by=user_id).values('id', 'type', 'media_url', 'title', 'description', 'created_at')
 
 
     # Format the created_at timestamp after fetching data
@@ -158,3 +156,11 @@ def deactivate_reaction(reaction_instance):
     return reaction_instance
 def get_reaction_by_name(post_id):
     return MasterList.objects.filter(id=post_id).first()
+
+
+def get_user_post_comment_count(user_id):
+    posts = Post.objects.filter(posted_by=user_id).annotate(
+        comment_count=Count('fk_post_comments_post_id', filter=Q(fk_post_comments_post_id__is_active=True))
+    ).values('id', 'comment_count')
+
+    return list(posts)  # Returns a list of dictionaries with 'id' and 'comment_count'
