@@ -23,7 +23,6 @@ class ChatListView(View):
     def get(self, request):
         user = request.user
         chats = chat_service.list_chats_by_user(user)
-        followers, followings = chat_service.get_all_user_follow(user)
         chat_data = []
         if not chats:
             no_chat_message = {"message": "No chats available"}

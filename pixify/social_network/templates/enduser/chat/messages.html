@@ -14,6 +14,9 @@
 <div class="chat-container">
     <!-- Chat Header -->
     <div class="chat-header">
+      <div style="font-size:16px;cursor:pointer;" onclick="window.location.href='{% url 'chat_list' %}';">
+        <i class="fas fa-arrow-left text-gray-700 hover:text-black text-xl"></i>
+      </div>
         <div class="user-info">
             {% if data.chat.is_group %}
             <div class="profile-pic">
@@ -2650,6 +2653,7 @@ document.querySelectorAll('.media-stop').forEach(video => {
         }
     
         .username {
+            cursor:pointer;
             font-size: 22px;
             font-weight: bold;
             color: white;

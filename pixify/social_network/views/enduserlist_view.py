@@ -29,7 +29,6 @@ class EnduserprofileListView(View):
             'posts': user_posts,
             'reactions':reactions
         }
-        print(user_details)
 
         return render(request, 'enduser/profile/userprofile.html', {'user_details': user_details,'user':request.user})
 
@@ -72,7 +71,6 @@ class CreateUpdatePostReactions(View):
             post_id = data.get('post_id')
             reaction_id = data.get('reaction_id')
 
-            # print("gnrnyn",data)
             
             # Ensure user is authenticated
             if not request.user or not request.user.is_authenticated:
@@ -119,7 +117,6 @@ class CommentListViewApi(View):
     def get(self, request, post_id):
         user_id=request.user.id
         comments = comment_service.get_comments_by_post(post_id,user_id)
-        # print("comments",comments)
         return JsonResponse({"comments": comments}, safe=False)
     
 
@@ -156,7 +153,6 @@ class DeleteComment(View):
         if not comment_id:
             return JsonResponse({'success': False, 'message': 'Comment ID is required'}, status=400)
 
-        # print(f"🚀 Attempting to delete comment ID: {comment_id}")  # Debugging
 
         try:
             comment = comment_service.get_post_comment(comment_id)
@@ -179,7 +175,6 @@ class TogglReactionView(View):
             data = json.loads(request.body)
             comment_id = data.get("comment_id")
             reacted_by = request.user.id  # Get logged-in user
-            # print("comment_id :",comment_id,"reacted_by:",reacted_by)
             response_data = comment_service.toggle_reaction(comment_id, reacted_by)
             return JsonResponse(response_data)
 
@@ -200,7 +195,6 @@ class ToggleFollowView(View):
     def post(self, request):
         try:
             data = json.loads(request.body)
-            print("Received Data:", data)  # Debugging
 
             following_id = data.get("following_id")
             created_by = data.get("created_by") 
@@ -239,10 +233,8 @@ logger = logging.getLogger(__name__)  # Logger for debugging
 class GetFollowersFollowing(View):
     def get(self, request):
         user_id = request.GET.get("user_id")
-        print(user_id)
         try:
             followers, following, count_follower, count_following =chat_service.get_all_user_follow(user_id)
-            print( followers, following, count_follower, count_following)
             return JsonResponse({
                 "followers": followers,
                 "following": following,

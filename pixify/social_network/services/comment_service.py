@@ -164,7 +164,6 @@ def get_comments_by_post(post_id, user_id):
 
 def get_count_react(comment_id):
     cmt_count=CommentReaction.objects.filter(comment_id=comment_id, is_active=True).count()
-    print(cmt_count)
     return cmt_count
 
 def create_comment(user, post_id, comment_text, reply_for_id=None):
@@ -187,8 +186,6 @@ def create_comment(user, post_id, comment_text, reply_for_id=None):
     if reply_for_id:
         reply_for = get_object_or_404(Comment, id=reply_for_id)
 
-    # ✅ Debugging before saving
-    print(f"🔍 DEBUG: Creating comment by User: {user} (ID: {user.id}), Reply for: {reply_for_id}")
 
     # ✅ Save comment
     comment = Comment.objects.create(
@@ -200,8 +197,6 @@ def create_comment(user, post_id, comment_text, reply_for_id=None):
     )
 
     # ✅ Debugging saved comment
-    print(f"✅ Comment created by: {comment.comment_by} (ID: {comment.comment_by.id if comment.comment_by else 'None'})")
-
     return {
         "id": comment.id,
         "user": comment.comment_by.first_name if comment.comment_by else "Unknown",
@@ -246,7 +241,6 @@ def toggle_reaction(comment_id, reacted_by):
         comment = Comment.objects.get(id=comment_id)
         user = User.objects.get(id=reacted_by)  # Get the correct User model instance
 
-        # print("comment_id:", comment.id, "reacted_by:", user.id)
 
         # Find an existing reaction
         reaction, created = CommentReaction.objects.get_or_create(
@@ -254,7 +248,6 @@ def toggle_reaction(comment_id, reacted_by):
             defaults={"created_by": user, "is_active": True}
         )
 
-        # print("hello")
 
         if not created:
             # Toggle `is_active` instead of deleting the reaction
@@ -262,24 +255,20 @@ def toggle_reaction(comment_id, reacted_by):
             reaction.save()
 
             if not reaction.is_active:
-                print("Reaction removed (Unliked)")
                 return {
                     "status": "unliked",
                     "total_likes": CommentReaction.objects.filter(comment_id=comment, is_active=True).count()
                 }
 
-        print("Reaction added (Liked)")
         return {
             "status": "liked",
             "total_likes": CommentReaction.objects.filter(comment_id=comment, is_active=True).count()
         }
 
     except ObjectDoesNotExist:
-        print("Error: Comment or User not found")
         return {"error": "Comment or User not found"}
 
     except Exception as e:
-        print("🔴 ERROR:", str(e))
         return {"error": "Something went wrong on the server"}
 
 
@@ -292,9 +281,6 @@ def toggle_follow(following_id, created_by):
     following_user = User.objects.filter(id=following_id).first()
     created_by_user = User.objects.filter(id=created_by).first()
 
-    print("following_user:", following_user)
-    print("created_by:", created_by_user)
-
     if not following_user or not created_by_user:
         return {"error": "User not found"}, 404
 
@@ -306,18 +292,14 @@ def toggle_follow(following_id, created_by):
     ).first()
 
     if follow_instance:
-        print("Processing unfollow")
         follow_instance.delete()  # No need to pass arguments
-        print("Successfully unfollowed")
         return {"following": False, "message": "Unfollowed successfully"}, 200
     else:
-        print("Processing follow")
         Follower.objects.create(
             created_by=created_by_user,
             user_id=created_by_user,  # Fix: Pass User instance, not ID
             following=following_user  # Fix: Pass User instance, not ID
         )
-        print("Successfully followed")
         return {"following": True, "message": "Followed successfully"}, 200
 
 # services.py
