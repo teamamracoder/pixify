@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 from django.views import View
 import json
 from social_network.constants.default_values import Role
@@ -6,6 +6,7 @@ from ..decorators import auth_required, role_required
 from social_network.decorators.exception_decorators import catch_error
 from django.http import JsonResponse
 from ..services import user_service,chat_service,post_service,message_reaction_service,comment_service
+from ..models import User
 
 
 class EnduserprofileListView(View):
@@ -14,24 +15,21 @@ class EnduserprofileListView(View):
         if not detail:
             return render(request, 'enduser/profile/userprofile.html', {'user_details': None})
 
-        follower_list, following_list = chat_service.get_all_user_follow(user_id)
         dob = detail.dob
         age = user_service.calculate_age(dob)
         user_posts = post_service.get_user_posts(user_id)
         reactions = message_reaction_service.show_reactions()
 
         user_details = {
+            'id':user_id,
             'user_name': f"{detail.first_name} {detail.last_name}",
             'profile_photo': detail.profile_photo_url if detail.profile_photo_url else '/images/avatar.jpg',
             'age': age,
             'status': "Active" if detail.is_active else "Inactive",
-            'following_count': len(following_list),
-            'followers_count': len(follower_list),
-            'followers': follower_list,
-            'followings': following_list,
             'posts': user_posts,
             'reactions':reactions
         }
+        print(user_details)
 
         return render(request, 'enduser/profile/userprofile.html', {'user_details': user_details,'user':request.user})
 
@@ -121,7 +119,7 @@ class CommentListViewApi(View):
     def get(self, request, post_id):
         user_id=request.user.id
         comments = comment_service.get_comments_by_post(post_id,user_id)
-        print("comments",comments)
+        # print("comments",comments)
         return JsonResponse({"comments": comments}, safe=False)
     
 
@@ -190,3 +188,68 @@ class TogglReactionView(View):
 
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=500)
+        
+
+class ToggleFollowView(View):
+    @catch_error
+    @auth_required
+    @role_required(Role.ADMIN.value, Role.END_USER.value)
+    def get(self, request):
+        return JsonResponse({"error": "GET method not allowed"}, status=405)
+
+    def post(self, request):
+        try:
+            data = json.loads(request.body)
+            print("Received Data:", data)  # Debugging
+
+            following_id = data.get("following_id")
+            created_by = data.get("created_by") 
+
+            response_data, status_code = comment_service.toggle_follow(following_id,created_by)
+            return JsonResponse(response_data, status=status_code)
+
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON"}, status=400)
+
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+        
+
+class CheckFollowState(View):
+    def get(self, request):
+        following_id = request.GET.get("following_id")
+        created_by_id = request.user.id  # Assuming user is authenticated
+
+        if not following_id:
+            return JsonResponse({"error": "Missing 'following_id'"}, status=400)
+
+        is_following = comment_service.is_user_following(created_by_id, following_id)
+
+        if is_following is None:
+            return JsonResponse({"error": "User not found"}, status=404)
+
+        return JsonResponse({"is_following": is_following})
+    
+
+
+import logging
+
+logger = logging.getLogger(__name__)  # Logger for debugging
+
+class GetFollowersFollowing(View):
+    def get(self, request):
+        user_id = request.GET.get("user_id")
+        print(user_id)
+        try:
+            followers, following, count_follower, count_following =chat_service.get_all_user_follow(user_id)
+            print( followers, following, count_follower, count_following)
+            return JsonResponse({
+                "followers": followers,
+                "following": following,
+                "count_follower": count_follower,
+                "count_following": count_following
+            })
+
+        except Exception as e:
+            logger.error(f"Error fetching followers/followings for user {user_id}: {str(e)}", exc_info=True)
+            return JsonResponse({"error": "Internal server error"}, status=500)

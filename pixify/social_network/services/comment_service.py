@@ -1,6 +1,7 @@
 from django.http import JsonResponse
 from django.utils import timezone
-from ..models import Post,User,Comment
+
+from ..models import Post,User,Comment,Follower
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
 from ..models import User,CommentReaction
@@ -280,6 +281,59 @@ def toggle_reaction(comment_id, reacted_by):
     except Exception as e:
         print("🔴 ERROR:", str(e))
         return {"error": "Something went wrong on the server"}
+
+
+
+def toggle_follow(following_id, created_by):
+    if not following_id:
+        return {"error": "Missing 'following_id'"}, 400
+
+    # Fetch User instances
+    following_user = User.objects.filter(id=following_id).first()
+    created_by_user = User.objects.filter(id=created_by).first()
+
+    print("following_user:", following_user)
+    print("created_by:", created_by_user)
+
+    if not following_user or not created_by_user:
+        return {"error": "User not found"}, 404
+
+    # Check if follow relationship exists
+    follow_instance = Follower.objects.filter(
+        created_by=created_by_user,
+        user_id=created_by_user,
+        following=following_user  # Use `following` instead of `following_id`
+    ).first()
+
+    if follow_instance:
+        print("Processing unfollow")
+        follow_instance.delete()  # No need to pass arguments
+        print("Successfully unfollowed")
+        return {"following": False, "message": "Unfollowed successfully"}, 200
+    else:
+        print("Processing follow")
+        Follower.objects.create(
+            created_by=created_by_user,
+            user_id=created_by_user,  # Fix: Pass User instance, not ID
+            following=following_user  # Fix: Pass User instance, not ID
+        )
+        print("Successfully followed")
+        return {"following": True, "message": "Followed successfully"}, 200
+
+# services.py
+
+def is_user_following(created_by_id, following_id):
+    """
+    Check if the user (created_by_id) is following another user (following_id).
+    Returns True if following, otherwise False.
+    """
+    created_by_user = User.objects.filter(id=created_by_id).first()
+    following_user = User.objects.filter(id=following_id).first()
+
+    if not created_by_user or not following_user:
+        return None  # Return None to indicate user not found
+
+    return Follower.objects.filter(created_by=created_by_user, following=following_user).exists()
 
 
 

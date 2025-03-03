@@ -220,6 +220,9 @@ urlpatterns = [
     path('comments/<int:post_id>/', views.CommentCreate.as_view(), name='post_comment_create' ),
     path('comments/delete/<int:comment_id>/', views.DeleteComment.as_view(), name='post_delete_comment'),
     path("toggle_reaction/", views.TogglReactionView.as_view(), name="toggle_reaction"),
+    path('toggle-follow/', views.ToggleFollowView.as_view(), name='toggle_follow'),
+    path("check-follow-state/",views.CheckFollowState.as_view(), name="check-follow-state"),
+    path("get-followers-following/",views. GetFollowersFollowing.as_view(), name="get_followers_following"),
 
 ]
 

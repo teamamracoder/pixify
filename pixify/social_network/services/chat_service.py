@@ -224,8 +224,10 @@ def get_all_user_follow(user):
         }
         for f in following_list
     ]
+    count_follower=len(followers_data)
+    count_following=len(followings_data)
 
-    return followers_data, followings_data
+    return followers_data, followings_data,count_follower,count_following
 
 
 def list_chats_api(request,chat_data_list):

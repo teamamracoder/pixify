@@ -12,56 +12,37 @@
                 <div class="profile-info">
                     <p><i class="bi bi-circle  user_profile-icons"></i><strong>Status:</strong> <span class="active">{{ user_details.status }}</span></p>
                     <p><i class="bi bi-calendar3 user_profile-icons"></i><strong>Age:</strong> {{ user_details.age }}</p>
-                    <p><i class="bi bi-people-fill user_profile-icons"></i><strong>Followers:</strong> {{ user_details.followers_count }}</p>
-                    <p><i class="bi bi-people user_profile-icons"></i><strong>Followings:</strong> {{ user_details.following_count }}</p>
+                    <p><i class="bi bi-people-fill user_profile-icons"></i><strong>Followers:</strong> <span id="follower-count">0</span></p>
+                    <p><i class="bi bi-people user_profile-icons"></i><strong>Followings:</strong> <span id="following-count">0</span></p>
                 </div>
             </div>
             <div class="fol-unfol-btn">
-                <div class="fol-unfol">Follow</div>
-                <div class="fol-unfol">Unfollow</div>
-            </div>
+                <div class="fol follow1-btn" onclick="toggleFollow(event)" data-profile-id="{{ user_details.id }}">Follow</div>
+                <div class="unfol unfollow-btn" onclick="toggleFollow(event)" data-profile-id="{{ user_details.id }}">Unfollow</div>
+            </div>            
         </div>
     
-        <!-- Followers Section -->
-        <div class="friends-section">
-            <div class="heading-part">
-                <h4>Followers</h4>
-                <div class="see-all-btn" onclick="toggleFriends('followers-list', this)">show</div>
-            </div>
-            {% if user_details.followers %}
-            <div class="friend-list" id="followers-list">
-                {% for friend in user_details.followers %}
-                <div class="friend-card hidden-follower" onclick="window.location.href='{% url 'profile' friend.id %}'">
-                    <img src="{% static friend.profile_pic|default:'/images/avatar.jpg' %}" alt="Follower" class="friend-img">
-                    <div>{{ friend.first_name }}</div>
+       <!-- Followers Section -->
+            <div class="friends-section">
+                <div class="heading-part">
+                    <h4>Followers (<span id="follower-count">0</span>)</h4>
+                    <div class="see-all-btn" onclick="toggleFriends('followers-list', this)">show</div>
                 </div>
-                {% endfor %}
-            </div>
-            {% else %}
-            <p class="no-friends">No followers found.</p>
-            {% endif %}
-        </div>
-    
-        <!-- Following Section -->
-        <div class="friends-section">
-            <div class="heading-part">
-                <h4>Following</h4>
-                <div class="see-all-btn" onclick="toggleFriends('following-list', this)">show</div>
-            </div>
-            {% if user_details.followings %}
-            <div class="friend-list" id="following-list">
-                {% for friend in user_details.followings %}
-                <div class="friend-card hidden-following" onclick="window.location.href='{% url 'profile' friend.id %}'">
-                    <img src="{% static friend.profile_pic|default:'/images/avatar.jpg' %}" alt="Following" class="friend-img">
-                    <div>{{ friend.first_name }}</div>
+                <div class="friend-list" id="followers-list">
+                    <p class="no-friends">No followers found.</p>
                 </div>
-                {% endfor %}
             </div>
-            {% else %}
-            <p class="no-friends">Not following anyone.</p>
-            {% endif %}
-        </div>
-    
+
+            <!-- Following Section -->
+            <div class="friends-section">
+                <div class="heading-part">
+                    <h4>Following (<span id="following-count">0</span>)</h4>
+                    <div class="see-all-btn" onclick="toggleFriends('following-list', this)">show</div>
+                </div>
+                <div class="friend-list" id="following-list">
+                    <p class="no-friends">Not following anyone.</p>
+                </div>
+            </div>
         <!-- Posts Section -->
         <h4>Posts</h4>
         <div class="user-post-container">
@@ -981,6 +962,130 @@ function toggleReaction(commentId, iconElement, likeCountElement) {
     
 </script>
 
+<script>
+    let isFollowing = false; // Ensure this is defined globally
+
+    document.addEventListener("DOMContentLoaded", function () {
+        checkFollowState(); // Fetch follow state on page load
+    });
+
+    function checkFollowState() {
+        let followingId = "{{ user_details.id }}"; // Get profile ID from template
+
+        fetch(`/check-follow-state/?following_id=${followingId}`)
+        .then(response => response.json())
+        .then(data => {
+            isFollowing = data.is_following;
+            updateFollowState();
+        })
+        .catch(error => console.error("Error checking follow state:", error));
+    }
+
+    function updateFollowState() {
+        document.querySelector(".follow1-btn").style.display = isFollowing ? "none" : "block";
+        document.querySelector(".unfollow-btn").style.display = isFollowing ? "block" : "none";
+    }
+
+    function toggleFollow(event) {
+        console.log("toggleFollow() called");
+
+        let followingId = event.target.getAttribute("data-profile-id");
+        let createdBy = parseInt(USER_ID);
+        console.log("Followed ID:", followingId);
+
+        fetch("/toggle-follow/", {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": getCookie("csrftoken"),
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ following_id: parseInt(followingId), created_by: parseInt(createdBy) })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                console.error("Error:", data.error);
+                return;
+            }
+            isFollowing = data.following;
+            updateFollowState();
+            updateFollowerFollowingData()
+        })
+        .catch(error => console.error("Fetch error:", error));
+    }
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== "") {
+            document.cookie.split(";").forEach(cookie => {
+                let cookieItem = cookie.trim();
+                if (cookieItem.startsWith(name + "=")) {
+                    cookieValue = decodeURIComponent(cookieItem.substring(name.length + 1));
+                }
+            });
+        }
+        return cookieValue;
+    }
+
+
+    //follower following reloads
+    document.addEventListener("DOMContentLoaded", function () {
+        updateFollowerFollowingData();
+    });
+    
+    function updateFollowerFollowingData() {
+        let userId = "{{ user_details.id|default:0 }}"; // Ensure Django renders the ID
+    
+        if (!userId || userId === "0") {
+            console.error("User ID is missing or invalid.");
+            return;
+        }
+    
+        fetch(`/get-followers-following/?user_id=${userId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    console.error("Server Error:", data.error);
+                    return;
+                }
+    
+                // Update the counts
+                document.querySelectorAll("#follower-count").forEach(el => el.innerText = data.count_follower);
+                document.querySelectorAll("#following-count").forEach(el => el.innerText = data.count_following);
+    
+                // Populate follower and following lists
+                populateUserList("followers-list", data.followers, "No followers found.");
+                populateUserList("following-list", data.following, "Not following anyone.");
+            })
+            .catch(error => console.error("Error loading follower data:", error));
+    }
+    
+    function populateUserList(containerId, users, emptyMessage) {
+        let container = document.getElementById(containerId);
+        container.innerHTML = ""; // Clear previous content
+    
+        if (users.length === 0) {
+            container.innerHTML = `<p class="no-friends">${emptyMessage}</p>`;
+            return;
+        }
+    
+        users.forEach(user => {
+            let userElement = document.createElement("div");
+            userElement.classList.add("friend-card");
+            userElement.onclick = () => window.location.href = `/profile/${user.id}`;
+            userElement.innerHTML = `
+                <img src="${user.profile_pic || '/images/avatar.jpg'}" alt="${user.first_name}" class="friend-img">
+                <div>${user.first_name}</div>
+            `;
+            container.appendChild(userElement);
+        });
+    }
+    
+    
+</script>    
+
+
+
     
          
         
@@ -1368,17 +1473,30 @@ function toggleReaction(commentId, iconElement, likeCountElement) {
         align-items: center;
         display: flex;
     }
-    .fol-unfol{
-        justify-content: center;
-        align-items: center;
-        display: flex;
-        padding: 5px;
+    .fol{
+        padding-left: 20px;
         font-size: 20px;
         margin: 5px;
         border: none;
         border-radius: 20px;
         background: #984fc1;
-        width: 120px;
+        width: 100px;
+    }
+    .unfol{
+        color: #170229;
+        padding-left: 14px;
+        font-size: 20px;
+        margin: 5px;
+        border: none;
+        border-radius: 20px;
+        background: rgb(188 151 232);
+        width: 110px;
+    }
+    .fol:active{
+        background:rgb(188 151 232);
+    }
+    .unfol:active{
+        background: #984fc1;
     }
 
     </style>
