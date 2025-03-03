@@ -117,23 +117,24 @@
                             <div class="user_profile_comment">{{post.comment_count}} comments</div>
                             </div>
                         </div>    
+
                         <div class="post-opt-icons" style="height: 4vh;">
                             <div class="post-reaction" style="cursor: pointer;" data-post-id="{{ post.id }}">
                                 {% with user_reaction=post.reactions.all|dictsort:"user_id"|first %}
                                     <i id="reaction-icon-{{ post.id }}" class="reaction-icon" onclick="toggleReactionPopup('{{ post.id }}')">
                                         {% if user_reaction and user_reaction.user_id == request.user.id %}
-                                            {{ user_reaction.reaction.value|safe }}  <!-- Show user's reaction emoji -->
+                                            {{ user_reaction.reaction.value|safe }}
                                         {% else %}
-                                            <i class="bi bi-heart"></i>  <!-- Show default heart icon -->
+                                            <i class="bi bi-heart"></i>
                                         {% endif %}
                                     </i>
                                 {% endwith %}
-                            
+
                                 <span data-toggle="modal" class="load-comments" data-post-id="{{ post.id }}">
                                     <i class="fa-regular fa-comment"></i>
                                 </span>
                                 <i class="fa-solid fa-share-nodes share-post-btn" data-post-id="{{ post.id }}" data-bs-toggle="modal" data-bs-target="#shareModal"></i>
-                            
+
                                 <!-- Reaction Popup -->
                                 <div class="reaction-popup" id="reaction-popup-{{ post.id }}" style="display: none;">
                                     {% for reaction in user_details.reactions %}
@@ -142,7 +143,8 @@
                                         </span>
                                     {% endfor %}
                                 </div>
-                            </div>                                                                                                             
+                            </div>
+
                                 <!-- Ensure CSRF Token is Included -->
                                 <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">                                
 
@@ -790,14 +792,32 @@ $(document).ready(function () {
         });
     });
     
-    // Toggle Reaction Popup
+    // Toggle Reaction Popup (Only Opens If User Has Not Reacted)
     function toggleReactionPopup(postId) {
         const popup = document.getElementById(`reaction-popup-${postId}`);
         if (!popup) return;
     
-        const isVisible = popup.style.display === "block";
-        document.querySelectorAll(".reaction-popup").forEach(p => p.style.display = "none");
-        popup.style.display = isVisible ? "none" : "block";
+        fetch(`/fetch_post_reactions/${postId}/`)
+            .then(response => response.json())
+            .then(data => {
+                let userHasReacted = false;
+                if (data.reactions) {
+                    data.reactions.forEach(reaction => {
+                        if (parseInt(reaction.user_id) === parseInt(USER_ID)) {
+                            userHasReacted = true;
+                        }
+                    });
+                }
+    
+                if (!userHasReacted) {
+                    const isVisible = popup.style.display === "block";
+                    document.querySelectorAll(".reaction-popup").forEach(p => p.style.display = "none");
+                    popup.style.display = isVisible ? "none" : "block";
+                } else {
+                    removeReaction(postId);
+                }
+            })
+            .catch(error => console.error("Error fetching reactions:", error));
     }
     
     // Handle Reactions (Add/Update)
@@ -813,7 +833,6 @@ $(document).ready(function () {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                console.log("Reaction updated successfully!");
                 loadReactions(postId);
                 const popup = document.getElementById(`reaction-popup-${postId}`);
                 if (popup) {
@@ -832,62 +851,55 @@ $(document).ready(function () {
             .then(response => response.json())
             .then(data => {
                 let userReaction = null;
+                let otherReactions = [];
+                let totalReactions = data.reactions ? data.reactions.length : 0;
     
                 if (data.reactions) {
                     data.reactions.forEach(reaction => {
-                        if (parseInt(reaction.user_id) === parseInt(USER_ID)) {  
-                            userReaction = reaction.value; 
+                        if (parseInt(reaction.user_id) === parseInt(USER_ID)) {
+                            userReaction = reaction.value;
+                        } else {
+                            otherReactions.push({ value: reaction.value, name: reaction.user_name });
                         }
                     });
                 }
+    
                 const reactionContainer = document.getElementById(`post-reactions-${postId}`);
                 if (!reactionContainer) return;
-        
-                reactionContainer.innerHTML = "";
-        
-                if (!data.reactions || data.reactions.length === 0) {
-                    reactionContainer.innerHTML = " ";
-                    return;
+    
+                reactionContainer.innerHTML = totalReactions === 0 ? " " : "";
+    
+                let displayText = [];
+    
+                // If the user reacted, show "You" first
+                if (userReaction) {
+                    displayText.push(`${userReaction} <strong>You</strong>`);
                 }
-        
-                // Create a map to store unique reactions with their counts
-                const reactionMap = {};
-        
-                data.reactions.forEach(reaction => {
-                    if (reactionMap[reaction.value]) {
-                        reactionMap[reaction.value]++; // Increment count if reaction already exists
-                    } else {
-                        reactionMap[reaction.value] = 1; // Initialize count
-                    }
-                });
-        
-                // Append reactions without duplicates but with counts
-                Object.keys(reactionMap).forEach(reaction => {
-                    const reactionHTML = `
-                        <span class="reaction-display" onclick="removeReaction('${postId}')">
-                            ${reaction} <sup class="react-count">${reactionMap[reaction]}</sup>
-                        </span>
-                    `;
-                    reactionContainer.innerHTML += reactionHTML;
-                });
     
+                // When user reacted → Show only 1 more name
+                // When user did NOT react → Show 2 names
+                let maxNamesToShow = userReaction ? 1 : 2; 
     
-                // Update the reaction icon dynamically
+                for (let i = 0; i < Math.min(maxNamesToShow, otherReactions.length); i++) {
+                    displayText.push(`${otherReactions[i].value} <strong>${otherReactions[i].name}</strong>`);
+                }
+    
+                // If more than 2 total reactions (or 3 if user didn't react), show "and X more"
+                let remainingCount = totalReactions - displayText.length;
+                if (remainingCount > 0) {
+                    displayText.push(`and ${remainingCount} more`);
+                }
+    
+                reactionContainer.innerHTML = displayText.join(", ");
+    
+                // Update reaction icon
                 const reactionIcon = document.getElementById(`reaction-icon-${postId}`);
                 if (reactionIcon) {
-                    if (userReaction) {
-                        reactionIcon.innerHTML = userReaction;  // Show the user's reaction emoji
-                    } else {
-                        reactionIcon.innerHTML = '<i class="bi bi-heart"></i>';  // Show default heart icon
-                    }
+                    reactionIcon.innerHTML = userReaction ? userReaction : '<i class="bi bi-heart"></i>';
                 }
             })
             .catch(error => console.error("Error fetching reactions:", error));
     }
-    
-    
-    
-    
     
     
     // Remove Reaction
@@ -903,7 +915,6 @@ $(document).ready(function () {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                console.log("Reaction removed successfully!");
                 loadReactions(postId);
             } else {
                 console.error("Failed to delete reaction:", data.error);
@@ -1165,7 +1176,7 @@ function toggleReaction(commentId, iconElement, likeCountElement) {
         }
 
         .friends-section {
-            border-bottom: 2px solid rgb(0, 0, 0);
+            border-bottom: 1px solid rgb(0, 0, 0);
             margin-bottom: 10px;
             overflow-y: scroll;
             margin-top: 20px;
@@ -1185,12 +1196,12 @@ function toggleReaction(commentId, iconElement, likeCountElement) {
         }
 
         .friend-card {
-            border: 2px solid #7474c1;
+            border: 2px solid #000000;
             gap: 10px;
             justify-content: flex-start;
-            display: flex        ;
+            display: flex;
             align-items: center;
-            background-color: #25004d;
+            background-color: #1f0545;
             padding: 10px;
             margin: 5px;
             border-radius: 5px;
@@ -1339,8 +1350,9 @@ function toggleReaction(commentId, iconElement, likeCountElement) {
         justify-content: end;
         }
     .react-comment-wrapper{
+        margin-left: 20px;
+        font-size: 14px;
         display: flex;
-        align-items: end;
         justify-content: space-between;
     }
     .user_profile-icons{

@@ -46,7 +46,12 @@ class FetchPostReactions(View):
             reactions = post_service.get_active_post_reactions(post_id)
             
             reaction_list = [
-                {"id": reaction.master_list_id.id, "value": reaction.master_list_id.value, "user_id": reaction.reacted_by.id}
+                {
+                    "id": reaction.master_list_id.id,
+                    "value": reaction.master_list_id.value,
+                    "user_id": reaction.reacted_by.id,
+                    "user_name": "You" if reaction.reacted_by.id == request.user.id else reaction.reacted_by.first_name,
+                }
                 for reaction in reactions
             ]
 
@@ -56,7 +61,6 @@ class FetchPostReactions(View):
             return JsonResponse({'success': True, 'reactions': reaction_list, 'user_reaction': user_reaction}, status=200)
         except Exception as e:
             return JsonResponse({'success': False, 'error': str(e)}, status=400)
-
 
 
 class CreateUpdatePostReactions(View):
