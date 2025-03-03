@@ -3,16 +3,22 @@
 <body>
     {% if user_details %}
     <div class="profile-container">
-        <div class="profile-card">
-            <div class="profile-header">
-                <img src="{% static user_details.profile_photo |default:'/images/avatar.jpg' %}" alt="Profile Picture" class="profile-img">
-                <p class="user_title">{{ user_details.user_name }}</p>
+        <div style="border:2px solid black;">
+            <div class="profile-card">
+                <div class="profile-header">
+                    <img src="{% static user_details.profile_photo |default:'/images/avatar.jpg' %}" alt="Profile Picture" class="profile-img">
+                    <p class="user_title">{{ user_details.user_name }}</p>
+                </div>
+                <div class="profile-info">
+                    <p><i class="bi bi-circle  user_profile-icons"></i><strong>Status:</strong> <span class="active">{{ user_details.status }}</span></p>
+                    <p><i class="bi bi-calendar3 user_profile-icons"></i><strong>Age:</strong> {{ user_details.age }}</p>
+                    <p><i class="bi bi-people-fill user_profile-icons"></i><strong>Followers:</strong> {{ user_details.followers_count }}</p>
+                    <p><i class="bi bi-people user_profile-icons"></i><strong>Followings:</strong> {{ user_details.following_count }}</p>
+                </div>
             </div>
-            <div class="profile-info">
-                <p><i class="bi bi-circle  user_profile-icons"></i><strong>Status:</strong> <span class="active">{{ user_details.status }}</span></p>
-                <p><i class="bi bi-calendar3 user_profile-icons"></i><strong>Age:</strong> {{ user_details.age }}</p>
-                <p><i class="bi bi-people-fill user_profile-icons"></i><strong>Followers:</strong> {{ user_details.followers_count }}</p>
-                <p><i class="bi bi-people user_profile-icons"></i><strong>Followings:</strong> {{ user_details.following_count }}</p>
+            <div class="fol-unfol-btn">
+                <div class="fol-unfol">Follow</div>
+                <div class="fol-unfol">Unfollow</div>
             </div>
         </div>
     
@@ -178,10 +184,6 @@
 
                     <div id="CommentsectionTextarea" class="container-fluid py-2 com_sent" style="position: absolute; bottom: 0; ">
                         <div class="input-group ms-2">
-                            <!-- Left icons -->
-                            <div class="input-group-prepend d-flex gap-2 align-items-center pe-2">
-                                <i class="bi bi-emoji-smile text-light fs-6"></i>
-                            </div>
 
                             <!-- Comment input -->
                             <input
@@ -194,7 +196,7 @@
 
                             <!-- Cancel reply button container -->
                             <div id="reply-cancel-container" style="display: none; align-self: center; margin-left: 10px;">
-                                <button id="replyCancel" type="button" class="btn btn-secondary btn-sm">Cancel Reply</button>
+                                <button id="replyCancel" type="button" class="btn btn-secondary btn-sm" style="border-radius: 15px;height: 35px;}">Cancel Reply</button>
                             </div>
                             <!-- Right button -->
                             <div class="input-group-append d-flex gap-3 align-items-center ps-2">
@@ -1145,7 +1147,6 @@ function toggleReaction(commentId, iconElement, likeCountElement) {
             gap: 20px;
             align-items: center;
             padding: 20px;
-            border: 2px solid rgba(0, 0, 0, 0.98);
         }
 
         .profile-header {
@@ -1360,6 +1361,24 @@ function toggleReaction(commentId, iconElement, likeCountElement) {
     margin-bottom: 8px;
     padding: 5px;
     font-size: 13px;
+    }
+    .fol-unfol-btn{
+        height: 70px;
+        justify-content: center;
+        align-items: center;
+        display: flex;
+    }
+    .fol-unfol{
+        justify-content: center;
+        align-items: center;
+        display: flex;
+        padding: 5px;
+        font-size: 20px;
+        margin: 5px;
+        border: none;
+        border-radius: 20px;
+        background: #984fc1;
+        width: 120px;
     }
 
     </style>
