@@ -644,7 +644,7 @@ function updateShareResults(postId) {
           html += `
             <div class="profile-item">
               <img src="${staticUrl}${cleanMediaPath(chatImage)}" alt="Chat Cover" class="profile-pic">
-              <div>
+              <div style="width: 66%;overflow: hidden;white-space: nowrap;text-overflow: ellipsis;">
                 <strong>${chat.title}</strong><br>
                 <small>${chatBio}</small>
               </div>
