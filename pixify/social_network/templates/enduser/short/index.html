@@ -779,19 +779,23 @@ function renderComment(comment, container, prepend = false, isReply = false, fla
       .then((response) => response.json())
       .then((data) => {
         if (data.success) {
-          // If there's no like count span and new count > 0, create one.
-          if (!likeCountSpan && data.like_count > 0) {
-            likeCountSpan = document.createElement("span");
-            likeCountSpan.classList.add("like-count");
-            // Insert it immediately after the icon element.
-            const icon = this.querySelector("i");
-            icon.insertAdjacentElement("afterend", likeCountSpan);
-          }
-          // If the element exists, update its text
-          if (likeCountSpan) {
+          // If the new like count is greater than 0, update or create the element
+          if (data.like_count > 0) {
+            if (!likeCountSpan) {
+              likeCountSpan = document.createElement("span");
+              likeCountSpan.classList.add("like-count");
+              const icon = this.querySelector("i");
+              icon.insertAdjacentElement("afterend", likeCountSpan);
+            }
             likeCountSpan.textContent = data.like_count;
+          } else {
+            // If the new like count is 0, remove the element if it exists.
+            if (likeCountSpan) {
+              likeCountSpan.remove();
+              likeCountSpan = null;
+            }
           }
-          
+    
           // Toggle the liked classes
           this.classList.toggle("liked", data.user_liked);
           const icon = this.querySelector("i");
