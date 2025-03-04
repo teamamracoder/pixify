@@ -28,7 +28,7 @@
        <!-- Followers Section -->
             <div class="friends-section">
                 <div class="heading-part">
-                    <h4>Followers (<span id="follower-count">0</span>)</h4>
+                    <p style="font-size:20px;">Followers (<span id="follower-count">0</span>)</p>
                     <div class="see-all-btn" onclick="toggleFriends('followers-list', this)">show</div>
                 </div>
                 <div class="friend-list" id="followers-list">
@@ -39,7 +39,7 @@
             <!-- Following Section -->
             <div class="friends-section">
                 <div class="heading-part">
-                    <h4>Following (<span id="following-count">0</span>)</h4>
+                    <p style="font-size:20px;">Following (<span id="following-count">0</span>)</p>
                     <div class="see-all-btn" onclick="toggleFriends('following-list', this)">show</div>
                 </div>
                 <div class="friend-list" id="following-list">
@@ -211,7 +211,7 @@
 <!-- Share Modal -->
 <div class="modal fade" id="shareModal" tabindex="-1" aria-labelledby="shareModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content bg-purple text-light">
+      <div class="modal-content bg-purple text-light" style="height:75vh">
         <div class="modal-header">
           <h5 class="modal-title mx-auto" id="shareModalLabel">Share Post</h5>
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -1369,7 +1369,7 @@ function toggleReaction(commentId, iconElement, likeCountElement) {
         }
         .heading-part{
             justify-content: space-between;
-            align-items: center;
+            align-items: flex-end;
             display: flex;
         }
         .footer{
@@ -1441,20 +1441,21 @@ function toggleReaction(commentId, iconElement, likeCountElement) {
                 width: 100% !important;
             }
             .modal-content{
-                height: 100% !important;
+                margin-right: 15px;
+                height: 50vh!important;
                 width: 100% !important;
             }
             
         }
         @media (max-width: 480px) {
             .modal-dialog{
-                margin-top: 30% !important;
+                right: 2%;
+                padding: 20px;
                 height: 70vh !important;
                 width: 100% !important;
             }
            
         }
-
 
         .user_profile_combo-img{
             height: 58vh;
@@ -1499,7 +1500,7 @@ function toggleReaction(commentId, iconElement, likeCountElement) {
     font-size: 13px;
     }
     .fol-unfol-btn{
-        margin-left: 20px;
+        margin-left: 40px;
         flex-direction: column;
         justify-content: center;
         align-items: flex-start;
@@ -1512,7 +1513,7 @@ function toggleReaction(commentId, iconElement, likeCountElement) {
         margin: 5px;
         border: none;
         border-radius: 2px;
-        background: #984fc1;
+        background: #a065e7;
         width: 80px;
     }
     .unfol{
