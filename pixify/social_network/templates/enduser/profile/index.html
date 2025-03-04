@@ -4,69 +4,88 @@
 {% load static %}
 {% block content %}
 
+
 <div class="px-3 py-3 mt-3  users"
         style="background-color: #1f0447e3;border: 1px solid #827b7b70;font-family: serif;border-radius: 7px;">
         <div class="row loginuserprofile mx-2 pt-1 pb-3 px-2 mb-2 fw-semibold "
             style="border: 1px solid black;border-radius: 3px;">
+
+
+            {% for user in user_data %}
             <div id="p-pic" class="col-md-4 col-lg-5 col-xl-5 col-xxl-5" id="item-1">
-                <img class="img-fluid" src="{% static 'images/avatar.jpg' %}" alt="">
+                {% if user.profile_photo %}
+                <img class="img-fluid" src="{% static user.profile_photo %}" alt="User Profile Photo" >
+                {% else %}
+                <img class="img-fluid" src="{% static 'images/user.png' %}" alt="User Profile Photo" >
+                {% endif %}
             </div>
             <div class="pt-1 col-md-8 col-lg-7 col-xl-7 col-xxl-7 pb-3 px-2 fw-semibold mr-5 prof-li" id="user-details" style="border-radius: 3px;">
-                <h4 style="padding: 10px;margin-bottom:0px;position: relative;"><i class="bi bi-person"></i> Priya<i class="bi bi-patch-check prof-check"></i></h4>
+                    <h4 style="padding: 10px; margin-bottom: 0px; position: relative;">
+                        <i class="bi bi-person"></i> {{ user.first_name }}
+                         <i class="bi bi-patch-check prof-check" style="padding-right: 2px;"></i>
+                    </h4>
 
                 <ul class=" prof-ul" mr-5>
+                    {% if user.status == True %}
                     <li class="pb-2"><a href="#" class="light text-white"><i class="bi bi-circle"></i> Status <span
                                 class="text-t fw-medium">(Active)</span> </a></li>
+                    {% else %}
+                    <li class="pb-2"><a href="#" class="light text-white"><i class="bi bi-circle"></i> Status <span
+                        class="text-t fw-medium">(Deactive)</span> </a></li>
+                    {% endif %}
                     <li class="pb-2"><a href="#" class="text-white"><i class="bi bi-calendar3"></i> Age <span
-                                class="text-t fw-medium">(22 Year)</span></a></li>
-                    <li class="pb-2"><a href="#" class="text-white"><i class="bi bi-people-fill"></i> Friends <span
-                                class="text-t fw-medium">(270)</span></a></li>
+                                class="text-t fw-medium">({{user.age}})</span></a></li>
+                    <li class="pb-2"><a href="#" class="text-white"><i class="bi bi-people-fill"></i> Following <span
+                                class="text-t fw-medium">({{user.friends}})</span></a></li>
                     <li class="pb-2"><a href="#" class="text-white"><i class="bi bi-chat-dots"></i> Messages <span
                                 class="text-t fw-medium">(10)</span></a></li>
-                    <li class="pb-2"><a href="#" class="text-white"><i class="bi bi-bell"></i> Notifications <span
-                                class="text-t fw-medium">(5)</span></a></li>
-                </ul>
+                                 {% endfor %}
+                                 <li class="pb-2">
+                                  <a href="#" class="text-white">
+                                      <i class="bi bi-bell"></i> Notifications
+                                      <span id="notification-count" class="text-t fw-medium">(0)</span>
+                                  </a>
+                              </li>
+                         </ul>
 
                 <div class="col-auto col-sm-auto d-flex" style="gap:10px">
-                    <button type="button" class="prof-btn btn btn-primary" style="font-size:14px ;">EDIT</button>
-                    <button type="button" class="btn btn-primary prof-btn" style="font-size:14px;">CHANGE PASSWORD</button>
-                </div>
+                  <button type="button" class="prof-btn btn btn-primary" style="font-size:14px;">
+                      <a href="{% url 'enduser_edit_profile' user.id %}" style="text-decoration:none; color:White;">EDIT DETAILS</a>
+                  </button>
+                  {% comment %} <button type="button" class="btn btn-primary prof-btn" data-bs-toggle="modal" data-bs-target="#changePasswordModal" style="font-size:14px;">CHANGE PASSWORD</button> {% endcomment %}
+              </div>
+
             </div>
         </div>
-        <div id="item-2">
+
+       <div id="item-2">
             <div style="width: 100%; display:flex;justify-content:center;">
                 <span class="text-center px-2 "
                     style="font-size:25px; border-bottom: 2px solid rgba(172, 57, 147, 0.973); ">Friends</span>
             </div>
+
             <div  class="m-2">
-                <div class="px-3 py-2 fnd-pic d-flex  justify-content-around" >
-                    <span></span>
-                    <span class="text-center text-align-center ms-auto fw-semibold"
-                    style="color: rgb(0, 255, 242);cursor: pointer;    font-size: 14px;">See
-                    All</span>
-
-
-                </div>
+              <div class="px-3 py-2 fnd-pic d-flex justify-content-around">
+                <button id="load-more-btn"
+                    style="all: unset; display: inline-block; color: rgb(0, 255, 242); cursor: pointer; font-size: 14px; font-weight: 600; text-align: center; margin-left: auto;">
+                    See All
+                </button>
+            </div>
               </div>
             <div>
-                <div style="border: 1px solid black;border-radius: 3px;" class="m-2">
-                    <div class="p-3 fnd-pic">
-                        <a href="#" style="text-decoration: none; display:flex; align-items:center; gap:20px ">
-                            <img class="img-fluid" src="{% static 'images/avatar.jpg' %}" alt=""
-                                style="height:40px;   border-radius:50%;">
-                            <p class="verify-Icon-div">Friend 1 <i class="bi bi-patch-check verify-Icon"></i></p>
-                        </a>
-                    </div>
+            {% for following in followings %}
+            <div class="m-2 friend-item" style="border: 1px solid black; border-radius: 3px;">
+                <div class="p-3 fnd-pic">
+                    <a href="#" style="text-decoration: none; display: flex; align-items: center; gap: 20px;">
+                        <img class="img-fluid" src="{{ following.user_id__profile_photo_url|default:'https://static.turbosquid.com/Preview/001292/481/WV/_D.jpg' }}"
+                             alt="" style="height: 40px; border-radius: 50%;">
+                        <p class="verify-Icon-div">
+                            {{ following.user_id__first_name }} {{ following.user_id__last_name }}
+                        </p>
+                    </a>
                 </div>
-                <div style="border: 1px solid black;border-radius: 3px;" class="m-2">
-                    <div class="p-3 fnd-pic">
-                        <a href="#" style="text-decoration: none; display:flex; align-items:center; gap:20px ">
-                            <img src="{% static 'images/avatar.jpg' %}" class="img-fluid" alt=""
-                                style="height:40px;   border-radius:50%;">
-                            <p class="verify-Icon-div">Friend 1 <i class="bi bi-patch-check verify-Icon"></i></p>
-                        </a>
-                    </div>
-                </div>
+            </div>
+            {% endfor %}
             </div>
         </div>
 
@@ -158,7 +177,7 @@
             <div class="container text-center p-2" class="memory">
               <div class="row">
                 <div class="col">
-                  <img src="{% static 'images/p4.jpg' %}" class="img-fluid rounded" alt="Responsive image">
+                  <img src="{% static 'images/river.png' %}" class="img-fluid rounded" alt="Responsive image">
                 </div>
                 <div class="col">
                   <img src="{% static 'images/p3.jpg' %}" class="img-fluid rounded" alt="Responsive image">
@@ -185,7 +204,6 @@
                         <span class="text-center text-align-center ms-auto fw-semibold"
                         style="color: rgb(0, 255, 242);cursor: pointer;    font-size: 14px;">See
                         All</span>
-
 
                     </div>
                 </div>
@@ -225,16 +243,84 @@
              </div>
 
           </div>
+</div>
 
-
-
-
-
-
-    </div>
 <style>
+
     .galary .col{
     padding-right:0;
     }
-</style>
+      </style>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+let offset = 5;
+const limit = 5;
+
+document.getElementById('load-more-btn').addEventListener('click', function () {
+    fetch(`/profile/?offset=${offset}&limit=${limit}`, {
+        method: 'GET',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(response => response.json())
+    .then(data => {
+        const container = document.getElementById('friends-container');
+        const loadMoreButton = document.getElementById('load-more-btn');
+
+        if (data.followings && data.followings.length > 0) {
+            data.followings.forEach(following => {
+                const friendDiv = document.createElement('div');
+                friendDiv.classList.add('m-2', 'friend-item');
+                friendDiv.style.border = '1px solid black';
+                friendDiv.style.borderRadius = '3px';
+                friendDiv.innerHTML = `
+                    <div class="p-3 fnd-pic">
+                        <a href="#" style="text-decoration: none; display: flex; align-items: center; gap: 20px;">
+                            <img class="img-fluid" src="${following.user_id__profile_photo_url || 'https://static.turbosquid.com/Preview/001292/481/WV/_D.jpg'}"
+                                 alt="" style="height: 40px; border-radius: 50%;">
+                            <p class="verify-Icon-div">
+                                ${following.user_id__first_name} ${following.user_id__last_name}
+                            </p>
+                        </a>
+                    </div>
+                `;
+                container.appendChild(friendDiv);
+            });
+            offset += limit;
+        }
+
+        if (!data.followings || data.followings.length < limit) {
+            loadMoreButton.style.display = 'none';
+        } else {
+            loadMoreButton.style.display = 'block';
+        }
+    })
+    .catch(error => console.error('Error:', error));
+});
+
+
+  async function fetchUnreadNotificationsCount() {
+      try {
+          const response = await fetch('/notifications/unread_count/');
+          if (response.ok) {
+              const data = await response.json();
+              document.getElementById('notification-count').textContent = `(${data.unread_count})`;
+          } else {
+              console.error('Failed to fetch unread notifications count');
+          }
+      } catch (error) {
+          console.error('Error:', error);
+      }
+  }
+
+  document.addEventListener('DOMContentLoaded', fetchUnreadNotificationsCount);
+
+</script>
+
 {% endblock %}
+
+
+
+
+
+

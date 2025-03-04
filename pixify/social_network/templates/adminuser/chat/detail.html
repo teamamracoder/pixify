@@ -17,31 +17,32 @@
                         {% csrf_token %}
                         <div class="row">
                             <div class="mb-3">
-                                <label for="title" class="form-label">Title</label>
-                                <input type="text" class="form-control" id="title" name="title" value="{{ chat.title }}">
+                                <strong>Title:</strong>
+                                <span >{{ chat.title }}</span>
                             </div>
                             <div class="mb-3">
-                                <label for="type" class="form-label">Type</label>
-                                <select id="type" name="type" class="form-select">
-                                    {% for type in choices_type %}
-                                        {% for name, value in type.items %}
-                                            <option value="{{ name }}">{{ value }}</option>
-                                        {% endfor %}
+                                <strong>Type:</strong>
+                                {% for type in choices_type %}
+                                    {% for name, value in type.items %}
+
+                                        {% if name == chat.type %}
+                                            {{ value }}
+                                        {% endif %}
                                     {% endfor %}
-                                </select>
-                            </div>                                                              
+                                {% endfor %}
+                            </div>
                                 <div class="mb-3">
-                                    <label for="chat_cover" class="form-label">Chat_Cover</label>
-                                    <input type="chat_cover" class="form-control" id="chat_cover" name="chat_cover" value="{{ chat.chat_cover }}"> 
-                                </div>                               
+                                    <strong>Chat_Cover:</strong>
+                                    <span >{{ chat.chat_cover }}</span>
+                                </div>
                                 <div class="form-group form-check">
                                     <input type="checkbox" name="is_active" class="form-check-input" id="is_active" checked>
                                     <label class="form-check-label" for="is_active">Is Active</label>
-                                </div>                          
-                        </div>                             
+                                </div>
+                        </div>
                         <div class="text-start">
                             <a href="{% url 'manage_chat_list' %}" class="btn btn-sm btn-outline-secondary">Back</a>
-                            <a href="{% url 'manage_chat_update' chat.id %}" class="btn btn-sm btn-primary">Edit</a>
+                            <!-- <a href="{% url 'manage_chat_update' chat.id %}" class="btn btn-sm btn-primary">Edit</a> -->
                             <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#userInfoModal">
                                 Manage Member
                             </button>
@@ -49,7 +50,7 @@
                     </form>
                 </div>
             </div>
-        </div>       
+        </div>
 </div>
 
 <!-- First Modal -->
@@ -66,14 +67,16 @@
                 <div class="d-flex align-items-center justify-content-between mb-4">
                     <!-- Left Section: User Info -->
                     <div class="d-flex align-items-center">
-                        <img src="https://tse1.mm.bing.net/th?id=OIP.ULdaKJ-nJlOAZqR5lToUWgHaHa&pid=Api&P=0&h=220" 
-                             alt="User Image" 
-                             class="rounded-circle me-3" 
+                        <img src="https://tse1.mm.bing.net/th?id=OIP.ULdaKJ-nJlOAZqR5lToUWgHaHa&pid=Api&P=0&h=220"
+                             alt="User Image"
+                             class="rounded-circle me-3"
                              style="width: 50px; height: 50px;">
                         <div>
                             <h5 class="mb-0">{{ member.first_name }} {{ member.last_name }}</h5>
                         </div>
-                    </div>                   
+                    </div>
+
+
                     <!-- Right Section: Toggle Button -->
                     <div class="form-check form-switch">
                         <button class="btn btn-sm toggle-status" data-chat-member-id="{{ member.id }}">
@@ -87,10 +90,19 @@
                 </div>
                 {% endfor %}
             </div>
-            
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" data-bs-target="#secondModal" data-bs-toggle="modal" data-bs-dismiss="modal">
+                    Edit Info</a>
+                </button>
+            </div>
+
         </div>
     </div>
 </div>
+
+
 
 <script>
 // JavaScript to handle toggle
@@ -119,6 +131,8 @@ $(document).ready(function() {
             });
         });
     });
-</script>
+
+});
+ </script>
 
 {% endblock %}

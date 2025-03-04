@@ -36,7 +36,7 @@
     - create database 'pixify'
     - make sure you have set password = 2023 ,for default user 'postgres' while installing and setting up postgresSQL database
         - if not then open query tool on the database 'pixify' and run below commands
-            - if username is correct and password is wrong 
+            - if username is correct and password is wrong
                 > ALTER USER postgres WITH PASSWORD '2023';
             - if username is no correct
                 > CREATE USER postgres WITH PASSWORD '2023';
@@ -61,3 +61,9 @@
 ## Step 7: Run the server
 
     > python manage.py runserver
+
+## Step 8:
+    - If got this error - "ModuleNotFoundError: No module named 'user_agents'"
+        -step 8.1: install
+            > pip install pyyaml ua-parser user-agents
+

@@ -1,15 +1,15 @@
 {% extends "enduser/base.html" %} {% block title %}Pixify-Message{% endblock %}
 {% block content %} {% load static %}
 
-<div class="px-3 py-3 mt-3 users"
-    style="background-color: #1f0447e3;box-shadow: 0 4px 8px rgba(151, 95, 236, 0.5);font-family: serif;border-radius: 7px;position:relative;">
+<div class="maindiv">
+<div class="px-3 py-3 mt-3 users chats-list-box" style="height: calc(-84px + 100vh);">
     <!-- heading -->
     <div class="m-2">
         <div class="p-3 fnd-pic" style="justify-content: space-between; display: flex">
             <h2 class="mobile-hide">Chats</h2>
             <div class="input-wrapper">
-                <button data-toggle="modal" data-target="#example" class="border-0 bg-transparent">
-                    <i class="bi bi-search" style="font-size:30px" ></i>
+                <button type="button" class="border-0 bg-transparent" data-bs-toggle="modal" data-bs-target="#example" onclick="focusSearchBar()">
+                    <i class="bi bi-search" style="font-size: 30px;"></i>
                 </button>
             </div>
             <!-- Modal -->
@@ -21,13 +21,9 @@
                         <div class="input-group mb-3 " style=" border-radius: 5px; ">
                             <input type="text" id="search_chats" class="form-control" placeholder="Searching chats here....."
                                 aria-label="Example text with button addon" aria-describedby="button-addon1" />
-                                <button class="btn btn-primary" type="button" id="button-addon1" id="searchbtn">
-                                    <i class="bi bi-search"></i>
-                                </button>
                             </div>
                         </div>
-                        <h6 style="padding-left:10px; color: rgb(178, 190, 181);font-size:15px; ">Search results : <hr></h6>
-                        <div id="fill" >       
+                        <div id="fill" >
                         </div>
                     </div>
                 </div>
@@ -41,14 +37,14 @@
                                 success: function (res) {
                                     // Clear previous results
                                     $("#fill").html('');
-                    
+
                                     // Append each chat to the DOM
                                     res.forEach(chat => {
-                                        
+
                                         $("#fill").append(`
                                         <div class="modal-list">
                                         <img src="${chat.chat_cover}" id="profile-photo">
-                                            <a href="/chat/${chat.id}" class="chats-item" id="hyperlink-text">${chat.title}</a><br>
+                                            <a href="${chat.id}/message/" class="chats-item" id="hyperlink-text">${chat.title}</a><br>
                                         </div>
                                         `);
                                     });
@@ -59,50 +55,107 @@
                     });
                 })
             });
-        </script>        
+        </script>
     </div>
 </div>
 
-
+    {% if data.chats %}
     <!-- Peoples -->
-    {% for chat in chats %}
+    {% for chat in data.chats %}
     <div style="border: 1px solid black; border-radius: 3px" class="m-2">
-        <div class="chat-item">
+       <div class="chat-item" onclick="window.location.href='{% url 'message' chat_id=chat.id %}';">
             <!-- Image Section -->
             <div class="image-div">
                 {% if chat.is_group %}
-                <img src="{{ chat.chat_cover|default:'\static\images\group_pic.png' }}" alt="Chat Cover" class="profile-photo">
-                {% else%}
-                <img src="{{ chat.chat_cover|default:'\static\images\avatar.jpg' }}" alt="Chat Cover" class="profile-photo">
-                {% endif %}          
+                    <img src="{{ chat.chat_cover|default:'/static/images/group_pic.png' }}" alt="Chat Cover" class="profile-photo">
+                {% else %}
+                    <img src="{{ chat.chat_cover|default:'/static/images/avatar.jpg' }}" alt="Chat Cover" class="profile-photo">
+                {% endif %}
             </div>
-        
+
             <!-- Middle Section -->
             <div class="content-div">
                 <p class="chat-title">
-                    <a href="{% url 'chat_details' chat_id=chat.id %}" id="hyperlink-text" class="chat_title">
+                    <a href="{% url 'message' chat_id=chat.id %}" id="hyperlink-text" class="chat_title">
                         {{ chat.title }}
                     </a>
                 </p>
-                <p class="chat-message chat_title">{{ chat.latest_message }}</p>
+                <div style="display:flex">
+                    <span class="chat-message">
+                       {% if chat.latest_message_sender_id == user.id and chat.latest_message_time >= chat.latest_reaction_time %}
+                        {% if chat.is_group %}
+
+                            {% if chat.seen_by_all %}
+                            <i class="bi bi-check2-all"></i>
+                            {% else %}
+                            <i class="bi bi-check2"></i>
+                            {% endif %}
+                            <span class="msg_sender">
+                            You:
+                            </span>
+                        {% else %}
+
+                            {% if chat.seen_by_all %}
+                                <i class="bi bi-check2-all"></i>
+                            {% else %}
+                                <i class="bi bi-check2"></i>
+                            {% endif %}
+
+                        {% endif %}
+                        {% else %}
+                         {% if chat.is_group %}
+                         <span class="msg_sender">
+                            {{chat.latest_message_sender_name}}:
+                         </span>
+                         {% comment %} {% else %}
+                           {{chat.latest_message_sender_name}}: {% endcomment %}
+                        {% endif %}
+                      {% endif %}
+                    </span>
+                    <span>
+                    {% if chat.latest_message %}
+                        {% if chat.latest_reaction_time == '' or chat.latest_message_time >= chat.latest_reaction_time %}
+                            <p class="chat-message chat_title">{{ chat.latest_message }}</p>
+                        {% else %}
+                            <p class="chat-message chat_title"> Reacted {{ chat.latest_reaction|safe }} on "{{ chat.latest_message }}"</p>
+                        {% endif %}
+                    {% else %}
+                        <p class="chat-message chat_title">No messages yet</p>
+                    {% endif %}
+
+                    </span>
+                </div>
             </div>
-        
+
             <!-- Right-aligned Section -->
             <div class="badge-div">
                 <span class="badge unread-messages">{{ chat.unread_messages }}</span>
-                <span class="timestamp">{{ chat.latest_message_timestamp }}</span>
+                <span class="timestamp">
+                        <span class="timestamp">{{ chat.latest_message_timestamp }}</span>
+                </span>
             </div>
         </div>
-        
     </div>
-    {% endfor %}
+{% endfor %}
+{% else %}
+<hr>
+<p class="chat-message chat_title">No chats available yet</p>
+{% endif %}
+
+<!-- Auto-Reload Logic -->
+<script>
+  // Reload the page if navigated to from cache
+  window.addEventListener('pageshow', function (event) {
+    if (event.persisted) {
+      // Reload the page to ensure fresh data
+      window.location.reload();
+    }
+  });
+</script>
 
 
-    <div style="position: absolute;bottom: 33px;right: 28px;background-color: #1f0647;height: 40px;width: 40px;border-radius: 50%;display: flex;justify-content: center;align-content: center;align-items: center;">
-        <button data-toggle="modal" data-target="#exampleModalCenter" class="border-0 bg-transparent">
-            <i class="text-light bi bi-plus-circle fs-1"></i>
-        </button>
-    </div>
+
+
 
     <!-- Modal -->
     <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog"
@@ -111,14 +164,11 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <div class="input-group mb-3">
-                                                                    
+
                     <div class="parchat-container">
                         <div class="parchat-trend-text">Make A Conversation</div>
                         <div class="parchat-input-wrapper">
                             <input type="text" id="parchat-searchin" class="parchat-form-control" placeholder="Search Name" aria-label="Search Name">
-                            <button class="parchat-btn parchat-btn-outline-secondary" type="button" id="parchat-searchbtn" style="border-top-right-radius: 10px; border-bottom-right-radius: 10px;">
-                                <i class="fas fa-search"></i>
-                            </button>
                         </div>
                         <div id="parchat-filled" class="parchat-profile-grid">
                             <!-- Profile items go here -->
@@ -143,9 +193,12 @@
     </div>
 </div>
 
-   <script>
-    
-    
+<script>
+function focusSearchBar() {
+    setTimeout(function() {
+        document.getElementById('search_chats').focus();
+    }, 500); // Adjust delay if needed
+}
 $(document).ready(function () {
     let selectedItems = []; // Array to store selected item IDs
     let holdTimer;
@@ -154,35 +207,27 @@ $(document).ready(function () {
 
     console.log('Initial selectedItems:', selectedItems);
 
-    // Function to fetch followers and followings based on the search query
-    function fetchFollowersAndFollowings(searchQuery = '') {
-        $.ajax({
-            url: '/chat/followers/api?search=' + searchQuery,
-            type: 'GET',
-            success: function (res) {
-                var combinedHtml = '';
-                const fallbackImage = '/static/images/avatar.jpg';
+// Function to fetch followers and followings based on the search query
+function fetchFollowersAndFollowings(searchQuery = '') {
+    $.ajax({
+        url: '/chat/followers/api?search=' + searchQuery,
+        type: 'GET',
+        success: function (res) {
+            let combinedHtml = '';
+            const fallbackImage = '/static/images/avatar.jpg';
 
+            if (res.members.length === 0) {
+                // If no members are found, display a message
+                combinedHtml = '<div class="no-members-message">No Followers And Followings to Display</div>';
+            } else {
                 // Render followers
-                res.followers.forEach(function (follower) {
-                    const profileImage = follower.user_id__profile_photo_url || fallbackImage;
+                res.members.forEach(function (member) {
+                    const profileImage = member.user_id__profile_photo_url || fallbackImage;
                     combinedHtml += `
-                        <div class="parchat-selection-body" id="user-${follower.user_id}" data-user-id="${follower.user_id}">
-                            <img src="${profileImage}" alt="${follower.user_id__first_name}'s profile photo" class="parchat-profile-photo">
-                            <input type="checkbox" class="parchat-checkbox" id="checkbox-${follower.user_id}" onchange="checkSelection(${follower.user_id})" onclick="event.stopPropagation();">
-                            <div class="parchat-profile-text">${follower.user_id__first_name} ${follower.user_id__last_name}</div>
-                        </div>
-                    `;
-                });
-
-                // Render followings
-                res.followings.forEach(function (following) {
-                    const profileImage = following.user_id__profile_photo_url || fallbackImage;
-                    combinedHtml += `
-                        <div class="parchat-selection-body" id="user-${following.user_id}" data-user-id="${following.user_id}">
-                            <img src="${profileImage}" alt="${following.user_id__first_name}'s profile photo" class="parchat-profile-photo">
-                            <input type="checkbox" class="parchat-checkbox" id="checkbox-${following.user_id}" onchange="checkSelection(${following.user_id})" onclick="event.stopPropagation();">
-                            <div class="parchat-profile-text">${following.user_id__first_name} ${following.user_id__last_name}</div>
+                        <div class="parchat-selection-body" id="user-${member.user_id}" data-user-id="${member.user_id}">
+                            <img src="${profileImage}" alt="${member.user_id__first_name}'s profile photo" class="parchat-profile-photo">
+                            <input type="checkbox" class="parchat-checkbox" id="checkbox-${member.user_id}" onchange="checkSelection(${member.user_id})" onclick="event.stopPropagation();">
+                            <div class="parchat-profile-text">${member.user_id__first_name} ${member.user_id__last_name}</div>
                         </div>
                     `;
                 });
@@ -198,12 +243,14 @@ $(document).ready(function () {
 
                 updateArrowButtonVisibility();
                 applyPressHoldFunctionality();
-            },
-            error: function (xhr, status, error) {
-                console.log(xhr);
-            },
-        });
-    }
+            }
+        },
+        error: function (xhr, status, error) {
+            console.log(xhr);
+        },
+    });
+}
+
 
     // Apply press-and-hold functionality for selecting profiles
     function applyPressHoldFunctionality() {
@@ -330,9 +377,41 @@ $(document).ready(function () {
     // Redirect to chat with the selected user
     window.redirectToChat = function (userId) {
         if (redirectEnabled) {
-            createChat(1, [userId]); // Pass an array with the single userId
+            checkExistingChat(userId, function (existingChat) {
+                if (existingChat && existingChat.chat_id) {
+                    // Redirect to the existing chat
+                    window.location.href = '/chat/' + existingChat.chat_id + '/message/?message=' + encodeURIComponent(existingChat.message || '');
+                } else {
+                    // Create a new chat if no existing chat is found
+                    createChat(1, [userId]);
+                }
+            });
         }
+    };
+
+    // Function to check if a chat already exists
+    function checkExistingChat(userId, callback) {
+        $.ajax({
+            url: '/chat/create/', // Endpoint to check or create chat
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({
+                type: 1, // Chat type (personal chat)
+                members: [userId], // User ID to check chat with
+                _token: $('meta[name="csrf-token"]').attr('content') // CSRF token for security
+            }),
+            success: function (res) {
+                // Pass the response to the callback function
+                callback(res);
+            },
+            error: function (xhr, status, error) {
+                console.log('Error:', xhr, status, error);
+                // Call callback with null on error
+                callback(null);
+            }
+        });
     }
+
 
     $.ajaxSetup({
         headers: {
@@ -351,8 +430,8 @@ $(document).ready(function () {
                 members: members,
                 _token: $('meta[name="csrf-token"]').attr('content') // CSRF token for security
             }),
-            success: function (res) {
-                window.location.href = '/chat/' + res.chat_id;
+           success: function (res) {
+            window.location.href = '/chat/' + res.chat_id + '/message/?message=' + encodeURIComponent(res.message);
             },
             error: function (xhr, status, error) {
                 console.log('Error:', xhr, status, error);
@@ -402,17 +481,62 @@ $(document).ready(function () {
     // Fetch all followers and followings on page load
     fetchFollowersAndFollowings();
 });
+
 </script>
 
+</div>
+<div class="plus-modal">
+    <button data-toggle="modal" data-target="#exampleModalCenter" class="border-0 bg-transparent">
+        <i class="text-light bi bi-plus-circle"></i>
+    </button>
+</div>
+</div>
 <style>
+    .chats-list-box{
+        background-color: #1f0447e3;
+        box-shadow: 0 4px 8px rgba(151, 95, 236, 0.5);
+        font-family: serif;
+        border-radius: 7px;
+        overflow-y: scroll;
+
+    }
+    .plus-modal{
+        font-size: 24px;
+        position: absolute;
+        bottom: 33px;right:
+        28px;background-color:  #6a0b7d;
+        height: 40px;
+        width: 40px;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-content: center;
+        align-items: center;
+    }
+    .maindiv{
+        position: relative;
+    }
+
+    .no-members-message {
+    text-align: center;
+    color: fff;
+    font-weight: bold;
+    box-shadow: none;
+    border: none;
+    padding: 45px;
+    margin: 0;
+    font-size: larger;
+}
+
+
     .modal-list{
         margin:10px;
-        background-color: rgb(170, 150, 291);
         border-radius:5px;
         border:10px white;
         padding:10px;
         display:flex;
-    
+        border: 2px solid #7474c1;
+
     }
     #unread_color{
         background-color:#ffffff63 !important;
@@ -421,9 +545,8 @@ $(document).ready(function () {
         width: 40px;
         height: 40px;
         border-radius:50%;
-        margin-right: 10px;
     }
-    
+
     #hyperlink-text{
         text-decoration:none;
         color:white;
@@ -526,7 +649,7 @@ $(document).ready(function () {
 
 
 
-    
+
     /* General Container */
 .chat-item {
     display: flex;
@@ -588,7 +711,7 @@ $(document).ready(function () {
     display: flex;
     flex-direction: column;
     align-items: flex-end;
-    gap: 5px;
+    gap: 15px;
     width: 80px; /* Fixed width for consistent alignment */
 }
 
@@ -614,12 +737,12 @@ $(document).ready(function () {
         width: 70px; /* Adjust for smaller screens */
     }
     #hyperlink-text {
-        display: block;         
-        width: 100%;             
-        white-space: nowrap;    
-        overflow: hidden;        
+        display: block;
+        width: 100%;
+        white-space: nowrap;
+        overflow: hidden;
         text-overflow: ellipsis;
-       
+
         font-size: 17px;
     }
 }
@@ -633,12 +756,12 @@ $(document).ready(function () {
             bottom: 100px;
         }
         #hyperlink-text {
-            display: block;         
-            width: 100%;             
-            white-space: nowrap;    
-            overflow: hidden;        
+            display: block;
+            width: 100%;
+            white-space: nowrap;
+            overflow: hidden;
             text-overflow: ellipsis;
-           
+
             font-size: 17px;
         }
     }
@@ -654,12 +777,12 @@ $(document).ready(function () {
             bottom: 85px;
         }
         #hyperlink-text {
-            display: block;         
-            width: 100%;             
-            white-space: nowrap;    
-            overflow: hidden;        
+            display: block;
+            width: 100%;
+            white-space: nowrap;
+            overflow: hidden;
             text-overflow: ellipsis;
-           
+
             font-size: 13px;
         }
     }
@@ -667,7 +790,7 @@ $(document).ready(function () {
     /* Hide the element on screens smaller than 768px (or your desired breakpoint) */
     @media only screen and (max-width: 768px) {
         .mobile-hide {
-            
+
         }
     }
 
@@ -693,12 +816,12 @@ $(document).ready(function () {
             bottom: 55px;
         }
         #hyperlink-text {
-            display: block;         
-            width: 100%;             
-            white-space: nowrap;    
-            overflow: hidden;        
+            display: block;
+            width: 100%;
+            white-space: nowrap;
+            overflow: hidden;
             text-overflow: ellipsis;
-           
+
             font-size: 17px;
         }
     }
@@ -730,12 +853,12 @@ $(document).ready(function () {
 
         }
         #hyperlink-text {
-            display: block;         
-            width: 100%;             
-            white-space: nowrap;    
-            overflow: hidden;        
+            display: block;
+            width: 100%;
+            white-space: nowrap;
+            overflow: hidden;
             text-overflow: ellipsis;
-           
+
             font-size: 17px;
         }
     }
@@ -761,207 +884,227 @@ $(document).ready(function () {
             font-size: 0.9rem;
         }
         #hyperlink-text {
-            display: block;         
-            width: 100%;             
-            white-space: nowrap;    
-            overflow: hidden;        
+            display: block;
+            width: 100%;
+            white-space: nowrap;
+            overflow: hidden;
             text-overflow: ellipsis;
-           
+
             font-size: 12px;
         }
-        
-      
+        .plus-modal{
+            bottom: 90px;
+        }
+
+
+    }
+    .user-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+        padding: 5px; /* Increase padding for larger touch area */
+        cursor: pointer;
+        width: 100%; /* Ensure the item spans the full width of its container */
+        box-sizing: border-box; /* Ensure padding is included in the width */
     }
 
-/*Message mention */
-    
-.profile-photo {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    margin-right: 10px;
-}
+    .user-item .user-content {
+        display: flex;
+        align-items: center;
+        flex: 1;
+    }
 
-.user-item {
-    display: flex;
-    align-items: center;
-    margin-bottom: 10px;
-    padding: 5px; /* Increase padding for larger touch area */
-    cursor: pointer;
-    width: 100%; /* Ensure the item spans the full width of its container */
-    box-sizing: border-box; /* Ensure padding is included in the width */
-}
+    .user-item.selected {
+        background-color: #11dbf940;
+        border: 3px solid #ccc;
+        border-radius: 30px;
+        width: 370px; /* Correct syntax to ensure the item spans the full width */
+    }
 
-.user-item .user-content {
-    display: flex;
-    align-items: center;
-    flex: 1;
-}
+    .user-item a {
+        text-decoration: none;
+        color: inherit; /* Ensure the link inherits the color for readability */
+    }
 
-.user-item.selected {
-    background-color: #11dbf940;
-    border: 3px solid #ccc;
-    border-radius: 30px;
-    width: 370px; /* Correct syntax to ensure the item spans the full width */
-}
+    #searchin {
+        height:40px;
+        width: 320px;
+        border-radius:15px;
+        background-color : rgb(86 185 200);
+        border-top-right-radius:0px;
+        border-bottom-right-radius:0px;
+    }
 
-.user-item a {
-    text-decoration: none;
-    color: inherit; /* Ensure the link inherits the color for readability */
-}
+    .parchat-container {
+        width: 90%;
+        padding: 20px;
+        position: relative; /* Ensure relative positioning for children */
+    }
 
-#searchin {
-    height:40px;
-    width: 320px; 
-    border-radius:15px;
-    background-color : rgb(86 185 200);
-    border-top-right-radius:0px;
-    border-bottom-right-radius:0px;
-}
+    .parchat-trend-text {
+        font-size: 24px;
+        margin-bottom: 20px;
+    }
 
-.parchat-container {
-    width: 90%;
-    padding: 20px;
-    position: relative; /* Ensure relative positioning for children */
-}
+    .parchat-profile-grid {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 20px;
+    }
 
-.parchat-trend-text {
-    font-size: 24px;
-    margin-bottom: 20px;
-}
+    .parchat-selection-body {
+        height: 85px;
+        width: 85px;
+        position: relative;
+        display: inline-block;
+        margin: 10px;
+        cursor: pointer;
+        border: 2px solid transparent;
+        border-radius: 50%;
+        padding: 10px;
+        transition: transform 0.2s, border-color 0.2s;
+    }
 
-.parchat-input-wrapper {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 20px;
-}
+    .parchat-selection-body.selected {
+        border-color: #007BFF;
+        background-color: rgba(0, 123, 255, 0.1); /* Light blue background for selected profiles */
+    }
 
-.parchat-profile-grid {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 20px;
-}
+    .parchat-profile-photo {
+        border-radius: 50%;
+        width: 60px;
+        height: 60px;
+    }
 
-.parchat-selection-body {
-    height: 85px;
-    width: 85px;
-    position: relative;
-    display: inline-block;
-    margin: 10px;
-    cursor: pointer;
-    border: 2px solid transparent;
-    border-radius: 50%;
-    padding: 10px;
-    transition: transform 0.2s, border-color 0.2s;
-}
+    .parchat-checkbox {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        width: 15px;
+        height: 15px;
+        background-color: white;
+        border-radius: 50%;
+        border: 2px solid #333;
+        display: none;
+    }
 
-.parchat-selection-body.selected {
-    border-color: #007BFF;
-    background-color: rgba(0, 123, 255, 0.1); /* Light blue background for selected profiles */
-}
+    .parchat-profile-text {
+        text-align: center;
+        margin-top: 10px;
+    }
 
-.parchat-profile-photo {
-    border-radius: 50%;
-    width: 60px;
-    height: 60px;
-}
+    .parchat-btn,
+    .parchat-btn-outline-secondary {
+        background:none;
+        margin-top: 10px;
+        padding: 10px;
+        font-size: 16px;
+    }
 
-.parchat-checkbox {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    width: 15px;
-    height: 15px;
-    background-color: white;
-    border-radius: 50%;
-    border: 2px solid #333;
-    display: none;
-}
+    .parchat-form-control {
+        background:none;
+        padding:10px;
+        flex-grow: 1;
+    }
 
-.parchat-profile-text {
-    text-align: center;
-    margin-top: 10px;
-}
+    .parchat-btn-outline-secondary {
+        background-color: black;
+        color: #333;
+    }
 
-.parchat-form-control,
-.parchat-btn,
-.parchat-btn-outline-secondary {
-    background-color: #3D3D6B;
-    color: black;
-    margin-top: 10px;
-    padding: 10px;
-    font-size: 16px;
-}
+    .parchat-modal {
+        display: none; /* Hidden by default */
+        position: fixed; /* Stay in place */
+        z-index: 1000; /* Sit on top */
+        left: 0;
+        top: 0;
+        width: 100%; /* Full width */
+        height: 100%; /* Full height */
+        overflow: auto; /* Enable scroll if needed */
+        background-color: rgba(0, 0, 0, 0.4); /* Black with opacity */
+    }
 
-.parchat-form-control {
-    flex-grow: 1;
-}
+    .parchat-modal-content {
+        background-color: #fefefe;
+        margin: 15% auto; /* 15% from the top and centered */
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%; /* Fixed width */
+        max-width: 600px; /* Add a max-width to limit expansion */
+        height: 400px; /* Fixed height */
+        overflow-y: auto; /* Make the modal content scrollable */
+        position: relative;
+    }
 
-.parchat-btn-outline-secondary {
-    background-color: black;
-    color: #333;
-    border: 1px solid #ccc;
-}
+    .parchat-close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
 
-.parchat-modal {
-    display: none; /* Hidden by default */
-    position: fixed; /* Stay in place */
-    z-index: 1000; /* Sit on top */
-    left: 0;
-    top: 0;
-    width: 100%; /* Full width */
-    height: 100%; /* Full height */
-    overflow: auto; /* Enable scroll if needed */
-    background-color: rgba(0, 0, 0, 0.4); /* Black with opacity */
-}
+    .parchat-close:hover,
+    .parchat-close:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+    }
 
-.parchat-modal-content {
-    background-color: #fefefe;
-    margin: 15% auto; /* 15% from the top and centered */
-    padding: 20px;
-    border: 1px solid #888;
-    width: 80%; /* Fixed width */
-    max-width: 600px; /* Add a max-width to limit expansion */
-    height: 400px; /* Fixed height */
-    overflow-y: auto; /* Make the modal content scrollable */
-    position: relative;
-}
+    #arrow-button {
+        display: none; /* Hide by default */
+        position: fixed;
 
-.parchat-close {
-    color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
-}
+    }
 
-.parchat-close:hover,
-.parchat-close:focus {
-    color: black;
-    text-decoration: none;
-    cursor: pointer;
-}
+    .parchat-arrow-button {
+        display: none; /* Hide by default */
+        position: absolute; /* Position inside parent */
+        bottom: 26%; /* Adjust based on parent height */
+        right: 35%;
+        background-color: #007BFF;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        padding: 10px 20px;
+        cursor: pointer;
+        font-size: 20px;
+    }
 
-#arrow-button {
-    display: none; /* Hide by default */
-    position: fixed;
-  
-}
+    .parchat-input-wrapper {
+        display: flex;
+        align-items: center;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 5px;
+        max-width: 300px;
+        margin: 0 auto;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
 
-.parchat-arrow-button {
-    display: none; /* Hide by default */
-    position: absolute; /* Position inside parent */
-    bottom: 26%; /* Adjust based on parent height */
-    right: 35%;
-    background-color: #007BFF;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    padding: 10px 20px;
-    cursor: pointer;
-    font-size: 20px;
-}
+    .parchat-form-control {
+        background: none;
+        padding: 10px;
+        flex-grow: 1;
+        border: none;
+        outline: none;
+        font-size: 16px;
+    }
+
+    .parchat-form-control::placeholder {
+        color: #aaa;
+    }
+
+    .parchat-input-wrapper:focus-within {
+        border-color: #007BFF;
+        box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+    }
+    .msg_sender{
+      color: #4f8892;
+      padding-right:5px;
+    }
+
 
 </style>
-</div>
 {% endblock %}
