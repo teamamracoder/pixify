@@ -192,10 +192,10 @@ urlpatterns = [
     path('short/comment/<int:comment_id>/reaction/', views.ShortCommentReactionView.as_view(),name='short_comment_reaction'),
 
     # path('save-fcm-token/', views.save_fcm_token, name='save-fcm-token'),
-    # path('firebase-messaging-sw.js', views.FirebaseMessagingSwFile, name='firebase-messaging-sw'),
-    # path('firebase-notify/', views.Firebasenotify, name='firebase-notify'),
-    # path('save_fcm_token/', views.save_fcm_token, name="save_fcm_token"),
-    # path('send_notification/',views.send_notification, name="send_notification"),
+    path('firebase-messaging-sw.js', views.FirebaseMessagingSwFile, name='firebase-messaging-sw'),
+    path('firebase-notify/', views.Firebasenotify, name='firebase-notify'),
+    path('save_fcm_token/', views.save_fcm_token, name="save_fcm_token"),
+    path('send_notification/',views.send_notification, name="send_notification"),
 
     # Short Share List Api
     path('short/share/api', views.ShortShareListViewApi.as_view(), name='short_share_api'),
