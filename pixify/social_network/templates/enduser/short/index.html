@@ -18,16 +18,33 @@
         {% endif %}
 
         <div class="video-info">
-          
+          <div class="user-info">
             {% if video.posted_by.id == user.id %}
-            <div class="user-info" onclick="window.location.href='{% url 'userprofile' %}'">
-          {% else %}
-          <div class="user-info" onclick="window.location.href='{% url 'profile' video.posted_by.id %}'">
+              <img src="{% static video.posted_by.profile_photo_url|default:'/images/avatar.jpg' %}"
+                   alt="{{ video.posted_by.first_name }}'s Profile Picture"
+                   class="short-profile-pic" onclick="window.location.href='{% url 'userprofile' %}'">
+            {% else %}
+              <img src="{% static video.posted_by.profile_photo_url|default:'/images/avatar.jpg' %}"
+                   alt="{{ video.posted_by.first_name }}'s Profile Picture"
+                   class="short-profile-pic" onclick="window.location.href='{% url 'profile' video.posted_by.id %}'">
+            {% endif %}
+            {% if video.posted_by.id == user.id %}
+              <div class="username" onclick="window.location.href='{% url 'userprofile' %}'">
+                {{ video.posted_by.first_name }} {{ video.posted_by.last_name }}
+              </div>
+            {% else %}
+              <div class="username" onclick="window.location.href='{% url 'profile' video.posted_by.id %}'">
+                {{ video.posted_by.first_name }} {{ video.posted_by.last_name }}
+              </div>
+            {% endif %}
+          {% if video.posted_by.id != user.id %}
+            <div id="followBtn{{ video.id }}" class="short-user-follow" data-user-id="{{ video.posted_by.id }}"
+                 onclick="toggleFollow({{ video.posted_by.id }}, {{ video.id }})">
+              <span id="followText{{ video.id }}">
+                {% if video.followed %}Unfollow{% else %}Follow{% endif %}
+              </span>
+            </div>
           {% endif %}
-            <img src="{% static video.posted_by.profile_photo_url|default:'/images/avatar.jpg' %}"
-                 alt="{{ video.posted_by.first_name }}'s Profile Picture"
-                 class="short-profile-pic">
-            <div class="username">{{ video.posted_by.first_name }} {{ video.posted_by.last_name }}</div>
           </div>
           <div class="video-description">
             {% if video.title %}
@@ -40,8 +57,8 @@
               {% endif %}
               <div class="description">{{ video.created_at }}</div>
               <div id="seeLess{{ video.id }}" class="description" onclick="toggleVideoDetails('{{ video.id }}')">See Less</div>
-            </div>   
-          </div>         
+            </div>
+          </div>
         </div>
 
         <!-- Modal for Comments (unique for each video) -->
@@ -1010,9 +1027,45 @@ function closeShortShareModal(modalId) {
   if (modal) modal.style.display = "none";
 }
 
+  
+function toggleFollow(following_id, videoId) {
+  // Select all follow buttons for the same user by data attribute
+  const followButtons = document.querySelectorAll("[data-user-id='" + following_id + "']");
+  
+  fetch('/toggle-follow/', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': getCookie('csrftoken')
+    },
+    body: JSON.stringify({
+      "following_id": following_id,
+      "created_by": currentUserId
+    })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (typeof data.following !== "undefined") {
+      // Update every follow button's text for this user
+      followButtons.forEach(btn => {
+        const btnText = btn.querySelector("span");
+        if (btnText) {
+          btnText.textContent = data.following ? "Unfollow" : "Follow";
+        }
+      });
+    } else {
+      alert("Error toggling follow: " + (data.error || "Unknown error"));
+    }
+  })
+  .catch(error => {
+    console.error("Error:", error);
+    alert("An error occurred while toggling follow.");
+  });
+}
 
 
 </script>
+  
 
 
 <script>
@@ -2133,6 +2186,18 @@ margin-top: 16px;
     padding: 10px;
     width: 100%;
     height: 65px;
+}
+
+.short-user-follow{
+  margin-left: auto;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  display: flex;
+  justify-content: space-between;
+  padding: 5px 9px;
+  border-radius: 5px;
+  cursor: pointer;
 }
 </style>
 {% endblock %}

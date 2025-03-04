@@ -1064,8 +1064,11 @@ function toggleReaction(commentId, iconElement, likeCountElement) {
             let userElement = document.createElement("div");
             userElement.classList.add("friend-card");
             userElement.onclick = () => window.location.href = `/profile/${user.id}`;
+            const imageUrl = user.profile_pic
+            ? staticUrl + cleanMediaPath(user.profile_pic)
+            : staticUrl + 'images/avatar.jpg';
             userElement.innerHTML = `
-                <img src="${user.profile_pic || '/images/avatar.jpg'}" alt="${user.first_name}" class="friend-img">
+                <img src="${imageUrl}" alt="${user.first_name}" class="friend-img">
                 <div>${user.first_name}</div>
             `;
             container.appendChild(userElement);
