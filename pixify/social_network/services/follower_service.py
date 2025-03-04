@@ -19,7 +19,7 @@ def list_followers_api(request, user):
         followers = Follower.objects.filter(following=user, is_active=True).values('user_id', 'user_id__first_name', 'user_id__last_name', 'user_id__email', 'user_id__profile_photo_url')
         followings = Follower.objects.filter(user_id=user, is_active=True).values('following', 'following__first_name', 'following__last_name', 'following__email', 'following__profile_photo_url')
 
-    combined_list = list(followers) + list(followings)    
+    combined_list = followers.union(followings)
 
     response_data = {
         'members': list(combined_list),
@@ -46,7 +46,7 @@ def members_list_api(request, user, chat_members):
     followers = followers_query.values(*follower_fields)
     followings = followings_query.values(*following_fields)
 
-    combined_list = list(followers) + list(followings)
+    combined_list = followers.union(followings)
 
     response_data = {
         'members': list(combined_list),
@@ -112,7 +112,7 @@ def list_follow_api(request, user):
         followers = Follower.objects.filter(following=user, is_active=True).exclude(user_id__in=mem1).values('user_id', 'user_id__first_name', 'user_id__last_name', 'user_id__email', 'user_id__profile_photo_url', 'user_id__bio')
         followings = Follower.objects.filter(user_id=user, is_active=True).exclude(following__in=mem1).values('following', 'following__first_name', 'following__last_name', 'following__email', 'following__profile_photo_url', 'following__bio')
   
-    combined_list = list(followers) + list(followings)
+    combined_list = followers.union(followings)
     
     
     response_data = {
