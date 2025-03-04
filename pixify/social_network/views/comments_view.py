@@ -102,6 +102,7 @@ class CommentsListView(View):
 
         # Ensure proper naming and data structure
         for comment in comment_list:
+            comment['comment_by_id'] = comment.get('comment_by__id', 'Unknown')
             comment['comment_by_first_name'] = comment.get('comment_by__first_name', 'Unknown')
             comment['comment_by_last_name'] = comment.get('comment_by__last_name', 'Unknown')
             comment['profile_photo_url'] = comment.get('comment_by__profile_photo_url', '') 
