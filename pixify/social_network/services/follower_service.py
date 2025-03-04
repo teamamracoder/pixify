@@ -120,3 +120,8 @@ def list_follow_api(request, user):
     }
 
     return response_data
+
+
+def follower_check(posted_by,user):
+    return Follower.objects.filter(user_id=user,following=posted_by).exists()
+    
