@@ -8,24 +8,27 @@
                 <div class="profile-header">
                     <img src="{% static user_details.profile_photo |default:'/images/avatar.jpg' %}" alt="Profile Picture" class="profile-img">
                     <p class="user_title">{{ user_details.user_name }}</p>
+                    <div class="btnnn">
+                        <div class="fol follow1-btn" onclick="toggleFollow(event)" data-profile-id="{{ user_details.id }}">Follow</div>
+                        <div class="unfol unfollow-btn" onclick="toggleFollow(event)" data-profile-id="{{ user_details.id }}">Unfollow</div>
+                    </div>
                 </div>
                 <div class="profile-info">
-                    <p><i class="bi bi-circle  user_profile-icons"></i><strong>Status:</strong> <span class="active">{{ user_details.status }}</span></p>
-                    <p><i class="bi bi-calendar3 user_profile-icons"></i><strong>Age:</strong> {{ user_details.age }}</p>
-                    <p><i class="bi bi-people-fill user_profile-icons"></i><strong>Followers:</strong> <span id="follower-count">0</span></p>
-                    <p><i class="bi bi-people user_profile-icons"></i><strong>Followings:</strong> <span id="following-count">0</span></p>
+                    <p><i class="bi bi-circle  user_profile-icons"></i><strong>Status:</strong><span class="active eee">({{ user_details.status }})</span></p>
+                    <p><i class="bi bi-calendar3 user_profile-icons"></i><strong>Age:</strong><span class="eee">({{ user_details.age }})</span></p>
+                    <p><i class="bi bi-people-fill user_profile-icons"></i><strong>Followers:</strong> <span class="eee">(<span id="follower-count"class="eee"></span>)</span></p>
+                    <p><i class="bi bi-people user_profile-icons"></i><strong>Followings:</strong> <span class="eee">(<span id="following-count"class="eee"></span>)</span></p>
                 </div>
             </div>
             <div class="fol-unfol-btn">
-                <div class="fol follow1-btn" onclick="toggleFollow(event)" data-profile-id="{{ user_details.id }}">Follow</div>
-                <div class="unfol unfollow-btn" onclick="toggleFollow(event)" data-profile-id="{{ user_details.id }}">Unfollow</div>
+                <div class="bio-field">{{user_details.bio}}</div>
             </div>            
         </div>
     
        <!-- Followers Section -->
             <div class="friends-section">
                 <div class="heading-part">
-                    <h4>Followers (<span id="follower-count">0</span>)</h4>
+                    <p style="font-size:20px;">Followers (<span id="follower-count">0</span>)</p>
                     <div class="see-all-btn" onclick="toggleFriends('followers-list', this)">show</div>
                 </div>
                 <div class="friend-list" id="followers-list">
@@ -36,7 +39,7 @@
             <!-- Following Section -->
             <div class="friends-section">
                 <div class="heading-part">
-                    <h4>Following (<span id="following-count">0</span>)</h4>
+                    <p style="font-size:20px;">Following (<span id="following-count">0</span>)</p>
                     <div class="see-all-btn" onclick="toggleFriends('following-list', this)">show</div>
                 </div>
                 <div class="friend-list" id="following-list">
@@ -151,7 +154,7 @@
 <!-- Comment Modal -->
 <div class="modal fade" id="commentModal" tabindex="-1" aria-labelledby="commentModalLabel" aria-hidden="true">
     <div class="modal-dialog" style="height: 70vh; width:45%;">
-        <div class="modal-content" style="height: 100%; width: 96%;">
+        <div class="modal-content" style="height: 100%; width: 96%;top:10%;">
             <div class="modal-header" id="modal-comments-header">
                 <h5 class="modal-title" id="commentModalLabel">Comments</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -208,7 +211,7 @@
 <!-- Share Modal -->
 <div class="modal fade" id="shareModal" tabindex="-1" aria-labelledby="shareModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content bg-purple text-light">
+      <div class="modal-content bg-purple text-light" style="height:75vh">
         <div class="modal-header">
           <h5 class="modal-title mx-auto" id="shareModalLabel">Share Post</h5>
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -1293,17 +1296,19 @@ function toggleReaction(commentId, iconElement, likeCountElement) {
         }
 
         .user_title {
+            font-size: 20px;
             margin-top: 10px;
             white-space: nowrap;
             text-align: center;
         }
 
         .profile-info p {
+            text-shadow: 0 0 1px rgba(255, 255, 255, 0.3), 0 0 2px rgba(255, 255, 255, 0.3), 0 0 5px rgba(255, 255, 255, 0.2);
             margin: 5px 0;
         }
 
         .active {
-            color: lightgreen;
+            color: #975fec;
         }
 
         .friends-section {
@@ -1364,7 +1369,7 @@ function toggleReaction(commentId, iconElement, likeCountElement) {
         }
         .heading-part{
             justify-content: space-between;
-            align-items: center;
+            align-items: flex-end;
             display: flex;
         }
         .footer{
@@ -1436,20 +1441,21 @@ function toggleReaction(commentId, iconElement, likeCountElement) {
                 width: 100% !important;
             }
             .modal-content{
-                height: 100% !important;
+                margin-right: 15px;
+                height: 50vh!important;
                 width: 100% !important;
             }
             
         }
         @media (max-width: 480px) {
             .modal-dialog{
-                margin-top: 30% !important;
+                right: 2%;
+                padding: 20px;
                 height: 70vh !important;
                 width: 100% !important;
             }
            
         }
-
 
         .user_profile_combo-img{
             height: 58vh;
@@ -1494,9 +1500,10 @@ function toggleReaction(commentId, iconElement, likeCountElement) {
     font-size: 13px;
     }
     .fol-unfol-btn{
-        height: 70px;
+        margin-left: 40px;
+        flex-direction: column;
         justify-content: center;
-        align-items: center;
+        align-items: flex-start;
         display: flex;
     }
     .fol{
@@ -1506,7 +1513,7 @@ function toggleReaction(commentId, iconElement, likeCountElement) {
         margin: 5px;
         border: none;
         border-radius: 2px;
-        background: #984fc1;
+        background: #a065e7;
         width: 80px;
     }
     .unfol{
@@ -1525,6 +1532,25 @@ function toggleReaction(commentId, iconElement, likeCountElement) {
     }
     .unfol:active{
         background: #984fc1;
+    }
+    .eee{
+        color: #975fec;
+    }
+    .bio-field{
+        word-wrap: break-word;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin-bottom: 30px;
+        width: 50%;
+
+    }
+    .btnnn{
+        margin-bottom: 10px;
+        align-items: baseline;
+        justify-content: center;
+        display: flex;
+        width: 100%;
+
     }
 
     </style>

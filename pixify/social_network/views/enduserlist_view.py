@@ -25,9 +25,10 @@ class EnduserprofileListView(View):
             'user_name': f"{detail.first_name} {detail.last_name}",
             'profile_photo': detail.profile_photo_url if detail.profile_photo_url else '/images/avatar.jpg',
             'age': age,
-            'status': "Active" if detail.is_active else "Inactive",
+            'status': "Active" if detail.is_active else "Deactive",
             'posts': user_posts,
-            'reactions':reactions
+            'reactions':reactions,
+            'bio':detail.bio if detail.bio else " "
         }
 
         return render(request, 'enduser/profile/userprofile.html', {'user_details': user_details,'user':request.user})
