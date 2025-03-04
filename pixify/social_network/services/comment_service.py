@@ -9,6 +9,7 @@ from .. import models
 from django.utils import timezone
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth import get_user_model
+from django.db.models import Count
 
 
 
@@ -319,3 +320,27 @@ def is_user_following(created_by_id, following_id):
 
 
 
+
+def get_comments_likes(user_id, post_id):
+    """
+    Fetch all comments for a given post and return their like count and like status.
+    """
+    try:
+        user = User.objects.get(id=user_id)  # Retrieve the user instance
+    except User.DoesNotExist:
+        return []  # Return empty list if user does not exist
+
+    comments = Comment.objects.filter(post_id=post_id).annotate(
+        react_count=Count('fk_comment_comment_reactions_users_id')
+    )
+
+    comments_data = [
+        {
+            "id": comment.id,
+            "react_count": comment.react_count,  # Count reactions dynamically
+            "liked": CommentReaction.objects.filter(comment_id=comment, reacted_by=user).exists(),  # Check if user liked it
+        }
+        for comment in comments
+    ]
+
+    return comments_data

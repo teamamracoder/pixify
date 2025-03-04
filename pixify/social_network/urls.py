@@ -163,9 +163,7 @@ urlpatterns = [
     path('post/reactions/', views.GetPostReactionsView.as_view(), name='get_post_reactions'),
     path('post/comment/', views.GetPostCommentView.as_view(), name='get_comment_reactions'),
     path("delete-comment/", views.DeleteCommentView.as_view(), name="delete-comment"),
-    path('toggle-like/', views.ToggleLikeView.as_view(), name='toggle-like'),
     path("remove_reaction/", views.remove_reaction.as_view(), name="remove_reaction"),
-    path("fetch-comment-likes/", views.fetch_comment_likes.as_view(), name="fetch_comment_likes"),
 
 
 
@@ -219,11 +217,12 @@ urlpatterns = [
     path("api/comments/<int:post_id>/", views.CommentListViewApi.as_view(), name="get_comments"),
     path('comments/<int:post_id>/', views.CommentCreate.as_view(), name='post_comment_create' ),
     path('comments/delete/<int:comment_id>/', views.DeleteComment.as_view(), name='post_delete_comment'),
-    path("toggle_reaction/", views.TogglReactionView.as_view(), name="toggle_reaction"),
+    path("toggle_reaction/", views.TogglReactionView.as_view(), name='toggle_reaction'),
     path('toggle-follow/', views.ToggleFollowView.as_view(), name='toggle_follow'),
-    path("check-follow-state/",views.CheckFollowState.as_view(), name="check-follow-state"),
-    path("get-followers-following/",views. GetFollowersFollowing.as_view(), name="get_followers_following"),
+    path('check-follow-state/',views.CheckFollowState.as_view(), name='check-follow-state'),
+    path('get-followers-following/',views. GetFollowersFollowing.as_view(), name='get_followers_following'),
     path('get-user-posts-comments/<int:user_id>/',views.GetUserPostsComments.as_view(), name='get_user_posts_comments'),
+     path('get-comments-likes/<int:user_id>/<int:post_id>/',views.GetCommentsLikes.as_view(), name='get_comments_likes'),
 
 ]
 

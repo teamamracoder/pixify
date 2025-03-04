@@ -6,7 +6,7 @@ from ..decorators import auth_required, role_required
 from social_network.decorators.exception_decorators import catch_error
 from django.http import JsonResponse
 from ..services import user_service,chat_service,post_service,message_reaction_service,comment_service
-from ..models import User
+from ..models import User,Comment
 
 
 class EnduserprofileListView(View):
@@ -253,3 +253,12 @@ class GetUserPostsComments(View):
         posts = post_service.get_user_post_comment_count(user_id)
         print(posts)
         return JsonResponse({'posts': list(posts)})
+    
+
+
+class GetCommentsLikes(View):
+    def get(self, request, user_id, post_id):
+        comments_data = comment_service.get_comments_likes(user_id, post_id)
+        return JsonResponse({"comments": comments_data})
+
+

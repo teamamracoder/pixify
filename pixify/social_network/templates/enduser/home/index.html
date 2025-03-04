@@ -358,7 +358,8 @@
                                 <i data-reaction-id="4" class="fa-solid fa-face-angry" style="color: #ff0a0a;font-size: 20px;cursor: pointer;"></i>
                             </div>
                         </div>
-
+                        <input type="hidden" id="user_id" value="{{ request.user.id }}">
+                        <input type="hidden" id="post_id" value="{{ post.id }}">
                         <span data-toggle="modal" class="load-comments"><i class="fa-regular fa-comment"></i></span>
                         <i class="fa-solid fa-share-nodes share-post-btn" data-post-id="{{ post.id }}" data-bs-toggle="modal" data-bs-target="#shareModal"></i>
 
@@ -1224,7 +1225,6 @@ $(document).ready(function () {
                                         style="width:35px; height:35px;object-fit: cover;">
                                     <div class="d-flex flex-column">
 
-
                                         <input type="hidden" class="comment-id" value="${ comment.id }">
                                         <div class="comment-text mb-0 ps-2 py-1 rounded px-3"
                                              style="background-color:#311e4ee3;width: 300px;">
@@ -1235,9 +1235,12 @@ $(document).ready(function () {
                                         </div>
                                         <div class="d-flex p-1 comment_by" style="gap:20px; margin-left: 17px;">
                                             <span style="font-size:11px;cursor:pointer;">${new Date(comment.created_at).toLocaleString([], { weekday: 'long' })} ${new Date(comment.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                                            <span style="font-size:11px;cursor:pointer;" class="commentlike" style="font-size:14px;"><i class="bi bi-heart"></i> <span class="like-count" style="font-size:12px; margin-left:5px;">0</span></span>
-
-
+                                            <div class="comment">
+                                                <i class="bi bi-heart" data-comment-id="${comment.id}" style="cursor: pointer;"></i>
+                                               <span class="like-count" style="color:white;font-size:10px; ${comment.react_count > 0 ? '' : 'display:none;'}">
+                                                    ${comment.react_count}
+                                                </span>
+                                            </div>
                                           <input type="hidden" value="${comment.id}" id="com_by">
                                            <input type="hidden" value="${comment.comment_by__first_name}" id="com_by_name">
 
@@ -1429,9 +1432,12 @@ photo_com.html(postItem);
                                         </div>
                                         <div class="d-flex p-1 comment_by" style="gap:20px; margin-left: 17px;">
                                             <span style="font-size:11px;cursor:pointer;">${new Date(comment.created_at).toLocaleString([], { weekday: 'long' })} ${new Date(comment.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                                            <span style="font-size:11px;cursor:pointer;" class="commentlike"><i class="bi bi-heart" style="font-size:14px;"></i><span class="like-count" style="font-size:12px; margin-left:5px;">0</span></span>
-
-
+                                            <div class="comment">
+                                                <i class="bi bi-heart" data-comment-id="${comment.id}" style="cursor: pointer;"></i>
+                                               <span class="like-count" style="color:white;font-size:10px; ${comment.react_count > 0 ? '' : 'display:none;'}">
+                                                    ${comment.react_count}
+                                                </span>
+                                            </div>
                                           <input type="hidden" value="${comment.id}" id="com_by">
                                            <input type="hidden" value="${comment.comment_by__first_name}" id="com_by_name">
 
@@ -1565,55 +1571,112 @@ $(document).on('click', '.view-comment', function () {
     }
 });
 
-$(document).on("click", ".commentlike", function () {
-    var commentLikeBtn = $(this);
-    var commentId = commentLikeBtn.closest(".allcomments").find(".comment-id").val();
-    var likeCountSpan = commentLikeBtn.closest(".allcomments").find(".like-count");
+document.addEventListener("click", function (event) {
+    if (event.target.classList.contains("bi-heart") || event.target.classList.contains("bi-heart-fill")) {
+        const commentElement = event.target.closest(".comment");
+        const commentId = event.target.dataset.commentId;
+        const likeCountElement = commentElement.querySelector(".like-count");
 
-    console.log(commentId)
-
-    $.ajax({
-        type: "POST",
-        url: "/toggle-like/",  // URL defined in urls.py
-        data: {
-            comment_id: commentId,
-            csrfmiddlewaretoken: $("input[name=csrfmiddlewaretoken]").val(),
-        },
-        success: function (response) {
-            console.log(response)
-
-            if (response.liked) {
-                commentLikeBtn.find("i").removeClass("bi-heart").addClass("bi-heart-fill").css("color", "red");
-            } else {
-                commentLikeBtn.find("i").removeClass("bi-heart-fill").addClass("bi-heart").css("color", "");
-            }
-            likeCountSpan.text(response.like_count);
-        },
-    });
+        if (commentId) {
+            toggleReaction(commentId, event.target, likeCountElement);
+        }
+    }
 });
-$(document).ready(function () {
-    $(".allcomments").each(function () {
-        var commentId = $(this).find(".comment-id").val();
 
-        console.log("commentId:", commentId);
+function toggleReaction(commentId, iconElement, likeCountElement) {
+    console.log("Sending reaction toggle request...");
 
-        if (!commentId) {
-            console.error("Comment ID not found in:", $(this));
-            return;  // Skip if no comment ID
+    fetch("/toggle_reaction/", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": getCSRFToken()
+        },
+        body: JSON.stringify({ comment_id: commentId })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === "liked") {
+            iconElement.classList.remove("bi-heart");
+            iconElement.classList.add("bi-heart-fill");
+            iconElement.style.color = "red";
+        } else {
+            iconElement.classList.remove("bi-heart-fill");
+            iconElement.classList.add("bi-heart");
+            iconElement.style.color = "";
         }
 
-        $.ajax({
-            type: "GET",
-            url: "/fetch-comment-likes/",
-            data: {
-                comment_id: commentId,
-            },
-            success: function (response) {
-                console.log("Response for comment", commentId, ":", response);
-            },
+        if (likeCountElement) {
+            likeCountElement.textContent = data.total_likes;
+            likeCountElement.style.display = data.total_likes > 0 ? "inline" : "none";
+        }
+    })
+    .catch(error => console.error("Error:", error));
+}
+
+function getCSRFToken() {
+    const tokenElement = document.querySelector('[name=csrfmiddlewaretoken]');
+    return tokenElement ? tokenElement.value : "";
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+    const modal = document.querySelector(".allcomments");
+
+    if (modal) {
+        modal.addEventListener("show.bs.modal", function () {
+            console.log("Modal opened, loading comments...");
+            loadCommentsLikes();
         });
+    }
+
+    document.body.addEventListener("click", function (event) {
+        if (event.target.closest(".load-comments")) {
+            console.log("Load comments clicked...");
+            loadCommentsLikes();
+        }
     });
 });
+
+function loadCommentsLikes() {
+    const userIdElement = document.getElementById("user_id");
+    const postIdElement = document.getElementById("post_id");
+
+    if (!userIdElement || !postIdElement) {
+        console.error("User ID or Post ID not found!");
+        return;
+    }
+
+    const userId = userIdElement.value;
+    const postId = postIdElement.value;
+
+    fetch(`/get-comments-likes/${userId}/${postId}/`)
+    .then(response => response.json())
+    .then(data => {
+        data.comments.forEach(comment => {
+            const commentElement = document.querySelector(`[data-comment-id="${comment.id}"]`);
+            if (commentElement) {
+                const iconElement = commentElement;
+                const likeCountElement = commentElement.closest(".comment").querySelector(".like-count");
+
+                if (comment.liked) {
+                    iconElement.classList.remove("bi-heart");
+                    iconElement.classList.add("bi-heart-fill");
+                    iconElement.style.color = "red";
+                } else {
+                    iconElement.classList.remove("bi-heart-fill");
+                    iconElement.classList.add("bi-heart");
+                    iconElement.style.color = "";
+                }
+
+                if (likeCountElement) {
+                    likeCountElement.textContent = comment.react_count;
+                    likeCountElement.style.display = comment.react_count > 0 ? "inline" : "none";
+                }
+            }
+        });
+    })
+    .catch(error => console.error("Error fetching comments likes:", error));
+}
 
 
 </script>
