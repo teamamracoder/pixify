@@ -72,7 +72,7 @@ def list_chats_by_user(user):
                                     Message.objects.filter(id=OuterRef('id'))
                                     .values('sender_id__first_name')[:1]
                                 ),
-                                Value(" sent a reels"),
+                                Value(" sent a posts"),
                                 output_field=CharField()
                             ),
                             output_field=CharField()
