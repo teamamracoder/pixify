@@ -941,6 +941,8 @@ $(document).ready(function () {
  <script src="{% static 'js/sribash.js' %}"></script>
 <script>
 
+    const currentUserId = {{ userid }}; 
+
 $(document).ready(function () {
     let holdTimer; // Track the hold time
 
@@ -1217,18 +1219,23 @@ $(document).ready(function () {
                     if (data.comments.length > 0 ) {
                         data.comments.forEach(comment => {
                             if (comment.reply_for_id==null){
+
+                                const profileUrl = (parseInt(comment.comment_by__id) === parseInt(currentUserId))
+                                ? "{% url 'userprofile' %}"
+                                : "/profile/" + comment.comment_by__id + "/";
+
                             const profileImage = comment.comment_by__profile_photo_url ? comment.comment_by__profile_photo_url : '/images/avatar.jpg';
 
                             const commentItem = `
                          <div class="d-flex py-1 allcomments">
-                                    <img src="static${profileImage}" alt="User" class="rounded-circle"
-                                        style="width:35px; height:35px;object-fit: cover;">
+                                    <img src="static${profileImage}" alt="User" class="rounded-circle follow-redirect"
+                                        style="width:35px; height:35px;object-fit: cover;" data-profile-url="${profileUrl}">
                                     <div class="d-flex flex-column">
 
                                         <input type="hidden" class="comment-id" value="${ comment.id }">
                                         <div class="comment-text mb-0 ps-2 py-1 rounded px-3"
                                              style="background-color:#311e4ee3;width: 300px;">
-                                            <span class="d-block fw-bold">${comment.comment_by__first_name} ${comment.comment_by__last_name}</span>
+                                            <span class="d-block fw-bold follow-redirect" data-profile-url="${profileUrl}">${comment.comment_by__first_name} ${comment.comment_by__last_name}</span>
                                             <li class="list-group-item">
                                                 <span style="font-size:13px">${comment.comment}</span>
                                             </li>
@@ -1316,16 +1323,18 @@ $(document).ready(function () {
 
 
 data.user_details.forEach(com_del => {
+    const profileUrl = (parseInt(com_del.id) === parseInt(currentUserId))
+    ? "{% url 'userprofile' %}"
+    : "/profile/" + com_del.id + "/";
+
     const profileImage = com_del.profile_photo_url ? com_del.profile_photo_url : '/images/avatar.jpg';
 const com_prof=`
 
 
-<a href="" class="mx-1">
-                    <img src="/static${profileImage}" alt="avatar" class="rounded-circle me-2 " style="width: 35px; object-fit: cover; height: 35px; " >
-                </a>
+                    <img src="/static${profileImage}" alt="avatar" class="rounded-circle me-2 follow-redirect" style="width: 35px; object-fit: cover; height: 35px; " data-profile-url="${profileUrl}">
 
                 <div class="d-flex "style="flex-direction: column;" >
-                 <h6 class="u-name mx-1"style="font-size:14px">${com_del.first_name} ${com_del.last_name} </h6>
+                 <h6 class="u-name mx-1 follow-redirect" style="font-size:14px" data-profile-url="${profileUrl}">${com_del.first_name} ${com_del.last_name} </h6>
                  <span style="font-size:11px;margin-left:5px;position: relative;bottom: 10px;" class="py-1">${new Date(com_del.created_at).toLocaleString([],  { weekday: 'long' })} ${new Date(com_del.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}<i class="bi bi-globe-americas p-1" style="font-size:10px"></i></span>
 
                  </div>    `;
@@ -1413,19 +1422,24 @@ photo_com.html(postItem);
 
                     if (data.comments.length > 0 ) {
                         data.comments.forEach(comment => {
+                            const commentUserId = comment.comment_by__id || "";
+                            const profileUrl = (parseInt(commentUserId) === parseInt(currentUserId))
+                            ? "{% url 'userprofile' %}"
+                            : "/profile/" + commentUserId + "/";
+
                             if (comment.reply_for_id==null){
                                 const profileImage = comment.comment_by__profile_photo_url ? comment.comment_by__profile_photo_url : '/images/avatar.jpg'
                             const commentItem = `
                                 <div class="d-flex py-1 allcomments">
-                                    <img src="static${profileImage}" alt="User" class="rounded-circle"
-                                        style="width:35px; height:35px;object-fit: cover;">
+                                    <img src="/static${profileImage}" alt="User" class="rounded-circle follow-redirect"
+                                                style="width:35px; height:35px;object-fit: cover;" data-profile-url="${profileUrl}">
                                     <div class="d-flex flex-column">
 
 
                                         <input type="hidden" class="comment-id" value="${ comment.id }">
                                         <div class="comment-text mb-0 ps-2 py-1 rounded px-3"
                                              style="background-color:#311e4ee3;width: 300px;">
-                                            <span class="d-block fw-bold">${comment.comment_by__first_name} ${comment.comment_by__last_name}</span>
+                                            <span class="d-block fw-bold follow-redirect" data-profile-url="${profileUrl}"> ${comment.comment_by__first_name} ${comment.comment_by__last_name} </span>
                                             <li class="list-group-item">
                                                 <span style="font-size:13px">${comment.comment}</span>
                                             </li>
@@ -1469,6 +1483,12 @@ photo_com.html(postItem);
           });
         });
     });
+
+    $(document).on("click", ".follow-redirect", function() {
+        const url = $(this).data("profile-url");
+        window.location.href = url;
+    });
+    
   // comment total_count
 
 $(document).ready(function () {
@@ -1537,13 +1557,18 @@ $(document).on('click', '.view-comment', function () {
                     let replyHtml = `<div id="replies-${commentId}" class="ms-4" style="display: none;">`;
 
                     data.replies.forEach(reply => {
+
+                        const profileUrl = (parseInt(reply.comment_by__id) === parseInt(currentUserId))
+                        ? "{% url 'userprofile' %}"
+                        : "/profile/" + reply.comment_by__id + "/";
+
                         profile_pic=reply.comment_by__profile_photo_url ? reply.comment_by__profile_photo_url : '/images/avatar.jpg'
                         replyHtml += `
                             <div class="d-flex py-1 allcomments">
-                                <img src="static${profile_pic}" alt="User" class="rounded-circle" style="width:30px; height:30px;object-fit:cover;">
+                                <img src="static${profile_pic}" alt="User" class="rounded-circle follow-redirect" style="width:30px; height:30px;object-fit:cover;" data-profile-url="${profileUrl}">
                                 <div class="d-flex flex-column">
                                     <div class="comment-text mb-0 ps-2 py-1 rounded px-3" style="background-color:#311e4ee3;width: 250px;">
-                                        <span class="d-block fw-bold">${reply.comment_by__first_name} ${reply.comment_by__last_name}</span>
+                                        <span class="d-block fw-bold follow-redirect" data-profile-url="${profileUrl}">${reply.comment_by__first_name} ${reply.comment_by__last_name}</span>
                                         <span style="font-size:13px">${reply.comment}</span>
                                     </div>
                                 </div>

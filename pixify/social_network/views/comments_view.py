@@ -102,6 +102,7 @@ class CommentsListView(View):
 
         # Ensure proper naming and data structure
         for comment in comment_list:
+            comment['comment_by_id'] = comment.get('comment_by__id', 'Unknown')
             comment['comment_by_first_name'] = comment.get('comment_by__first_name', 'Unknown')
             comment['comment_by_last_name'] = comment.get('comment_by__last_name', 'Unknown')
             comment['profile_photo_url'] = comment.get('comment_by__profile_photo_url', '') 
@@ -238,7 +239,7 @@ class GetRepliesView(View):
 
         # Fetch only replies where reply_for_id matches the comment_id
         replies = Comment.objects.filter(reply_for_id=comment_id).values(
-            'id', 'comment', 'comment_by__first_name', 'comment_by__last_name', 'created_at','comment_by__profile_photo_url',
+            'id', 'comment', 'comment_by__id', 'comment_by__first_name', 'comment_by__last_name', 'created_at','comment_by__profile_photo_url',
         )
         reply_count = replies.count()  # Count number of replies
 

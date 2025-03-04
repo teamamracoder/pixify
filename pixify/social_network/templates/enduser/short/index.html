@@ -113,7 +113,9 @@
           <i id="heartIcon{{ forloop.counter }}"
              class="bi {% if video.user_reacted %}bi-heart-fill{% else %}bi-heart{% endif %}"
              aria-label="Like"></i>
-          <div class="reaction-count">{{ video.reaction_count }}</div>
+          {% if video.reaction_count != "0" %}
+            <div class="reaction-count">{{ video.reaction_count }}</div>
+          {% endif %}
         </div>
         <!-- Chat Icon (to open comments modal) -->
         <div>
@@ -121,7 +123,9 @@
                 onclick="openShortCommentsModal('{{ video.id }}')">
             <i class="bi bi-chat"></i>
           </span>
-          <div class="reaction-count">{{ video.comments_count }}</div>
+          {% if video.comments_count != "0" %}
+            <div class="comment-count">{{ video.comments_count }}</div>
+          {% endif %}
         </div>
         <div class="icon" onclick="shareShort('{{ video.id }}')">
           <i class="bi bi-send"></i>
@@ -197,52 +201,64 @@
 
 document.addEventListener('DOMContentLoaded', () => {
     // Handle reactions (like/dislike)
-    const handleReaction = (iconElement, isDelete = false) => {
-        const postId = iconElement.closest('.video-wrapper').dataset.postId;
-        const url = isDelete
-            ? `/short/reaction/${postId}/delete`
-            : `/short/${postId}/reaction/create`;
-
-        fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': getCookie('csrftoken'), // Ensure CSRF token is handled
-            },
-            body: JSON.stringify({ post_id: postId }),
-        })
-        .then((response) => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
-        })
-        .then((data) => {
-            if (data.success) {
-                console.log('Reaction updated:', data);
-
-                // Update the reaction count
-                const likeCountSpan = iconElement.closest('.right-icons').querySelector('.reaction-count');
-                if (likeCountSpan) {
-                    likeCountSpan.textContent = data.reaction_count;
-                }
-
-                // Toggle the heart icon class
-                if (isDelete) {
-                    iconElement.classList.remove('bi-heart-fill');
-                    iconElement.classList.add('bi-heart');
-                } else {
-                    iconElement.classList.remove('bi-heart');
-                    iconElement.classList.add('bi-heart-fill');
-                }
-            } else {
-                console.error('Failed to update reaction:', data);
-            }
-        })
-        .catch((error) => {
-            console.error('Error:', error);
-        });
-    };
+      const handleReaction = (iconElement, isDelete = false) => {
+          const postId = iconElement.closest('.video-wrapper').dataset.postId;
+          const url = isDelete
+              ? `/short/reaction/${postId}/delete`
+              : `/short/${postId}/reaction/create`;
+  
+          fetch(url, {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json',
+                  'X-CSRFToken': getCookie('csrftoken'),
+              },
+              body: JSON.stringify({ post_id: postId }),
+          })
+          .then(response => {
+              if (!response.ok) {
+                  throw new Error('Network response was not ok');
+              }
+              return response.json();
+          })
+          .then(data => {
+              if (data.success) {
+                  console.log('Reaction updated:', data);
+                  // Limit search to the container that holds the heart icon and its count
+                  const likeContainer = iconElement.parentElement;
+                  let likeCountSpan = likeContainer.querySelector('.reaction-count');
+  
+                  if (data.reaction_count > 0) {
+                      // If count > 0 but span doesn't exist, create it
+                      if (!likeCountSpan) {
+                          likeCountSpan = document.createElement('div');
+                          likeCountSpan.className = 'reaction-count';
+                          likeContainer.appendChild(likeCountSpan);
+                      }
+                      likeCountSpan.textContent = data.reaction_count;
+                  } else {
+                      // If count is 0, remove the span if it exists
+                      if (likeCountSpan) {
+                          likeCountSpan.remove();
+                      }
+                  }
+  
+                  // Toggle the heart icon class
+                  if (isDelete) {
+                      iconElement.classList.remove('bi-heart-fill');
+                      iconElement.classList.add('bi-heart');
+                  } else {
+                      iconElement.classList.remove('bi-heart');
+                      iconElement.classList.add('bi-heart-fill');
+                  }
+              } else {
+                  console.error('Failed to update reaction:', data);
+              }
+          })
+          .catch(error => {
+              console.error('Error:', error);
+          });
+      };
 
     // Add double-tap functionality to video screen
     let lastTap = 0;
@@ -647,9 +663,11 @@ function handleCommentSubmit(postId, commentInput, commentsList, replyingToComme
     .then((response) => response.json())
     .then((data) => {
       if (data.success) {
+        // Remove any "no comments" message if present.
         const noCommentsMessage = commentsList.querySelector(".no-comments");
         if (noCommentsMessage) noCommentsMessage.remove();
         
+        // Render the new comment.
         if (replyingToCommentId) {
           const parentComment = commentsList.querySelector(
             `[data-comment-id="${replyingToCommentId}"]`
@@ -668,19 +686,13 @@ function handleCommentSubmit(postId, commentInput, commentsList, replyingToComme
             }
           }
           renderComment(data.reply, replyContainer, false, true, replyContainer);
+          updateCommentCount(postId, data.reply.comment_count);
         } else {
           renderComment(data.comment, commentsList, true);
+          updateCommentCount(postId, data.comment.comment_count);
         }
         
-        const commentIcon = document.querySelector(
-          `.chat-icon[data-video-id="${postId}"]`
-        );
-        const countElement = commentIcon?.nextElementSibling;
-        if (countElement) {
-          countElement.textContent =
-            data.comment_count || parseInt(countElement.textContent) + 1;
-        }
-        
+        // Clear the input and reset reply state.
         commentInput.value = "";
         const commentInputContainer = commentInput.parentElement;
         const cancelReplyControl = commentInputContainer.querySelector(".btn-cancel-reply");
@@ -736,7 +748,7 @@ function renderComment(comment, container, prepend = false, isReply = false, fla
       <div class="short-comment-actions">
         <div class="btn-like ${likedClass}" data-comment-id="${comment.id}" role="button" tabindex="0">
           <i class="bi ${iconClass}"></i>
-          <span class="like-count">${comment.like_count || 0}</span>
+          ${ parseInt(comment.like_count, 10) > 0 ? `<span class="like-count">${comment.like_count}</span>` : '' }
         </div>
         <div class="btn-reply" data-comment-id="${comment.id}" role="button" tabindex="0">Reply</div>
         <div class="btn-delete" data-comment-id="${comment.id}" style="display: none;" role="button" tabindex="0">Delete</div>
@@ -755,7 +767,8 @@ function renderComment(comment, container, prepend = false, isReply = false, fla
   const likeButton = commentItem.querySelector(".btn-like");
   likeButton.addEventListener("click", function () {
     const commentId = this.dataset.commentId;
-    const likeCountSpan = this.querySelector(".like-count");
+    // Try to find the like count element
+    let likeCountSpan = this.querySelector(".like-count");
     
     fetch(`/short/comment/${commentId}/reaction/`, {
       method: "POST",
@@ -766,7 +779,20 @@ function renderComment(comment, container, prepend = false, isReply = false, fla
       .then((response) => response.json())
       .then((data) => {
         if (data.success) {
-          likeCountSpan.textContent = data.like_count;
+          // If there's no like count span and new count > 0, create one.
+          if (!likeCountSpan && data.like_count > 0) {
+            likeCountSpan = document.createElement("span");
+            likeCountSpan.classList.add("like-count");
+            // Insert it immediately after the icon element.
+            const icon = this.querySelector("i");
+            icon.insertAdjacentElement("afterend", likeCountSpan);
+          }
+          // If the element exists, update its text
+          if (likeCountSpan) {
+            likeCountSpan.textContent = data.like_count;
+          }
+          
+          // Toggle the liked classes
           this.classList.toggle("liked", data.user_liked);
           const icon = this.querySelector("i");
           if (data.user_liked) {
@@ -780,6 +806,7 @@ function renderComment(comment, container, prepend = false, isReply = false, fla
         console.error("Error reacting to comment:", error)
       );
   });
+  
   
   // Handling long press for deletion.
   let pressTimer;
@@ -978,14 +1005,9 @@ function deleteComment(commentId, container, isReply = false) {
           `[data-comment-id="${commentId}"]`
         );
         if (commentItem) commentItem.remove();
-        const commentIcon = document.querySelector(
-          `.chat-icon[data-video-id="${postId}"]`
-        );
-        const countElement = commentIcon?.nextElementSibling;
-        if (countElement) {
-          countElement.textContent =
-            data.comment_count || parseInt(countElement.textContent) - 1;
-        }
+        
+        // Use the helper to update the comment count.
+        updateCommentCount(postId, data.comment_count);
       } else {
         alert("Error deleting comment");
         console.error("Deletion error:", data.message);
@@ -1025,6 +1047,37 @@ document.querySelectorAll(".chat-icon").forEach((button) => {
 function closeShortShareModal(modalId) {
   const modal = document.getElementById(modalId);
   if (modal) modal.style.display = "none";
+}
+
+
+function updateCommentCount(postId, newCount) {
+  // Convert newCount to a number.
+  newCount = parseInt(newCount, 10);
+  
+  // Find the chat icon using its data attribute.
+  const commentIcon = document.querySelector(`.chat-icon[data-video-id="${postId}"]`);
+  if (!commentIcon) return;
+
+  // Get the container (the parent of the chat icon).
+  const container = commentIcon.parentElement;
+  
+  // Look for an existing comment count element.
+  let commentCountDiv = container.querySelector('.comment-count');
+  
+  if (newCount > 0) {
+    // If there's no comment count element, create one and insert it right after the chat icon.
+    if (!commentCountDiv) {
+      commentCountDiv = document.createElement('div');
+      commentCountDiv.classList.add('comment-count');
+      commentIcon.insertAdjacentElement('afterend', commentCountDiv);
+    }
+    commentCountDiv.textContent = newCount;
+  } else {
+    // If newCount is 0, remove the element if it exists.
+    if (commentCountDiv) {
+      commentCountDiv.remove();
+    }
+  }
 }
 
   
@@ -1898,6 +1951,10 @@ margin-top: 16px;
     color: #fff;
 }
 
+.comment-count{
+  font-size: 15px;
+  color: #fff;
+}
 
 /* Modal Overlay */
 .short-create-modal {
