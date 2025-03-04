@@ -8,17 +8,20 @@
                 <div class="profile-header">
                     <img src="{% static user_details.profile_photo |default:'/images/avatar.jpg' %}" alt="Profile Picture" class="profile-img">
                     <p class="user_title">{{ user_details.user_name }}</p>
+                    <div class="btnnn">
+                        <div class="fol follow1-btn" onclick="toggleFollow(event)" data-profile-id="{{ user_details.id }}">Follow</div>
+                        <div class="unfol unfollow-btn" onclick="toggleFollow(event)" data-profile-id="{{ user_details.id }}">Unfollow</div>
+                    </div>
                 </div>
                 <div class="profile-info">
-                    <p><i class="bi bi-circle  user_profile-icons"></i><strong>Status:</strong> <span class="active">{{ user_details.status }}</span></p>
-                    <p><i class="bi bi-calendar3 user_profile-icons"></i><strong>Age:</strong> {{ user_details.age }}</p>
-                    <p><i class="bi bi-people-fill user_profile-icons"></i><strong>Followers:</strong> <span id="follower-count">0</span></p>
-                    <p><i class="bi bi-people user_profile-icons"></i><strong>Followings:</strong> <span id="following-count">0</span></p>
+                    <p><i class="bi bi-circle  user_profile-icons"></i><strong>Status:</strong><span class="active eee">({{ user_details.status }})</span></p>
+                    <p><i class="bi bi-calendar3 user_profile-icons"></i><strong>Age:</strong><span class="eee">({{ user_details.age }})</span></p>
+                    <p><i class="bi bi-people-fill user_profile-icons"></i><strong>Followers:</strong> <span class="eee">(<span id="follower-count"class="eee"></span>)</span></p>
+                    <p><i class="bi bi-people user_profile-icons"></i><strong>Followings:</strong> <span class="eee">(<span id="following-count"class="eee"></span>)</span></p>
                 </div>
             </div>
             <div class="fol-unfol-btn">
-                <div class="fol follow1-btn" onclick="toggleFollow(event)" data-profile-id="{{ user_details.id }}">Follow</div>
-                <div class="unfol unfollow-btn" onclick="toggleFollow(event)" data-profile-id="{{ user_details.id }}">Unfollow</div>
+                <div class="bio-field">{{user_details.bio}}</div>
             </div>            
         </div>
     
@@ -1293,17 +1296,19 @@ function toggleReaction(commentId, iconElement, likeCountElement) {
         }
 
         .user_title {
+            font-size: 20px;
             margin-top: 10px;
             white-space: nowrap;
             text-align: center;
         }
 
         .profile-info p {
+            text-shadow: 0 0 1px rgba(255, 255, 255, 0.3), 0 0 2px rgba(255, 255, 255, 0.3), 0 0 5px rgba(255, 255, 255, 0.2);
             margin: 5px 0;
         }
 
         .active {
-            color: lightgreen;
+            color: #975fec;
         }
 
         .friends-section {
@@ -1494,9 +1499,10 @@ function toggleReaction(commentId, iconElement, likeCountElement) {
     font-size: 13px;
     }
     .fol-unfol-btn{
-        height: 70px;
+        margin-left: 20px;
+        flex-direction: column;
         justify-content: center;
-        align-items: center;
+        align-items: flex-start;
         display: flex;
     }
     .fol{
@@ -1525,6 +1531,25 @@ function toggleReaction(commentId, iconElement, likeCountElement) {
     }
     .unfol:active{
         background: #984fc1;
+    }
+    .eee{
+        color: #975fec;
+    }
+    .bio-field{
+        word-wrap: break-word;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin-bottom: 30px;
+        width: 50%;
+
+    }
+    .btnnn{
+        margin-bottom: 10px;
+        align-items: baseline;
+        justify-content: center;
+        display: flex;
+        width: 100%;
+
     }
 
     </style>
