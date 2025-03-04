@@ -43,7 +43,12 @@ def manage_list_posts_filtered(search_query, sorting_order, sort_by, page_number
         .paginate(limit=10, page=page_number)
         .execute()
     )
-    # return data
+    # print(f"Post data = {data}")
+    # for val in data['data']:
+    #     # print(f"Post data = {val}")
+    #     # print(f"Post data = {val['id']}")
+    #     print(f"Post data = {val['posted_by_id']}")
+    #     posted_by_id = val['posted_by_id']
     return data
 
 
@@ -67,7 +72,8 @@ def manage_list_comments_filtered(post_id):
 
 
 
-
+def get_users_by_id(user_id):
+            return User.objects.filter(id=user_id).all()
 
 
 def admin_list_posts_filtered(search_query, sort_by='posted_by'):
@@ -101,3 +107,7 @@ def update_post(user_id,post_id,post_titile):
 # comment
 def reaction_name(post_id):
    return PostReaction.objects.filter( post_id_id=post_id, is_active=True).first()
+
+
+def get_users_by_id(user_id):
+            return User.objects.filter(id=user_id).all()
