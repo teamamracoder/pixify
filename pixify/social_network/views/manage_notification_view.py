@@ -88,6 +88,7 @@ class ManageNotificationUpdateView(View):
             return redirect('manage_notification_list')
         return render(request, 'adminuser/notification/update.html', {"form": form, "notification_id": notification.id})
 
+
 class ManageToggleNotificationActiveView(View):
      def post(self, request, notification_id):
         notification = services.manage_notification_service.manage_get_notification(notification_id)
