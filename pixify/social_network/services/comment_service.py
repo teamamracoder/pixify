@@ -130,7 +130,7 @@ def get_comments_by_post(post_id, user_id):
             {
                 "id": reply.id,
                 "user_id": reply.comment_by.id,
-                "user": reply.comment_by.first_name,
+                "user": f"{reply.comment_by.first_name} {reply.comment_by.last_name}",
                 "user_profile": reply.comment_by.profile_photo_url if reply.comment_by.profile_photo_url else "",
                 "text": reply.comment,
                 "reply_for": reply.reply_for_id,
@@ -148,7 +148,7 @@ def get_comments_by_post(post_id, user_id):
         {
             "id": comment.id,
             "user_id": comment.comment_by.id,
-            "user": comment.comment_by.first_name,
+            "user": f"{comment.comment_by.first_name} {comment.comment_by.last_name}",
             "user_profile": comment.comment_by.profile_photo_url if comment.comment_by.profile_photo_url else "",
             "text": comment.comment,
             "reply_for": comment.reply_for_id,
