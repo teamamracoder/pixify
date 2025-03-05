@@ -40,7 +40,7 @@ class HomeView(View):
         }
 
         # Fetch stories
-        storys = services.story_service.storylist_storys()
+        storys = services.story_service.storylist_storys(request.user.id)
         story_dict = {
             'storys': storys,
             #'name': 'sribash',

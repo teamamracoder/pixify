@@ -10,23 +10,19 @@ function openStoryView(userId) {
 fetch(`/stories/view/${userId}`)
     .then(response => response.json())
     .then(data => {
-        console.log(data.userDetails.profile_photo_url)
+        console.log(data)
         storiesByUser = data.stories;
         userIds = Object.keys(storiesByUser); // Get list of user IDs
         currentUserIndex = userIds.indexOf(userId.toString()); // Set current user index
         currentStoryIndex = 0; // Reset story index
 
-
-            // userNameContainer.innerHTML = "sham sing"
-
             // ✅ Update user profile image (if available)
-            let profileImg = document.querySelector(".profile-img img");
-            let username=document.querySelector("#usernamecr");
-            if (username && data.userDetails.first_name) {
-              username.textContent = data.userDetails.first_name;
-            }
-            //profileImg.src = data.userDetails.profile_photo_url ? data.userDetails.profile_photo_url : "/static/images/avatar.jpg";
-           profileImg.src = data.userDetails.profile_photo_url ? `/static${data.userDetails.profile_photo_url}` : "/static/images/avatar.jpg";
+            //let profileImg = document.querySelector(".profile-img img");
+            // let username=document.querySelector("#usernamecr");
+            // if (username && data.userDetails.first_name) {
+            //   username.textContent = data.userDetails.first_name;
+            // }
+           //profileImg.src = data.userDetails.profile_photo_url ? `/static${data.userDetails.profile_photo_url}` : "/static/images/avatar.jpg";
 
 
 
@@ -51,12 +47,19 @@ function loadStory(userIndex, storyIndex) {
     console.log(story)
     let storyContent = document.getElementById("storyContent");
    // let userNameContainer = document.querySelector(".username");// Select the username element
-    let profileImg = document.querySelector(".profile-img img"); // Select the profile image element
+    //let profileImg = document.querySelector(".profile-img img"); // Select the profile image element
     storyContent.innerHTML = "";
 
     // Set user's name dynamically
+    let username=document.querySelector("#usernamecr");
+    if (username && story.first_name) {
+      username.textContent = story.first_name+" "+ story.last_name;
+    }
+    let profileImg = document.querySelector(".profile-img img");
+    profileImg.src = story.profile_photo_url ? `/static${story.profile_photo_url}` : "/static/images/avatar.jpg";
 
-console.log('story.media_type',story.media_type);
+
+    //console.log('story.media_type',story.media_type);
     // Check for media type and render appropriately
     if (story.media_type === 3 && story.media_url) {
         let video = document.createElement("video");
