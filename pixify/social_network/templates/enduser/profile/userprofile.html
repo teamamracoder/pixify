@@ -1,132 +1,1558 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Work</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</head>
+{% extends "enduser/base.html" %} {% block title %}Profile Page{% endblock %}
+{% block content %} {% load static %}
 <body>
-
-    <div class="container w-100 mx-auto p-3" style="max-width: 800px; border: solid; margin-top: 50px;">
-
-        <div class="container mt-4">
-            <div class="card p-3">
-                <div class="d-flex align-items-start">
-
-                    <img src="https://plus.unsplash.com/premium_photo-1728657016169-a425d4b5f813?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3"
-                         alt="Profile Picture" class="rounded-circle me-3 img-fluid" style="width: 100px; height: 100px; object-fit: cover;">
-
-                    <div class="flex-grow-1">
-                        <h4 class="mb-1">Ms. Fighter</h4>
-                        <p class="text-muted mb-1">39 friends + 2 mutual</p>
+    {% if user_details %}
+    <div class="profile-container">
+        <div style="border:2px solid black;">
+            <div class="profile-card">
+                <div class="profile-header">
+                    <img src="{% static user_details.profile_photo |default:'/images/avatar.jpg' %}" alt="Profile Picture" class="profile-img">
+                    <p class="user_title">{{ user_details.user_name }}</p>
+                    <div class="btnnn">
+                        <div class="fol follow1-btn" onclick="toggleFollow(event)" data-profile-id="{{ user_details.id }}">Follow</div>
+                        <div class="unfol unfollow-btn" onclick="toggleFollow(event)" data-profile-id="{{ user_details.id }}">Unfollow</div>
                     </div>
+                </div>
+                <div class="profile-info">
+                    <p><i class="bi bi-circle  user_profile-icons"></i><strong>Status:</strong><span class="active eee">({{ user_details.status }})</span></p>
+                    <p><i class="bi bi-calendar3 user_profile-icons"></i><strong>Age:</strong><span class="eee">({{ user_details.age }})</span></p>
+                    <p><i class="bi bi-people-fill user_profile-icons"></i><strong>Followers:</strong> <span class="eee">(<span id="follower-count"class="eee"></span>)</span></p>
+                    <p><i class="bi bi-people user_profile-icons"></i><strong>Followings:</strong> <span class="eee">(<span id="following-count"class="eee"></span>)</span></p>
+                </div>
+            </div>
+            <div class="fol-unfol-btn">
+                <div class="bio-field">{{user_details.bio}}</div>
+            </div>            
+        </div>
+    
+       <!-- Followers Section -->
+            <div class="friends-section">
+                <div class="heading-part">
+                    <p style="font-size:20px;">Followers (<span id="follower-count">0</span>)</p>
+                    <div class="see-all-btn" onclick="toggleFriends('followers-list', this)">show</div>
+                </div>
+                <div class="friend-list" id="followers-list">
+                    <p class="no-friends">No followers found.</p>
+                </div>
+            </div>
 
-
-                    <div class="d-flex flex-wrap gap-2 mt-2">
-                        <button class="btn btn-primary">Respond</button>
-                        <button class="btn btn-outline-secondary">Message</button>
-
-                        <div class="dropdown">
-                            <button class="btn btn-outline-secondary dropdown-toggle" type="button"
-                                    id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-                                More
-                            </button>
-                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                <li><a class="dropdown-item" href="#">Report</a></li>
-                                <li><a class="dropdown-item" href="#">Block</a></li>
-                            </ul>
+            <!-- Following Section -->
+            <div class="friends-section">
+                <div class="heading-part">
+                    <p style="font-size:20px;">Following (<span id="following-count">0</span>)</p>
+                    <div class="see-all-btn" onclick="toggleFriends('following-list', this)">show</div>
+                </div>
+                <div class="friend-list" id="following-list">
+                    <p class="no-friends">Not following anyone.</p>
+                </div>
+            </div>
+        <!-- Posts Section -->
+        <h4>Posts</h4>
+        <div class="user-post-container">
+            {% if user_details.posts %}
+                {% for post in user_details.posts %}
+                    <div class="user-post" data-post-id="{{ post.id }}">
+                        <div class="post-title-wrapper">
+                            <img src="{% static user_details.profile_photo|default:'/images/avatar.jpg' %}" class="photo-of-post">
+                            <div class="post-title"><h6>{{ user_details.user_name }}</h6>
+                            <div style="font-size: 11px;position: relative;bottom: 6px;">{{post.created_at}}</div>
+                            </div>
                         </div>
-                    </div>
-                </div>
-
-                <div class="mt-3 d-flex justify-content-between align-items-center flex-wrap">
-                    <p class="mb-0"><strong>Mr. XX</strong> sent you a friend request!</p>
-                    <div class="d-flex">
-                        <button class="btn btn-success me-2">Confirm Request</button>
-                        <button class="btn btn-danger">Delete Request</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-
-        <nav class="navbar navbar-expand-lg bg-body-tertiary mt-3 px-1 mx-2">
-            <div class="container-fluid">
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="navbarNavDropdown">
-                    <ul class="navbar-nav w-100 d-flex justify-content-around">
-                        <li class="nav-item"><a class="nav-link active" href="#">Posts</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#">About</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#">Friends</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#">Photos</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#">Videos</a></li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">More</a>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="#">View</a></li>
-                                <li><a class="dropdown-item" href="#">Trend</a></li>
-                                <li><a class="dropdown-item" href="#">Groups</a></li>
-                                <li><a class="dropdown-item" href="#">Events</a></li>
-                            </ul>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </nav>
-
-
-        <div class="container">
-            <div class="card">
-                <div class="d-flex ps-3 align-items-center mt-2">
-                    <img src="https://plus.unsplash.com/premium_photo-1728657016169-a425d4b5f813?w=500&auto=format&fit=crop&q=60" class="rounded-circle img-fluid" style="width: 45px; height: 45px;">
-                    <span class="ms-2">Mr. xyz Abc</span>
-                </div>
-                <div class="card-header">Wow, this is good!</div>
-                <div class="card-body">
-                    <img src="https://images.unsplash.com/photo-1729691692870-a957012d616a?w=500&auto=format&fit=crop&q=60" class="card-img-top img-fluid" style="height:400px;">
-                </div>
-            </div>
-        </div>
-
-        <div class="container mt-4">
-            <div class="card p-3">
-                <div class="d-flex align-items-center mb-3">
-                    <img src="https://plus.unsplash.com/premium_photo-1728657016169-a425d4b5f813?w=500&auto=format&fit=crop&q=60" class="rounded-circle img-fluid" style="width: 40px; height: 40px;">
-                    <div class="ms-2">
-                        <h6 class="mb-0">Ms. Fighter</h6>
-                        <small>20 May <i class="bi bi-lock-fill"></i></small>
-                    </div>
-                    <a href="#" class="ms-auto"><i class="bi bi-three-dots"></i></a>
-                </div>
-
-                <div class="border p-2 mb-3">
-                    <div class="d-flex align-items-center mb-2">
-                        <img src="https://plus.unsplash.com/premium_photo-1728657016169-a425d4b5f813?w=500&auto=format&fit=crop&q=60" class="rounded-circle img-fluid" style="width: 40px; height: 40px;">
                         <div>
-                            <h6 class="mb-0">XXXXXXXX</h6>
-                            <small>1m ago <i class="bi bi-people-fill"></i></small>
+                        {% if post.media_url|length > 1 %}
+                        <div id="postCarousel{{ post.id }}" class="carousel slide" data-interval="false">
+                            <div class="carousel-inner user_profile_combo-img">
+                            {% for media in post.media_url %}
+                                <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                                {% if media|slice:"-4:" == ".mp4" %}
+                                    <video class="post_video w-100" muted controls>
+                                    <source src="{% static media %}" type="video/mp4">
+                                    Your browser does not support the video tag.
+                                    </video>
+                                {% else %}
+                                    <img src="{% static media %}" alt="Post Image" class="post-image w-100">
+                                {% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                            <a class="carousel-control-prev user_profile_carousel_btn" href="#postCarousel{{ post.id }}" role="button" data-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="sr-only">Previous</span>
+                            </a>
+                            <a class="carousel-control-next user_profile_carousel_btn" href="#postCarousel{{ post.id }}" role="button" data-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="sr-only">Next</span>
+                            </a>
+                        </div>
+                        {% else %}
+                    
+                        {% for media in post.media_url %}
+                            {% if media|slice:"-4:" == ".mp4" %}
+                        {% if post.type == 3 %}
+                            <video class="post_video w-100" muted controls onclick="window.location.href='{% url 'short_detail' post.id %}'">
+                        {% else %}        
+                            <video class="post_video w-100" muted controls> 
+                        {% endif %} 
+                                <source src="{% static media %}" type="video/mp4">
+                                Your browser does not support the video tag.
+                            </video>
+                            
+                            {% else %}
+                            <img src="{% static media %}" alt="Post Image" class="post-image w-100">
+                            {% endif %}
+                            {% endfor %}
+                            {% endif %}
+                            <div class="react-comment-wrapper">
+                            <div class="post-reactions"  id="post-reactions-{{ post.id }}"><!-- Reactions will be dynamically loaded here --></div>
+                            <div id="comment-count-{{ post.id }}" class="user_profile_comment" data-user-id="{{user_details.id}}">
+                                {{ post.comment_count }} comments
+                            </div>                           
+                            </div>
+                        </div>    
+
+                        <div class="post-opt-icons" style="height: 4vh;">
+                            <div class="post-reaction" style="cursor: pointer;" data-post-id="{{ post.id }}">
+                                {% with user_reaction=post.reactions.all|dictsort:"user_id"|first %}
+                                    <i id="reaction-icon-{{ post.id }}" class="reaction-icon" onclick="toggleReactionPopup('{{ post.id }}')">
+                                        {% if user_reaction and user_reaction.user_id == request.user.id %}
+                                            {{ user_reaction.reaction.value|safe }}
+                                        {% else %}
+                                            <i class="bi bi-heart"></i>
+                                        {% endif %}
+                                    </i>
+                                {% endwith %}
+
+                                <span data-toggle="modal" class="load-comments" data-post-id="{{ post.id }}">
+                                    <i class="fa-regular fa-comment"></i>
+                                </span>
+                                <i class="fa-solid fa-share-nodes share-post-btn" data-post-id="{{ post.id }}" data-bs-toggle="modal" data-bs-target="#shareModal"></i>
+
+                                <!-- Reaction Popup -->
+                                <div class="reaction-popup" id="reaction-popup-{{ post.id }}" style="display: none;">
+                                    {% for reaction in user_details.reactions %}
+                                        <span class="reaction-emoji" onclick="handleReaction('{{ post.id }}', '{{ reaction.id }}')">
+                                            {{ reaction.value|safe }}
+                                        </span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+
+                                <!-- Ensure CSRF Token is Included -->
+                                <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">                                
+
+                            </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p>No posts available.</p>
+            {% endif %}
+        </div>
+{% endif %}
+<div class="footer">Nothing to show</div>
+
+
+<!-- Comment Modal -->
+<div class="modal fade" id="commentModal" tabindex="-1" aria-labelledby="commentModalLabel" aria-hidden="true">
+    <div class="modal-dialog" style="height: 70vh; width:45%;">
+        <div class="modal-content" style="height: 100%; width: 96%;top:10%;">
+            <div class="modal-header" id="modal-comments-header">
+                <h5 class="modal-title" id="commentModalLabel">Comments</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <div class="modal-body" id="comments-container">
+                <!-- Comments will be loaded here -->
+            </div>
+                <div class="commt-foot">
+                    <form id="commentForm" class="mt-3">
+                    {% csrf_token %}
+
+                    <div id="CommentsectionTextarea" class="container-fluid py-2 com_sent" style="position: absolute; bottom: 0; ">
+                        <div class="input-group ms-2">
+
+                            <!-- Comment input -->
+                            <input
+                                class="form-control"
+                                id="commentText"
+                                name="comment_text"
+                                placeholder="Write a comment..."
+                                style="border-radius: 15px; background-color: #27236e; color: white;"
+                            >
+
+                            <!-- Cancel reply button container -->
+                            <div id="reply-cancel-container" style="display: none; align-self: center; margin-left: 10px;">
+                                <button id="replyCancel" type="button" class="btn btn-secondary btn-sm" style="border-radius: 15px;height: 35px;}">Cancel Reply</button>
+                            </div>
+                            <!-- Right button -->
+                            <div class="input-group-append d-flex gap-3 align-items-center ps-2">
+                                <button id="createcomment" type="submit" class="btn btn-transparent text-info p-0"></button>
+                            </div>
                         </div>
                     </div>
-                    <p>hello</p>
-                </div>
-
-                <div class="d-flex justify-content-between">
-                    <button class="btn btn-light flex-fill"><i class="bi bi-hand-thumbs-up"></i> Like</button>
-                    <button class="btn btn-light flex-fill"><i class="bi bi-chat"></i> Comment</button>
-                    <button class="btn btn-light flex-fill"><i class="bi bi-send"></i> Send</button>
-                    <button class="btn btn-light flex-fill"><i class="bi bi-share"></i> Share</button>
-                </div>
+                </form>
             </div>
         </div>
-
     </div>
+</div>
 
+<div id="deleteModal" class="delete-modal" style="padding: 20px; border-radius: 5px; text-align: center;display:none;">
+    <div class="delete-modal-content" style="flex-direction: column;display: flex; background-color: #1f0447fb;">
+        <p>Are you sure you want to delete this comment?</p>
+        <button id="confirmDelete" style="background-color:red;">Confirm Delete</button>
+        <button id="cancelDelete" style="background-color:gray; margin: 10px; padding: 10px 15px; border: none; cursor: pointer;">Cancel</button>
+    </div>
+</div>
+<script>
+    var USER_ID = {{ request.user.id|default:0 }};
+</script>
+
+
+<!-- Share Modal -->
+<div class="modal fade" id="shareModal" tabindex="-1" aria-labelledby="shareModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content bg-purple text-light" style="height:75vh">
+        <div class="modal-header">
+          <h5 class="modal-title mx-auto" id="shareModalLabel">Share Post</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <!-- Hidden input for post id -->
+          <input type="hidden" id="sharePostId" value="">
+          <!-- Search input -->
+          <input type="text" class="form-control mb-3" id="shareModalInput" placeholder="Type a name">
+          <!-- Container to load profile items dynamically -->
+          <div id="profileContainer">
+            <!-- Dynamic profiles will be injected here -->
+          </div>
+          <!-- Social icons for sharing -->
+          <div class="share-social-icons d-flex justify-content-around my-3">
+            <div class="icon whatsapp"><i class="fab fa-whatsapp"></i></div>
+            <div class="icon facebook"><i class="fab fa-facebook-f"></i></div>
+            <div class="icon twitter"><i class="fab fa-twitter"></i></div>
+            <div class="icon linkedin"><i class="fab fa-linkedin-in"></i></div>
+            <div class="icon instagram"><i class="fab fa-instagram"></i></div>
+            <div class="icon link"><i class="fas fa-link"></i></div>
+          </div>
+          <!-- Share button container: hidden until at least one profile is selected -->
+          <div class="share-button-container" id="shareButtonContainer" style="display: none;">
+            <button class="btn btn-primary" id="sendShareButton">
+              <i class="bi bi-send-fill"></i> Share
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+
+<script>
+
+    $(document).on("click", ".share-post-btn", function () {
+        // Read the post id from the data attribute
+        let postId = $(this).data("post-id");
+        // Set the hidden input value so it's available for later logic
+        $("#sharePostId").val(postId);
+        // Optionally, update your share modal content based on this post id
+        updateShareResults(postId);
+        // Show the modal (if not already triggered by data attributes)
+        $("#shareModal").modal("show");
+      });
+      
+
+const senderId = "{{ user.id }}"; // Rendered from your template
+const staticUrl = "{% static '' %}"; // This usually returns "/static/"
+
+function cleanMediaPath(media) {
+  return media.startsWith('/') ? media.slice(1) : media;
+}
+
+// Global variable to store the current post id
+let currentPostId = null;
+
+// Function to update the share results (chats and profiles) via AJAX
+function updateShareResults(postId) {
+  const $container = $("#profileContainer");
+  // Fade out container to indicate loading
+  $container.fadeTo(100, 0.5);
+
+  // Get current search query
+  const searchQuery = $("#shareModalInput").val();
+
+  // AJAX call to fetch chats and profiles
+  $.ajax({
+    url: '/post/share/api',
+    type: 'GET',
+    data: { post_id: postId, search: searchQuery },
+    dataType: 'json',
+    success: function (data) {
+      let html = '';
+      const fallbackImage = "/images/avatar.jpg";
+
+      // Render Chats Section
+      if (data.chats && data.chats.length > 0) {
+        html += `<div class="section chats-section"><h6>Chats</h6>`;
+        data.chats.forEach(chat => {
+          const chatImage = chat.chat_cover ? chat.chat_cover : fallbackImage;
+          const chatBio = chat.bio ? chat.bio : "No bio available";
+          html += `
+            <div class="profile-item">
+              <img src="${staticUrl}${cleanMediaPath(chatImage)}" alt="Chat Cover" class="profile-pic">
+              <div>
+                <strong>${chat.title}</strong><br>
+                <small>${chatBio}</small>
+              </div>
+              <div class="custom-checkbox">
+                <input type="checkbox" class="share-checkbox" id="chat-${chat.id}" onclick="toggleShareButton()">
+              </div>
+            </div>
+          `;
+        });
+        html += `</div>`;
+      }
+
+      // Render Follower & Following Section
+      if (data.follow && data.follow.members && data.follow.members.length > 0) {
+        html += `<div class="section members-section"><h6>follower &amp; following</h6>`;
+        data.follow.members.forEach(member => {
+          const profilePhoto = member.user_id__profile_photo_url ? member.user_id__profile_photo_url : fallbackImage;
+          const bioText = member.user_id__bio ? member.user_id__bio : "No bio available";
+          html += `
+            <div class="profile-item">
+              <img src="${staticUrl}${cleanMediaPath(profilePhoto)}" alt="Profile Picture" class="profile-pic">
+              <div>
+                <strong>${member.user_id__first_name} ${member.user_id__last_name}</strong><br>
+                <small>${bioText}</small>
+              </div>
+              <div class="custom-checkbox">
+                <input type="checkbox" class="share-checkbox" id="profile-${member.user_id}" onclick="toggleShareButton()">
+              </div>
+            </div>
+          `;
+        });
+        html += `</div>`;
+      }
+
+      // If nothing is available, show a message
+      if (!html.trim()) {
+        html = "<p>No chats or profiles found.</p>";
+      }
+
+      // Update the container with new content and restore opacity
+      $container.html(html).fadeTo(100, 1);
+      // Reset share button state based on checkboxes
+      toggleShareButton();
+    },
+    error: function () {
+      $container.html("<p>Error loading profiles.</p>").fadeTo(100, 1);
+    }
+  });
+}
+
+// Utility function to toggle the share button based on checkbox selections
+function toggleShareButton() {
+  const checkboxes = document.querySelectorAll('.share-checkbox');
+  const isAnyChecked = Array.from(checkboxes).some(checkbox => checkbox.checked);
+  document.getElementById("shareButtonContainer").style.display = isAnyChecked ? "block" : "none";
+}
+
+// Function to send share data to a specific chat via WebSocket
+const sendShareToChat = (chatId, postId, senderId) => {
+  const ws = new WebSocket(`ws://${window.location.host}/ws/chat/`);
+
+  ws.onopen = () => {
+    // Join the chat group first
+    ws.send(JSON.stringify({
+      action: 'join',
+      chat_id: chatId,
+    }));
+
+    // After a brief delay, send the create request
+    setTimeout(() => {
+      ws.send(JSON.stringify({
+        chat_id: chatId,
+        sender_id: senderId,
+        post_id: postId,
+        action: 'create',
+      }));
+      // Optionally close the connection after sending
+      ws.close();
+    }, 200);
+  };
+
+  ws.onerror = (error) => {
+    console.error(`WebSocket error for chatId ${chatId}:`, error);
+  };
+
+  ws.onclose = (e) => {
+  };
+};
+
+$(document).ready(function () {
+  // Optionally initialize currentPostId from the hidden input if it has a value
+  currentPostId = $("#sharePostId").val();
+  updateShareResults(currentPostId);
+
+  // When the search input changes, update the profile list using the current post id
+  $("#shareModalInput").on("input", function () {
+    let postIdForSearch = $("#sharePostId").val() || currentPostId;
+    updateShareResults(postIdForSearch);
+  });
+
+  // When a share button on a post is clicked,
+  // Ensure your share buttons have the class 'share-post-btn' and a data attribute 'data-post-id'
+  $(document).on("click", ".share-post-btn", function () {
+    let buttonPostId = $(this).data("post-id");
+    currentPostId = buttonPostId;
+    $("#sharePostId").val(currentPostId);
+    updateShareResults(currentPostId);
+    $("#shareModal").modal("show");
+  });
+
+  // When the send share button is clicked, use the global currentPostId
+  $("#sendShareButton").on("click", function () {
+    // Use currentPostId or the value from the hidden input as fallback
+    const postIdForSend = currentPostId || $("#sharePostId").val();
+    
+    let selectedMembers = [];
+    let selectedChats = [];
+
+    // Iterate over each checked share-checkbox
+    $(".share-checkbox:checked").each(function () {
+      let idStr = $(this).attr("id");
+      if (idStr.indexOf("profile-") === 0) {
+        selectedMembers.push(idStr.replace("profile-", ""));
+      } else if (idStr.indexOf("chat-") === 0) {
+        selectedChats.push(idStr.replace("chat-", ""));
+      }
+    });
+
+    if (selectedMembers.length === 0 && selectedChats.length === 0) {
+      alert("Please select at least one profile or chat.");
+      return;
+    }
+
+    // Send both selected chats and members via AJAX using the determined post id
+    $.ajax({
+      url: '/post/send',
+      type: 'POST',
+      headers: { 'X-CSRFToken': getCookie('csrftoken') },
+      contentType: 'application/json',
+      data: JSON.stringify({
+        post_id: postIdForSend,
+        chats: selectedChats,
+        members: selectedMembers
+      }),
+      dataType: 'json',
+      success: function (response) {
+        if (response.chat && response.chat.length > 0) {
+          response.chat.forEach((chatId) => {           
+            sendShareToChat(chatId, postIdForSend, senderId);
+          });
+        }
+        alert("Post shared successfully!");
+        $("#shareModal").modal("hide");
+      },
+      error: function () {
+        alert("Error sharing post.");
+      }
+    });
+  });
+
+  // Utility function to get a cookie by name (used for CSRF token)
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== "") {
+      const cookies = document.cookie.split(";");
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + "=")) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+});
+
+
+</script>
+
+
+</div>
+
+
+<script>
+    
+
+    $(document).ready(function () {
+        // Close modal when the close button (×) is clicked
+        $(document).on("click", ".close", function () {
+            $("#commentModal").modal("hide");
+        });
+    
+        // Close modal when clicking outside the modal content
+        $(document).on("click", function (event) {
+            if ($(event.target).is("#commentModal")) {
+                $("#commentModal").modal("hide");
+            }
+        });
+    });
+    
+
+    
+
+//comment create
+$(document).ready(function () {
+    const currentUserId = {{ user.id }};  // Inject current user ID from Django
+    // Added staticUrl, fallbackImage, and cleanMediaPath for proper image handling
+    const staticUrl = "{% static '' %}"; // This usually returns "/static/"
+    const fallbackImage = 'images/avatar.jpg';
+    function cleanMediaPath(media) {
+        return media.startsWith('/') ? media.slice(1) : media;
+    }
+    
+        // Function to reset reply mode and clear the input field
+        function resetReplyMode() {
+            $("#commentText").removeAttr("data-reply-for").val("");
+            $("#reply-cancel-container").hide();
+        }
+    
+        // Bind the reply cancel button click event
+        $("#replyCancel").click(function () {
+            resetReplyMode();
+        });
+    
+    // Function to submit a comment or a reply
+    function submitComment(postId, replyFor = null) {
+        const commentText = $("#commentText").val().trim();
+        const csrfToken = $("input[name=csrfmiddlewaretoken]").val();
+    
+        if (!postId) {
+            console.error("❌ Error: Post ID is missing!");
+            return;
+        }
+        if (!commentText.length) {
+            console.warn("⚠️ Warning: Comment text is empty.");
+            return;
+        }
+
+        // Ensure replyFor is a valid number or null
+        replyFor = replyFor && !isNaN(replyFor) ? parseInt(replyFor) : null;
+
+
+        $.ajax({
+            url: `/comments/${postId}/`,
+            type: "POST",
+            headers: { "X-CSRFToken": csrfToken },
+            contentType: "application/json",
+            data: JSON.stringify({ 
+                comment_text: commentText, 
+                reply_for: replyFor 
+            }),
+            success: function (response) {
+
+                // Clear input field and reset reply mode
+                resetReplyMode();
+                // Reload comments dynamically
+                $(`.load-comments[data-post-id="${postId}"]`).click();
+            },
+            error: function (xhr) {
+                console.error("❌ Error:", xhr.responseText);
+            }
+        });
+    }
+    
+    // Attach event listener to submit button
+    $("#createcomment").click(function (e) {
+        e.preventDefault(); // Prevent form submission
+        const postId = $(".load-comments").data("post-id");
+        const replyFor = $("#commentText").attr("data-reply-for") || null; // Ensure null if no reply
+        submitComment(postId, replyFor);
+    });
+
+    // Load comments when "View Comments" is clicked
+    $(".load-comments").click(function () {
+        let postId = $(this).data("post-id");
+        let userId = $(".user_profile_comment").data("user-id");
+
+    
+        if (!postId) {
+            console.error("❌ Error: Post ID is undefined!");
+            return;
+        }
+    
+        $("#comments-container").html("<p>Loading comments...</p>");
+        $("#commentModal").modal("show");
+    
+        $.ajax({
+            url: `/api/comments/${postId}/`,
+            type: "GET",
+            dataType: "json",
+            success: function (response) {
+                let commentsHtml = response.comments.length
+                    ? generateCommentTree(response.comments)
+                    : "<p>No comments yet.</p>";
+
+                $("#comments-container").html(commentsHtml);
+            loadUserPostsComments(userId);
+
+            },
+            error: function () {
+                $("#comments-container").html("<p>Failed to load comments.</p>");
+            }
+        });
+    });
+    
+        // When the comment modal is closed, reset reply mode and clear the input field
+        $("#commentModal").on("hidden.bs.modal", function () {
+            resetReplyMode();
+    });
+    
+    // Function to generate nested comments with reply button
+    function generateCommentTree(comments, isReply = false) {
+        return comments
+            .slice()  // Create a shallow copy to avoid modifying the original array
+            .reverse() // Reverse the order so the latest comments appear first
+            .map(comment => {
+                const imageUrl = comment.user_profile 
+                    ? staticUrl + cleanMediaPath(comment.user_profile)
+                    : staticUrl + fallbackImage;
+                const commentUserId = comment.user_id;
+                const profileUrl = (parseInt(commentUserId) === parseInt(currentUserId))
+                    ? "{% url 'userprofile' %}"
+                    : "/profile/" + commentUserId + "/";
+                return `
+                <div class="comment" style="margin-left: ${isReply ? "30px" : "0px"};">
+                    <div style="display: flex; gap:5px; align-items: flex-start;">
+                    <a href="${profileUrl}">
+                        <img src="${imageUrl}" alt="${comment.user}" class="comment-profile-img">
+                    </a>
+                        <div class="comment-content"> 
+                            <div class="comment-header">
+                                <div><strong>${comment.user}</strong></div>
+                                <div>${comment.text}</div>  
+                            </div>
+                            <div class="foot-cmt">
+                                <div class="reply-btn" data-comment-id="${comment.id}" data-post-id="${comment.post_id}" data-post-creator="${comment.user}" 
+                                    style="font-size: small; cursor: pointer; color: lightblue;">Reply</div>
+                                <div>
+                                    <i class="bi ${comment.react_created_by ? 'bi-heart-fill' : 'bi-heart'}" 
+                                        style="font-size:12px; ${comment.react_created_by ? 'color:red;' : ''}" 
+                                        data-comment-id="${comment.id}">
+                                    </i>
+                                    <span class="like-count" style="color:white;font-size:10px; ${comment.react_count > 0 ? '' : 'display:none;'}">
+                                        ${comment.react_count}
+                                    </span>
+                                </div>
+                                <div style="font-size: 10px;">${comment.timestamp}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                ${comment.replies && comment.replies.length > 0 
+                    ? generateCommentTree(comment.replies, true)  // Replies maintain their order
+                    : ""}
+            `;
+            }).join("");
+    }
+    
+        // Delete functionality
+    $(document).ready(function () {
+        let holdTimeout;
+        
+        // Show delete modal on long press
+        $(document).on("mousedown touchstart", ".comment-content", function (event) {
+            let commentId = $(this).find(".reply-btn").data("comment-id");
+            let postId = $(this).find(".reply-btn").data("post-id");
+    
+            holdTimeout = setTimeout(() => {
+                $("#deleteModal").show().data("comment-id", commentId).data("post-id", postId);
+            }, 500); // 500ms to trigger modal
+        });
+    
+        // Cancel if user releases early
+        $(document).on("mouseup touchend", function () {
+            clearTimeout(holdTimeout);
+        });
+    
+        // Close delete modal on cancel button click
+        $("#cancelDelete").click(function () {
+            $("#deleteModal").hide();
+        });
+    
+    // Handle delete action
+    $("#confirmDelete").click(function () {
+        let commentId = $("#deleteModal").data("comment-id");
+        let postId = $(".load-comments").data("post-id");
+        let csrfToken = $("input[name=csrfmiddlewaretoken]").val();
+
+        
+        $.ajax({
+            url: `/comments/delete/${commentId}/`,
+            type: "POST",
+            headers: { "X-CSRFToken": csrfToken },
+            success: function (response) {
+                $("#deleteModal").hide();
+        
+                // Reload comments dynamically WITHOUT clicking "View Comments"
+                $.ajax({
+                    url: `/api/comments/${postId}/`,
+                    type: "GET",
+                    dataType: "json",
+                    success: function (response) {
+                        let commentsHtml = response.comments.length
+                            ? generateCommentTree(response.comments)
+                            : "<p>No comments yet.</p>";
+        
+                        $("#comments-container").html(commentsHtml); // Update comment section
+                    },
+                    error: function () {
+                        $("#comments-container").html("<p>Failed to load comments.</p>");
+                    }
+                });
+            },
+            error: function (xhr) {
+                console.error("❌ Error deleting comment:", xhr.responseText);
+            }
+        });
+    });
+    });
+    
+        // Updated reply handler with regex to remove all existing mentions
+    $(document).on("click", ".reply-btn", function () {
+        let commentId = $(this).data("comment-id");
+        let commentBy = $(this).data("post-creator");
+    
+        if (!commentId || isNaN(commentId)) {
+            console.error("❌ Error: Invalid comment ID for reply.");
+            return;
+        }
+    
+            // Set reply mode for this comment and show the cancel button
+        $("#commentText").attr("data-reply-for", commentId).focus();
+        $("#reply-cancel-container").show();
+    
+        // Remove all leading @mentions and then prepend the new one
+        let currentText = $("#commentText").val().trim();
+        currentText = currentText.replace(/^(@\S+\s*)+/, "");
+        $("#commentText").val(`@${commentBy} ` + currentText).focus();
+    
+        // Scroll to the input field for better UX
+        $("html, body").animate({
+            scrollTop: $("#commentText").offset().top - 100
+        }, 300);
+    });
+});   
+
+
+    
+    
+    function toggleFriends(listId, btn) {
+        let list = document.getElementById(listId);
+        
+        if (list.style.display === "none" || list.style.display === "") {
+            list.style.display = "flex"; // Show full friend list
+            list.style.overflowY = "auto"; // Allow scrolling
+            list.style.maxHeight = "305px"; // Fixed property name
+            btn.innerText = "~hide";
+        } else {
+            list.style.display = "none"; // Hide full friend list
+            btn.innerText = "show";
+        }
+    }
+    
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll(".user-post").forEach(post => {
+            const postId = post.getAttribute("data-post-id");
+            if (postId) {
+                loadReactions(postId);
+            }
+        });
+    });
+    
+    // Toggle Reaction Popup (Only Opens If User Has Not Reacted)
+    function toggleReactionPopup(postId) {
+        const popup = document.getElementById(`reaction-popup-${postId}`);
+        if (!popup) return;
+    
+        fetch(`/fetch_post_reactions/${postId}/`)
+            .then(response => response.json())
+            .then(data => {
+                let userHasReacted = false;
+                if (data.reactions) {
+                    data.reactions.forEach(reaction => {
+                        if (parseInt(reaction.user_id) === parseInt(USER_ID)) {
+                            userHasReacted = true;
+                        }
+                    });
+                }
+    
+                if (!userHasReacted) {
+                    const isVisible = popup.style.display === "block";
+                    document.querySelectorAll(".reaction-popup").forEach(p => p.style.display = "none");
+                    popup.style.display = isVisible ? "none" : "block";
+                } else {
+                    removeReaction(postId);
+                }
+            })
+            .catch(error => console.error("Error fetching reactions:", error));
+    }
+    
+    // Handle Reactions (Add/Update)
+    function handleReaction(postId, reactionId) {
+        fetch(`/create_update_post_reactions/`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": getCSRFToken()
+            },
+            body: JSON.stringify({ post_id: postId, reaction_id: reactionId })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                loadReactions(postId);
+                const popup = document.getElementById(`reaction-popup-${postId}`);
+                if (popup) {
+                    popup.style.display = "none";
+                }
+            } else {
+                console.error("Failed to update reaction:", data.error || "Unknown error");
+            }
+        })
+        .catch(error => console.error("Error:", error));
+    }
+    
+    // Load Reactions and Update UI
+    function loadReactions(postId) {
+        fetch(`/fetch_post_reactions/${postId}/`)
+            .then(response => response.json())
+            .then(data => {
+                let userReaction = null;
+                let otherReactions = [];
+                let totalReactions = data.reactions ? data.reactions.length : 0;
+    
+                if (data.reactions) {
+                    data.reactions.forEach(reaction => {
+                        if (parseInt(reaction.user_id) === parseInt(USER_ID)) {
+                            userReaction = reaction.value;
+                        } else {
+                            otherReactions.push({ value: reaction.value, name: reaction.user_name });
+                        }
+                    });
+                }
+    
+                const reactionContainer = document.getElementById(`post-reactions-${postId}`);
+                if (!reactionContainer) return;
+    
+                reactionContainer.innerHTML = totalReactions === 0 ? " " : "";
+    
+                let displayText = [];
+    
+                // If the user reacted, show "You" first
+                if (userReaction) {
+                    displayText.push(`${userReaction} <strong>You</strong>`);
+                }
+    
+                // When user reacted → Show only 1 more name
+                // When user did NOT react → Show 2 names
+                let maxNamesToShow = userReaction ? 1 : 2; 
+    
+                for (let i = 0; i < Math.min(maxNamesToShow, otherReactions.length); i++) {
+                    displayText.push(`${otherReactions[i].value} <strong>${otherReactions[i].name}</strong>`);
+                }
+    
+                // If more than 2 total reactions (or 3 if user didn't react), show "and X more"
+                let remainingCount = totalReactions - displayText.length;
+                if (remainingCount > 0) {
+                    displayText.push(`and ${remainingCount} more`);
+                }
+    
+                reactionContainer.innerHTML = displayText.join(", ");
+    
+                // Update reaction icon
+                const reactionIcon = document.getElementById(`reaction-icon-${postId}`);
+                if (reactionIcon) {
+                    reactionIcon.innerHTML = userReaction ? userReaction : '<i class="bi bi-heart"></i>';
+                }
+            })
+            .catch(error => console.error("Error fetching reactions:", error));
+    }
+    
+    
+    // Remove Reaction
+    function removeReaction(postId) {
+        fetch(`/delete_post_reactions/`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": getCSRFToken()
+            },
+            body: JSON.stringify({ post_id: postId })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                loadReactions(postId);
+            } else {
+                console.error("Failed to delete reaction:", data.error);
+                alert("Error: " + data.error);
+            }
+        })
+        .catch(error => {
+            console.error("Network error:", error);
+            alert("Failed to remove reaction. Please try again.");
+        });
+    }
+    
+    
+// Function to Get CSRF Token
+function getCSRFToken() {
+    const tokenElement = document.querySelector('[name=csrfmiddlewaretoken]');
+    return tokenElement ? tokenElement.value : "";
+}
+
+
+document.addEventListener("click", function (event) {
+    if (event.target.classList.contains("bi-heart") || event.target.classList.contains("bi-heart-fill")) {
+        const commentElement = event.target.closest(".comment");
+        const commentId = event.target.dataset.commentId; 
+        const likeCountElement = commentElement.querySelector(".like-count");  
+        toggleReaction(commentId, event.target, likeCountElement);
+    }
+});
+
+function toggleReaction(commentId, iconElement, likeCountElement) {
+    fetch("/toggle_reaction/", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": getCSRFToken()
+        },
+        body: JSON.stringify({ comment_id: commentId })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === "liked") {
+            iconElement.classList.remove("bi-heart");
+            iconElement.classList.add("bi-heart-fill");
+            iconElement.style.color = "red"; 
+        } else {
+            iconElement.classList.remove("bi-heart-fill");
+            iconElement.classList.add("bi-heart");
+            iconElement.style.color = "";  
+        }
+
+        if (likeCountElement) {
+            if (data.total_likes > 0) {
+                likeCountElement.textContent = data.total_likes;
+                likeCountElement.style.display = "inline";
+            } else {
+                likeCountElement.style.display = "none";
+            }
+        }
+    })
+    .catch(error => console.error("Error:", error));
+}
+    
+</script>
+
+<script>
+    let isFollowing = false; // Ensure this is defined globally
+
+    document.addEventListener("DOMContentLoaded", function () {
+        checkFollowState(); // Fetch follow state on page load
+    });
+
+    function checkFollowState() {
+        let followingId = "{{ user_details.id }}"; // Get profile ID from template
+
+        fetch(`/check-follow-state/?following_id=${followingId}`)
+        .then(response => response.json())
+        .then(data => {
+            isFollowing = data.is_following;
+            updateFollowState();
+        })
+        .catch(error => console.error("Error checking follow state:", error));
+    }
+
+    function updateFollowState() {
+        document.querySelector(".follow1-btn").style.display = isFollowing ? "none" : "block";
+        document.querySelector(".unfollow-btn").style.display = isFollowing ? "block" : "none";
+    }
+
+    function toggleFollow(event) {
+
+        let followingId = event.target.getAttribute("data-profile-id");
+        let createdBy = parseInt(USER_ID);
+        fetch("/toggle-follow/", {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": getCookie("csrftoken"),
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ following_id: parseInt(followingId), created_by: parseInt(createdBy) })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                console.error("Error:", data.error);
+                return;
+            }
+            isFollowing = data.following;
+            updateFollowState();
+            updateFollowerFollowingData()
+        })
+        .catch(error => console.error("Fetch error:", error));
+    }
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== "") {
+            document.cookie.split(";").forEach(cookie => {
+                let cookieItem = cookie.trim();
+                if (cookieItem.startsWith(name + "=")) {
+                    cookieValue = decodeURIComponent(cookieItem.substring(name.length + 1));
+                }
+            });
+        }
+        return cookieValue;
+    }
+
+
+    //follower following reloads
+    document.addEventListener("DOMContentLoaded", function () {
+        updateFollowerFollowingData();
+    });
+    
+    function updateFollowerFollowingData() {
+        let userId = "{{ user_details.id|default:0 }}"; // Ensure Django renders the ID
+    
+        if (!userId || userId === "0") {
+            console.error("User ID is missing or invalid.");
+            return;
+        }
+    
+        fetch(`/get-followers-following/?user_id=${userId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    console.error("Server Error:", data.error);
+                    return;
+                }
+    
+                // Update the counts
+                document.querySelectorAll("#follower-count").forEach(el => el.innerText = data.count_follower);
+                document.querySelectorAll("#following-count").forEach(el => el.innerText = data.count_following);
+    
+                // Populate follower and following lists
+                populateUserList("followers-list", data.followers, "No followers found.");
+                populateUserList("following-list", data.following, "Not following anyone.");
+            })
+            .catch(error => console.error("Error loading follower data:", error));
+    }
+    
+    function populateUserList(containerId, users, emptyMessage) {
+        let container = document.getElementById(containerId);
+        container.innerHTML = ""; // Clear previous content
+    
+        if (users.length === 0) {
+            container.innerHTML = `<p class="no-friends">${emptyMessage}</p>`;
+            return;
+        }
+    
+        users.forEach(user => {
+            let userElement = document.createElement("div");
+            userElement.classList.add("friend-card");
+            userElement.onclick = () => window.location.href = `/profile/${user.id}`;
+            const imageUrl = user.profile_pic
+            ? staticUrl + cleanMediaPath(user.profile_pic)
+            : staticUrl + 'images/avatar.jpg';
+            userElement.innerHTML = `
+                <img src="${imageUrl}" alt="${user.first_name}" class="friend-img">
+                <div>${user.first_name}</div>
+            `;
+            container.appendChild(userElement);
+        });
+    }
+
+
+
+
+   $(document).ready(function() {
+    setTimeout(function() {
+        let userId = $(".user_profile_comment").data("user-id");
+        if (userId) {
+            loadUserPostsComments(userId);
+        } else {
+        }
+    }, 500);  // Small delay for safety
+});
+
+    
+    function loadUserPostsComments(userId) {
+    
+        $.ajax({
+            url: `/get-user-posts-comments/${userId}/`,
+            type: 'GET',
+            success: function(response) {
+                if (response.posts) {
+                    response.posts.forEach(post => {
+                        let commentElement = $(`#comment-count-${post.id}`);
+                        if (commentElement.length) {
+                            commentElement.text(post.comment_count + " comments");
+                        } else {
+                        }
+                    });
+                }
+            },
+            error: function(xhr) {
+                console.error("Error loading comment counts:", xhr.responseText);
+            }
+        });
+    }
+    
+    </script>
+     
+
+
+    <style>
+
+        #confirmDelete{
+            justify-content: center;
+            align-items: center;
+            display: flex;
+            background: red;
+            height: 30px;
+        }
+        #cancelDelete{
+            justify-content: center;
+            align-items: center;
+            display: flex;
+            height: 30px;
+        }
+
+
+        
+        .foot-cmt{
+            gap: 10%;
+            margin-left: 30px;
+            width: 74%;
+            align-items: center;
+            display: flex;
+        }
+        .comment{
+            margin-bottom: 10px;
+        }
+        .comment-content{
+            width:90%;
+        }
+        .comment-header{
+            padding-left: 10px;
+            border-radius: 10px;
+            width: 90%;
+            background: #311e4ee3;
+        }
+
+        #modal-comments-header{
+            justify-content: space-between;
+            display: flex;
+            align-items: center;
+        }     
+        
+        .comment-profile-img {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        
+        .replies {
+            margin-left: 40px; /* Indent replies */
+            padding-left: 10px;
+        }
+        
+        .post-reactions{
+            justify-content: center;
+            align-items: center;
+            display: flex;
+        }
+        .post-reaction{
+        font-size: 20px;
+        justify-content: flex-start;
+        align-items: center;
+        display: flex;
+        height: 100%;
+        gap: 20px;
+        cursor: pointer;
+        
+        }
+        .reaction-popup span{
+            margin:2px;
+            cursor:pointer;
+            font-size:10px;
+        }
+        .post-opt-icons{
+            background: #260557fb;
+            padding-left: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .reaction-popup {
+        margin-bottom: 25%;
+        right: 40%;
+        position: relative;
+        display: none;
+        background: black;
+        padding: 8px 8px;
+        border-radius: 8px;
+        box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.2);
+        z-index: 10;
+        }
+    
+        .reaction-popup span {
+            margin-right: 10px;
+            cursor: pointer;
+            font-size: 20px;
+        }
+    
+        .reaction-popup span:hover {
+            transform: scale(1.2);
+            transition: 0.3s;
+        }
+    
+        .reaction-display {
+            margin-bottom: 5px;
+            align-items: end;
+            margin-left: 20px;
+            display: flex;
+            gap: 2px;
+            font-size: 16px;
+        }
+    
+        .reaction-display span {
+            margin-left:10px;
+            border-radius: 10px;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            font-weight: bold;
+        }
+        .user-post-container{
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            display: flex;
+        }
+        .user-post{
+            border: 2px solid #1a033bfb;
+            margin: 20px 0px 20px 0px;
+            width: 100%;
+            background: #1f0447fb;
+        }
+        .post_video{
+            cursor:pointer;
+            margin-top: 10px;
+            padding: 8px;
+            object-fit: cover;
+            justify-content: center;
+            align-items: center;
+            display: flex;
+            height: 60vh;
+            width: 100%;
+        }
+        .profile-container {
+            height: 100%;
+            overflow-y: auto;
+            max-height: 90vh;
+            margin-top: 16px;
+            padding: 20px;
+            background-color: #1f0447e3;
+            border-radius: 10px;
+            box-shadow: 0px 0px 15px rgba(255, 255, 255, 0.2);
+        }
+
+        .profile-card {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .profile-header {
+            flex-direction: column;
+            align-items: center;
+            display: flex;
+            width: 50%;
+        }
+
+        .profile-img {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+        }
+
+        .user_title {
+            font-size: 20px;
+            margin-top: 10px;
+            white-space: nowrap;
+            text-align: center;
+        }
+
+        .profile-info p {
+            text-shadow: 0 0 1px rgba(255, 255, 255, 0.3), 0 0 2px rgba(255, 255, 255, 0.3), 0 0 5px rgba(255, 255, 255, 0.2);
+            margin: 5px 0;
+        }
+
+        .active {
+            color: #975fec;
+        }
+
+        .friends-section {
+            border-bottom: 1px solid rgb(0, 0, 0);
+            margin-bottom: 10px;
+            overflow-y: scroll;
+            margin-top: 20px;
+        }
+
+        .friend-list {
+            display: none; /* Initially hidden */
+            max-height: 305px; /* Limit height */
+            overflow-y: auto; /* Enable scrolling */
+            flex-direction: column;
+            align-items: center;
+        }
+        
+
+        .friend-list.expanded {
+            max-height: none;
+        }
+
+        .friend-card {
+            border: 2px solid #000000;
+            gap: 10px;
+            justify-content: flex-start;
+            display: flex;
+            align-items: center;
+            background-color: #1f0545;
+            padding: 10px;
+            margin: 5px;
+            border-radius: 5px;
+            width: 100%;
+        }
+
+        .friend-img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .see-all-btn {
+            justify-content: end;
+            display: flex;
+            color: #2be8e2;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .no-friends{
+            align-items: center;
+            justify-content: center;
+            display: flex;
+            font-size: 12px;
+        }
+        .heading-part{
+            justify-content: space-between;
+            align-items: flex-end;
+            display: flex;
+        }
+        .footer{
+            color: #9858dd;
+            padding-top: 30px;
+            align-items: end;
+            justify-content: center;
+            display: flex;
+            font-size: small;
+            height: 30px;
+        }
+        .post0title{
+            display: flex;
+            align-items: center;
+            font-size: 20px;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            white-space: nowrap;
+            background: transparent;
+            height: 60px;
+        }
+        .photo-of-post{
+            align-items: center;
+            justify-content: center;
+            display: flex;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+        }
+        .post-title-wrapper{
+            height: 45px;
+            background: #260557fb;
+            padding: 8px;
+            gap: 10px;
+            display: flex;;
+            align-items: center;
+            justify-content: flex-start;
+        }
+        .post-descript{
+            padding: 10px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-size: 22px;
+            display: flex;
+            align-items: center;
+            height:70px;
+        }
+        .post-immage{
+            object-fit: cover;
+            justify-content: center;
+            align-items: center;
+            display: flex;
+            height: 50%;
+            width: 100%;
+        }
+
+        @media (max-width: 1200px) {
+            .profile-container{
+                width:100%;  
+            }
+        }
+
+
+
+        @media (max-width: 768px) {
+            .modal-dialog{
+                margin-top: 10% !important;
+                height: 70vh !important;
+                width: 100% !important;
+            }
+            .modal-content{
+                margin-right: 15px;
+                height: 50vh!important;
+                width: 100% !important;
+            }
+            
+        }
+        @media (max-width: 480px) {
+            .modal-dialog{
+                right: 2%;
+                padding: 20px;
+                height: 70vh !important;
+                width: 100% !important;
+            }
+           
+        }
+
+        .user_profile_combo-img{
+            height: 58vh;
+        }
+        .carousel-item{
+            height: 100%;
+        }
+        .post-image{
+            cursor:pointer;
+            height: 100%;
+            padding: 6px;
+            border-radius: none;
+        }
+        .user_profile_carousel_btn{
+            top: 42%;
+            display: flex;
+            height: 5vh;
+            align-items: end;
+        }
+        .post-title{
+            padding-left: 8px;
+            padding-top: 6px;
+        }
+        .user_profile_comment{
+        height: 30px;
+        font-size: 14px;
+        margin-right: 10px;
+        display: flex;
+        align-items: end;
+        justify-content: end;
+        }
+    .react-comment-wrapper{
+        margin-left: 20px;
+        font-size: 14px;
+        display: flex;
+        justify-content: space-between;
+    }
+    .user_profile-icons{
+    color: rgba(172, 57, 147, 0.973);
+    margin-bottom: 8px;
+    padding: 5px;
+    font-size: 13px;
+    }
+    .fol-unfol-btn{
+        margin-left: 40px;
+        flex-direction: column;
+        justify-content: center;
+        align-items: flex-start;
+        display: flex;
+    }
+    .fol{
+        cursor: pointer;
+        padding-left: 18px;
+        font-size: 15px;
+        margin: 5px;
+        border: none;
+        border-radius: 2px;
+        background: #a065e7;
+        width: 80px;
+    }
+    .unfol{
+        color: black;
+        cursor: pointer;
+        padding-left: 12px;
+        font-size: 15px;
+        margin: 5px;
+        border: none;
+        border-radius: 2px;
+        background:rgb(188 151 232) ;
+        width: 90px;
+    }
+    .fol:active{
+        background:rgb(188 151 232);
+    }
+    .unfol:active{
+        background: #984fc1;
+    }
+    .eee{
+        color: #975fec;
+    }
+    .bio-field{
+        word-wrap: break-word;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin-bottom: 30px;
+        width: 50%;
+
+    }
+    .btnnn{
+        margin-bottom: 10px;
+        align-items: baseline;
+        justify-content: center;
+        display: flex;
+        width: 100%;
+
+    }
+
+    </style>
 </body>
-</html>
-
-////
+{% endblock %}

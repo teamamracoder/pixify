@@ -163,9 +163,7 @@ urlpatterns = [
     path('post/reactions/', views.GetPostReactionsView.as_view(), name='get_post_reactions'),
     path('post/comment/', views.GetPostCommentView.as_view(), name='get_comment_reactions'),
     path("delete-comment/", views.DeleteCommentView.as_view(), name="delete-comment"),
-    path('toggle-like/', views.ToggleLikeView.as_view(), name='toggle-like'),
     path("remove_reaction/", views.remove_reaction.as_view(), name="remove_reaction"),
-    path("fetch-comment-likes/", views.fetch_comment_likes.as_view(), name="fetch_comment_likes"),
 
 
 
@@ -192,7 +190,6 @@ urlpatterns = [
 
     #short
     path('short/', views.ShortListView.as_view(),name='short'),
-    path('short/<int:post_id>/', views.ShortDetailView.as_view(), name='short_detail'),
     path('short/<int:post_id>/reaction/create', views.ShortReactionCreateView.as_view(),name='short_reaction_create'),
     path('short/reaction/<int:post_id>/delete', views.ShortReactionDeleteView.as_view(),name='short_reaction_delete'),
     path('short/<int:post_id>/comments/', views.ShortCommentListView.as_view(),name='short_comments'),
@@ -207,9 +204,25 @@ urlpatterns = [
     path('save_fcm_token/', views.save_fcm_token, name="save_fcm_token"),
     path('send_notification/',views.send_notification, name="send_notification"),
 
-    # Short Share List Api
-    path('short/share/api', views.ShortShareListViewApi.as_view(), name='short_share_api'),
-    path('short/send', views.ShortSendView.as_view(), name='short_send'),
+    # post Share List Api
+    path('post/share/api', views.PostShareListViewApi.as_view(), name='short_share_api'),
+    path('post/send', views.PostSendView.as_view(), name='short_send'),
+
+    path('post/<int:post_id>/', views.PostDetailView.as_view(), name='short_detail'),
+
+
+    path('fetch_post_reactions/<int:post_id>/', views.FetchPostReactions.as_view(), name='fetch_post_reactions'),
+    path('create_update_post_reactions/', views.CreateUpdatePostReactions.as_view(), name='create_update_post_reactions'),
+    path('delete_post_reactions/', views.DeletePostReactions.as_view(), name='delete_post_reactions'),
+    path("api/comments/<int:post_id>/", views.CommentListViewApi.as_view(), name="get_comments"),
+    path('comments/<int:post_id>/', views.CommentCreate.as_view(), name='post_comment_create' ),
+    path('comments/delete/<int:comment_id>/', views.DeleteComment.as_view(), name='post_delete_comment'),
+    path("toggle_reaction/", views.TogglReactionView.as_view(), name='toggle_reaction'),
+    path('toggle-follow/', views.ToggleFollowView.as_view(), name='toggle_follow'),
+    path('check-follow-state/',views.CheckFollowState.as_view(), name='check-follow-state'),
+    path('get-followers-following/',views. GetFollowersFollowing.as_view(), name='get_followers_following'),
+    path('get-user-posts-comments/<int:user_id>/',views.GetUserPostsComments.as_view(), name='get_user_posts_comments'),
+     path('get-comments-likes/<int:user_id>/<int:post_id>/',views.GetCommentsLikes.as_view(), name='get_comments_likes'),
 
 ]
 

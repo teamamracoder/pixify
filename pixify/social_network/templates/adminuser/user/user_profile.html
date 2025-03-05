@@ -37,12 +37,12 @@
             <!-- Profile Picture -->
              <img
                 id="profile-pic"
-                src="{% if user.profile_photo_url %}{{ user.profile_photo_url }}{% else %}/images/avat.png{% endif %}"
+                src="{% if user.profile_photo_url %}{{ user.profile_photo_url }}{% else %}/static/images/avatar.jpg{% endif %}"
                 class="rounded-circle mb-3 border border-primary"
                 alt="Profile Picture"
                 width="150" height="150"
                 style="cursor: pointer;"
-                onerror="this.onerror=null; this.src='/images/avat.png';"
+                onerror="this.onerror=null; this.src='/static/images/avatar.jpg';"
             >
 
             <!-- Hidden file input -->

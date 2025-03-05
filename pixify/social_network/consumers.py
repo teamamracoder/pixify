@@ -1,6 +1,6 @@
 from channels.generic.websocket import AsyncWebsocketConsumer
 import json
-from .models import Message, Chat, ChatMember,User
+from .models import Message, Chat, ChatMember, User, Post
 from .services import message_service, message_mention_service, user_service,message_read_status_service,chat_service,message_reaction_service, short_service
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
@@ -365,6 +365,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
         reply_text = None
         reply_username = None
         reply_user_pic = None
+        reply_media_url = None
+        reply_post_data = None
 
         if message.reply_for_message_id_id:
             reply = True
@@ -372,6 +374,21 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 replied_message = await sync_to_async(Message.objects.get)(id=message.reply_for_message_id_id)
                 replied_user = await sync_to_async(lambda: replied_message.sender_id)()
                 reply_text = replied_message.text
+                reply_media_url = replied_message.media_url
+                if replied_message.post_id_id:
+                    reply_post  = await sync_to_async (Post.objects.get)(id=replied_message.post_id_id)
+                    reply_posted_by = await sync_to_async(User.objects.get)(id=reply_post.posted_by_id)
+                    reply_post_data = {
+                                    'id': reply_post.id,
+                                    'media_url': reply_post.media_url, 
+                                    'posted_by': {
+                                        'first_name': reply_posted_by.first_name,
+                                        'last_name': reply_posted_by.last_name,
+                                        'profile_photo_url': reply_posted_by.profile_photo_url
+                                    }
+                                }
+
+                # reply_username = f"{replied_user.first_name} {replied_user.last_name}"
                 reply_username = replied_user.first_name
                 reply_user_pic = replied_user.profile_photo_url
             except Message.DoesNotExist:
@@ -409,6 +426,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
             'update': updated,
             'reply': reply,
             'replyText': reply_text,
+            'reply_media_url': reply_media_url,
+            'replyPost': reply_post_data,
             'reply_username': reply_username,
             'reply_userPic': reply_user_pic,
             'user_id': sender.id,
@@ -481,6 +500,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 'update': message['update'],
                 'reply': message['reply'],
                 'replyText': message['replyText'],
+                'reply_media_url':message['reply_media_url'],
+                'replyPost':message['replyPost'],
                 'reply_username': message['reply_username'],
                 'reply_userPic': message['reply_userPic'],
                 'user_id': message['user_id'],
@@ -501,7 +522,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         sender = await sync_to_async(User.objects.get)(id=user)
 
          # Set default image if user_pic is None
-        user_pic = sender.profile_photo_url or "/static/images/avatar.jpg"
+        user_pic = sender.profile_photo_url or "/images/avatar.jpg"
 
         typer = {
             'user': sender.first_name,

@@ -1,10 +1,21 @@
 from django.views import View
 from django.shortcuts import render, redirect
-from ..services import short_service, chat_service, follower_service, message_service, chat_member_service, message_read_status_service
+from ..services import (
+    short_service,
+    chat_service,
+    follower_service,
+    chat_member_service,
+    story_service,
+    post_reaction_service,
+    post_service,
+    comment_service,
+)
 import random
 from django.http import JsonResponse
 import json
-from ..constants import ChatType
+from ..constants import ChatType, PostType
+from social_network.packages.response import success_response
+
 
 class ShortListView(View):
     def get(self, request):
@@ -16,40 +27,80 @@ class ShortListView(View):
             comments = short_service.comment_count(short.id)
             short.comments_count = short_service.format_count(comments)
             short.user_reacted = short_service.user_has_reacted(short, user)
+            short.created_at = short_service.format_created_time(short.created_at)
+            short.followed = follower_service.follower_check(short.posted_by,user)
+
         random.shuffle(shorts)  # Randomize the list
         return render(request, 'enduser/short/index.html', {'shorts': shorts,'user':user})
-    
-    
-class ShortDetailView(View):
+
+
+class PostDetailView(View):
     def get(self, request, post_id):
         user = request.user
-        
-        selected_short = short_service.get_short(post_id)
-        count = short_service.reaction_count(selected_short.id)
-        selected_short.reaction_count = short_service.format_count(count)
-        comments = short_service.comment_count(selected_short.id)
-        selected_short.comments_count = short_service.format_count(comments)
-        selected_short.user_reacted = short_service.user_has_reacted(selected_short, user)
-        
+        selected_post = short_service.get_short(post_id)
 
-        shorts = short_service.get_shorts()
-        
-        for s in shorts:
-            if s.id != selected_short.id:
-                cnt = short_service.reaction_count(s.id)
-                s.reaction_count = short_service.format_count(cnt)
-                comm = short_service.comment_count(s.id)
-                s.comments_count = short_service.format_count(comm)
-                s.user_reacted = short_service.user_has_reacted(s, user)
-        
-        
-        shorts = [s for s in shorts if s.id != selected_short.id]
-        
-        random.shuffle(shorts)
+        if selected_post.type == PostType.SHOTS.value:
+            # Process and render the shots template
+            count = short_service.reaction_count(selected_post.id)
+            selected_post.reaction_count = short_service.format_count(count)
+            comments = short_service.comment_count(selected_post.id)
+            selected_post.comments_count = short_service.format_count(comments)
+            selected_post.user_reacted = short_service.user_has_reacted(selected_post, user)
 
-        shorts.insert(0, selected_short)
-                
-        return render(request, 'enduser/short/index.html', {'shorts': shorts, 'user': user})
+            shorts = short_service.get_shorts()
+            for s in shorts:
+                if s.id != selected_post.id:
+                    cnt = short_service.reaction_count(s.id)
+                    s.reaction_count = short_service.format_count(cnt)
+                    comm = short_service.comment_count(s.id)
+                    s.comments_count = short_service.format_count(comm)
+                    s.user_reacted = short_service.user_has_reacted(s, user)
+
+            shorts = [s for s in shorts if s.id != selected_post.id]
+            random.shuffle(shorts)
+            shorts.insert(0, selected_post)
+
+            return render(request, 'enduser/short/index.html', {'shorts': shorts, 'user': user})
+        else:
+            # For all other post types, process the post view
+            message = request.session.pop("message", "")
+            message_type = request.session.pop("message_type", "")
+            userid = user.id
+
+            post = post_service.Postlist_posts()
+            posts = [s for s in post if s.id != selected_post.id]
+            posts.insert(0, selected_post)
+
+            postreaction = post_reaction_service.get_reaction()
+            post_id_param = request.GET.get('post_id')
+            comment_list = comment_service.comment_list(post_id_param)
+            post_dict = {
+                'posts': posts,
+                'comment_list': comment_list,
+                'postreaction': postreaction,
+            }
+
+            storys = story_service.storylist_storys(request.user.id)
+            story_dict = {'storys': storys}
+            shorts = short_service.get_shorts()
+            for short in shorts:
+                count = short_service.reaction_count(short.id)
+                short.reaction_count = short_service.format_count(count)
+                comments = short_service.comment_count(short.id)
+                short.comments_count = short_service.format_count(comments)
+                short.user_reacted = short_service.user_has_reacted(short, user)
+            random.shuffle(shorts)
+
+            context = success_response(message=message, message_type=message_type)
+            context.update({
+                'post_dict': post_dict,
+                'story_dict': story_dict,
+                'shorts': shorts,
+                'userid': userid,
+            })
+
+            return render(request, "enduser/home/index.html", context)
+
 
 
 
@@ -88,6 +139,7 @@ class ShortCommentListView(View):
 
        return JsonResponse({"comments": list(comments)}, safe=False)
 
+
 class ShortCommentCreateView(View):
     def post(self, request, post_id):
         user = request.user
@@ -110,6 +162,7 @@ class ShortCommentCreateView(View):
             'comment': {
                 'id': comment.id,
                 'comment': comment.comment,
+                'comment_by__id': comment.comment_by.id,
                 'comment_by__first_name': comment.comment_by.first_name,
                 'comment_by__last_name': comment.comment_by.last_name,
                 'comment_by__profile_photo_url': comment.comment_by.profile_photo_url or None,  # Handle null cases
@@ -143,6 +196,7 @@ class ShortCommentReplyView(View):
             'reply': {
                 'id': reply.id,
                 'comment': reply.comment,
+                'comment_by__id': reply.comment_by.id,
                 'comment_by__first_name': reply.comment_by.first_name,
                 'comment_by__last_name': reply.comment_by.last_name,
                 'comment_by__profile_photo_url': reply.comment_by.profile_photo_url or None,  # Handle null cases
@@ -191,12 +245,12 @@ class ShortCommentReactionView(View):
 
 
 
-class ShortShareListViewApi(View):
+class PostShareListViewApi(View):
     def get(self, request):
         user = request.user
         chats = chat_service.list_top_chats_api(request, user)
         follow = follower_service.list_follow_api(request, user)
-        
+
         data = {
             "chats": chats,
             "follow": follow
@@ -206,7 +260,7 @@ class ShortShareListViewApi(View):
 
 
 
-class ShortSendView(View):
+class PostSendView(View):
     def post(self, request):
         user = request.user
         try:
@@ -218,7 +272,7 @@ class ShortSendView(View):
         members = data.get("members", [])
 
         chat_ids = []  # List to collect chat ids
-        
+
         # Send the video to the selected chats
         for chat_id in chats:
             chat = chat_service.get_chat_by_id(chat_id)

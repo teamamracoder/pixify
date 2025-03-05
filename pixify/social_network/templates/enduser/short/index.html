@@ -19,12 +19,46 @@
 
         <div class="video-info">
           <div class="user-info">
-            <img src="{% static video.posted_by.profile_photo_url|default:'/images/avatar.jpg' %}"
-                 alt="{{ video.posted_by.first_name }}'s Profile Picture"
-                 class="short-profile-pic">
-            <div class="username">{{ video.posted_by.first_name }} {{ video.posted_by.last_name }}</div>
+            {% if video.posted_by.id == user.id %}
+              <img src="{% static video.posted_by.profile_photo_url|default:'/images/avatar.jpg' %}"
+                   alt="{{ video.posted_by.first_name }}'s Profile Picture"
+                   class="short-profile-pic" onclick="window.location.href='{% url 'userprofile' %}'">
+            {% else %}
+              <img src="{% static video.posted_by.profile_photo_url|default:'/images/avatar.jpg' %}"
+                   alt="{{ video.posted_by.first_name }}'s Profile Picture"
+                   class="short-profile-pic" onclick="window.location.href='{% url 'profile' video.posted_by.id %}'">
+            {% endif %}
+            {% if video.posted_by.id == user.id %}
+              <div class="username" onclick="window.location.href='{% url 'userprofile' %}'">
+                {{ video.posted_by.first_name }} {{ video.posted_by.last_name }}
+              </div>
+            {% else %}
+              <div class="username" onclick="window.location.href='{% url 'profile' video.posted_by.id %}'">
+                {{ video.posted_by.first_name }} {{ video.posted_by.last_name }}
+              </div>
+            {% endif %}
+          {% if video.posted_by.id != user.id %}
+            <div id="followBtn{{ video.id }}" class="short-user-follow" data-user-id="{{ video.posted_by.id }}"
+                 onclick="toggleFollow({{ video.posted_by.id }}, {{ video.id }})">
+              <span id="followText{{ video.id }}">
+                {% if video.followed %}Unfollow{% else %}Follow{% endif %}
+              </span>
+            </div>
+          {% endif %}
           </div>
-          <div class="description">{{ video.description }}</div>
+          <div class="video-description">
+            {% if video.title %}
+              <div class="description">{{ video.title }}</div>
+            {% endif %}
+            <div id="seeMore{{ video.id }}" class="description" onclick="toggleVideoDetails('{{ video.id }}')">See More</div>
+            <div id="videoDetails{{ video.id }}" style="display: none;">
+              {% if video.description %}
+                <div class="description">{{ video.description }}</div>
+              {% endif %}
+              <div class="description">{{ video.created_at }}</div>
+              <div id="seeLess{{ video.id }}" class="description" onclick="toggleVideoDetails('{{ video.id }}')">See Less</div>
+            </div>
+          </div>
         </div>
 
         <!-- Modal for Comments (unique for each video) -->
@@ -79,7 +113,9 @@
           <i id="heartIcon{{ forloop.counter }}"
              class="bi {% if video.user_reacted %}bi-heart-fill{% else %}bi-heart{% endif %}"
              aria-label="Like"></i>
-          <div class="reaction-count">{{ video.reaction_count }}</div>
+          {% if video.reaction_count != "0" %}
+            <div class="reaction-count">{{ video.reaction_count }}</div>
+          {% endif %}
         </div>
         <!-- Chat Icon (to open comments modal) -->
         <div>
@@ -87,7 +123,9 @@
                 onclick="openShortCommentsModal('{{ video.id }}')">
             <i class="bi bi-chat"></i>
           </span>
-          <div class="reaction-count">{{ video.comments_count }}</div>
+          {% if video.comments_count != "0" %}
+            <div class="comment-count">{{ video.comments_count }}</div>
+          {% endif %}
         </div>
         <div class="icon" onclick="shareShort('{{ video.id }}')">
           <i class="bi bi-send"></i>
@@ -123,54 +161,104 @@
 
 
 <script>
+
+
+  function toggleVideoDetails(videoId) {
+    const detailsDiv = document.getElementById("videoDetails" + videoId);
+    const seeMore = document.getElementById("seeMore" + videoId);
+    
+    if (detailsDiv.style.display === "none") {
+      detailsDiv.style.display = "block";
+      seeMore.style.display = "none";
+    } else {
+      detailsDiv.style.display = "none";
+      seeMore.style.display = "block";
+    }
+  }
+  
+
+  function hideVideoDetails() {
+      const detailsList = document.querySelectorAll("[id^='videoDetails']");
+      const seeMoreList = document.querySelectorAll("[id^='seeMore']");
+  
+      detailsList.forEach(function(detailsDiv) {
+        detailsDiv.style.display = "none";
+      });
+      
+      seeMoreList.forEach(function(seeMore) {
+        seeMore.style.display = "block";
+      });
+    }
+  
+    // Example: Attach the function to a click event on the document
+    document.addEventListener("click", function(event) {
+      // Only hide if the click did not occur inside an element with the "video-description" class.
+      if (!event.target.closest(".video-description")) {
+        hideVideoDetails();
+      }
+    });
+  
+
 document.addEventListener('DOMContentLoaded', () => {
     // Handle reactions (like/dislike)
-    const handleReaction = (iconElement, isDelete = false) => {
-        const postId = iconElement.closest('.video-wrapper').dataset.postId;
-        const url = isDelete
-            ? `/short/reaction/${postId}/delete`
-            : `/short/${postId}/reaction/create`;
-
-        fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': getCookie('csrftoken'), // Ensure CSRF token is handled
-            },
-            body: JSON.stringify({ post_id: postId }),
-        })
-        .then((response) => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
-        })
-        .then((data) => {
-            if (data.success) {
-                console.log('Reaction updated:', data);
-
-                // Update the reaction count
-                const likeCountSpan = iconElement.closest('.right-icons').querySelector('.reaction-count');
-                if (likeCountSpan) {
-                    likeCountSpan.textContent = data.reaction_count;
-                }
-
-                // Toggle the heart icon class
-                if (isDelete) {
-                    iconElement.classList.remove('bi-heart-fill');
-                    iconElement.classList.add('bi-heart');
-                } else {
-                    iconElement.classList.remove('bi-heart');
-                    iconElement.classList.add('bi-heart-fill');
-                }
-            } else {
-                console.error('Failed to update reaction:', data);
-            }
-        })
-        .catch((error) => {
-            console.error('Error:', error);
-        });
-    };
+      const handleReaction = (iconElement, isDelete = false) => {
+          const postId = iconElement.closest('.video-wrapper').dataset.postId;
+          const url = isDelete
+              ? `/short/reaction/${postId}/delete`
+              : `/short/${postId}/reaction/create`;
+  
+          fetch(url, {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json',
+                  'X-CSRFToken': getCookie('csrftoken'),
+              },
+              body: JSON.stringify({ post_id: postId }),
+          })
+          .then(response => {
+              if (!response.ok) {
+                  throw new Error('Network response was not ok');
+              }
+              return response.json();
+          })
+          .then(data => {
+              if (data.success) {
+                  console.log('Reaction updated:', data);
+                  // Limit search to the container that holds the heart icon and its count
+                  const likeContainer = iconElement.parentElement;
+                  let likeCountSpan = likeContainer.querySelector('.reaction-count');
+  
+                  if (data.reaction_count > 0) {
+                      // If count > 0 but span doesn't exist, create it
+                      if (!likeCountSpan) {
+                          likeCountSpan = document.createElement('div');
+                          likeCountSpan.className = 'reaction-count';
+                          likeContainer.appendChild(likeCountSpan);
+                      }
+                      likeCountSpan.textContent = data.reaction_count;
+                  } else {
+                      // If count is 0, remove the span if it exists
+                      if (likeCountSpan) {
+                          likeCountSpan.remove();
+                      }
+                  }
+  
+                  // Toggle the heart icon class
+                  if (isDelete) {
+                      iconElement.classList.remove('bi-heart-fill');
+                      iconElement.classList.add('bi-heart');
+                  } else {
+                      iconElement.classList.remove('bi-heart');
+                      iconElement.classList.add('bi-heart-fill');
+                  }
+              } else {
+                  console.error('Failed to update reaction:', data);
+              }
+          })
+          .catch(error => {
+              console.error('Error:', error);
+          });
+      };
 
     // Add double-tap functionality to video screen
     let lastTap = 0;
@@ -328,6 +416,7 @@ function getCookie(name) {
                 if (index !== currentIndex) {
             // Close all modals of the previous short before updating active video.
                     closeAllModals();
+                    hideVideoDetails();
                     updateActiveVideo(index);
                     currentIndex = index;
                     updateButtonVisibility();
@@ -377,8 +466,28 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
+// Global variables (adjust these as needed)
+const currentUserId = {{ user.id }};  // Inject current user ID from Django
 let replyingToCommentId = null;
 
+// Utility: Get a cookie by name (used for CSRF token)
+function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== "") {
+    const cookies = document.cookie.split(";");
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      // Does this cookie string begin with the name we want?
+      if (cookie.substring(0, name.length + 1) === name + "=") {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
+
+// Clear the comment modal inputs and reset reply state.
 function clearCommentModal(modal) {
   if (modal.id && modal.id.startsWith("shortCommentsModal-")) {
     const inputField = modal.querySelector('input[id^="shortCommentInput-"]');
@@ -394,6 +503,7 @@ function clearCommentModal(modal) {
   }
 }
 
+// Close a specific comments modal.
 function closeShortCommentsModal(modalId) {
   const modal = document.getElementById(modalId);
   if (!modal) return;
@@ -405,24 +515,28 @@ function closeShortCommentsModal(modalId) {
   }, 300);
 }
 
+// Close all modals (comments, share, delete, etc.)
 function closeAllModals() {
-
   const modals = document.querySelectorAll(
     ".short-modal, .short-create-modal, .short-delete-modal"
   );
-
   modals.forEach((modal) => {
     if (modal.id && modal.id.startsWith("shortCommentsModal-")) {
       clearCommentModal(modal);
       modal.dataset.loading = "false";
     }
-
     modal.classList.remove("show");
     modal.style.display = "none";
-
   });
 }
 
+// Clean a media path if needed (customize as required)
+function cleanMediaPath(media) {
+  return media.startsWith('/') ? media.slice(1) : media;
+}
+
+// --------------------------------------------------------------------
+// Open the comments modal for a given postId.
 function openShortCommentsModal(postId) {
   const modal = document.getElementById("shortCommentsModal-" + postId);
   const commentsList = document.getElementById("shortCommentsList-" + postId);
@@ -432,15 +546,14 @@ function openShortCommentsModal(postId) {
     return;
   }
   
-  if (modal.dataset.loading === "true") {
-    return;
-  }
+  if (modal.dataset.loading === "true") return;
   modal.dataset.loading = "true";
   
   commentsList.innerHTML = "";
   modal.style.display = "flex";
   setTimeout(() => modal.classList.add("show"), 10);
 
+  // Add the comment input if not already present.
   if (!document.getElementById("shortCommentInput-" + postId)) {
     const commentInputContainer = document.createElement("div");
     commentInputContainer.classList.add("short-comment-input");
@@ -479,6 +592,7 @@ function openShortCommentsModal(postId) {
     }
   };
   
+  // Bind Enter key on submitButton and commentInput (if not already bound)
   if (!submitButton.hasAttribute("data-keydown-bound")) {
     submitButton.addEventListener("keydown", function (event) {
       if (event.key === "Enter" || event.key === " ") {
@@ -499,6 +613,7 @@ function openShortCommentsModal(postId) {
     commentInput.setAttribute("data-keydown-bound", "true");
   }
   
+  // Fetch comments from the server.
   fetch(`/short/${postId}/comments/`)
     .then((response) => response.json())
     .then((data) => {
@@ -506,7 +621,7 @@ function openShortCommentsModal(postId) {
         const topLevelComments = data.comments.filter(
           (comment) => !comment.parent_comment_id
         );
-        topLevelComments.forEach((comment) => {
+        topLevelComments.forEach((comment) => {          
           renderComment(comment, commentsList);
         });
       } else {
@@ -524,7 +639,8 @@ function openShortCommentsModal(postId) {
     });
 }
 
-// Handle submitting a new comment or reply
+// --------------------------------------------------------------------
+// Handle submitting a new comment or reply.
 function handleCommentSubmit(postId, commentInput, commentsList, replyingToCommentId, callback) {
   const commentText = commentInput.value.trim();
   if (!commentText) {
@@ -540,18 +656,18 @@ function handleCommentSubmit(postId, commentInput, commentsList, replyingToComme
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "X-CSRFToken": getCookie('csrftoken'),
+      "X-CSRFToken": getCookie("csrftoken"),
     },
     body: JSON.stringify({ text: commentText }),
   })
     .then((response) => response.json())
     .then((data) => {
       if (data.success) {
+        // Remove any "no comments" message if present.
         const noCommentsMessage = commentsList.querySelector(".no-comments");
-        if (noCommentsMessage) {
-          noCommentsMessage.remove();
-        }
+        if (noCommentsMessage) noCommentsMessage.remove();
         
+        // Render the new comment.
         if (replyingToCommentId) {
           const parentComment = commentsList.querySelector(
             `[data-comment-id="${replyingToCommentId}"]`
@@ -570,25 +686,17 @@ function handleCommentSubmit(postId, commentInput, commentsList, replyingToComme
             }
           }
           renderComment(data.reply, replyContainer, false, true, replyContainer);
+          updateCommentCount(postId, data.reply.comment_count);
         } else {
           renderComment(data.comment, commentsList, true);
+          updateCommentCount(postId, data.comment.comment_count);
         }
         
-        const commentIcon = document.querySelector(
-          `.chat-icon[data-video-id="${postId}"]`
-        );
-        const countElement = commentIcon?.nextElementSibling;
-        if (countElement) {
-          countElement.textContent =
-            data.comment_count || parseInt(countElement.textContent) + 1;
-        }
-        
+        // Clear the input and reset reply state.
         commentInput.value = "";
         const commentInputContainer = commentInput.parentElement;
         const cancelReplyControl = commentInputContainer.querySelector(".btn-cancel-reply");
-        if (cancelReplyControl) {
-          cancelReplyControl.remove();
-        }
+        if (cancelReplyControl) cancelReplyControl.remove();
         
         callback();
       } else {
@@ -600,12 +708,21 @@ function handleCommentSubmit(postId, commentInput, commentsList, replyingToComme
     });
 }
 
-
+// --------------------------------------------------------------------
+// Render a comment with clickable user info (without using an <a> tag).
 function renderComment(comment, container, prepend = false, isReply = false, flatReplyContainer = null) {
+  // Use the keys exactly as returned by the views.
   const profilePhotoUrl = comment.comment_by__profile_photo_url || "/images/avatar.jpg";
   const firstName = comment.comment_by__first_name || "Anonymous";
   const lastName = comment.comment_by__last_name || "";
   const createdAt = comment.created_at || "";
+  
+  const commentUserId = comment.comment_by__id || comment.comment_by_id || "";
+
+  const profileUrl = (parseInt(commentUserId) === parseInt(currentUserId))
+  ? "{% url 'userprofile' %}"
+  : "/profile/" + commentUserId + "/";
+
   
   const commentItem = document.createElement("div");
   commentItem.classList.add("short-comment-item");
@@ -618,9 +735,11 @@ function renderComment(comment, container, prepend = false, isReply = false, fla
   const likedClass = comment.user_liked ? "liked" : "";
   const iconClass = comment.user_liked ? "bi-heart-fill" : "bi-heart";
   
+  // Create the comment's HTML.
+  // The .user-info div has a data attribute with the profile URL.
   commentItem.innerHTML = `
     <div class="short-comment-content">
-      <div class="user-info">
+      <div class="user-info" data-profile-url="${profileUrl}">
         <img src="${staticUrl}${cleanMediaPath(profilePhotoUrl)}" alt="${firstName}'s Profile Picture">
         <span class="short-username">${firstName} ${lastName}</span>
         <span class="short-created-at">${createdAt}</span>
@@ -629,7 +748,7 @@ function renderComment(comment, container, prepend = false, isReply = false, fla
       <div class="short-comment-actions">
         <div class="btn-like ${likedClass}" data-comment-id="${comment.id}" role="button" tabindex="0">
           <i class="bi ${iconClass}"></i>
-          <span class="like-count">${comment.like_count || 0}</span>
+          ${ parseInt(comment.like_count, 10) > 0 ? `<span class="like-count">${comment.like_count}</span>` : '' }
         </div>
         <div class="btn-reply" data-comment-id="${comment.id}" role="button" tabindex="0">Reply</div>
         <div class="btn-delete" data-comment-id="${comment.id}" style="display: none;" role="button" tabindex="0">Delete</div>
@@ -637,21 +756,47 @@ function renderComment(comment, container, prepend = false, isReply = false, fla
     </div>
   `;
   
+  // Make the user-info area clickable without an <a> tag.
+  const userInfoDiv = commentItem.querySelector(".user-info");
+  userInfoDiv.addEventListener("click", function () {
+    const url = this.getAttribute("data-profile-url");
+    window.location.href = url;
+  });
+  
+  // Set up the like button event listener.
   const likeButton = commentItem.querySelector(".btn-like");
   likeButton.addEventListener("click", function () {
     const commentId = this.dataset.commentId;
-    const likeCountSpan = this.querySelector(".like-count");
+    // Try to find the like count element
+    let likeCountSpan = this.querySelector(".like-count");
     
     fetch(`/short/comment/${commentId}/reaction/`, {
       method: "POST",
       headers: {
-        "X-CSRFToken": getCookie('csrftoken'),
+        "X-CSRFToken": getCookie("csrftoken"),
       },
     })
       .then((response) => response.json())
       .then((data) => {
         if (data.success) {
-          likeCountSpan.textContent = data.like_count;
+          // If the new like count is greater than 0, update or create the element
+          if (data.like_count > 0) {
+            if (!likeCountSpan) {
+              likeCountSpan = document.createElement("span");
+              likeCountSpan.classList.add("like-count");
+              const icon = this.querySelector("i");
+              icon.insertAdjacentElement("afterend", likeCountSpan);
+            }
+            likeCountSpan.textContent = data.like_count;
+          } else {
+            // If the new like count is 0, remove the element if it exists.
+            if (likeCountSpan) {
+              likeCountSpan.remove();
+              likeCountSpan = null;
+            }
+          }
+    
+          // Toggle the liked classes
           this.classList.toggle("liked", data.user_liked);
           const icon = this.querySelector("i");
           if (data.user_liked) {
@@ -666,6 +811,8 @@ function renderComment(comment, container, prepend = false, isReply = false, fla
       );
   });
   
+  
+  // Handling long press for deletion.
   let pressTimer;
   const longPressDelay = 500;
   
@@ -708,6 +855,7 @@ function renderComment(comment, container, prepend = false, isReply = false, fla
     handlePressEnd();
   });
   
+  // Delete button event listener.
   const deleteButton = commentItem.querySelector(".btn-delete");
   deleteButton.addEventListener("click", function (e) {
     e.stopPropagation();
@@ -715,6 +863,7 @@ function renderComment(comment, container, prepend = false, isReply = false, fla
     openDeleteModal(commentId, container, isReply);
   });
   
+  // Reply button event listener.
   const replyButton = commentItem.querySelector(".btn-reply");
   replyButton.addEventListener("click", function (e) {
     e.stopPropagation();
@@ -722,6 +871,7 @@ function renderComment(comment, container, prepend = false, isReply = false, fla
     replyToComment(commentId, firstName, commentItem);
   });
   
+  // Render replies if present.
   if (!isReply && comment.replies && comment.replies.length > 0) {
     const replyContainer = document.createElement("div");
     replyContainer.classList.add("reply-list");
@@ -755,6 +905,7 @@ function renderComment(comment, container, prepend = false, isReply = false, fla
     container.appendChild(commentItem);
   }
   
+  // Render nested replies if they exist.
   if (!isReply && comment.replies && comment.replies.length > 0 && comment._replyContainer) {
     comment.replies.forEach((reply) => {
       renderComment(reply, comment._replyContainer, false, true, comment._replyContainer);
@@ -766,6 +917,8 @@ function renderComment(comment, container, prepend = false, isReply = false, fla
   }
 }
 
+// --------------------------------------------------------------------
+// Handle replying to a comment.
 function replyToComment(commentId, parentUsername, commentItem) {
   const modal = commentItem.closest(".short-modal");
   const commentInput = modal.querySelector('input[id^="shortCommentInput-"]');
@@ -773,9 +926,7 @@ function replyToComment(commentId, parentUsername, commentItem) {
   
   if (replyingToCommentId && replyingToCommentId !== commentId) {
     const existingCancelButton = commentInputContainer.querySelector(".btn-cancel-reply");
-    if (existingCancelButton) {
-      existingCancelButton.remove();
-    }
+    if (existingCancelButton) existingCancelButton.remove();
     commentInput.value = "";
     commentInput.placeholder = "Add a comment...";
   }
@@ -807,6 +958,8 @@ function replyToComment(commentId, parentUsername, commentItem) {
   commentInput.placeholder = `Replying to @${parentUsername}...`;
 }
 
+// --------------------------------------------------------------------
+// Open the delete modal for a comment.
 function openDeleteModal(commentId, container, isReply) {
   const deleteModal = document.getElementById("deleteModal");
   let btnDeleteConfirm = document.getElementById("btnDeleteConfirm");
@@ -814,6 +967,7 @@ function openDeleteModal(commentId, container, isReply) {
   
   deleteModal.style.display = "block";
   
+  // Clone buttons to remove previous event listeners.
   const newBtnDeleteConfirm = btnDeleteConfirm.cloneNode(true);
   btnDeleteConfirm.parentNode.replaceChild(newBtnDeleteConfirm, btnDeleteConfirm);
   const newBtnDeleteCancel = btnDeleteCancel.cloneNode(true);
@@ -823,29 +977,29 @@ function openDeleteModal(commentId, container, isReply) {
     deleteComment(commentId, container, isReply);
     closeDeleteModal();
     const commentModal = container.closest(".short-modal");
-    if (commentModal) {
-      closeShortCommentsModal(commentModal.id);
-    }
+    if (commentModal) closeShortCommentsModal(commentModal.id);
   });
   
   newBtnDeleteCancel.addEventListener("click", closeDeleteModal);
 }
 
-
+// Close the delete modal.
 function closeDeleteModal() {
   const deleteModal = document.getElementById("deleteModal");
   deleteModal.style.display = "none";
 }
 
+// --------------------------------------------------------------------
+// Delete a comment.
 function deleteComment(commentId, container, isReply = false) {
-  const videoWrapper = container.closest('.video-wrapper');
+  const videoWrapper = container.closest(".video-wrapper");
   const postId = videoWrapper ? videoWrapper.dataset.postId : null;
   
   fetch(`/short/comment/${commentId}/delete/`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "X-CSRFToken": getCookie('csrftoken'),
+      "X-CSRFToken": getCookie("csrftoken"),
     },
   })
     .then((response) => response.json())
@@ -854,17 +1008,10 @@ function deleteComment(commentId, container, isReply = false) {
         const commentItem = container.querySelector(
           `[data-comment-id="${commentId}"]`
         );
-        if (commentItem) {
-          commentItem.remove();
-        }
-        const commentIcon = document.querySelector(
-          `.chat-icon[data-video-id="${postId}"]`
-        );
-        const countElement = commentIcon?.nextElementSibling;
-        if (countElement) {
-          countElement.textContent =
-            data.comment_count || parseInt(countElement.textContent) - 1;
-        }
+        if (commentItem) commentItem.remove();
+        
+        // Use the helper to update the comment count.
+        updateCommentCount(postId, data.comment_count);
       } else {
         alert("Error deleting comment");
         console.error("Deletion error:", data.message);
@@ -875,6 +1022,10 @@ function deleteComment(commentId, container, isReply = false) {
     });
 }
 
+// --------------------------------------------------------------------
+// Global event listeners.
+
+// Close modal when clicking on any close button within a short-modal.
 document.querySelectorAll(".short-modal .close").forEach((closeBtn) => {
   closeBtn.addEventListener("click", function () {
     const modal = this.closest(".short-modal");
@@ -882,13 +1033,13 @@ document.querySelectorAll(".short-modal .close").forEach((closeBtn) => {
   });
 });
 
-
+// When a chat icon is clicked, open the corresponding comments modal.
 document.querySelectorAll(".chat-icon").forEach((button) => {
   button.addEventListener("click", function () {
     const postId = button.dataset.videoId;
     const shareModalId = "short-create-modal-" + postId;
     const shareModal = document.getElementById(shareModalId);
-    // If the share modal is open (display is not "none"), close it.
+    // If the share modal is open, close it.
     if (shareModal && shareModal.style.display !== "none") {
       closeShortShareModal(shareModalId);
     }
@@ -896,8 +1047,82 @@ document.querySelectorAll(".chat-icon").forEach((button) => {
   });
 });
 
+// Helper: Close a share modal.
+function closeShortShareModal(modalId) {
+  const modal = document.getElementById(modalId);
+  if (modal) modal.style.display = "none";
+}
+
+
+function updateCommentCount(postId, newCount) {
+  // Convert newCount to a number.
+  newCount = parseInt(newCount, 10);
+  
+  // Find the chat icon using its data attribute.
+  const commentIcon = document.querySelector(`.chat-icon[data-video-id="${postId}"]`);
+  if (!commentIcon) return;
+
+  // Get the container (the parent of the chat icon).
+  const container = commentIcon.parentElement;
+  
+  // Look for an existing comment count element.
+  let commentCountDiv = container.querySelector('.comment-count');
+  
+  if (newCount > 0) {
+    // If there's no comment count element, create one and insert it right after the chat icon.
+    if (!commentCountDiv) {
+      commentCountDiv = document.createElement('div');
+      commentCountDiv.classList.add('comment-count');
+      commentIcon.insertAdjacentElement('afterend', commentCountDiv);
+    }
+    commentCountDiv.textContent = newCount;
+  } else {
+    // If newCount is 0, remove the element if it exists.
+    if (commentCountDiv) {
+      commentCountDiv.remove();
+    }
+  }
+}
+
+  
+function toggleFollow(following_id, videoId) {
+  // Select all follow buttons for the same user by data attribute
+  const followButtons = document.querySelectorAll("[data-user-id='" + following_id + "']");
+  
+  fetch('/toggle-follow/', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': getCookie('csrftoken')
+    },
+    body: JSON.stringify({
+      "following_id": following_id,
+      "created_by": currentUserId
+    })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (typeof data.following !== "undefined") {
+      // Update every follow button's text for this user
+      followButtons.forEach(btn => {
+        const btnText = btn.querySelector("span");
+        if (btnText) {
+          btnText.textContent = data.following ? "Unfollow" : "Follow";
+        }
+      });
+    } else {
+      alert("Error toggling follow: " + (data.error || "Unknown error"));
+    }
+  })
+  .catch(error => {
+    console.error("Error:", error);
+    alert("An error occurred while toggling follow.");
+  });
+}
+
 
 </script>
+  
 
 
 <script>
@@ -948,7 +1173,7 @@ document.querySelectorAll(".chat-icon").forEach((button) => {
 
   // AJAX call to fetch share data (chats and members)
   $.ajax({
-      url: '/short/share/api',
+      url: '/post/share/api',
       type: 'GET',
       data: { video_id: videoId, search: searchQuery },
       dataType: 'json',
@@ -1049,7 +1274,7 @@ document.querySelectorAll(".chat-icon").forEach((button) => {
 
           // Send the share request via AJAX
           $.ajax({
-              url: '/short/send', // Your send endpoint
+              url: '/post/send', // Your send endpoint
               type: 'POST',
               headers: { 'X-CSRFToken': getCookie('csrftoken') },
               contentType: 'application/json',
@@ -1341,7 +1566,7 @@ document.querySelectorAll(".chat-icon").forEach((button) => {
         padding: 0; /* No padding */
         margin: 0; /* No margin */
         margin-top: -10px !important;
-
+        margin-left: 60px !important;
     }
 
 /* When a comment is being pressed, show the delete button */
@@ -1618,10 +1843,10 @@ margin-top: 16px;
 /* User Info */
 
 /* Container for user information */
-.user-info {
-    display: flex;
-    align-items: center;
-    margin-bottom: 10px;
+.user-info {  
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
 }
 
 /* Styling for profile picture */
@@ -1634,13 +1859,21 @@ margin-top: 16px;
 
 /* Styling for username */
 .username {
+  cursor:pointer;
     font-weight: bold;
     font-size: 1.1em;
 }
 
 /* Styling for video description */
 .description {
+    cursor:pointer;
     font-size: 1em;
+}
+
+.video-description{
+  font-size: 1em;
+  overflow: auto;
+  max-height: 200px;  
 }
 
 /* Reels Header */
@@ -1722,6 +1955,10 @@ margin-top: 16px;
     color: #fff;
 }
 
+.comment-count{
+  font-size: 15px;
+  color: #fff;
+}
 
 /* Modal Overlay */
 .short-create-modal {
@@ -1974,18 +2211,18 @@ margin-top: 16px;
 }
 
 .xyz-title{
-    white-space: nowrap;
-    height: 4vh;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    font-size: 10px;
-    color: #fff;
-    display: flex;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    text-overflow: ellipsis;
+  white-space: nowrap;
+  height: 4vh;
+  justify-content: space-evenly;
+  align-items: center;
+  width: 100%;
+  font-size: 10px;
+  color: #fff;
+  display: flex;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .short-members-section{
     overflow-y: scroll;
@@ -2012,6 +2249,18 @@ margin-top: 16px;
     padding: 10px;
     width: 100%;
     height: 65px;
+}
+
+.short-user-follow{
+    margin-left: 10px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    display: flex;
+    justify-content: space-between;
+    padding: 0px 5px;
+    border-radius: 5px;
+    cursor: pointer
 }
 </style>
 {% endblock %}

@@ -35,7 +35,17 @@ def list_chats_by_user(user):
             F('created_at')
         )
     ).annotate(
-        latest_message=Subquery(
+        latest_message_id=Subquery(
+            Message.objects.filter(
+                Q(chat_id=OuterRef('pk')),
+                Q(is_active=True),
+                ~Q(delete_type=MessageDeleteType.DELETED_FOR_EVERYONE.value),
+                ~Q(deleted_by__contains=[user.id])
+            ).order_by('-send_at')
+            .values('id')[:1]  # Fetch only the ID of the latest message
+        )
+    ).annotate(
+        latest_message_content=Subquery(
             Message.objects.filter(
                 Q(chat_id=OuterRef('pk')),
                 Q(is_active=True),
@@ -62,7 +72,7 @@ def list_chats_by_user(user):
                                     Message.objects.filter(id=OuterRef('id'))
                                     .values('sender_id__first_name')[:1]
                                 ),
-                                Value(" sent a reels"),
+                                Value(" sent a posts"),
                                 output_field=CharField()
                             ),
                             output_field=CharField()
@@ -84,10 +94,12 @@ def list_chats_by_user(user):
             ).order_by('-send_at')
             .values('sender_id')[:1]
         )
+    ).annotate(
+        latest_message=F('latest_message_content')  # ✅ Fix: Add this annotation so that chat.latest_message works
     ).order_by('-latest_message_timestamp')
 
     user_chats = user_chats.filter(
-        Q(latest_message__isnull=False) | Q(type=ChatType.GROUP.value)
+        Q(latest_message_id__isnull=False) | Q(type=ChatType.GROUP.value)
     )
 
     chat_data = []
@@ -101,17 +113,22 @@ def list_chats_by_user(user):
         ).last()
 
         seen_by_all = False
+        seen_by_user = False
         if latest_message:
             seen_by_all = is_message_seen_by_all(latest_message)
-
+            seen_by_user = is_seen_by_user(latest_message,user)
         chat_data.append({
             'chat': chat,
+            'latest_message_id': chat.latest_message_id,  # ✅ Fixed latest message ID
+            'latest_message': chat.latest_message,  # ✅ Now `latest_message` exists
             'seen_by_all': seen_by_all,
+            'seen_by_user':seen_by_user,
         })
 
     return chat_data
 
-
+def is_seen_by_user(message_id, user):
+    return MessageReadStatus.objects.filter(message_id=message_id, read_by=user).exists()
 
 
 def is_message_seen_by_all(message):
@@ -186,9 +203,32 @@ def get_recipients_for_group(chat_id,user):
         return " , ".join(first_names)
 
 def get_all_user_follow(user):
-    followers = Follower.objects.filter(follower=user, is_active=True).select_related('following')
-    followings = Follower.objects.filter(following=user, is_active=True).select_related('follower')
-    return followers, followings
+    follower_list = Follower.objects.filter(following=user, is_active=True).exclude(created_by=user).select_related('created_by')
+    following_list = Follower.objects.filter(user_id=user, is_active=True).exclude(following=user).select_related('following')
+
+    # Correcting ID extraction from Follower objects
+    followers_data = [
+        {
+            "id": f.created_by.id,  # Extracting correct user ID
+            "first_name": f"{f.created_by.first_name} {f.created_by.last_name}",
+            "profile_pic": f.created_by.profile_photo_url
+        }
+        for f in follower_list
+    ]
+
+    followings_data = [
+        {
+            "id": f.following.id,  # Extracting correct user ID
+            "first_name": f"{f.following.first_name} {f.following.last_name}",
+            "profile_pic": f.following.profile_photo_url
+        }
+        for f in following_list
+    ]
+    count_follower=len(followers_data)
+    count_following=len(followings_data)
+
+    return followers_data, followings_data,count_follower,count_following
+
 
 def list_chats_api(request,chat_data_list):
     search_query =request.GET.get('search', '')
@@ -227,7 +267,7 @@ def chat_details(chat_id, user):
     chat_data = {
         'id': chat.id,
         'title': chat_title,
-        'chat_cover': chat.chat_cover if chat.chat_cover else '/static/images/group_pic.png',
+        'chat_cover': chat.chat_cover if chat.chat_cover else '/images/group_pic.png',
         'created_by':chat.created_by,
         'is_group': chat.type == ChatType.GROUP.value,
         'chat_bio':chat.chat_bio,
@@ -235,7 +275,7 @@ def chat_details(chat_id, user):
             {
                 'id': member.member_id,
                 'first_name': "You" if member.member_id.id == user else member.member_id.first_name +" "+ member.member_id.last_name,
-                'profile': member.member_id.profile_photo_url if member.member_id.profile_photo_url else '/static/images/avatar.jpg'
+                'profile': member.member_id.profile_photo_url if member.member_id.profile_photo_url else '/images/avatar.jpg'
             }
             for member in active_members
         ]
@@ -324,22 +364,27 @@ def list_followings(user, offset=0, limit=5):
 def list_top_chats_api(request, user):
     search_query = request.GET.get('search', '').strip()
 
+    # Subquery for chats where the total active members are at least 2.
+    active_chat_ids = ChatMember.objects.filter(
+        is_active=True
+    ).values('chat_id').annotate(
+        active_count=Count('id')
+    ).filter(
+        active_count__gte=2
+    ).values_list('chat_id', flat=True)
+
+    # Subquery for chats where the user is an active member.
+    user_chat_ids = ChatMember.objects.filter(
+        member_id=user,
+        is_active=True
+    ).values_list('chat_id', flat=True)
+
+    # Filter chats: first by the ones the user is in, then by those with at least 2 active members.
     chats = Chat.objects.filter(
         is_active=True,
-        id__in=ChatMember.objects.filter(
-            member_id=user,
-            is_active=True
-        ).values_list('chat_id', flat=True)
-    ).annotate(
-        active_members_count=Count('chatmember', filter=Q(chatmember__is_active=True)),
-        message_count=Count(
-            'fk_chat_messages_chats_id', 
-            filter=Q(fk_chat_messages_chats_id__is_active=True) &
-                   ~Q(fk_chat_messages_chats_id__delete_type=MessageDeleteType.DELETED_FOR_EVERYONE.value) &
-                   ~Q(fk_chat_messages_chats_id__deleted_by__contains=[user.id])
-        )
+        id__in=user_chat_ids
     ).filter(
-        active_members_count__gte=2
+        id__in=active_chat_ids
     )
 
     if search_query:
@@ -348,31 +393,42 @@ def list_top_chats_api(request, user):
             Q(members__last_name__icontains=search_query)
         ).distinct()
 
+    # Annotate message_count directly.
+    chats = chats.annotate(
+        message_count=Count(
+            'fk_chat_messages_chats_id', 
+            filter=Q(fk_chat_messages_chats_id__is_active=True) &
+                   ~Q(fk_chat_messages_chats_id__delete_type=MessageDeleteType.DELETED_FOR_EVERYONE.value) &
+                   ~Q(fk_chat_messages_chats_id__deleted_by__contains=[user.id])
+        )
+    ).order_by('-message_count')
+
     chat_data_list = []
-    for c in chats:
-        # Retrieve chat-specific title and cover.
+    for c in chats[:6]:
         if c.type == ChatType.PERSONAL.value:
             member = get_recipient_for_personal(c.id, user)
             title = f"{member.first_name} {member.last_name}"
             chat_cover = member.profile_photo_url or '/images/avatar.jpg'
+            bio = member.bio
         elif c.type == ChatType.GROUP.value:
             title = c.title or get_recipients_for_group(c.id, user)
             chat_cover = c.chat_cover or '/images/group_pic.png'
+            bio = c.chat_bio
         else:
             title = "Unknown Chat"
             chat_cover = '/images/default_chat.jpg'
-               
+                
         chat_info = {
             'id': c.id,
             'title': title,
             'chat_cover': chat_cover,
             'message_count': c.message_count,
+            'bio':bio
         }
         chat_data_list.append(chat_info)
 
-    chat_data_list.sort(key=lambda c: c['message_count'], reverse=True)
-    
-    return chat_data_list[:6]
+    return chat_data_list
+
 
 
 def is_message_seen_by_user(message, user):
