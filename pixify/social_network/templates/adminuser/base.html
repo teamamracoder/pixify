@@ -14,11 +14,11 @@
     <title>{% block title %}My Django App{% endblock %}</title>
     <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
     <link rel="stylesheet" href="{% static 'css/toastr.min.css' %}">
-    {% comment %} {% if request.user.ui_mode == 2 %}
+    <!-- {% if request.user.ui_mode == 2 %}
     <link rel="stylesheet" href="{% static 'css/bootstrap.adminuser-light.css' %}">
     {% else %}
     <link rel="stylesheet" href="{% static 'css/bootstrap.adminuser-dark.css' %}">
-    {% endif %} {% endcomment %}
+    {% endif %} -->
     <!-- <link rel="stylesheet" href="{% static 'css/style.css' %}"> -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css" rel="stylesheet">
     <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
@@ -43,7 +43,7 @@
     </style>
 </head>
 
-<body class="overflow-hidden" style="background-color:#CCFFFF;">
+<body class="overflow-hidden" style="background-color:#edf3f3;">
 
     <nav class="navbar navbar-expand-lg navbar-light bg-info fixed-top">
         <div class="container-fluid">
