@@ -100,12 +100,13 @@ class CommentsListView(View):
 
         comment_count = services.comment_service.comment_count(post_id)
 
+
         # Ensure proper naming and data structure
         for comment in comment_list:
             comment['comment_by_id'] = comment.get('comment_by__id', 'Unknown')
             comment['comment_by_first_name'] = comment.get('comment_by__first_name', 'Unknown')
             comment['comment_by_last_name'] = comment.get('comment_by__last_name', 'Unknown')
-            comment['profile_photo_url'] = comment.get('comment_by__profile_photo_url', '') 
+            comment['profile_photo_url'] = comment.get('comment_by__profile_photo_url', '')
 
         return JsonResponse({
             "status": "success",
@@ -165,6 +166,7 @@ class CommentReplyView(View):
                 "replies": list(reply_list),
 
 
+
             })
         except Exception as e:
             return JsonResponse({"status": "error", "message": str(e)}, status=500)
@@ -196,6 +198,37 @@ class DeleteCommentView(View):
 
 #         return JsonResponse(comment_likes)
 
+
+# class fetch_comment_likes(View):
+#     def get(self, request, *args, **kwargs):
+#         user_id = request.user.id  # Get logged-in user's ID
+#         comment_id = request.GET.get("comment_id")  # Use GET instead of POST
+#         print(comment_id)
+
+
+#         if comment_id:
+#             # Fetch like count for a specific comment
+#             like_count = CommentReaction.objects.filter(comment_id_id=comment_id).count()
+#             user_liked = CommentReaction.objects.filter(comment_id_id=comment_id, user_id=user_id).exists()
+
+#             return JsonResponse({
+#                 "comment_id": comment_id,
+#                 "like_count": like_count,
+#                 "user_liked": user_liked
+#             })
+
+#         # Fetch likes for all comments if no specific comment_id is given
+#         comment_likes = {}
+#         all_comments = CommentReaction.objects.values("comment_id_id").distinct()
+
+#         for comment in all_comments:
+#             c_id = comment["comment_id_id"]
+#             like_count = CommentReaction.objects.filter(comment_id_id=c_id).count()
+#             user_liked = CommentReaction.objects.filter(comment_id_id=c_id, user_id=user_id).exists()
+
+#             comment_likes[c_id] = {"like_count": like_count, "user_liked": user_liked}
+
+#         return JsonResponse(comment_likes)
 
 # class fetch_comment_likes(View):
 #     def get(self, request, *args, **kwargs):
@@ -249,3 +282,22 @@ class GetRepliesView(View):
 
 
 
+
+class FetchCommentLikes(View):
+    def get(self, request, *args, **kwargs):
+        user_id = request.user.id if request.user.is_authenticated else None
+        comment_id = request.GET.get("comment_id")
+
+        print("Received comment_id:", comment_id, "User ID:", user_id)  # Debugging
+
+        if comment_id:
+            like_count = CommentReaction.objects.filter(comment_id_id=comment_id).count()
+            user_liked = CommentReaction.objects.filter(comment_id_id=comment_id, user_id=user_id).exists()
+
+            return JsonResponse({
+                "comment_id": comment_id,
+                "like_count": like_count,
+                "user_liked": user_liked  # ✅ Ensuring this is boolean
+            })
+
+        return JsonResponse({"error": "Invalid request"}, status=400)

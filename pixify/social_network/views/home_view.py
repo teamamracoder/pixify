@@ -16,7 +16,6 @@ from django.forms import model_to_dict
 
 
 class HomeView(View):
-
     @catch_error
     @auth_required
     @role_required(Role.ADMIN.value, Role.END_USER.value)

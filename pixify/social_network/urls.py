@@ -207,10 +207,10 @@ urlpatterns = [
     # post Share List Api
     path('post/share/api', views.PostShareListViewApi.as_view(), name='short_share_api'),
     path('post/send', views.PostSendView.as_view(), name='short_send'),
-    
+
     path('post/<int:post_id>/', views.PostDetailView.as_view(), name='short_detail'),
-    
-    
+
+
     path('fetch_post_reactions/<int:post_id>/', views.FetchPostReactions.as_view(), name='fetch_post_reactions'),
     path('create_update_post_reactions/', views.CreateUpdatePostReactions.as_view(), name='create_update_post_reactions'),
     path('delete_post_reactions/', views.DeletePostReactions.as_view(), name='delete_post_reactions'),
