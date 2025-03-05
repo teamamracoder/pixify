@@ -1,4 +1,4 @@
-{% extends "enduser/base.html" %} {% block title %}Pixify-Message{% endblock %}
+{% extends "enduser/base.html" %} {% block title %}Pixify-Chats{% endblock %}
 {% block content %} {% load static %}
 
 <div class="maindiv">
@@ -42,9 +42,11 @@
                                     res.forEach(chat => {
 
                                         $("#fill").append(`
-                                        <div class="modal-list">
-                                        <img src="${chat.chat_cover}" id="profile-photo">
-                                            <a href="${chat.id}/message/" class="chats-item" id="hyperlink-text">${chat.title}</a><br>
+                                        <div class="modal-list" onclick="window.location.href='${chat.id}/message/'" style="cursor: pointer;">
+                                            <div class="src-profile-photo">
+                                                <img src="${staticUrl}${cleanMediaPath(chat.chat_cover)}" id="profile-photo">
+                                            </div>
+                                            <div class="chats-item">${chat.title}</div>
                                         </div>
                                         `);
                                     });
@@ -53,7 +55,12 @@
                             console.log(xhr)
                         },
                     });
-                })
+                });
+                // Reset input field and search results when modal is closed
+                $(".modal").on('hidden.bs.modal', function () {
+                    $("#search_chats").val(""); // Clear input field
+                    $("#fill").html(""); // Clear search results
+                });
             });
         </script>
     </div>
@@ -67,26 +74,26 @@
             <!-- Image Section -->
             <div class="image-div">
                 {% if chat.is_group %}
-                    <img src="{{ chat.chat_cover|default:'/static/images/group_pic.png' }}" alt="Chat Cover" class="profile-photo">
+                    <img src="{% static  chat.chat_cover|default:'/images/group_pic.png' %}" alt="Chat Cover" class="profile-photo">
                 {% else %}
-                    <img src="{{ chat.chat_cover|default:'/static/images/avatar.jpg' }}" alt="Chat Cover" class="profile-photo">
+                    <img src="{% static  chat.chat_cover|default:'/images/avatar.jpg' %}" alt="Chat Cover" class="profile-photo">
                 {% endif %}
             </div>
 
             <!-- Middle Section -->
             <div class="content-div">
-                <p class="chat-title">
+                <p class="chat-title" style="font-size:20px;">
                     <a href="{% url 'message' chat_id=chat.id %}" id="hyperlink-text" class="chat_title">
                         {{ chat.title }}
                     </a>
                 </p>
-                <div style="display:flex">
-                    <span class="chat-message">
-                       {% if chat.latest_message_sender_id == user.id and chat.latest_message_time >= chat.latest_reaction_time %}
+                <div style="display:flex; height:20px;font-size:15px;">
+                    <span class="chat-lts-message">
+                    {% if chat.latest_message_sender_id == user.id and chat.latest_message_time >= chat.latest_reaction_time %}
                         {% if chat.is_group %}
 
                             {% if chat.seen_by_all %}
-                            <i class="bi bi-check2-all"></i>
+                            <i class="bi bi-check2-all" style="color:#2ef3e4"></i>
                             {% else %}
                             <i class="bi bi-check2"></i>
                             {% endif %}
@@ -96,31 +103,30 @@
                         {% else %}
 
                             {% if chat.seen_by_all %}
-                                <i class="bi bi-check2-all"></i>
+                                <i class="bi bi-check2-all" style="color:#2ef3e4"></i>
                             {% else %}
                                 <i class="bi bi-check2"></i>
                             {% endif %}
 
                         {% endif %}
-                        {% else %}
-                         {% if chat.is_group %}
-                         <span class="msg_sender">
-                            {{chat.latest_message_sender_name}}:
-                         </span>
-                         {% comment %} {% else %}
-                           {{chat.latest_message_sender_name}}: {% endcomment %}
+                    {% else %}
+                        {% if chat.is_group and chat.latest_message_time >= chat.latest_reaction_time %}
+                        <span class="msg_sender">{{ chat.latest_message_sender_name}} :</span>
                         {% endif %}
-                      {% endif %}
+                    {% endif %}
                     </span>
                     <span>
                     {% if chat.latest_message %}
                         {% if chat.latest_reaction_time == '' or chat.latest_message_time >= chat.latest_reaction_time %}
-                            <p class="chat-message chat_title">{{ chat.latest_message }}</p>
+                             <!-- ✅ If message is unread, apply bold styling -->
+                            <p class="chat-lts-message {% if not chat.seen_by_user %}unread{% endif %}">
+                                {{ chat.latest_message }}
+                            </p>
                         {% else %}
-                            <p class="chat-message chat_title"> Reacted {{ chat.latest_reaction|safe }} on "{{ chat.latest_message }}"</p>
+                            <p class="chat-lts-message">'{{chat.latest_reaction_message_reacted_by}}' Reacted {{ chat.latest_reaction|safe }} on "{{ chat.latest_message }}"</p>
                         {% endif %}
                     {% else %}
-                        <p class="chat-message chat_title">No messages yet</p>
+                        <p class="chat-lts-message">No messages yet</p>
                     {% endif %}
 
                     </span>
@@ -139,7 +145,7 @@
 {% endfor %}
 {% else %}
 <hr>
-<p class="chat-message chat_title">No chats available yet</p>
+<p class="chat-lts-message">No chats available yet</p>
 {% endif %}
 
 <!-- Auto-Reload Logic -->
@@ -156,341 +162,327 @@
 
 
 
-
-    <!-- Modal -->
-    <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog"
-        aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <div class="input-group mb-3">
-
-                    <div class="parchat-container">
-                        <div class="parchat-trend-text">Make A Conversation</div>
-                        <div class="parchat-input-wrapper">
-                            <input type="text" id="parchat-searchin" class="parchat-form-control" placeholder="Search Name" aria-label="Search Name">
-                        </div>
-                        <div id="parchat-filled" class="parchat-profile-grid">
-                            <!-- Profile items go here -->
-                        </div>
-                        <button class="parchat-arrow-button" id="arrow-button">
-                            <i class='far fa-hand-point-right'></i>
-                        </button>
-                    </div>
-
-                    <!-- Modal for displaying user details -->
-                    <div id="parchat-userModal" class="parchat-modal">
-                        <div class="parchat-modal-content">
-                            <span class="parchat-close">&times;</span>
-                            <div id="parchat-user-details"></div>
-                        </div>
-                    </div>
-                </div>
-
+    <!-- Chat Create Modal -->
+<div id="chat-create-modal" class="chat-create-modal">
+    <div class="chat-create-modal-content">
+        <!-- Updated close button calls closeChatModal() -->
+        <div class="chat-close" onclick="closeChatModal()">✖</div>
+        <h5 class="chat-create-modal-title">Make A Conversation</h5>
+        <input type="text" id="chat-search" class="chat-form-control" placeholder="Search Name..." aria-label="Search Name">
+        <div id="chat-filled" class="chat-profile-grid">
+            <!-- Profile items go here -->
+        </div>
+        <div class="chat-modal-footer">
+            <div class="chat-arrow-button" id="arrow-button">
+                <i class="bi bi-arrow-right-circle"></i>
             </div>
-            </a>
         </div>
     </div>
 </div>
 
 <script>
-function focusSearchBar() {
-    setTimeout(function() {
-        document.getElementById('search_chats').focus();
-    }, 500); // Adjust delay if needed
-}
-$(document).ready(function () {
-    let selectedItems = []; // Array to store selected item IDs
-    let holdTimer;
-    let holdTriggered = false;
-    let redirectEnabled = true;  // Flag to determine if redirection is enabled
 
-    console.log('Initial selectedItems:', selectedItems);
+    const staticUrl = "{% static '' %}"; // This usually returns "/static/"
 
-// Function to fetch followers and followings based on the search query
-function fetchFollowersAndFollowings(searchQuery = '') {
-    $.ajax({
-        url: '/chat/followers/api?search=' + searchQuery,
-        type: 'GET',
-        success: function (res) {
-            let combinedHtml = '';
-            const fallbackImage = '/static/images/avatar.jpg';
+    function cleanMediaPath(media) {
+        return media.startsWith('/') ? media.slice(1) : media;
+      }
 
-            if (res.members.length === 0) {
-                // If no members are found, display a message
-                combinedHtml = '<div class="no-members-message">No Followers And Followings to Display</div>';
-            } else {
-                // Render followers
-                res.members.forEach(function (member) {
-                    const profileImage = member.user_id__profile_photo_url || fallbackImage;
-                    combinedHtml += `
-                        <div class="parchat-selection-body" id="user-${member.user_id}" data-user-id="${member.user_id}">
-                            <img src="${profileImage}" alt="${member.user_id__first_name}'s profile photo" class="parchat-profile-photo">
-                            <input type="checkbox" class="parchat-checkbox" id="checkbox-${member.user_id}" onchange="checkSelection(${member.user_id})" onclick="event.stopPropagation();">
-                            <div class="parchat-profile-text">${member.user_id__first_name} ${member.user_id__last_name}</div>
-                        </div>
-                    `;
-                });
+    // Focus on the new modal’s search bar
+    function focusSearchBar() {
+        setTimeout(function() {
+            document.getElementById('chat-search').focus();
+        }, 500); // Adjust delay if needed
+    }
 
-                // Update profiles in the DOM
-                $("#parchat-filled").html(combinedHtml);
+    $(document).ready(function () {
+        // Define selectedItems in this scope for global access via window.
+        let selectedItems = [];
 
-                // Reapply selected class to previously selected items
-                selectedItems.forEach(function (itemId) {
-                    $(`#user-${itemId}`).addClass('selected');
-                    $(`#checkbox-${itemId}`).prop('checked', true);
-                });
+        let holdTimer;
+        let holdTriggered = false;
+        let redirectEnabled = true;  // Flag to determine if redirection is enabled
 
-                updateArrowButtonVisibility();
-                applyPressHoldFunctionality();
-            }
-        },
-        error: function (xhr, status, error) {
-            console.log(xhr);
-        },
-    });
-}
+        console.log('Initial selectedItems:', selectedItems);
 
+        // Function to clear all selections and update UI elements
+        window.clearSelections = function () {
+            selectedItems = [];
+            $(".chat-selection-body").removeClass('selected');
+            $(".chat-checkbox").prop("checked", false).hide();
+            updateArrowButtonVisibility();
+            updateRedirectState();
+        };
 
-    // Apply press-and-hold functionality for selecting profiles
-    function applyPressHoldFunctionality() {
-        $(".parchat-selection-body").mousedown(function (event) {
-            let userId = $(this).data('user-id');
-            if (event.target.classList.contains('parchat-checkbox')) {
-                return; // Ignore mousedown on checkbox
-            }
-            holdTimer = setTimeout(function () {
-                selectProfile(userId);
-                holdTriggered = true; // Mark the hold as triggered
-                showUserDetails(userId); // Show the user details in the modal
-            }, 1000); // 1 second hold
-        }).mouseup(function (event) {
-            clearTimeout(holdTimer);
+        // Function to close the modal and clear selections
+        window.closeChatModal = function () {
+            document.getElementById('chat-create-modal').style.display = 'none';
+            window.clearSelections();
+        };
 
-            // Only trigger the regular click if hold was NOT triggered
-            if (!holdTriggered && !$(event.target).hasClass('parchat-checkbox')) {
-                if (redirectEnabled) {
-                    let userId = $(this).data('user-id');
-                    redirectToChat(userId);  // Handle the regular click event here
+        // Function to fetch followers and followings based on the search query
+        function fetchFollowersAndFollowings(searchQuery = '') {
+            $.ajax({
+                url: '/chat/followers/api?search=' + searchQuery,
+                type: 'GET',
+                success: function (res) {
+                    let combinedHtml = '';
+                    const fallbackImage = '/images/avatar.jpg';
+        
+                    if (res.members.length === 0) {
+                        combinedHtml = '<div class="no-members-message">No Followers And Followings to Display</div>';
+                    } else {
+                        res.members.forEach(function (member) {
+                            let id, firstName, lastName, profilePhoto;
+        
+                            // Check if the member is a follower or a following.
+                            if (member.hasOwnProperty('user_id')) {
+                                id = member.user_id;
+                                firstName = member.user_id__first_name;
+                                lastName = member.user_id__last_name;
+                                profilePhoto = member.user_id__profile_photo_url || fallbackImage;
+                            } else if (member.hasOwnProperty('following')) {
+                                id = member.following;
+                                firstName = member.following__first_name;
+                                lastName = member.following__last_name;
+                                profilePhoto = member.following__profile_photo_url || fallbackImage;
+                            } else {
+                                // Skip if neither key exists.
+                                return;
+                            }
+        
+                            combinedHtml += `
+                                <div class="xyz1">
+                                    <div class="xyz1-wrapper">
+                                        <div class="chat-selection-body" id="user-${id}" data-user-id="${id}">
+                                            <img src="${staticUrl}${cleanMediaPath(profilePhoto)}" alt="${firstName}'s profile photo" class="chat-profile-photo">
+                                        </div>
+                                        <input type="checkbox" class="chat-checkbox" id="checkbox-${id}" onchange="checkSelection(${id})" onclick="event.stopPropagation();">
+                                    </div>
+                                    <div class="chat-profile-text">
+                                        <div class="xyz1-title">${firstName} ${lastName}</div>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                    }
+        
+                    // Update profiles in the DOM
+                    $("#chat-filled").html(combinedHtml);
+        
+                    // Reapply selected class to previously selected items and check their checkboxes
+                    selectedItems.forEach(function (itemId) {
+                        $(`#user-${itemId}`).addClass('selected');
+                        $(`#checkbox-${itemId}`).prop('checked', true);
+                    });
+        
+                    updateArrowButtonVisibility();
+                    updateCheckboxVisibility();
+                    applyPressHoldFunctionality();
+                },
+                error: function (xhr, status, error) {
+                    console.log(xhr);
+                },
+            });
+        }
+
+        // Apply press-and-hold functionality for selecting profiles
+        function applyPressHoldFunctionality() {
+            $(".chat-selection-body").mousedown(function (event) {
+                let userId = $(this).data('user-id');
+                if (event.target.classList.contains('chat-checkbox')) {
+                    return; // Ignore mousedown on checkbox
                 }
+                holdTimer = setTimeout(function () {
+                    selectProfile(userId);
+                    holdTriggered = true; // Mark the hold as triggered
+                }, 1000); // 1 second hold
+            }).mouseup(function (event) {
+                clearTimeout(holdTimer);
+                if (!holdTriggered && !$(event.target).hasClass('chat-checkbox')) {
+                    let userId = $(this).data('user-id');
+                    // If no profile is yet selected, then redirect on click.
+                    // Otherwise, toggle the selection.
+                    if (redirectEnabled) {
+                        redirectToChat(userId);
+                    } else {
+                        selectProfile(userId);
+                    }
+                }
+                holdTriggered = false;
+            }).mouseleave(function () {
+                clearTimeout(holdTimer);
+                holdTriggered = false;
+            });
+        }
+
+        // Select the profile when pressed or clicked
+        window.selectProfile = function (userId) {
+            $(`#user-${userId}`).toggleClass('selected');
+            // Ensure checkboxes are visible if there is any selection
+            if (selectedItems.length === 0 || !$(`#user-${userId}`).hasClass('selected')) {
+                // When deselecting, check if no items remain selected
+                updateCheckboxVisibility();
+            } else {
+                $('.chat-checkbox').css('display', 'block');
             }
-            holdTriggered = false; // Reset holdTriggered after mouseup
-        }).mouseleave(function () {
-            clearTimeout(holdTimer);
-            holdTriggered = false; // Reset on mouse leave
-        });
-    }
 
-    // Select the profile when pressed or clicked
-    window.selectProfile = function (userId) {
-        $(`#user-${userId}`).toggleClass('selected');
-
-        // Show checkboxes on all profiles
-        $('.parchat-checkbox').css('display', 'block');
-
-        // Automatically check the selected profile's checkbox
-        if ($(`#user-${userId}`).hasClass('selected')) {
-            $(`#checkbox-${userId}`).prop('checked', true);
-            if (!selectedItems.includes(userId)) {
-                selectedItems.push(userId);
+            if ($(`#user-${userId}`).hasClass('selected')) {
+                $(`#checkbox-${userId}`).prop('checked', true);
+                if (!selectedItems.includes(userId)) {
+                    selectedItems.push(userId);
+                }
+            } else {
+                $(`#checkbox-${userId}`).prop('checked', false);
+                selectedItems = selectedItems.filter(id => id !== userId);
             }
-        } else {
-            $(`#checkbox-${userId}`).prop('checked', false);
-            selectedItems = selectedItems.filter(id => id !== userId);
-        }
 
-        console.log('Selected items after toggle:', selectedItems);
+            console.log('Selected items after toggle:', selectedItems);
+            updateArrowButtonVisibility();
+            updateRedirectState();
+            updateCheckboxVisibility();
+        };
 
-        updateArrowButtonVisibility();
-        updateRedirectState();
-        updateCheckboxVisibility();
-    }
-
-    // Handle changes in the checkbox (selection)
-    window.checkSelection = function (userId) {
-        const element = $(`#user-${userId}`);
-
-        if ($(`#checkbox-${userId}`).is(':checked')) {
-            element.addClass('selected');
-            if (!selectedItems.includes(userId)) {
-                selectedItems.push(userId);
+        // Handle changes in the checkbox (selection)
+        window.checkSelection = function (userId) {
+            const element = $(`#user-${userId}`);
+            if ($(`#checkbox-${userId}`).is(':checked')) {
+                element.addClass('selected');
+                if (!selectedItems.includes(userId)) {
+                    selectedItems.push(userId);
+                }
+            } else {
+                element.removeClass('selected');
+                selectedItems = selectedItems.filter(id => id !== userId);
             }
-        } else {
-            element.removeClass('selected');
-            selectedItems = selectedItems.filter(id => id !== userId);
-        }
 
-        console.log('Selected items after checkbox change:', selectedItems);
+            console.log('Selected items after checkbox change:', selectedItems);
+            updateArrowButtonVisibility();
+            updateRedirectState();
+            updateCheckboxVisibility();
+        };
 
-        updateArrowButtonVisibility();
-        updateRedirectState();
-        updateCheckboxVisibility();
-    }
-
-    // Update the visibility of the arrow button based on the number of selected items
-    function updateArrowButtonVisibility() {
-        console.log('Selected items length:', selectedItems.length);
-        if (selectedItems.length > 1) {
-            $('#arrow-button').css('display', 'block');
-            console.log('Arrow button shown');
-        } else {
-            $('#arrow-button').css('display', 'none');
-            console.log('Arrow button hidden');
-        }
-    }
-
-    // Update the redirect state (if no items are selected, enable redirection)
-    function updateRedirectState() {
-        if (selectedItems.length === 0) {
-            redirectEnabled = true; // Allow redirect when no checkboxes are selected
-        } else {
-            redirectEnabled = false; // Prevent redirect when any checkbox is selected
-        }
-    }
-
-    // Update the checkbox visibility based on selected items
-    function updateCheckboxVisibility() {
-        if (selectedItems.length === 0) {
-            // Hide checkboxes when no items are selected
-            $('.parchat-checkbox').hide();
-        } else if (selectedItems.length > 1) {
-            // Show checkboxes when more than 1 item is selected
-            $('.parchat-checkbox').show();
-        }
-    }
-
-    let arrowButton = document.getElementById('arrow-button');
-    if (arrowButton) {
-        arrowButton.addEventListener('click', function() {
-            console.log('Arrow button clicked. Selected items:', selectedItems);
-
-            if (selectedItems.length === 1) {
-                createChat(1, selectedItems); // Convert type to integer and pass array
-            } else if (selectedItems.length > 1) {
-                createChat(2, selectedItems); // Convert type to integer
+        // Update the visibility of the arrow button based on the number of selected items
+        function updateArrowButtonVisibility() {
+            console.log('Selected items length:', selectedItems.length);
+            if (selectedItems.length > 1) {
+                $('#arrow-button').css('display', 'block');
+                console.log('Arrow button shown');
+            } else {
+                $('#arrow-button').css('display', 'none');
+                console.log('Arrow button hidden');
             }
-        });
-    } else {
-        console.error("Arrow button element not found!");
-    }
+        }
 
-    // Redirect to chat with the selected user
-    window.redirectToChat = function (userId) {
-        if (redirectEnabled) {
-            checkExistingChat(userId, function (existingChat) {
-                if (existingChat && existingChat.chat_id) {
-                    // Redirect to the existing chat
-                    window.location.href = '/chat/' + existingChat.chat_id + '/message/?message=' + encodeURIComponent(existingChat.message || '');
-                } else {
-                    // Create a new chat if no existing chat is found
-                    createChat(1, [userId]);
+        // Update the redirect state (if no items are selected, enable redirection)
+        function updateRedirectState() {
+            redirectEnabled = selectedItems.length === 0;
+        }
+
+        // Update the checkbox visibility based on selected items
+        // Now: if at least one item is selected, show all checkboxes; otherwise hide them.
+        function updateCheckboxVisibility() {
+            if (selectedItems.length > 0) {
+                $('.chat-checkbox').show();
+            } else {
+                $('.chat-checkbox').hide();
+            }
+        }
+
+        let arrowButton = document.getElementById('arrow-button');
+        if (arrowButton) {
+            arrowButton.addEventListener('click', function() {
+                console.log('Arrow button clicked. Selected items:', selectedItems);
+                if (selectedItems.length === 1) {
+                    createChat(1, selectedItems);
+                } else if (selectedItems.length > 1) {
+                    createChat(2, selectedItems);
+                }
+            });
+        } else {
+            console.error("Arrow button element not found!");
+        }
+
+        // Redirect to chat with the selected user
+        window.redirectToChat = function (userId) {
+            if (redirectEnabled) {
+                checkExistingChat(userId, function (existingChat) {
+                    if (existingChat && existingChat.chat_id) {
+                        window.location.href = '/chat/' + existingChat.chat_id + '/message/?message=' + encodeURIComponent(existingChat.message || '');
+                    } else {
+                        createChat(1, [userId]);
+                    }
+                });
+            }
+        };
+
+        // Function to check if a chat already exists
+        function checkExistingChat(userId, callback) {
+            $.ajax({
+                url: '/chat/create/',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    type: 1,
+                    members: [userId],
+                    _token: $('meta[name="csrf-token"]').attr('content')
+                }),
+                success: function (res) {
+                    callback(res);
+                },
+                error: function (xhr, status, error) {
+                    console.log('Error:', xhr, status, error);
+                    callback(null);
                 }
             });
         }
-    };
 
-    // Function to check if a chat already exists
-    function checkExistingChat(userId, callback) {
-        $.ajax({
-            url: '/chat/create/', // Endpoint to check or create chat
-            type: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify({
-                type: 1, // Chat type (personal chat)
-                members: [userId], // User ID to check chat with
-                _token: $('meta[name="csrf-token"]').attr('content') // CSRF token for security
-            }),
-            success: function (res) {
-                // Pass the response to the callback function
-                callback(res);
-            },
-            error: function (xhr, status, error) {
-                console.log('Error:', xhr, status, error);
-                // Call callback with null on error
-                callback(null);
+        $.ajaxSetup({
+            headers: {
+                'X-CSRFToken': $('meta[name="csrf-token"]').attr('content')
             }
         });
-    }
 
-
-    $.ajaxSetup({
-        headers: {
-            'X-CSRFToken': $('meta[name="csrf-token"]').attr('content') // Set CSRF token in the headers
+        // Function to create a chat with the selected members
+        function createChat(type, members) {
+            $.ajax({
+                url: '/chat/create/',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    type: type,
+                    members: members,
+                    _token: $('meta[name="csrf-token"]').attr('content')
+                }),
+                success: function (res) {
+                    window.location.href = '/chat/' + res.chat_id + '/message/?message=' + encodeURIComponent(res.message);
+                },
+                error: function (xhr, status, error) {
+                    console.log('Error:', xhr, status, error);
+                }
+            });
         }
-    });
 
-    // Function to create a chat with the selected members
-    function createChat(type, members) {
-        $.ajax({
-            url: '/chat/create/',
-            type: 'POST',
-            contentType: 'application/json', // Set content type to JSON
-            data: JSON.stringify({
-                type: type,
-                members: members,
-                _token: $('meta[name="csrf-token"]').attr('content') // CSRF token for security
-            }),
-           success: function (res) {
-            window.location.href = '/chat/' + res.chat_id + '/message/?message=' + encodeURIComponent(res.message);
-            },
-            error: function (xhr, status, error) {
-                console.log('Error:', xhr, status, error);
-            }
+        // Dynamic search listener for the new modal input
+        $('#chat-search').on('input', function () {
+            const searchQuery = $(this).val();
+            fetchFollowersAndFollowings(searchQuery);
         });
-    }
 
-    // Show user details in a modal
-    function showUserDetails(userId) {
-        $.ajax({
-            url: `/chat/user/details/${userId}`,
-            type: 'GET',
-            success: function (data) {
-                // Populate the modal with user details
-                $('#parchat-user-details').html(`
-                    <h3>${data.name}</h3>
-                    <p>${data.bio}</p>
-                    <p>Email: ${data.email}</p>
-                `);
-
-                // Show the modal
-                $('#parchat-userModal').show();
-            },
-            error: function (xhr, status, error) {
-                console.log('Error fetching user details:', error);
-            }
-        });
-    }
-
-    // Close modal on clicking the close button
-    $('#parchat-userModal .parchat-close').click(function() {
-        $('#parchat-userModal').hide();
+        // Fetch all followers and followings on page load
+        fetchFollowersAndFollowings();
     });
-
-    // Event listener for dynamic search
-    $('#parchat-searchin').on('input', function () {
-        const searchQuery = $(this).val();
-        fetchFollowersAndFollowings(searchQuery); // Fetch followers and followings based on the search query
-    });
-
-    // Event listener for search button click
-    $('#parchat-searchbtn').click(function () {
-        const searchQuery = $('#parchat-searchin').val();
-        fetchFollowersAndFollowings(searchQuery); // Trigger search when button is clicked
-    });
-
-    // Fetch all followers and followings on page load
-    fetchFollowersAndFollowings();
-});
-
 </script>
 
+
+
 </div>
-<div class="plus-modal">
-    <button data-toggle="modal" data-target="#exampleModalCenter" class="border-0 bg-transparent">
-        <i class="text-light bi bi-plus-circle"></i>
-    </button>
+    <div class="plus-modal" onclick="document.getElementById('chat-create-modal').style.display='block'">
+        <div> <i class="text-light bi bi-plus-circle"></i> </div>
+    </div>
 </div>
-</div>
+
+
 <style>
     .chats-list-box{
         background-color: #1f0447e3;
@@ -503,8 +495,9 @@ function fetchFollowersAndFollowings(searchQuery = '') {
     .plus-modal{
         font-size: 24px;
         position: absolute;
-        bottom: 33px;right:
-        28px;background-color:  #6a0b7d;
+        bottom: 33px;
+        right: 28px;
+        background-color:  #6a0b7d;
         height: 40px;
         width: 40px;
         border-radius: 50%;
@@ -519,17 +512,18 @@ function fetchFollowersAndFollowings(searchQuery = '') {
 
     .no-members-message {
     text-align: center;
-    color: fff;
+    color:#b19eee;
     font-weight: bold;
     box-shadow: none;
     border: none;
     padding: 45px;
     margin: 0;
-    font-size: larger;
+    font-size:smaller;
 }
 
 
     .modal-list{
+        align-items: center;
         margin:10px;
         border-radius:5px;
         border:10px white;
@@ -548,9 +542,12 @@ function fetchFollowersAndFollowings(searchQuery = '') {
     }
 
     #hyperlink-text{
-        text-decoration:none;
-        color:white;
-        font-size:17px;
+        justify-content: flex-start;
+        align-items: center;
+        display: flex;
+        text-decoration: none;
+        color: white;
+        font-size: 17px;
     }
     #p-pic img {
         padding: 15px 20px;
@@ -678,8 +675,8 @@ function fetchFollowersAndFollowings(searchQuery = '') {
 
 /* Middle Section (Dynamic) */
 .content-div {
-    margin-left: 70px; /* Leaves space for the fixed image section */
-    margin-right: 100px; /* Leaves space for the fixed right-aligned section */
+    width: 70%;
+    margin-left: 60px;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
@@ -688,19 +685,14 @@ function fetchFollowersAndFollowings(searchQuery = '') {
 /* Title and Message Styling */
 .chat-title {
     margin: 0;
-    color: #000;
-    overflow: hidden;
-    width:100%;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    color: gray;
 }
 
-.chat-message {
-    margin: 0;
-    font-size: 0.9em;
-    color: gray;
-    overflow: hidden;
+.chat-lts-message {
     text-overflow: ellipsis;
+    overflow: hidden;
+    max-width: 290px;
+    color: #aca5a7d6;
 }
 
 /* Right-aligned Section (Fixed) */
@@ -742,8 +734,7 @@ function fetchFollowersAndFollowings(searchQuery = '') {
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-
-        font-size: 17px;
+        font-size: 20px;
     }
 }
 
@@ -764,12 +755,23 @@ function fetchFollowersAndFollowings(searchQuery = '') {
 
             font-size: 17px;
         }
+        .chat-create-modal-content{
+            width:90% !important;
+        }
+        .chat-create-modal{
+            left: 0% !important;
+            width: 100% !important;
+        }
     }
 
     @media (max-width: 992px) {
         .users {
             padding: 20px;
             box-shadow: 0 4px 8px rgba(151, 95, 236, 0.5);
+        }
+        .chat-profile-grid {
+            gap: 5% !important;
+            padding: 10px !important;
         }
 
         .sticky-icon {
@@ -782,17 +784,19 @@ function fetchFollowersAndFollowings(searchQuery = '') {
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-
-            font-size: 13px;
+            font-size: 20px;
+        }
+        .chat-create-modal-content{
+            height: 80% !important;
+            width:90% !important;
+        }
+        .chat-create-modal{
+            top: 0% !important;
+            left: 6% !important;
+            width: 90% !important;
         }
     }
 
-    /* Hide the element on screens smaller than 768px (or your desired breakpoint) */
-    @media only screen and (max-width: 768px) {
-        .mobile-hide {
-
-        }
-    }
 
     @media (max-width: 768px) {
         .users {
@@ -849,9 +853,6 @@ function fetchFollowersAndFollowings(searchQuery = '') {
             right: 92px;
             bottom: 50px;
         }
-        .count_aling{
-
-        }
         #hyperlink-text {
             display: block;
             width: 100%;
@@ -896,7 +897,6 @@ function fetchFollowersAndFollowings(searchQuery = '') {
             bottom: 90px;
         }
 
-
     }
     .user-item {
         display: flex;
@@ -935,176 +935,199 @@ function fetchFollowersAndFollowings(searchQuery = '') {
         border-bottom-right-radius:0px;
     }
 
-    .parchat-container {
-        width: 90%;
-        padding: 20px;
-        position: relative; /* Ensure relative positioning for children */
+/* Modal Changes: Renamed from "parchat-" to "chat-" */
+
+    /* Modal Overlay */
+    .chat-create-modal {  
+        left: 10%;
+        width: 80%;
+        height: 70vh;
+        display: none;
+        position: absolute;
+        z-index: 1000;
+        top: 0;
     }
 
-    .parchat-trend-text {
-        font-size: 24px;
-        margin-bottom: 20px;
-    }
-
-    .parchat-profile-grid {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 20px;
-    }
-
-    .parchat-selection-body {
-        height: 85px;
-        width: 85px;
+    /* Modal Content */
+    .chat-create-modal-content {
+        border-radius: 15px;
+        height:100%;
+        background-color: #301756;
+        margin: 15% auto;
+        padding: 30px;
+        width:80%;
         position: relative;
-        display: inline-block;
-        margin: 10px;
+    }
+
+    /* Close Button */
+    .chat-close {
+    color: #aaa;
+    float: right;
+    font-size: 20px;
+    font-weight: bold;
+    }
+    .chat-close:hover,
+    .chat-close:focus {
+    text-decoration: none;
+    cursor: pointer;
+    }
+
+    /* Modal Title */
+    .chat-create-modal-title {
+    font-size: 24px;
+    margin-bottom: 20px;
+    }
+
+    /* Search Input */
+    .chat-form-control {
+        border-radius: 5px;
+        border: 2px rgb(163, 120, 120);
+        width: 100%;
+        background: #3d3d6b;
+        padding: 10px;
+        flex-grow: 1; 
+        border: 10px;
+        outline: none;
+        font-size: 16px;
+        border-color: #007BFF;
+        box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+    }
+    .chat-form-control::placeholder {
+    color: #aaa;
+    }
+
+    /* Profile Grid */
+    .chat-profile-grid {
+        height: 38vh;
+        overflow-y: scroll;
+        padding:30px;
+        flex-wrap: wrap;
+        display: flex;
+        gap: 2%;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+    }
+
+    /* Profile Item */
+    .chat-selection-body {
+        justify-content: center;
+        align-items: center;
+        height: 70px;
+        width: 70px;
+        position: relative;
+        display: flex;
         cursor: pointer;
         border: 2px solid transparent;
         border-radius: 50%;
         padding: 10px;
         transition: transform 0.2s, border-color 0.2s;
     }
-
-    .parchat-selection-body.selected {
-        border-color: #007BFF;
-        background-color: rgba(0, 123, 255, 0.1); /* Light blue background for selected profiles */
+    .chat-selection-body.selected {
+    border-color: #007BFF;
+    background-color: rgba(0, 123, 255, 0.1);
     }
 
-    .parchat-profile-photo {
+    /* Profile Photo */
+    .chat-profile-photo {
+        justify-content: center;
+        align-items: center;
+        display: flex;
         border-radius: 50%;
         width: 60px;
         height: 60px;
+        margin: 0 auto;
     }
 
-    .parchat-checkbox {
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        width: 15px;
-        height: 15px;
-        background-color: white;
-        border-radius: 50%;
-        border: 2px solid #333;
-        display: none;
-    }
-
-    .parchat-profile-text {
-        text-align: center;
-        margin-top: 10px;
-    }
-
-    .parchat-btn,
-    .parchat-btn-outline-secondary {
-        background:none;
-        margin-top: 10px;
-        padding: 10px;
-        font-size: 16px;
-    }
-
-    .parchat-form-control {
-        background:none;
-        padding:10px;
-        flex-grow: 1;
-    }
-
-    .parchat-btn-outline-secondary {
-        background-color: black;
-        color: #333;
-    }
-
-    .parchat-modal {
-        display: none; /* Hidden by default */
-        position: fixed; /* Stay in place */
-        z-index: 1000; /* Sit on top */
-        left: 0;
-        top: 0;
-        width: 100%; /* Full width */
-        height: 100%; /* Full height */
-        overflow: auto; /* Enable scroll if needed */
-        background-color: rgba(0, 0, 0, 0.4); /* Black with opacity */
-    }
-
-    .parchat-modal-content {
-        background-color: #fefefe;
-        margin: 15% auto; /* 15% from the top and centered */
-        padding: 20px;
-        border: 1px solid #888;
-        width: 80%; /* Fixed width */
-        max-width: 600px; /* Add a max-width to limit expansion */
-        height: 400px; /* Fixed height */
-        overflow-y: auto; /* Make the modal content scrollable */
+    /* Checkbox */
+    .chat-checkbox {
+        left: 13px;
         position: relative;
+        border: 2px solid #333;
     }
 
-    .parchat-close {
-        color: #aaa;
-        float: right;
-        font-size: 28px;
-        font-weight: bold;
+    /* Profile Text */
+    .chat-profile-text {
+        height: 4vh;
+        justify-content: center;
+        align-items: center;
+        width: 70%;
+        font-size: 10px;
+        color: #fff;
+        display: flex;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
-    .parchat-close:hover,
-    .parchat-close:focus {
-        color: black;
-        text-decoration: none;
-        cursor: pointer;
-    }
-
+    /* Arrow Button */
     #arrow-button {
-        display: none; /* Hide by default */
-        position: fixed;
-
+    bottom: 2%;
+    display: none;
+    left: 80%;
+    position: absolute;
     }
-
-    .parchat-arrow-button {
-        display: none; /* Hide by default */
-        position: absolute; /* Position inside parent */
-        bottom: 26%; /* Adjust based on parent height */
+    .chat-arrow-button {
+        width:68px;
+        display: none;
+        position: absolute;
+        bottom: 26%;
         right: 35%;
-        background-color: #007BFF;
         color: white;
         border: none;
         border-radius: 5px;
         padding: 10px 20px;
         cursor: pointer;
-        font-size: 20px;
+        font-size: 30px;
     }
 
-    .parchat-input-wrapper {
-        display: flex;
-        align-items: center;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        padding: 5px;
-        max-width: 300px;
-        margin: 0 auto;
-        margin-bottom: 20px;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    }
-
-    .parchat-form-control {
-        background: none;
-        padding: 10px;
-        flex-grow: 1;
-        border: none;
-        outline: none;
-        font-size: 16px;
-    }
-
-    .parchat-form-control::placeholder {
-        color: #aaa;
-    }
+    /* End of Modal Changes */
 
     .parchat-input-wrapper:focus-within {
         border-color: #007BFF;
         box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
     }
     .msg_sender{
-      color: #4f8892;
+      color: #ddcaff;
       padding-right:5px;
     }
-
+    .src-profile-photo{
+        width: 40px;
+        height: 40px;
+    }
+    .chats-item{
+        padding-left: 10px;
+        width: 80%;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        display: block;
+    }
+    .xyz1{
+        width: 30%;
+        justify-content: center;
+        align-items: center;
+        display: flex;
+        flex-direction: column;
+        padding-top: 10px;
+    }
+    .xyz1-title{
+        white-space: nowrap;
+        height: 4vh;
+        align-items: center;
+        width: 100%;
+        font-size: 13px;
+        color: #fff;
+        display: flex;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .unread {
+        font-weight: bold;
+    }
 
 </style>
 {% endblock %}

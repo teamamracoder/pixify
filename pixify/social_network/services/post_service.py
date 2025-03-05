@@ -1,10 +1,12 @@
+from django.db.models import Count
 from ..models.user_model import User
 from . import GetData
-from ..models import Post,Comment,PostReaction,PostReaction
+from ..models import Post,Comment,PostReaction,PostReaction,MasterList
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
 from ..constants.default_values import PostType
 from ..models import models
+from ..services import comment_service
 
 def manage_list_posts():
     return Post.objects.all()
@@ -107,6 +109,68 @@ def update_post(user_id,post_id,post_titile):
 # comment
 def reaction_name(post_id):
    return PostReaction.objects.filter( post_id_id=post_id, is_active=True).first()
+
+
+def get_user_posts(user_id):
+    user_posts = Post.objects.filter(posted_by=user_id).values('id', 'type', 'media_url', 'title', 'description', 'created_at')
+
+
+    # Format the created_at timestamp after fetching data
+    formatted_posts = [
+        {**post, 'created_at': comment_service.format_timestamp(post['created_at'])}
+        for post in user_posts
+    ]
+
+    return formatted_posts
+
+
+def get_active_post_reactions(post_id):
+    return PostReaction.objects.filter(post_id=post_id, is_active=True)
+
+
+
+def create_or_update_post_reaction(post_id, user, reaction):
+    post = Post.objects.get(id=post_id)
+
+    post_reaction, created = PostReaction.objects.get_or_create(
+        post_id=post,
+        created_by=user,
+        reacted_by=user,
+        defaults={'master_list_id': reaction}
+    )
+
+    if not created:
+
+        post_reaction.master_list_id = reaction
+        post_reaction.is_active=True
+        post_reaction.updated_by =user
+        post_reaction.save()
+
+
+
+def get_active_reaction(post_id, user):
+    return PostReaction.objects.filter(
+        post_id=post_id,
+        reacted_by=user,
+        is_active=True
+    ).first()
+
+
+def deactivate_reaction(reaction_instance):
+    reaction_instance.is_active = False
+    reaction_instance.save()
+    return reaction_instance
+def get_reaction_by_name(post_id):
+    return MasterList.objects.filter(id=post_id).first()
+
+
+def get_user_post_comment_count(user_id):
+    posts = Post.objects.filter(posted_by=user_id).annotate(
+        comment_count=Count('fk_post_comments_post_id', filter=Q(fk_post_comments_post_id__is_active=True))
+    ).values('id', 'comment_count')
+
+    return list(posts)  # Returns a list of dictionaries with 'id' and 'comment_count'
+
 
 
 def get_users_by_id(user_id):

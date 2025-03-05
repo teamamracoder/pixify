@@ -7,7 +7,7 @@ from pixify import settings
 from ..services import user_service
 from ..constants import Gender
 from ..constants import RelationShipStatus
-from ..services import chat_service
+from ..services import chat_service,message_service
 from django.http import JsonResponse
 from ..services import manage_notification_service
 from django.http import JsonResponse
@@ -155,8 +155,24 @@ class EnduserprofileUpdateView(View):
 def unread_notifications_count(request):
     user = request.user
     unread_count = Notification.objects.filter(receiver_id=user, is_read=False).count()
+    if unread_count > 10:
+        unread_count = '10+'
+    elif unread_count== 0:
+        unread_count = ''
     return JsonResponse({'unread_count': unread_count})
 
 
 
 
+@login_required
+def unread_messages_count(request): 
+    user=request.user        #unread message show
+    unread_msg_count=message_service.unread_msg_count(user.id)
+    if unread_msg_count > 10:
+        unread_msg_count = '10+'
+    elif unread_msg_count== 0:
+        unread_msg_count = ''
+    return JsonResponse({'unread_msg_count': unread_msg_count})
+    
+
+        

@@ -60,6 +60,8 @@ def list_messages_mention_Api(chat, user, search_query, exclude_ids, mentioned_a
             Q(member_id__first_name__icontains=search_query) |Q(member_id__last_name__icontains=search_query))
 
     mention_list = list(mention.values('member_id', 'member_id__first_name', 'member_id__last_name', 'member_id__profile_photo_url'))
+
+    mention_list.sort(key=lambda x: x['member_id__first_name'])
     
     return mention_list
 

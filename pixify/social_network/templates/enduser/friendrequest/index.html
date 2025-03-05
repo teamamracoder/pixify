@@ -73,12 +73,13 @@
                     //for default profile photo
                     let profilePhoto = user.profile_photo_url ? user.profile_photo_url : "/images/avatar.jpg";
                     let followersText = user.followers_text || "No followers yet";
+                    const profileUrl = "/profile/" + user.id + "/";
                     //append user card for users one by one
                     usersList.append(`
                         <div class="user-card" data-user-id="${user.id}">
-                            <img src="/static${profilePhoto}" alt="User">
+                            <img src="/static${profilePhoto}" alt="User" class = "follow-redirect" data-profile-url="${profileUrl}">
                             <div class="user-info">
-                                <h4 id="userName">${user.first_name} ${user.middle_name ? user.middle_name + " " : ""}${user.last_name}</h4>
+                                <h4 id="userName" class = "follow-redirect" data-profile-url="${profileUrl}" >${user.first_name} ${user.middle_name ? user.middle_name + " " : ""}${user.last_name}</h4>
                                 <p>${followersText}</p>
                             </div>
                             <button class="follow-btn" id="followUser">Follow</button>
@@ -104,6 +105,12 @@
             }
         });
     }
+
+    $(document).on("click", ".follow-redirect", function() {
+        const url = $(this).data("profile-url");
+        window.location.href = url;
+    });
+    
 
 //After Click Follow Button To Insert Follower table and add Following
     function followUser(following_id, buttonElement) {

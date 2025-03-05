@@ -67,6 +67,7 @@ def get_comment_replies(parent_comment_id, user):
         reply_dict = {
             'id': reply.id,
             'comment': reply.comment,
+            'comment_by__id': reply.comment_by.id,
             'comment_by__first_name': reply.comment_by.first_name,
             'comment_by__last_name': reply.comment_by.last_name,
             'comment_by__profile_photo_url': reply.comment_by.profile_photo_url,
@@ -89,6 +90,7 @@ def short_comments(short, user):
         comment_dict = {
             'id': comment.id,
             'comment': comment.comment,
+            'comment_by__id': comment.comment_by.id,
             'comment_by__first_name': comment.comment_by.first_name,
             'comment_by__last_name': comment.comment_by.last_name,
             'comment_by__profile_photo_url': comment.comment_by.profile_photo_url,
@@ -186,3 +188,32 @@ def toggle_like(comment, user):
 def comment_reaction_count(comment):
     return CommentReaction.objects.filter(comment_id = comment, is_active = True).count()
 
+
+def get_short_media(post_id):
+    return Post.objects.filter(id=post_id, is_active=True).values('media_url')
+
+
+def get_post_by_id(post_id):
+    return Post.objects.get(id=post_id)  # Ensure this is `.get()` and NOT `.filter()`
+
+
+def format_created_time(timestamp):
+    if not timestamp:
+        return ''
+    now = timezone.now()
+    diff = now - timestamp
+
+    if diff.total_seconds() < 60:
+        return "Just now"
+    elif diff.total_seconds() < 3600:
+        minutes = int(diff.total_seconds() / 60)
+        return f"{minutes} minutes ago"
+    elif diff.total_seconds() < 86400:
+        hours = int(diff.total_seconds() / 3600)
+        return f"{hours} hours ago"
+    elif  diff.total_seconds() < 604800:
+        return f"{int(diff.total_seconds() // 86400)}d ago"
+    else:        
+        return timestamp.strftime('%B %d %Y').replace(' 0', ' ')    
+    
+    
