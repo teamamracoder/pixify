@@ -271,7 +271,7 @@
                     </span>
                   </div>
                 </div>
-              
+
 
                 <div class="post-des-img">
                     <p class="px-3 pt-2" id="title" style="font-size:15px; margin: 0; margin-bottom: 5px;padding-bottom:13px;">
@@ -351,7 +351,7 @@
                                 <i class="bi bi-heart pe-1" style="font-size: 18px; cursor: pointer;position: relative;top: 6px;"></i>
                             </span>
 
-                            <div class="reaction-popover" style="display: none; position: absolute; top: -50px; left: 0; background:black; border-radius: 10px; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);">
+                            <div class="reaction-popover" style="display: none; position: absolute; top: -50px; left: 0; background:#34116d; border-radius: 10px; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);">
                                 <i data-reaction-id="1" class="fa-solid fa-heart" style="color: #ff0000;font-size: 20px;cursor: pointer;"></i>
                                 <i data-reaction-id="2" class="fa-solid fa-face-laugh-squint" style="color: #ffcb0f;font-size: 20px;cursor: pointer;"></i>
                                 <i data-reaction-id="3" class="fa-solid fa-face-smile-beam" style="color: #FFD43B;font-size: 20px;cursor: pointer;"></i>
@@ -436,15 +436,26 @@
     <div class="carousel-inner">
       {% for video in shorts %}
       <div class="carouselItemForShortSection {% if forloop.first %}active{% endif %}" id="videoBox{{ forloop.counter }}">
-        <a href="{% url 'short' %}?post_id={{ video.id }}" id="videoLink{{ forloop.counter }}">
+        <a href="{% url 'short_detail' post_id=video.id %}" id="videoLink{{ forloop.counter }}">
           <div class="video-wrapper" id="video{{ video.id }}" data-post-id="{{ video.id }}">
             <div class="video-box">
               {% if video.media_url %}
-              <video id="myVideo{{ forloop.counter }}" autoplay loop muted>
-                <source src="{% static video.media_url.0 %}" type="video/mp4">
-              </video>
+                <video id="myVideo{{ forloop.counter }}" loop muted>
+                    <source src="{% static video.media_url.0 %}" type="video/mp4">
+                </video>
+                <div class="user-info">
+                    <div class="profile-and-name">
+                        <img src="{% static video.posted_by.profile_photo_url | default:'/static/images/avatar.jpg' %}"
+                             alt="{{ video.posted_by.first_name }}'s Profile Picture"
+                             class="short-profile-pic">
+                        <div>
+                            <div class="username" data-username="{{ video.posted_by.first_name }} {{ video.posted_by.last_name }}">{{ video.posted_by.first_name }} {{ video.posted_by.last_name }}</div>
+                        </div>
+                    </div>
+                    <div class="description">{{ video.description }}</div>
+                </div>
               {% else %}
-              <p>No video available.</p>
+                <p>No video available.</p>
               {% endif %}
             </div>
           </div>
@@ -453,103 +464,206 @@
       {% endfor %}
     </div>
     <!-- Carousel Controls -->
-    <button class="carousel-control-prev" type="button" data-bs-target="#carouselExample" data-bs-slide="prev">
+    <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleForShortSection" data-bs-slide="prev">
       <span class="carousel-control-prev-icon" aria-hidden="true"></span>
       <span class="visually-hidden">Previous</span>
     </button>
-    <button class="carousel-control-next" type="button" data-bs-target="#carouselExample" data-bs-slide="next">
+    <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleForShortSection" data-bs-slide="next">
       <span class="carousel-control-next-icon" aria-hidden="true"></span>
       <span class="visually-hidden">Next</span>
     </button>
-  </div>
-
+</div>
 <style>
-    #carouselExampleForShortSection {
-        max-width: 100%;
-        margin: 10px auto;
-        overflow-x: hidden; /* Hide horizontal overflow */
-    }
-    .carousel-inner {
-        display: flex;
-        flex-wrap: nowrap; /* Prevent wrapping */
-        justify-content: flex-start; /* Align items to the start */
-        margin-left:10px;
-        gap: 5px;
-    }
-    .carouselItemForShortSection {
-        flex: 0 0 auto;
-        width: 100%;
-        max-width: calc(100% / 3 - 20px); /* Default to 3 videos per row */
-        margin: 5px;
-        box-sizing: border-box;
-        transition: transform 0.5s ease;
-    }
-    .carouselItemForShortSection video {
-        width: 100%;
-        height: auto;
-        margin:auto;
-        aspect-ratio: 9/16; /* Aspect ratio for vertical videos */
-        object-fit: cover;
-        border-radius: 10px;
-    }
-    @media (max-width: 768px) {
-        .carouselItemForShortSection {
-            max-width: calc(100% / 2 - 20px); /* Adjust to 2 videos per row for smaller screens */
-        }
-    }
+.control-div {
+    position: absolute;
+    top: 1.4vh;
+    align-items: center;
+}
 
+#carouselExampleForShortSection {
+    max-width: 100%;
+    margin: 10px auto;
+    overflow-x: hidden;
+}
+.carousel-inner {
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    margin-left: 10px;
+    gap: 5px;
+}
+.carouselItemForShortSection {
+    flex: 0 0 auto;
+    width: 100%;
+    max-width: calc(100% / 3 - 20px);
+    margin: 5px;
+    box-sizing: border-box;
+    transition: transform 0.5s ease;
+    position: relative;
+}
+.carouselItemForShortSection video {
+    width: 100%;
+    height: auto;
+    margin: auto;
+    aspect-ratio: 9/16;
+    object-fit: cover;
+    border-radius: 10px;
+}
+.short-profile-pic {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+.username {
+    color: #fff;
+    font-size: 14px;
+    font-weight: bold;
+}
+.user-info {
+    position: absolute;
+    bottom: 12px;
+    left: 1px;
+    display: flex;
+    align-items: center;
+    padding: 5px 10px;
+    border-radius: 5px;
+    flex-direction: column;
+    text-align: left;
+}
+
+.profile-and-name {
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.description {
+    color: #fff;
+    font-size: 12px;
+    margin-top: 5px;
+    text-align: left;
+    width: 100%;
+}
+
+
+@media (max-width: 768px) {
+    .carouselItemForShortSection {
+        max-width: calc(100% / 2 - 20px);
+    }
+}
 </style>
 
+
 <script>
+
+    document.querySelectorAll('.username').forEach(username => {
+        const maxLength = 10;
+        if (username.textContent.length > maxLength) {
+          username.textContent = username.textContent.substring(0, maxLength) + '...';
+        }
+      });
+
     document.addEventListener('DOMContentLoaded', function () {
-        const carousel = document.getElementById('carouselExample');
-        const prevButton = carousel.querySelector('.carousel-control-prev');
-        const nextButton = carousel.querySelector('.carousel-control-next');
-        const items = carousel.querySelectorAll('.carousel-item');
-        let currentIndex = 0;
-        const videosPerView = () => window.innerWidth < 768 ? 2 : 3;
+       const carousel = document.getElementById('carouselExampleForShortSection');
+       const prevButton = carousel.querySelector('.carousel-control-prev');
+       const nextButton = carousel.querySelector('.carousel-control-next');
+       const items = carousel.querySelectorAll('.carouselItemForShortSection');
+       let currentIndex = 0;
+       const videos = document.querySelectorAll('.carouselItemForShortSection video');
 
-        function showItems() {
-            const perView = videosPerView();
-            items.forEach((item, index) => {
-                item.style.display = (index >= currentIndex && index < currentIndex + perView) ? 'block' : 'none';
-            });
-            updateButtons();
-        }
+       const videosPerView = () => (window.innerWidth < 768 ? 2 : 3);
 
-        function showNextItem() {
-            if (currentIndex + videosPerView() < items.length) {
-                currentIndex++;
-            }
-            showItems();
-        }
+       function showItems() {
+           const perView = videosPerView();
+           items.forEach((item, index) => {
+               item.style.display = (index >= currentIndex && index < currentIndex + perView) ? 'block' : 'none';
+           });
+           updateButtons();
+       }
 
-        function showPrevItem() {
-            if (currentIndex > 0) {
-                currentIndex--;
-            }
-            showItems();
-        }
+       function showNextItem() {
+           if (currentIndex + videosPerView() < items.length) {
+               currentIndex++;
+           }
+           showItems();
+       }
 
-        function updateButtons() {
-            const isFirstItem = currentIndex === 0;
-            const isLastItem = currentIndex + videosPerView() >= items.length;
-            prevButton.style.display = isFirstItem ? 'none' : 'block';
-            nextButton.style.display = isLastItem ? 'none' : 'block';
-        }
+       function showPrevItem() {
+           if (currentIndex > 0) {
+               currentIndex--;
+           }
+           showItems();
+       }
 
-        prevButton.addEventListener('click', showPrevItem);
-        nextButton.addEventListener('click', showNextItem);
-        window.addEventListener('resize', showItems);
+       function updateButtons() {
+           const isFirstItem = currentIndex === 0;
+           const isLastItem = currentIndex + videosPerView() >= items.length;
+           prevButton.style.display = isFirstItem ? 'none' : 'block';
+           nextButton.style.display = isLastItem ? 'none' : 'block';
+       }
 
-        showItems();
-        updateButtons();
-    });
+       prevButton.addEventListener('click', showPrevItem);
+       nextButton.addEventListener('click', showNextItem);
+       window.addEventListener('resize', showItems);
+
+       showItems();
+       updateButtons();
+
+       function pauseAllVideos() {
+           videos.forEach(video => {
+               video.pause();
+               video.currentTime = 0;
+           });
+       }
+
+       videos.forEach(video => {
+           // Desktop: Hover to play
+           video.addEventListener('mouseenter', function () {
+               if (!isMobileDevice()) {
+                   pauseAllVideos(); // Pause all videos before playing the new one
+                   video.play();
+               }
+           });
+
+           video.addEventListener('mouseleave', function () {
+               if (!isMobileDevice()) {
+                   video.pause();
+                   video.currentTime = 0;
+               }
+           });
+
+           // Mobile: Tap to play (and stop others)
+           video.addEventListener('click', function () {
+               if (isMobileDevice()) {
+                   if (video.paused) {
+                       pauseAllVideos(); // Stop all other videos
+                       video.play();
+                   } else {
+                       video.pause();
+                       video.currentTime = 0;
+                   }
+               }
+           });
+
+           // iOS Fix: Ensure first touch enables autoplay
+           video.addEventListener('touchstart', function (event) {
+               if (isMobileDevice() && video.paused) {
+                   event.preventDefault(); // Prevent click issues
+                   pauseAllVideos(); // Stop other videos
+                   video.play();
+               }
+           });
+       });
+
+       function isMobileDevice() {
+           return /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+       }
+   });
 
 </script>
 
 {% comment %} End by Badhan {% endcomment %}
-
 
 
 
@@ -589,7 +703,7 @@
       </div>
     </div>
   </div>
-  
+
 
 <script>
 
@@ -603,7 +717,7 @@
         // Show the modal (if not already triggered by data attributes)
         $("#shareModal").modal("show");
       });
-      
+
 
 const senderId = "{{ user.id }}"; // Rendered from your template
 const staticUrl = "{% static '' %}"; // This usually returns "/static/"
@@ -762,7 +876,7 @@ $(document).ready(function () {
     // Use currentPostId or the value from the hidden input as fallback
     const postIdForSend = currentPostId || $("#sharePostId").val();
     console.log("postID for sending:", postIdForSend);
-    
+
     let selectedMembers = [];
     let selectedChats = [];
 
@@ -795,7 +909,7 @@ $(document).ready(function () {
       dataType: 'json',
       success: function (response) {
         if (response.chat && response.chat.length > 0) {
-          response.chat.forEach((chatId) => {           
+          response.chat.forEach((chatId) => {
             console.log("Sending to chat with postID:", postIdForSend);
             sendShareToChat(chatId, postIdForSend, senderId);
           });
@@ -941,7 +1055,7 @@ $(document).ready(function () {
  <script src="{% static 'js/sribash.js' %}"></script>
 <script>
 
-    const currentUserId = {{ userid }}; 
+    const currentUserId = {{ userid }};
 
 $(document).ready(function () {
     let holdTimer; // Track the hold time
@@ -987,32 +1101,40 @@ $(document).ready(function () {
     }
 });
 
-
 $(document).ready(function() {
-    // When the post_reaction is clicked, show the popover
     $('.post_reaction').click(function () {
         $(this).siblings('.reaction-popover').toggle();
+
+        // Disable carousel when pop-up opens
+        var carousel = $(this).closest('.post-box').find('.carousel');
+        if ($(this).siblings('.reaction-popover').is(':visible')) {
+            carousel.carousel('pause'); // Stop carousel sliding
+            carousel.find('.carousel-control-prev, .carousel-control-next').css('pointer-events', 'none'); // Disable buttons
+        } else {
+            carousel.carousel('cycle'); // Resume carousel
+            carousel.find('.carousel-control-prev, .carousel-control-next').css('pointer-events', 'auto'); // Enable buttons
+        }
     });
 
-    // When a reaction icon is clicked, update the span and send AJAX request
     $('.reaction-popover i').click(function () {
-        var reactionId = $(this).data('reaction-id');
         var postContainer = $(this).closest('.reaction-container');
         var FirstPostId = $(this).closest('.post-box').find('.firstPostId').val();
-        var selectedIcon = $(this).attr('class');  // Get the class of selected icon
-        var selectedColor = $(this).css('color'); // Get the color of selected reaction
+        var reactionId = $(this).data('reaction-id');
+        var selectedIcon = $(this).attr('class');
+        var selectedColor = $(this).css('color');
 
-        // Update the main reaction span with selected icon
         postContainer.find('.post_reaction i')
-            .attr('class', selectedIcon)  // Change the icon class
-            .css('color', selectedColor)// Apply the selected color
+            .attr('class', selectedIcon)
+            .css('color', selectedColor)
             .css('top', 0);
 
-
-        // Hide the popover after selection
         postContainer.find('.reaction-popover').hide();
 
-        // Send AJAX request to update reaction
+        // Enable carousel after reaction is selected
+        var carousel = postContainer.closest('.post-box').find('.carousel');
+        carousel.carousel('cycle');
+        carousel.find('.carousel-control-prev, .carousel-control-next').css('pointer-events', 'auto');
+
         $.ajax({
             url: "{% url 'update_post_reaction' %}",
             type: "POST",
@@ -1022,36 +1144,8 @@ $(document).ready(function() {
                 'csrfmiddlewaretoken': '{{ csrf_token }}'
             },
             success: function (response) {
-                console.log(response);
-
-                var totalReactions = response.total_count; // Total reactions
-                var reactionNames = response.reaction_name; // List of user names
-                var userReactionId = response.user_reaction_id; // User's reaction ID
-
-                // Update reaction count text dynamically
-                var reactionText = "";
-                if (reactionNames.length > 0) {
-                    if (reactionNames.length === 1) {
-                        reactionText = `${reactionNames[0]}`;
-                    } else if (reactionNames.length === 2) {
-                        reactionText = `${reactionNames[0]} and ${reactionNames[1]}`;
-                    } else {
-                        reactionText = `${reactionNames[0]}, ${reactionNames[1]} and ${totalReactions - 2} others`;
-                    }
-                }
-
-                // Update total reaction count
+                var totalReactions = response.total_count;
                 postContainer.closest('.post-box').find("#total-reaction-count").text(totalReactions);
-
-                // Update reaction names display
-                postContainer.closest('.post-box').find("#reaction-count").html(reactionText);
-
-                // Hide the reaction container if no reactions
-                if (parseInt(totalReactions) === 0) {
-                    postContainer.find(".emojis_hide").hide();
-                } else {
-                    postContainer.find(".emojis_hide").show();
-                }
             },
             error: function () {
                 alert('Error updating reaction');
@@ -1059,6 +1153,7 @@ $(document).ready(function() {
         });
     });
 });
+
 
 // get reaction ajax
 $(document).ready(function () {
@@ -1207,7 +1302,7 @@ $(document).ready(function () {
                 },
                 headers: { "X-CSRFToken": "{{ csrf_token }}" },
                 success: function (data) {
-
+                 console.log(data)
 
                     $('#commentText').val(''); // Clear textarea
                     const commentList = $('#commentList');
@@ -1292,10 +1387,6 @@ $(document).ready(function () {
             const FirstPostId = $(this).closest('.post-box').find('.firstPostId').val();
             const FirstUserId = $(this).closest('.post-box').find('.firstUserId').val();
 
-
-
-
-
             $.ajax({
                 url: 'comments/getComment/',
                 type: 'GET',
@@ -1328,6 +1419,12 @@ data.user_details.forEach(com_del => {
     : "/profile/" + com_del.id + "/";
 
     const profileImage = com_del.profile_photo_url ? com_del.profile_photo_url : '/images/avatar.jpg';
+    const formattedTime = new Date(data.posts[0].created_at).toLocaleString([], {
+        weekday: 'long'
+    }) + " " + new Date(data.posts[0].created_at).toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit'
+    });
 const com_prof=`
 
 
@@ -1335,7 +1432,9 @@ const com_prof=`
 
                 <div class="d-flex "style="flex-direction: column;" >
                  <h6 class="u-name mx-1 follow-redirect" style="font-size:14px" data-profile-url="${profileUrl}">${com_del.first_name} ${com_del.last_name} </h6>
-                 <span style="font-size:11px;margin-left:5px;position: relative;bottom: 10px;" class="py-1">${new Date(com_del.created_at).toLocaleString([],  { weekday: 'long' })} ${new Date(com_del.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}<i class="bi bi-globe-americas p-1" style="font-size:10px"></i></span>
+<span style="font-size:11px; margin-left:5px; position: relative; bottom: 10px;" class="py-1">
+                ${formattedTime} <i class="bi bi-globe-americas p-1" style="font-size:10px"></i>
+            </span>
 
                  </div>    `;
 com_profile.html(com_prof);
@@ -1346,6 +1445,7 @@ com_profile.html(com_prof);
 let uniqueId = `carousel${data.posts[0].id}_${Math.random().toString(36).substring(7)}`; // Ensure a unique ID
 
 let postItem = `
+
     <div class="post-des-img">
         <p class="px-3 pt-2" style="font-size:15px; margin: 0; margin-bottom: 5px;">${data.posts[0].title}</p>
 
@@ -1355,7 +1455,7 @@ let postItem = `
                 ?
                 // Carousel for multiple media files (images and videos)
                 `
-                    <div id="${uniqueId}" class="carousel slide" data-bs-ride="carousel">
+                    <div id="${uniqueId}" class="carousel slide" >
                         <div class="carousel-indicators">
                             ${data.posts[0].media_url.map((media, index) => `
                                 <button type="button" data-bs-target="#${uniqueId}"
@@ -1408,13 +1508,6 @@ let postItem = `
     </div>
 `;
 
-// **Manually initialize Bootstrap carousel after adding it to the DOM**
-setTimeout(() => {
-    let carouselElement = document.getElementById(uniqueId);
-    if (carouselElement) {
-        new bootstrap.Carousel(carouselElement);
-    }
-}, 500); // Delay to ensure it's added to the DOM
 
 photo_com.html(postItem);
 
@@ -1488,8 +1581,15 @@ photo_com.html(postItem);
         const url = $(this).data("profile-url");
         window.location.href = url;
     });
-    
+
   // comment total_count
+
+
+
+
+
+
+
 
 $(document).ready(function () {
         $(".post-box").each(function () {
@@ -1552,7 +1652,7 @@ $(document).on('click', '.view-comment', function () {
             dataType: 'json',
             data: { comment_id: commentId },
             success: function (data) {
-                console.log("af",data)
+
                 if (data.replies.length > 0) {
                     let replyHtml = `<div id="replies-${commentId}" class="ms-4" style="display: none;">`;
 
@@ -1705,7 +1805,40 @@ function loadCommentsLikes() {
 
 
 </script>
+<script>
+    $(document).ready(function () {
+        $(".allcomments").each(function () {
+            var commentElement = $(this);
+            var commentId = commentElement.find(".comment-id").val();
 
+            console.log("Comment ID:", commentId);
+
+            $.ajax({
+                type: "GET",
+                url: "/fetch-comment-likess/",  // URL to fetch likes
+                data: { comment_id: commentId },  // Send comment_id
+                success: function (response) {
+                    console.log("Response for Comment ID:", commentId, response);
+
+                    if (response.like_count !== undefined) {
+                        commentElement.find(".like-count").text(response.like_count);
+                    }
+
+                    // Update like button appearance based on whether the user liked it
+                    var likeButton = commentElement.find(".commentlike i");
+                    if (response.user_liked) {
+                        likeButton.removeClass("bi-heart").addClass("bi-heart-fill").css("color", "red");
+                    } else {
+                        likeButton.removeClass("bi-heart-fill").addClass("bi-heart").css("color", "");
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error fetching likes for Comment ID:", commentId, error);
+                }
+            });
+        });
+    });
+    </script>
 
 
 {% comment %} post update ajax {% endcomment %}

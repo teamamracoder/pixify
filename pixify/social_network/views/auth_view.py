@@ -60,6 +60,7 @@ class VerifyOTPView(View):
         otp = request.POST.get("otp")
 
         if services.auth_service.verify_otp(email, otp):
+            print("OTP",otp)
             # get user by email
             user = services.user_service.get_user_by_email(email)
 

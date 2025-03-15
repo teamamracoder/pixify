@@ -50,7 +50,7 @@ class ManagePostListView(View):
 
         # Fetch the search query from the URL parameters
         search_query = request.GET.get('search', '')
-        sort_by = request.GET.get('sort_by', 'posted_by')
+        sort_by = request.GET.get('sort_by', 'id')
         sort_order = request.GET.get('sort_order', SortingOrder.DESC.value)
         page_number = request.GET.get('page', 1)
 
@@ -61,6 +61,10 @@ class ManagePostListView(View):
             sorting_order=sort_order,
             page_number=page_number
         )
+        # if "data" in data and isinstance(data["data"], list):
+        for val in data["data"]:
+            user_id = val.get("posted_by_id")
+            val["user_data"] = list(services.get_users_by_id(user_id))    
         return render(request,
             'adminuser/post/list.html',
             success_response("post data fetched successfully", data)
@@ -99,7 +103,7 @@ class ManagePostUpdateView(View):
             post.treat_as = form.cleaned_data['treat_as']
             post.save()
             return redirect('manage_post_list')
-        # return render(request, 'adminuser/post/update.html', {"form": form, "post_id": post.id})
+        
         return render(request, 'adminuser/post/create.html',   success_response(
                 message=messages),
                 {"form": form,"post_id": post.id})
@@ -116,11 +120,11 @@ class ManagePostDeleteView(View):
 
 class ManageTogglePostActiveView(View):
     def post(self, request, post_id):
-        post = services.post_service.get_post(post_id)
+        post = Post.objects.get(id=post_id)
         post.is_active = not post.is_active  # Toggle active status
         post.save()
         return JsonResponse({'is_active': post.is_active})
-
+    
 
 class ManageToggleCommentActiveView(View):
      def post(self, request, comment_id):

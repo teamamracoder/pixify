@@ -16,7 +16,6 @@ from django.forms import model_to_dict
 
 
 class HomeView(View):
-
     @catch_error
     @auth_required
     @role_required(Role.ADMIN.value, Role.END_USER.value)
@@ -40,11 +39,13 @@ class HomeView(View):
         }
 
         # Fetch stories
-        storys = services.story_service.storylist_storys()
+        storys = services.story_service.storylist_storys(request.user.id)
         story_dict = {
             'storys': storys,
             #'name': 'sribash',
         }
+
+        # shorts fetching
         shorts = services.short_service.get_shorts()
         for short in shorts:
             count = services.short_service.reaction_count(short.id)

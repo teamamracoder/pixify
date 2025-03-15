@@ -3,8 +3,8 @@ from django.shortcuts import render, redirect
 from ..services import (
     short_service,
     chat_service,
-    follower_service,    
-    chat_member_service,    
+    follower_service,
+    chat_member_service,
     story_service,
     post_reaction_service,
     post_service,
@@ -32,13 +32,13 @@ class ShortListView(View):
 
         random.shuffle(shorts)  # Randomize the list
         return render(request, 'enduser/short/index.html', {'shorts': shorts,'user':user})
-    
-    
+
+
 class PostDetailView(View):
     def get(self, request, post_id):
         user = request.user
         selected_post = short_service.get_short(post_id)
-        
+
         if selected_post.type == PostType.SHOTS.value:
             # Process and render the shots template
             count = short_service.reaction_count(selected_post.id)
@@ -46,7 +46,7 @@ class PostDetailView(View):
             comments = short_service.comment_count(selected_post.id)
             selected_post.comments_count = short_service.format_count(comments)
             selected_post.user_reacted = short_service.user_has_reacted(selected_post, user)
-            
+
             shorts = short_service.get_shorts()
             for s in shorts:
                 if s.id != selected_post.id:
@@ -55,11 +55,11 @@ class PostDetailView(View):
                     comm = short_service.comment_count(s.id)
                     s.comments_count = short_service.format_count(comm)
                     s.user_reacted = short_service.user_has_reacted(s, user)
-            
+
             shorts = [s for s in shorts if s.id != selected_post.id]
             random.shuffle(shorts)
             shorts.insert(0, selected_post)
-            
+
             return render(request, 'enduser/short/index.html', {'shorts': shorts, 'user': user})
         else:
             # For all other post types, process the post view
@@ -80,7 +80,7 @@ class PostDetailView(View):
                 'postreaction': postreaction,
             }
 
-            storys = story_service.storylist_storys()
+            storys = story_service.storylist_storys(request.user.id)
             story_dict = {'storys': storys}
             shorts = short_service.get_shorts()
             for short in shorts:
@@ -250,7 +250,7 @@ class PostShareListViewApi(View):
         user = request.user
         chats = chat_service.list_top_chats_api(request, user)
         follow = follower_service.list_follow_api(request, user)
-        
+
         data = {
             "chats": chats,
             "follow": follow
@@ -272,7 +272,7 @@ class PostSendView(View):
         members = data.get("members", [])
 
         chat_ids = []  # List to collect chat ids
-        
+
         # Send the video to the selected chats
         for chat_id in chats:
             chat = chat_service.get_chat_by_id(chat_id)

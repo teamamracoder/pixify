@@ -1,5 +1,6 @@
 #story_view.py
 import os
+from typing import List
 from django.shortcuts import render, redirect
 from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import render, redirect
@@ -7,7 +8,7 @@ from django.views import View
 
 from pixify import settings
 from .. import services
-from ..models import User,Post,User
+from ..models import User,Post,User,Follower
 from django.core.paginator import Paginator
 
 
@@ -109,8 +110,10 @@ class UserActiveStories(View):
         """
         Fetch all stories grouped by user.
         """
+        following_users = list(Follower.objects.filter(created_by=user_id).values_list('following_id', flat=True))
+        following_users.append(user_id)
         users_with_stories = (
-            Post.objects.values("posted_by_id").distinct()
+            Post.objects.filter(posted_by__in=following_users, type=PostType.STATUS.value).values("posted_by_id").distinct()
         )  # Get unique users with stories
 
         all_stories = {}
@@ -120,7 +123,7 @@ class UserActiveStories(View):
             user_stories = Post.objects.filter(posted_by_id=user_id,type=PostType.STATUS.value).order_by(
                 "created_at"
             )  # Get all stories of the user
-            print("user_stories",user_stories)
+            print("user_stories",list(user_stories))
 
             all_stories[user_id] = [
                 {
@@ -129,7 +132,8 @@ class UserActiveStories(View):
                     "description": story.description,
                     "posted_by": story.posted_by.id,
                     "first_name": story.posted_by.first_name,
-                    "last_name" : story.posted_by.last_name
+                    "last_name" : story.posted_by.last_name,
+                    "profile_photo_url": story.posted_by.profile_photo_url
                 }
                 for story in user_stories
             ]

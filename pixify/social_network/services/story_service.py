@@ -2,7 +2,9 @@
 from django.db.models import Max
 from itertools import chain
 from operator import attrgetter
-from ..models import Post
+
+from requests import request
+from ..models import Post,Follower
 from django.shortcuts import get_object_or_404
 from django.db.models import Q , When , Value ,Case ,IntegerField
 def manage_list_posts():
@@ -69,13 +71,22 @@ def user_story(media_urls, media_types, user_id, music_url=None, story_text=None
                 posted_by_id=user_id,
             ))
     return Post.objects.bulk_create(posts)
-def storylist_storys():
+def storylist_storys(user_id):
+    following_users = list(Follower.objects.filter(created_by=user_id).values_list('following_id', flat=True))
+    following_users.append(user_id)
     latest_posts = (
-        Post.objects.values('posted_by')
-        .annotate(latest_created_at=Max('created_at'))
-        .values_list('posted_by', 'latest_created_at')
-        .filter(type=PostType.STATUS.value)
-    )
+    Post.objects.filter(posted_by__in=following_users, type=PostType.STATUS.value)
+    .values('posted_by')
+    .annotate(latest_created_at=Max('created_at'))
+    .values_list('posted_by', 'latest_created_at')
+)
+    # latest_posts = (
+    #     Post.objects.values('posted_by')
+    #     .annotate(latest_created_at=Max('created_at'))
+    #     .values_list('posted_by', 'latest_created_at')
+    #     .filter(type=PostType.STATUS.value)
+    # )
+
     latest_post_filters = [
         Q(posted_by=user_id, created_at=created_at)
         for user_id, created_at in latest_posts

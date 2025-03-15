@@ -45,7 +45,12 @@ def manage_list_posts_filtered(search_query, sorting_order, sort_by, page_number
         .paginate(limit=10, page=page_number)
         .execute()
     )
-    # return data
+    # print(f"Post data = {data}")
+    # for val in data['data']:
+    #     # print(f"Post data = {val}")
+    #     # print(f"Post data = {val['id']}")
+    #     print(f"Post data = {val['posted_by_id']}")
+    #     posted_by_id = val['posted_by_id']
     return data
 
 
@@ -69,7 +74,8 @@ def manage_list_comments_filtered(post_id):
 
 
 
-
+def get_users_by_id(user_id):
+            return User.objects.filter(id=user_id).all()
 
 
 def admin_list_posts_filtered(search_query, sort_by='posted_by'):
@@ -118,14 +124,14 @@ def get_user_posts(user_id):
     return formatted_posts
 
 
-def get_active_post_reactions(post_id):    
+def get_active_post_reactions(post_id):
     return PostReaction.objects.filter(post_id=post_id, is_active=True)
 
 
 
 def create_or_update_post_reaction(post_id, user, reaction):
-    post = Post.objects.get(id=post_id) 
-    
+    post = Post.objects.get(id=post_id)
+
     post_reaction, created = PostReaction.objects.get_or_create(
         post_id=post,
         created_by=user,
@@ -138,7 +144,7 @@ def create_or_update_post_reaction(post_id, user, reaction):
         post_reaction.master_list_id = reaction
         post_reaction.is_active=True
         post_reaction.updated_by =user
-        post_reaction.save()    
+        post_reaction.save()
 
 
 
@@ -164,3 +170,8 @@ def get_user_post_comment_count(user_id):
     ).values('id', 'comment_count')
 
     return list(posts)  # Returns a list of dictionaries with 'id' and 'comment_count'
+
+
+
+def get_users_by_id(user_id):
+            return User.objects.filter(id=user_id).all()
