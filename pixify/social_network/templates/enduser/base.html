@@ -71,9 +71,9 @@
 
                         <li class="nav-item" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Chat">
                             <a class="nav-link" href="/chat/">
-                                <span
+                                <span id="message-counts"
                                     class="position-absolute top-0 start-30 translate-middle badge rounded-pill bg-danger"
-                                    style="margin-left:27px; margin-top:7px;">2+</span>
+                                    style="margin-left:27px; margin-top:7px;">{{unread_count}}</span>
                                 <i class="bi bi-messenger"></i>
                             </a>
                         </li>
@@ -313,13 +313,19 @@
                         </div>
                         <p class="ps-2">50+ Suggestion</p>
                     </div>
-                    <div class="pb-1 pt-2 mt-3 rightSidebardivs">
+                   <div class="pb-1 pt-2 mt-3 rightSidebardivs">
                         <div class="d-flex">
                             <a class="text-center text-white rightSidebardivName">Birthdays</a>
                             <a href="/birthday" class="text-center text-align-center ms-auto fw-semibold">See All</a>
                         </div>
-                        <p class="ps-2">No Birthday</p>
-                    </div>
+                        {% comment %} <p class="ps-2">2 birthday was occuers</p>  {% endcomment %}
+                         <p class="ps-2">{{birthday_count}} birthday was occuers</p> 
+                         {% comment %} {% if request.session.birthday_count and request.session.birthday_count > 0 %}
+                         <p>{{ request.session.birthday_count }} birthday(s) today!</p>
+                     {% endif %} {% endcomment %}
+                     
+                    </div> 
+
                     {% comment %} <div class="pb-1 pt-2 mt-3 rightSidebardivs">
                         <div class="d-flex">
                             <a class="text-center text-white rightSidebardivName">Contacts</a>
@@ -377,6 +383,9 @@
                     //For Notification count
                     let count = response.user_details.unreadNotification;
                     $('#notification-counts').text(count > 0 ? count + "+" : '');
+                    //For message count
+                    let msg_count = response.user_details.unreadMessage;
+                    $('#message-counts').text(msg_count);
                     //For Home Page Upload Section user Profile
                     const userProfileUploadSection = document.getElementById("userProfileUploadSection");
                     if (userProfileUploadSection) {

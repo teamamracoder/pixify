@@ -13,7 +13,7 @@ class NotificationView(View):
     @role_required(Role.ADMIN.value, Role.END_USER.value)
     def get(self, request):
         user_id=request.user.id
-        notifications_fetch = services.user_Notification_service.count_notification(user_id)
+        notifications_fetch = services.user_Notification_service.count_notification(user_id) 
         notification_list = list(notifications_fetch.values())
 
         # Sort notifications by created_at in descending order (newest first)

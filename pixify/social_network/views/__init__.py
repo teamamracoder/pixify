@@ -31,3 +31,4 @@ from .short_view import *
 from .call_view import *
 from .post_view import *
 from .firebase_view import *
+from .enduserlist_view import *

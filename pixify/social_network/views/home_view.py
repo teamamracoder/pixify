@@ -16,7 +16,6 @@ from django.forms import model_to_dict
 
 
 class HomeView(View):
-
     @catch_error
     @auth_required
     @role_required(Role.ADMIN.value, Role.END_USER.value)
@@ -40,11 +39,13 @@ class HomeView(View):
         }
 
         # Fetch stories
-        storys = services.story_service.storylist_storys()
+        storys = services.story_service.storylist_storys(request.user.id)
         story_dict = {
             'storys': storys,
             #'name': 'sribash',
         }
+
+        # shorts fetching
         shorts = services.short_service.get_shorts()
         for short in shorts:
             count = services.short_service.reaction_count(short.id)
@@ -55,6 +56,7 @@ class HomeView(View):
 
         random.shuffle(shorts)  # Randomize the list
 
+
         # Merge everything into a single context
         context = success_response(message=message, message_type=message_type)
         context.update({
@@ -62,6 +64,7 @@ class HomeView(View):
             'story_dict': story_dict,
             'shorts':shorts,
             'userid':userid,
+
         })
 
         return render(request, "enduser/home/index.html", context)
@@ -91,6 +94,12 @@ class LoginUserDetailsView(View):
     def get(self, request):
         user_id = request.user.id
         user_details = services.user_service.get_user(user_id)
+                #unread message show
+        unread_count=services.message_service.unread_msg_count(user_id)
+        if unread_count > 10:
+            unread_count = '10+'
+        elif unread_count== 0:
+            unread_count = ''
 
         user_details_dict = model_to_dict(user_details)
         totalUnreadNotification=services.user_Notification_service.count_unread_notifications(user_id)
@@ -102,7 +111,7 @@ class LoginUserDetailsView(View):
             "country":user_details.country,
             "profile_image_url":user_details.profile_photo_url,
             "unreadNotification":totalUnreadNotification,
-            "unreadMessage":0
+            "unreadMessage":unread_count,
 
         }
 

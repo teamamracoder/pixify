@@ -33,21 +33,21 @@
             </div>
 
             <div class="table-responsive">
-                <table class="table table-bordered">
+                <table class="table table-bordered text-center ">
                     <!-- new aaded by sujit -->
                     <thead class="table-info text-white">
-                        <tr>
-                            <th>
-                                <a class="text-decoration-none text-white"
+                        <tr >
+                            <th >
+                                <a class="text-decoration-none text-dark"
                                     href="?sort_by=first_name&sort_order={% if data.applied_options.sort.order == 'asc' %}desc{% else %}asc{% endif %}">Full
                                     Name</a>
                             </th>
                             <th>
-                                <a class="text-decoration-none text-white"
+                                <a class="text-decoration-none text-dark"
                                     href="?sort_by=email&sort_order={% if data.applied_options.sort.order == 'asc' %}desc{% else %}asc{% endif %}">Email</a>
                             </th>
                             <th>
-                                <a class="text-decoration-none text-white"
+                                <a class="text-decoration-none text-dark"
                                     href="?sort_by=gender&sort_order={% if data.applied_options.sort.order == 'asc' %}desc{% else %}asc{% endif %}">Gender</a>
                             </th>
                             <th>
@@ -55,7 +55,6 @@
                             </th>
                         </tr>
                     </thead>
-
                     <tbody>
                         {% for user in data.data %}
                         <tr>

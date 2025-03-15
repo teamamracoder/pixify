@@ -1,3 +1,5 @@
+{% load static %}
+
 {# templates/enduser/chat/messages_list_partial.html #}
 {% for date_group in grouped_messages %}
   {% ifchanged date_group.0 %}
@@ -9,26 +11,153 @@
   {% for message in date_group.1 %}
     <div class="message {% if message.sender_id.id == request.user.id %}sent{% else %}received{% endif %}" id="message-{{ message.id }}">
       <div class="message-content">
+
         {% if message.reply_for_message_id %}
-          <div class="parent-message">
-            <span>{{ message.reply_for_message_id.sender_id.first_name }} </span>
-            <div>{{ message.reply_for_message_id.text }}</div>
-            {% if message.reply_for_message_id.media_url %}
-              <span>{{ message.reply_for_message_id.media_url }}</span>
-            {% endif %}
+        <div class="parent-message">
+          <span>{{ message.reply_for_message_id.sender_id.first_name }}: </span>
+          <div class="reply-message-text">
+            {{ message.reply_for_message_id.text }}
           </div>
-        {% endif %}
-  
-        <div class="message-header">
-          <img src="{{ message.sender_id.profile_photo_url|default:'\static\images\avatar.jpg' }}"
-               alt="{{ message.sender_id.first_name }}'s Profile Picture"
-               class="message-profile-pic">
-          <span class="message-username">{{ message.sender_id.first_name }}</span>
+      
+          {% if message.reply_for_message_id.media_url %}
+            <div class="reply-media-container">
+              {% if message.reply_for_message_id.media_url|length == 1 %}
+                <!-- Single media: display full-width -->
+                <div class="messageMedia-single-media reply-media-single" data-media-list="{{ message.reply_for_message_id.media_url|join:',' }}">
+                  {% with media=message.reply_for_message_id.media_url.0 %}
+                    {% if media|slice:"-4:" == ".mp4" %}
+                      <video src="{% static media %}"></video>
+                    {% else %}
+                      <img src="{% static media %}" alt="Media" style="width: 100%; height: 100%;">
+                    {% endif %}
+                  {% endwith %}
+                </div>
+              {% else %}
+                <!-- Multiple media: display grid (show only first 4) -->
+                <div class="messageMedia-grid reply-media-grid" data-media-list="{{ message.reply_for_message_id.media_url|join:',' }}">
+                  {% for media in message.reply_for_message_id.media_url|slice:":4" %}
+                    <div class="messageMedia-grid-item reply-media-grid-item" data-index="{{ forloop.counter0 }}">
+                      {% if media|slice:"-4:" == ".mp4" %}
+                        <video src="{% static media %}" muted class="media_size"></video>
+                      {% else %}
+                        <img src="{% static media %}" alt="Media" style="width: 100%; height: 100%;">
+                      {% endif %}
+                      {% if forloop.last and message.reply_for_message_id.media_url|length > 4 %}
+                        <!-- Overlay to indicate additional media count -->
+                        <div class="messageMedia-overlay reply-media-overlay">
+                          <span>+{{ message.reply_for_message_id.media_url|length|add:"-4" }}</span>
+                        </div>
+                      {% endif %}
+                    </div>
+                  {% endfor %}
+                </div>
+              {% endif %}
+            </div>
+          {% endif %}
+        
+        {% if message.reply_for_message_id.post_id %}
+        <div class="message-reply-post">
+          <video id="message-short" class="message-reply-short-video media-stop" muted>
+            <source src="{% static message.reply_for_message_id.post_id.media_url.0 %}" type="video/mp4">
+          </video>
+          <div class="message-reply-short-info">
+            <div class="message-reply-short-user-info">
+              <img src="{% static  message.reply_for_message_id.post_id.posted_by.profile_photo_url|default:'/images/avatar.jpg' %}"
+                   alt="{{ message.reply_for_message_id.post_id.posted_by.first_name }}'s Profile Picture"
+                   class="message-reply-short-profile-pic">
+              <div class="message-reply-short-username">
+                {{ message.reply_for_message_id.post_id.posted_by.first_name }} {{ message.reply_for_message_id.post_id.posted_by.last_name }}
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="message-text">{{ message.text }}</div>
-        {% if message.media_url %}
-          <span class="message-media">{{ message.media_url }}</span>
         {% endif %}
+      </div>
+      {% endif %}
+
+
+  
+<div class="message-header">
+                    <img src="{% static  message.sender_id.profile_photo_url|default:'\images\avatar.jpg' %}" alt="{{ message.sender_id.first_name }}'s Profile Picture" class="message-profile-pic">
+                    <span class="message-username">{{ message.sender_id.first_name }}</span>
+                </div>
+
+                {% if message.media_url %}
+                {% if message.media_url|length == 1 %}
+                  <!-- Single media: display full-width -->
+                  <div class="messageMedia-single-media" data-media-list="{{ message.media_url|join:',' }}">
+                    {% with media=message.media_url.0 %}
+                      {% if media|slice:"-4:" == ".mp4" %}
+                        <video src="{% static media %}" controls  class="media_size"></video>
+                      {% else %}
+                        <img src="{% static media %}" alt="Media" style="width: 100%;height: 100%;">
+                      {% endif %}
+                    {% endwith %}
+                  </div>
+                {% else %}
+                  <!-- Multiple media: display grid (show only first 4) -->
+                  <div class="messageMedia-grid" data-media-list="{{ message.media_url|join:',' }}">
+                    {% for media in message.media_url|slice:":4" %}
+                      <div class="messageMedia-grid-item" data-index="{{ forloop.counter0 }}">
+                        {% if media|slice:"-4:" == ".mp4" %}
+                          <video src="{% static media %}" controls class="media_size"></video>
+                        {% else %}
+                          <img src="{% static media %}" alt="Media" style="width: 100%;height: 100%;">
+                        {% endif %}
+                        {% if forloop.last and message.media_url|length > 4 %}
+                          <!-- Overlay to indicate additional media count -->
+                          <div class="messageMedia-overlay">
+                            <span>+{{ message.media_url|length|add:"-4" }}</span>
+                          </div>
+                        {% endif %}
+                      </div>
+                    {% endfor %}
+                  </div>
+                {% endif %}
+              {% endif %}
+              
+              <!-- Modal for full view of media (carousel) -->
+              <div id="messageMediaModal">
+                <div class="messageMedia-close">✖</div>
+                <div class="messageMedia-modal-content">
+                  <div class="messageMedia-carousel">
+                    <div class="messageMedia-carousel-item"></div>
+                    <div class="messageMedia-carousel-controls">
+                      <div class="messageMedia-prev">
+                        <i class="bi bi-arrow-left-circle-fill"></i>
+                      </div>
+                      <div class="messageMedia-next">
+                        <i class="bi bi-arrow-right-circle-fill"></i>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>                     
+                                                      
+                <!-- Short  Section -->                
+                {% if message.post_id %}
+                <div class="message-post" onclick="window.location.href='{% url 'short' %}{{ message.post_id.id }}'">
+                  <video id="message-short" class="message-short-video" muted>
+                    <source src="{% static message.post_id.media_url.0 %}" type="video/mp4">
+                  </video>
+                  <div class="message-short-info">
+                    <div class="message-short-user-info">
+                      <img src="{% static  message.post_id.posted_by.profile_photo_url|default:'/images/avatar.jpg' %}"
+                           alt="{{ message.post_id.posted_by.first_name }}'s Profile Picture"
+                           class="message-short-profile-pic">
+                      <div class="message-short-username">
+                        {{ message.post_id.posted_by.first_name }} {{ message.post_id.posted_by.last_name }}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                {% endif %}
+
+                {% if message.text %}
+                <div class="message-text">{{ message.text }}</div>
+            {% endif %}
+
+            
   
         {% if message.updated_by %}
           <div class="edited-messages">
@@ -36,6 +165,8 @@
           </div>
         {% endif %}
       </div>
+
+
   
       <div class="message-footer">
         <div class="time">{{ message.created_at|date:"h:i A" }}</div>
@@ -67,21 +198,6 @@
   
       <div class="reactionandseen">
         <div class="reaction-display" id="reaction-display-{{ message.id }}">
-
-  {% comment %} 
-  Another approach for reaction
-   <div class="reaction-display" id="reaction-display-{{ message.id }}">
-      {% for reaction_id, count in message.msg_reaction_count.items %}
-        {% for key, react_values in message.msg_reaction_value.items %}
-          {% if key == reaction_id %}
-            <span style="margin-right: 5px; cursor: pointer;">
-              {{ react_values.0|safe }} {{ count }}
-            </span>
-          {% endif %}
-        {% endfor %}
-      {% endfor %}
-    </div> 
-  {% endcomment %}
           
         </div>
         <div class="seen-status">
