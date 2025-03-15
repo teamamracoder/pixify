@@ -29,8 +29,6 @@ def send_otp(email):
 
 
 def verify_otp(email, otp):
-    # if is_debugging():
-    #     return True
     cached_otp = cache.get(f"otp_{email}")
     if cached_otp == otp:
         # Invalidate the OTP after successful verification

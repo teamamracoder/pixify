@@ -97,9 +97,11 @@
                             {% else %}
                             <i class="bi bi-check2"></i>
                             {% endif %}
+                            {% if "sent a post" not in chat.latest_message %}
                             <span class="msg_sender">
                             You:
                             </span>
+                            {% endif %}
                         {% else %}
 
                             {% if chat.seen_by_all %}
@@ -111,14 +113,15 @@
                         {% endif %}
                     {% else %}
                         {% if chat.is_group and chat.latest_message_time >= chat.latest_reaction_time %}
-                        <span class="msg_sender">{{ chat.latest_message_sender_name}} :</span>
+                        {% if "sent a post" not in chat.latest_message %}
+                            <span class="msg_sender">{{ chat.latest_message_sender_name}} :</span>
+                        {% endif %}
                         {% endif %}
                     {% endif %}
                     </span>
                     <span>
                     {% if chat.latest_message %}
                         {% if chat.latest_reaction_time == '' or chat.latest_message_time >= chat.latest_reaction_time %}
-                             <!-- ✅ If message is unread, apply bold styling -->
                             <p class="chat-lts-message {% if not chat.seen_by_user %}unread{% endif %}">
                                 {{ chat.latest_message }}
                             </p>
