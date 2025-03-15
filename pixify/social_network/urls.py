@@ -172,8 +172,8 @@ urlpatterns = [
     #for enduser story
     # path('story/create/', views.UserStoryCreatView.as_view(),name='userstory_create'),
     # path('uploadStory/', views.UploadStoryView.as_view(),name='uploadStory'),
-    # path('call/<str:page_type>/<str:call_id>/<int:chat_id>/', views.MakeCallView.as_view(), name='make_call_page'),
-    #  path('call/<str:call_id>/<int:chat_id>/', views.CallView.as_view(), name='call_page'),
+    path('call/<str:page_type>/<str:call_id>/<int:chat_id>/', views.MakeCallView.as_view(), name='make_call_page'),
+    path('call/<str:call_id>/<int:chat_id>/', views.CallView.as_view(), name='call_page'),
     #for enduser story
     path('story/create/', views.UserStoryCreatView.as_view(),name='userstory_create'),
     # path('', views.UserStoryListView.as_view(), name='Userstory_list'),

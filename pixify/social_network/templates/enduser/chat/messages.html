@@ -32,7 +32,7 @@
             <div class="username " onclick="window.location.href='{% url 'profile' data.chat.member_id %}'">{{ data.chat.title }}</div>
             {% endif %}
         </div>
-        <!-- <div id="sendDataButton"><i class="fa-solid fa-phone"></i></div>  -->
+        <div id="sendDataButton"><i class="fa-solid fa-phone"></i></div>
     </div>
 
   <!-- Loading Spinner (placed as an overlay) -->
@@ -1096,24 +1096,24 @@ async function sendMessage() {
             return;
         }
 
-        // // Handle Calling
-        // if (data.action === "ringing") {
-        //   const callId = data.call_id;
-        //   const members = data.members;
-        //   const callerId = data.caller_id;
-        //   const currentUserId = "{{ user.id }}"; // Get logged-in user ID
+         // Handle Calling
+         if (data.action === "ringing") {
+           const callId = data.call_id;
+           const members = data.members;
+           const callerId = data.caller_id;
+           const currentUserId = "{{ user.id }}"; // Get logged-in user ID
       
-        //   console.log("Caller ID:", callerId);
-        //   console.log("Current User ID:", currentUserId);
+           console.log("Caller ID:", callerId);
+           console.log("Current User ID:", currentUserId);
       
-        //   if (currentUserId === callerId) {
-        //     console.log("Redirecting to ringing.html...");
-        //     window.location.href = `/call/ringing/${callId}/${chatId}/`;
-        //   } else {
-        //     console.log("Redirecting to calling.html...");
-        //     window.location.href = `/call/calling/${callId}/${chatId}/`;
-        //   }
-        // }
+           if (currentUserId === callerId) {
+             console.log("Redirecting to ringing.html...");
+             window.location.href = `/call/ringing/${callId}/${chatId}/`;
+           } else {
+             console.log("Redirecting to calling.html...");
+             window.location.href = `/call/calling/${callId}/${chatId}/`;
+           }
+         }
       
         // Handle typing indicator.
         const typingIndicator = document.querySelector('.chat-bubble');
@@ -2147,7 +2147,7 @@ if (chatBody) {
     });
 }
 
-/*
+
 // Call Handel
 function generateCallId() {
     return 'call_' + Math.random().toString(36).substr(2, 9); // Generates a random call ID
@@ -2166,7 +2166,7 @@ document.getElementById('sendDataButton').addEventListener('click', function() {
         caller_id: callerId // Include caller ID
     }));
 }); 
-*/
+
 
 // Typing Indicator
 document.addEventListener("DOMContentLoaded", function () {
