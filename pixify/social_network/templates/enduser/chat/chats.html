@@ -234,7 +234,7 @@
         call_id: incomingCallId,
         receiver: currentUserId
       }));
-      window.location.href = `/call/calling/${incomingCallId}/${incomingChatId}/`;
+      window.location.href = `/call/${incomingCallId}/${incomingChatId}/`;
     });
     
     document.getElementById("declineCallBtn").addEventListener("click", function() {
