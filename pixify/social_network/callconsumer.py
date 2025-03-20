@@ -16,12 +16,16 @@ class CallConsumer(AsyncWebsocketConsumer):
         user = self.scope.get("user")
         if user and user.is_authenticated:
             user_id = user.id
-            full_name = f"{user.first_name} {user.last_name}".strip() or user.username
-            profile_photo = user.profile_photo_url or "/static/images/default-profile.png"
+            full_name = (
+                f"{user.first_name} "
+                f"{(user.middle_name + ' ') if user.middle_name else ''}"
+                f"{user.last_name}"
+            )
+            profile_photo = user.profile_photo_url or  "/static/images/avatar.jpg"
         else:
             user_id = None
             full_name = "Anonymous"
-            profile_photo = "/static/images/default-profile.png"
+            profile_photo =  "/static/images/avatar.jpg"
 
         # Build a user details dict.
         self.user_details = {
