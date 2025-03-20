@@ -180,9 +180,6 @@ urlpatterns = [
     path('stories/user/<int:user_id>/', views.UserstoryListView.as_view(), name='user-stories'),
     path('uploadStory/', views.UploadStoryView.as_view(),name='uploadStory'),
 
-    # path('call/<str:page_type>/<str:call_id>/<int:chat_id>/', views.MakeCallView.as_view(), name='make_call_page'),
-    # path('call/<str:call_id>/<int:chat_id>/', views.CallView.as_view(), name='call_page'),
-
     path('stories/view/<int:user_id>/', views.UserActiveStories.as_view(), name='user_active_stories'),
 
 

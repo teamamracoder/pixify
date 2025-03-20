@@ -26,160 +26,107 @@
         <button class="action-button end-call" id="end-call"><i class="fas fa-phone-slash"></i></button>
     </div>
 </div>
+<audio id="localAudio" autoplay></audio>
 
+</body>
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         const chatId = "{{ chat_id }}";
-        const callId = "{{ call_id }}";
         const socket = new WebSocket(`ws://${window.location.host}/ws/call/${chatId}/`);
     
         let peerConnection;
-        let activeUsers = 0;
         let isMuted = false;
+        let localStream;
         const config = { iceServers: [{ urls: "stun:stun.l.google.com:19302" }] };
-        let iceCandidateQueue = [];  // Store ICE candidates until SDP is set
+        let iceCandidateQueue = [];
+    
+        function initializePeerConnection() {
+            if (peerConnection) return;
+    
+            peerConnection = new RTCPeerConnection(config);
+            console.log("🔧 PeerConnection initialized.");
+    
+            peerConnection.onicecandidate = (event) => {
+                if (event.candidate) {
+                    socket.send(JSON.stringify({
+                        action: "webrtc_signal",
+                        signal: event.candidate,
+                        from: chatId
+                    }));
+                }
+            };
+    
+            peerConnection.ontrack = (event) => {
+                if (event.streams.length > 0) {
+                    document.getElementById("remoteAudio").srcObject = event.streams[0];
+                }
+            };
+    
+            peerConnection.onconnectionstatechange = () => {
+                if (peerConnection.connectionState === "disconnected" || peerConnection.connectionState === "failed") {
+                    endCall();
+                }
+            };
+        }
     
         socket.onmessage = async function (event) {
             const data = JSON.parse(event.data);
             console.log("📩 Received WebSocket message:", data);
-
+    
             if (data.action === "webrtc_signal") {
-                if (!peerConnection) {
-                    console.warn("⚠️ PeerConnection is not initialized yet. Initializing now...");
-                    initializePeerConnection(); // Ensure this function exists
-                }
-
+                if (!peerConnection) initializePeerConnection();
+    
                 if (data.signal.type === "offer") {
-                    console.log("📞 Received WebRTC Offer. Current signaling state:", peerConnection.signalingState);
-
-                    if (peerConnection.signalingState !== "stable") {
-                        console.warn("⚠️ Skipping offer because signaling state is:", peerConnection.signalingState);
-                        return;
-                    }
-
-                    try {
-                        await peerConnection.setRemoteDescription(new RTCSessionDescription(data.signal));
-                        console.log("✅ Remote offer set successfully.");
-
-                        const answer = await peerConnection.createAnswer();
-                        console.log("📝 Created WebRTC Answer:", answer);
-
-                        await peerConnection.setLocalDescription(answer);
-                        console.log("✅ Local description set. Sending answer...");
-
-                        socket.send(JSON.stringify({
-                            action: "webrtc_signal",
-                            signal: answer,
-                            from: chatId
-                        }));
-
-                        // Process queued ICE candidates
-                        processQueuedICECandidates();
-                    } catch (error) {
-                        console.error("❌ Error handling offer:", error);
-                    }
-                } 
-                else if (data.signal.type === "answer") {
-                    console.log("📞 Received WebRTC Answer. Current signaling state:", peerConnection.signalingState);
-
-                    if (peerConnection.signalingState !== "have-local-offer") {
-                        console.warn("⚠️ Skipping answer because signaling state is:", peerConnection.signalingState);
-                        return;
-                    }
-
-                    try {
-                        await peerConnection.setRemoteDescription(new RTCSessionDescription(data.signal));
-                        console.log("✅ Remote answer set successfully.");
-
-                        // Process queued ICE candidates
-                        processQueuedICECandidates();
-                    } catch (error) {
-                        console.error("❌ Error setting remote answer:", error);
-                    }
-                } 
-                else if (data.signal.candidate) {
-                    console.log("🌍 Received ICE Candidate:", data.signal);
-
-                    if (peerConnection.remoteDescription && peerConnection.remoteDescription.type) {
-                        // Remote SDP is set, add ICE candidate immediately
-                        try {
-                            await peerConnection.addIceCandidate(new RTCIceCandidate(data.signal));
-                            console.log("✅ ICE candidate added:", data.signal);
-                        } catch (error) {
-                            console.error("❌ Error adding ICE candidate:", error);
-                        }
-                    } else {
-                        // Remote SDP not set yet, queue the ICE candidate
-                        console.warn("⚠️ Remote SDP not set yet. Queuing ICE candidate.");
-                        iceCandidateQueue.push(data.signal);
-
-                        // Retry adding ICE candidates after a short delay
-                        setTimeout(processQueuedICECandidates, 500);
-                    }
+                    await handleOffer(data.signal);
+                } else if (data.signal.type === "answer") {
+                    await handleAnswer(data.signal);
+                } else if (data.signal.candidate) {
+                    handleIceCandidate(data.signal);
                 }
-            } 
-            else if (data.action === "user_joined") {
-                activeUsers = data.active_users;
-                console.log(`👥 Users in call: ${activeUsers}`);
-            } 
-            else if (data.action === "user_left") {
-                activeUsers = data.active_users;
-                console.log(`👥 Users in call: ${activeUsers}`);
-
-                if (activeUsers <= 1) {
-                    console.log("🚪 Only one user in call, ending call...");
-                    endCall();
-                }
+            } else if (data.action === "user_left") {
+                if (data.active_users <= 1) endCall();
             }
         };
-
-        /**
-        * Processes queued ICE candidates once the remote description is set.
-        */
-        async function processQueuedICECandidates() {
-            if (peerConnection.remoteDescription && peerConnection.remoteDescription.type) {
-                console.log("🔄 Processing queued ICE candidates...");
-                for (let candidate of iceCandidateQueue) {
-                    try {
-                        await peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
-                        console.log("✅ Buffered ICE candidate added:", candidate);
-                    } catch (error) {
-                        console.error("❌ Error adding buffered ICE candidate:", error);
-                    }
-                }
-                iceCandidateQueue = []; // Clear queue after processing
+    
+        async function handleOffer(offer) {
+            if (peerConnection.signalingState !== "stable") return;
+            await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
+            const answer = await peerConnection.createAnswer();
+            await peerConnection.setLocalDescription(answer);
+            socket.send(JSON.stringify({ action: "webrtc_signal", signal: answer, from: chatId }));
+            processQueuedICECandidates();
+        }
+    
+        async function handleAnswer(answer) {
+            await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
+            processQueuedICECandidates();
+        }
+    
+        function handleIceCandidate(candidate) {
+            if (peerConnection.remoteDescription) {
+                peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+            } else {
+                iceCandidateQueue.push(candidate);
             }
         }
-
-        
+    
+        function processQueuedICECandidates() {
+            while (iceCandidateQueue.length > 0) {
+                peerConnection.addIceCandidate(new RTCIceCandidate(iceCandidateQueue.shift()));
+            }
+        }
+    
         async function startCall() {
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                window.localStream = stream;
-                peerConnection = new RTCPeerConnection(config);
-                stream.getTracks().forEach(track => peerConnection.addTrack(track, stream));
-    
-                peerConnection.onicecandidate = event => {
-                    if (event.candidate) {
-                        socket.send(JSON.stringify({
-                            action: "webrtc_signal",
-                            signal: event.candidate,
-                            from: chatId
-                        }));
-                    }
-                };
-    
+                localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                document.getElementById("localAudio").srcObject = localStream;
+                initializePeerConnection();
+                localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+                
                 const offer = await peerConnection.createOffer();
                 await peerConnection.setLocalDescription(offer);
-                socket.send(JSON.stringify({
-                    action: "webrtc_signal",
-                    signal: offer,
-                    from: chatId
-                }));
-    
+                socket.send(JSON.stringify({ action: "webrtc_signal", signal: offer, from: chatId }));
                 socket.send(JSON.stringify({ action: "user_joined", chat_id: chatId }));
-    
-                console.log("Call started successfully.");
             } catch (error) {
                 console.error("Error starting call:", error);
             }
@@ -191,38 +138,26 @@
                 peerConnection = null;
             }
     
-            if (window.localStream) {
-                window.localStream.getTracks().forEach(track => track.stop());
+            if (localStream) {
+                localStream.getTracks().forEach(track => track.stop());
             }
     
             socket.send(JSON.stringify({ action: "user_left", chat_id: chatId }));
-    
+            socket.close();
             window.location.href = `/chat/${chatId}/message/`;
         }
-
+    
         function toggleMute() {
-            if (!window.localStream) return;
-    
-            const audioTracks = window.localStream.getAudioTracks();
+            if (!localStream) return;
+            const audioTracks = localStream.getAudioTracks();
             if (audioTracks.length === 0) return;
-    
             isMuted = !isMuted;
             audioTracks[0].enabled = !isMuted;
-    
-            const muteButton = document.getElementById("mute");
-            const muteIcon = muteButton.querySelector("i");
-    
-            if (isMuted) {
-                muteIcon.classList.remove("fa-microphone");
-                muteIcon.classList.add("fa-microphone-slash");
-            } else {
-                muteIcon.classList.remove("fa-microphone-slash");
-                muteIcon.classList.add("fa-microphone");
-            }
+            document.getElementById("mute").querySelector("i").classList.toggle("fa-microphone-slash", isMuted);
+            document.getElementById("mute").querySelector("i").classList.toggle("fa-microphone", !isMuted);
         }
     
         document.getElementById("mute").addEventListener("click", toggleMute);
-    
         document.getElementById("end-call").addEventListener("click", endCall);
     
         startCall();
