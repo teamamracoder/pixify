@@ -1095,25 +1095,6 @@ async function sendMessage() {
             // Stop further processing if the message is deleted.
             return;
         }
-
-         // Handle Calling
-         if (data.action === "ringing") {
-           const callId = data.call_id;
-           const members = data.members;
-           const callerId = data.caller_id;
-           const currentUserId = "{{ user.id }}"; // Get logged-in user ID
-      
-           console.log("Caller ID:", callerId);
-           console.log("Current User ID:", currentUserId);
-      
-           if (currentUserId === callerId) {
-             console.log("Redirecting to ringing.html...");
-             window.location.href = `/call/ringing/${callId}/${chatId}/`;
-           } else {
-             console.log("Redirecting to calling.html...");
-             window.location.href = `/call/calling/${callId}/${chatId}/`;
-           }
-         }
       
         // Handle typing indicator.
         const typingIndicator = document.querySelector('.chat-bubble');
@@ -2148,24 +2129,7 @@ if (chatBody) {
 }
 
 
-// Call Handel
-function generateCallId() {
-    return 'call_' + Math.random().toString(36).substr(2, 9); // Generates a random call ID
-}
 
-document.getElementById('sendDataButton').addEventListener('click', function() {
-    const chatId = document.getElementById("chat_id").value;
-    const callId = generateCallId();
-    const callerId = currentUserId;// Function to get the caller's ID
-
-    // Send updated data to the server
-    socket.send(JSON.stringify({
-        action: 'ringing',
-        call_id: callId,
-        chat_id: chatId,
-        caller_id: callerId // Include caller ID
-    }));
-}); 
 
 
 // Typing Indicator
@@ -2327,11 +2291,52 @@ document.querySelectorAll('.media-stop').forEach(video => {
     
 </script>
 
+<script>    // WebSocket connection for call initiation
+  
+  const call_socket = new WebSocket(`ws://${window.location.host}/ws/call/${chatId}/`);
+
+  call_socket.onmessage = function(event) {
+    const data = JSON.parse(event.data);
+    // Handle ringing event
+    if (data.action === "ringing") {
+      const callId = data.call_id;
+      const callerId = data.caller_id;
+      
+      console.log("Caller ID:", callerId);
+      console.log("Current User ID:", currentUserId);
+      
+      if (currentUserId === callerId) {
+        console.log("Redirecting to ringing.html...");
+        window.location.href = `/call/ringing/${callId}/${chatId}/`;
+      } else {
+        console.log("Redirecting to calling.html...");
+        window.location.href = `/call/calling/${callId}/${chatId}/`;
+      }
+    }
+  };
+
+  // Function to generate a random call ID
+  function generateCallId() {
+    return 'call_' + Math.random().toString(36).substr(2, 9);
+  }
+
+  // Assuming there's a button with id "sendDataButton" for initiating the call
+  document.getElementById('sendDataButton').addEventListener('click', function() {
+    const chatId = document.getElementById("chat_id").value;
+    const callId = generateCallId();
+    // currentUserId is already defined above
+
+    // Send ringing action to the server with call details
+    call_socket.send(JSON.stringify({
+      action: 'ringing',
+      call_id: callId,
+      chat_id: chatId,
+      caller_id: currentUserId
+    }));
+  });
 
 
-
-
-
+</script>
 
 
 <style>
