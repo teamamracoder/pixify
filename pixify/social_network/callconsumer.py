@@ -198,6 +198,21 @@ class CallConsumer(AsyncWebsocketConsumer):
                         "user_list": self.joined_users.get(group_name, [])
                     }
                 )
+            elif action == "call_terminated":
+                actual_chat_id = data.get("chat_id")
+                call_id = data.get("call_id")
+                group_name = f"call_{actual_chat_id}"
+
+                # Notify all users in the chat that the call has been terminated
+                await self.channel_layer.group_send(
+                    group_name,
+                    {
+                        "type": "call.terminated",
+                        "chat_id": actual_chat_id,
+                        "call_id": call_id
+                    }
+                )
+    
         except Exception as e:
             print(f"[WebSocket Error] Failed to process message: {e}")
 
@@ -243,3 +258,12 @@ class CallConsumer(AsyncWebsocketConsumer):
             "active_users": event["active_users"],
             "user_list": event["user_list"]
         }))
+
+
+    async def call_terminated(self, event):
+        await self.send(text_data=json.dumps({
+            "action": "call_terminated",
+            "chat_id": event["chat_id"],
+            "call_id": event["call_id"]
+        }))
+

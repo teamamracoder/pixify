@@ -97,8 +97,8 @@
       <button class="action-button accept-call" id="accept-call">
         <i class="fa-solid fa-phone" style="color: #FFD43B;"></i>
       </button>
-      <button class="action-button end-call" id="end-call">
-        <i class="fas fa-phone-slash"></i>
+      <button id="end-call" class="action-button end-call">
+        <i class="fas fa-phone"></i>
       </button>
     </div>
   </div>
@@ -127,6 +127,10 @@
             console.log("Incoming call detected...");
           }
         }
+        else if (data.action === "call_terminated") {
+          console.log("Call terminated by another user.");
+          window.location.href = `/chat/${chatId}/message/`;
+      }
       };
 
       document.getElementById("accept-call").addEventListener("click", function () {

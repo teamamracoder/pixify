@@ -92,7 +92,7 @@
     </div>
     <div class="call-footer">
       <button id="end-call" class="action-button end-call">
-        <i class="fas fa-phone-slash"></i>
+        <i class="fas fa-phone"></i>
       </button>
     </div>
   </div>
@@ -122,6 +122,10 @@
           if (callTimeout) clearTimeout(callTimeout);
           window.location.href = `/call/${callId}/${chatId}/`;
         }
+        else if (data.action === "call_terminated") {
+          console.log("Call terminated by another user.");
+          window.location.href = `/chat/${chatId}/message/`;
+        }
       };
 
       socket.onopen = function () {
@@ -134,11 +138,20 @@
       };
 
       document.getElementById("end-call").addEventListener("click", () => {
-        if (callTimeout) clearTimeout(callTimeout);
-        socket.send(JSON.stringify({ action: "user_left", chat_id: chatId }));
+        if (callTimeout) clearTimeout(callTimeout);    
+        // Send a message to terminate the entire call
+        socket.send(JSON.stringify({
+            action: "call_terminated",
+            chat_id: chatId,
+            call_id: callId
+        }));    
         window.location.href = `/chat/${chatId}/message/`;
       });
+
     });
+
+
+
   </script>
   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
