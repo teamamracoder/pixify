@@ -1,215 +1,152 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pixify Calling</title>
-
-    </head>
-<body>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-        <!-- Add this hidden input to store chat_id -->
-        <input type="hidden" id="chatId" value="{{ chat_id }}">
-    
-        <div class="call-container">
-            <header class="call-header">
-                <p id="ring_ptag">Call - Pixify</p>
-            </header>
-            <div class="call-body">
-                <div class="profile-icon">
-                   <img src="http://celebrityinsider.org/wp-content/uploads/2019/04/tom-cruise.jpg" alt="">
-                </div>
-                <p class="contact-name">Subham</p>
-                <p class="call-status">Incoming...</p>
-            </div>
-            <div class="call-footer">
-                <button class="action-button more-options">⋯</button>
-                <button class="action-button accept-call"><i class="fa-solid fa-phone" style="color: #FFD43B;"></i></button>
-                <button class="action-button end-call"><i class="fas fa-phone-slash"></i></button>
-            </div>
-        </div>
-    
-        <script>
-            // Wait until the DOM is fully loaded
-            document.addEventListener("DOMContentLoaded", function () {
-                const chatId = "{{ chat_id }}";
-                const callId = "{{ call_id }}";
-                
-                // Initialize WebSocket
-                const socket = new WebSocket(`ws://${window.location.host}/ws/call/${chatId}/`);
-                
-                // Status to track who has accepted the call
-                let callAccepted = false;
-        
-                socket.onmessage = function (event) {
-                    const data = JSON.parse(event.data);
-        
-                    // Handle the response when the call is accepted
-                    if (data.action === "call_accepted" && data.call_id === callId) {
-                        // Only the person who accepted should be redirected
-                        if (!callAccepted) {
-                            window.location.href = `/call/${callId}/${chatId}/`;
-                            callAccepted = true;  // Ensure redirection only once
-                        }
-                    }
-                };
-        
-                // Accept call click event
-                document.querySelector(".accept-call").addEventListener("click", function () {
-                    if (callId) {
-                        // Send message to WebSocket server that the call has been accepted
-                        socket.send(JSON.stringify({
-                            action: "call_accepted",
-                            call_id: callId
-                        }));
-        
-                        // Set callAccepted flag to avoid multiple redirects
-                        callAccepted = true;
-                        window.location.href = `/call/${callId}/${chatId}/`;
-                    } else {
-                        console.error("Call ID is missing!");
-                    }
-                });
-        
-                // End call click event
-                document.querySelector(".end-call").addEventListener("click", function () {
-                    if (chatId) {
-                        window.location.href = `/chat/${chatId}/message/`;
-                    } else {
-                        console.error("Chat ID is missing!");
-                    }
-                });
-            });
-        </script>
-    <style>
-
-        #ring_ptag{
-          color: #ffff;
-        }        
-    
-    .profile-icon img {
-        object-fit: cover;
-        width: 100px;
-        height: 100px;
-        border-radius: 50%;
-        /* margin-right: 10px; */
-        flex-shrink: 0;
-    }
-            /* General Styles */
+  <meta charset="UTF-8">
+  <title>Incoming Call - Pixify</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+  <style>
     body {
-        font-family: Arial, sans-serif;
-        margin: 0;
-        background-color: #1A0933;
-        color: white;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
+      background: linear-gradient(135deg, #1A0933, #2C2A4A);
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
     }
-    
-    button {
-        border: none;
-        cursor: pointer;
-        font-size: 16px;
-    }
-    
-    /* Call Container */
     .call-container {
-        width: 400px;
-        height: 600px;
-        background-color: #1A0933;
-        border-radius: 12px;
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
-        box-shadow: 0 0 15px rgba(0, 0, 0, 0.7);
+      width: 350px;
+      background-color: #1E1E1E;
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
     }
-    
-    /* Header */
     .call-header {
-        background-color: #2953cd;
-        color: #aaa;
-        padding: 10px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        font-size: 16px;
+      background: #2953cd;
+      padding: 15px;
+      text-align: center;
+      font-weight: bold;
     }
-    
-    .close-btn {
-        background-color: transparent;
-        color: #fff;
-        font-size: 20px;
-    }
-    
-    /* Body */
     .call-body {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
+      padding: 30px;
+      text-align: center;
     }
-    
     .profile-icon {
-        background-color: #555;
-        width: 100px;
-        height: 100px;
-        border-radius: 50%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        font-size: 50px;
-        color: #bbb;
-        margin-bottom: 20px;
+      width: 120px;
+      height: 120px;
+      margin: 0 auto 15px;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 3px solid #fff;
     }
-    
-    .contact-name {
-        font-size: 24px;
-        font-weight: bold;
-        margin-bottom: 10px;
+    .profile-icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
-    
     .call-status {
-        font-size: 18px;
-        color: #aaa;
+      font-size: 1.2rem;
+      color: #aaa;
     }
-    
-    /* Footer */
     .call-footer {
-        background-color: #ffff;
-        padding: 15px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
+      background: #fff;
+      padding: 15px;
+      text-align: center;
     }
-    
     .action-button {
-        height: 50px;
-        width: 50px;
-        padding: 10px 15px;
-        font-size: 16px;
-        color: #ffff;
-        background-color: #444;
-        border-radius: 50%;
-        transition: background-color 0.3s;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      border: none;
+      margin: 0 10px;
+      font-size: 1.2rem;
+      transition: background 0.3s;
     }
-    
-    .action-button.more-options {
-      
-    }
-    
-    .action-button.accept-call {
-        
-    }
-    
-    .action-button.end-call {
-        background-color: #f00;
-    }
-    
     .action-button:hover {
-        opacity: 0.8;
+      opacity: 0.8;
     }
-    
-        </style>
+    .accept-call {
+      background-color: #28a745;
+      color: #fff;
+    }
+    .end-call {
+      background-color: #d9534f;
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+  <!-- Hidden inputs -->
+  <input type="hidden" id="chatId" value="{{ chat_id }}">
+  <input type="hidden" id="callId" value="{{ call_id }}">
+  <input type="hidden" id="currentUser" value="{{ user.id }}">
+  <input type="hidden" id="isGroupCall" value="{{ is_group_call }}">
+  
+  <div class="call-container">
+    <div class="call-header">
+      Pixify - Incoming Call
+    </div>
+    <div class="call-body">
+      <div class="profile-icon">
+        <img src="http://celebrityinsider.org/wp-content/uploads/2019/04/tom-cruise.jpg" alt="Profile">
+      </div>
+      <h3>Subham</h3>
+      <p class="call-status">Incoming...</p>
+    </div>
+    <div class="call-footer">
+      <button class="action-button accept-call" id="accept-call">
+        <i class="fa-solid fa-phone" style="color: #FFD43B;"></i>
+      </button>
+      <button class="action-button end-call" id="end-call">
+        <i class="fas fa-phone-slash"></i>
+      </button>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const chatId    = document.getElementById("chatId").value;
+      const callId    = document.getElementById("callId").value;
+      const currentUser = document.getElementById("currentUser").value;
+      const isGroupCall = document.getElementById("isGroupCall").value === "True";
+      const socket = new WebSocket(`ws://${window.location.host}/ws/call/${chatId}/`);
+
+      // For one-to-one calls, auto-cancel after 30 seconds.
+      let callTimeout;
+      if (!isGroupCall) {
+        callTimeout = setTimeout(() => {
+          console.log("No action on incoming call within timeout. Ending call automatically.");
+          window.location.href = `/chat/${chatId}/message/`;
+        }, 30000);
+      }
+
+      socket.onmessage = function (event) {
+        const data = JSON.parse(event.data);
+        if (data.action === "ringing") {
+          if (currentUser !== data.caller_id) {
+            console.log("Incoming call detected...");
+          }
+        }
+      };
+
+      document.getElementById("accept-call").addEventListener("click", function () {
+        if (callTimeout) clearTimeout(callTimeout);
+        socket.send(JSON.stringify({
+          action: "call_accepted",
+          call_id: callId,
+          receiver: currentUser
+        }));
+        window.location.href = `/call/${callId}/${chatId}/`;
+      });
+
+      document.getElementById("end-call").addEventListener("click", function () {
+        if (callTimeout) clearTimeout(callTimeout);
+        window.location.href = `/chat/${chatId}/message/`;
+      });
+    });
+  </script>
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>

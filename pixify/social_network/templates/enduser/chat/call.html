@@ -1,291 +1,293 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Call</title>
+  <meta charset="UTF-8">
+  <title>Active Call - Pixify</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(135deg, #1A0933, #2C2A4A);
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+    }
+    .call-container {
+      width: 350px;
+      background-color: #1E1E1E;
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+    }
+    .call-header {
+      background: #2953cd;
+      padding: 15px;
+      text-align: center;
+      font-weight: bold;
+    }
+    .call-body {
+      padding: 30px;
+      text-align: center;
+    }
+    .joined-users {
+      margin-top: 20px;
+      text-align: left;
+    }
+    .joined-users h5 {
+      margin-bottom: 10px;
+      color: #ccc;
+    }
+    .joined-users .user-box {
+      display: flex;
+      align-items: center;
+      background: #2C2A4A;
+      padding: 5px 10px;
+      border-radius: 5px;
+      margin-bottom: 5px;
+    }
+    .joined-users .user-box img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-right: 10px;
+    }
+    .call-footer {
+      background: #fff;
+      padding: 15px;
+      text-align: center;
+    }
+    .action-button {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      border: none;
+      margin: 0 10px;
+      font-size: 1.2rem;
+      transition: background 0.3s;
+    }
+    .action-button:hover {
+      opacity: 0.8;
+    }
+    .end-call {
+      background-color: #d9534f;
+      color: #fff;
+    }
+  </style>
 </head>
 <body>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-<!-- Hidden input to store chat_id -->
-<input type="hidden" id="chatId" value="{{ chat_id }}">
+  <!-- Hidden inputs -->
+  <input type="hidden" id="chatId" value="{{ chat_id }}">
+  <input type="hidden" id="callId" value="{{ call_id }}">
 
-<div class="call-container">
-    <header class="call-header">
-        <p>Pixify</p>
-        <p>End-to-end encrypted</p>
-    </header>
+  <div class="call-container">
+    <div class="call-header">
+      Pixify - Active Call
+    </div>
     <div class="call-body">
-        <div class="profile-icon">
-            <img src="http://celebrityinsider.org/wp-content/uploads/2019/04/tom-cruise.jpg" alt="">
+      <!-- Section to display joined user details -->
+      <div class="joined-users">
+        <h5>Participants:</h5>
+        <div id="userList">
+          <!-- Each user's box will be rendered here -->
         </div>
-
+      </div>
     </div>
     <div class="call-footer">
-        <button class="action-button" id="mute"><i class="fas fa-microphone"></i></button>
-        <button class="action-button end-call" id="end-call"><i class="fas fa-phone-slash"></i></button>
+      <button id="mute" class="action-button btn btn-secondary">
+        <i class="fas fa-microphone"></i>
+      </button>
+      <button id="end-call" class="action-button end-call">
+        <i class="fas fa-phone-slash"></i>
+      </button>
     </div>
-</div>
-<audio id="localAudio" autoplay></audio>
-
-</body>
-<script>
+  </div>
+  <audio id="localAudio" autoplay></audio>
+  <script>
     document.addEventListener("DOMContentLoaded", function () {
-        const chatId = "{{ chat_id }}";
-        const socket = new WebSocket(`ws://${window.location.host}/ws/call/${chatId}/`);
-    
-        let peerConnection;
-        let isMuted = false;
-        let localStream;
-        const config = { iceServers: [{ urls: "stun:stun.l.google.com:19302" }] };
-        let iceCandidateQueue = [];
-    
-        function initializePeerConnection() {
-            if (peerConnection) return;
-    
-            peerConnection = new RTCPeerConnection(config);
-            console.log("🔧 PeerConnection initialized.");
-    
-            peerConnection.onicecandidate = (event) => {
-                if (event.candidate) {
-                    socket.send(JSON.stringify({
-                        action: "webrtc_signal",
-                        signal: event.candidate,
-                        from: chatId
-                    }));
-                }
-            };
-    
-            peerConnection.ontrack = (event) => {
-                if (event.streams.length > 0) {
-                    document.getElementById("remoteAudio").srcObject = event.streams[0];
-                }
-            };
-    
-            peerConnection.onconnectionstatechange = () => {
-                if (peerConnection.connectionState === "disconnected" || peerConnection.connectionState === "failed") {
-                    endCall();
-                }
-            };
-        }
-    
-        socket.onmessage = async function (event) {
-            const data = JSON.parse(event.data);
-            console.log("📩 Received WebSocket message:", data);
-    
-            if (data.action === "webrtc_signal") {
-                if (!peerConnection) initializePeerConnection();
-    
-                if (data.signal.type === "offer") {
-                    await handleOffer(data.signal);
-                } else if (data.signal.type === "answer") {
-                    await handleAnswer(data.signal);
-                } else if (data.signal.candidate) {
-                    handleIceCandidate(data.signal);
-                }
-            } else if (data.action === "user_left") {
-                if (data.active_users <= 1) endCall();
-            }
+      const chatId = document.getElementById("chatId").value;
+      const callId = document.getElementById("callId").value;
+      const socket = new WebSocket(`ws://${window.location.host}/ws/call/${chatId}/`);
+
+      let peerConnection;
+      let isMuted = false;
+      let localStream;
+      const config = { iceServers: [{ urls: "stun:stun.l.google.com:19302" }] };
+      let iceCandidateQueue = [];
+
+      function initializePeerConnection() {
+        if (peerConnection) return;
+        peerConnection = new RTCPeerConnection(config);
+        console.log("PeerConnection initialized.");
+
+        peerConnection.onicecandidate = (event) => {
+          if (event.candidate) {
+            socket.send(JSON.stringify({
+              action: "webrtc_signal",
+              signal: event.candidate,
+              from: chatId
+            }));
+          }
         };
-    
-        async function handleOffer(offer) {
-            if (peerConnection.signalingState !== "stable") return;
-            await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
-            const answer = await peerConnection.createAnswer();
-            await peerConnection.setLocalDescription(answer);
-            socket.send(JSON.stringify({ action: "webrtc_signal", signal: answer, from: chatId }));
-            processQueuedICECandidates();
+
+        peerConnection.ontrack = (event) => {
+          if (event.streams && event.streams[0]) {
+            // Attach remote stream if available.
+          }
+        };
+
+        peerConnection.onconnectionstatechange = () => {
+          if (peerConnection.connectionState === "disconnected" ||
+              peerConnection.connectionState === "failed") {
+            endCall();
+          }
+        };
+      }
+
+      socket.onmessage = async function (event) {
+        const data = JSON.parse(event.data);
+        console.log("Received:", data);
+
+        // Update the participants list on join/leave events.
+        if (data.action === "user_joined" || data.action === "user_left") {
+          updateUserList(data.user_list);
         }
-    
-        async function handleAnswer(answer) {
-            await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
-            processQueuedICECandidates();
+
+        if (data.action === "webrtc_signal") {
+          if (!peerConnection) initializePeerConnection();
+
+          if (data.signal.type === "offer") {
+            await handleOffer(data.signal);
+          } else if (data.signal.type === "answer") {
+            await handleAnswer(data.signal);
+          } else if (data.signal.candidate) {
+            handleIceCandidate(data.signal);
+          }
+        } else if (data.action === "user_left") {
+          if (data.active_users <= 1) endCall();
         }
-    
-        function handleIceCandidate(candidate) {
-            if (peerConnection.remoteDescription) {
-                peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
-            } else {
-                iceCandidateQueue.push(candidate);
-            }
+      };
+
+      async function handleOffer(offer) {
+        if (peerConnection.signalingState !== "stable") return;
+        await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
+        const answer = await peerConnection.createAnswer();
+        await peerConnection.setLocalDescription(answer);
+        socket.send(JSON.stringify({ action: "webrtc_signal", signal: answer, from: chatId }));
+        processQueuedICECandidates();
+      }
+
+      async function handleAnswer(answer) {
+        await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
+        processQueuedICECandidates();
+      }
+
+      function handleIceCandidate(candidate) {
+        if (peerConnection.remoteDescription) {
+          peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+        } else {
+          iceCandidateQueue.push(candidate);
         }
-    
-        function processQueuedICECandidates() {
-            while (iceCandidateQueue.length > 0) {
-                peerConnection.addIceCandidate(new RTCIceCandidate(iceCandidateQueue.shift()));
-            }
+      }
+
+      function processQueuedICECandidates() {
+        while (iceCandidateQueue.length > 0) {
+          peerConnection.addIceCandidate(new RTCIceCandidate(iceCandidateQueue.shift()));
         }
-    
-        async function waitForSocketOpen(socket) {
-            return new Promise((resolve) => {
-                if (socket.readyState === WebSocket.OPEN) {
-                    resolve();
-                } else {
-                    socket.addEventListener("open", resolve, { once: true });
-                }
-            });
+      }
+
+      async function waitForSocketOpen(socket) {
+        return new Promise((resolve) => {
+          if (socket.readyState === WebSocket.OPEN) {
+            resolve();
+          } else {
+            socket.addEventListener("open", resolve, { once: true });
+          }
+        });
+      }
+
+      async function startCall() {
+        try {
+          await waitForSocketOpen(socket);
+          localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          if (!localStream) {
+            console.error("Failed to access local audio stream.");
+            return;
+          }
+          const localAudio = document.getElementById("localAudio");
+          if (localAudio) {
+            localAudio.srcObject = localStream;
+          }
+          initializePeerConnection();
+          localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+          const offer = await peerConnection.createOffer();
+          await peerConnection.setLocalDescription(offer);
+          socket.send(JSON.stringify({ action: "webrtc_signal", signal: offer, from: chatId }));
+          socket.send(JSON.stringify({ action: "user_joined", chat_id: chatId }));
+        } catch (error) {
+          console.error("Error starting call:", error);
         }
-        
-        async function startCall() {
-            try {
-                await waitForSocketOpen(socket); // Ensure WebSocket is open before sending
-                
-                localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                if (!localStream) {
-                    console.error("Failed to access local audio stream.");
-                    return;
-                }
-        
-                const localAudio = document.getElementById("localAudio");
-                if (localAudio) {
-                    localAudio.srcObject = localStream;
-                } else {
-                    console.error("Local audio element not found.");
-                    return;
-                }
-        
-                initializePeerConnection();
-                localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
-        
-                const offer = await peerConnection.createOffer();
-                await peerConnection.setLocalDescription(offer);
-        
-                socket.send(JSON.stringify({ action: "webrtc_signal", signal: offer, from: chatId }));
-                socket.send(JSON.stringify({ action: "user_joined", chat_id: chatId }));
-            } catch (error) {
-                console.error("Error starting call:", error);
-            }
+      }
+
+      function endCall() {
+        if (peerConnection) {
+          peerConnection.close();
+          peerConnection = null;
         }
-    
-        function endCall() {
-            if (peerConnection) {
-                peerConnection.close();
-                peerConnection = null;
-            }
-    
-            if (localStream) {
-                localStream.getTracks().forEach(track => track.stop());
-            }
-    
-            socket.send(JSON.stringify({ action: "user_left", chat_id: chatId }));
-            socket.close();
-            window.location.href = `/chat/${chatId}/message/`;
+        if (localStream) {
+          localStream.getTracks().forEach(track => track.stop());
         }
-    
-        function toggleMute() {
-            if (!localStream) return;
-            const audioTracks = localStream.getAudioTracks();
-            if (audioTracks.length === 0) return;
-            isMuted = !isMuted;
-            audioTracks[0].enabled = !isMuted;
-            document.getElementById("mute").querySelector("i").classList.toggle("fa-microphone-slash", isMuted);
-            document.getElementById("mute").querySelector("i").classList.toggle("fa-microphone", !isMuted);
+        socket.send(JSON.stringify({ action: "user_left", chat_id: chatId }));
+        socket.close();
+        window.location.href = `/chat/${chatId}/message/`;
+      }
+
+      function toggleMute() {
+        if (!localStream) return;
+        const audioTracks = localStream.getAudioTracks();
+        if (audioTracks.length === 0) return;
+        isMuted = !isMuted;
+        audioTracks[0].enabled = !isMuted;
+        const muteIcon = document.getElementById("mute").querySelector("i");
+        muteIcon.classList.toggle("fa-microphone-slash", isMuted);
+        muteIcon.classList.toggle("fa-microphone", !isMuted);
+      }
+
+      // Update the participants list with boxes showing photo and name.
+      function updateUserList(userList) {
+        const userListElem = document.getElementById("userList");
+        userListElem.innerHTML = "";
+        if (userList && userList.length > 0) {
+          userList.forEach(user => {
+            const box = document.createElement("div");
+            box.className = "user-box";
+            const img = document.createElement("img");
+            img.src = user.photo;
+            img.alt = user.name;
+            const span = document.createElement("span");
+            span.textContent = user.name;
+            box.appendChild(img);
+            box.appendChild(span);
+            userListElem.appendChild(box);
+          });
+        } else {
+          const noUserBox = document.createElement("div");
+          noUserBox.className = "user-box";
+          noUserBox.textContent = "No participants";
+          userListElem.appendChild(noUserBox);
         }
-    
-        document.getElementById("mute").addEventListener("click", toggleMute);
-        document.getElementById("end-call").addEventListener("click", endCall);
-    
-        startCall();
+      }
+
+      document.getElementById("mute").addEventListener("click", toggleMute);
+      document.getElementById("end-call").addEventListener("click", endCall);
+
+      startCall();
     });
-    
-</script>
-<style>
-    /* General Reset */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: Arial, sans-serif;
-}
-
-body {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background-color:rgb(80, 5, 218);
-    color: white;
-}
-
-.call-container {
-    width: 350px;
-    height: 80vh;
-    background: #1e1e1e;
-    border-radius: 15px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-    text-align: center;
-    overflow: hidden;
-    position: relative;
-}
-
-.call-header {
-    padding: 15px;
-    background: #222;
-    border-bottom: 1px solid #333;
-}
-
-.call-header p {
-    font-size: 14px;
-    color: #bbb;
-}
-
-.call-body {
-    padding: 30px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.profile-icon img {
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 3px solid #444;
-}
-
-.call-footer {
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    padding: 20px;
-    background: #222;
-    border-top: 1px solid #333;
-}
-
-.action-button {
-    width: 50px;
-    height: 50px;
-    background: #444;
-    border: none;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: 0.3s;
-}
-
-.action-button i {
-    font-size: 20px;
-    color: white;
-}
-
-.action-button:hover {
-    background: #666;
-}
-
-.end-call {
-    background: #d9534f;
-}
-
-.end-call:hover {
-    background: #c9302c;
-}
-</style>
-   
+  </script>
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>

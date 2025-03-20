@@ -1,177 +1,147 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ringing</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+  <meta charset="UTF-8">
+  <title>Ringing - Pixify</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(135deg, #1A0933, #2C2A4A);
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+    }
+    .call-container {
+      width: 350px;
+      background-color: #1E1E1E;
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+    }
+    .call-header {
+      background: #2953cd;
+      padding: 15px;
+      text-align: center;
+      font-weight: bold;
+    }
+    .call-body {
+      padding: 30px;
+      text-align: center;
+    }
+    .profile-icon {
+      width: 120px;
+      height: 120px;
+      margin: 0 auto 15px;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 3px solid #fff;
+    }
+    .profile-icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .call-status {
+      font-size: 1.2rem;
+      color: #aaa;
+    }
+    .call-footer {
+      background: #fff;
+      padding: 15px;
+      text-align: center;
+    }
+    .action-button {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      border: none;
+      margin: 0 10px;
+      font-size: 1.2rem;
+      transition: background 0.3s;
+    }
+    .action-button:hover {
+      opacity: 0.8;
+    }
+    .end-call {
+      background-color: #d9534f;
+      color: #fff;
+    }
+  </style>
 </head>
 <body>
-    <!-- Hidden input to store chat_id -->
-    <input type="hidden" id="chatId" value="{{ chat_id }}">
+  <!-- Hidden inputs for storing IDs and call type -->
+  <input type="hidden" id="chatId" value="{{ chat_id }}">
+  <input type="hidden" id="callId" value="{{ call_id }}">
+  <input type="hidden" id="callerId" value="{{ user.id }}">
+  <!-- Pass the group call flag as a string: "True" or "False" -->
+  <input type="hidden" id="isGroupCall" value="{{ is_group_call }}">
 
-    <div class="call-container">
-        <header class="call-header">
-            <p>Pixify</p>
-            <p>End-to-end encrypted</p>
-        </header>
-        <div class="call-body">
-            <div class="profile-icon">
-                <img src="http://celebrityinsider.org/wp-content/uploads/2019/04/tom-cruise.jpg" alt="">
-            </div>
-            <p class="contact-name">Subham</p>
-            <p class="call-status">Ringing...</p>
-        </div>
-        <div class="call-footer">
-            <button class="action-button" id="add-user">⋯</button>
-            <button class="action-button" id="share-screen"><i class="fas fa-video"></i></button>
-            <button class="action-button" id="mute"><i class="fas fa-microphone"></i></button>
-            <button class="action-button end-call" id="end-call"><i class="fas fa-phone-slash"></i></button>
-        </div>
+  <div class="call-container">
+    <div class="call-header">
+      Pixify - Encrypted Call
     </div>
+    <div class="call-body">
+      <div class="profile-icon">
+        <img src="http://celebrityinsider.org/wp-content/uploads/2019/04/tom-cruise.jpg" alt="Profile">
+      </div>
+      <h3>Subham</h3>
+      <p class="call-status">Ringing...</p>
+    </div>
+    <div class="call-footer">
+      <button id="end-call" class="action-button end-call">
+        <i class="fas fa-phone-slash"></i>
+      </button>
+    </div>
+  </div>
 
-<script>
+  <script>
     document.addEventListener("DOMContentLoaded", function () {
-        const chatId = "{{ chat_id }}";
-        const callId = "{{ call_id }}";
-        const socket = new WebSocket(`ws://${window.location.host}/ws/call/${chatId}/`);
+      const chatId    = document.getElementById("chatId").value;
+      const callId    = document.getElementById("callId").value;
+      const callerId  = document.getElementById("callerId").value;
+      const isGroupCall = document.getElementById("isGroupCall").value === "True";
+      const socket = new WebSocket(`ws://${window.location.host}/ws/call/${chatId}/`);
 
-        // WebSocket event: When a member accepts the call, redirect the caller too
-        socket.onmessage = function (event) {
-            const data = JSON.parse(event.data);
+      // For one-to-one calls only, set a timer to auto end if unanswered.
+      let callTimeout;
+      if (!isGroupCall) {
+        callTimeout = setTimeout(() => {
+          console.log("No answer received within timeout. Ending call automatically.");
+          socket.send(JSON.stringify({ action: "user_left", chat_id: chatId }));
+          window.location.href = `/chat/${chatId}/message/`;
+        }, 30000);
+      }
 
-            if (data.action === "call_accepted") {
-                console.log("Call accepted, redirecting to call.html...");
-                window.location.href = `/call/${callId}/${chatId}/`;
-            }
-        };
+      socket.onmessage = function (event) {
+        const data = JSON.parse(event.data);
+        if (data.action === "call_accepted") {
+          console.log("Call accepted, redirecting to call page...");
+          if (callTimeout) clearTimeout(callTimeout);
+          window.location.href = `/call/${callId}/${chatId}/`;
+        }
+      };
 
-        // End Call Button - Redirect to chat messages
-        document.getElementById("end-call").addEventListener("click", () => {
-            if (chatId) {
-                socket.send(JSON.stringify({ action: "user_left", chat_id: chatId })); // Notify server
-                window.location.href = `/chat/${chatId}/message/`;
-            } else {
-                console.error("Chat ID is missing!");
-            }
-        });
+      socket.onopen = function () {
+        socket.send(JSON.stringify({
+          action: "ringing",
+          call_id: callId,
+          chat_id: chatId,
+          caller_id: callerId
+        }));
+      };
 
-        // Accept Call Button (for testing if needed)
-        document.querySelector(".accept-call")?.addEventListener("click", function () {
-            socket.send(JSON.stringify({
-                action: "call_accepted",
-                call_id: callId
-            }));
-
-            window.location.href = `/call/${callId}/${chatId}/`;
-        });
+      document.getElementById("end-call").addEventListener("click", () => {
+        if (callTimeout) clearTimeout(callTimeout);
+        socket.send(JSON.stringify({ action: "user_left", chat_id: chatId }));
+        window.location.href = `/chat/${chatId}/message/`;
+      });
     });
-</script>        
-</body>
-
-
-
-
-<style>
-    .profile-icon img {
-     object-fit: cover;
-     width: 100px;
-     height: 100px;
-     border-radius: 50%;
-     /* margin-right: 10px; */
-     flex-shrink: 0;
- }
- body {
-     font-family: Arial, sans-serif;
-     margin: 0;
-     background-color: #1A0933;
-     color: white;
-     display: flex;
-     justify-content: center;
-     align-items: center;
-     height: 100vh;
- }
- 
- .call-container {
-     width: 400px;
-     height: 600px;
-     background-color: #1A0933;
-     border-radius: 12px;
-     display: flex;
-     flex-direction: column;
-     overflow: hidden;
-     box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
- }
- 
- .call-header {
-     background-color: #2953cd;
-     color: #ffff;
-     text-align: center;
-     /* padding: 10px; */
-     font-size: 14px;
- }
- 
- .call-body {
-     flex: 1;
-     display: flex;
-     flex-direction: column;
-     justify-content: center;
-     align-items: center;
- }
- 
- .profile-icon {
-     background-color: #555;
-     width: 100px;
-     height: 100px;
-     border-radius: 50%;
-     display: flex;
-     justify-content: center;
-     align-items: center;
-     font-size: 50px;
-     color: #bbb;
-     margin-bottom: 20px;
- }
- 
- .contact-name {
-     font-size: 24px;
-     font-weight: bold;
-     margin-bottom: 10px;
- }
- 
- .call-status {
-     font-size: 18px;
-     color: #aaa;
- }
- 
- .call-footer {
-     background-color: #ffff;
-     padding: 10px;
-     display: flex;
-     justify-content: space-around;
-     align-items: center;
- }
- 
- .action-button {
-     background-color: #444;
-     border: none;
-     border-radius: 50%;
-     width: 50px;
-     height: 50px;
-     color: white;
-     font-size: 20px;
-     cursor: pointer;
-     display: flex;
-     justify-content: center;
-     align-items: center;
- }
- 
- .end-call {
-     background-color: #f00;
- }
- 
- .action-button:hover {
-     opacity: 0.8;
- }
- </style>
+  </script>
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>
