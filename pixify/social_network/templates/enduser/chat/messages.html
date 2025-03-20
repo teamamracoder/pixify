@@ -2129,9 +2129,6 @@ if (chatBody) {
 }
 
 
-
-
-
 // Typing Indicator
 document.addEventListener("DOMContentLoaded", function () {
     const messageInput = document.getElementById("message-input");
@@ -2302,14 +2299,9 @@ document.querySelectorAll('.media-stop').forEach(video => {
       const callId = data.call_id;
       const callerId = data.caller_id;
       
-      console.log("Caller ID:", callerId);
-      console.log("Current User ID:", currentUserId);
-      
       if (currentUserId === callerId) {
-        console.log("Redirecting to ringing.html...");
         window.location.href = `/call/ringing/${callId}/${chatId}/`;
       } else {
-        console.log("Redirecting to calling.html...");
         window.location.href = `/call/calling/${callId}/${chatId}/`;
       }
     }

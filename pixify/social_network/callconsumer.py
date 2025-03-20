@@ -1,6 +1,6 @@
 from channels.generic.websocket import AsyncWebsocketConsumer
 import json
-from .services import chat_service
+from .services import chat_service, user_service
 from asgiref.sync import sync_to_async
 
 
@@ -124,6 +124,15 @@ class CallConsumer(AsyncWebsocketConsumer):
                 # Save caller's channel for this call.
                 self.call_initiators[call_id] = self.channel_name
                 actual_chat_id = data.get("chat_id")  # This should be provided.
+                caller = await sync_to_async (user_service.get_user)(data.get("caller_id"))
+
+                caller_full_name = (
+                    f"{caller.first_name} " +
+                    (f"{caller.middle_name} " if caller.middle_name else "") +
+                    f"{caller.last_name}"
+                    )
+                caller_image = caller.profile_photo_url or "/static/images/avatar.jpg"
+
                 group_name = f"call_{actual_chat_id}"
                 await self.channel_layer.group_send(
                     group_name,
@@ -132,8 +141,8 @@ class CallConsumer(AsyncWebsocketConsumer):
                         "call_id": call_id,
                         "chat_id": actual_chat_id,
                         "caller_id": data.get("caller_id"),
-                        "caller_name": data.get("caller_name"),
-                        "caller_photo": data.get("caller_photo")
+                        "caller_name": caller_full_name,
+                        "caller_photo":caller_image
                     }
                 )
             elif action == "call_accepted":
