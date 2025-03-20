@@ -103,6 +103,7 @@
     </div>
   </div>
 
+<!-- Incoming Call HTML snippet -->
   <script>
     document.addEventListener("DOMContentLoaded", function () {
       const chatId    = document.getElementById("chatId").value;
@@ -111,7 +112,6 @@
       const isGroupCall = document.getElementById("isGroupCall").value === "True";
       const socket = new WebSocket(`ws://${window.location.host}/ws/call/${chatId}/`);
 
-      // For one-to-one calls, auto-cancel after 30 seconds.
       let callTimeout;
       if (!isGroupCall) {
         callTimeout = setTimeout(() => {
@@ -130,7 +130,7 @@
         else if (data.action === "call_terminated") {
           console.log("Call terminated by another user.");
           window.location.href = `/chat/${chatId}/message/`;
-      }
+        }
       };
 
       document.getElementById("accept-call").addEventListener("click", function () {
@@ -138,17 +138,25 @@
         socket.send(JSON.stringify({
           action: "call_accepted",
           call_id: callId,
-          receiver: currentUser
+          receiver: currentUser,
+          chat_id: chatId
         }));
         window.location.href = `/call/${callId}/${chatId}/`;
       });
 
+      // Modified "end call" to send a call_declined message
       document.getElementById("end-call").addEventListener("click", function () {
         if (callTimeout) clearTimeout(callTimeout);
+        socket.send(JSON.stringify({
+            action: "call_declined",
+            call_id: callId,
+            chat_id: chatId
+        }));
         window.location.href = `/chat/${chatId}/message/`;
       });
     });
   </script>
+
   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>

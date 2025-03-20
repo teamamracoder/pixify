@@ -89,7 +89,7 @@
     <div class="call-body">
       <!-- Section to display joined user details -->
       <div class="joined-users">
-        <h5>Participants:</h5>
+        <h5>Participants (0):</h5>
         <div id="userList">
           <!-- Each user's box will be rendered here -->
         </div>
@@ -100,7 +100,7 @@
         <i class="fas fa-microphone"></i>
       </button>
       <button id="end-call" class="action-button end-call">
-        <i class="fas fa-phone-slash"></i>
+        <i class="fas fa-phone"></i>
       </button>
     </div>
   </div>
@@ -150,9 +150,9 @@
         const data = JSON.parse(event.data);
         console.log("Received:", data);
 
-        // Update the participants list on join/leave events.
+        // Update the participants list based on active users.
         if (data.action === "user_joined" || data.action === "user_left") {
-          updateUserList(data.user_list);
+          updateUserList(data.user_list, data.active_users);
         }
 
         if (data.action === "webrtc_signal") {
@@ -166,6 +166,7 @@
             handleIceCandidate(data.signal);
           }
         } else if (data.action === "user_left") {
+          // End the call if no other participants remain.
           if (data.active_users <= 1) endCall();
         }
       };
@@ -225,6 +226,7 @@
           const offer = await peerConnection.createOffer();
           await peerConnection.setLocalDescription(offer);
           socket.send(JSON.stringify({ action: "webrtc_signal", signal: offer, from: chatId }));
+          // Inform others that this user has joined.
           socket.send(JSON.stringify({ action: "user_joined", chat_id: chatId }));
         } catch (error) {
           console.error("Error starting call:", error);
@@ -255,10 +257,14 @@
         muteIcon.classList.toggle("fa-microphone", !isMuted);
       }
 
-      // Update the participants list with boxes showing photo and name.
-      function updateUserList(userList) {
+      // Update the participants list using both the list and active user count.
+      function updateUserList(userList, activeUsers) {
         const userListElem = document.getElementById("userList");
         userListElem.innerHTML = "";
+        // Update the header with the current number of active users.
+        const header = document.querySelector(".joined-users h5");
+        header.textContent = `Participants (${activeUsers}):`;
+        
         if (userList && userList.length > 0) {
           userList.forEach(user => {
             const box = document.createElement("div");
