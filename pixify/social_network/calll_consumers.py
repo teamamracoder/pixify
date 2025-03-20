@@ -1,27 +1,32 @@
-from channels.generic.websocket import AsyncWebsocketConsumer
 import json
-from .models import  Chat, ChatMember, User
-from .services import user_service,chat_service
-from asgiref.sync import sync_to_async
-
+import time
+from channels.generic.websocket import AsyncWebsocketConsumer
 
 class CallConsumer(AsyncWebsocketConsumer):
-    active_users = {}  # Dictionary to track active users in each call
+    # Dictionary to track active users in each call room (per chat)
+    active_users = {}
 
     async def connect(self):
+        # Retrieve chat_id from the URL route.
         self.chat_id = self.scope['url_route']['kwargs']['chat_id']
         self.call_group_name = f"call_{self.chat_id}"
 
-        # Add user to active users list
+        # Update active user count for this room.
         if self.call_group_name not in self.active_users:
             self.active_users[self.call_group_name] = 0
         self.active_users[self.call_group_name] += 1
 
-        # Join room group
-        await self.channel_layer.group_add(self.call_group_name, self.channel_name)
+        # Optionally, store the last heartbeat timestamp.
+        self.last_heartbeat = time.time()
+
+        # Join the call group.
+        await self.channel_layer.group_add(
+            self.call_group_name,
+            self.channel_name
+        )
         await self.accept()
 
-        # Notify others about user joining
+        # Notify the group that a new user has joined.
         await self.channel_layer.group_send(
             self.call_group_name,
             {
@@ -30,20 +35,22 @@ class CallConsumer(AsyncWebsocketConsumer):
                 "active_users": self.active_users[self.call_group_name]
             }
         )
-
-        print(f"[WebSocket] User connected to chat {self.chat_id}, Active users: {self.active_users[self.call_group_name]}")
+        print(f"[WebSocket] User connected to chat {self.chat_id}. Active users: {self.active_users[self.call_group_name]}")
 
     async def disconnect(self, close_code):
-        # Remove user from active users list
+        # Decrement active user count.
         if self.call_group_name in self.active_users:
             self.active_users[self.call_group_name] -= 1
             if self.active_users[self.call_group_name] <= 0:
                 del self.active_users[self.call_group_name]
 
-        # Leave room group
-        await self.channel_layer.group_discard(self.call_group_name, self.channel_name)
+        # Leave the call group.
+        await self.channel_layer.group_discard(
+            self.call_group_name,
+            self.channel_name
+        )
 
-        # Notify others about user leaving
+        # Notify the group that a user has left.
         await self.channel_layer.group_send(
             self.call_group_name,
             {
@@ -52,15 +59,17 @@ class CallConsumer(AsyncWebsocketConsumer):
                 "active_users": self.active_users.get(self.call_group_name, 0)
             }
         )
-
-        print(f"[WebSocket] User disconnected from chat {self.chat_id}, Remaining users: {self.active_users.get(self.call_group_name, 0)}")
+        print(f"[WebSocket] User disconnected from chat {self.chat_id}. Remaining users: {self.active_users.get(self.call_group_name, 0)}")
 
     async def receive(self, text_data):
         try:
             data = json.loads(text_data)
             action = data.get("action")
 
-            if action == "call_started":
+            if action == "heartbeat":
+                self.last_heartbeat = time.time()
+                await self.send(text_data=json.dumps({"action": "heartbeat_ack"}))
+            elif action == "call_started":
                 await self.channel_layer.group_send(
                     self.call_group_name,
                     {
@@ -69,7 +78,6 @@ class CallConsumer(AsyncWebsocketConsumer):
                         "chat_id": self.chat_id
                     }
                 )
-
             elif action == "call_accepted":
                 await self.channel_layer.group_send(
                     self.call_group_name,
@@ -79,7 +87,6 @@ class CallConsumer(AsyncWebsocketConsumer):
                         "chat_id": self.chat_id
                     }
                 )
-
             elif action == "webrtc_signal":
                 await self.channel_layer.group_send(
                     self.call_group_name,
@@ -90,7 +97,16 @@ class CallConsumer(AsyncWebsocketConsumer):
                         "chat_id": self.chat_id
                     }
                 )
-
+            elif action == "ringing":
+                await self.channel_layer.group_send(
+                    self.call_group_name,
+                    {
+                        "type": "call.ringing",
+                        "call_id": data["call_id"],
+                        "caller_id": data["caller_id"],
+                        "chat_id": self.chat_id
+                    }
+                )
             elif action == "user_joined":
                 await self.channel_layer.group_send(
                     self.call_group_name,
@@ -100,7 +116,6 @@ class CallConsumer(AsyncWebsocketConsumer):
                         "active_users": self.active_users[self.call_group_name]
                     }
                 )
-
             elif action == "user_left":
                 await self.channel_layer.group_send(
                     self.call_group_name,
@@ -110,11 +125,9 @@ class CallConsumer(AsyncWebsocketConsumer):
                         "active_users": self.active_users.get(self.call_group_name, 0)
                     }
                 )
-
+            # Add additional actions as needed.
         except Exception as e:
             print(f"[WebSocket Error] Failed to process message: {e}")
-
-    # Event Handlers
 
     async def call_started(self, event):
         await self.send(text_data=json.dumps({
@@ -150,4 +163,20 @@ class CallConsumer(AsyncWebsocketConsumer):
             "action": "user_left",
             "chat_id": event["chat_id"],
             "active_users": event["active_users"]
+        }))
+
+    async def call_ringing(self, event):
+        await self.send(text_data=json.dumps({
+            "action": "ringing",
+            "call_id": event["call_id"],
+            "caller_id": event["caller_id"],
+            "chat_id": event["chat_id"]
+        }))
+
+    # Optional: send active speaker command.
+    async def set_active_speaker(self, event):
+        await self.send(text_data=json.dumps({
+            "action": "set_active_speaker",
+            "active_speaker": event["active_speaker"],
+            "chat_id": event["chat_id"]
         }))

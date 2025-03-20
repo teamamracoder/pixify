@@ -1,331 +1,358 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Call</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Call with Screen Share</title>
+  <!-- Font Awesome for icons -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+  <style>
+    /* General Reset */
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background-color: rgb(80, 5, 218);
+      color: white;
+      height: 100vh;
+    }
+    .call-container {
+      width: 350px;
+      height: 80vh;
+      background: #1e1e1e;
+      border-radius: 15px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      text-align: center;
+      overflow: hidden;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+    .call-header {
+      padding: 15px;
+      background: #222;
+      border-bottom: 1px solid #333;
+    }
+    .call-header p { font-size: 14px; color: #bbb; }
+    .call-body {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #000;
+    }
+    /* Remote video element styling */
+    #remoteVideo {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+    .call-footer {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      padding: 10px;
+      background: #222;
+      border-top: 1px solid #333;
+    }
+    .action-button {
+      width: 50px;
+      height: 50px;
+      background: #444;
+      border: none;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .action-button i { font-size: 20px; color: white; }
+    .action-button:hover { background: #666; }
+    .end-call { background: #d9534f; }
+    .end-call i {
+      font-family: "Font Awesome 5 Free"; 
+      font-weight: 900;
+      content: "\f095";
+    }
+    .end-call:hover { background: #c9302c; }
+    .screen-share { background: #5bc0de; }
+    .screen-share:hover { background: #31b0d5; }
+  </style>
 </head>
 <body>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-<!-- Hidden input to store chat_id -->
-<input type="hidden" id="chatId" value="{{ chat_id }}">
+  <!-- Hidden input to store chat_id -->
+  <input type="hidden" id="chat_id" value="{{ chat_id }}">
 
-<div class="call-container">
+  <div class="call-container">
     <header class="call-header">
-        <p>Pixify</p>
-        <p>End-to-end encrypted</p>
+      <p>Pixify</p>
+      <p>End-to-end encrypted</p>
     </header>
     <div class="call-body">
-        <div class="profile-icon">
-            <img src="http://celebrityinsider.org/wp-content/uploads/2019/04/tom-cruise.jpg" alt="">
-        </div>
-
+      <!-- Video element for remote video (screen share or camera video) -->
+      <video id="remoteVideo" autoplay playsinline></video>
     </div>
     <div class="call-footer">
-        <button class="action-button" id="mute"><i class="fas fa-microphone"></i></button>
-        <button class="action-button end-call" id="end-call"><i class="fas fa-phone-slash"></i></button>
+      <button class="action-button" id="mute">
+        <i class="fas fa-microphone"></i>
+      </button>
+      <button class="action-button end-call" id="end-call">
+        <i class="fas fa-phone"></i>
+      </button>
+      <!-- Screen Share Button -->
+      <button class="action-button screen-share" id="screen-share">
+        <i class="fas fa-desktop"></i>
+      </button>
+      <!-- Audio element for remote audio -->
+      <audio id="remoteAudio" autoplay></audio>
     </div>
-</div>
+  </div>
 
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const chatId = "{{ chat_id }}";
-        const callId = "{{ call_id }}";
-        const socket = new WebSocket(`ws://${window.location.host}/ws/call/${chatId}/`);
+  <script>
+    document.addEventListener("DOMContentLoaded", async function () {
+      const chatId = document.getElementById("chat_id").value;
+      const currentUserId = "{{ user.id }}"; // Provided by Django.
+      const callId = "{{ call_id }}"; // Optionally provided.
     
-        let peerConnection;
-        let activeUsers = 0;
-        let isMuted = false;
-        const config = { iceServers: [{ urls: "stun:stun.l.google.com:19302" }] };
-        let iceCandidateQueue = [];  // Store ICE candidates until SDP is set
+      const socket = new WebSocket('ws://' + window.location.host + '/ws/call/' + chatId + '/');
+      let peerConnection;
+      const config = { iceServers: [{ urls: "stun:stun.l.google.com:19302" }] };
+      let iceCandidateQueue = [];
+      const remoteVideo = document.getElementById("remoteVideo");
+      const remoteAudio = document.getElementById("remoteAudio");
     
-        socket.onmessage = async function (event) {
-            const data = JSON.parse(event.data);
-            console.log("📩 Received WebSocket message:", data);
-
-            if (data.action === "webrtc_signal") {
-                if (!peerConnection) {
-                    console.warn("⚠️ PeerConnection is not initialized yet. Initializing now...");
-                    initializePeerConnection(); // Ensure this function exists
-                }
-
-                if (data.signal.type === "offer") {
-                    console.log("📞 Received WebRTC Offer. Current signaling state:", peerConnection.signalingState);
-
-                    if (peerConnection.signalingState !== "stable") {
-                        console.warn("⚠️ Skipping offer because signaling state is:", peerConnection.signalingState);
-                        return;
-                    }
-
-                    try {
-                        await peerConnection.setRemoteDescription(new RTCSessionDescription(data.signal));
-                        console.log("✅ Remote offer set successfully.");
-
-                        const answer = await peerConnection.createAnswer();
-                        console.log("📝 Created WebRTC Answer:", answer);
-
-                        await peerConnection.setLocalDescription(answer);
-                        console.log("✅ Local description set. Sending answer...");
-
-                        socket.send(JSON.stringify({
-                            action: "webrtc_signal",
-                            signal: answer,
-                            from: chatId
-                        }));
-
-                        // Process queued ICE candidates
-                        processQueuedICECandidates();
-                    } catch (error) {
-                        console.error("❌ Error handling offer:", error);
-                    }
-                } 
-                else if (data.signal.type === "answer") {
-                    console.log("📞 Received WebRTC Answer. Current signaling state:", peerConnection.signalingState);
-
-                    if (peerConnection.signalingState !== "have-local-offer") {
-                        console.warn("⚠️ Skipping answer because signaling state is:", peerConnection.signalingState);
-                        return;
-                    }
-
-                    try {
-                        await peerConnection.setRemoteDescription(new RTCSessionDescription(data.signal));
-                        console.log("✅ Remote answer set successfully.");
-
-                        // Process queued ICE candidates
-                        processQueuedICECandidates();
-                    } catch (error) {
-                        console.error("❌ Error setting remote answer:", error);
-                    }
-                } 
-                else if (data.signal.candidate) {
-                    console.log("🌍 Received ICE Candidate:", data.signal);
-
-                    if (peerConnection.remoteDescription && peerConnection.remoteDescription.type) {
-                        // Remote SDP is set, add ICE candidate immediately
-                        try {
-                            await peerConnection.addIceCandidate(new RTCIceCandidate(data.signal));
-                            console.log("✅ ICE candidate added:", data.signal);
-                        } catch (error) {
-                            console.error("❌ Error adding ICE candidate:", error);
-                        }
-                    } else {
-                        // Remote SDP not set yet, queue the ICE candidate
-                        console.warn("⚠️ Remote SDP not set yet. Queuing ICE candidate.");
-                        iceCandidateQueue.push(data.signal);
-
-                        // Retry adding ICE candidates after a short delay
-                        setTimeout(processQueuedICECandidates, 500);
-                    }
-                }
-            } 
-            else if (data.action === "user_joined") {
-                activeUsers = data.active_users;
-                console.log(`👥 Users in call: ${activeUsers}`);
-            } 
-            else if (data.action === "user_left") {
-                activeUsers = data.active_users;
-                console.log(`👥 Users in call: ${activeUsers}`);
-
-                if (activeUsers <= 1) {
-                    console.log("🚪 Only one user in call, ending call...");
-                    endCall();
-                }
-            }
+      // Create a global AudioContext.
+      let audioContext;
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        audioContext = new AudioContext();
+      } catch (err) {
+        console.error("AudioContext not supported:", err);
+      }
+    
+      // Resume AudioContext on any user click.
+      document.addEventListener('click', function resumeAudioContext() {
+        if (audioContext && audioContext.state === "suspended") {
+          audioContext.resume().then(() => {
+            console.log("AudioContext resumed after user interaction.");
+          });
+        }
+      });
+    
+      // Initialize the PeerConnection.
+      function initializePeerConnection() {
+        peerConnection = new RTCPeerConnection(config);
+    
+        // Send ICE candidates to the signaling server.
+        peerConnection.onicecandidate = event => {
+          if (event.candidate) {
+            console.log("Sending ICE candidate:", event.candidate);
+            socket.send(JSON.stringify({
+              action: "webrtc_signal",
+              signal: event.candidate,
+              from: currentUserId
+            }));
+          }
         };
-
-        /**
-        * Processes queued ICE candidates once the remote description is set.
-        */
-        async function processQueuedICECandidates() {
-            if (peerConnection.remoteDescription && peerConnection.remoteDescription.type) {
-                console.log("🔄 Processing queued ICE candidates...");
-                for (let candidate of iceCandidateQueue) {
-                    try {
-                        await peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
-                        console.log("✅ Buffered ICE candidate added:", candidate);
-                    } catch (error) {
-                        console.error("❌ Error adding buffered ICE candidate:", error);
-                    }
-                }
-                iceCandidateQueue = []; // Clear queue after processing
-            }
-        }
-
-        
-        async function startCall() {
+    
+        // ontrack handler: assign the received stream to video and audio.
+        peerConnection.ontrack = function (event) {
+          console.log("Received remote track event:", event);
+          const stream = event.streams[0];
+    
+          // Use only the audio element for playback.
+          remoteAudio.srcObject = stream;
+          remoteAudio.volume = 1;
+          remoteAudio.muted = false;
+          remoteAudio.play().then(() => {
+            console.log("Remote audio playback started via audio element.");
+          }).catch(e => {
+            console.error("Audio element playback error:", e);
+          });
+    
+          // Display the stream in the video element.
+          remoteVideo.srcObject = stream;
+        };
+    
+        // Optional: log available media devices.
+        navigator.mediaDevices.enumerateDevices().then(devices => {
+          console.log("Media Devices:", devices);
+        });
+      }
+    
+      // Process queued ICE candidates.
+      async function processQueuedICECandidates() {
+        if (peerConnection.remoteDescription && peerConnection.remoteDescription.type) {
+          console.log("Processing queued ICE candidates...");
+          while (iceCandidateQueue.length) {
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                window.localStream = stream;
-                peerConnection = new RTCPeerConnection(config);
-                stream.getTracks().forEach(track => peerConnection.addTrack(track, stream));
-    
-                peerConnection.onicecandidate = event => {
-                    if (event.candidate) {
-                        socket.send(JSON.stringify({
-                            action: "webrtc_signal",
-                            signal: event.candidate,
-                            from: chatId
-                        }));
-                    }
-                };
-    
-                const offer = await peerConnection.createOffer();
-                await peerConnection.setLocalDescription(offer);
-                socket.send(JSON.stringify({
-                    action: "webrtc_signal",
-                    signal: offer,
-                    from: chatId
-                }));
-    
-                socket.send(JSON.stringify({ action: "user_joined", chat_id: chatId }));
-    
-                console.log("Call started successfully.");
+              let candidate = iceCandidateQueue.shift();
+              await peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+              console.log("Added queued ICE candidate:", candidate);
             } catch (error) {
-                console.error("Error starting call:", error);
+              console.error("Error adding queued candidate:", error);
             }
+          }
         }
+      }
     
-        function endCall() {
-            if (peerConnection) {
-                peerConnection.close();
-                peerConnection = null;
-            }
-    
-            if (window.localStream) {
-                window.localStream.getTracks().forEach(track => track.stop());
-            }
-    
-            socket.send(JSON.stringify({ action: "user_left", chat_id: chatId }));
-    
-            window.location.href = `/chat/${chatId}/message/`;
+      // Periodically monitor the remote audio track state.
+      setInterval(() => {
+        if (remoteAudio.srcObject) {
+          const tracks = remoteAudio.srcObject.getAudioTracks();
+          if (tracks.length) {
+            console.log(`Monitoring remote audio track: muted=${tracks[0].muted}, readyState=${tracks[0].readyState}`);
+          }
         }
-
-        function toggleMute() {
-            if (!window.localStream) return;
+      }, 3000);
     
-            const audioTracks = window.localStream.getAudioTracks();
-            if (audioTracks.length === 0) return;
+      // Start the call by capturing local audio with constraints and sending an offer.
+      async function startCall() {
+        try {
+          const constraints = { 
+            audio: {
+              echoCancellation: true,
+              noiseSuppression: true,
+              autoGainControl: true
+            },
+            video: false 
+          };
     
-            isMuted = !isMuted;
-            audioTracks[0].enabled = !isMuted;
+          const stream = await navigator.mediaDevices.getUserMedia(constraints);
+          console.log("Got local stream:", stream);
+          
+          window.localStream = stream;
+          initializePeerConnection();
     
-            const muteButton = document.getElementById("mute");
-            const muteIcon = muteButton.querySelector("i");
+          stream.getTracks().forEach(track => {
+            console.log("Adding local track:", track.kind, track);
+            peerConnection.addTrack(track, stream);
+          });
     
-            if (isMuted) {
-                muteIcon.classList.remove("fa-microphone");
-                muteIcon.classList.add("fa-microphone-slash");
-            } else {
-                muteIcon.classList.remove("fa-microphone-slash");
-                muteIcon.classList.add("fa-microphone");
-            }
+          const offer = await peerConnection.createOffer();
+          await peerConnection.setLocalDescription(offer);
+          console.log("Local description set with offer:", offer);
+    
+          socket.send(JSON.stringify({
+            action: "webrtc_signal",
+            signal: offer,
+            from: currentUserId
+          }));
+        } catch (error) {
+          console.error("Error starting call:", error);
         }
+      }
     
-        document.getElementById("mute").addEventListener("click", toggleMute);
+      // End the call.
+      function endCall() {
+        if (peerConnection) {
+          peerConnection.close();
+          peerConnection = null;
+        }
+        if (window.localStream) {
+          window.localStream.getTracks().forEach(track => track.stop());
+        }
+        socket.send(JSON.stringify({ action: "user_left", chat_id: chatId, user_id: currentUserId }));
+        window.location.href = `/chat/${chatId}/message/`;
+      }
     
-        document.getElementById("end-call").addEventListener("click", endCall);
+      // Toggle mute/unmute.
+      let isMuted = false;
+      function toggleMute() {
+        if (!window.localStream) return;
+        const audioTracks = window.localStream.getAudioTracks();
+        if (audioTracks.length) {
+          isMuted = !isMuted;
+          audioTracks.forEach(track => { track.enabled = !isMuted; });
+          console.log("Local audio muted:", isMuted);
+        }
+      }
     
-        startCall();
+      // WebSocket event handlers.
+      socket.onopen = async function (e) {
+        console.log("Call WebSocket connected for chat " + chatId);
+        socket.send(JSON.stringify({ action: "join", chat_id: chatId }));
+        await startCall();
+      };
+    
+      socket.onmessage = async function (event) {
+        const data = JSON.parse(event.data);
+        console.log("Received from signaling server:", data);
+    
+        if (data.action === "webrtc_signal") {
+          if (!peerConnection) {
+            console.warn("PeerConnection not initialized. Initializing...");
+            initializePeerConnection();
+          }
+          try {
+            if (data.signal.type === "offer") {
+              if (!peerConnection.remoteDescription) {
+                await peerConnection.setRemoteDescription(new RTCSessionDescription(data.signal));
+                console.log("Remote description set with offer:", data.signal);
+                const answer = await peerConnection.createAnswer();
+                await peerConnection.setLocalDescription(answer);
+                console.log("Local description set with answer:", answer);
+                socket.send(JSON.stringify({
+                  action: "webrtc_signal",
+                  signal: answer,
+                  from: currentUserId
+                }));
+              } else {
+                console.warn("Received an offer, but remote description already set.");
+              }
+            } else if (data.signal.type === "answer") {
+              if (!peerConnection.remoteDescription) {
+                await peerConnection.setRemoteDescription(new RTCSessionDescription(data.signal));
+                console.log("Remote description set with answer:", data.signal);
+              } else {
+                console.warn("Received an answer, but remote description already set.");
+              }
+            } else if (data.signal.candidate) {
+              if (peerConnection.remoteDescription) {
+                await peerConnection.addIceCandidate(new RTCIceCandidate(data.signal));
+                console.log("Added ICE candidate:", data.signal);
+              } else {
+                iceCandidateQueue.push(data.signal);
+                setTimeout(processQueuedICECandidates, 500);
+              }
+            }
+          } catch (error) {
+            console.error("Error handling signaling:", error);
+          }
+        }
+      };
+    
+      socket.onerror = function (error) {
+        console.error("Call WebSocket error:", error);
+      };
+    
+      document.getElementById("end-call").addEventListener("click", endCall);
+      document.getElementById("mute").addEventListener("click", toggleMute);
+    
+      // Implement Screen Share functionality.
+      document.getElementById("screen-share").addEventListener("click", async () => {
+        try {
+          const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+          const screenTrack = screenStream.getVideoTracks()[0];
+    
+          // Replace the existing video track if one exists.
+          const sender = peerConnection.getSenders().find(s => s.track && s.track.kind === "video");
+          if (sender) {
+            sender.replaceTrack(screenTrack);
+          } else {
+            peerConnection.addTrack(screenTrack, screenStream);
+          }
+    
+          // Optionally, update the UI to show the screen share.
+          remoteVideo.srcObject = screenStream;
+          console.log("Screen share started.");
+        } catch (err) {
+          console.error("Screen share failed:", err);
+        }
+      });
     });
-    
-</script>
-<style>
-    /* General Reset */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: Arial, sans-serif;
-}
-
-body {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background-color:rgb(80, 5, 218);
-    color: white;
-}
-
-.call-container {
-    width: 350px;
-    height: 80vh;
-    background: #1e1e1e;
-    border-radius: 15px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-    text-align: center;
-    overflow: hidden;
-    position: relative;
-}
-
-.call-header {
-    padding: 15px;
-    background: #222;
-    border-bottom: 1px solid #333;
-}
-
-.call-header p {
-    font-size: 14px;
-    color: #bbb;
-}
-
-.call-body {
-    padding: 30px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.profile-icon img {
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 3px solid #444;
-}
-
-.call-footer {
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    padding: 20px;
-    background: #222;
-    border-top: 1px solid #333;
-}
-
-.action-button {
-    width: 50px;
-    height: 50px;
-    background: #444;
-    border: none;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: 0.3s;
-}
-
-.action-button i {
-    font-size: 20px;
-    color: white;
-}
-
-.action-button:hover {
-    background: #666;
-}
-
-.end-call {
-    background: #d9534f;
-}
-
-.end-call:hover {
-    background: #c9302c;
-}
-</style>
-   
+  </script>
 </body>
 </html>
