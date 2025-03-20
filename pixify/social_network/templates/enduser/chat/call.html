@@ -116,15 +116,40 @@
             }
         }
     
+        async function waitForSocketOpen(socket) {
+            return new Promise((resolve) => {
+                if (socket.readyState === WebSocket.OPEN) {
+                    resolve();
+                } else {
+                    socket.addEventListener("open", resolve, { once: true });
+                }
+            });
+        }
+        
         async function startCall() {
             try {
+                await waitForSocketOpen(socket); // Ensure WebSocket is open before sending
+                
                 localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                document.getElementById("localAudio").srcObject = localStream;
+                if (!localStream) {
+                    console.error("Failed to access local audio stream.");
+                    return;
+                }
+        
+                const localAudio = document.getElementById("localAudio");
+                if (localAudio) {
+                    localAudio.srcObject = localStream;
+                } else {
+                    console.error("Local audio element not found.");
+                    return;
+                }
+        
                 initializePeerConnection();
                 localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
-                
+        
                 const offer = await peerConnection.createOffer();
                 await peerConnection.setLocalDescription(offer);
+        
                 socket.send(JSON.stringify({ action: "webrtc_signal", signal: offer, from: chatId }));
                 socket.send(JSON.stringify({ action: "user_joined", chat_id: chatId }));
             } catch (error) {

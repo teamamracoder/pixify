@@ -30,28 +30,48 @@
     
         <script>
             // Wait until the DOM is fully loaded
-            document.addEventListener("DOMContentLoaded", () => {
-                // Get chat ID from the hidden input
-                const chatId = "{{ chat_id }}"
-                const callId = "{{ call_id }}"
-                console.log(chatId);
-                console.log(callId);
-    
-                // Get the buttons by their class names
-                const acceptCallButton = document.querySelector(".accept-call");
-                const endCallButton = document.querySelector(".end-call");
-    
-                // Add click event listener for "Accept Call" button
-                acceptCallButton.addEventListener("click", () => {
+            document.addEventListener("DOMContentLoaded", function () {
+                const chatId = "{{ chat_id }}";
+                const callId = "{{ call_id }}";
+                
+                // Initialize WebSocket
+                const socket = new WebSocket(`ws://${window.location.host}/ws/call/${chatId}/`);
+                
+                // Status to track who has accepted the call
+                let callAccepted = false;
+        
+                socket.onmessage = function (event) {
+                    const data = JSON.parse(event.data);
+        
+                    // Handle the response when the call is accepted
+                    if (data.action === "call_accepted" && data.call_id === callId) {
+                        // Only the person who accepted should be redirected
+                        if (!callAccepted) {
+                            window.location.href = `/call/${callId}/${chatId}/`;
+                            callAccepted = true;  // Ensure redirection only once
+                        }
+                    }
+                };
+        
+                // Accept call click event
+                document.querySelector(".accept-call").addEventListener("click", function () {
                     if (callId) {
+                        // Send message to WebSocket server that the call has been accepted
+                        socket.send(JSON.stringify({
+                            action: "call_accepted",
+                            call_id: callId
+                        }));
+        
+                        // Set callAccepted flag to avoid multiple redirects
+                        callAccepted = true;
                         window.location.href = `/call/${callId}/${chatId}/`;
                     } else {
                         console.error("Call ID is missing!");
                     }
                 });
-    
-                // Add click event listener for "End Call" button
-                endCallButton.addEventListener("click", () => {
+        
+                // End call click event
+                document.querySelector(".end-call").addEventListener("click", function () {
                     if (chatId) {
                         window.location.href = `/chat/${chatId}/message/`;
                     } else {
@@ -59,32 +79,7 @@
                     }
                 });
             });
-
-            document.addEventListener("DOMContentLoaded", function () {
-                const chatId = "{{ chat_id }}";
-                const callId = "{{ call_id }}";
-                const socket = new WebSocket(`ws://${window.location.host}/ws/call/${chatId}/`);
-            
-                socket.onmessage = function (event) {
-                    const data = JSON.parse(event.data);
-            
-                    if (data.action === "call_accepted") {
-                        window.location.href = `/call/${callId}/${chatId}/`;
-                    }
-                };
-            
-                document.querySelector(".accept-call").addEventListener("click", function () {
-                    socket.send(JSON.stringify({
-                        action: "call_accepted",
-                        call_id: callId
-                    }));
-            
-                    window.location.href = `/call/${callId}/${chatId}/`;
-                });
-            });
-            
         </script>
-
     <style>
 
         #ring_ptag{
