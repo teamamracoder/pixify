@@ -2296,9 +2296,19 @@ document.querySelectorAll('.media-stop').forEach(video => {
 </script>
 
 <script>
- 
   // Global variable to store the active call ID from the "ringing" event.
   let currentCallId = null;
+
+  // On page load, check if there is an active call stored in localStorage.
+  window.addEventListener('load', function() {
+    const storedCallId = localStorage.getItem("activeCallId");
+    if (storedCallId) {
+      currentCallId = storedCallId;
+      document.getElementById("persistentJoinCall").style.display = "block";
+    } else {
+      document.getElementById("persistentJoinCall").style.display = "none";
+    }
+  });
 
   // Create a single WebSocket connection
   const call_socket = new WebSocket(`ws://${window.location.host}/ws/call/${chatId}/`);
@@ -2325,8 +2335,10 @@ document.querySelectorAll('.media-stop').forEach(video => {
       document.getElementById("persistentJoinCall").style.display = "block";
       
     } else if (data.action === "user_joined") {
-      // Show join UI when another user joins (if applicable)
-      document.getElementById("persistentJoinCall").style.display = "block";
+      // Only show join UI if an active call is available.
+      if (currentCallId) {
+        document.getElementById("persistentJoinCall").style.display = "block";
+      }
       
     } else if (data.action === "call_terminated") {
       // Hide the persistent join UI and clear the stored call ID.
@@ -2334,6 +2346,7 @@ document.querySelectorAll('.media-stop').forEach(video => {
       currentCallId = null;
       localStorage.removeItem("activeCallId");
     }
+    // Optionally update participants UI here using data.user_list
   };
 
   // Function to generate a random call ID (used when initiating a call)
@@ -2371,9 +2384,12 @@ document.querySelectorAll('.media-stop').forEach(video => {
       window.location.href = `/call/${currentCallId}/${chatId}/`;
     } else {
       console.error("No active call available to join.");
+      // Optionally hide the join UI if no call is active.
+      document.getElementById("persistentJoinCall").style.display = "none";
     }
   });
 </script>
+
 
 
 
