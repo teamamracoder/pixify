@@ -5,23 +5,24 @@ from asgiref.sync import sync_to_async
 
 class CallConsumer(AsyncWebsocketConsumer):
     # For simplicity, these remain class-level; in production, consider using external storage.
-    active_users = {}
-    joined_users = {}
-    accepted_users = {}  # New: mapping: group_name -> list of users who accepted the call
-    call_initiators = {}  # Mapping: call_id -> caller's channel name
-    call_declines = {}     # Mapping: call_id -> set of callee channel names who declined
+    active_users = {}         # Total connections per group
+    joined_users = {}         # All connected users per group
+    accepted_users = {}       # Users who have “joined” the call session
+    call_initiators = {}      # Mapping: call_id -> caller's channel name
+    call_declines = {}        # Mapping: call_id -> set of callee channel names who declined
+
+    # New: Track active call status per chat/group.
+    active_calls = {}         # Mapping: group_name -> bool
 
     async def get_user_chat_ids(self, user):
-        """
-        Return a list of chat IDs the user is part of.
-        """
-        print(user)
+        # Returns the list of chat IDs the user is part of.
         chats = await sync_to_async(lambda: list(chat_service.get_all_user_chats(user)))()
         return chats
 
     async def connect(self):
         self.chat_id = self.scope['url_route']['kwargs']['chat_id']
         user = self.scope.get("user")
+        # If using "all" as a catch-all, load multiple chat_ids
         if self.chat_id == "all":
             self.chat_ids = await self.get_user_chat_ids(user)
         else:
@@ -29,12 +30,17 @@ class CallConsumer(AsyncWebsocketConsumer):
 
         for cid in self.chat_ids:
             group_name = f"call_{cid}"
-            if group_name not in self.active_users:
-                self.active_users[group_name] = 0
+            # Increase connection count.
+            self.active_users.setdefault(group_name, 0)
             self.active_users[group_name] += 1
 
-            if group_name not in self.joined_users:
-                self.joined_users[group_name] = []
+            # Track all joined users.
+            self.joined_users.setdefault(group_name, [])
+            
+            # Initialize active call flag if not present.
+            if group_name not in self.active_calls:
+                self.active_calls[group_name] = False
+
             # Build user details.
             if user and user.is_authenticated:
                 user_id = user.id
@@ -49,20 +55,19 @@ class CallConsumer(AsyncWebsocketConsumer):
                 full_name = "Anonymous"
                 profile_photo = "/static/images/avatar.jpg"
 
-            user_details = {
+            self.user_details = {
                 "id": user_id,
                 "name": full_name,
                 "photo": profile_photo
             }
-            self.user_details = user_details
-            self.joined_users[group_name].append(user_details)
+            self.joined_users[group_name].append(self.user_details)
             await self.channel_layer.group_add(group_name, self.channel_name)
 
         await self.accept()
 
+        # Inform everyone on connection.
         for cid in self.chat_ids:
             group_name = f"call_{cid}"
-            # On connection, broadcast the joined users (this list shows everyone who connected).
             await self.channel_layer.group_send(
                 group_name,
                 {
@@ -72,27 +77,32 @@ class CallConsumer(AsyncWebsocketConsumer):
                     "user_list": self.accepted_users.get(group_name, [])
                 }
             )
-            print(f"[WebSocket] {self.user_details['name']} connected to chat {cid}, Active users: {self.active_users[group_name]}")
+            print(f"[WebSocket] {self.user_details['name']} connected to chat {cid}")
 
     async def disconnect(self, close_code):
         user_id = self.user_details.get("id")
         for cid in self.chat_ids:
             group_name = f"call_{cid}"
+            # Decrement connection count.
             if group_name in self.active_users:
                 self.active_users[group_name] -= 1
-                if self.active_users[group_name] <= 0:
-                    del self.active_users[group_name]
+                # Only clear call flag if no connections AND no accepted participants remain.
+                if self.active_users[group_name] <= 0 and not self.accepted_users.get(group_name):
+                    self.active_calls[group_name] = False
+
+            # Remove the user from joined and accepted lists.
             if group_name in self.joined_users and user_id is not None:
                 self.joined_users[group_name] = [
                     user for user in self.joined_users[group_name] if user.get("id") != user_id
                 ]
-                if not self.joined_users[group_name]:
-                    del self.joined_users[group_name]
-            # Remove from accepted_users if present.
             if group_name in self.accepted_users and user_id is not None:
                 self.accepted_users[group_name] = [
                     user for user in self.accepted_users[group_name] if user.get("id") != user_id
                 ]
+                # If no one is left in the call session, mark call as inactive.
+                if not self.accepted_users[group_name]:
+                    self.active_calls[group_name] = False
+
             await self.channel_layer.group_discard(group_name, self.channel_name)
             await self.channel_layer.group_send(
                 group_name,
@@ -103,9 +113,9 @@ class CallConsumer(AsyncWebsocketConsumer):
                     "user_list": self.accepted_users.get(group_name, [])
                 }
             )
-            print(f"[WebSocket] {self.user_details['name']} disconnected from chat {cid}, Remaining users: {self.active_users.get(group_name, 0)}")
+            print(f"[WebSocket] {self.user_details['name']} disconnected from chat {cid}")
 
-        # Also remove from call_initiators if present.
+        # Clean up call_initiators if needed.
         for call_id, channel in list(self.call_initiators.items()):
             if channel == self.channel_name:
                 del self.call_initiators[call_id]
@@ -114,9 +124,10 @@ class CallConsumer(AsyncWebsocketConsumer):
         try:
             data = json.loads(text_data)
             action = data.get("action")
+            
             if action == "ringing":
                 call_id = data["call_id"]
-                # Save caller's channel for this call.
+                # Save caller's channel.
                 self.call_initiators[call_id] = self.channel_name
                 actual_chat_id = data.get("chat_id")
                 caller = await sync_to_async(user_service.get_user)(data.get("caller_id"))
@@ -127,6 +138,9 @@ class CallConsumer(AsyncWebsocketConsumer):
                 )
                 caller_image = caller.profile_photo_url or "/static/images/avatar.jpg"
                 group_name = f"call_{actual_chat_id}"
+                # Mark the call as active.
+                self.active_calls[group_name] = True
+
                 await self.channel_layer.group_send(
                     group_name,
                     {
@@ -138,18 +152,17 @@ class CallConsumer(AsyncWebsocketConsumer):
                         "caller_photo": caller_image
                     }
                 )
+
             elif action == "call_accepted":
                 call_id = data["call_id"]
                 receiver = data["receiver"]
                 actual_chat_id = data.get("chat_id")
                 group_name = f"call_{actual_chat_id}"
-                # Update accepted_users list for this group.
-                if group_name not in self.accepted_users:
-                    self.accepted_users[group_name] = []
-                # Add this user only if not already added.
+                # Add user to accepted list.
+                self.accepted_users.setdefault(group_name, [])
                 if self.user_details not in self.accepted_users[group_name]:
                     self.accepted_users[group_name].append(self.user_details)
-                # Notify the caller if present.
+                # Notify the caller if available.
                 caller_channel = self.call_initiators.get(call_id)
                 if caller_channel:
                     await self.channel_layer.send(
@@ -161,8 +174,10 @@ class CallConsumer(AsyncWebsocketConsumer):
                             "receiver": receiver
                         }
                     )
-                    del self.call_initiators[call_id]
-                # Broadcast the updated active (accepted) participants list.
+                    # For one-to-one calls, you might want to clear the initiator now.
+                    if len(self.joined_users.get(group_name, [])) < 3:
+                        del self.call_initiators[call_id]
+                # Broadcast update.
                 await self.channel_layer.group_send(
                     group_name,
                     {
@@ -172,6 +187,7 @@ class CallConsumer(AsyncWebsocketConsumer):
                         "user_list": self.accepted_users[group_name]
                     }
                 )
+
             elif action == "webrtc_signal":
                 actual_chat_id = data.get("chat_id")
                 group_name = f"call_{actual_chat_id}"
@@ -184,15 +200,14 @@ class CallConsumer(AsyncWebsocketConsumer):
                         "chat_id": actual_chat_id
                     }
                 )
+
             elif action == "user_joined":
                 actual_chat_id = data.get("chat_id")
                 group_name = f"call_{actual_chat_id}"
-                # For active call page, treat a "user_joined" as acceptance.
-                if group_name not in self.accepted_users:
-                    self.accepted_users[group_name] = []
+                # Treat a "user_joined" message as acceptance.
+                self.accepted_users.setdefault(group_name, [])
                 if self.user_details not in self.accepted_users[group_name]:
                     self.accepted_users[group_name].append(self.user_details)
-                # Broadcast updated accepted participants list.
                 await self.channel_layer.group_send(
                     group_name,
                     {
@@ -202,6 +217,7 @@ class CallConsumer(AsyncWebsocketConsumer):
                         "user_list": self.accepted_users[group_name]
                     }
                 )
+
             elif action == "user_left":
                 actual_chat_id = data.get("chat_id")
                 group_name = f"call_{actual_chat_id}"
@@ -214,40 +230,46 @@ class CallConsumer(AsyncWebsocketConsumer):
                         "user_list": self.accepted_users.get(group_name, [])
                     }
                 )
+
             elif action == "call_declined":
+                # In one-to-one calls, a decline terminates the call.
                 call_id = data["call_id"]
                 actual_chat_id = data.get("chat_id")
                 group_name = f"call_{actual_chat_id}"
-                if call_id not in self.call_declines:
-                    self.call_declines[call_id] = set()
+                self.call_declines.setdefault(call_id, set())
                 self.call_declines[call_id].add(self.channel_name)
                 
                 total_in_group = self.active_users.get(group_name, 0)
                 num_callees = total_in_group - 1 if call_id in self.call_initiators else total_in_group
                 
                 if len(self.call_declines[call_id]) >= num_callees:
-                    caller_channel = self.call_initiators.get(call_id)
-                    if caller_channel:
-                        await self.channel_layer.send(
-                            caller_channel,
+                    # For one-to-one calls, terminate the call.
+                    if total_in_group < 3:  # Assuming group call has at least 3 participants.
+                        if call_id in self.call_initiators:
+                            await self.channel_layer.send(
+                                self.call_initiators[call_id],
+                                {
+                                    "type": "call.terminated",
+                                    "call_id": call_id,
+                                    "chat_id": actual_chat_id
+                                }
+                            )
+                        await self.channel_layer.group_send(
+                            group_name,
                             {
                                 "type": "call.terminated",
                                 "call_id": call_id,
                                 "chat_id": actual_chat_id
                             }
                         )
-                    await self.channel_layer.group_send(
-                        group_name,
-                        {
-                            "type": "call.terminated",
-                            "call_id": call_id,
-                            "chat_id": actual_chat_id
-                        }
-                    )
-                    if call_id in self.call_initiators:
-                        del self.call_initiators[call_id]
-                    if call_id in self.call_declines:
-                        del self.call_declines[call_id]
+                        if call_id in self.call_initiators:
+                            del self.call_initiators[call_id]
+                        if call_id in self.call_declines:
+                            del self.call_declines[call_id]
+                        # Terminate the call.
+                        self.active_calls[group_name] = False
+                    # In group calls, you might choose not to terminate the call immediately.
+            
             elif action == "call_terminated":
                 actual_chat_id = data.get("chat_id")
                 call_id = data.get("call_id")
@@ -260,11 +282,37 @@ class CallConsumer(AsyncWebsocketConsumer):
                         "call_id": call_id
                     }
                 )
+                self.active_calls[group_name] = False
+
+            # New action to allow late joining.
+            elif action == "join_late":
+                actual_chat_id = data.get("chat_id")
+                group_name = f"call_{actual_chat_id}"
+                # Permit joining only if the call is active.
+                if self.active_calls.get(group_name, False):
+                    self.accepted_users.setdefault(group_name, [])
+                    if self.user_details not in self.accepted_users[group_name]:
+                        self.accepted_users[group_name].append(self.user_details)
+                    await self.channel_layer.group_send(
+                        group_name,
+                        {
+                            "type": "user.joined",
+                            "chat_id": actual_chat_id,
+                            "active_users": len(self.accepted_users[group_name]),
+                            "user_list": self.accepted_users[group_name]
+                        }
+                    )
+                else:
+                    await self.send(text_data=json.dumps({
+                        "action": "error",
+                        "message": "Call is not active."
+                    }))
     
         except Exception as e:
             print(f"[WebSocket Error] Failed to process message: {e}")
 
     # Event Handlers
+
     async def ringing(self, event):
         await self.send(text_data=json.dumps({
             "action": "ringing",
