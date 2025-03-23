@@ -576,7 +576,6 @@ $(document).ready(function () {
     $(".load-comments").click(function () {
         let postId = $(this).data("post-id");
         let userId = $(".user_profile_comment").data("user-id");
-
     
         if (!postId) {
             console.error("❌ Error: Post ID is undefined!");
@@ -591,47 +590,116 @@ $(document).ready(function () {
             type: "GET",
             dataType: "json",
             success: function (response) {
-                // Handle Post Data
                 let post = response.post_data;
-                if (post) {
-                    let postMedia = post.post_media
-                        ? `<${post.content_type === 'video' ? 'video controls' : 'img'} 
-                            src="${post.post_media}" 
-                            class="post-media" 
-                            style="width: 100%; height: 100%; border-radius: 10px;">
-                        ${post.content_type === 'video' ? '</video>' : ''}`
-                        : '<p>No media available</p>';
     
+                // Define carouselId so it's always available
+                let carouselId = `carousel-${postId}`;
+                let postMediaHTML = '';
+    
+                if (post) {
+                    // Handle Media
+                    if (post.post_media) {
+                        if (post.content_type === 'VIDEO') {
+                            // Video branch: use video tag with correct source
+                            postMediaHTML = `
+                                <video controls 
+                                       src="/static${post.post_media}" 
+                                       class="post-media" 
+                                       style="width: 100%; height: 100%; border-radius: 10px;">
+                                </video>`;
+                        } else if (Array.isArray(post.post_media) && post.post_media.length > 2) {
+                            // Carousel branch for more than 2 images
+                            postMediaHTML = `
+                                <div id="${carouselId}" class="carousel slide" data-bs-ride="carousel">
+                                    <div class="carousel-indicators">`;
+    
+                            post.post_media.forEach((media, index) => {
+                                postMediaHTML += `
+                                    <button type="button" data-bs-target="#${carouselId}" 
+                                            data-bs-slide-to="${index}" 
+                                            ${index === 0 ? 'class="active" aria-current="true"' : ''} 
+                                            aria-label="Slide ${index + 1}">
+                                    </button>`;
+                            });
+    
+                            postMediaHTML += `
+                                    </div>
+                                    <div class="carousel-inner">`;
+    
+                            post.post_media.forEach((media, index) => {
+                                postMediaHTML += `
+                                    <div class="carousel-item ${index === 0 ? 'active' : ''}">
+                                        <img src="${staticUrl}${cleanMediaPath(media)}" 
+                                             class="d-block w-100 post-media" 
+                                             style="height: 100%; border-radius: 10px;">
+                                    </div>`;
+                            });
+    
+                            postMediaHTML += `
+                                    </div>
+                                    <button class="carousel-control-prev" type="button" data-bs-target="#${carouselId}" data-bs-slide="prev" onclick="event.stopPropagation();">
+                                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                        <span class="visually-hidden">Previous</span>
+                                    </button>
+                                    <button class="carousel-control-next" type="button" data-bs-target="#${carouselId}" data-bs-slide="next" onclick="event.stopPropagation();">
+                                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                        <span class="visually-hidden">Next</span>
+                                    </button>
+                                </div>`;
+                        } else {
+                            // Single image or an array with 1-2 images: display the first image
+                            let imageSrc = Array.isArray(post.post_media) ? post.post_media[0] : post.post_media;
+                            postMediaHTML = `
+                                <img src="${staticUrl}${cleanMediaPath(imageSrc)}" 
+                                     class="post-media" 
+                                     style="width: 100%; height: 100%; border-radius: 10px;">`;
+                        }
+                    } else {
+                        postMediaHTML = '<p>No media available</p>';
+                    }
+    
+                    // Construct Post Content HTML
                     let postHtml = `
                         <div class="post-header" style="display: flex; align-items: center; gap: 10px;">
-                            <img src="${post.posted_by_image}" alt="User" class="profile-img" style="width: 40px; height: 40px; border-radius: 50%;">
+                            <img src="${staticUrl}${cleanMediaPath(post.posted_by_image)}" 
+                                 alt="User" 
+                                 class="profile-img" 
+                                 style="width: 40px; height: 40px; border-radius: 50%;">
                             <div>
                                 <div>${post.posted_by_name}</div>
                                 <div style="font-size: 10px; color: lightgray;">${post.created_at}</div>
                             </div>
                         </div>
-                        <div class="post-media-container" style="margin-top: 10px; height:80%;">
-                            ${postMedia}
+                        <div class="post-media-container" style="margin-top: 10px; height: 80%;">
+                            ${postMediaHTML}
                         </div>`;
     
                     $(".post-content").html(postHtml);
                 }
     
                 // Handle Comments
-                let commentsHtml = response.comments.length
+                let commentsHtml = response.comments && response.comments.length
                     ? generateCommentTree(response.comments)
                     : "<p>No comments yet.</p>";
-
+    
                 $("#comments-container").html(commentsHtml);
-            loadUserPostsComments(userId);
-
+    
+                if (typeof userId !== "undefined" && userId) {
+                    loadUserPostsComments(userId);
+                }
+    
+                // Initialize carousel if it exists
+                if ($(`#${carouselId}`).length) {
+                    $(`#${carouselId}`).carousel();
+                }
             },
             error: function () {
                 $("#comments-container").html("<p>Failed to load comments.</p>");
             }
         });
-    });
+    }); 
     
+
         // When the comment modal is closed, reset reply mode and clear the input field
         $("#commentModal").on("hidden.bs.modal", function () {
             resetReplyMode();

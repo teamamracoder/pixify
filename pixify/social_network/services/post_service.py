@@ -4,7 +4,7 @@ from . import GetData
 from ..models import Post,Comment,PostReaction,PostReaction,MasterList
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
-from ..constants.default_values import PostType
+from ..constants.default_values import PostType, PostContentType
 from ..models import models
 from ..services import comment_service
 
@@ -185,9 +185,9 @@ def get_post_by_post_id(post_id):
             'post_media':post.media_url,
             'type':post.type,
             'posted_by_name':f"{post.posted_by.first_name} {post.posted_by.last_name}",
-            'posted_by_image':post.posted_by.profile_photo_url or '/static/images/avatar.jpg',
+            'posted_by_image':post.posted_by.profile_photo_url or '/images/avatar.jpg',
             'created_at':comment_service.format_timestamp(post.created_at),
-            'content_type':post.content_type
+            'content_type':PostContentType(post.content_type).name
         }
         print(post_data)
         return post_data
