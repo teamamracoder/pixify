@@ -117,8 +117,10 @@ class CommentListViewApi(View):
     @role_required(Role.ADMIN.value, Role.END_USER.value)
     def get(self, request, post_id):
         user_id=request.user.id
+        post_details=post_service.get_post_by_post_id(post_id)
         comments = comment_service.get_comments_by_post(post_id,user_id)
-        return JsonResponse({"comments": comments}, safe=False)
+        return JsonResponse({"comments": comments,'post_data':post_details}, safe=False)
+
     
 
 

@@ -175,3 +175,20 @@ def get_user_post_comment_count(user_id):
 
 def get_users_by_id(user_id):
             return User.objects.filter(id=user_id).all()
+
+def get_post_by_post_id(post_id):
+    post=Post.objects.filter(id=post_id,is_active=True).first()
+    post_data={}
+    if post:
+        post_data={
+            'id':post.id,
+            'post_media':post.media_url,
+            'type':post.type,
+            'posted_by_name':f"{post.posted_by.first_name} {post.posted_by.last_name}",
+            'posted_by_image':post.posted_by.profile_photo_url or '/static/images/avatar.jpg',
+            'created_at':post.created_at,
+            'content_type':post.content_type
+        }
+        print(post_data)
+        return post_data
+    return post_data

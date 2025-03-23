@@ -1,6 +1,52 @@
 {% extends "enduser/base.html" %} {% block title %}Profile Page{% endblock %}
 {% block content %} {% load static %}
 <body>
+    <!-- Comment Modal -->
+<div class="modal fade" id="commentModal" tabindex="-1" aria-labelledby="commentModalLabel" aria-hidden="true">
+    <div class="modal-dialog"style="box-shadow: 0 2px 4px rgba(151, 95, 236, 0.5);color: black;padding: 20px;border-radius: 12px;background: #2c0068;gap: 40px;justify-content: space-between;display: flex;max-width: 70%;top:8%;    align-items: end;">
+        <div class="post-content" style="width: 50%; height: 75vh;">
+        </div>
+        <div class="modal-header" id="modal-comments-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+        <div class="modal-content" style="box-shadow: none;background: none;width: 60%;top: 10%;">
+            <div class="modal-body" id="comments-container" style="scrollbar-width: none;overflow-y: scroll;height: 70vh;">
+                <!-- Comments will be loaded here -->
+            </div>
+                <div class="commt-foot">
+                    <form id="commentForm" class="mt-3">
+                    {% csrf_token %}
+
+                    <div id="CommentsectionTextarea" class="container-fluid py-2 com_sent" style="position: absolute; bottom: 0; ">
+                        <div class="input-group ms-2">
+
+                            <!-- Comment input -->
+                            <input
+                                class="form-control"
+                                id="commentText"
+                                name="comment_text"
+                                placeholder="Write a comment..."
+                                style="border-radius: 15px; background-color: #27236e; color: white;"
+                            >
+
+                            <!-- Cancel reply button container -->
+                            <div id="reply-cancel-container" style="display: none; align-self: center; margin-left: 10px;">
+                                <button id="replyCancel" type="button" class="btn btn-secondary btn-sm" style="border-radius: 15px;height: 35px;}">Cancel Reply</button>
+                            </div>
+                            <!-- Right button -->
+                            <div class="input-group-append d-flex gap-3 align-items-center ps-2">
+                                <button id="createcomment" type="submit" class="btn btn-transparent text-info p-0"></button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
     {% if user_details %}
     <div class="profile-container">
         <div style="border:2px solid black;">
@@ -150,51 +196,6 @@
 {% endif %}
 <div class="footer">Nothing to show</div>
 
-
-<!-- Comment Modal -->
-<div class="modal fade" id="commentModal" tabindex="-1" aria-labelledby="commentModalLabel" aria-hidden="true">
-    <div class="modal-dialog" style="height: 70vh; width:45%;">
-        <div class="modal-content" style="height: 100%; width: 96%;top:10%;">
-            <div class="modal-header" id="modal-comments-header">
-                <h5 class="modal-title" id="commentModalLabel">Comments</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <i class="bi bi-x-lg"></i>
-                </button>
-            </div>
-            <div class="modal-body" id="comments-container">
-                <!-- Comments will be loaded here -->
-            </div>
-                <div class="commt-foot">
-                    <form id="commentForm" class="mt-3">
-                    {% csrf_token %}
-
-                    <div id="CommentsectionTextarea" class="container-fluid py-2 com_sent" style="position: absolute; bottom: 0; ">
-                        <div class="input-group ms-2">
-
-                            <!-- Comment input -->
-                            <input
-                                class="form-control"
-                                id="commentText"
-                                name="comment_text"
-                                placeholder="Write a comment..."
-                                style="border-radius: 15px; background-color: #27236e; color: white;"
-                            >
-
-                            <!-- Cancel reply button container -->
-                            <div id="reply-cancel-container" style="display: none; align-self: center; margin-left: 10px;">
-                                <button id="replyCancel" type="button" class="btn btn-secondary btn-sm" style="border-radius: 15px;height: 35px;}">Cancel Reply</button>
-                            </div>
-                            <!-- Right button -->
-                            <div class="input-group-append d-flex gap-3 align-items-center ps-2">
-                                <button id="createcomment" type="submit" class="btn btn-transparent text-info p-0"></button>
-                            </div>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
 
 <div id="deleteModal" class="delete-modal" style="padding: 20px; border-radius: 5px; text-align: center;display:none;">
     <div class="delete-modal-content" style="flex-direction: column;display: flex; background-color: #1f0447fb;">
@@ -591,6 +592,33 @@ $(document).ready(function () {
             type: "GET",
             dataType: "json",
             success: function (response) {
+                // Handle Post Data
+                let post = response.post_data;
+                if (post) {
+                    let postMedia = post.post_media
+                        ? `<${post.content_type === 'video' ? 'video controls' : 'img'} 
+                            src="${post.post_media}" 
+                            class="post-media" 
+                            style="width: 100%; height: 100%; border-radius: 10px;">
+                        ${post.content_type === 'video' ? '</video>' : ''}`
+                        : '<p>No media available</p>';
+    
+                    let postHtml = `
+                        <div class="post-header" style="display: flex; align-items: center; gap: 10px;">
+                            <img src="${post.posted_by_image}" alt="User" class="profile-img" style="width: 40px; height: 40px; border-radius: 50%;">
+                            <div>
+                                <strong>${post.posted_by_name}</strong><br>
+                                <span style="font-size: 12px; color: lightgray;">${new Date(post.created_at).toLocaleString()}</span>
+                            </div>
+                        </div>
+                        <div class="post-media-container" style="margin-top: 10px; height:80%;">
+                            ${postMedia}
+                        </div>`;
+    
+                    $(".post-content").html(postHtml);
+                }
+    
+                // Handle Comments
                 let commentsHtml = response.comments.length
                     ? generateCommentTree(response.comments)
                     : "<p>No comments yet.</p>";
@@ -1157,9 +1185,10 @@ function toggleReaction(commentId, iconElement, likeCountElement) {
         }
 
         #modal-comments-header{
-            justify-content: space-between;
-            display: flex;
-            align-items: center;
+            margin: 10px;
+            top: 2px;
+            right: 10px;
+            position: absolute;
         }     
         
         .comment-profile-img {
