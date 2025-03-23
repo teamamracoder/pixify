@@ -732,8 +732,15 @@ $(document).ready(function () {
                         let commentsHtml = response.comments.length
                             ? generateCommentTree(response.comments)
                             : "<p>No comments yet.</p>";
-        
-                        $("#comments-container").html(commentsHtml); // Update comment section
+                        $("#comments-container").html(commentsHtml);
+            
+                        // Load user posts' updated comment counts
+                        setTimeout(function() {
+                            let userId = $(".user_profile_comment").data("user-id");
+                            if (userId) {
+                                loadUserPostsComments(userId);
+                            }
+                        }, 500); 
                     },
                     error: function () {
                         $("#comments-container").html("<p>Failed to load comments.</p>");
