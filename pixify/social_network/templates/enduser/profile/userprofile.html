@@ -2,45 +2,49 @@
 {% block content %} {% load static %}
     <!-- Comment Modal -->
 <div class="modal fade" id="commentModal" tabindex="-1" aria-labelledby="commentModalLabel" aria-hidden="true">
-    <div class="modal-dialog"style="box-shadow: 0 2px 4px rgba(151, 95, 236, 0.5);color: black;padding: 20px;border-radius: 12px;background: #2c0068;gap: 40px;justify-content: space-between;display: flex;max-width: 70%;top:8%;    align-items: end;">
-        <div class="post-content" style="width: 50%; height: 75vh;">
-        </div>
+    <div class="modal-dialog"style="box-shadow: 0 2px 4px rgba(151, 95, 236, 0.5);color: black;padding: 20px 20px 20px 0px;border-radius: 12px;background: #2c0068;gap: 40px;justify-content: space-between;display: flex;max-width: 70%;top:8%;    align-items: end;">
+        
         <div class="modal-header" id="modal-comments-header">
             <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="font-weight: bold;font-size: 15px;">
                 <i class="bi bi-x-lg"></i>
             </button>
         </div>
-        <div class="modal-content" style="box-shadow: none;background: none;width: 60%;top: 10%;">
-            <div class="modal-body" id="comments-container" style="scrollbar-width: none;overflow-y: scroll;height: 70vh;">
-                <!-- Comments will be loaded here -->
+        <div class="modal-content" style="box-shadow: none;background: none;width: 60%;top: 10%;display:contents;">
+            <div class="post-content" style="width: 50%; height: 75vh;">
+                <!--dynamically load post details-->
             </div>
-                <div class="commt-foot">
-                    <form id="commentForm" class="mt-3">
-                    {% csrf_token %}
+            <div style="width:60%;margin-left:30px;">
+                <div class="modal-body" id="comments-container" style="scrollbar-width: none;overflow-y: scroll;height: 65vh; margin-bottom: 33px;">
+                    <!-- Comments will be loaded here -->
+                </div>
+                    <div class="commt-foot">
+                        <form id="commentForm" class="mt-3">
+                        {% csrf_token %}
 
-                    <div id="CommentsectionTextarea" class="container-fluid py-2 com_sent" style="position: absolute; bottom: 0; ">
-                        <div class="input-group ms-2">
+                        <div id="CommentsectionTextarea" class="container-fluid py-2 com_sent" style="position: absolute; bottom: 0;width:33%; ">
+                            <div class="input-group ms-2">
 
-                            <!-- Comment input -->
-                            <input
-                                class="form-control"
-                                id="commentText"
-                                name="comment_text"
-                                placeholder="Write a comment..."
-                                style="border-radius: 15px; background-color: #27236e; color: white;"
-                            >
+                                <!-- Comment input -->
+                                <input
+                                    class="form-control"
+                                    id="commentText"
+                                    name="comment_text"
+                                    placeholder="Write a comment..."
+                                    style="border-radius: 15px; background-color: #27236e; color: white;"
+                                >
 
-                            <!-- Cancel reply button container -->
-                            <div id="reply-cancel-container" style="display: none; align-self: center; margin-left: 10px;">
-                                <button id="replyCancel" type="button" class="btn btn-secondary btn-sm" style="border-radius: 15px;height: 35px;}">Cancel Reply</button>
-                            </div>
-                            <!-- Right button -->
-                            <div class="input-group-append d-flex gap-3 align-items-center ps-2">
-                                <button id="createcomment" type="submit" class="btn btn-transparent text-info p-0"></button>
+                                <!-- Cancel reply button container -->
+                                <div id="reply-cancel-container" style="display: none; align-self: center; margin-left: 10px;">
+                                    <button id="replyCancel" type="button" class="btn btn-secondary btn-sm" style="border-radius: 15px;height: 35px;}">Cancel Reply</button>
+                                </div>
+                                <!-- Right button -->
+                                <div class="input-group-append d-flex gap-3 align-items-center ps-2">
+                                    <button id="createcomment" type="submit" class="btn btn-transparent text-info p-0"></button>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </form>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
@@ -486,21 +490,6 @@ $(document).ready(function () {
 <script>
     
 
-    $(document).ready(function () {
-        // Close modal when the close button (×) is clicked
-        $(document).on("click", ".close", function () {
-            $("#commentModal").modal("hide");
-        });
-    
-        // Close modal when clicking outside the modal content
-        $(document).on("click", function (event) {
-            if ($(event.target).is("#commentModal")) {
-                $("#commentModal").modal("hide");
-            }
-        });
-    });
-    
-
     
 
 //comment create
@@ -605,7 +594,7 @@ $(document).ready(function () {
                                 <video controls 
                                        src="/static${post.post_media}" 
                                        class="post-media" 
-                                       style="width: 100%; height: 100%; border-radius: 10px;">
+                                       style="width: 100%; height: 100%; border-radius: 10px;object-fit:cover;">
                                 </video>`;
                         } else if (Array.isArray(post.post_media) && post.post_media.length > 2) {
                             // Carousel branch for more than 2 images
@@ -670,7 +659,7 @@ $(document).ready(function () {
                                 <div style="font-size: 10px; color: lightgray;">${post.created_at}</div>
                             </div>
                         </div>
-                        <div class="post-media-container" style="margin-top: 10px; height: 80%;">
+                        <div class="post-media-container" style="margin-top: 10px; height: 85%;padding: 15px;background: #1f0447fb;">
                             ${postMediaHTML}
                         </div>`;
     
