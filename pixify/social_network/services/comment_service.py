@@ -95,7 +95,7 @@ def format_timestamp(timestamp):
     elif diff.total_seconds() < 86400:
         hours = int(diff.total_seconds() / 3600)
         return f"{hours} hours ago"
-    elif diff.days < 7:
+    elif diff.days < 30:
         return f"{diff.days} days ago"
     else:
         months = (now.year - timestamp.year) * 12 + now.month - timestamp.month

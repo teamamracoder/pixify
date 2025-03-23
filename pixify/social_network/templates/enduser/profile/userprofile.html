@@ -1,13 +1,12 @@
 {% extends "enduser/base.html" %} {% block title %}Profile Page{% endblock %}
 {% block content %} {% load static %}
-<body>
     <!-- Comment Modal -->
 <div class="modal fade" id="commentModal" tabindex="-1" aria-labelledby="commentModalLabel" aria-hidden="true">
     <div class="modal-dialog"style="box-shadow: 0 2px 4px rgba(151, 95, 236, 0.5);color: black;padding: 20px;border-radius: 12px;background: #2c0068;gap: 40px;justify-content: space-between;display: flex;max-width: 70%;top:8%;    align-items: end;">
         <div class="post-content" style="width: 50%; height: 75vh;">
         </div>
         <div class="modal-header" id="modal-comments-header">
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="font-weight: bold;font-size: 15px;">
                 <i class="bi bi-x-lg"></i>
             </button>
         </div>
@@ -607,8 +606,8 @@ $(document).ready(function () {
                         <div class="post-header" style="display: flex; align-items: center; gap: 10px;">
                             <img src="${post.posted_by_image}" alt="User" class="profile-img" style="width: 40px; height: 40px; border-radius: 50%;">
                             <div>
-                                <strong>${post.posted_by_name}</strong><br>
-                                <span style="font-size: 12px; color: lightgray;">${new Date(post.created_at).toLocaleString()}</span>
+                                <div>${post.posted_by_name}</div>
+                                <div style="font-size: 10px; color: lightgray;">${post.created_at}</div>
                             </div>
                         </div>
                         <div class="post-media-container" style="margin-top: 10px; height:80%;">
@@ -1185,7 +1184,6 @@ function toggleReaction(commentId, iconElement, likeCountElement) {
         }
 
         #modal-comments-header{
-            margin: 10px;
             top: 2px;
             right: 10px;
             position: absolute;
@@ -1464,24 +1462,36 @@ function toggleReaction(commentId, iconElement, likeCountElement) {
 
         @media (max-width: 768px) {
             .modal-dialog{
-                margin-top: 10% !important;
-                height: 70vh !important;
-                width: 100% !important;
+                top: 18% !important;
+                height: 82vh !important;
+                max-width: 100% !important;
+                margin: 0 !important;
             }
             .modal-content{
                 margin-right: 15px;
-                height: 50vh!important;
+                height: 75vh!important;
                 width: 100% !important;
+            }
+            .post-content{
+                display:none;
+            }
+            .modal-content{
+                top:1% !important;
             }
             
         }
         @media (max-width: 480px) {
             .modal-dialog{
-                right: 2%;
                 padding: 20px;
-                height: 70vh !important;
+                width: 100% !important;
+                top:18%!important;
+            }
+            .modal-content{
+                margin-right: 15px;
+                height: 75vh!important;
                 width: 100% !important;
             }
+
            
         }
 

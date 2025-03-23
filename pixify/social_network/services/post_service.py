@@ -186,7 +186,7 @@ def get_post_by_post_id(post_id):
             'type':post.type,
             'posted_by_name':f"{post.posted_by.first_name} {post.posted_by.last_name}",
             'posted_by_image':post.posted_by.profile_photo_url or '/static/images/avatar.jpg',
-            'created_at':post.created_at,
+            'created_at':comment_service.format_timestamp(post.created_at),
             'content_type':post.content_type
         }
         print(post_data)
