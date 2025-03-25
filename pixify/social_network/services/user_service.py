@@ -2,6 +2,9 @@ from urllib import request
 from ..models import User,Follower
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
+from social_network.constants.default_values import Role
+from django.db.models import Value, CharField
+from django.db.models.functions import Concat
 
 
 def list_users():
@@ -80,4 +83,31 @@ def updateFCMToken(user_id,fcm_token):
 def getFCMtoken(user_id):
     return User.objects.filter(id=user_id).values_list('fcm_token', flat=True).first()
 
+
+def user_search_api(request):
+    query = request.GET.get('search', '').strip()
+    if query:
+        terms = query.split()
+        # Use __contains to check if the roles array contains the END_USER role
+        users = User.objects.filter(is_active=True, roles__contains=[Role.END_USER.value])
+        for term in terms:
+            users = users.filter(
+                Q(first_name__icontains=term) |
+                Q(middle_name__icontains=term) |
+                Q(last_name__icontains=term)
+            )
+        users = users.order_by('first_name', 'middle_name', 'last_name')            
+    else:
+        users = User.objects.none()
+
+    users_data = [
+        {
+            "id": user.id,
+            # Join first, middle, and last names, skipping any None or empty values
+            "full_name": " ".join(filter(None, [user.first_name, user.middle_name, user.last_name])),
+            "profile_photo": user.profile_photo_url
+        }
+        for user in users
+    ]
+    return {"users": users_data}
 

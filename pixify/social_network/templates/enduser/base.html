@@ -39,20 +39,27 @@
                         <img src="{% static 'images/logo1.jpg' %}" alt="Logo" class="d-inline-block align-top"
                             style="width: 38px; height: 38px;">
                     </a>
-                    <form action="" class="nav-item" id="searchbarInput" style="padding-top: 5px;">
-                        <div class="input-group">
+                    <div id="searchContainer" style="position: relative; width: 100%;">
+                        <form action="" class="nav-item" id="searchbarInput" style="padding-top: 5px;">
+                          <div class="input-group">
                             <span class="input-group-text border-0">
-                                <i class="fa fa-search"></i>
+                              <i class="fa fa-search"></i>
                             </span>
                             <input type="text" class="form-control" placeholder="Search" />
-                        </div>
-                    </form>
+                          </div>
+                        </form>
+                        <!-- Container for search results -->
+                        <div id="userListContainer" style="position: absolute; top: 100%; left: 0; width: 100%; z-index: 1000; background-color: #fff;"></div>
+                      </div>
+
                 </div>
                 <!-- Right side: Profile Image -->
                 <div class="collapse navbar-collapse pe-auto col-md-5" id="navbarNav" style="height: 40px;justify-content: center;">
                     <form action="" class="nav-item" id="searchbarInputMiddle" style="padding-top: 5px;margin-right: 85px;width: 100%;display:none;">
                         <input class="form-control " type="text" placeholder="Search" />
                     </form>
+                     <div id="userListContainerMiddle" style="position: absolute; top: 100%; left: 32%; width: 100%; z-index: 1000; background-color: #fff;"></div>
+
                     <ul class="navbar-nav ms-auto" id="navbarNavMiddle">
                         <li class="nav-item" id="searchbarBtn" style="display:none;" data-bs-toggle="tooltip"
                             data-bs-placement="bottom" >
@@ -150,6 +157,83 @@
         </nav>
 
 
+        <script>
+            const UserId = {{ request.user.id }};
+            console.log(UserId);
+          
+            // Reusable function to attach search functionality to a given input and container.
+            function setupUserSearch(inputSelector, containerSelector) {
+              $(inputSelector).on('keyup', function() {
+                const searchQuery = $(this).val().trim();
+                // If the search field is empty, clear the results and exit.
+                if (!searchQuery) {
+                  $(containerSelector).empty();
+                  return;
+                }
+                
+                $.ajax({
+                  url: "{% url 'user_search_api' %}",
+                  data: { search: searchQuery },
+                  dataType: 'json',
+                  success: function(response) {
+                    console.log(response);
+                    const users = response.users;
+                    let html = "";
+                    if (users.length > 0) {
+                      html += "<ul class='list-group'>";
+                      $.each(users, function(index, user) {
+                        const profileUrl = (parseInt(user.id) === parseInt(UserId))
+                          ? "{% url 'userprofile' %}"
+                          : "/profile/" + user.id + "/";
+                        
+                        let ProfileImage = user.profile_photo ? user.profile_photo : "/images/avatar.jpg";
+                        html += "<li class='list-group-item d-flex align-items-center user-redirect' data-profile-url='" + profileUrl + "'>" +
+                                  "<img src='/static" + ProfileImage + "' alt='Profile Photo' style='width:30px; height:30px; border-radius:50%; margin-right:10px;'>" +
+                                  "<span>" + user.full_name + "</span>" +
+                                "</li>";
+                      });
+                      html += "</ul>";
+                    }
+                    $(containerSelector).html(html);
+                  },
+                  error: function(xhr, status, error) {
+                    console.error("Error fetching users:", error);
+                  }
+                });
+              });
+            }
+          
+            $(document).ready(function() {
+              // Setup search for both inputs.
+              setupUserSearch('#searchbarInput input', '#userListContainer');
+              setupUserSearch('#searchbarInputMiddle input', '#userListContainerMiddle');
+            });
+          
+            // Handle redirection when a search result is clicked.
+            $(document).on("click", ".user-redirect", function() {
+              const url = $(this).data("profile-url");
+              window.location.href = url;
+            });
+          </script>
+          
+<style>
+    #userListContainer .list-group {
+        gap: 0px;
+        width: 16%;
+        justify-content: center;
+        align-items: normal;
+        position: fixed;
+    }
+    
+ #userListContainerMiddle .list-group {
+    gap: 0px;
+    width: 28%;
+    justify-content: center;
+    align-items: normal;
+    position: fixed;
+}
+
+</style>
         <nav class="navbar fixed-top px-3" data-bs-theme="dark"  style="background-color:#220b46;disp;ay:none;" id="SmallScreenNav">
             <div class="container-fluid pb-0" id="SmallScreenNavDiv">
                 <!-- Upper Line: BrandLogo and Search -->
