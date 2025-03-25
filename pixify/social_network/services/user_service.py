@@ -3,8 +3,6 @@ from ..models import User,Follower
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
 from social_network.constants.default_values import Role
-from django.db.models import Value, CharField
-from django.db.models.functions import Concat
 
 
 def list_users():
