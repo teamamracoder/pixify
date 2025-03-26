@@ -289,6 +289,17 @@ class CallConsumer(AsyncWebsocketConsumer):
                 )
                 self.active_calls[group_name] = False
 
+            elif action == "check_call_status":
+                actual_chat_id = data.get("chat_id")
+                group_name = f"call_{actual_chat_id}"
+                # Check if the group has an active call.
+                is_active = self.active_calls.get(group_name, False)
+                # Now, we do not require the call initiator to be online.
+                await self.send(text_data=json.dumps({
+                    "action": "active_call_status",
+                    "active": is_active
+                }))
+
             elif action == "join_late":
                 actual_chat_id = data.get("chat_id")
                 group_name = f"call_{actual_chat_id}"

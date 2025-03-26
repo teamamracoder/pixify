@@ -2295,71 +2295,76 @@ document.querySelectorAll('.media-stop').forEach(video => {
     
 </script>
 
-<script>
-  // Global variable to store the active call ID from the "ringing" event.
-  let currentCallId = null;
 
-  // On page load, check if there is an active call stored in localStorage.
+<script>
+  // Retrieve any stored call ID from localStorage.
+  let currentCallId = localStorage.getItem("activeCallId") || null;
+
+  // On page load, ensure the persistent join UI is hidden initially.
   window.addEventListener('load', function() {
-    const storedCallId = localStorage.getItem("activeCallId");
-    if (storedCallId) {
-      currentCallId = storedCallId;
-      document.getElementById("persistentJoinCall").style.display = "block";
-    } else {
-      document.getElementById("persistentJoinCall").style.display = "none";
-    }
+    document.getElementById("persistentJoinCall").style.display = "none";
   });
 
-  // Create a single WebSocket connection
+  // Create the WebSocket connection.
   const call_socket = new WebSocket(`ws://${window.location.host}/ws/call/${chatId}/`);
 
-  // Combined onmessage handler for call events and persistent join UI
+  call_socket.onopen = function() {
+    // If a call ID is stored, ask the server to check if it's still active.
+    if (currentCallId) {
+      call_socket.send(JSON.stringify({
+        action: "check_call_status",
+        chat_id: chatId,
+        call_id: currentCallId
+      }));
+    }
+  };
+
   call_socket.onmessage = function(event) {
     const data = JSON.parse(event.data);
-    
-    if (data.action === "ringing") {
-      // Store the call ID and persist it in localStorage
+
+    if (data.action === "active_call_status") {
+      // Only show the join UI if the server confirms the call is active.
+      if (data.active) {
+        document.getElementById("persistentJoinCall").style.display = "block";
+      } else {
+        currentCallId = null;
+        localStorage.removeItem("activeCallId");
+        document.getElementById("persistentJoinCall").style.display = "none";
+      }
+    }
+    else if (data.action === "ringing") {
+      // When a ringing event is received, store the call ID.
       currentCallId = data.call_id;
       localStorage.setItem("activeCallId", currentCallId);
-      
+
       const callerId = data.caller_id;
-      
-      // Redirect based on whether current user is the caller or callee.
+      // Redirect based on whether the current user is the caller or callee.
       if (currentUserId === callerId) {
         window.location.href = `/call/ringing/${currentCallId}/${chatId}/`;
       } else {
         window.location.href = `/call/calling/${currentCallId}/${chatId}/`;
       }
-      
-      // Show the persistent join UI.
       document.getElementById("persistentJoinCall").style.display = "block";
-      
-    } else if (data.action === "user_joined") {
-      // Only show join UI if an active call is available.
+    }
+    else if (data.action === "user_joined") {
+      // If a user joins and an active call exists, show the join UI.
       if (currentCallId) {
         document.getElementById("persistentJoinCall").style.display = "block";
       }
-      
-    } else if (data.action === "call_terminated") {
-      // Hide the persistent join UI and clear the stored call ID.
+    }
+    else if (data.action === "call_terminated") {
+      // On call termination, hide the join UI and clear the stored call.
       document.getElementById("persistentJoinCall").style.display = "none";
       currentCallId = null;
       localStorage.removeItem("activeCallId");
     }
-    // Optionally update participants UI here using data.user_list
+    // Other event types (e.g., webrtc_signal) can be handled as before.
   };
 
-  // Function to generate a random call ID (used when initiating a call)
-  function generateCallId() {
-    return 'call_' + Math.random().toString(36).substr(2, 9);
-  }
-
-  // Event listener for initiating the call (on the message page)
+  // Event listener for initiating a call.
   document.getElementById('sendDataButton').addEventListener('click', function() {
     const chatId = document.getElementById("chat_id").value;
-    const callId = generateCallId();
-    
-    // Send a ringing event to initiate the call
+    const callId = 'call_' + Math.random().toString(36).substr(2, 9);
     call_socket.send(JSON.stringify({
       action: 'ringing',
       call_id: callId,
@@ -2368,9 +2373,8 @@ document.querySelectorAll('.media-stop').forEach(video => {
     }));
   });
 
-  // Event listener for joining the call late via the persistent UI
+  // Event listener for joining an active call via the persistent join UI.
   document.getElementById("joinCallButton").addEventListener("click", function () {
-    // Retrieve the call ID from localStorage if not set in the variable
     if (!currentCallId) {
       currentCallId = localStorage.getItem("activeCallId");
     }
@@ -2380,15 +2384,14 @@ document.querySelectorAll('.media-stop').forEach(video => {
         chat_id: chatId,
         call_id: currentCallId
       }));
-      // Redirect to the call page
       window.location.href = `/call/${currentCallId}/${chatId}/`;
     } else {
       console.error("No active call available to join.");
-      // Optionally hide the join UI if no call is active.
       document.getElementById("persistentJoinCall").style.display = "none";
     }
   });
 </script>
+
 
 
 
