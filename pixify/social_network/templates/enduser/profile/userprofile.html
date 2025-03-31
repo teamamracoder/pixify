@@ -52,7 +52,7 @@
         <div style="border:2px solid black;">
             <div class="profile-card">
                 <div class="profile-header">
-                    <img src="{% static user_details.profile_photo |default:'/images/avatar.jpg' %}" alt="Profile Picture" class="profile-img">
+                    <img src="{% static user_details.profile_photo |default:'/images/avatar.jpg' %}" alt="Profile Picture" class="profile-img" style="object-fit: cover;">
                     <p class="user_title">{{ user_details.user_name }}</p>
                     <div class="btnnn">
                         <div class="fol follow1-btn" onclick="toggleFollow(event)" data-profile-id="{{ user_details.id }}">Follow</div>
@@ -109,7 +109,7 @@
                         <div id="postCarousel{{ post.id }}" class="carousel slide" data-interval="false">
                             <div class="carousel-inner user_profile_combo-img">
                             {% for media in post.media_url %}
-                                <div class="carousel-item {% if forloop.first %}active{% endif %}" style="height: 450px;
+                                <div class="carousel-item {% if forloop.first %}active{% endif %}" style="height: 508px;
                                 width: 100% !important;">
                                 {% if media|slice:"-4:" == ".mp4" %}
                                     <video class="post_video w-100" muted controls>
@@ -157,10 +157,10 @@
                             </div>
                         </div>    
 
-                        <div class="post-opt-icons" style="height: 4vh;">
+                        <div class="post-opt-icons" style="height: 5vh;">
                             <div class="post-reaction" style="cursor: pointer;" data-post-id="{{ post.id }}">
                                 {% with user_reaction=post.reactions.all|dictsort:"user_id"|first %}
-                                    <i id="reaction-icon-{{ post.id }}" class="reaction-icon" onclick="toggleReactionPopup('{{ post.id }}')">
+                                    <i id="reaction-icon-{{ post.id }}" class="reaction-icon" onclick="toggleReactionPopup('{{ post.id }}')" style="color:rgba(172, 57, 147, 0.973);">
                                         {% if user_reaction and user_reaction.user_id == request.user.id %}
                                             {{ user_reaction.reaction.value|safe }}
                                         {% else %}
@@ -170,9 +170,9 @@
                                 {% endwith %}
 
                                 <span data-toggle="modal" class="load-comments" data-post-id="{{ post.id }}">
-                                    <i class="fa-regular fa-comment"></i>
+                                    <i class="fa-regular fa-comment" style="color:rgba(172, 57, 147, 0.973);"></i>
                                 </span>
-                                <i class="fa-solid fa-share-nodes share-post-btn" data-post-id="{{ post.id }}" data-bs-toggle="modal" data-bs-target="#shareModal"></i>
+                                <i class="fa-solid fa-share-nodes share-post-btn" data-post-id="{{ post.id }}" data-bs-toggle="modal" data-bs-target="#shareModal" style="color:rgba(172, 57, 147, 0.973);"></i>
 
                                 <!-- Reaction Popup -->
                                 <div class="reaction-popup" id="reaction-popup-{{ post.id }}" style="display: none;">
@@ -819,9 +819,9 @@ $(document).ready(function () {
                 }
     
                 if (!userHasReacted) {
-                    const isVisible = popup.style.display === "block";
+                    const isVisible = popup.style.display === "flex";
                     document.querySelectorAll(".reaction-popup").forEach(p => p.style.display = "none");
-                    popup.style.display = isVisible ? "none" : "block";
+                    popup.style.display = isVisible ? "none" : "flex";
                 } else {
                     removeReaction(postId);
                 }
@@ -882,7 +882,7 @@ $(document).ready(function () {
     
                 // If the user reacted, show "You" first
                 if (userReaction) {
-                    displayText.push(`${userReaction} <strong>You</strong>`);
+                    displayText.push(`${userReaction} <strong style="margin-left:5px;">You</strong>`);
                 }
     
                 // When user reacted → Show only 1 more name
@@ -904,7 +904,7 @@ $(document).ready(function () {
                 // Update reaction icon
                 const reactionIcon = document.getElementById(`reaction-icon-${postId}`);
                 if (reactionIcon) {
-                    reactionIcon.innerHTML = userReaction ? userReaction : '<i class="bi bi-heart"></i>';
+                    reactionIcon.innerHTML = userReaction ? userReaction : '<i class="bi bi-heart" style="color:rgba(172, 57, 147, 0.973);" ></i>';
                 }
             })
             .catch(error => console.error("Error fetching reactions:", error));
@@ -1223,8 +1223,8 @@ function toggleReaction(commentId, iconElement, likeCountElement) {
             margin:2px;
             cursor:pointer;
             font-size:10px;
-            padding: 10px;
-    padding-top: 10px;
+            /* padding: 10px;
+    padding-top: 10px; */
         }
         .post-opt-icons{
             background: #260557fb;
@@ -1234,26 +1234,27 @@ function toggleReaction(commentId, iconElement, likeCountElement) {
             justify-content: space-between;
         }
         .reaction-popup {
-            margin-bottom: 24%;
-            right: 37%;
+            margin-bottom: 33%;
+            right: 45%;
         position: relative;
         display: none;
         background: rgb(52, 17, 109);
-
+        gap: 25px;
         padding: 10px;
 
         border-radius: 8px;
-        box-shadow: rgba(0, 0, 0, 0.2) 0px 0px 10px;
+        /* box-shadow: rgba(0, 0, 0, 0.2) 0px 0px 10px; */
 
         z-index: 10;
         }
        
     
         .reaction-popup span {
-            margin-right: 10px;
+            /* margin-right: 10px; */
             cursor: pointer;
             font-size: 20px;
-        }
+        
+    }
     
         .reaction-popup span:hover {
             transform: scale(1.2);
@@ -1492,9 +1493,9 @@ function toggleReaction(commentId, iconElement, likeCountElement) {
            
         }
 
-        .user_profile_combo-img{
+        /* .user_profile_combo-img{
             height: 58vh;
-        }
+        } */
         .carousel-item{
             height: 100%;
         }
