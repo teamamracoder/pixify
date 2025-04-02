@@ -112,7 +112,7 @@ def reaction_name(post_id):
 
 
 def get_user_posts(user_id):
-    user_posts = Post.objects.filter(posted_by=user_id).values('id', 'type', 'media_url', 'title', 'description', 'created_at')
+    user_posts = Post.objects.filter(posted_by=user_id).values('id', 'type', 'media_url', 'title', 'description', 'created_at').order_by('-created_at')
 
 
     # Format the created_at timestamp after fetching data

@@ -3,12 +3,9 @@ from pyexpat.errors import messages
 from django.shortcuts import render, redirect
 from django.views import View
 from pixify import settings
-from ..services import user_service
 from ..constants import Gender
 from ..constants import RelationShipStatus
-from ..services import chat_service,message_service
-from django.http import JsonResponse
-from ..services import manage_notification_service
+from ..services import chat_service,message_service,post_service,message_service,message_reaction_service,user_service
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from ..models import Notification
@@ -42,10 +39,29 @@ class EnduserprofileView(View):
                     'friends': friends,
                 })
 
+
+
+
+            detail = user_service.get_user_details(user.id)
+            if not detail:
+                return render(request, 'enduser/profile/userprofile.html', {'user_details': None})
+
+            dob = detail.dob
+            age = user_service.calculate_age(dob)
+            user_posts = post_service.get_user_posts(user.id)
+            reactions = message_reaction_service.show_reactions()
+
+            user_details = {
+                'user_name': f"{detail.first_name} {detail.last_name}",
+                'posts': user_posts,
+                'reactions':reactions,
+                'bio':detail.bio if detail.bio else " "
+            }
+
             return render(
                 request,
                 'enduser/profile/index.html',
-                {'followings': data['followings'], 'user_data': user_data}
+                {'followings': data['followings'], 'user_data': user_data,'user_details':user_details}
             )
 
 class EnduserprofileUpdateView(View):
