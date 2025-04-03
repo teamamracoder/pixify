@@ -103,7 +103,7 @@
                         <li class="nav-item ms-3 userImage" id="userImage" style="margin-right: auto;">
                             {% comment %} <a class="nav-link" href="#" style="padding-top: 2px;padding-bottom: 2px;">
                                 <img src="{% static 'images/avatar.jpg' %}" alt="User" class="rounded-circle"
-                                    style="width: 38px; height: 38px;">
+                                    style="width: 38px; height: 38px; object-fit: cover;">
                             </a> {% endcomment %}
                             <!-- Dropdown content -->
                             <div id="userDropdown" class="dropdown-menu userDropdown">
@@ -111,7 +111,7 @@
                                     <div class="p-2" style="border-bottom: 1.5px solid #975fec;">
                                         <a class="d-flex userDropdownAnchor" href="#" id="userDropdownAnchor">
                                             {% comment %} <img src="{% static 'images/avatar.jpg' %}" alt="User" class="rounded-circle"
-                                                style="width: 38px; height: 38px;">
+                                                style="width: 38px; height: 38px; object-fit: cover;">
                                             <div>
                                                 <span class="fw-semibold ps-2 username d-block" style="color:#f8c471;">Subhasis Barman</span>
                                                 <span class="ps-2 fw-normal d-block" style="color:white;font-size: 13px;">Cooch Behar</span>
@@ -156,7 +156,7 @@
                 <div class="d-flex justify-content-between align-items-center w-100 pb-2">
                     <a class="navbar-brand me-4" href="/" id="sidelogo">
                         <img src="{% static 'images/logo1.jpg' %}" alt="Logo" class="d-inline-block align-top"
-                            style="width: 38px; height: 38px;">
+                            style="width: 38px; height: 38px;    object-fit: cover;">
                     </a>
                     {% comment %} <form class="d-flex">
                         <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
@@ -178,7 +178,7 @@
                             <li class="nav-item ms-3 userImage" id="userImage" style="margin-right: auto;">
                                 {% comment %} <a class="nav-link" href="#" style="padding-top: 2px;padding-bottom: 2px;">
                                     <img src="{% static 'images/avatar.jpg' %}" alt="User" class="rounded-circle"
-                                        style="width: 38px; height: 38px;">
+                                        style="width: 38px; height: 38px;  object-fit: cover;">
                                 </a> {% endcomment %}
                                  <!-- Dropdown content -->
                                 <div id="userDropdown" class="dropdown-menu userDropdown">
@@ -186,7 +186,7 @@
                                         <div class="p-2" style="border-bottom: 1.5px solid #975fec;">
                                             <a class="d-flex userDropdownAnchor" href="#" id="userDropdownAnchor">
                                                 {% comment %} <img src="{% static 'images/avatar.jpg' %}" alt="User" class="rounded-circle"
-                                                    style="width: 38px; height: 38px;">
+                                                    style="width: 38px; height: 38px;    object-fit: cover;">
                                                     <div>
                                                     <span class="fw-semibold ps-2 username d-block" style="color:#f8c471;">Subhasis Barman</span>
                                                     <span class="ps-2 fw-normal d-block" style="color:white;font-size: 13px;">Cooch Behar</span>
@@ -361,7 +361,7 @@
                     html_navabrUserprofile = ''
                         html_navabrUserprofile += `<a class="nav-link" href="#" style="padding-top: 2px;padding-bottom: 2px;">
                                 <img src="/static${profileImageUrl}" alt="User" class="rounded-circle"
-                                    style="width: 38px; height: 38px;">
+                                    style="width: 38px; height: 38px;    object-fit: cover;">
                             </a>
                         `;
                         $('.userImage').append(html_navabrUserprofile);

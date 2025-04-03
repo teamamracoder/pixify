@@ -489,8 +489,8 @@
     display: flex;
     flex-wrap: nowrap;
     justify-content: flex-start;
-    margin-left: 10px;
-    gap: 5px;
+    /* margin-left: 10px;*/
+    gap: 5px; 
 }
 .carouselItemForShortSection {
     flex: 0 0 auto;
@@ -1055,68 +1055,223 @@ $(document).ready(function () {
  <script src="{% static 'js/sribash.js' %}"></script>
 <script>
 
-    const currentUserId = {{ userid }};
+const currentUserId = {{ userid }};
+
+// $(document).ready(function () {
+//     let holdTimer; // Track the hold time
+
+//     $(".post_reaction").on("mousedown touchstart", function (event) {
+//         event.preventDefault(); // Prevent unintended behavior on mobile
+//         let reactionButton = $(this);
+//         let postContainer = reactionButton.closest('.reaction-container');
+//         let postId = postContainer.closest('.post-box').find('.firstPostId').val();
+
+//         // Start a timer when the button is pressed or touched
+//         holdTimer = setTimeout(function () {
+//             deleteReaction(reactionButton, postId);
+//         }, 1000); // 1-second delay
+//     });
+
+//     $(".post_reaction").on("mouseup mouseleave touchend touchcancel", function () {
+//         clearTimeout(holdTimer); // Cancel timer if released before 1 second
+//     });
+
+//     function deleteReaction(button, postId) {
+//         $.ajax({
+//             url: "{% url 'delete_post_reaction' %}",  // Define this URL in Django
+//             type: "POST",
+//             data: {
+//                 'post_id': postId,
+//                 'csrfmiddlewaretoken': '{{ csrf_token }}'
+//             },
+//             success: function (response) {
+//                 if (response.success) {
+//                     button.find("i").removeClass().addClass("bi bi-heart").css({'color': '#a7358b', 'position': 'relative', 'top': '6px'}); // Reset icon
+//                     button.closest('.post-box').find("#total-reaction-count").text(response.total_count); // Update count
+
+//                     if (response.total_count === 0) {
+//                         button.closest('.reaction-container').find(".emojis_hide").hide(); // Hide if no reactions
+//                     }
+//                 }
+//             },
+//             error: function () {
+//                 alert('Error deleting reaction');
+//             }
+//         });
+//     }
+// });
+
+
+// $(document).ready(function () {
+//     $(".post_reaction").on("click", function () {
+//         let reactionButton = $(this);
+//         let postContainer = reactionButton.closest('.reaction-container');
+//         let postId = postContainer.closest('.post-box').find('.firstPostId').val();
+
+//         deleteReaction(reactionButton, postId);
+//     });
+
+//     function deleteReaction(button, postId) {
+//         $.ajax({
+//             url: "{% url 'delete_post_reaction' %}",  // Ensure this URL matches Django URL patterns
+//             type: "POST",
+//             data: {
+//                 'post_id': postId,
+//                 'csrfmiddlewaretoken': '{{ csrf_token }}'
+//             },
+//             dataType: "json",
+//             success: function (response) {
+//                 if (response.success) {
+//                     // Reset the reaction icon to the default state
+//                     button.find("i").removeClass().addClass("bi bi-heart").css({
+//                         'color': '#a7358b',
+//                         'position': 'relative',
+//                         'top': '6px'
+//                     });
+
+//                     // Update the total reaction count in the UI
+//                     button.closest('.post-box').find("#total-reaction-count").text(response.total_count);
+
+//                     // Hide the reaction container if there are no reactions left
+//                     if (response.total_count === 0) {
+//                         button.closest('.reaction-container').find(".emojis_hide").hide();
+//                     }
+//                 } 
+//             },
+            
+//         });
+//     }
+// });
+
+// $(document).ready(function() {
+//     $('.post_reaction').click(function(event) {
+//         event.stopPropagation(); // Prevent click from bubbling to document
+//         $(this).siblings('.reaction-popover').toggle();
+
+//         // Disable carousel when pop-up opens
+//         var carousel = $(this).closest('.post-box').find('.carousel');
+//         if ($(this).siblings('.reaction-popover').is(':visible')) {
+//             carousel.carousel('pause'); // Stop carousel sliding
+//             carousel.find('.carousel-control-prev, .carousel-control-next').css('pointer-events', 'none'); // Disable buttons
+//         } else {
+//             carousel.carousel('cycle'); // Resume carousel
+//             carousel.find('.carousel-control-prev, .carousel-control-next').css('pointer-events', 'auto'); // Enable buttons
+//         }
+//     });
+
+//     $('.reaction-popover i').click(function(event) {
+//         event.stopPropagation(); // Prevent click from bubbling to document
+//         var postContainer = $(this).closest('.reaction-container');
+//         var FirstPostId = $(this).closest('.post-box').find('.firstPostId').val();
+//         var reactionId = $(this).data('reaction-id');
+//         var selectedIcon = $(this).attr('class');
+//         var selectedColor = $(this).css('color');
+
+//         postContainer.find('.post_reaction i')
+//             .attr('class', selectedIcon)
+//             .css('color', selectedColor)
+//             .css('top', 0);
+
+//         postContainer.find('.reaction-popover').hide();
+
+//         // Enable carousel after reaction is selected
+//         var carousel = postContainer.closest('.post-box').find('.carousel');
+//         carousel.carousel('cycle');
+//         carousel.find('.carousel-control-prev, .carousel-control-next').css('pointer-events', 'auto');
+
+//         $.ajax({
+//             url: "{% url 'update_post_reaction' %}",
+//             type: "POST",
+//             data: {
+//                 'post_id': FirstPostId,
+//                 'reaction_id': reactionId,
+//                 'csrfmiddlewaretoken': '{{ csrf_token }}'
+//             },
+//             success: function(response) {
+//                 var totalReactions = response.total_count;
+//                 postContainer.closest('.post-box').find("#total-reaction-count").text(totalReactions);
+//             },
+//             error: function() {
+//                 alert('Error updating reaction');
+//             }
+//         });
+//     });
+
+//     // Hide reaction popover when clicking outside
+//     $(document).click(function(event) {
+//         if (!$(event.target).closest('.reaction-popover, .post_reaction').length) {
+//             $('.reaction-popover').hide();
+
+//             // Enable carousel when pop-up is closed
+//             $('.carousel').carousel('cycle');
+//             $('.carousel-control-prev, .carousel-control-next').css('pointer-events', 'auto');
+//         }
+//     });
+// });
 
 $(document).ready(function () {
-    let holdTimer; // Track the hold time
-
-    $(".post_reaction").on("mousedown touchstart", function (event) {
-        event.preventDefault(); // Prevent unintended behavior on mobile
+    $(".post_reaction").on("click", function (event) {
+        event.stopPropagation(); // Prevent event bubbling
         let reactionButton = $(this);
         let postContainer = reactionButton.closest('.reaction-container');
         let postId = postContainer.closest('.post-box').find('.firstPostId').val();
+        let reactionIcon = reactionButton.find("i");
 
-        // Start a timer when the button is pressed or touched
-        holdTimer = setTimeout(function () {
+        // Check if reaction exists (i.e., not the default "heart" icon)
+        if (!reactionIcon.hasClass("bi-heart")) {
+            // If a reaction exists, delete it
             deleteReaction(reactionButton, postId);
-        }, 1000); // 1-second delay
-    });
+        } else {
+            // If no reaction exists, open the reaction pop-up
+            reactionButton.siblings('.reaction-popover').toggle();
 
-    $(".post_reaction").on("mouseup mouseleave touchend touchcancel", function () {
-        clearTimeout(holdTimer); // Cancel timer if released before 1 second
+            // Disable carousel when pop-up opens
+            var carousel = reactionButton.closest('.post-box').find('.carousel');
+            if (reactionButton.siblings('.reaction-popover').is(':visible')) {
+                carousel.carousel('pause'); // Stop carousel
+                carousel.find('.carousel-control-prev, .carousel-control-next').css('pointer-events', 'none'); // Disable buttons
+            } else {
+                carousel.carousel('cycle'); // Resume carousel
+                carousel.find('.carousel-control-prev, .carousel-control-next').css('pointer-events', 'auto'); // Enable buttons
+            }
+        }
     });
 
     function deleteReaction(button, postId) {
         $.ajax({
-            url: "{% url 'delete_post_reaction' %}",  // Define this URL in Django
+            url: "{% url 'delete_post_reaction' %}",  // Ensure this URL matches Django URL patterns
             type: "POST",
             data: {
                 'post_id': postId,
                 'csrfmiddlewaretoken': '{{ csrf_token }}'
             },
+            dataType: "json",
             success: function (response) {
                 if (response.success) {
-                    button.find("i").removeClass().addClass("bi bi-heart").css({'color': '#a7358b', 'position': 'relative', 'top': '6px'}); // Reset icon
-                    button.closest('.post-box').find("#total-reaction-count").text(response.total_count); // Update count
+                    // Reset the reaction icon to the default state (empty heart)
+                    button.find("i").removeClass().addClass("bi bi-heart").css({
+                        'color': '#a7358b',
+                        'position': 'relative',
+                        'top': '6px'
+                    });
 
+                    // Update the total reaction count in the UI
+                    button.closest('.post-box').find("#total-reaction-count").text(response.total_count);
+
+                    // Hide the reaction container if there are no reactions left
                     if (response.total_count === 0) {
-                        button.closest('.reaction-container').find(".emojis_hide").hide(); // Hide if no reactions
+                        button.closest('.reaction-container').find(".emojis_hide").hide();
                     }
                 }
             },
             error: function () {
-                alert('Error deleting reaction');
+                alert('Error deleting reaction.');
             }
         });
     }
-});
 
-$(document).ready(function() {
-    $('.post_reaction').click(function () {
-        $(this).siblings('.reaction-popover').toggle();
-
-        // Disable carousel when pop-up opens
-        var carousel = $(this).closest('.post-box').find('.carousel');
-        if ($(this).siblings('.reaction-popover').is(':visible')) {
-            carousel.carousel('pause'); // Stop carousel sliding
-            carousel.find('.carousel-control-prev, .carousel-control-next').css('pointer-events', 'none'); // Disable buttons
-        } else {
-            carousel.carousel('cycle'); // Resume carousel
-            carousel.find('.carousel-control-prev, .carousel-control-next').css('pointer-events', 'auto'); // Enable buttons
-        }
-    });
-
-    $('.reaction-popover i').click(function () {
+    $('.reaction-popover i').click(function (event) {
+        event.stopPropagation(); // Prevent event bubbling
         var postContainer = $(this).closest('.reaction-container');
         var FirstPostId = $(this).closest('.post-box').find('.firstPostId').val();
         var reactionId = $(this).data('reaction-id');
@@ -1148,9 +1303,20 @@ $(document).ready(function() {
                 postContainer.closest('.post-box').find("#total-reaction-count").text(totalReactions);
             },
             error: function () {
-                alert('Error updating reaction');
+                alert('Error updating reaction.');
             }
         });
+    });
+
+    // Hide reaction popover when clicking outside
+    $(document).click(function (event) {
+        if (!$(event.target).closest('.reaction-popover, .post_reaction').length) {
+            $('.reaction-popover').hide();
+
+            // Enable carousel when pop-up is closed
+            $('.carousel').carousel('cycle');
+            $('.carousel-control-prev, .carousel-control-next').css('pointer-events', 'auto');
+        }
     });
 });
 
