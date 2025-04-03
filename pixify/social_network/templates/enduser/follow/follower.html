@@ -20,7 +20,7 @@
     <div class="fcontainer" style="height:100%;scrollbar-width: none;overflow-y: scroll;">
         {% if followers %}
             {% for follower in followers %}
-            <div class="user-card">
+            <div class="user-card" id="follower-item">
                 <img src="{% static follower.profile_pic %}" alt="User">
                 <div class="user-info">
                     <h4 id="userName">{{follower.fullname}}</h4>
@@ -33,4 +33,10 @@
         {% endif %}
     </div>
 </div>
+
+<style>
+    #follower-item{
+        margin:20px;
+    }
+</style>
 {% endblock %}

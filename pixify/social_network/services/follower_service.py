@@ -143,9 +143,9 @@ def get_all_follower_details(user):
     follower_list = Follower.objects.filter(following=user, is_active=True).exclude(created_by=user).select_related('created_by')
     follower_data = [
         {
-            "id": f.following.id,  # Extracting correct user ID
-            "fullname": f"{f.following.first_name} {f.following.last_name}",
-            "profile_pic": f.following.profile_photo_url
+            "id": f.user_id.id,  # Extracting correct user ID
+            "fullname": f"{f.user_id.first_name} {f.user_id.last_name}",
+            "profile_pic": f.user_id.profile_photo_url
         }
         for f in follower_list
     ]
