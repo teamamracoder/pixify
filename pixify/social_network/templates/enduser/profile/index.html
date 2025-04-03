@@ -83,8 +83,8 @@
                     {% endif %}
                     <li class="pb-2"><a href="#" class="text-white"><i class="bi bi-calendar3"></i> Age <span
                                 class="text-t fw-medium">({{user.age}})</span></a></li>
-                                <p><i class="bi bi-people-fill user_profile-icons"></i><strong>Followers:</strong> <span class="eee">(<span id="follower-count"class="eee"></span>)</span></p>
-                                <p><i class="bi bi-people user_profile-icons"></i><strong>Followings:</strong> <span class="eee">(<span id="following-count"class="eee"></span>)</span></p>
+                                <p><i class="bi bi-people-fill user_profile-icons"></i><strong onclick="window.location.href='{% url 'get_followers' user_id=user.id %}'">Followers:</strong> <span class="eee">(<span id="follower-count"class="eee"></span>)</span></p>
+                                <p><i class="bi bi-people user_profile-icons"></i><strong onclick="window.location.href='{% url 'get_followers' user_id=user.id %}'">Followings:</strong> <span class="eee">(<span id="following-count"class="eee"></span>)</span></p>
         
                     {% endfor %}
                                  

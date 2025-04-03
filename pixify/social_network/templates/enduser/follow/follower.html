@@ -1,0 +1,36 @@
+{% extends "enduser/base.html" %}
+
+{% block title %}Pixify | followers{% endblock %}
+
+{% block content %}
+
+{% load static %}
+{% csrf_token %}
+<div class="px-3 py-3 mt-3" style="height: 100%;background-color: #1f0447e3; box-shadow: 0 4px 8px rgba(151, 95, 236, 0.5);font-family: serif;border-radius: 7px;" >
+    <div class="card mb-sm-3 mb-md-0 contacts_card" style="background-color: #1f0447e3; ">
+        <div class="p-2 card-header">
+            <div class="input-group px-5">
+                <input type="text" placeholder="Search..." name="" class="form-control search-inp" >
+                <div class="input-group-prepend">
+                    <span class="input-group-text search_btn"><i class="fas fa-search"></i></span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="fcontainer" style="height:100%;scrollbar-width: none;overflow-y: scroll;">
+        {% if followers %}
+            {% for follower in followers %}
+            <div class="user-card" data-user-id="${user.id}">
+                <img src="{% static "{{follower.profile_pic}}" %}" alt="User" class = "follow-redirect" data-profile-url="${profileUrl}">
+                <div class="user-info">
+                    <h4 id="userName">{{follower.fullname}}</h4>
+                </div>
+                <button class="follow-btn" id="followUser">Follow</button>
+            </div>
+            {% endfor %}
+        {% else %}
+        <p> No followers found </p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

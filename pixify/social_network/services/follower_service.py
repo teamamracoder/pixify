@@ -124,4 +124,30 @@ def list_follow_api(request, user):
 
 def follower_check(posted_by,user):
     return Follower.objects.filter(user_id=user,following=posted_by).exists()
+
+
+def get_all_following_details(user):
+    following_list = Follower.objects.filter(user_id=user, is_active=True).exclude(following=user).select_related('following')
+    followings_data = [
+        {
+            "id": f.following.id,  # Extracting correct user ID
+            "fullname": f"{f.following.first_name} {f.following.last_name}",
+            "profile_pic": f.following.profile_photo_url
+        }
+        for f in following_list
+    ]
+    return followings_data
+
+
+def get_all_follower_details(user):
+    follower_list = Follower.objects.filter(following=user, is_active=True).exclude(created_by=user).select_related('created_by')
+    follower_data = [
+        {
+            "id": f.following.id,  # Extracting correct user ID
+            "fullname": f"{f.following.first_name} {f.following.last_name}",
+            "profile_pic": f.following.profile_photo_url
+        }
+        for f in follower_list
+    ]
+    return follower_data
     

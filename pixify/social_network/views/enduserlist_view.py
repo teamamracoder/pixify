@@ -117,6 +117,7 @@ class CommentListViewApi(View):
     @role_required(Role.ADMIN.value, Role.END_USER.value)
     def get(self, request, post_id):
         user_id=request.user.id
+        print(post_id)
         post_details=post_service.get_post_by_post_id(post_id)
         comments = comment_service.get_comments_by_post(post_id,user_id)
         return JsonResponse({"comments": comments,'post_data':post_details}, safe=False)
@@ -133,7 +134,8 @@ class CommentCreate(View):
             data = json.loads(request.body)
             comment_text = data.get("comment_text")
             reply_for_id = data.get("reply_for")  # Get reply_for field
-            
+            print(data)
+            print(post_id)
             response = comment_service.create_comment(request.user, post_id, comment_text, reply_for_id)
 
             if "error" in response:
@@ -238,10 +240,8 @@ class GetFollowersFollowing(View):
         user_id = request.GET.get("user_id")
         print(user_id)
         try:
-            followers, following, count_follower, count_following =chat_service.get_all_user_follow(user_id)
+            count_follower, count_following =chat_service.get_all_user_follow(user_id)
             return JsonResponse({
-                "followers": followers,
-                "following": following,
                 "count_follower": count_follower,
                 "count_following": count_following
             })

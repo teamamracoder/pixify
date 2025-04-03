@@ -65,8 +65,8 @@
                 <div class="profile-info">
                     <p><i class="bi bi-circle  user_profile-icons"></i><strong>Status:</strong><span class="active eee">({{ user_details.status }})</span></p>
                     <p><i class="bi bi-calendar3 user_profile-icons"></i><strong>Age:</strong><span class="eee">({{ user_details.age }})</span></p>
-                    <p><i class="bi bi-people-fill user_profile-icons"></i><strong>Followers:</strong> <span class="eee">(<span id="follower-count"class="eee"></span>)</span></p>
-                    <p><i class="bi bi-people user_profile-icons"></i><strong>Followings:</strong> <span class="eee">(<span id="following-count"class="eee"></span>)</span></p>
+                    <p><i class="bi bi-people-fill user_profile-icons"></i><strong onclick="window.location.href='{% url 'get_followers' user_id=user_details.id %}'">Followers:</strong> <span class="eee">(<span id="follower-count"class="eee"></span>)</span></p>
+                    <p><i class="bi bi-people user_profile-icons"></i><strong onclick="window.location.href='{% url 'get_followings' user_id=user_details.id %}'">Followings:</strong> <span class="eee">(<span id="following-count"class="eee"></span>)</span></p>
                 </div>
             </div>
             <div class="fol-unfol-btn">

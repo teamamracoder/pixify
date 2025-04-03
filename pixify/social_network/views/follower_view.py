@@ -4,6 +4,8 @@ from django.http import JsonResponse
 from social_network.decorators.exception_decorators import catch_error
 from social_network.constants.default_values import Role
 from ..decorators import auth_required, role_required
+from django.shortcuts import render
+
  
 class FollowerListViewApi(View): 
     @catch_error
@@ -28,3 +30,15 @@ class MemberListViewApi(View):
         return JsonResponse(member_data, safe=False)
 
     
+class FollowerListView(View):
+    def get(self,request,user_id):
+        followers=follower_service.get_all_follower_details(user_id)
+        print(followers)
+        return render(request,'enduser/follow/follower.html',{'followers':followers})
+    
+class FollowingListView(View):
+    def get(self,request,user_id):
+        followings = follower_service.get_all_following_details(user_id)
+        return render(request,'enduser/follow/following.html',{'followings':followings})
+    
+

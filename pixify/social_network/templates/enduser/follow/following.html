@@ -1,0 +1,25 @@
+{% extends "enduser/base.html" %}
+
+{% block title %}Pixify | followings{% endblock %}
+
+{% block content %}
+
+{% load static %}
+{% csrf_token %}
+<div class="px-3 py-3 mt-3" style="height: 100%;background-color: #1f0447e3; box-shadow: 0 4px 8px rgba(151, 95, 236, 0.5);font-family: serif;border-radius: 7px;" >
+    <div class="card mb-sm-3 mb-md-0 contacts_card" style="background-color: #1f0447e3; ">
+        <div class="p-2 card-header">
+            <div class="input-group px-5">
+                <input type="text" placeholder="Search..." name="" class="form-control search-inp" >
+                <div class="input-group-prepend">
+                    <span class="input-group-text search_btn"><i class="fas fa-search"></i></span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="fcontainer" style="height:100%;scrollbar-width: none;overflow-y: scroll;">
+        <div class="user-list" id="usersList">
+        </div>
+    </div>
+</div>
+{% endblock %}
