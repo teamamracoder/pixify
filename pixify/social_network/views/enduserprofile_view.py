@@ -52,6 +52,7 @@ class EnduserprofileView(View):
             reactions = message_reaction_service.show_reactions()
 
             user_details = {
+                'id':user.id,
                 'user_name': f"{detail.first_name} {detail.last_name}",
                 'posts': user_posts,
                 'reactions':reactions,

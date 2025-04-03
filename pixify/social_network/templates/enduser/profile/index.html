@@ -266,6 +266,40 @@
 
 <script>
 
+
+ //follower following reloads
+    document.addEventListener("DOMContentLoaded", function () {
+        updateFollowerFollowingData();
+    });
+
+    function updateFollowerFollowingData() {
+        let userId = "{{user_details.id}}"; // Ensure Django renders the ID
+        if (!userId || userId === "0") {
+            console.error("User ID is missing or invalid.");
+            return;
+        }
+
+        console.log("Fetching data for user ID:", userId);  // Check if the ID is correctly rendered
+
+        fetch(`/get-followers-following/?user_id=${userId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    console.error("Server Error:", data.error);
+                    return;
+                }
+
+                // Update the counts
+                document.querySelector("#follower-count").innerText = data.count_follower;
+                document.querySelector("#following-count").innerText = data.count_following;
+            })
+            .catch(error => console.error("Error loading follower data:", error));
+    }
+
+
+
+
+
   $(document).on("click", ".share-post-btn", function () {
       // Read the post id from the data attribute
       let postId = $(this).data("post-id");

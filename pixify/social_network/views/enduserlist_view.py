@@ -236,6 +236,7 @@ logger = logging.getLogger(__name__)  # Logger for debugging
 class GetFollowersFollowing(View):
     def get(self, request):
         user_id = request.GET.get("user_id")
+        print(user_id)
         try:
             followers, following, count_follower, count_following =chat_service.get_all_user_follow(user_id)
             return JsonResponse({
