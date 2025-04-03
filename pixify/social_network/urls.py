@@ -223,8 +223,8 @@ urlpatterns = [
 
     #follower following
 
-    path('followers/<int:user_id>',views.FollowerListView.as_view(), name='get_followers'),
-    path('followings/<int:user_id>',views.FollowingListView.as_view(), name='get_followings'),
+    path('followers/<int:user_id>/',views.FollowerListView.as_view(), name='get_followers'),
+    path('followings/<int:user_id>/',views.FollowingListView.as_view(), name='get_followings'),
 
 
 
