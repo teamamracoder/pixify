@@ -5,21 +5,31 @@ from ..constants import ChatType
 
 
 def list_followers_api(request, user):
-    search_query = request.GET.get('search', '')
-    if search_query:
-        followers = Follower.objects.filter(following=user, is_active=True).filter(
-            Q(user_id__first_name__icontains=search_query) | Q(user_id__last_name__icontains=search_query)
-        ).values('user_id', 'user_id__first_name', 'user_id__last_name', 'user_id__email', 'user_id__profile_photo_url')
+    search_query = request.GET.get('search', '').strip()
 
-        followings = Follower.objects.filter(user_id=user, is_active=True).filter(
-            Q(user_id__first_name__icontains=search_query) | Q(user_id__last_name__icontains=search_query)
-        ).values('following', 'following__first_name', 'following__last_name', 'following__email', 'following__profile_photo_url')
+    followers_query = Follower.objects.filter(following=user, is_active=True)
+    followings_query = Follower.objects.filter(user_id=user, is_active=True)
+
+    if search_query:
+        query = search_query.split()
+        for q in query:
+            followers_query = followers_query.filter(
+                Q(user_id__first_name__icontains=q)
+                | Q(user_id__middle_name__icontains=q)
+                | Q(user_id__last_name__icontains=q)
+            ).values('user_id', 'user_id__first_name', 'user_id__last_name', 'user_id__email', 'user_id__profile_photo_url')
+
+            followings_query = followings_query.filter(
+                Q(user_id__first_name__icontains=q)
+                | Q(user_id__middle_name__icontains=q)
+                | Q(user_id__last_name__icontains=q)
+            ).values('following', 'following__first_name', 'following__last_name', 'following__email', 'following__profile_photo_url')
 
     else:
-        followers = Follower.objects.filter(following=user, is_active=True).values('user_id', 'user_id__first_name', 'user_id__last_name', 'user_id__email', 'user_id__profile_photo_url')
-        followings = Follower.objects.filter(user_id=user, is_active=True).values('following', 'following__first_name', 'following__last_name', 'following__email', 'following__profile_photo_url')
+        followers_query = followers_query.values('user_id', 'user_id__first_name', 'user_id__last_name', 'user_id__email', 'user_id__profile_photo_url')
+        followings_query = followings_query.values('following', 'following__first_name', 'following__last_name', 'following__email', 'following__profile_photo_url')
 
-    combined_list = followers.union(followings)
+    combined_list = followers_query.union(followings_query)
 
     response_data = {
         'members': list(combined_list),
@@ -28,14 +38,16 @@ def list_followers_api(request, user):
 
 
 def members_list_api(request, user, chat_members):
-    search_query = request.GET.get('search', '')
+    search_query = request.GET.get('search', '').strip()
 
     followers_query = Follower.objects.filter(following=user, is_active=True)
     followings_query = Follower.objects.filter(user_id=user, is_active=True)
 
     if search_query:
-        followers_query = followers_query.filter(Q(user_id__first_name__icontains=search_query) | Q(user_id__last_name__icontains=search_query))
-        followings_query = followings_query.filter(Q(following__first_name__icontains=search_query) | Q(following__last_name__icontains=search_query))
+        query = search_query.split()
+        for q in query:
+            followers_query = followers_query.filter(Q(user_id__first_name__icontains=q) | Q(user_id__middle_name__icontains=q) | Q(user_id__last_name__icontains=q))
+            followings_query = followings_query.filter(Q(following__first_name__icontains=q) | Q(following__middle_name__icontains=q) | Q(following__last_name__icontains=q))
 
     followers_query = followers_query.exclude(user_id__in=chat_members)
     followings_query = followings_query.exclude(following__in=chat_members)
@@ -52,6 +64,7 @@ def members_list_api(request, user, chat_members):
         'members': list(combined_list),
     }
     return response_data
+
 
 def list_followers_birthday(user):
     try:
@@ -79,7 +92,7 @@ def list_followers_birthday(user):
 
 
 def list_follow_api(request, user):
-    search_query = request.GET.get('search', '')
+    search_query = request.GET.get('search', '').strip()
 
     other_member_subquery = ChatMember.objects.filter(
         chat_id=OuterRef('pk'),
@@ -95,25 +108,38 @@ def list_follow_api(request, user):
         other_member=Subquery(other_member_subquery)
     )
 
-    # Now you can easily retrieve a list of other member IDs:
+    # Retrieve a list of other member IDs.
     mem1 = list(chats.values_list('other_member', flat=True))
 
-    if search_query:
-        followers = Follower.objects.filter(following=user, is_active=True).filter(
-            Q(user_id__first_name__icontains=search_query) | Q(user_id__last_name__icontains=search_query)
-        ).exclude(user_id__in=mem1).values('user_id', 'user_id__first_name', 'user_id__last_name', 'user_id__email', 'user_id__profile_photo_url', 'user_id__bio')
+    followers_query = Follower.objects.filter(following=user, is_active=True).exclude(user_id__in=mem1)
+    followings_query = Follower.objects.filter(user_id=user, is_active=True).exclude(following__in=mem1)
 
-        followings = Follower.objects.filter(user_id=user, is_active=True).filter(
-            Q(following__first_name__icontains=search_query) | Q(following__last_name__icontains=search_query)
-        ).exclude(following__in=mem1).values('following', 'following__first_name', 'following__last_name', 'following__email', 'following__profile_photo_url', 'following__bio')
+    if search_query:
+        query = search_query.split()
+        for q in query:
+            followers_query = followers_query.filter(
+                Q(user_id__first_name__icontains=q)
+                | Q(user_id__middle_name__icontains=q)
+                | Q(user_id__last_name__icontains=q)
+            ).values('user_id', 'user_id__first_name', 'user_id__last_name', 'user_id__email', 'user_id__profile_photo_url')
+
+            followings_query = followings_query.filter(
+                Q(following__first_name__icontains=q)
+                | Q(following__middle_name__icontains=q)
+                | Q(following__last_name__icontains=q)
+            ).values('following', 'following__first_name', 'following__last_name', 'following__email', 'following__profile_photo_url')
 
     else:
-
-        followers = Follower.objects.filter(following=user, is_active=True).exclude(user_id__in=mem1).values('user_id', 'user_id__first_name', 'user_id__last_name', 'user_id__email', 'user_id__profile_photo_url', 'user_id__bio')
-        followings = Follower.objects.filter(user_id=user, is_active=True).exclude(following__in=mem1).values('following', 'following__first_name', 'following__last_name', 'following__email', 'following__profile_photo_url', 'following__bio')
+        followers_query = followers_query.values(
+            'user_id', 'user_id__first_name', 'user_id__last_name', 
+            'user_id__email', 'user_id__profile_photo_url', 'user_id__bio'
+        )
+        followings_query = followings_query.values(
+            'following', 'following__first_name', 'following__last_name', 
+            'following__email', 'following__profile_photo_url', 'following__bio'
+        )
   
-    combined_list = followers.union(followings)
-    
+    combined_list = followers_query.union(followings_query)
     
     response_data = {
         'members': list(combined_list),

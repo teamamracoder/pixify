@@ -371,10 +371,14 @@ def list_top_chats_api(request, user):
     )
 
     if search_query:
-        chats = chats.filter(
-            Q(members__first_name__icontains=search_query) |
-            Q(members__last_name__icontains=search_query)
-        ).distinct()
+        query = search_query.split()
+        for q in query:
+            chats = chats.filter(
+                Q(members__first_name__icontains=q)
+                | Q(members__middle_name__icontains=q)
+                | Q(members__last_name__icontains=q)
+                | Q(title__icontains=q)
+            ).distinct()
 
     # Annotate message_count directly.
     chats = chats.annotate(

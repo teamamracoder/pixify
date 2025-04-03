@@ -228,6 +228,9 @@ urlpatterns = [
 
 
 
+    # User Searching API
+    path('user/search/api', views.UserSearchApi.as_view(), name='user_search_api'),
+
 ]
 
 
