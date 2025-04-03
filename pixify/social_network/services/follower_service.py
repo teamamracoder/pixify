@@ -132,7 +132,7 @@ def get_all_following_details(user):
         {
             "id": f.following.id,  # Extracting correct user ID
             "fullname": f"{f.following.first_name} {f.following.last_name}",
-            "profile_pic": f.following.profile_photo_url
+            "profile_pic": f.following.profile_photo_url if f.following.profile_photo_url else '/images/avatar.jpg'
         }
         for f in following_list
     ]
@@ -145,7 +145,7 @@ def get_all_follower_details(user):
         {
             "id": f.user_id.id,  # Extracting correct user ID
             "fullname": f"{f.user_id.first_name} {f.user_id.last_name}",
-            "profile_pic": f.user_id.profile_photo_url
+            "profile_pic": f.user_id.profile_photo_url if f.user_id.profile_photo_url else '/images/avatar.jpg'
         }
         for f in follower_list
     ]

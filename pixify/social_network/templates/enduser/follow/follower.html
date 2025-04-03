@@ -17,13 +17,13 @@
             </div>
         </div>
     </div>
-    <div class="fcontainer" style="height:100%; scrollbar-width: none; overflow-y: scroll;">
+    <div class="fcontainer" style="height:90%; scrollbar-width: none; overflow-y: scroll;">
         {% if followers %}
             {% for follower in followers %}
             <div class="user-card" id="follower-item">
-                <img src="{% static follower.profile_pic %}" alt="User">
-                <div class="user-info">
-                    <h4 id="userName">{{ follower.fullname }}</h4>
+                <div>
+                    <img src="{% static follower.profile_pic %}" alt="User">
+                    <div class="user-info"><h4 id="userName">{{ follower.fullname }}</h4></div>
                 </div>
                 <!-- Button Logic: Check if current user and skip rendering button -->
                 {% if follower.id != current_user %}
@@ -50,25 +50,28 @@
 
 <style>
     .follow-btn {
-        background-color: #4CAF50;
+        border-radius: 5px;
+        background-color: #0d6efd;
         color: white;
-        padding: 10px;
+        padding: 5px 20px;
         border: none;
         cursor: pointer;
     }
     
     .follow-back-btn {
-        background-color: #FF8C00;
+        border-radius: 5px;
+        background-color: #0d6efd;
         color: white;
-        padding: 10px;
+        padding: 5px 20px;
         border: none;
         cursor: pointer;
     }
     
     .unfollow-btn {
-        background-color: #f44336;
+        border-radius: 5px;
+        background-color: #0d6efd;
         color: white;
-        padding: 10px;
+        padding: 5px 20px;
         border: none;
         cursor: pointer;
     }
@@ -79,6 +82,9 @@
     
     #follower-item{
         margin:20px;
+        justify-content: space-between;
+        display: flex;
+        align-items: center;
     }
 </style>
 {% endblock %}
