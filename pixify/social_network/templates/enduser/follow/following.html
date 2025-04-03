@@ -17,22 +17,63 @@
             </div>
         </div>
     </div>
-    <div class="fcontainer" style="height:100%;scrollbar-width: none;overflow-y: scroll;">
+    <div class="fcontainer" style="height:100%; scrollbar-width: none; overflow-y: scroll;">
         {% if followings %}
             {% for following in followings %}
             <div class="user-card" id="follower-item">
                 <img src="{% static following.profile_pic %}" alt="User">
                 <div class="user-info">
-                    <h4 id="userName">{{following.fullname}}</h4>
+                    <h4 id="userName">{{ following.fullname }}</h4>
                 </div>
+                <!-- Button Logic: Check if current user and skip rendering button -->
+                {% if following.id != current_user %}
+                    {% for button in follow_button_types %}
+                        {% if button.id == following.id %}
+                            {% if button.button_type == 'follow-back' %}
+                                <button class="follow-back-btn">Follow Back</button>
+                            {% elif button.button_type == 'unfollow' %}
+                                <button class="unfollow-btn">Unfollow</button>
+                            {% else %}
+                                <button class="follow-btn">Follow</button>
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
             </div>
             {% endfor %}
         {% else %}
-        <p> No followings found </p>
+            <p>No followings found</p>
         {% endif %}
-    </div>
-</div>
+    </div>        
+</div>    
 <style>
+    .follow-btn {
+        background-color: #4CAF50;
+        color: white;
+        padding: 10px;
+        border: none;
+        cursor: pointer;
+    }
+    
+    .follow-back-btn {
+        background-color: #FF8C00;
+        color: white;
+        padding: 10px;
+        border: none;
+        cursor: pointer;
+    }
+    
+    .unfollow-btn {
+        background-color: #f44336;
+        color: white;
+        padding: 10px;
+        border: none;
+        cursor: pointer;
+    }
+    
+    button:hover {
+        opacity: 0.8;
+    }
     #follower-item{
         margin:20px;
     }
