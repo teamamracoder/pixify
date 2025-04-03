@@ -32,14 +32,16 @@ class MemberListViewApi(View):
     
 class FollowerListView(View):
     def get(self,request,user_id):
+        current_user=request.user.id
         followers=follower_service.get_all_follower_details(user_id)
         print("folllowers:",followers)
-        return render(request,'enduser/follow/follower.html',{'followers':followers})
+        return render(request,'enduser/follow/follower.html',{'followers':followers,'current_user_id':current_user})
     
 class FollowingListView(View):
     def get(self,request,user_id):
+        current_user=request.user.id
         followings = follower_service.get_all_following_details(user_id)
         print("followings:",followings)
-        return render(request,'enduser/follow/following.html',{'followings':followings})
+        return render(request,'enduser/follow/following.html',{'followings':followings,'current_user_id':current_user})
     
 
