@@ -572,13 +572,18 @@ $(document).ready(function () {
       });
   }
   
-  // Attach event listener to submit button
-  $("#createcomment").click(function (e) {
-      e.preventDefault(); // Prevent form submission
-      const postId = $(".load-comments").data("post-id");
-      const replyFor = $("#commentText").attr("data-reply-for") || null; // Ensure null if no reply
-      submitComment(postId, replyFor);
-  });
+ // Attach event listener to submit button
+ $("#createcomment").click(function (e) {
+    e.preventDefault(); // Prevent form submission
+
+    // Get the postId from the button's data attribute
+    const postId = $(this).data("post-id");
+
+    const replyFor = $("#commentText").attr("data-reply-for") || null; // Ensure null if no reply
+
+    // Call the function to submit the comment with the postId and reply info
+    submitComment(postId, replyFor);
+});
 
   // Load comments when "View Comments" is clicked
   $(".load-comments").click(function () {
@@ -589,6 +594,9 @@ $(document).ready(function () {
           console.error("❌ Error: Post ID is undefined!");
           return;
       }
+
+       // Set the postId dynamically on the submit button
+    $("#createcomment").data("post-id", postId);  // Add the postId as data attribute to the button
   
       $("#comments-container").html("<p>Loading comments...</p>");
       $("#commentModal").modal("show");

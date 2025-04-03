@@ -288,7 +288,7 @@ class FetchCommentLikes(View):
         user_id = request.user.id if request.user.is_authenticated else None
         comment_id = request.GET.get("comment_id")
 
-        print("Received comment_id:", comment_id, "User ID:", user_id)  # Debugging
+        # print("Received comment_id:", comment_id, "User ID:", user_id)  # Debugging
 
         if comment_id:
             like_count = CommentReaction.objects.filter(comment_id_id=comment_id).count()

@@ -134,7 +134,7 @@ class CommentCreate(View):
             data = json.loads(request.body)
             comment_text = data.get("comment_text")
             reply_for_id = data.get("reply_for")  # Get reply_for field
-            print(data)
+            # print(data)
             print(post_id)
             response = comment_service.create_comment(request.user, post_id, comment_text, reply_for_id)
 
@@ -238,7 +238,7 @@ logger = logging.getLogger(__name__)  # Logger for debugging
 class GetFollowersFollowing(View):
     def get(self, request):
         user_id = request.GET.get("user_id")
-        print(user_id)
+        # print(user_id)
         try:
             count_follower, count_following =chat_service.get_all_user_follow(user_id)
             return JsonResponse({
@@ -255,7 +255,7 @@ class GetFollowersFollowing(View):
 class GetUserPostsComments(View):
     def get(self, request, user_id):
         posts = post_service.get_user_post_comment_count(user_id)
-        print(posts)
+        # print(posts)
         return JsonResponse({'posts': list(posts)})
     
 
