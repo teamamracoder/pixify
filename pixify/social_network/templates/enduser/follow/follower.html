@@ -21,9 +21,13 @@
         {% if followers %}
             {% for follower in followers %}
             <div class="user-card" id="follower-item">
-                <div>
+                <div style="align-items: center;display: flex;">
                     <img src="{% static follower.profile_pic %}" alt="User">
+                    {% if follower.id == current_user %}
+                    <div class="user-info"><h4 id="userName">You</h4></div>
+                    {% else %}
                     <div class="user-info"><h4 id="userName">{{ follower.fullname }}</h4></div>
+                    {% endif %}
                 </div>
                 <!-- Button Logic: Check if current user and skip rendering button -->
                 {% if follower.id != current_user %}

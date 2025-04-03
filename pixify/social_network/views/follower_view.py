@@ -64,7 +64,8 @@ class FollowerListView(View):
             'followers': followers,
             'current_user_followers': current_user_followers,
             'current_user_followings': current_user_followings,
-            'follow_button_types': follow_button_types
+            'follow_button_types': follow_button_types,
+            'current_user':current_user
         })
 
 
@@ -103,7 +104,8 @@ class FollowingListView(View):
             'followings': followings,
             'current_user_followers': current_user_followers,
             'current_user_followings': current_user_followings,
-            'follow_button_types': follow_button_types
+            'follow_button_types': follow_button_types,
+            'current_user':current_user
         })
 
 

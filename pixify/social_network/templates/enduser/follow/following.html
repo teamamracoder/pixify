@@ -21,7 +21,7 @@
         {% if followings %}
             {% for following in followings %}
             <div class="user-card" id="follower-item">
-                <div style="    align-items: center;display: flex;">
+                <div style="align-items: center;display: flex;">
                     <img src="{% static following.profile_pic %}" alt="User">
                     <div class="user-info"><h4 id="userName">{{ following.fullname }}</h4></div>
                 </div>
