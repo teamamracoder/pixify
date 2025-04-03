@@ -537,7 +537,7 @@ $(document).ready(function () {
         }
 
         $("#createcomment").data("post-id", postId);  // Add the postId as data attribute to the button
-        $("#comments-container").html("<p>Loading comments...</p>");
+        $("#comments-container").data("post-id", postId).html("<p>Loading comments...</p>"); // Set postId to the comments container dynamically
         $("#commentModal").modal("show");
     
         $.ajax({
@@ -733,48 +733,57 @@ $(document).ready(function () {
         });
     
     // Handle delete action
-    $("#confirmDelete").click(function () {
-        let commentId = $("#deleteModal").data("comment-id");
-        let postId = $(".load-comments").data("post-id");
-        let csrfToken = $("input[name=csrfmiddlewaretoken]").val();
+// Handle delete action
+$("#confirmDelete").click(function () {
+    let commentId = $("#deleteModal").data("comment-id"); // Comment to be deleted
+    let postId = $("#comments-container").data("post-id"); // Get the postId dynamically from the comments container
+    let csrfToken = $("input[name=csrfmiddlewaretoken]").val();
+    let dltmodal =document.getElementById('deleteModal');
 
-        
-        $.ajax({
-            url: `/comments/delete/${commentId}/`,
-            type: "POST",
-            headers: { "X-CSRFToken": csrfToken },
-            success: function (response) {
-                $("#deleteModal").hide();
-        
-                // Reload comments dynamically WITHOUT clicking "View Comments"
-                $.ajax({
-                    url: `/api/comments/${postId}/`,
-                    type: "GET",
-                    dataType: "json",
-                    success: function (response) {
-                        let commentsHtml = response.comments.length
-                            ? generateCommentTree(response.comments)
-                            : "<p>No comments yet.</p>";
-                        $("#comments-container").html(commentsHtml);
-            
-                        // Load user posts' updated comment counts
-                        setTimeout(function() {
-                            let userId = $(".user_profile_comment").data("user-id");
-                            if (userId) {
-                                loadUserPostsComments(userId);
-                            }
-                        }, 500); 
-                    },
-                    error: function () {
-                        $("#comments-container").html("<p>Failed to load comments.</p>");
-                    }
-                });
-            },
-            error: function (xhr) {
-                console.error("❌ Error deleting comment:", xhr.responseText);
-            }
-        });
+
+    if (!postId) {
+        console.error("❌ Error: Post ID is undefined!");
+        return;
+    }
+
+    $.ajax({
+        url: `/comments/delete/${commentId}/`,
+        type: "POST",
+        headers: { "X-CSRFToken": csrfToken },
+        success: function (response) {
+            $("#deleteModal").modal("hide"); // Close delete modal on success
+
+            // Reload comments for the correct post ID
+            $.ajax({
+                url: `/api/comments/${postId}/`, // Use the correct postId here
+                type: "GET",
+                dataType: "json",
+                success: function (response) {
+                    dltmodal.style.display="none";
+                    let commentsHtml = response.comments && response.comments.length
+                        ? generateCommentTree(response.comments)
+                        : "<p>No comments yet.</p>";
+                    $("#comments-container").html(commentsHtml); // Update the comments container with new data
+
+                    // Optionally, reload user posts' updated comment counts
+                    setTimeout(function() {
+                        let userId = $(".user_profile_comment").data("user-id");
+                        if (userId) {
+                            loadUserPostsComments(userId); // Ensure user post counts are updated
+                        }
+                    }, 500); 
+                },
+                error: function () {
+                    $("#comments-container").html("<p>Failed to load comments.</p>");
+                }
+            });
+        },
+        error: function (xhr) {
+            console.error("❌ Error deleting comment:", xhr.responseText);
+        }
     });
+});
+
     });
     
         // Updated reply handler with regex to remove all existing mentions
