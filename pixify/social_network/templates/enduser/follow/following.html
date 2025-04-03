@@ -18,8 +18,19 @@
         </div>
     </div>
     <div class="fcontainer" style="height:100%;scrollbar-width: none;overflow-y: scroll;">
-        <div class="user-list" id="usersList">
-        </div>
+        {% if followings %}
+            {% for following in followings %}
+            <div class="user-card">
+                <img src="{% static following.profile_pic %}" alt="User">
+                <div class="user-info">
+                    <h4 id="userName">{{following.fullname}}</h4>
+                </div>
+                <button class="follow-btn">Following</button>
+            </div>
+            {% endfor %}
+        {% else %}
+        <p> No followings found </p>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

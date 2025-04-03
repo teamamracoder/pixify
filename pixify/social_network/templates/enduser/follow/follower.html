@@ -20,12 +20,12 @@
     <div class="fcontainer" style="height:100%;scrollbar-width: none;overflow-y: scroll;">
         {% if followers %}
             {% for follower in followers %}
-            <div class="user-card" data-user-id="${user.id}">
-                <img src="{% static "{{follower.profile_pic}}" %}" alt="User" class = "follow-redirect" data-profile-url="${profileUrl}">
+            <div class="user-card">
+                <img src="{% static follower.profile_pic %}" alt="User">
                 <div class="user-info">
                     <h4 id="userName">{{follower.fullname}}</h4>
                 </div>
-                <button class="follow-btn" id="followUser">Follow</button>
+                <button class="follow-btn">Follow</button>
             </div>
             {% endfor %}
         {% else %}
