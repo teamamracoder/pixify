@@ -2297,10 +2297,10 @@ document.querySelectorAll('.media-stop').forEach(video => {
 
 
 <script>
-  // Retrieve any stored call ID from localStorage.
-  let currentCallId = localStorage.getItem("activeCallId") || null;
+  // Retrieve stored call ID (if any)
+  let currentCallId = localStorage.getItem("activeCallId") || null;        
 
-  // On page load, ensure the persistent join UI is hidden initially.
+  // Initially hide the persistent join UI
   window.addEventListener('load', function() {
     document.getElementById("persistentJoinCall").style.display = "none";
   });
@@ -2336,7 +2336,6 @@ document.querySelectorAll('.media-stop').forEach(video => {
       // When a ringing event is received, store the call ID.
       currentCallId = data.call_id;
       localStorage.setItem("activeCallId", currentCallId);
-
       const callerId = data.caller_id;
       // Redirect based on whether the current user is the caller or callee.
       if (currentUserId === callerId) {
@@ -2347,23 +2346,21 @@ document.querySelectorAll('.media-stop').forEach(video => {
       document.getElementById("persistentJoinCall").style.display = "block";
     }
     else if (data.action === "user_joined") {
-      // If a user joins and an active call exists, show the join UI.
+      // Show the join UI if a user joins and a call is active.
       if (currentCallId) {
         document.getElementById("persistentJoinCall").style.display = "block";
       }
     }
     else if (data.action === "call_terminated") {
-      // On call termination, hide the join UI and clear the stored call.
+      // Hide the join UI and clear the stored call ID.
       document.getElementById("persistentJoinCall").style.display = "none";
       currentCallId = null;
       localStorage.removeItem("activeCallId");
     }
-    // Other event types (e.g., webrtc_signal) can be handled as before.
   };
 
   // Event listener for initiating a call.
   document.getElementById('sendDataButton').addEventListener('click', function() {
-    const chatId = document.getElementById("chat_id").value;
     const callId = 'call_' + Math.random().toString(36).substr(2, 9);
     call_socket.send(JSON.stringify({
       action: 'ringing',
@@ -2391,6 +2388,8 @@ document.querySelectorAll('.media-stop').forEach(video => {
     }
   });
 </script>
+
+
 
 
 

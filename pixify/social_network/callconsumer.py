@@ -4,14 +4,12 @@ from .services import chat_service, user_service
 from asgiref.sync import sync_to_async
 
 class CallConsumer(AsyncWebsocketConsumer):
-    # For simplicity, these remain class-level; in production, consider using external storage.
+    # Class-level storage (for demo; consider external storage in production)
     active_users = {}         # Total connections per group
     joined_users = {}         # All connected users per group
-    accepted_users = {}       # Users who have “joined” the call session; each user dict now includes an "online" flag.
+    accepted_users = {}       # Accepted users per group (each with an "online" flag)
     call_initiators = {}      # Mapping: call_id -> caller's channel name
     call_declines = {}        # Mapping: call_id -> set of callee channel names who declined
-
-    # Track active call status per chat/group.
     active_calls = {}         # Mapping: group_name -> bool
 
     def get_online_users(self, group_name):
@@ -19,7 +17,7 @@ class CallConsumer(AsyncWebsocketConsumer):
         return [user for user in self.accepted_users.get(group_name, []) if user.get("online")]
 
     async def get_user_chat_ids(self, user):
-        # Returns the list of chat IDs the user is part of.
+        """Returns the list of chat IDs the user is part of."""
         chats = await sync_to_async(lambda: list(chat_service.get_all_user_chats(user)))()
         return chats
 
@@ -33,18 +31,14 @@ class CallConsumer(AsyncWebsocketConsumer):
 
         for cid in self.chat_ids:
             group_name = f"call_{cid}"
-            # Increase connection count.
             self.active_users.setdefault(group_name, 0)
             self.active_users[group_name] += 1
-
-            # Track all joined users.
             self.joined_users.setdefault(group_name, [])
-            
             # Initialize active call flag if not present.
             if group_name not in self.active_calls:
                 self.active_calls[group_name] = False
 
-            # Build user details (include an "online" flag).
+            # Build user details with an "online" flag.
             if user and user.is_authenticated:
                 user_id = user.id
                 full_name = (
@@ -69,7 +63,7 @@ class CallConsumer(AsyncWebsocketConsumer):
 
         await self.accept()
 
-        # Inform everyone on connection with updated online participants.
+        # Inform the group of the updated online participants.
         for cid in self.chat_ids:
             group_name = f"call_{cid}"
             online_users = self.get_online_users(group_name)
@@ -91,22 +85,18 @@ class CallConsumer(AsyncWebsocketConsumer):
             # Decrement connection count.
             if group_name in self.active_users:
                 self.active_users[group_name] -= 1
-                # We keep the call active for persistent membership.
-
-            # Remove from joined_users (tracks live connections)
+            # Remove from joined_users.
             if group_name in self.joined_users and user_id is not None:
                 self.joined_users[group_name] = [
                     user for user in self.joined_users[group_name] if user.get("id") != user_id
                 ]
-            
-            # Instead of removing the user from accepted_users, mark them offline.
+            # Mark user as offline in accepted_users.
             if group_name in self.accepted_users:
                 for user in self.accepted_users[group_name]:
                     if user.get("id") == user_id:
                         user["online"] = False
 
             await self.channel_layer.group_discard(group_name, self.channel_name)
-            # Broadcast updated online participants.
             online_users = self.get_online_users(group_name)
             await self.channel_layer.group_send(
                 group_name,
@@ -119,7 +109,7 @@ class CallConsumer(AsyncWebsocketConsumer):
             )
             print(f"[WebSocket] {self.user_details['name']} disconnected from chat {cid}")
 
-        # Clean up call_initiators if needed.
+        # Clean up call_initiators if necessary.
         for call_id, channel in list(self.call_initiators.items()):
             if channel == self.channel_name:
                 del self.call_initiators[call_id]
@@ -198,7 +188,7 @@ class CallConsumer(AsyncWebsocketConsumer):
                 await self.channel_layer.group_send(
                     group_name,
                     {
-                        "type": "webrtc.signal",
+                        "type": "webrtc_signal",
                         "signal": data["signal"],
                         "from": data["from"],
                         "chat_id": actual_chat_id
@@ -292,9 +282,9 @@ class CallConsumer(AsyncWebsocketConsumer):
             elif action == "check_call_status":
                 actual_chat_id = data.get("chat_id")
                 group_name = f"call_{actual_chat_id}"
-                # Check if the group has an active call.
-                is_active = self.active_calls.get(group_name, False)
-                # Now, we do not require the call initiator to be online.
+                online_users = self.get_online_users(group_name)
+                # Only mark the call as active if flagged active and at least 2 users are online.
+                is_active = self.active_calls.get(group_name, False) and len(online_users) >= 2
                 await self.send(text_data=json.dumps({
                     "action": "active_call_status",
                     "active": is_active
@@ -330,7 +320,7 @@ class CallConsumer(AsyncWebsocketConsumer):
         except Exception as e:
             print(f"[WebSocket Error] Failed to process message: {e}")
 
-    # Event Handlers
+    # --- Event Handlers ---
 
     async def ringing(self, event):
         await self.send(text_data=json.dumps({
