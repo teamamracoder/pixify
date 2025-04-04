@@ -1,5 +1,5 @@
 from django.views import View 
-from ..services import follower_service,chat_member_service
+from ..services import follower_service,chat_member_service,user_service
 from django.http import JsonResponse 
 from social_network.decorators.exception_decorators import catch_error
 from social_network.constants.default_values import Role
@@ -107,6 +107,78 @@ class FollowingListView(View):
             'follow_button_types': follow_button_types,
             'current_user':current_user
         })
+
+
+class FollowCreateView(View):
+    def post(self, request, user_id):
+        current_user = request.user
+
+        follower_id = user_service.get_user_obj(user_id)
+        if current_user == follower_id:
+            return JsonResponse({'status': 'error', 'message': 'You cannot follow yourself'}, status=400)
+
+        # Check if the follow relationship already exists
+        created = follower_service.create_follow(user_id,current_user)
+
+        if created:
+            return JsonResponse({'status': 'success', 'message': 'Followed successfully', 'button': 'unfollow'})
+        else:
+            return JsonResponse({'status': 'error', 'message': 'Already following this user'}, status=400)
+        
+        
+class FollowBackCreateView(View):
+    def post(self, request, user_id):
+        current_user = request.user
+        follower_id = user_service.get_user_obj(user_id)
+
+        if current_user == follower_id:
+            return JsonResponse({'status': 'error', 'message': 'You cannot follow-back yourself'}, status=400)
+
+        # Check if the follow relationship already exists
+        created = follower_service.create_follow(user_id, current_user)
+
+        if created:
+            return JsonResponse({
+                'status': 'success',
+                'message': 'Follow-back successfully',
+                'button': 'unfollow'
+            })
+        else:
+            return JsonResponse({
+                'status': 'error',
+                'message': 'Already following this user'
+            }, status=400)
+        
+
+class UnfollowCreateView(View):
+    def post(self, request, user_id):
+        current_user = request.user
+        follower_id = user_service.get_user_obj(user_id)
+        
+        if current_user == follower_id:
+            return JsonResponse({'status': 'error', 'message': 'You cannot unfollow yourself'}, status=400)
+
+        # Check if the follow relationship exists
+        update = follower_service.unfollow(user_id, current_user)
+        
+        if update:
+            # Check if the unfollowed person is following the current user
+            is_followed_back = follower_service.is_following_back(current_user, follower_id)
+            
+            if is_followed_back:
+                return JsonResponse({
+                    'status': 'success',
+                    'message': 'Unfollowed successfully',
+                    'button': 'follow-back'
+                })
+            else:
+                return JsonResponse({
+                    'status': 'success',
+                    'message': 'Unfollowed successfully',
+                    'button': 'follow'
+                })
+        else:
+            return JsonResponse({'status': 'error', 'message': 'You are not following this user'}, status=400)
 
 
 

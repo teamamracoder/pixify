@@ -225,6 +225,9 @@ urlpatterns = [
 
     path('followers/<int:user_id>/',views.FollowerListView.as_view(), name='get_followers'),
     path('followings/<int:user_id>/',views.FollowingListView.as_view(), name='get_followings'),
+    path('api/follow/<int:user_id>/', views.FollowCreateView.as_view(), name='follow_user'),
+    path('api/follow-back/<int:user_id>/', views.FollowBackCreateView.as_view(), name='follow_back'),
+    path('api/unfollow/<int:user_id>/', views.UnfollowCreateView.as_view(), name='unfollow_user'),
 
 
 

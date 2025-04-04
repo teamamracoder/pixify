@@ -80,4 +80,5 @@ def updateFCMToken(user_id,fcm_token):
 def getFCMtoken(user_id):
     return User.objects.filter(id=user_id).values_list('fcm_token', flat=True).first()
 
-
+def get_user_obj(user_id):
+    return User.objects.filter(id=user_id,is_active=True).first()

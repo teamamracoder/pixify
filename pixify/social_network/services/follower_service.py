@@ -1,7 +1,8 @@
 from datetime import date
-from ..models import Follower, Chat, ChatMember
+from ..models import Follower, Chat, ChatMember,User
 from django.db.models import Q, OuterRef, Subquery
 from ..constants import ChatType
+from ..services import user_service
 
 
 def list_followers_api(request, user):
@@ -151,3 +152,23 @@ def get_all_follower_details(user):
     ]
     return follower_data
     
+
+
+def create_follow(user_id,current_user):
+    print(user_id,current_user)
+    user = user_service.get_user_obj(user_id)
+    return Follower.objects.create(
+        user_id = current_user,
+        following = user,
+        created_by = current_user,
+        is_active=True
+    )
+def unfollow(user_id,current_user):
+    following= Follower.objects.filter(following=user_id,user_id=current_user,is_active=True).first()
+    following.is_active=False
+    following.save()
+    return True
+
+
+def is_following_back(current_user, follower_id):
+    return Follower.objects.filter(user_id=follower_id, following=current_user).exists()
