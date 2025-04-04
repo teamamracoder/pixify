@@ -72,29 +72,25 @@ class FollowerListView(View):
 class FollowingListView(View):
     def get(self, request, user_id):
         current_user = request.user.id
-        followings = follower_service.get_all_following_details(user_id)
-        current_user_followers = follower_service.get_all_follower_details(current_user)
-        current_user_followings = follower_service.get_all_following_details(current_user)
+        followings = follower_service.get_all_following_details(user_id)  # People the user follows
+        current_user_followers = follower_service.get_all_follower_details(current_user)  # People who follow the user
+        current_user_followings = follower_service.get_all_following_details(current_user)  # People the user follows
 
-        # Create a list to store button types for each following along with their id
         follow_button_types = []
 
         for following in followings:
-            following_id = following.get('id')  # Get the following's ID from the dictionary
+            following_id = following.get('id')
 
-            # If the following is the current user, skip adding button for them
             if following_id == current_user:
-                continue
+                continue  # Skip current user
 
-            # Determine the button type for this following
-            if following_id in [follower.get('id') for follower in current_user_followers]:
-                button_type = 'follow-back'
-            elif following_id in [follower.get('id') for follower in current_user_followings]:
-                button_type = 'unfollow'
+            if following_id in [f.get('id') for f in current_user_followings]:
+                button_type = 'unfollow'  # You are already following them
+            elif following_id in [f.get('id') for f in current_user_followers]:
+                button_type = 'follow-back'  # They follow you, but you don’t follow them
             else:
-                button_type = 'follow'
+                button_type = 'follow'  # Neither follows each other
 
-            # Append the button type along with following id
             follow_button_types.append({
                 'id': following_id,
                 'button_type': button_type
@@ -102,11 +98,10 @@ class FollowingListView(View):
 
         return render(request, 'enduser/follow/following.html', {
             'followings': followings,
-            'current_user_followers': current_user_followers,
-            'current_user_followings': current_user_followings,
             'follow_button_types': follow_button_types,
-            'current_user':current_user
+            'current_user': current_user
         })
+
 
 
 class FollowCreateView(View):

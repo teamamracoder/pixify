@@ -34,11 +34,11 @@
                     {% for button in follow_button_types %}
                         {% if button.id == following.id %}
                             {% if button.button_type == 'follow-back' %}
-                                <button class="follow-back-btn">Follow Back</button>
+                                <button class="follow-back-btn" onclick="handleButtonClick(this, 'follow', {{ following.id }})">Follow Back</button>
                             {% elif button.button_type == 'unfollow' %}
-                                <button class="unfollow-btn">Unfollow</button>
+                                <button class="unfollow-btn" onclick="handleButtonClick(this, 'unfollow', {{ following.id }})">Unfollow</button>
                             {% else %}
-                                <button class="follow-btn">Follow</button>
+                                <button class="follow-btn" onclick="handleButtonClick(this, 'follow', {{ following.id }})">Follow</button>
                             {% endif %}
                         {% endif %}
                     {% endfor %}
@@ -49,7 +49,78 @@
             <p>No followings found</p>
         {% endif %}
     </div>        
-</div>    
+</div> 
+
+
+
+<script>
+    // Function to handle button click
+    function handleButtonClick(button, actionType, userId) {
+        let apiUrl = '';
+
+        // Determine which API to call based on the action type
+        if (actionType === 'follow') {
+            apiUrl = '/api/follow/' + userId + '/';
+        } else if (actionType === 'unfollow') {
+            apiUrl = '/api/unfollow/' + userId + '/';
+        } else if (actionType === 'follow-back') {
+            apiUrl = '/api/follow-back/' + userId + '/';
+        }
+
+        // Make the API call via AJAX
+        fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken'), // Include CSRF token for security
+            },
+        })
+        .then(response => {
+            // Check if response is ok (status code 200)
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json(); // Try to parse JSON
+        })
+        .then(data => {
+            // Handle success response
+            if (data.status === 'success') {
+                if (data.button === 'follow') {
+                    button.innerHTML = 'Follow';
+                } else if (data.button === 'unfollow') {
+                    button.innerHTML = 'Unfollow';
+                } else if (data.button === 'follow-back') {
+                    button.innerHTML = 'Follow Back';
+                }
+            } else {
+                console.log('Error:', data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });        
+    }
+
+    // Helper function to get CSRF token for AJAX requests
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+</script>
+
+
+
+
 <style>
     .user-item{
 
