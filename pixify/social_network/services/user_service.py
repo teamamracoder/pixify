@@ -1,7 +1,7 @@
 from urllib import request
 from ..models import User,Follower
 from django.shortcuts import get_object_or_404
-from django.db.models import Q
+from django.db.models import Q, Case, When, Value, BooleanField
 from social_network.constants.default_values import Role
 
 
@@ -86,7 +86,7 @@ def user_search_api(request):
     query = request.GET.get('search', '').strip()
     if query:
         terms = query.split()
-        # Use __contains to check if the roles array contains the END_USER role
+        # Start with all active users with the END_USER role
         users = User.objects.filter(is_active=True, roles__contains=[Role.END_USER.value])
         for term in terms:
             users = users.filter(
@@ -94,14 +94,34 @@ def user_search_api(request):
                 Q(middle_name__icontains=term) |
                 Q(last_name__icontains=term)
             )
-        users = users.order_by('first_name', 'middle_name', 'last_name')            
+        
+        # Get the current user from the request
+        current_user = request.user
+
+        # Retrieve followers and followings
+        followers_query = Follower.objects.filter(following=current_user, is_active=True).values_list('user_id', flat=True)
+        followings_query = Follower.objects.filter(user_id=current_user, is_active=True).values_list('following_id', flat=True)
+
+        # Combine the queries
+        related_users = followers_query.union(followings_query)
+
+        # Annotate users with is_related field
+        users = users.annotate(
+            is_related=Case(
+                When(id__in=related_users, then=Value(True)),
+                default=Value(False),
+                output_field=BooleanField()
+            )
+        )
+
+        # Order by is_related descending, then by name
+        users = users.order_by('-is_related', 'first_name', 'middle_name', 'last_name')
     else:
         users = User.objects.none()
 
     users_data = [
         {
             "id": user.id,
-            # Join first, middle, and last names, skipping any None or empty values
             "full_name": " ".join(filter(None, [user.first_name, user.middle_name, user.last_name])),
             "profile_photo": user.profile_photo_url
         }
