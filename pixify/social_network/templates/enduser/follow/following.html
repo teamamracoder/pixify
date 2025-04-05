@@ -8,19 +8,12 @@
 {% csrf_token %}
 <div class="px-3 py-3 mt-3" style="height: 100%;background-color: #1f0447e3; box-shadow: 0 4px 8px rgba(151, 95, 236, 0.5);font-family: serif;border-radius: 7px;" >
     <div class="card mb-sm-3 mb-md-0 contacts_card" style="background-color: #1f0447e3; ">
-        <div class="p-2 card-header">
-            <div class="input-group px-5">
-                <input type="text" placeholder="Search..." name="" class="form-control search-inp" >
-                <div class="input-group-prepend">
-                    <span class="input-group-text search_btn"><i class="fas fa-search"></i></span>
-                </div>
-            </div>
-        </div>
+        <input type="text" id="following-search" placeholder="Search..." name="" class="form-control search-inp" style="border-radius: 20px !important;">
     </div>
     <div class="fcontainer" style="height:90%; scrollbar-width: none; overflow-y: scroll;">
         {% if followings %}
             {% for following in followings %}
-            <div class="user-card" id="follower-item">
+            <div class="user-card" id="follower-item" data-name="{% if following.id == current_user %}you{% else %}{{ following.fullname|lower }}{% endif %}">
                 <div style="align-items: center;display: flex;">
                     <img src="{% static following.profile_pic %}" alt="User">
                     {% if following.id == current_user %}
@@ -54,6 +47,24 @@
 
 
 <script>
+    document.getElementById("following-search").addEventListener("input", function() {
+        const query = this.value.toLowerCase();
+        const followers = document.querySelectorAll(".user-card");
+
+        followers.forEach(card => {
+            const name = card.getAttribute("data-name");
+            if (name.includes(query)) {
+                card.style.display = "flex"; // Show matching
+            } else {
+                card.style.display = "none"; // Hide non-matching
+            }
+        });
+    });
+
+
+
+
+
     // Function to handle button click
     function handleButtonClick(button, actionType, userId) {
         let apiUrl = '';
@@ -87,10 +98,13 @@
             if (data.status === 'success') {
                 if (data.button === 'follow') {
                     button.innerHTML = 'Follow';
+                    location.reload();
                 } else if (data.button === 'unfollow') {
                     button.innerHTML = 'Unfollow';
+                    location.reload();
                 } else if (data.button === 'follow-back') {
                     button.innerHTML = 'Follow Back';
+                    location.reload();
                 }
             } else {
                 console.log('Error:', data.message);
@@ -156,7 +170,7 @@
         opacity: 0.8;
     }
     #follower-item{
-        margin:20px;
+        margin: 20px 0px 20px 0px;
         justify-content: space-between;
         display: flex;
         align-items: center;
