@@ -6,26 +6,26 @@
 
   <!-- Comment Modal -->
   <div class="modal fade" id="commentModal" tabindex="-1" aria-labelledby="commentModalLabel" aria-hidden="true">
-    <div class="modal-dialog"style="box-shadow: 0 2px 4px rgba(151, 95, 236, 0.5);color: black;padding: 20px 20px 20px 0px;border-radius: 12px;background: #2c0068;gap: 40px;justify-content: space-between;display: flex;max-width: 70%;top:8%;    align-items: end;">
+    <div class="modal-dialog"style="box-shadow: 0 2px 4px rgba(151, 95, 236, 0.5);color: black;padding: 20px 20px 20px 0px;border-radius: 12px;background: #2c0068;gap: 40px;justify-content: space-between;display: flex;max-width:1000px;top:9%;align-items: end;">
         
         <div class="modal-header" id="modal-comments-header">
             <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="font-weight: bold;font-size: 15px;">
-                <i class="bi bi-x-lg"></i>
+                <i class="bi bi-x-lg" style="color: black;font-size: 20px;"></i>
             </button>
         </div>
         <div class="modal-content" style="box-shadow: none;background: none;width: 60%;top: 10%;display:contents;">
-            <div class="post-content" style="width: 50%; height: 75vh;">
+            <div class="post-content" style="width: 70%; height: 80vh;">
                 <!--dynamically load post details-->
             </div>
-            <div style="width:60%;margin-left:30px;">
-                <div class="modal-body" id="comments-container" style="scrollbar-width: none;overflow-y: scroll;height: 65vh; margin-bottom: 33px;">
+            <div id="cmt-wrp" style="width:45%;margin-left: 30px;margin-bottom: 40px;">
+                <div class="modal-body" id="comments-container" style="scrollbar-width: none;overflow-y: scroll;height: 62vh; margin-bottom: 33px;">
                     <!-- Comments will be loaded here -->
                 </div>
                     <div class="commt-foot">
                         <form id="commentForm" class="mt-3">
                         {% csrf_token %}
 
-                        <div id="CommentsectionTextarea" class="container-fluid py-2 com_sent" style="position: absolute; bottom: 0;width:33%; ">
+                        <div id="CommentsectionTextarea" class="container-fluid py-2 com_sent" style="left: 52%;position: absolute;bottom: 0;min-width: 33%;width: 42%; ">
                             <div class="input-group ms-2">
 
                                 <!-- Comment input -->
@@ -686,7 +686,7 @@ $(document).ready(function () {
                               <div style="font-size: 10px; color: lightgray;">${post.created_at}</div>
                           </div>
                       </div>
-                      <div class="post-media-container" style="margin-top: 10px; height: 85%;padding: 15px;background: #1f0447fb;">
+                      <div class="post-media-container" style="margin-top: 10px; height: 90%;padding: 15px 0px;border: 1px solid black;background: #1f0447fb;">
                           ${postMediaHTML}
                       </div>`;
   
@@ -743,7 +743,7 @@ $(document).ready(function () {
                       <div class="comment-content"> 
                           <div class="comment-header">
                               <div><strong>${comment.user}</strong></div>
-                              <div>${comment.text}</div>  
+                              <div style="word-wrap: break-word;">${comment.text}</div>  
                           </div>
                           <div class="foot-cmt">
                               <div class="reply-btn" data-comment-id="${comment.id}" data-post-id="${comment.post_id}" data-post-creator="${comment.user}" 
@@ -1281,14 +1281,14 @@ function toggleReaction(commentId, iconElement, likeCountElement) {
       justify-content: center;
       align-items: center;
       display: flex;
-      height: 60vh;
+      height: 450px;
       width: 100%;
   }
   .profile-container {
       height: 100%;
       overflow-y: auto;
       margin-top: 16px;
-      padding: 20px;
+      padding: 10px;
       background-color: #1f0447e3;
       border-radius: 10px;
       box-shadow: 0px 0px 15px rgba(255, 255, 255, 0.2);
@@ -1363,6 +1363,7 @@ function toggleReaction(commentId, iconElement, likeCountElement) {
       height: 35px;
   }
   .post-title-wrapper{
+      margin-bottom:20px;
       height: 45px;
       background: #260557fb;
       padding: 8px;
@@ -1398,6 +1399,9 @@ function toggleReaction(commentId, iconElement, likeCountElement) {
 
 
   @media (max-width: 768px) {
+    #cmt-wrp{
+        width:100% !important;
+    }
       .modal-dialog{
           top: 18% !important;
           height: 82vh !important;
@@ -1415,9 +1419,17 @@ function toggleReaction(commentId, iconElement, likeCountElement) {
       .modal-content{
           top:1% !important;
       }
+      #CommentsectionTextarea{
+        width: 70% !important;
+        left:12% !important;
+    }
       
   }
   @media (max-width: 480px) {
+    #CommentsectionTextarea{
+        width: 90% !important;
+        left:2% !important;
+    }
       .modal-dialog{
           padding: 20px;
           width: 100% !important;
@@ -1440,7 +1452,7 @@ function toggleReaction(commentId, iconElement, likeCountElement) {
   }
   .post-image{
       cursor:pointer;
-      height: 100%;
+      height: 500px;
       padding: 6px;
       border-radius: none;
   }
