@@ -954,59 +954,51 @@ $("#confirmDelete").click(function () {
   
   // Load Reactions and Update UI
   function loadReactions(postId) {
-      fetch(`/fetch_post_reactions/${postId}/`)
-          .then(response => response.json())
-          .then(data => {
-              let userReaction = null;
-              let otherReactions = [];
-              let totalReactions = data.reactions ? data.reactions.length : 0;
-  
-              if (data.reactions) {
-                  data.reactions.forEach(reaction => {
-                      if (parseInt(reaction.user_id) === parseInt(USER_ID)) {
-                          userReaction = reaction.value;
-                      } else {
-                          otherReactions.push({ value: reaction.value, name: reaction.user_name });
-                      }
-                  });
-              }
-  
-              const reactionContainer = document.getElementById(`post-reactions-${postId}`);
-              if (!reactionContainer) return;
-  
-              reactionContainer.innerHTML = totalReactions === 0 ? " " : "";
-  
-              let displayText = [];
-  
-              // If the user reacted, show "You" first
-              if (userReaction) {
-                  displayText.push(`${userReaction} <strong>You</strong>`);
-              }
-  
-              // When user reacted → Show only 1 more name
-              // When user did NOT react → Show 2 names
-              let maxNamesToShow = userReaction ? 1 : 2; 
-  
-              for (let i = 0; i < Math.min(maxNamesToShow, otherReactions.length); i++) {
-                  displayText.push(`${otherReactions[i].value} <strong>${otherReactions[i].name}</strong>`);
-              }
-  
-              // If more than 2 total reactions (or 3 if user didn't react), show "and X more"
-              let remainingCount = totalReactions - displayText.length;
-              if (remainingCount > 0) {
-                  displayText.push(`and ${remainingCount} more`);
-              }
-  
-              reactionContainer.innerHTML = displayText.join(", ");
-  
-              // Update reaction icon
-              const reactionIcon = document.getElementById(`reaction-icon-${postId}`);
-              if (reactionIcon) {
-                  reactionIcon.innerHTML = userReaction ? userReaction : '<i class="bi bi-heart" style="color: rgba(172, 57, 147, 0.973);"></i>';
-              }
-          })
-          .catch(error => console.error("Error fetching reactions:", error));
-  }
+    fetch(`/fetch_post_reactions/${postId}/`)
+        .then(response => response.json())
+        .then(data => {
+            const reactions = data.reactions || [];
+            const totalReactions = reactions.length;
+
+            const reactionContainer = document.getElementById(`post-reactions-${postId}`);
+            if (!reactionContainer) return;
+
+            if (totalReactions === 0) {
+                reactionContainer.innerHTML = " ";
+                return;
+            }
+
+            const latestReactions = reactions.slice(0, 2); // Show only latest 2 reactions
+
+            // Prepare emojis and names
+            const emojis = latestReactions.map(r => r.value).join(" ");
+            const names = latestReactions.map(r => {
+                return parseInt(r.user_id) === parseInt(USER_ID) ? "You" : r.user_name;
+            }).join(", ");
+
+            let displayText = `${emojis} ${names}`;
+
+            const moreCount = totalReactions - latestReactions.length;
+            if (moreCount > 0) {
+                displayText += `, and ${moreCount} more`;
+            }
+
+            reactionContainer.innerHTML = displayText;
+
+            // Update the reaction icon if current user reacted
+            const currentUserReaction = reactions.find(
+                r => parseInt(r.user_id) === parseInt(USER_ID)
+            );
+            const reactionIcon = document.getElementById(`reaction-icon-${postId}`);
+            if (reactionIcon) {
+                reactionIcon.innerHTML = currentUserReaction
+                    ? currentUserReaction.value
+                    : '<i class="bi bi-heart" style="color: rgba(172, 57, 147, 0.973);"></i>';
+            }
+        })
+        .catch(error => console.error("Error fetching reactions:", error));
+}
+
   
   
   // Remove Reaction
@@ -1452,7 +1444,7 @@ function toggleReaction(commentId, iconElement, likeCountElement) {
   }
   .post-image{
       cursor:pointer;
-      height: 500px;
+      height: 450px;
       padding: 6px;
       border-radius: none;
   }
