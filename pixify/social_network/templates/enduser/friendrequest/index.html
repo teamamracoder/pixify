@@ -115,7 +115,8 @@
             data: { following_id: following_id },
             success: function (response) {
                // console.log(response);
-                buttonElement.text("Following").prop("disabled", true);
+               buttonElement.text("Following").prop("disabled", true).css("background", "#2d0669");
+
             },
             error: function (xhr, status, error) {
                 console.error("Error following user:", error);
