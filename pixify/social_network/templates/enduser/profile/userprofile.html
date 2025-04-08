@@ -94,99 +94,7 @@
         </div>
 
 
-<style>
-        :root {
-        --primary: #7b2cbf;
-        --secondary: #9d4edd;
-        --dark: #1a1a2e;
-        --light: #f8f9fa;
-        --accent: #ff9e00;
-    }
-
-    .profile-headerrr {
-        margin-top: 18px;
-        position: relative;
-        margin-bottom: 5px;
-    }
-
-    .profile-banner {
-        height: 172px;
-        background: linear-gradient(135deg, var(--primary), var(--secondary));
-        border-radius: 0 0 20px 20px;
-        overflow: hidden;
-    }
-
-    .profile-info-container {
-        text-align: center;
-        position: relative;
-        transform: translateY(-50px);
-    }
-
-    .profile-picture {
-        width: 150px;
-        height: 150px;
-        border-radius: 50%;
-        border: 5px solid var(--dark);
-        object-fit: cover;
-        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-    }
-
-    .profile-name {
-        font-size: 2rem;
-        font-weight: 700;
-        color: var(--light);
-        margin-bottom: 10px;
-    }
-
-    .profile-stats {
-        display: flex;
-        gap: 30px;
-        justify-content: center;
-        margin: 20px 0;
-    }
-
-    .stat-item {
-        cursor: pointer;
-        text-align: center;
-        transition: transform 0.3s ease;
-    }
-
-    .stat-item:hover {
-        transform: translateY(-3px);
-    }
-
-    .stat-number {
-        display: block;
-        font-size: 1.2rem;
-        font-weight: 700;
-        color: var(--accent);
-    }
-
-    .stat-label {
-        font-size: 0.9rem;
-        color: #ccc;
-    }
-
-    .bio-section {
-        max-width: 600px;
-        margin: 0 auto;
-        color: #ddd;
-        font-size: 1rem;
-        line-height: 1.5;
-        padding: 0 20px;
-    }
-    .section-title {
-        margin-left: 10px;
-    border-left: 6px solid blue;
-    font-weight: 700;
-    margin-bottom: 20px;
-    color: var(--text);
-    position: relative;
-    padding-left: 6px;
-}
-
-
-</style>        
+     
         <!-- Posts Section -->
         <h3 class="section-title">Posts</h3>
         <div class="user-post-container">
@@ -1665,6 +1573,98 @@ function toggleReaction(commentId, iconElement, likeCountElement) {
 
     }
 
-    </style>
+
+    :root {
+    --primary: #7b2cbf;
+    --secondary: #9d4edd;
+    --dark: #1a1a2e;
+    --light: #f8f9fa;
+    --accent: #ff9e00;
+}
+
+.profile-headerrr {
+    margin-top: 18px;
+    position: relative;
+    margin-bottom: 5px;
+}
+
+.profile-banner {
+    height: 172px;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    border-radius: 0 0 20px 20px;
+    overflow: hidden;
+}
+
+.profile-info-container {
+    text-align: center;
+    position: relative;
+    transform: translateY(-50px);
+}
+
+.profile-picture {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    border: 5px solid var(--dark);
+    object-fit: cover;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.profile-name {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--light);
+    margin-bottom: 10px;
+}
+
+.profile-stats {
+    display: flex;
+    gap: 30px;
+    justify-content: center;
+    margin: 20px 0;
+}
+
+.stat-item {
+    cursor: pointer;
+    text-align: center;
+    transition: transform 0.3s ease;
+}
+
+.stat-item:hover {
+    transform: translateY(-3px);
+}
+
+.stat-number {
+    display: block;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--accent);
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    color: #ccc;
+}
+
+.bio-section {
+    max-width: 600px;
+    margin: 0 auto;
+    color: #ddd;
+    font-size: 1rem;
+    line-height: 1.5;
+    padding: 0 20px;
+}
+.section-title {
+    margin-left: 10px;
+border-left: 6px solid blue;
+font-weight: 700;
+margin-bottom: 20px;
+color: var(--text);
+position: relative;
+padding-left: 6px;
+}
+
+
+</style>   
 </body>
 {% endblock %}
