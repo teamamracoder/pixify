@@ -68,7 +68,7 @@
         <div class="reaction-item">
           <img src="default-profile.png" alt="Profile" class="profile-image" />
           <span class="user-name">Partha Sutradhar</span>
-          <span class="emoji">😡</span>
+          <span class="emoji"></span>
         </div>
       </div>
     </div>
@@ -262,7 +262,7 @@
                                 {% endfor %}
                                 {% endif %}
                                 <div class="react-comment-wrapper">
-                                <div class="post-reactions"  id="post-reactions-{{ post.id }}" onclick="open_details_modal()"><!-- Reactions will be dynamically loaded here --></div>
+                                <div class="post-reactions"  id="post-reactions-{{ post.id }}" onclick="open_details_modal({{post.id}})"><!-- Reactions will be dynamically loaded here --></div>
                                 <div id="comment-count-{{ post.id }}" class="user_profile_comment" data-user-id="{{user_details.id}}">
                                     {{ post.comment_count }} comments
                                 </div>                           
@@ -370,9 +370,42 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <script>
-    function open_details_modal(){
-        let modal=document.getElementById("modal");
-        modal.style.display="block";
+    function open_details_modal(postId) {
+        let modal = document.getElementById("modal");
+        let container = document.querySelector(".modal-body-container");
+    
+        // Clear existing content
+        container.innerHTML = "<p>Loading...</p>";
+    
+        // Show modal
+        modal.style.display = "block";
+    
+        // Fetch reaction data
+        fetch(`/reaction/details/${postId}/`)
+            .then(res => res.json())
+            .then(data => {
+                container.innerHTML = ""; // Clear loading state
+    
+                if (data.reactions.length === 0) {
+                    container.innerHTML = "<p>No reactions yet.</p>";
+                    return;
+                }
+    
+                data.reactions.forEach(reaction => {
+                    const item = document.createElement("div");
+                    item.className = "reaction-item";
+                    item.innerHTML = `
+                        <img src="${reaction.user_pic || 'default-profile.png'}" alt="Profile" class="profile-image" />
+                        <span class="user-name">${reaction.user_name}</span>
+                        <span class="emoji">${reaction.reaction}</span>
+                    `;
+                    container.appendChild(item);
+                });
+            })
+            .catch(err => {
+                console.error("Error fetching reactions:", err);
+                container.innerHTML = "<p>Error loading reactions.</p>";
+            });
     }
     function close_details_modal(event) {
         const modalContent = document.querySelector('.modal-content2');

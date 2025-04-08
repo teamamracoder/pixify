@@ -279,8 +279,18 @@ class GetCommentsLikes(View):
 
 
 class PostReactionDetailsView(View):
-    def get(self,request,post_id):
-        
-        return 
+    def get(self, request, post_id):
+        reactions = post_service.get_all_reactions(post_id)
+        print(reactions)
+        reaction_data = [
+            {
+                'user_name': f"{reaction.reacted_by.first_name} {reaction.reacted_by.last_name}" or "unknown",
+                'user_pic':reaction.reacted_by.profile_photo_url or '/static/images/avatar.jpg',
+                'reaction': reaction.master_list_id.value,
+            }
+            for reaction in reactions
+        ]
+        print(reaction_data)
+        return JsonResponse({'post_id': post_id, 'reactions': reaction_data})
 
 
