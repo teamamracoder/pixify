@@ -18,6 +18,7 @@ class User(AbstractUser):
         ),
         blank=True
     )
+    phone = models.IntegerField(blank = True , null= True)
     address = models.CharField(blank=True, null=True, max_length=100)
     hobbies = ArrayField(models.CharField(max_length=50,blank=True, null=True), null=True, blank=True)
     bio = models.CharField(max_length=100, null=True, blank=True)

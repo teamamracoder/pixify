@@ -24,7 +24,7 @@ def update_user(request, user_id, first_name, last_name, email, phone, gender, a
     user.first_name = first_name
     user.last_name = last_name
     user.email = email
-    # user.phone = phone
+    user.phone = phone
     user.gender = gender
     user.address = address
     user.dob = dob
