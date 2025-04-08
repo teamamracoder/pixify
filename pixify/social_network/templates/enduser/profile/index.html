@@ -53,6 +53,111 @@
         </div>
     </div>
 </div>
+
+
+
+<!-- Modal Overlay -->
+<div class="modal-overlay" id="modal" onclick="close_details_modal(event)" style="display:none;">
+    <div class="modal-content2">
+      <div class="modal-header2">
+        <h3>All Reactions</h3>
+        <button class="close-btn" onclick="close_details_modal(event)">✕</button>
+      </div>
+      <hr style="border-color: #6d28d9;" />
+      <div class="modal-body-container">
+        <div class="reaction-item">
+          <img src="default-profile.png" alt="Profile" class="profile-image" />
+          <span class="user-name">Partha Sutradhar</span>
+          <span class="emoji">😡</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+
+  <style>
+    .modal-overlay {
+        z-index: 9999;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        justify-content: center;
+        align-items: center;
+      }
+      
+      .modal-content2 {
+        margin: 10% auto;
+        overflow-y: scroll;
+        scrollbar-width: none;
+        height: 70vh;
+        background: #0f0f2b;
+        padding: 20px;
+        border-radius: 8px;
+        width: 400px;
+        color: white;
+      }
+      
+      .modal-header2 {
+        margin-left: 22%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      @media(max-width:768px){
+        .modal-content2{
+            margin: 20% auto !important;
+        }
+      }
+      @media(max-width:480px){
+        .modal-content2{
+            margin: 30% auto !important;
+        }
+      }
+      
+      .close-btn {
+        background: none;
+        color: white;
+        font-size: 20px;
+        border: none;
+        cursor: pointer;
+      }
+      
+      .reaction-item {
+        display: flex;
+        align-items: center;
+        margin-top: 20px;
+      }
+      
+      .profile-image {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background-color: #ccc;
+        margin-right: 10px;
+      }
+      
+      .user-name {
+        flex: 1;
+      }
+      
+      .emoji {
+        font-size: 20px;
+        margin-right: 5px;
+      }
+      
+      .count {
+        font-weight: bold;
+        color: #ff4d4f;
+      }
+      
+  </style>
+  
+
+
 <div class="px-3 py-3 mt-3  users"
         style="background-color: #1f0447e3;border: 1px solid #827b7b70;font-family: serif;border-radius: 7px;">
         <div class="row loginuserprofile mx-2 pt-1 pb-3 px-2 mb-2 fw-semibold "
@@ -157,7 +262,7 @@
                                 {% endfor %}
                                 {% endif %}
                                 <div class="react-comment-wrapper">
-                                <div class="post-reactions"  id="post-reactions-{{ post.id }}"><!-- Reactions will be dynamically loaded here --></div>
+                                <div class="post-reactions"  id="post-reactions-{{ post.id }}" onclick="open_details_modal()"><!-- Reactions will be dynamically loaded here --></div>
                                 <div id="comment-count-{{ post.id }}" class="user_profile_comment" data-user-id="{{user_details.id}}">
                                     {{ post.comment_count }} comments
                                 </div>                           
@@ -265,8 +370,22 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <script>
+    function open_details_modal(){
+        let modal=document.getElementById("modal");
+        modal.style.display="block";
+    }
+    function close_details_modal(event) {
+        const modalContent = document.querySelector('.modal-content2');
+        document.getElementById('modal').style.display = 'none';
 
-
+        
+        // If the click is outside the modal content, hide the modal
+        if (!modalContent.contains(event.target)) {
+            document.getElementById('modal').style.display = 'none';
+        }
+    }
+    
+    
  //follower following reloads
     document.addEventListener("DOMContentLoaded", function () {
         updateFollowerFollowingData();
@@ -1412,7 +1531,7 @@ function toggleReaction(commentId, iconElement, likeCountElement) {
           margin: 0 !important;
       }
       .modal-content{
-          margin-right: 15px;
+          margin: 15px;
           height: 75vh!important;
           width: 100% !important;
       }
@@ -1439,7 +1558,7 @@ function toggleReaction(commentId, iconElement, likeCountElement) {
           top:18%!important;
       }
       .modal-content{
-          margin-right: 15px;
+          margin: 15px;
           height: 75vh!important;
           width: 100% !important;
       }

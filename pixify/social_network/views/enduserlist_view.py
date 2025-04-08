@@ -274,5 +274,13 @@ class GetCommentsLikes(View):
     def get(self, request, user_id, post_id):
         comments_data = comment_service.get_comments_likes(user_id, post_id)
         return JsonResponse({"comments": comments_data})
+    
+
+
+
+class PostReactionDetailsView(View):
+    def get(self,request,post_id):
+        
+        return 
 
 
