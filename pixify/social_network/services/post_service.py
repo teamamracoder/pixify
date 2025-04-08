@@ -4,7 +4,7 @@ from . import GetData
 from ..models import Post,Comment,PostReaction,PostReaction,MasterList
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
-from ..constants.default_values import PostType
+from ..constants.default_values import PostType, PostContentType
 from ..models import models
 from ..services import comment_service
 
@@ -112,7 +112,7 @@ def reaction_name(post_id):
 
 
 def get_user_posts(user_id):
-    user_posts = Post.objects.filter(posted_by=user_id).values('id', 'type', 'media_url', 'title', 'description', 'created_at')
+    user_posts = Post.objects.filter(posted_by=user_id).values('id', 'type', 'media_url', 'title', 'description', 'created_at').order_by('-created_at')
 
 
     # Format the created_at timestamp after fetching data
@@ -175,3 +175,25 @@ def get_user_post_comment_count(user_id):
 
 def get_users_by_id(user_id):
             return User.objects.filter(id=user_id).all()
+
+def get_post_by_post_id(post_id):
+    post=Post.objects.filter(id=post_id,is_active=True).first()
+    post_data={}
+    if post:
+        post_data={
+            'id':post.id,
+            'post_media':post.media_url,
+            'type':post.type,
+            'posted_by_name':f"{post.posted_by.first_name} {post.posted_by.last_name}",
+            'posted_by_image':post.posted_by.profile_photo_url or '/images/avatar.jpg',
+            'created_at':comment_service.format_timestamp(post.created_at),
+            'content_type':PostContentType(post.content_type).name
+        }
+        print(post_data)
+        return post_data
+    return post_data
+
+
+
+def get_all_reactions(post_id):
+     return PostReaction.objects.filter(post_id=post_id,is_active=True).select_related('reacted_by','master_list_id')

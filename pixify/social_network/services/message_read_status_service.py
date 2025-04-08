@@ -8,4 +8,3 @@ def create_message_read_status(message_id, user):
         updated_by=user
     )
     
-       

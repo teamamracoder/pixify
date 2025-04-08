@@ -1,7 +1,8 @@
 from datetime import date
-from ..models import Follower, Chat, ChatMember
+from ..models import Follower, Chat, ChatMember,User
 from django.db.models import Q, OuterRef, Subquery
 from ..constants import ChatType
+from ..services import user_service
 
 
 def list_followers_api(request, user):
@@ -150,4 +151,50 @@ def list_follow_api(request, user):
 
 def follower_check(posted_by,user):
     return Follower.objects.filter(user_id=user,following=posted_by).exists()
+
+
+def get_all_following_details(user):
+    following_list = Follower.objects.filter(user_id=user, is_active=True).exclude(following=user).select_related('following').distinct()
+    followings_data = [
+        {
+            "id": f.following.id,  # Extracting correct user ID
+            "fullname": f"{f.following.first_name} {f.following.last_name}",
+            "profile_pic": f.following.profile_photo_url if f.following.profile_photo_url else '/images/avatar.jpg'
+        }
+        for f in following_list
+    ]
+    return followings_data
+
+
+def get_all_follower_details(user):
+    follower_list = Follower.objects.filter(following=user, is_active=True).exclude(created_by=user).select_related('created_by').distinct()
+    follower_data = [
+        {
+            "id": f.user_id.id,  # Extracting correct user ID
+            "fullname": f"{f.user_id.first_name} {f.user_id.last_name}",
+            "profile_pic": f.user_id.profile_photo_url if f.user_id.profile_photo_url else '/images/avatar.jpg'
+        }
+        for f in follower_list
+    ]
+    return follower_data
     
+
+
+def create_follow(user_id,current_user):
+    print(user_id,current_user)
+    user = user_service.get_user_obj(user_id)
+    return Follower.objects.create(
+        user_id = current_user,
+        following = user,
+        created_by = current_user,
+        is_active=True
+    )
+def unfollow(user_id,current_user):
+    following= Follower.objects.filter(following=user_id,user_id=current_user,is_active=True).first()
+    following.is_active=False
+    following.save()
+    return True
+
+
+def is_following_back(current_user, follower_id):
+    return Follower.objects.filter(user_id=follower_id, following=current_user).exists()

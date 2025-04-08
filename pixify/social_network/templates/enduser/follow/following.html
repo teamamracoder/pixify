@@ -1,0 +1,190 @@
+{% extends "enduser/base.html" %}
+
+{% block title %}Pixify | followings{% endblock %}
+
+{% block content %}
+
+{% load static %}
+{% csrf_token %}
+<div class="px-3 py-3 mt-3" style="height: 100%;background-color: #1f0447e3; box-shadow: 0 4px 8px rgba(151, 95, 236, 0.5);font-family: serif;border-radius: 7px;" >
+    <div class="card mb-sm-3 mb-md-0 contacts_card" style="background-color: #1f0447e3; ">
+        <input type="text" id="following-search" placeholder="Search..." name="" class="form-control search-inp" style="border-radius: 20px !important;">
+    </div>
+    <div class="fcontainer" style="height:90%; scrollbar-width: none; overflow-y: scroll;">
+        {% if followings %}
+            {% for following in followings %}
+            <div class="user-card" id="follower-item" data-name="{% if following.id == current_user %}you{% else %}{{ following.fullname|lower }}{% endif %}">
+                <div style="align-items: center;display: flex;" onclick="redirect_profile({{following.id}})">
+                    <img src="{% static following.profile_pic %}" alt="User">
+                    {% if following.id == current_user %}
+                    <div class="user-info"><h4 id="userName">You</h4></div>
+                    {% else %}
+                    <div class="user-info"><h4 id="userName">{{ following.fullname }}</h4></div>
+                    {% endif %}
+                </div>
+                <!-- Button Logic: Check if current user and skip rendering button -->
+                {% if following.id != current_user %}
+                    {% for button in follow_button_types %}
+                        {% if button.id == following.id %}
+                            {% if button.button_type == 'follow-back' %}
+                                <button class="follow-back-btn" onclick="handleButtonClick(this, 'follow', {{ following.id }})">Follow Back</button>
+                            {% elif button.button_type == 'unfollow' %}
+                                <button class="unfollow-btn" onclick="handleButtonClick(this, 'unfollow', {{ following.id }})">Unfollow</button>
+                            {% else %}
+                                <button class="follow-btn" onclick="handleButtonClick(this, 'follow', {{ following.id }})">Follow</button>
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+            </div>
+            {% endfor %}
+        {% else %}
+            <p>No followings found</p>
+        {% endif %}
+    </div>        
+</div> 
+
+
+
+<script>
+    document.getElementById("following-search").addEventListener("input", function() {
+        const query = this.value.toLowerCase();
+        const followers = document.querySelectorAll(".user-card");
+
+        followers.forEach(card => {
+            const name = card.getAttribute("data-name");
+            if (name.includes(query)) {
+                card.style.display = "flex"; // Show matching
+            } else {
+                card.style.display = "none"; // Hide non-matching
+            }
+        });
+    });
+
+
+
+
+
+    // Function to handle button click
+    function handleButtonClick(button, actionType, userId) {
+        let apiUrl = '';
+
+        // Determine which API to call based on the action type
+        if (actionType === 'follow') {
+            apiUrl = '/api/follow/' + userId + '/';
+        } else if (actionType === 'unfollow') {
+            apiUrl = '/api/unfollow/' + userId + '/';
+        } else if (actionType === 'follow-back') {
+            apiUrl = '/api/follow-back/' + userId + '/';
+        }
+
+        // Make the API call via AJAX
+        fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken'), // Include CSRF token for security
+            },
+        })
+        .then(response => {
+            // Check if response is ok (status code 200)
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json(); // Try to parse JSON
+        })
+        .then(data => {
+            // Handle success response
+            if (data.status === 'success') {
+                if (data.button === 'follow') {
+                    button.innerHTML = 'Follow';
+                    location.reload();
+                } else if (data.button === 'unfollow') {
+                    button.innerHTML = 'Unfollow';
+                    location.reload();
+                } else if (data.button === 'follow-back') {
+                    button.innerHTML = 'Follow Back';
+                    location.reload();
+                }
+            } else {
+                console.log('Error:', data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });        
+    }
+
+    // Helper function to get CSRF token for AJAX requests
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    
+    const currentUserId = {{ request.user.id }};
+        
+    function redirect_profile(followingId) {
+        if (followingId === currentUserId) {
+            window.location.href = "/profile/";
+        } else {
+            window.location.href = `/profile/${followingId}/`;  // use backticks
+        }
+    }
+</script>
+
+
+
+
+<style>
+    .user-item{
+
+    }
+    .follow-btn {
+        border-radius: 5px;
+        background-color: #0d6efd;
+        color: white;
+        padding: 5px 20px;
+        border: none;
+        cursor: pointer;
+    }
+    
+    .follow-back-btn {
+        border-radius: 5px;
+        background-color: #0d6efd;
+        color: white;
+        padding: 5px 20px;
+        border: none;
+        cursor: pointer;
+    }
+    
+    .unfollow-btn {
+        border-radius: 5px;
+        background-color: #0d6efd;
+        color: white;
+        padding: 5px 20px;
+        border: none;
+        cursor: pointer;
+    }
+    
+    button:hover {
+        opacity: 0.8;
+    }
+    #follower-item{
+        margin: 20px 0px 20px 0px;
+        justify-content: space-between;
+        display: flex;
+        align-items: center;
+    }
+</style>
+{% endblock %}

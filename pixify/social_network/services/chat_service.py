@@ -207,27 +207,10 @@ def get_all_user_follow(user):
     following_list = Follower.objects.filter(user_id=user, is_active=True).exclude(following=user).select_related('following')
 
     # Correcting ID extraction from Follower objects
-    followers_data = [
-        {
-            "id": f.created_by.id,  # Extracting correct user ID
-            "first_name": f"{f.created_by.first_name} {f.created_by.last_name}",
-            "profile_pic": f.created_by.profile_photo_url
-        }
-        for f in follower_list
-    ]
+    count_follower=len(follower_list)
+    count_following=len(following_list)
 
-    followings_data = [
-        {
-            "id": f.following.id,  # Extracting correct user ID
-            "first_name": f"{f.following.first_name} {f.following.last_name}",
-            "profile_pic": f.following.profile_photo_url
-        }
-        for f in following_list
-    ]
-    count_follower=len(followers_data)
-    count_following=len(followings_data)
-
-    return followers_data, followings_data,count_follower,count_following
+    return count_follower,count_following
 
 
 def list_chats_api(request,chat_data_list):

@@ -219,7 +219,19 @@ urlpatterns = [
     path('check-follow-state/',views.CheckFollowState.as_view(), name='check-follow-state'),
     path('get-followers-following/',views. GetFollowersFollowing.as_view(), name='get_followers_following'),
     path('get-user-posts-comments/<int:user_id>/',views.GetUserPostsComments.as_view(), name='get_user_posts_comments'),
-     path('get-comments-likes/<int:user_id>/<int:post_id>/',views.GetCommentsLikes.as_view(), name='get_comments_likes'),
+    path('get-comments-likes/<int:user_id>/<int:post_id>/',views.GetCommentsLikes.as_view(), name='get_comments_likes'),
+    path('reaction/details/<int:post_id>/',views.PostReactionDetailsView.as_view(), name='reaction_details'),
+    
+
+    #follower following
+
+    path('followers/<int:user_id>/',views.FollowerListView.as_view(), name='get_followers'),
+    path('followings/<int:user_id>/',views.FollowingListView.as_view(), name='get_followings'),
+    path('api/follow/<int:user_id>/', views.FollowCreateView.as_view(), name='follow_user'),
+    path('api/follow-back/<int:user_id>/', views.FollowBackCreateView.as_view(), name='follow_back'),
+    path('api/unfollow/<int:user_id>/', views.UnfollowCreateView.as_view(), name='unfollow_user'),
+
+
 
     # User Searching API
     path('user/search/api', views.UserSearchApi.as_view(), name='user_search_api'),

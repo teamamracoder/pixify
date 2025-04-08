@@ -172,7 +172,105 @@
   </div>
   </div>
 
+<!-- Modal Overlay -->
+<div class="modal-overlay" id="modal" onclick="close_details_modal(event)" style="display:none;">
+    <div class="modal-content2">
+      <div class="modal-header2">
+        <h3>All Reactions</h3>
+        <button class="close-btn" onclick="close_details_modal(event)">✕</button>
+      </div>
+      <hr style="border-color: #6d28d9;" />
+      <div class="modal-body-container">
+        <div class="reaction-item">
+          <img src="default-profile.png" alt="Profile" class="profile-image" />
+          <span class="user-name"></span>
+          <span class="emoji"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+  
 
+  <style>
+    .modal-overlay {
+        z-index: 9999;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        justify-content: center;
+        align-items: center;
+      }
+      
+      .modal-content2 {
+        margin: 10% auto;
+        overflow-y: scroll;
+        scrollbar-width: none;
+        height: 70vh;
+        background: #0f0f2b;
+        padding: 20px;
+        border-radius: 8px;
+        width: 400px;
+        color: white;
+      }
+      
+      .modal-header2 {
+        margin-left: 22%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      @media(max-width:768px){
+        .modal-content2{
+            margin: 20% auto !important;
+        }
+      }
+      @media(max-width:480px){
+        .modal-content2{
+            margin: 30% auto !important;
+        }
+      }
+      
+      .close-btn {
+        background: none;
+        color: white;
+        font-size: 20px;
+        border: none;
+        cursor: pointer;
+      }
+      
+      .reaction-item {
+        display: flex;
+        align-items: center;
+        margin-top: 20px;
+      }
+      
+      .profile-image {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background-color: #ccc;
+        margin-right: 10px;
+      }
+      
+      .user-name {
+        flex: 1;
+      }
+      
+      .emoji {
+        font-size: 20px;
+        margin-right: 5px;
+      }
+      
+      .count {
+        font-weight: bold;
+        color: #ff4d4f;
+      }
+      
+  </style>
 
 <!--Post Modal-->
 <div class="modal fade" id="addPhotosVideosModal" tabindex="-1" aria-labelledby="addPhotosVideosModalLabel"
@@ -248,7 +346,7 @@
     {% if post_dict.posts %}
     {% for post in post_dict.posts %}
         <div class="container post-center pb-3 mb-3">
-            <div class="post-box">
+            <div class="post-box" data-post-id="{{ post.id }}">
                 <input type="hidden" class="firstPostId" name="firstPostId" value="{{post.id}}">
                 <input type="hidden" class="firstUserId" name="firstUserId" value="{{post.posted_by_id}}">
 
@@ -332,11 +430,10 @@
 
                 <div>
                     <div class="d-flex align-items-center px-2">
-                        <i class="bi bi-hand-thumbs-up pe-1 emojis_hide" style="font-size:12px"></i>
-                        <i class="bi bi-heart emojis_hide" style="font-size:12px"></i>
-                        <span style="font-size:14px;color:#e9e6e6c7;margin-left: 5px;margin-bottom: 2px;" id="reaction-count">
-                            <span style="font-size:14px;color:#e9e6e6c7;margin-left: 5px;" class="px-2" id="total-reaction-count"></span>
-                        </span>
+                        <script>
+                            var USER_ID = {{ request.user.id|default:0 }};
+                        </script>
+                        <div class="post-reactions"  id="post-reactions-{{ post.id }}" onclick="open_details_modal({{post.id}})"><!-- Reactions will be dynamically loaded here --></div>
                         <span style="font-size:14px;color:#e9e6e6c7;" class="ms-auto pe-2 commentcountshow">
                             <span id="total-comment-count"></span> comments
                         </span>
@@ -345,19 +442,30 @@
 
                 <div class="post-react-det">
                     <div class="post-react" style="cursor: pointer;">
-                        <div class="reaction-container" style="position: relative; display: inline-block;">
+                        <div class="reaction-container user-post" data-post-id="{{ post.id }}" style=" position: relative; display: flex;align-items: center;">
                             <input type="hidden" class="getemoji">
-                            <span class="post_reaction" style="cursor: pointer;">
-                                <i class="bi bi-heart pe-1" style="font-size: 18px; cursor: pointer;position: relative;top: 6px;"></i>
+                            
+                            <!-- Reaction Display Icon -->
+                            <span class="post_reaction" style="cursor: pointer;" onclick="toggleReactionPopup({{ post.id }})">
+                                <span id="reaction-icon-{{ post.id }}">
+                                    <i class="bi bi-heart pe-1" style="font-size: 18px; cursor: pointer; position: relative; top: 6px;"></i>
+                                </span>
                             </span>
-
-                            <div class="reaction-popover" style="display: none; position: absolute; top: -50px; left: 0; background:#34116d; border-radius: 10px; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);">
-                                <i data-reaction-id="1" class="fa-solid fa-heart" style="color: #ff0000;font-size: 20px;cursor: pointer;"></i>
-                                <i data-reaction-id="2" class="fa-solid fa-face-laugh-squint" style="color: #ffcb0f;font-size: 20px;cursor: pointer;"></i>
-                                <i data-reaction-id="3" class="fa-solid fa-face-smile-beam" style="color: #FFD43B;font-size: 20px;cursor: pointer;"></i>
-                                <i data-reaction-id="4" class="fa-solid fa-face-angry" style="color: #ff0a0a;font-size: 20px;cursor: pointer;"></i>
+                        
+                            <!-- Reaction Options Popup -->
+                            <div id="reaction-popup-{{ post.id }}" class="reaction-popup reaction-popover" 
+                                 style="display: none; position: absolute; top: -61px; left: 0; background: #34116d; 
+                                        border-radius: 10px; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2); padding: 5px 10px;">
+                                        <div style="display: flex;">
+                                {% for reaction in reactions %}
+                                    <span class="reaction-emoji" onclick="handleReaction({{ post.id }}, {{ reaction.id }})" style="cursor: pointer; padding: 3px;">
+                                        {{ reaction.value|safe }}
+                                    </span>
+                                {% endfor %}
+                                </div>
                             </div>
                         </div>
+
                         <input type="hidden" id="user_id" value="{{ request.user.id }}">
                         <input type="hidden" id="post_id" value="{{ post.id }}">
                         <span data-toggle="modal" class="load-comments"><i class="fa-regular fa-comment"></i></span>
@@ -489,8 +597,8 @@
     display: flex;
     flex-wrap: nowrap;
     justify-content: flex-start;
-    margin-left: 10px;
-    gap: 5px;
+    /* margin-left: 10px;*/
+    gap: 5px; 
 }
 .carouselItemForShortSection {
     flex: 0 0 auto;
@@ -556,6 +664,209 @@
 
 
 <script>
+
+
+     
+document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".user-post").forEach(post => {
+        const postId = post.getAttribute("data-post-id");
+        if (postId) {
+            loadReactions(postId);
+        }
+    });
+});
+
+// Toggle Reaction Popup (Only Opens If User Has Not Reacted)
+function toggleReactionPopup(postId) {
+    const popup = document.getElementById(`reaction-popup-${postId}`);
+    if (!popup) return;
+
+    fetch(`/fetch_post_reactions/${postId}/`)
+        .then(response => response.json())
+        .then(data => {
+            let userHasReacted = false;
+            if (data.reactions) {
+                data.reactions.forEach(reaction => {
+                    if (parseInt(reaction.user_id) === parseInt(USER_ID)) {
+                        userHasReacted = true;
+                    }
+                });
+            }
+
+            if (!userHasReacted) {
+                const isVisible = popup.style.display === "block";
+                document.querySelectorAll(".reaction-popup").forEach(p => p.style.display = "none");
+                popup.style.display = isVisible ? "none" : "block";
+            } else {
+                removeReaction(postId);
+            }
+        })
+        .catch(error => console.error("Error fetching reactions:", error));
+}
+
+// Handle Reactions (Add/Update)
+function handleReaction(postId, reactionId) {
+    fetch(`/create_update_post_reactions/`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": getCSRFToken()
+        },
+        body: JSON.stringify({ post_id: postId, reaction_id: reactionId })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            loadReactions(postId);
+            const popup = document.getElementById(`reaction-popup-${postId}`);
+            if (popup) {
+                popup.style.display = "none";
+            }
+        } else {
+            console.error("Failed to update reaction:", data.error || "Unknown error");
+        }
+    })
+    .catch(error => console.error("Error:", error));
+}
+
+// Load Reactions and Update UI
+function loadReactions(postId) {
+    fetch(`/fetch_post_reactions/${postId}/`)
+        .then(response => response.json())
+        .then(data => {
+            const reactions = data.reactions || [];
+            const totalReactions = reactions.length;
+
+            const reactionContainer = document.getElementById(`post-reactions-${postId}`);
+            if (reactionContainer) reactionContainer.style.gap = '5px';
+
+            if (reactionContainer) {
+                if (totalReactions === 0) {
+                    reactionContainer.innerHTML = " ";
+                } else {
+                    const latestReactions = reactions.slice(0, 2);
+                    const emojis = latestReactions.map(r => r.value).join("  ");
+                    const namesArray = latestReactions.map(r => ({
+                        name: parseInt(r.user_id) === parseInt(USER_ID) ? "You" : r.user_name,
+                        isYou: parseInt(r.user_id) === parseInt(USER_ID)
+                    }));
+                    namesArray.sort((a, b) => b.isYou - a.isYou);
+                    const names = namesArray.map(n => n.name).join(", ");
+                    let displayText = `${emojis} ${names}`;
+                    const moreCount = totalReactions - latestReactions.length;
+                    if (moreCount > 0) displayText += ` and ${moreCount} more`;
+                    reactionContainer.innerHTML = displayText;
+                }
+            }
+
+            // Update the reaction icon
+            const currentUserReaction = reactions.find(
+                r => parseInt(r.user_id) === parseInt(USER_ID)
+            );
+            const reactionIcon = document.getElementById(`reaction-icon-${postId}`);
+            if (reactionIcon) {
+                reactionIcon.innerHTML = ""; // Clear previous content
+                if (currentUserReaction) {
+                    reactionIcon.innerHTML = currentUserReaction.value;
+                } else {
+                    const defaultIcon = document.createElement("i");
+                    defaultIcon.className = "bi bi-heart";
+                    defaultIcon.style.color = "rgba(172, 57, 147, 0.973)";
+                    reactionIcon.appendChild(defaultIcon);
+                }
+            }
+        })
+        .catch(error => console.error("Error fetching reactions:", error));
+}
+
+// Remove Reaction
+function removeReaction(postId) {
+    fetch(`/delete_post_reactions/`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": getCSRFToken()
+        },
+        body: JSON.stringify({ post_id: postId })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            loadReactions(postId);
+
+            // Hide popup (optional)
+            const popup = document.getElementById(`reaction-popup-${postId}`);
+            if (popup) {
+                popup.style.display = "none";
+            }
+        } else {
+            console.error("Failed to delete reaction:", data.error);
+            alert("Error: " + data.error);
+        }
+    })
+    .catch(error => {
+        console.error("Network error:", error);
+        alert("Failed to remove reaction. Please try again.");
+    });
+}
+ 
+    function open_details_modal(postId) {
+        let modal = document.getElementById("modal");
+        let container = document.querySelector(".modal-body-container");
+    
+        // Clear existing content
+        container.innerHTML = "<p>Loading...</p>";
+    
+        // Show modal
+        modal.style.display = "block";
+    
+        // Fetch reaction data
+        fetch(`/reaction/details/${postId}/`)
+            .then(res => res.json())
+            .then(data => {
+                container.innerHTML = ""; // Clear loading state
+    
+                if (data.reactions.length === 0) {
+                    container.innerHTML = "<p>No reactions yet.</p>";
+                    return;
+                }
+    
+                data.reactions.forEach(reaction => {
+                    const item = document.createElement("div");
+                    item.className = "reaction-item";
+                    item.innerHTML = `
+                        <img src="${reaction.user_pic || 'default-profile.png'}" alt="Profile" class="profile-image" />
+                        <span class="user-name">${reaction.user_name}</span>
+                        <span class="emoji">${reaction.reaction}</span>
+                    `;
+                    container.appendChild(item);
+                });
+            })
+            .catch(err => {
+                console.error("Error fetching reactions:", err);
+                container.innerHTML = "<p>Error loading reactions.</p>";
+            });
+    }
+    function close_details_modal(event) {
+        const modalContent = document.querySelector('.modal-content2');
+        document.getElementById('modal').style.display = 'none';
+
+        
+        // If the click is outside the modal content, hide the modal
+        if (!modalContent.contains(event.target)) {
+            document.getElementById('modal').style.display = 'none';
+        }
+    }
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll(".post-box").forEach(post => {
+            const postId = post.getAttribute("data-post-id");
+            if (postId) {
+                loadReactions(postId);
+            }
+        });
+    });
+
+
 
     document.querySelectorAll('.username').forEach(username => {
         const maxLength = 10;
@@ -1055,197 +1366,50 @@ $(document).ready(function () {
  <script src="{% static 'js/sribash.js' %}"></script>
 <script>
 
-    const currentUserId = {{ userid }};
+const currentUserId = {{ userid }};
+
 
 $(document).ready(function () {
-    let holdTimer; // Track the hold time
-
-    $(".post_reaction").on("mousedown touchstart", function (event) {
-        event.preventDefault(); // Prevent unintended behavior on mobile
+    $(".post_reaction").on("click", function (event) {
+        event.stopPropagation(); // Prevent event bubbling
         let reactionButton = $(this);
         let postContainer = reactionButton.closest('.reaction-container');
         let postId = postContainer.closest('.post-box').find('.firstPostId').val();
+        let reactionIcon = reactionButton.find("i");
 
-        // Start a timer when the button is pressed or touched
-        holdTimer = setTimeout(function () {
+        // Check if reaction exists (i.e., not the default "heart" icon)
+        if (!reactionIcon.hasClass("bi-heart")) {
+            // If a reaction exists, delete it
             deleteReaction(reactionButton, postId);
-        }, 1000); // 1-second delay
-    });
-
-    $(".post_reaction").on("mouseup mouseleave touchend touchcancel", function () {
-        clearTimeout(holdTimer); // Cancel timer if released before 1 second
-    });
-
-    function deleteReaction(button, postId) {
-        $.ajax({
-            url: "{% url 'delete_post_reaction' %}",  // Define this URL in Django
-            type: "POST",
-            data: {
-                'post_id': postId,
-                'csrfmiddlewaretoken': '{{ csrf_token }}'
-            },
-            success: function (response) {
-                if (response.success) {
-                    button.find("i").removeClass().addClass("bi bi-heart").css({'color': '#a7358b', 'position': 'relative', 'top': '6px'}); // Reset icon
-                    button.closest('.post-box').find("#total-reaction-count").text(response.total_count); // Update count
-
-                    if (response.total_count === 0) {
-                        button.closest('.reaction-container').find(".emojis_hide").hide(); // Hide if no reactions
-                    }
-                }
-            },
-            error: function () {
-                alert('Error deleting reaction');
-            }
-        });
-    }
-});
-
-$(document).ready(function() {
-    $('.post_reaction').click(function () {
-        $(this).siblings('.reaction-popover').toggle();
-
-        // Disable carousel when pop-up opens
-        var carousel = $(this).closest('.post-box').find('.carousel');
-        if ($(this).siblings('.reaction-popover').is(':visible')) {
-            carousel.carousel('pause'); // Stop carousel sliding
-            carousel.find('.carousel-control-prev, .carousel-control-next').css('pointer-events', 'none'); // Disable buttons
         } else {
-            carousel.carousel('cycle'); // Resume carousel
-            carousel.find('.carousel-control-prev, .carousel-control-next').css('pointer-events', 'auto'); // Enable buttons
-        }
-    });
+            // If no reaction exists, open the reaction pop-up
+            reactionButton.siblings('.reaction-popover').toggle();
 
-    $('.reaction-popover i').click(function () {
-        var postContainer = $(this).closest('.reaction-container');
-        var FirstPostId = $(this).closest('.post-box').find('.firstPostId').val();
-        var reactionId = $(this).data('reaction-id');
-        var selectedIcon = $(this).attr('class');
-        var selectedColor = $(this).css('color');
-
-        postContainer.find('.post_reaction i')
-            .attr('class', selectedIcon)
-            .css('color', selectedColor)
-            .css('top', 0);
-
-        postContainer.find('.reaction-popover').hide();
-
-        // Enable carousel after reaction is selected
-        var carousel = postContainer.closest('.post-box').find('.carousel');
-        carousel.carousel('cycle');
-        carousel.find('.carousel-control-prev, .carousel-control-next').css('pointer-events', 'auto');
-
-        $.ajax({
-            url: "{% url 'update_post_reaction' %}",
-            type: "POST",
-            data: {
-                'post_id': FirstPostId,
-                'reaction_id': reactionId,
-                'csrfmiddlewaretoken': '{{ csrf_token }}'
-            },
-            success: function (response) {
-                var totalReactions = response.total_count;
-                postContainer.closest('.post-box').find("#total-reaction-count").text(totalReactions);
-            },
-            error: function () {
-                alert('Error updating reaction');
-            }
-        });
-    });
-});
-
-
-// get reaction ajax
-$(document).ready(function () {
-    $(".post-box").each(function () {
-        var postContainer = $(this);
-        var postId = postContainer.find('.firstPostId').val();
-
-        // First AJAX: Fetch reactions and set emoji
-        $.ajax({
-            url: "{% url 'get_post_reactions' %}",
-            type: "GET",
-            data: {
-                'post_id': postId
-            },
-            success: function (response) {
-
-
-                var userReactionId = response.user_reaction_id; // User's reaction ID
-                postContainer.find('.getemoji').val(userReactionId);  // Set value
-
-                 // Get reaction count and names
-                var totalReactions = response.total_count;
-                var reactionNames = response.reaction_name; // List of names
-                var userReactionId = response.user_reaction_id; // User's reaction ID
-
-
-
-                if (parseInt(totalReactions)==0){
-
-                    postContainer.find(".emojis_hide").hide()
-                }
-                // Set the reaction ID in the hidden input box
-                postContainer.find('.getemoji').val(userReactionId);
-
-                var reactionText = "";
-
-                if (reactionNames.length > 0) {
-                    if (reactionNames.length === 1) {
-                        reactionText = `${reactionNames[0]}`;
-                    } else if (reactionNames.length === 2) {
-                        reactionText = `${reactionNames[0]} and ${reactionNames[1]}`;
-                    } else {
-                        reactionText = `${reactionNames[0]}, ${reactionNames[1]} and ${totalReactions - 2} others`;
-                    }
-                }
-
-
-                // Update the total reaction count
-                postContainer.find("#total-reaction-count").text(totalReactions);
-
-                // Update the reaction display with names
-                postContainer.find("#reaction-count").html(reactionText);
-                // Now fetch the emoji_id after setting it
-                fetchEmojiDetails(postContainer, postId);
-            },
-            error: function () {
-
-            }
-        });
-    });
-
-
-    function fetchEmojiDetails(postContainer, postId) {
-    var FirstUserId = postContainer.find('.firstUserId').val();
-    var emoji_id = postContainer.find('.getemoji').val();
-
-    // Prepare data object
-    var requestData = {
-        'post_id': postId,
-        'user_id': FirstUserId
-    };
-
-    // Only add emoji_id if it's not null or empty
-    if (emoji_id) {
-        requestData['emoji_id'] = emoji_id;
-    }
-
-    $.ajax({
-        url: '/fetch_reactions/',
-        method: 'GET',
-        data: requestData,  // Send only non-null values
-        success: function(response) {
-            if (response.react && response.react.length > 0) {
-                var emojiHtml = response.react[0].value; // Get the emoji HTML like <i class="fa-solid fa-heart"></i>
-                // Update the reaction span with the new emoji
-                postContainer.find('.post_reaction').html(emojiHtml);
+            // Disable carousel when pop-up opens
+            var carousel = reactionButton.closest('.post-box').find('.carousel');
+            if (reactionButton.siblings('.reaction-popover').is(':visible')) {
+                carousel.carousel('pause'); // Stop carousel
+                carousel.find('.carousel-control-prev, .carousel-control-next').css('pointer-events', 'none'); // Disable buttons
+            } else {
+                carousel.carousel('cycle'); // Resume carousel
+                carousel.find('.carousel-control-prev, .carousel-control-next').css('pointer-events', 'auto'); // Enable buttons
             }
         }
     });
-}
+   
 
+    // Hide reaction popover when clicking outside
+    $(document).click(function (event) {
+        if (!$(event.target).closest('.reaction-popover, .post_reaction').length) {
+            $('.reaction-popover').hide();
+
+            // Enable carousel when pop-up is closed
+            $('.carousel').carousel('cycle');
+            $('.carousel-control-prev, .carousel-control-next').css('pointer-events', 'auto');
+        }
+    });
 });
+
 
 
 // comment reply

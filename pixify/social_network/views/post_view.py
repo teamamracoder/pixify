@@ -279,21 +279,16 @@ class DeletePostReactionView(View):
     def post(self, request, *args, **kwargs):
         post_id = request.POST.get('post_id')
         user_id = request.user.id
-
         try:
             post = Post.objects.get(id=post_id)
         except Post.DoesNotExist:
             return JsonResponse({'success': False, 'error': 'Post not found'}, status=404)
-
         # Find existing reaction by the user
         reaction = PostReaction.objects.filter(post_id=post, reacted_by_id=user_id, is_active=True).first()
-
         if reaction:
             reaction.delete()  # Delete the reaction
         else:
             return JsonResponse({'success': False, 'error': 'Reaction not found'}, status=404)
-
         # Get updated reaction count
         total_count = PostReaction.objects.filter(post_id=post, is_active=True).count()
-
         return JsonResponse({'success': True, 'total_count': total_count})

@@ -33,7 +33,7 @@ def get_count_comment(postid):
 #     return list(comments.values('id', 'comment', 'created_at',
 #                                 'comment_by__first_name', 'comment_by__last_name','reply_for_id'))
 def comment_list(post_id):
-    comments = Comment.objects.filter(post_id=post_id).values(
+    comments = Comment.objects.filter(post_id=post_id ,is_active=True).values(
         'id', 'comment', 'created_at', 'comment_by__id',
         'comment_by__first_name', 'comment_by__last_name',
         'comment_by__profile_photo_url', 'reply_for_id'
@@ -95,7 +95,7 @@ def format_timestamp(timestamp):
     elif diff.total_seconds() < 86400:
         hours = int(diff.total_seconds() / 3600)
         return f"{hours} hours ago"
-    elif diff.days < 7:
+    elif diff.days < 30:
         return f"{diff.days} days ago"
     else:
         months = (now.year - timestamp.year) * 12 + now.month - timestamp.month
