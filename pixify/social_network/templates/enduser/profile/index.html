@@ -82,10 +82,10 @@
                 </h2>
                     <!-- Bio Section -->
                 <p class="profile-bio">
-                    {% if user.bio %}
-                        {{ user.bio }}
+                    {% if user_details.bio %}
+                        {{ user_details.bio }}
                     {% else %}
-                        <span class="bio-placeholder">No bio added yet.</span>
+                        <span class="bio-placeholder"></span>
                     {% endif %}
                 </p>
                 <div class="profile-stats">
