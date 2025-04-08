@@ -149,6 +149,28 @@
         color: #ff4d4f;
       }
       
+
+      .profile-banner {
+    margin-top: 18px;
+    height: 172px;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    border-radius: 0 0 20px 20px;
+    }
+
+    .profile-banner {
+        margin-top: 18px;
+        height: 172px;
+        border-radius: 0 0 20px 20px;
+        overflow: hidden;
+        position: relative;
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    }
+
+    .profile-banner img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
   </style>
 
 
@@ -160,7 +182,7 @@
         <!-- New Profile Header -->
         <div class="profile-headerrr">
             <div class="profile-banner">
-                <img src="{% static user_details.profile_photo |default:'/images/avatar.jpg' %}" alt="Profile Picture" class="profile-img" style="object-fit: cover;">
+                <img src="{% static user_details.cover_photo |default:'/static/images/defaultcoverimg.png' %}" >
             </div>
             <div class="profile-info-container">
                 <img src="{% static user_details.profile_photo|default:'/images/avatar.jpg' %}" 

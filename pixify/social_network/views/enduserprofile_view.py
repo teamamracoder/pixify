@@ -35,6 +35,7 @@ class EnduserprofileView(View):
                     'first_name': detail.first_name,
                     'last_name': detail.last_name,
                     'profile_photo': detail.profile_photo_url,
+                    'cover_photo': detail.cover_photo_url,
                     'age': age,
                     'status': detail.is_active,
                     'friends': friends,
