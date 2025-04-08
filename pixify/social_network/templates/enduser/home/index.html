@@ -349,7 +349,7 @@
             <div class="post-box" data-post-id="{{ post.id }}">
                 <input type="hidden" class="firstPostId" name="firstPostId" value="{{post.id}}">
                 <input type="hidden" class="firstUserId" name="firstUserId" value="{{post.posted_by_id}}">
-
+                <div style="background: #29095a;display: flex;align-items: center;justify-content: space-between;">
                 {% if post.posted_by.id == userid %}
                 <div class="post-top" style="height: 45px;" onclick="window.location.href='{% url 'userprofile' %}'">
               {% else %}
@@ -369,6 +369,26 @@
                     </span>
                   </div>
                 </div>
+                <div class="dropdown" style="margin-right: 10px;">
+                  <i class="bi bi-three-dots-vertical" id="postMenuDropdown{{ post.id }}" role="button"
+                     data-bs-toggle="dropdown" aria-expanded="false" style="cursor: pointer;"></i>
+              
+                  <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="postMenuDropdown{{ post.id }}">
+                      {% if post.posted_by_id == userid %}
+                          <li>
+                              <a class="dropdown-item editmodal" href="#" data-bs-toggle="modal">
+                                  <i class="fa-solid fa-pen me-2"></i> Edit
+                              </a>
+                          </li>
+                          <li>
+                              <a class="dropdown-item text-danger" href="#" id="deletePostBtn">
+                                  <i class="fa-solid fa-trash me-2"></i> Delete
+                              </a>
+                          </li>
+                      {% endif %}
+                  </ul>
+              </div>
+            </div>
 
 
                 <div class="post-des-img">
@@ -470,11 +490,6 @@
                         <input type="hidden" id="post_id" value="{{ post.id }}">
                         <span data-toggle="modal" class="load-comments"><i class="fa-regular fa-comment"></i></span>
                         <i class="fa-solid fa-share-nodes share-post-btn" data-post-id="{{ post.id }}" data-bs-toggle="modal" data-bs-target="#shareModal"></i>
-
-                        {% if post.posted_by_id == userid %}
-                            <span data-bs-toggle="modal" class="editmodal"><i class="fa-solid fa-pen post-pe-icon"></i></span>
-                            <i class="fa-solid fa-trash post-pe-icon" id="deletePostBtn"></i>
-                        {% endif %}
                     </div>
                 </div>
             </div>

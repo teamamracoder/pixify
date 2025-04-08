@@ -24,6 +24,7 @@ class EnduserprofileListView(View):
             'id':user_id,
             'user_name': f"{detail.first_name} {detail.last_name}",
             'profile_photo': detail.profile_photo_url if detail.profile_photo_url else '/images/avatar.jpg',
+            'cover_photo': detail.cover_photo_url if detail.cover_photo_url else '/images/defaultcoverimg.png',
             'age': age,
             'status': "Active" if detail.is_active else "Deactive",
             'posts': user_posts,

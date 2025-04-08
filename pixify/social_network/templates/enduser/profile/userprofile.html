@@ -149,6 +149,28 @@
         color: #ff4d4f;
       }
       
+
+      .profile-banner {
+    margin-top: 18px;
+    height: 172px;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    border-radius: 0 0 20px 20px;
+    }
+
+    .profile-banner {
+        margin-top: 18px;
+        height: 172px;
+        border-radius: 0 0 20px 20px;
+        overflow: hidden;
+        position: relative;
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    }
+
+    .profile-banner img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
   </style>
 
 
@@ -156,30 +178,49 @@
 
 
     {% if user_details %}
-    <div class="profile-container">
-        <div style="border:2px solid black;">
-            <div class="profile-card">
-                <div class="profile-header">
-                    <img src="{% static user_details.profile_photo |default:'/images/avatar.jpg' %}" alt="Profile Picture" class="profile-img" style="object-fit: cover;">
-                    <p class="user_title">{{ user_details.user_name }}</p>
-                    <div class="btnnn">
-                        <div class="fol follow1-btn" onclick="toggleFollow(event)" data-profile-id="{{ user_details.id }}">Follow</div>
-                        <div class="unfol unfollow-btn" onclick="toggleFollow(event)" data-profile-id="{{ user_details.id }}">Unfollow</div>
+    <div class="container-fluid px-0" style="background-color: #1f0545;">
+        <!-- New Profile Header -->
+        <div class="profile-headerrr">
+            <div class="profile-banner">
+                <img src="{% static user_details.cover_photo |default:'/static/images/defaultcoverimg.png' %}" >
+            </div>
+            <div class="profile-info-container">
+                <img src="{% static user_details.profile_photo|default:'/images/avatar.jpg' %}" 
+                     class="profile-picture" 
+                     alt="Profile Picture">
+                
+                <h2 class="profile-name">{{ user_details.user_name }}</h2>
+                
+                <div class="bio-section">
+                    {{ user_details.bio }}
+                </div>
+                <div class="profile-stats">
+                    <div class="stat-item" onclick="window.location.href='{% url 'get_followers' user_id=user_details.id %}'">
+                        <span class="stat-number" id="follower-count">0</span>
+                        <span class="stat-label">Followers</span>
+                    </div>
+                    <div class="stat-item" onclick="window.location.href='{% url 'get_followings' user_id=user_details.id %}'">
+                        <span class="stat-number" id="following-count">0</span>
+                        <span class="stat-label">Following</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">{{ user_details.posts|length }}</span>
+                        <span class="stat-label">Posts</span>
                     </div>
                 </div>
-                <div class="profile-info">
-                    <p><i class="bi bi-circle  user_profile-icons"></i><strong>Status:</strong><span class="active eee">({{ user_details.status }})</span></p>
-                    <p><i class="bi bi-calendar3 user_profile-icons"></i><strong>Age:</strong><span class="eee">({{ user_details.age }})</span></p>
-                    <p><i class="bi bi-people-fill user_profile-icons"></i><strong onclick="window.location.href='{% url 'get_followers' user_id=user_details.id %}'">Followers:</strong> <span class="eee">(<span id="follower-count"class="eee"></span>)</span></p>
-                    <p><i class="bi bi-people user_profile-icons"></i><strong onclick="window.location.href='{% url 'get_followings' user_id=user_details.id %}'">Followings:</strong> <span class="eee">(<span id="following-count"class="eee"></span>)</span></p>
+    
+    
+                <div class="btnnn">
+                    <div class="fol follow1-btn" onclick="toggleFollow(event)" data-profile-id="{{ user_details.id }}">Follow</div>
+                    <div class="unfol unfollow-btn" onclick="toggleFollow(event)" data-profile-id="{{ user_details.id }}">Unfollow</div>
                 </div>
             </div>
-            <div class="fol-unfol-btn">
-                <div class="bio-field">{{user_details.bio}}</div>
-            </div>            
         </div>
+
+
+     
         <!-- Posts Section -->
-        <h4>Posts</h4>
+        <h3 class="section-title">Posts</h3>
         <div class="user-post-container">
             {% if user_details.posts %}
                 {% for post in user_details.posts %}
@@ -1683,25 +1724,24 @@ function toggleReaction(commentId, iconElement, likeCountElement) {
         display: flex;
     }
     .fol{
-        cursor: pointer;
-        padding-left: 18px;
-        font-size: 15px;
-        margin: 5px;
-        border: none;
-        border-radius: 2px;
-        background: #a065e7;
-        width: 80px;
+    background-color: #9d4edd;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 20px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    cursor: pointer;
     }
     .unfol{
-        color: black;
-        cursor: pointer;
-        padding-left: 12px;
-        font-size: 15px;
-        margin: 5px;
-        border: none;
-        border-radius: 2px;
-        background:rgb(188 151 232) ;
-        width: 90px;
+        background-color: #9d4edd;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 20px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    cursor: pointer;
     }
     .fol:active{
         background:rgb(188 151 232);
@@ -1742,6 +1782,98 @@ function toggleReaction(commentId, iconElement, likeCountElement) {
           }
     }
 
-    </style>
+
+    :root {
+    --primary: #7b2cbf;
+    --secondary: #9d4edd;
+    --dark: #1a1a2e;
+    --light: #f8f9fa;
+    --accent: #ff9e00;
+}
+
+.profile-headerrr {
+    margin-top: 18px;
+    position: relative;
+    margin-bottom: 5px;
+}
+
+.profile-banner {
+    height: 172px;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    border-radius: 0 0 20px 20px;
+    overflow: hidden;
+}
+
+.profile-info-container {
+    text-align: center;
+    position: relative;
+    transform: translateY(-50px);
+}
+
+.profile-picture {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    border: 5px solid var(--dark);
+    object-fit: cover;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.profile-name {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--light);
+    margin-bottom: 10px;
+}
+
+.profile-stats {
+    display: flex;
+    gap: 30px;
+    justify-content: center;
+    margin: 20px 0;
+}
+
+.stat-item {
+    cursor: pointer;
+    text-align: center;
+    transition: transform 0.3s ease;
+}
+
+.stat-item:hover {
+    transform: translateY(-3px);
+}
+
+.stat-number {
+    display: block;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--accent);
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    color: #ccc;
+}
+
+.bio-section {
+    max-width: 600px;
+    margin: 0 auto;
+    color: #ddd;
+    font-size: 1rem;
+    line-height: 1.5;
+    padding: 0 20px;
+}
+.section-title {
+    margin-left: 10px;
+border-left: 6px solid blue;
+font-weight: 700;
+margin-bottom: 20px;
+color: var(--text);
+position: relative;
+padding-left: 6px;
+}
+
+
+</style>   
 </body>
 {% endblock %}

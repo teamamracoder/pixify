@@ -54,8 +54,6 @@
     </div>
 </div>
 
-
-
 <!-- Modal Overlay -->
 <div class="modal-overlay" id="modal" onclick="close_details_modal(event)" style="display:none;">
     <div class="modal-content2">
@@ -168,69 +166,170 @@
       }
       
   </style>
-  
 
 
-<div class="px-3 py-3 mt-3  users"
-        style="background-color: #1f0447e3;border: 1px solid #827b7b70;font-family: serif;border-radius: 7px;">
-        <div class="row loginuserprofile mx-2 pt-1 pb-3 px-2 mb-2 fw-semibold "
-            style="border: 1px solid black;border-radius: 3px;">
 
+<!-- Main Profile Section -->
+<div class="container-fluid px-0" style="background-color: #1f0545;">
+    <div class="profile-headertwo">
+        <!-- Profile Banner (With Default Cover Photo) -->
+        <div class="profile-banner">
+            {% if user_data.0.cover_photo %}
+                <img src="{% static user_data.0.cover_photo %}" alt="Cover Photo">
+            {% else %}
+                <img src="{% static 'images/defaultcoverimg.png' %}" alt="Default Cover Photo">
+            {% endif %}
+        </div>
+        
 
-            {% for user in user_data %}
-            <div id="p-pic" class="col-md-4 col-lg-5 col-xl-5 col-xxl-5" id="item-1">
+        <div class="profile-info-container">
+            <div class="profile-pic-container">
+                {% for user in user_data %}
                 {% if user.profile_photo %}
-                <img class="img-fluid" src="{% static user.profile_photo %}" alt="User Profile Photo" >
+                <img src="{% static user.profile_photo %}" alt="Profile" class="profile-picture">
                 {% else %}
-                <img class="img-fluid" src="{% static 'images/user.png' %}" alt="User Profile Photo" >
+                <img src="/static/images/avatar.jpg" alt="Profile" class="profile-picture">
                 {% endif %}
             </div>
-            <div class="pt-1 col-md-8 col-lg-7 col-xl-7 col-xxl-7 pb-3 px-2 fw-semibold mr-5 prof-li" id="user-details" style="border-radius: 3px;">
-                    <h4 style="padding: 10px; margin-bottom: 0px; position: relative;">
-                        <i class="bi bi-person"></i> {{ user.first_name }}
-                         <i class="bi bi-patch-check prof-check" style="padding-right: 2px;"></i>
-                    </h4>
-
-                <ul class=" prof-ul" mr-5>
-                    {% if user.status == True %}
-                    <li class="pb-2"><a href="#" class="light text-white"><i class="bi bi-circle"></i> Status <span
-                                class="text-t fw-medium">(Active)</span> </a></li>
+            <div class="profile-details" style="text-align: center;">
+                <h2 class="profile-name">
+                    {{ user.first_name }}
+                </h2>
+                    <!-- Bio Section -->
+                <p class="profile-bio">
+                    {% if user_details.bio %}
+                        {{ user_details.bio }}
                     {% else %}
-                    <li class="pb-2"><a href="#" class="light text-white"><i class="bi bi-circle"></i> Status <span
-                        class="text-t fw-medium">(Deactive)</span> </a></li>
+                        <span class="bio-placeholder"></span>
                     {% endif %}
-                    <li class="pb-2"><a href="#" class="text-white"><i class="bi bi-calendar3"></i> Age <span
-                                class="text-t fw-medium">({{user.age}})</span></a></li>
-                                <p><i class="bi bi-people-fill user_profile-icons"></i><strong onclick="window.location.href='{% url 'get_followers' user_id=user.id %}'">Followers:</strong> <span class="eee">(<span id="follower-count"class="eee"></span>)</span></p>
-                                <p><i class="bi bi-people user_profile-icons"></i><strong onclick="window.location.href='{% url 'get_followings' user_id=user.id %}'">Followings:</strong> <span class="eee">(<span id="following-count"class="eee"></span>)</span></p>
-        
-                    {% endfor %}
-                                 
-                         </ul>
+                </p>
+                <div class="profile-stats">
+                    <div class="stat-item" onclick="window.location.href='{% url 'get_followers' user_id=user.id %}'">
+                        <span class="stat-number" id="follower-count">0</span>
+                        <span class="stat-label">Followers</span>
+                    </div>
+                    <div class="stat-item" onclick="window.location.href='{% url 'get_followings' user_id=user.id %}'">
+                        <span class="stat-number" id="following-count">0</span>
+                        <span class="stat-label">Following</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">{{ user_details.posts|length }}</span>
+                        <span class="stat-label">Posts</span>
+                    </div>
+                </div>
+                
 
-                <div class="col-auto col-sm-auto d-flex" style="gap:10px">
-                  <button type="button" class="prof-btn btn btn-primary" style="font-size:14px;">
-                      <a href="{% url 'enduser_edit_profile' user.id %}" style="text-decoration:none; color:White;">EDIT DETAILS</a>
-                  </button>
-              </div>
-
+                
+                <a href="{% url 'enduser_edit_profile' user.id %}" class="btn btn-edit-profile">
+                    <i class="bi bi-pencil-square"></i> Edit Profile
+                </a>
+                {% endfor %}
             </div>
         </div>
+    </div>
+        
+
+<!-- Delete Confirmation Modal -->
+<div id="deleteConfirmModal" class="modal fade" tabindex="-1" role="dialog" >
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content shadow-lg"  style="background-color:#1f0447fb;">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold text-light">Confirm Deletion</h5>
+                <button type="button" class="close text-muted" data-dismiss="modal" aria-label="Close">
+                    {% comment %} <span aria-hidden="true">&times;</span> {% endcomment %}
+                </button>
+            </div>
+            <div class="modal-body text-center">
+                <p class="text-light">Are you sure you want to delete this post?</p>
+            </div>
+            <div class="modal-footer border-0 d-flex justify-content-center">
+                <button type="button"  class="btn  px-4 py-2 " id="cancelDeleteBtn" style="background-color: rgb(94, 94, 94);color:white">Cancel</button>
+                <button type="button" class="btn  px-4 py-2" id="confirmDeleteBtn" style="background-color:#ea4545;color:white;">Yes, Delete</button>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+<!--Edit Modal -->
+<div class="modal fade" id="editpostModal" tabindex="-1" aria-labelledby="editpostModalLabel" aria-hidden="true" >
+    <div class="modal-dialog">
+        <input type="hidden"  id="p_id" style="color:black;">
+        <input type="hidden"  id="p_user" style="color:black;">
+
+        <form  id="editForm"  class="mt-3">
+            <meta name="csrf-token" content="{{ csrf_token }}">
+
+
+
+
+        <div class="modal-content   " style="background-color:#2f066de3;" >
+             <div class="modal-header" >
+                <h5 class="modal-title mx-auto" id="editpostModalLabel">Edit Post</h5>
+                <button type="button" class="btn-close ml-5" data-bs-dismiss="modal" aria-label="Close" style="margin-left:0px;"></button>
+            </div>
+            <div class="modal-body" >
+            <div class="d-flex align-items-center mb-3" style="margin-top:10px;" id="update_userpost">
+
+                {% comment %} <img src="{% static 'images/avatar.jpg' %}" alt="User Avatar"
+                        class="user-avatar me-2">
+                    <span class="fw-bold text-light">Priya Mitra</span>{% endcomment %}
+                </div>
+                <div class="mb-3  " id="updatepost">
+
+               </div>
+               </div>
+               </div>
+        </form>
+    </div>
+    </div>
+        
 
         {% if user_details %}
             <!-- Posts Section -->
-            <h4>Posts</h4>
+            <h3 class="section-title">Your Posts</h3>
             <div class="user-post-container">
                 {% if user_details.posts %}
                     {% for post in user_details.posts %}
                         <div class="user-post" data-post-id="{{ post.id }}">
+                <div style="background: #29095a;display: flex;align-items: center;justify-content: space-between;">
                             <div class="post-title-wrapper">
                                 <img src="{% static user_details.profile_photo|default:'/images/avatar.jpg' %}" class="photo-of-post">
                                 <div class="post-title"><h6>{{ user_details.user_name }}</h6>
                                 <div style="font-size: 11px;position: relative;bottom: 6px;">{{post.created_at}}</div>
                                 </div>
                             </div>
+
+
+                            <div class="dropdown" style="margin-right: 10px;">
+                                <i class="bi bi-three-dots-vertical" id="postMenuDropdown{{ post.id }}" role="button"
+                                   data-bs-toggle="dropdown" aria-expanded="false" style="cursor: pointer;"></i>
+                            
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="postMenuDropdown{{ post.id }}">
+                                    {% if post.posted_by_id == userid %}
+                                        <li>
+                                            <a class="dropdown-item editmodal" href="#" data-bs-toggle="modal">
+                                                <i class="fa-solid fa-pen me-2"></i> Edit
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item text-danger" href="#" id="deletePostBtn">
+                                                <i class="fa-solid fa-trash me-2"></i> Delete
+                                            </a>
+                                        </li>
+                                    {% endif %}
+                                </ul>
+                            </div>
+                            </div>
+
+
+
                             <div>
+                                <p class="px-3 pt-2 post-title-display" id="title-{{ post.id }}" style="font-size:15px;">
+                                    {{ post.title }}
+                                </p>
+                                
                             {% if post.media_url|length > 1 %}
                             <div id="postCarousel{{ post.id }}" class="carousel slide" data-interval="false">
                                 <div class="carousel-inner user_profile_combo-img">
@@ -1368,7 +1467,8 @@ function toggleReaction(commentId, iconElement, likeCountElement) {
       font-size:10px;
   }
   .post-opt-icons{
-      background: #260557fb;
+    margin-bottom: 12px;
+      /* background: #260557fb; */
       padding-left: 20px;
       display: flex;
       align-items: center;
@@ -1700,6 +1800,383 @@ font-size: 13px;
 }
 
 </style>
+
+
+<style>
+    /* Modern Color Scheme */
+    :root {
+        --primary-color: #7b2cbf;
+        --secondary-color: #9d4edd;
+        --dark-color: #1a1a2e;
+        --light-color: #f8f9fa;
+        --accent-color: #ff9e00;
+        --success-color: #4cc9f0;
+        --danger-color: #f72585;
+        --glass-bg: rgba(30, 30, 60, 0.7);
+        --glass-border: rgba(255, 255, 255, 0.1);
+    }
+    /* Profile Header */
+.profile-headertwo {
+    position: relative;
+    margin-bottom: 10px;
+}
+
+.profile-banner {
+    margin-top: 18px;
+    height: 172px;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    border-radius: 0 0 20px 20px;
+}
+
+.profile-info-container {
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    display: flex;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    position: relative;
+    transform: translateY(-70px);
+}
+
+.profile-pic-container {
+    /* margin-right: 30px; */
+}
+
+.profile-picture {
+    margin-right: 0;
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    border: 5px solid var(--dark-color);
+    object-fit: cover;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.profile-details {
+    flex: 1;
+}
+
+.profile-name {
+    justify-content: center;
+    font-weight: 700;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+}
+
+.verified-badge {
+    color: var(--success-color);
+    font-size: 1.2rem;
+    margin-left: 8px;
+}
+
+.profile-stats {
+    align-items: center;
+    display: flex;
+    gap: 20px;
+    margin: 30px 0;
+    justify-content: center;
+}
+
+.stat-item {
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.stat-item:hover {
+    transform: translateY(-3px);
+}
+
+.stat-number {
+    display: block;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--accent-color);
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    margin-bottom: 15px;
+}
+
+.status-badge i {
+    margin-right: 5px;
+}
+
+.status-badge.active {
+    background-color: rgba(76, 201, 240, 0.2);
+    color: var(--success-color);
+}
+
+.status-badge.inactive {
+    background-color: rgba(247, 37, 133, 0.2);
+    color: var(--danger-color);
+}
+
+.btn-edit-profile {
+    background-color: var(--secondary-color);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 20px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-edit-profile:hover {
+    background-color: var(--primary-color);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(123, 44, 191, 0.4);
+}
+/* Profile Banner */
+.profile-banner {
+    margin-top: 18px;
+    height: 172px;
+    border-radius: 0 0 20px 20px;
+    overflow: hidden;
+    position: relative;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+}
+
+.profile-banner img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.section-title {
+    margin-left: 10px;
+    border-left: 6px solid blue;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: var(--text);
+    position: relative;
+    padding-left: 6px;
+}
+
+.section-title::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 5px;
+    height: 70%;
+    width: 4px;
+    background: linear-gradient(to bottom, var(--primary), var(--secondary));
+    border-radius: 2px;
+}
+.profile-bio {
+    font-size: 1rem;
+    color: var(--light-color);
+    margin-bottom: 10px;
+    max-width: 500px;
+    line-height: 1.5;
+}
+
+.bio-placeholder {
+    font-style: italic;
+    opacity: 0.7;
+}
+
+</style>
+
+
+<!-- post delete  -->
+ 
+<script>
+    $(document).on('click', '#deletePostBtn', function () {
+    const postContainer = $(this).closest('.user-post'); // get the user-post container
+    const postId = postContainer.data('post-id'); // get the data-post-id
+
+    if (!postId) {
+        console.error('Post ID not found');
+        return;
+    }
+
+    // Show the modal
+    $('#deleteConfirmModal').modal('show');
+
+    // Handle confirm delete button
+    $('#confirmDeleteBtn').off('click').on('click', function () {
+        $.ajax({
+            type: 'POST',
+            url: '/post/delete/',
+            dataType: 'json',
+            data: {
+                post_id: postId,
+                csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
+            },
+            success: function (response) {
+                $('#deleteConfirmModal').modal('hide');
+                postContainer.fadeOut(300, function () {
+                    $(this).remove();
+                });
+            },
+            error: function (xhr) {
+                console.error('Error deleting post:', xhr.responseJSON.error);
+            }
+        });
+    });
+
+    // Handle cancel button click
+    $('#cancelDeleteBtn').off('click').on('click', function () {
+        $('#deleteConfirmModal').modal('hide');
+    });
+});
+
+</script>
+
+
+<!-- post edit  -->
+<script>
+    $(document).ready(function () {
+        // Click handler for edit button
+        $(document).on('click', '.editmodal', function () {
+            const postContainer = $(this).closest('.user-post');
+            const postId = postContainer.data('post-id');
+            const userId = {{ user.id }};
+            const csrfToken = $('input[name="csrfmiddlewaretoken"]').val();  // Better way to get it
+    
+            // Fetch current post data
+            $.ajax({
+                url: '/post/update/',
+                type: 'GET',
+                dataType: 'json',
+                data: {
+                    post_id: postId,
+                    user_id: userId
+                },
+                success: function (data) {
+                    $('#p_id').val(postId);
+                    $('#p_user').val(userId);
+    
+                    const $userDetail = $('#update_userpost');
+                    const $postPhoto = $('#updatepost');
+    
+                    // Render user data
+                    data.User_del.forEach(user => {
+                        const profilePic = user.profile_photo_url || '/images/avatar.jpg';
+                        $userDetail.html(`
+                            <img src="/static${profilePic}" alt="User Avatar" class="user-avatar me-2" style="object-fit:cover;">
+                            <span class="fw-bold text-light">${user.first_name} ${user.last_name}</span>
+                        `);
+                    });
+    
+                    // Render post data
+                    data.post_detail.forEach(post => {
+                        let mediaContent = '';
+    
+                        if (post.media_url.length > 1) {
+                            mediaContent = `
+                                <div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="carousel">
+                                    <div class="carousel-inner">
+                                        ${post.media_url.map((media, i) => `
+                                            <div class="carousel-item ${i === 0 ? 'active' : ''}">
+                                                ${media.endsWith('.mp4') || media.endsWith('.webm') ? `
+                                                    <video controls class="d-block w-100" style="height: 200px; object-fit: cover;">
+                                                        <source src="/static${media}" type="video/mp4">
+                                                        Your browser does not support the video tag.
+                                                    </video>
+                                                ` : `
+                                                    <img src="/static${media}" class="d-block w-100" style="height: 200px; object-fit: cover;">
+                                                `}
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                    <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
+                                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                        <span class="visually-hidden">Previous</span>
+                                    </button>
+                                    <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
+                                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                        <span class="visually-hidden">Next</span>
+                                    </button>
+                                </div>`;
+                        } else {
+                            mediaContent = post.media_url.map(media => `
+                                <div class="editpic rounded" style="width: 100%;">
+                                    ${media.endsWith('.mp4') || media.endsWith('.webm') ? `
+                                        <video controls class="rounded" style="width: 100%; height: auto;">
+                                            <source src="/static${media}" type="video/mp4">
+                                            Your browser does not support the video tag.
+                                        </video>` :
+                                        `<img src="/static${media}" class="rounded">`
+                                    }
+                                    <span style="font-size:40px;">&times;</span>
+                                </div>
+                            `).join('');
+                        }
+    
+                        const postContent = `
+                            <textarea id="editTitle" class="form-control text-light" placeholder="caption..." rows="2"
+                                style="outline:none;border:none;resize:none;background-color:#27236e">${post.title}</textarea>
+                            <div class="mb-3">${mediaContent}</div>
+                            <div class="pt-1 pb-1 px-2 mb-1 fw-semibold text-dark rounded align-items-center">
+                                <div class="d-flex justify-content-between rounded p-2" style="border:1px solid black;box-shadow:rgba(100,100,111,0.2) 0px 7px 29px 0px;background:white;">
+                                    <span>Add to your post</span>
+                                    <div class="gap-3 d-flex md-icon">
+                                        <i class="bi bi-images text-success"></i>
+                                        <i class="bi bi-tag text-primary"></i>
+                                        <i class="bi bi-emoji-smile text-warning"></i>
+                                        <i class="bi bi-geo-alt-fill text-danger"></i>
+                                        <i class="bi bi-filetype-gif text-info"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="justify-content-center mx-auto mb-3 d-flex">
+                                <button type="button" id="updatePostBtn" class="btn text-dark mx-auto b_btn px-5" style="background-color:white">Post</button>
+                            </div>
+                        `;
+                        $postPhoto.html(postContent);
+                    });
+    
+                    $('#editpostModal').modal('show');
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error fetching post data:', error);
+                }
+            });
+        });
+    
+        // Submit edited post
+        $(document).on('click', '#updatePostBtn', function (e) {
+            e.preventDefault();
+    
+            const updatedTitle = $('#editTitle').val();
+            const postId = $('#p_id').val();
+            const csrfToken = $('input[name="csrfmiddlewaretoken"]').val();
+    
+            $.ajax({
+                type: 'POST',
+                url: '/post/update/',
+                dataType: 'json',
+                data: {
+                    post_id: postId,
+                    postTitle: updatedTitle,
+                    csrfmiddlewaretoken: csrfToken
+                },
+                success: function (response) {
+                    $('#editTitle').val(updatedTitle);
+                    $(`#title-${postId}`).text(updatedTitle);
+                    $('#editpostModal').modal('hide');
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error updating title:', error);
+                }
+            });
+        });
+    });
+    </script>
 
 
 {% endblock %}
