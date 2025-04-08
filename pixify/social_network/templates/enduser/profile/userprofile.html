@@ -1622,6 +1622,14 @@ function toggleReaction(commentId, iconElement, likeCountElement) {
                 width: 100% !important;
             }
 
+            .reaction-popup {
+                padding: 8px 10px;
+                margin-bottom: 30% !important;
+                right: 46% !important;
+              }
+              .reaction-popup span {
+                padding: 2px !important;
+              }
            
         }
 
@@ -1719,6 +1727,19 @@ function toggleReaction(commentId, iconElement, likeCountElement) {
         display: flex;
         width: 100%;
 
+    }
+
+    
+    @media (min-width: 768px) and (max-width: 992px) {
+
+        .reaction-popup span {
+            padding: 1px !important;
+          }
+          .reaction-popup {
+            padding: 8px 6px!important;
+            margin-bottom: 33%!important;
+            right: 48% !important;
+          }
     }
 
     </style>
