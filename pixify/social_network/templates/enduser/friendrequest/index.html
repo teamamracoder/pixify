@@ -7,20 +7,11 @@
 
 {% load static %}
 {% csrf_token %}
-<div class="px-3 py-3 mt-3" style="background-color: #1f0447e3; box-shadow: 0 4px 8px rgba(151, 95, 236, 0.5);font-family: serif;border-radius: 7px;" >
-    <div class="card mb-sm-3 mb-md-0 contacts_card" style="background-color: #1f0447e3; ">
-        <div class="p-2 card-header">
-            <div class="input-group px-5">
-                <input type="text" placeholder="Search..." name="" class="form-control search-inp" >
-                <div class="input-group-prepend">
-                    <span class="input-group-text search_btn"><i class="fas fa-search"></i></span>
-                </div>
-            </div>
-    </div>
-</div>
+<div class="px-3 py-3 mt-3" style="height:100%;background-color: #1f0447e3; box-shadow: 0 4px 8px rgba(151, 95, 236, 0.5);font-family: serif;border-radius: 7px;" >
+    
 <form method="post">{% csrf_token %}</form>
 
-<div class="fcontainer">
+<div class="fcontainer" style="height:100%;overflow-y:scroll;scrollbar-width:none;">
     <div class="user-list" id="usersList">
         {% comment %} <div class="user-card">
             <img src="https://cdn-icons-png.flaticon.com/128/201/201634.png" alt="User">
@@ -124,7 +115,8 @@
             data: { following_id: following_id },
             success: function (response) {
                // console.log(response);
-                buttonElement.text("Following").prop("disabled", true);
+               buttonElement.text("Following").prop("disabled", true).css("background", "#2d0669");
+
             },
             error: function (xhr, status, error) {
                 console.error("Error following user:", error);

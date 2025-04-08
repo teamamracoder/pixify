@@ -192,3 +192,8 @@ def get_post_by_post_id(post_id):
         print(post_data)
         return post_data
     return post_data
+
+
+
+def get_all_reactions(post_id):
+     return PostReaction.objects.filter(post_id=post_id,is_active=True).select_related('reacted_by','master_list_id')

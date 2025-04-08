@@ -43,22 +43,32 @@ class FetchPostReactions(View):
         try:
             reactions = post_service.get_active_post_reactions(post_id)
             
+            # Build the full list
             reaction_list = [
                 {
                     "id": reaction.master_list_id.id,
                     "value": reaction.master_list_id.value,
                     "user_id": reaction.reacted_by.id,
                     "user_name": "You" if reaction.reacted_by.id == request.user.id else reaction.reacted_by.first_name,
+                    "is_you": reaction.reacted_by.id == request.user.id  # Add this for sorting
                 }
                 for reaction in reactions
             ]
 
-            # Identify the current user's reaction
-            user_reaction = next((r["value"] for r in reaction_list if r["user_id"] == request.user.id), None)
+            # Sort so "You" (the requester) is first if present
+            reaction_list.sort(key=lambda r: not r["is_you"])  # False (user is 'You') comes first
+
+            # Extract current user's reaction (if any)
+            user_reaction = next((r["value"] for r in reaction_list if r["is_you"]), None)
+
+            # Remove the helper key before returning
+            for r in reaction_list:
+                r.pop("is_you")
 
             return JsonResponse({'success': True, 'reactions': reaction_list, 'user_reaction': user_reaction}, status=200)
         except Exception as e:
             return JsonResponse({'success': False, 'error': str(e)}, status=400)
+
 
 
 class CreateUpdatePostReactions(View):
@@ -134,7 +144,7 @@ class CommentCreate(View):
             data = json.loads(request.body)
             comment_text = data.get("comment_text")
             reply_for_id = data.get("reply_for")  # Get reply_for field
-            print(data)
+            # print(data)
             print(post_id)
             response = comment_service.create_comment(request.user, post_id, comment_text, reply_for_id)
 
@@ -238,7 +248,7 @@ logger = logging.getLogger(__name__)  # Logger for debugging
 class GetFollowersFollowing(View):
     def get(self, request):
         user_id = request.GET.get("user_id")
-        print(user_id)
+        # print(user_id)
         try:
             count_follower, count_following =chat_service.get_all_user_follow(user_id)
             return JsonResponse({
@@ -255,7 +265,7 @@ class GetFollowersFollowing(View):
 class GetUserPostsComments(View):
     def get(self, request, user_id):
         posts = post_service.get_user_post_comment_count(user_id)
-        print(posts)
+        # print(posts)
         return JsonResponse({'posts': list(posts)})
     
 
@@ -264,5 +274,23 @@ class GetCommentsLikes(View):
     def get(self, request, user_id, post_id):
         comments_data = comment_service.get_comments_likes(user_id, post_id)
         return JsonResponse({"comments": comments_data})
+    
+
+
+
+class PostReactionDetailsView(View):
+    def get(self, request, post_id):
+        reactions = post_service.get_all_reactions(post_id)
+        print(reactions)
+        reaction_data = [
+            {
+                'user_name': f"{reaction.reacted_by.first_name} {reaction.reacted_by.last_name}" or "unknown",
+                'user_pic':reaction.reacted_by.profile_photo_url or '/static/images/avatar.jpg',
+                'reaction': reaction.master_list_id.value,
+            }
+            for reaction in reactions
+        ]
+        print(reaction_data)
+        return JsonResponse({'post_id': post_id, 'reactions': reaction_data})
 
 

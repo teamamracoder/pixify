@@ -2,26 +2,26 @@
 {% block content %} {% load static %}
     <!-- Comment Modal -->
 <div class="modal fade" id="commentModal" tabindex="-1" aria-labelledby="commentModalLabel" aria-hidden="true">
-    <div class="modal-dialog"style="box-shadow: 0 2px 4px rgba(151, 95, 236, 0.5);color: black;padding: 20px 20px 20px 0px;border-radius: 12px;background: #2c0068;gap: 40px;justify-content: space-between;display: flex;max-width: 70%;top:8%;    align-items: end;">
+    <div class="modal-dialog"style="box-shadow: 0 2px 4px rgba(151, 95, 236, 0.5);color: black;padding: 20px 20px 20px 0px;border-radius: 12px;background: #2c0068;gap: 40px;justify-content: space-between;display: flex;max-width: 1000px;top:9%;align-items: end;">
         
         <div class="modal-header" id="modal-comments-header">
             <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="font-weight: bold;font-size: 15px;">
-                <i class="bi bi-x-lg"></i>
+                <i class="bi bi-x-lg" style="color: black;font-size: 20px;"></i>
             </button>
         </div>
         <div class="modal-content" style="box-shadow: none;background: none;width: 60%;top: 10%;display:contents;">
-            <div class="post-content" style="width: 50%; height: 75vh;">
+            <div class="post-content" style="width: 70%; height: 80vh;">
                 <!--dynamically load post details-->
             </div>
-            <div style="width:60%;margin-left:30px;">
-                <div class="modal-body" id="comments-container" style="scrollbar-width: none;overflow-y: scroll;height: 65vh; margin-bottom: 33px;">
+            <div id="cmt-wrp" style="width:45%;margin-left: 30px;margin-bottom: 40px;">
+                <div class="modal-body" id="comments-container" style="scrollbar-width: none;overflow-y: scroll;height: 62vh; margin-bottom: 33px;">
                     <!-- Comments will be loaded here -->
                 </div>
                     <div class="commt-foot">
                         <form id="commentForm" class="mt-3">
                         {% csrf_token %}
 
-                        <div id="CommentsectionTextarea" class="container-fluid py-2 com_sent" style="position: absolute; bottom: 0;width:33%; ">
+                        <div id="CommentsectionTextarea" class="container-fluid py-2 com_sent" style="left: 52%;position: absolute;bottom: 0;min-width: 33%;width: 42%; ">
                             <div class="input-group ms-2">
 
                                 <!-- Comment input -->
@@ -50,16 +50,118 @@
     </div>
 </div>
 
+
+<!-- Modal Overlay -->
+<div class="modal-overlay" id="modal" onclick="close_details_modal(event)" style="display:none;">
+    <div class="modal-content2">
+      <div class="modal-header2">
+        <h3>All Reactions</h3>
+        <button class="close-btn" onclick="close_details_modal(event)">✕</button>
+      </div>
+      <hr style="border-color: #6d28d9;" />
+      <div class="modal-body-container">
+        <div class="reaction-item">
+          <img src="default-profile.png" alt="Profile" class="profile-image" />
+          <span class="user-name"></span>
+          <span class="emoji"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+
+  <style>
+    .modal-overlay {
+        z-index: 9999;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        justify-content: center;
+        align-items: center;
+      }
+      
+      .modal-content2 {
+        margin: 10% auto;
+        overflow-y: scroll;
+        scrollbar-width: none;
+        height: 70vh;
+        background: #0f0f2b;
+        padding: 20px;
+        border-radius: 8px;
+        width: 400px;
+        color: white;
+      }
+      
+      .modal-header2 {
+        margin-left: 22%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      @media(max-width:768px){
+        .modal-content2{
+            margin: 20% auto !important;
+        }
+      }
+      @media(max-width:480px){
+        .modal-content2{
+            margin: 30% auto !important;
+        }
+      }
+      
+      .close-btn {
+        background: none;
+        color: white;
+        font-size: 20px;
+        border: none;
+        cursor: pointer;
+      }
+      
+      .reaction-item {
+        display: flex;
+        align-items: center;
+        margin-top: 20px;
+      }
+      
+      .profile-image {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background-color: #ccc;
+        margin-right: 10px;
+      }
+      
+      .user-name {
+        flex: 1;
+      }
+      
+      .emoji {
+        font-size: 20px;
+        margin-right: 5px;
+      }
+      
+      .count {
+        font-weight: bold;
+        color: #ff4d4f;
+      }
+      
+  </style>
+
+
+
+
+
     {% if user_details %}
     <div class="container-fluid px-0" style="background-color: #1f0545;">
         <!-- New Profile Header -->
         <div class="profile-headerrr">
             <div class="profile-banner">
-                <img src="{% static 'images/defaultcoverimg.png' %}" 
-                     class="w-100 h-100 object-fit-cover" 
-                     alt="Cover Photo">
+                <img src="{% static user_details.profile_photo |default:'/images/avatar.jpg' %}" alt="Profile Picture" class="profile-img" style="object-fit: cover;">
             </div>
-    
             <div class="profile-info-container">
                 <img src="{% static user_details.profile_photo|default:'/images/avatar.jpg' %}" 
                      class="profile-picture" 
@@ -112,7 +214,8 @@
                         <div id="postCarousel{{ post.id }}" class="carousel slide" data-interval="false">
                             <div class="carousel-inner user_profile_combo-img">
                             {% for media in post.media_url %}
-                                <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                                <div class="carousel-item {% if forloop.first %}active{% endif %}" style="height: 508px;
+                                width: 100% !important;">
                                 {% if media|slice:"-4:" == ".mp4" %}
                                     <video class="post_video w-100" muted controls>
                                     <source src="{% static media %}" type="video/mp4">
@@ -152,17 +255,17 @@
                             {% endfor %}
                             {% endif %}
                             <div class="react-comment-wrapper">
-                            <div class="post-reactions"  id="post-reactions-{{ post.id }}"><!-- Reactions will be dynamically loaded here --></div>
+                            <div class="post-reactions"  id="post-reactions-{{ post.id }}" onclick="open_details_modal({{post.id}})"><!-- Reactions will be dynamically loaded here --></div>
                             <div id="comment-count-{{ post.id }}" class="user_profile_comment" data-user-id="{{user_details.id}}">
                                 {{ post.comment_count }} comments
                             </div>                           
                             </div>
                         </div>    
 
-                        <div class="post-opt-icons" style="height: 4vh;">
+                        <div class="post-opt-icons" style="height: 5vh;">
                             <div class="post-reaction" style="cursor: pointer;" data-post-id="{{ post.id }}">
                                 {% with user_reaction=post.reactions.all|dictsort:"user_id"|first %}
-                                    <i id="reaction-icon-{{ post.id }}" class="reaction-icon" onclick="toggleReactionPopup('{{ post.id }}')">
+                                    <i id="reaction-icon-{{ post.id }}" class="reaction-icon" onclick="toggleReactionPopup('{{ post.id }}')" style="color:rgba(172, 57, 147, 0.973);">
                                         {% if user_reaction and user_reaction.user_id == request.user.id %}
                                             {{ user_reaction.reaction.value|safe }}
                                         {% else %}
@@ -172,9 +275,9 @@
                                 {% endwith %}
 
                                 <span data-toggle="modal" class="load-comments" data-post-id="{{ post.id }}">
-                                    <i class="fa-regular fa-comment"></i>
+                                    <i class="fa-regular fa-comment" style="color:rgba(172, 57, 147, 0.973);"></i>
                                 </span>
-                                <i class="fa-solid fa-share-nodes share-post-btn" data-post-id="{{ post.id }}" data-bs-toggle="modal" data-bs-target="#shareModal"></i>
+                                <i class="fa-solid fa-share-nodes share-post-btn" data-post-id="{{ post.id }}" data-bs-toggle="modal" data-bs-target="#shareModal" style="color:rgba(172, 57, 147, 0.973);"></i>
 
                                 <!-- Reaction Popup -->
                                 <div class="reaction-popup" id="reaction-popup-{{ post.id }}" style="display: none;">
@@ -251,6 +354,53 @@
   
 
 <script>
+    function open_details_modal(postId) {
+        let modal = document.getElementById("modal");
+        let container = document.querySelector(".modal-body-container");
+    
+        // Clear existing content
+        container.innerHTML = "<p>Loading...</p>";
+    
+        // Show modal
+        modal.style.display = "block";
+    
+        // Fetch reaction data
+        fetch(`/reaction/details/${postId}/`)
+            .then(res => res.json())
+            .then(data => {
+                container.innerHTML = ""; // Clear loading state
+    
+                if (data.reactions.length === 0) {
+                    container.innerHTML = "<p>No reactions yet.</p>";
+                    return;
+                }
+    
+                data.reactions.forEach(reaction => {
+                    const item = document.createElement("div");
+                    item.className = "reaction-item";
+                    item.innerHTML = `
+                        <img src="${reaction.user_pic || 'default-profile.png'}" alt="Profile" class="profile-image" />
+                        <span class="user-name">${reaction.user_name}</span>
+                        <span class="emoji">${reaction.reaction}</span>
+                    `;
+                    container.appendChild(item);
+                });
+            })
+            .catch(err => {
+                console.error("Error fetching reactions:", err);
+                container.innerHTML = "<p>Error loading reactions.</p>";
+            });
+    }
+    function close_details_modal(event) {
+        const modalContent = document.querySelector('.modal-content2');
+        document.getElementById('modal').style.display = 'none';
+
+        
+        // If the click is outside the modal content, hide the modal
+        if (!modalContent.contains(event.target)) {
+            document.getElementById('modal').style.display = 'none';
+        }
+    }
 
     $(document).on("click", ".share-post-btn", function () {
         // Read the post id from the data attribute
@@ -534,22 +684,31 @@ $(document).ready(function () {
     // Attach event listener to submit button
     $("#createcomment").click(function (e) {
         e.preventDefault(); // Prevent form submission
-        const postId = $(".load-comments").data("post-id");
+    
+        // Get the postId from the button's data attribute
+        const postId = $(this).data("post-id");
+        console.log("post id in create modal" + postId);
+    
         const replyFor = $("#commentText").attr("data-reply-for") || null; // Ensure null if no reply
+    
+        // Call the function to submit the comment with the postId and reply info
         submitComment(postId, replyFor);
     });
 
     // Load comments when "View Comments" is clicked
     $(".load-comments").click(function () {
         let postId = $(this).data("post-id");
+        console.log("post id in modal23"+postId);
+
         let userId = $(".user_profile_comment").data("user-id");
     
         if (!postId) {
             console.error("❌ Error: Post ID is undefined!");
             return;
         }
-    
-        $("#comments-container").html("<p>Loading comments...</p>");
+
+        $("#createcomment").data("post-id", postId);  // Add the postId as data attribute to the button
+        $("#comments-container").data("post-id", postId).html("<p>Loading comments...</p>"); // Set postId to the comments container dynamically
         $("#commentModal").modal("show");
     
         $.ajax({
@@ -637,7 +796,7 @@ $(document).ready(function () {
                                 <div style="font-size: 10px; color: lightgray;">${post.created_at}</div>
                             </div>
                         </div>
-                        <div class="post-media-container" style="margin-top: 10px; height: 85%;padding: 15px;background: #1f0447fb;">
+                        <div class="post-media-container" style="margin-top: 10px; height: 90%;padding: 15px 0px;border: 1px solid black;background: #1f0447fb;">
                             ${postMediaHTML}
                         </div>`;
     
@@ -694,7 +853,7 @@ $(document).ready(function () {
                         <div class="comment-content"> 
                             <div class="comment-header">
                                 <div><strong>${comment.user}</strong></div>
-                                <div>${comment.text}</div>  
+                                <div style="word-wrap: break-word;">${comment.text}</div>  
                             </div>
                             <div class="foot-cmt">
                                 <div class="reply-btn" data-comment-id="${comment.id}" data-post-id="${comment.post_id}" data-post-creator="${comment.user}" 
@@ -745,48 +904,57 @@ $(document).ready(function () {
         });
     
     // Handle delete action
-    $("#confirmDelete").click(function () {
-        let commentId = $("#deleteModal").data("comment-id");
-        let postId = $(".load-comments").data("post-id");
-        let csrfToken = $("input[name=csrfmiddlewaretoken]").val();
+// Handle delete action
+$("#confirmDelete").click(function () {
+    let commentId = $("#deleteModal").data("comment-id"); // Comment to be deleted
+    let postId = $("#comments-container").data("post-id"); // Get the postId dynamically from the comments container
+    let csrfToken = $("input[name=csrfmiddlewaretoken]").val();
+    let dltmodal =document.getElementById('deleteModal');
 
-        
-        $.ajax({
-            url: `/comments/delete/${commentId}/`,
-            type: "POST",
-            headers: { "X-CSRFToken": csrfToken },
-            success: function (response) {
-                $("#deleteModal").hide();
-        
-                // Reload comments dynamically WITHOUT clicking "View Comments"
-                $.ajax({
-                    url: `/api/comments/${postId}/`,
-                    type: "GET",
-                    dataType: "json",
-                    success: function (response) {
-                        let commentsHtml = response.comments.length
-                            ? generateCommentTree(response.comments)
-                            : "<p>No comments yet.</p>";
-                        $("#comments-container").html(commentsHtml);
-            
-                        // Load user posts' updated comment counts
-                        setTimeout(function() {
-                            let userId = $(".user_profile_comment").data("user-id");
-                            if (userId) {
-                                loadUserPostsComments(userId);
-                            }
-                        }, 500); 
-                    },
-                    error: function () {
-                        $("#comments-container").html("<p>Failed to load comments.</p>");
-                    }
-                });
-            },
-            error: function (xhr) {
-                console.error("❌ Error deleting comment:", xhr.responseText);
-            }
-        });
+
+    if (!postId) {
+        console.error("❌ Error: Post ID is undefined!");
+        return;
+    }
+
+    $.ajax({
+        url: `/comments/delete/${commentId}/`,
+        type: "POST",
+        headers: { "X-CSRFToken": csrfToken },
+        success: function (response) {
+            $("#deleteModal").modal("hide"); // Close delete modal on success
+
+            // Reload comments for the correct post ID
+            $.ajax({
+                url: `/api/comments/${postId}/`, // Use the correct postId here
+                type: "GET",
+                dataType: "json",
+                success: function (response) {
+                    dltmodal.style.display="none";
+                    let commentsHtml = response.comments && response.comments.length
+                        ? generateCommentTree(response.comments)
+                        : "<p>No comments yet.</p>";
+                    $("#comments-container").html(commentsHtml); // Update the comments container with new data
+
+                    // Optionally, reload user posts' updated comment counts
+                    setTimeout(function() {
+                        let userId = $(".user_profile_comment").data("user-id");
+                        if (userId) {
+                            loadUserPostsComments(userId); // Ensure user post counts are updated
+                        }
+                    }, 500); 
+                },
+                error: function () {
+                    $("#comments-container").html("<p>Failed to load comments.</p>");
+                }
+            });
+        },
+        error: function (xhr) {
+            console.error("❌ Error deleting comment:", xhr.responseText);
+        }
     });
+});
+
     });
     
         // Updated reply handler with regex to remove all existing mentions
@@ -859,9 +1027,9 @@ $(document).ready(function () {
                 }
     
                 if (!userHasReacted) {
-                    const isVisible = popup.style.display === "block";
+                    const isVisible = popup.style.display === "flex";
                     document.querySelectorAll(".reaction-popup").forEach(p => p.style.display = "none");
-                    popup.style.display = isVisible ? "none" : "block";
+                    popup.style.display = isVisible ? "none" : "flex";
                 } else {
                     removeReaction(postId);
                 }
@@ -899,52 +1067,44 @@ $(document).ready(function () {
         fetch(`/fetch_post_reactions/${postId}/`)
             .then(response => response.json())
             .then(data => {
-                let userReaction = null;
-                let otherReactions = [];
-                let totalReactions = data.reactions ? data.reactions.length : 0;
-    
-                if (data.reactions) {
-                    data.reactions.forEach(reaction => {
-                        if (parseInt(reaction.user_id) === parseInt(USER_ID)) {
-                            userReaction = reaction.value;
-                        } else {
-                            otherReactions.push({ value: reaction.value, name: reaction.user_name });
-                        }
-                    });
-                }
+                const reactions = data.reactions || [];
+                const totalReactions = reactions.length;
     
                 const reactionContainer = document.getElementById(`post-reactions-${postId}`);
+                reactionContainer.style.gap = '5px';
                 if (!reactionContainer) return;
     
-                reactionContainer.innerHTML = totalReactions === 0 ? " " : "";
-    
-                let displayText = [];
-    
-                // If the user reacted, show "You" first
-                if (userReaction) {
-                    displayText.push(`${userReaction} <strong>You</strong>`);
+                if (totalReactions === 0) {
+                    reactionContainer.innerHTML = " ";
+                    return;
                 }
     
-                // When user reacted → Show only 1 more name
-                // When user did NOT react → Show 2 names
-                let maxNamesToShow = userReaction ? 1 : 2; 
+                const latestReactions = reactions.slice(0, 2); // Show only latest 2 reactions
     
-                for (let i = 0; i < Math.min(maxNamesToShow, otherReactions.length); i++) {
-                    displayText.push(`${otherReactions[i].value} <strong>${otherReactions[i].name}</strong>`);
+                // Prepare emojis and names
+                const emojis = latestReactions.map(r => r.value).join("  ");
+                const names = latestReactions.map(r => {
+                    return parseInt(r.user_id) === parseInt(USER_ID) ? "You" : r.user_name;
+                }).join(" , ");
+    
+                let displayText = `${emojis} ${names}`;
+    
+                const moreCount = totalReactions - latestReactions.length;
+                if (moreCount > 0) {
+                    displayText += ` and ${moreCount} more`;
                 }
     
-                // If more than 2 total reactions (or 3 if user didn't react), show "and X more"
-                let remainingCount = totalReactions - displayText.length;
-                if (remainingCount > 0) {
-                    displayText.push(`and ${remainingCount} more`);
-                }
+                reactionContainer.innerHTML = displayText;
     
-                reactionContainer.innerHTML = displayText.join(", ");
-    
-                // Update reaction icon
+                // Update the reaction icon if current user reacted
+                const currentUserReaction = reactions.find(
+                    r => parseInt(r.user_id) === parseInt(USER_ID)
+                );
                 const reactionIcon = document.getElementById(`reaction-icon-${postId}`);
                 if (reactionIcon) {
-                    reactionIcon.innerHTML = userReaction ? userReaction : '<i class="bi bi-heart"></i>';
+                    reactionIcon.innerHTML = currentUserReaction
+                        ? currentUserReaction.value
+                        : '<i class="bi bi-heart" style="color: rgba(172, 57, 147, 0.973);"></i>';
                 }
             })
             .catch(error => console.error("Error fetching reactions:", error));
@@ -1259,6 +1419,8 @@ function toggleReaction(commentId, iconElement, likeCountElement) {
             margin:2px;
             cursor:pointer;
             font-size:10px;
+            /* padding: 10px;
+    padding-top: 10px; */
         }
         .post-opt-icons{
             background: #260557fb;
@@ -1268,22 +1430,27 @@ function toggleReaction(commentId, iconElement, likeCountElement) {
             justify-content: space-between;
         }
         .reaction-popup {
-        margin-bottom: 25%;
-        right: 40%;
+            margin-bottom: 33%;
+            right: 45%;
         position: relative;
         display: none;
-        background: black;
-        padding: 8px 8px;
+        background: rgb(52, 17, 109);
+        gap: 25px;
+        padding: 10px;
+
         border-radius: 8px;
-        box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.2);
+        /* box-shadow: rgba(0, 0, 0, 0.2) 0px 0px 10px; */
+
         z-index: 10;
         }
+       
     
         .reaction-popup span {
-            margin-right: 10px;
+            /* margin-right: 10px; */
             cursor: pointer;
             font-size: 20px;
-        }
+        
+    }
     
         .reaction-popup span:hover {
             transform: scale(1.2);
@@ -1327,14 +1494,14 @@ function toggleReaction(commentId, iconElement, likeCountElement) {
             justify-content: center;
             align-items: center;
             display: flex;
-            height: 60vh;
+            height: 450px;
             width: 100%;
         }
         .profile-container {
             height: 100%;
             overflow-y: auto;
             margin-top: 16px;
-            padding: 20px;
+            padding: 10px;
             background-color: #1f0447e3;
             border-radius: 10px;
             box-shadow: 0px 0px 15px rgba(255, 255, 255, 0.2);
@@ -1409,6 +1576,7 @@ function toggleReaction(commentId, iconElement, likeCountElement) {
             height: 35px;
         }
         .post-title-wrapper{
+            margin-bottom:15px;
             height: 45px;
             background: #260557fb;
             padding: 8px;
@@ -1444,6 +1612,9 @@ function toggleReaction(commentId, iconElement, likeCountElement) {
 
 
         @media (max-width: 768px) {
+            #cmt-wrp{
+                width:100% !important;
+            }
             .modal-dialog{
                 top: 18% !important;
                 height: 82vh !important;
@@ -1461,9 +1632,17 @@ function toggleReaction(commentId, iconElement, likeCountElement) {
             .modal-content{
                 top:1% !important;
             }
+            #CommentsectionTextarea{
+                width: 70% !important;
+                left:12% !important;
+            }
             
         }
         @media (max-width: 480px) {
+            #CommentsectionTextarea{
+                width: 90% !important;
+                left:2% !important;
+            }
             .modal-dialog{
                 padding: 20px;
                 width: 100% !important;
@@ -1478,15 +1657,15 @@ function toggleReaction(commentId, iconElement, likeCountElement) {
            
         }
 
-        .user_profile_combo-img{
+        /* .user_profile_combo-img{
             height: 58vh;
-        }
+        } */
         .carousel-item{
             height: 100%;
         }
         .post-image{
             cursor:pointer;
-            height: 100%;
+            height: 450px;
             padding: 6px;
             border-radius: none;
         }

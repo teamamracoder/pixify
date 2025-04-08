@@ -73,24 +73,6 @@ class LoginUserDetailsView(View):
     @catch_error
     @auth_required
     @role_required(Role.ADMIN.value, Role.END_USER.value)
-    # def get(self,request):
-    #     user_id= request.user.id
-    #     user_details=services.user_service.get_user(user_id)
-    #     user_details_dict = model_to_dict(user_details)
-    #     post_del=services.comment_service.get_post(1)
-    #     comment=services.comment_service.comment_list(1)
-    #     print(comment)
-    #     post_del = list(services.comment_service.get_post(1).values())
-    #     comment_queryset = services.comment_service.comment_list(1)
-    #     comments = [model_to_dict(comment) for comment in comment_queryset]
-
-    #     return JsonResponse({
-    #         "status": "success",
-    #         "user_details": user_details_dict,
-    #         "post_del": list(post_del),
-    #         "comments": comments
-    #     })
-
     def get(self, request):
         user_id = request.user.id
         user_details = services.user_service.get_user(user_id)
