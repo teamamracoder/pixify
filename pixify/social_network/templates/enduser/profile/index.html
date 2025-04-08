@@ -180,7 +180,7 @@
             </div>
             <div class="profile-details" style="text-align: center;">
                 <h2 class="profile-name">
-                    {{ user.first_name }}
+                    {{ user.first_name }} {{user.last_name}}
                 </h2>
                     <!-- Bio Section -->
                 <p class="profile-bio">
@@ -1973,7 +1973,7 @@ font-size: 13px;
 
 
 <!-- post delete  -->
- 
+
 <script>
     $(document).on('click', '#deletePostBtn', function () {
     const postContainer = $(this).closest('.user-post'); // get the user-post container
