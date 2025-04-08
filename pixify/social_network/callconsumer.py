@@ -363,6 +363,14 @@ class CallConsumer(AsyncWebsocketConsumer):
             "active_users": event["active_users"],
             "user_list": event["user_list"]
         }))
+        group_name = f"call_{event['chat_id']}"
+        online_users = self.get_online_users(group_name)
+        is_active = self.active_calls.get(group_name, False) and len(online_users) >= 2
+
+        await self.send(text_data=json.dumps({
+            "action": "active_call_status",
+            "active": is_active
+        }))
 
     async def call_terminated(self, event):
         await self.send(text_data=json.dumps({
