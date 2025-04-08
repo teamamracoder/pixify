@@ -14,7 +14,7 @@
         {% if followers %}
             {% for follower in followers %}
             <div class="user-card" id="follower-item" data-name="{% if follower.id == current_user %}you{% else %}{{ follower.fullname|lower }}{% endif %}">
-                    <div style="align-items: center; display: flex;">
+                    <div style="align-items: center; display: flex;" onclick="redirect_profile({{follower.id}})">
                         <img src="{% static follower.profile_pic %}" alt="User">
                         {% if follower.id == current_user %}
                             <div class="user-info"><h4 id="userName">You</h4></div>
@@ -98,10 +98,13 @@
             if (data.status === 'success') {
                 if (data.button === 'follow') {
                     button.innerHTML = 'Follow';
+                    location.reload();
                 } else if (data.button === 'unfollow') {
                     button.innerHTML = 'Unfollow';
+                    location.reload();
                 } else if (data.button === 'follow-back') {
                     button.innerHTML = 'Follow Back';
+                    location.reload();
                 }
             } else {
                 console.log('Error:', data.message);
@@ -127,6 +130,19 @@
         }
         return cookieValue;
     }
+
+
+
+        const currentUserId = {{ request.user.id }};
+        
+        function redirect_profile(followerId) {
+            if (followerId === currentUserId) {
+                window.location.href = "/profile/";
+            } else {
+                window.location.href = `/profile/${followerId}/`;  // use backticks
+            }
+        }
+    
 </script>
 
 

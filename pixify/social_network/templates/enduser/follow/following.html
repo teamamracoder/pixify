@@ -14,7 +14,7 @@
         {% if followings %}
             {% for following in followings %}
             <div class="user-card" id="follower-item" data-name="{% if following.id == current_user %}you{% else %}{{ following.fullname|lower }}{% endif %}">
-                <div style="align-items: center;display: flex;">
+                <div style="align-items: center;display: flex;" onclick="redirect_profile({{following.id}})">
                     <img src="{% static following.profile_pic %}" alt="User">
                     {% if following.id == current_user %}
                     <div class="user-info"><h4 id="userName">You</h4></div>
@@ -129,6 +129,17 @@
             }
         }
         return cookieValue;
+    }
+
+    
+    const currentUserId = {{ request.user.id }};
+        
+    function redirect_profile(followingId) {
+        if (followingId === currentUserId) {
+            window.location.href = "/profile/";
+        } else {
+            window.location.href = `/profile/${followingId}/`;  // use backticks
+        }
     }
 </script>
 
