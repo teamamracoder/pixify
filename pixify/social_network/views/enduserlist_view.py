@@ -43,22 +43,32 @@ class FetchPostReactions(View):
         try:
             reactions = post_service.get_active_post_reactions(post_id)
             
+            # Build the full list
             reaction_list = [
                 {
                     "id": reaction.master_list_id.id,
                     "value": reaction.master_list_id.value,
                     "user_id": reaction.reacted_by.id,
                     "user_name": "You" if reaction.reacted_by.id == request.user.id else reaction.reacted_by.first_name,
+                    "is_you": reaction.reacted_by.id == request.user.id  # Add this for sorting
                 }
                 for reaction in reactions
             ]
 
-            # Identify the current user's reaction
-            user_reaction = next((r["value"] for r in reaction_list if r["user_id"] == request.user.id), None)
+            # Sort so "You" (the requester) is first if present
+            reaction_list.sort(key=lambda r: not r["is_you"])  # False (user is 'You') comes first
+
+            # Extract current user's reaction (if any)
+            user_reaction = next((r["value"] for r in reaction_list if r["is_you"]), None)
+
+            # Remove the helper key before returning
+            for r in reaction_list:
+                r.pop("is_you")
 
             return JsonResponse({'success': True, 'reactions': reaction_list, 'user_reaction': user_reaction}, status=200)
         except Exception as e:
             return JsonResponse({'success': False, 'error': str(e)}, status=400)
+
 
 
 class CreateUpdatePostReactions(View):

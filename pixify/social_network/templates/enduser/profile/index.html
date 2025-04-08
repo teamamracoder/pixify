@@ -961,6 +961,7 @@ $("#confirmDelete").click(function () {
             const totalReactions = reactions.length;
 
             const reactionContainer = document.getElementById(`post-reactions-${postId}`);
+            reactionContainer.style.gap = '5px';
             if (!reactionContainer) return;
 
             if (totalReactions === 0) {
@@ -971,17 +972,27 @@ $("#confirmDelete").click(function () {
             const latestReactions = reactions.slice(0, 2); // Show only latest 2 reactions
 
             // Prepare emojis and names
-            const emojis = latestReactions.map(r => r.value).join(" ");
-            const names = latestReactions.map(r => {
-                return parseInt(r.user_id) === parseInt(USER_ID) ? "You" : r.user_name;
-            }).join(", ");
+            const emojis = latestReactions.map(r => r.value).join("  ");
+
+            const namesArray = latestReactions.map(r => {
+                return {
+                    name: parseInt(r.user_id) === parseInt(USER_ID) ? "You" : r.user_name,
+                    isYou: parseInt(r.user_id) === parseInt(USER_ID)
+                };
+            });
+
+            // Sort so that "You" comes first
+            namesArray.sort((a, b) => b.isYou - a.isYou);
+
+            const names = namesArray.map(n => n.name).join(", ");
 
             let displayText = `${emojis} ${names}`;
 
             const moreCount = totalReactions - latestReactions.length;
             if (moreCount > 0) {
-                displayText += `, and ${moreCount} more`;
+                displayText += ` and ${moreCount} more`;
             }
+
 
             reactionContainer.innerHTML = displayText;
 
