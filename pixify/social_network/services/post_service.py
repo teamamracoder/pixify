@@ -1,30 +1,41 @@
-from django.db.models import Count
-from ..models.user_model import User
-from . import GetData
-from ..models import Post,Comment,PostReaction,PostReaction,MasterList
-from django.shortcuts import get_object_or_404
-from django.db.models import Q
-from ..constants.default_values import PostType
-from ..models import models
-from ..services import comment_service
+from django.db.models import Count      # Importing Count to perform aggregate functions like counting related objects
+from ..models.user_model import User    # Importing the User model to interact with user-related data
+from . import GetData   # Importing custom data retrieval utilities
+from ..models import Post, Comment, PostReaction, MasterList    # Importing models related to posts, comments, and reactions
+from django.shortcuts import get_object_or_404      # Importing get_object_or_404 to fetch an object or return a 404 error if not found
+from django.db.models import Q      # Importing Q objects to allow complex query filtering using OR/AND conditions
+from ..constants.default_values import PostType     # Importing predefined constants related to post types
+from ..models import models     # Importing models (although this seems unnecessary since models are already imported individually)
+from ..services import comment_service      # Importing comment-related services for handling comment-specific functionalities
 
+
+# Retrieves all posts from the database
 def manage_list_posts():
     return Post.objects.all()
 
+# tufan
+# Fetches a specific post by its ID or returns a 404 error if not found
 def manage_get_post(post_id):
     return get_object_or_404(Post, id=post_id)
 
+# tufan
+# Updates an existing post with new title and description
 def manage_update_post(post, title, description):
-    post.title = title
-    post.description = description
-    post.save()
-    return post
+    post.title = title  # Update title
+    post.description = description  # Update description
+    post.save()  # Save changes to the database
+    return post  # Return the updated post
 
-def manage_delete_post(post):
-    post.delete()
+# tufan
+def toggle_post_active_status(post_id):
+    """
+    Toggles the active status of a post and returns the updated status.
+    """
+    post = get_object_or_404(Post, id=post_id)  # Fetch post or return 404 if not found
+    post.is_active = not post.is_active  # Toggle the is_active status
+    post.save()  # Save the updated status to the database
+    return post.is_active  # Return the updated status
 
-def delete_post(post):
-    post.delete()
 
 # priya
 def user_post(post_Title,media_urls,user_id):
@@ -35,29 +46,35 @@ def Postlist_posts():
     return Post.objects.filter(type__in=[PostType.NORMAL.value, PostType.SHOTS.value]).order_by('-created_at')
 
 
-
+# tufan
 def manage_list_posts_filtered(search_query, sorting_order, sort_by, page_number):
-    # get data
+    """
+    Retrieves a filtered list of posts based on search query, sorting order, 
+    sorting field, and paginates the result.
+    """
+    # Fetch and filter posts based on search criteria
     data = (
         GetData(Post)
-        .search(search_query,"title","description")
-        .sort(sort_by, sorting_order)
-        .paginate(limit=10, page=page_number)
-        .execute()
+        .search(search_query, "id","title", "description")  # Search in title and description
+        .sort(sort_by, sorting_order)  # Sort results by specified field and order
+        .paginate(limit=10, page=page_number)  # Paginate with 10 results per page
+        .execute()  # Execute the query
     )
-    # print(f"Post data = {data}")
-    # for val in data['data']:
-    #     # print(f"Post data = {val}")
-    #     # print(f"Post data = {val['id']}")
-    #     print(f"Post data = {val['posted_by_id']}")
-    #     posted_by_id = val['posted_by_id']
-    return data
+    
+    return data  # Return the filtered and paginated post data
 
 
 def manage_list_likes_filtered(post_id):
+    """
+    Retrieves a list of user IDs who reacted to a specific post.
+    """
     return PostReaction.objects.filter(post_id=post_id).values_list('reacted_by_id', flat=True)
 
+
 def manage__posts_user():
+    """
+    Retrieves all users from the database.
+    """
     return User.objects.all()
 
 
@@ -70,8 +87,16 @@ def get_post_user(post_likes):
 
 
 def manage_list_comments_filtered(post_id):
+    """
+    Retrieves all top-level (non-reply) active comments for a specific post.
+    
+    Args:
+        post_id (int): The ID of the post for which comments are to be retrieved.
+    
+    Returns:
+        QuerySet: A filtered queryset containing active comments that are not replies.
+    """
     return Comment.objects.filter(post_id=post_id, reply_for__isnull=True, is_active=True)
-
 
 
 def get_users_by_id(user_id):
@@ -175,3 +200,27 @@ def get_user_post_comment_count(user_id):
 
 def get_users_by_id(user_id):
             return User.objects.filter(id=user_id).all()
+
+
+def toggle_comment_active_status(comment_id):
+    """
+    Toggles the active status of a comment.
+
+    :param comment_id: ID of the comment to be toggled
+    :return: The updated is_active status of the comment
+    """
+    try:
+        # Fetch the comment object
+        comment = Comment.objects.get(id=comment_id)
+
+        # Toggle the is_active status
+        comment.is_active = not comment.is_active
+
+        # Save the updated status
+        comment.save()
+
+        # Return the new status
+        return comment.is_active
+    except Comment.DoesNotExist:
+        # Handle the case where the comment does not exist
+        return None

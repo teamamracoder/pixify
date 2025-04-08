@@ -1,29 +1,24 @@
-from datetime import datetime
-from pyexpat.errors import messages
-from django.http import HttpResponseBadRequest
-from django.shortcuts import get_object_or_404, render, redirect
-from django.views import View
-from social_network.utils.common_utils import print_log
-from social_network.constants.default_values import SortingOrder
-from social_network.decorators.exception_decorators import catch_error
-from social_network.packages.response import success_response
-from ..forms.manage_user_forms import ManageAdminProfileUpdateForm, ManageUserUpdateForm
-from ..models.user_model import User
-from ..decorators.exception_decorators import catch_error
-from .. import services
-from ..constants import Gender, RelationShipStatus, Role
-from django.core.paginator import Paginator
-from django.http import JsonResponse
-from ..forms import ManageUserCreateForm
-from user_agents import parse
-from django.http import JsonResponse
-from django.shortcuts import get_object_or_404
-from django.core.files.storage import default_storage
-from django.core.files.base import ContentFile
-from django.conf import settings
-import uuid
-from urllib.parse import urljoin
-
+from datetime import datetime  # Import datetime module for handling dates
+from pyexpat.errors import messages  # Import messages for error handling
+from django.http import HttpResponseBadRequest, JsonResponse  # Import HTTP response classes
+from django.shortcuts import get_object_or_404, render, redirect  # Import shortcuts for common Django operations
+from django.views import View  # Import View class for class-based views
+from social_network.utils.common_utils import print_log  # Import logging utility
+from social_network.constants.default_values import SortingOrder  # Import sorting order constants
+from social_network.decorators.exception_decorators import catch_error  # Import decorator for error handling
+from social_network.packages.response import success_response  # Import success response helper
+from ..forms.manage_user_forms import ManageAdminProfileUpdateForm, ManageUserUpdateForm  # Import user management forms
+from ..models.user_model import User  # Import User model
+from ..import services  # Import services module
+from ..constants import Gender, RelationShipStatus, Role  # Import user-related constants
+from django.core.paginator import Paginator  # Import Paginator for pagination
+from user_agents import parse  # Import user agent parser to extract device/browser details
+from django.core.files.storage import default_storage  # Import storage utility for handling file uploads
+from django.core.files.base import ContentFile  # Import ContentFile to create file-like objects
+from django.conf import settings  # Import settings for accessing Django configurations
+import uuid  # Import UUID module for generating unique identifiers
+from urllib.parse import urljoin  # Import urljoin for constructing URLs
+from ..forms import ManageUserCreateForm # import the user form
 
 class ManageUserListView(View):
     @catch_error
@@ -102,39 +97,58 @@ class ManageUserCreateView(View):
                 message=messages),
                 {"form": form})
 
+
 class ManageUserDetailView(View):
     def get(self, request, user_id):
+        # Fetch user data by ID
         user = User.objects.get(id=user_id)
+        
+        # Get the user agent string from the request
         user_agent = request.META.get('HTTP_USER_AGENT', '')
+        
+        # Parse the user agent to extract browser, OS, and device info
         parsed_user_agent = parse(user_agent)
-
-        # Extract browser info
+        
+        # Extract browser name
         browser = parsed_user_agent.browser.family
+        
+        # Extract operating system name
         os = parsed_user_agent.os.family
+        
+        # Extract device type
         device = parsed_user_agent.device.family
 
-        # Add this information to the context
+        # Prepare context dictionary to pass to the template
         context = {
             'user': user,
             'browser': browser,
             'os': os,
             'device': device,
         }
+        
+        # Fetch user details using service function
         user = services.manage_user_service.manage_get_user(user_id)
+        
+        # Fetch count of all posts by the user
         all_post_count = services.manage_user_service.get_all_posts_by_user(user_id)
+        
+        # Fetch count of all followers of the user
         all_follower_count = services.manage_user_service.get_all_followers_by_user(user_id)
+        
+        # Prepare activity dictionary
         activity ={
-            'posts':all_post_count,
-            'followers':all_follower_count
+            'posts': all_post_count,
+            'followers': all_follower_count
         }
-        return render(request, 'adminuser/user/detail.html', {'user': user, 'context':context,'activity':activity})
+        
+        # Render user detail page with user data, context, and activity details
+        return render(request, 'adminuser/user/detail.html', {'user': user, 'context': context, 'activity': activity})
+
 
 class ManageUserUpdateView(View):
     @catch_error
     def get(self, request, user_id):
-        # choices_gender = [{gender.value: gender.name} for gender in Gender]
-        # choices_relationship_status = [{relationship_status.value: relationship_status.name} for relationship_status in RelationShipStatus]
-
+        # Fetch the user object by ID
         user = get_object_or_404(User, id=user_id)
 
         # Pre-populate form with existing user data
@@ -142,87 +156,82 @@ class ManageUserUpdateView(View):
             'first_name': user.first_name,
             'middle_name': user.middle_name,
             'last_name': user.last_name,
-            # 'email': user.email,
-            # 'gender': user.gender,
             'address': user.address,
-            # 'relationship_status': user.relationship_status,
             'hobbies': user.hobbies,
             'dob': user.dob
         })
 
+        # Render the update user page with the pre-filled form
         return render(request, 'adminuser/user/update.html', {
             'form': form,
-            'user': user,
-            # 'choices_gender': choices_gender,
-            # 'choices_relationship_status': choices_relationship_status
+            'user': user
         })
 
     @catch_error
     def post(self, request, user_id):
-        choices_gender = [{gender.value: gender.name} for gender in Gender]
-        choices_relationship_status = [{relationship_status.value: relationship_status.name} for relationship_status in RelationShipStatus]
-        login_user = request.user
+        # Fetch the user object by ID
         user = get_object_or_404(User, id=user_id)
-
         form = ManageUserUpdateForm(request.POST)
 
         if form.is_valid():
-            user.first_name = form.cleaned_data['first_name']
-            user.middle_name = form.cleaned_data.get('middle_name', '')  # Default to empty string if None
-            user.last_name = form.cleaned_data['last_name']
+            # Prepare user data for update
+            user_data = {
+                'first_name': form.cleaned_data['first_name'],
+                'middle_name': form.cleaned_data.get('middle_name', ''),  # Default to empty if None
+                'last_name': form.cleaned_data['last_name'],
+                'address': form.cleaned_data['address'],
+                'hobbies': form.cleaned_data['hobbies'],
+                'dob': form.cleaned_data.get('dob', None),  # Default None if empty
+                'updated_by': request.user
+            }
 
-            # Only update email if it has changed
-            # new_email = form.cleaned_data['email']
-            # if new_email != user.email:  # If email is different from the current one
-            #     user.email = new_email
+            # Call the service function to update the user
+            services.manage_user_service.manage_update_user(user_id, **user_data)
 
-            # user.gender = form.cleaned_data['gender']
-            user.address = form.cleaned_data['address']
-            user.hobbies = form.cleaned_data['hobbies']
-            # user.relationship_status = form.cleaned_data['relationship_status']
-
-            dob = form.cleaned_data.get('dob')
-            if dob:
-                user.dob = dob
-            else:
-                user.dob = None  # Set default value (None) for blank D.O.B.
-
-            user.updated_by = login_user
-            user.save()  # Save the updated user instance
-
-            return redirect('user_list')  # Redirect to the list page after successful save
+            # Redirect to the user list page after successful update
+            return redirect('user_list')
 
         # Render form with errors if invalid
         return render(request, 'adminuser/user/update.html', {
             'form': form,
-            'user_id': user.id,
-            # 'choices_gender': choices_gender,
-            # 'choices_relationship_status': choices_relationship_status
+            'user_id': user.id
         })
+
 
 class ManageToggleUserActiveView(View):
     def post(self, request, user_id):
+        # Fetch user data by ID
         user = services.manage_user_service.manage_get_user(user_id)
-        user.is_active = not user.is_active  # Toggle active status
+        # Toggle active status
+        user.is_active = not user.is_active
         user.save()
+        # Return the updated status as JSON response
         return JsonResponse({'is_active': user.is_active})
+
 
 class ManageUserProfileView(View):
     def get(self, request):
         return render(request, 'adminuser/user/user_profile.html')
 
+
 class ChangeMyThemeView(View):
     def post(self, request):
+        # Get the theme preference from the POST request
         theme = request.POST.get('theme')
+        # Retrieve the logged-in user details
         user = services.user_service.get_user(request.user.id)
+        # Update the user's theme preference
         services.user_service.change_theme(user, ui_mode=theme)
+        # Return a success response with the updated theme mode
         return JsonResponse(success_response('Theme changed to {theme} mode', {'theme': theme}))
 
-class ManageAdminProfileUpdateView(View):
 
+class ManageAdminProfileUpdateView(View):
     @catch_error
     def get(self, request, user_id):
+        # Retrieve the user object by ID, or return a 404 error if not found
         user = get_object_or_404(User, id=user_id)
+        # Initialize the form with the existing user details
         form = ManageAdminProfileUpdateForm(initial={
             'first_name': user.first_name,
             'middle_name': user.middle_name,
@@ -231,33 +240,35 @@ class ManageAdminProfileUpdateView(View):
             'hobbies': ", ".join(user.hobbies) if user.hobbies else "",
             'dob': user.dob
         })
+        # Render the user profile update template with the form
         return render(request, 'adminuser/user/user_profile.html', {"form": form, "user_id": user.id})
 
     @catch_error
     def post(self, request, user_id):
-        login_user=request.user
-        user = get_object_or_404(User, id=user_id)
+        # Get the currently logged-in user
+        login_user = request.user
+         # Initialize the form with POST data
         form = ManageAdminProfileUpdateForm(request.POST)
-        print(user)
 
         if form.is_valid():
-            user.first_name = form.cleaned_data['first_name']
-            user.middle_name = form.cleaned_data.get('middle_name', '')
-            user.last_name = form.cleaned_data['last_name']
-            user.address = form.cleaned_data['address']
-            user.hobbies = form.cleaned_data['hobbies']
-            # user.dob = form.cleaned_data.get('dob', None)
-            dob = form.cleaned_data.get('dob')
-            if dob:
-                user.dob = dob
-            else:
-                user.dob = None
+            # Prepare user data for updating
+            user_data = {
+                'first_name': form.cleaned_data['first_name'],
+                'middle_name': form.cleaned_data.get('middle_name', ''),
+                'last_name': form.cleaned_data['last_name'],
+                'address': form.cleaned_data['address'],
+                'hobbies': form.cleaned_data['hobbies'],
+                'dob': form.cleaned_data.get('dob', None),
+                'updated_by': login_user
+            }
 
-            user.updated_by = login_user
-            user.save()
+            # Call the service function to update the user profile
+            services.manage_user_service.manage_update_admin_profile(user_id, **user_data)
 
-            return redirect('user_profile_update', user_id=user.id)
+            # Redirect to the user profile update page after a successful update
+            return redirect('user_profile_update', user_id=user_id)
 
+        # Render the user profile update page again with the form containing validation errors
         return render(request, 'adminuser/user/user_profile.html', {'form': form})
 
 
