@@ -56,7 +56,7 @@ class HomeView(View):
 
         random.shuffle(shorts)  # Randomize the list
 
-
+        reactions=services.message_reaction_service.show_reactions()
         # Merge everything into a single context
         context = success_response(message=message, message_type=message_type)
         context.update({
@@ -64,6 +64,7 @@ class HomeView(View):
             'story_dict': story_dict,
             'shorts':shorts,
             'userid':userid,
+            'reactions':reactions,
 
         })
 
