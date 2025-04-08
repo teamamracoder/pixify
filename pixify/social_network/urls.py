@@ -221,6 +221,9 @@ urlpatterns = [
     path('get-user-posts-comments/<int:user_id>/',views.GetUserPostsComments.as_view(), name='get_user_posts_comments'),
      path('get-comments-likes/<int:user_id>/<int:post_id>/',views.GetCommentsLikes.as_view(), name='get_comments_likes'),
 
+    # User Searching API
+    path('user/search/api', views.UserSearchApi.as_view(), name='user_search_api'),
+
 ]
 
 
