@@ -180,15 +180,31 @@ def get_all_follower_details(user):
     
 
 
-def create_follow(user_id,current_user):
-    print(user_id,current_user)
+def create_follow(user_id, current_user):
+    print(user_id, current_user)
+
     user = user_service.get_user_obj(user_id)
-    return Follower.objects.create(
-        user_id = current_user,
-        following = user,
-        created_by = current_user,
-        is_active=True
-    )
+
+    # Check if follow relationship exists
+    follow_instance = Follower.objects.filter(
+        user_id=current_user,
+        following=user,
+        created_by=current_user
+    ).first()
+
+    if follow_instance:
+        if not follow_instance.is_active:
+            follow_instance.is_active = True
+            follow_instance.save()
+        return follow_instance
+    else:
+        return Follower.objects.create(
+            user_id=current_user,
+            following=user,
+            created_by=current_user,
+            is_active=True
+        )
+
 def unfollow(user_id,current_user):
     following= Follower.objects.filter(following=user_id,user_id=current_user,is_active=True).first()
     following.is_active=False
