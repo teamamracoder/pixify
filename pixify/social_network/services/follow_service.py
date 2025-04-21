@@ -23,3 +23,33 @@ def CreateFollowing(following_id,user_id):
     instance_user_id=User.objects.get(id=user_id)
     instance_following_id=User.objects.get(id=following_id)
     Follower.objects.create(user_id=instance_user_id,following=instance_following_id,created_by=instance_user_id)
+
+
+def get_follow_state(user_id, current_user):
+    is_follower = Follower.objects.filter(
+        user_id=user_id,
+        following=current_user,
+        is_active=True
+    ).exists()
+
+    is_following = Follower.objects.filter(
+        user_id=current_user,
+        following_id=user_id,
+        is_active=True
+    ).exists()
+
+    return {
+        'is_follower': is_follower,
+        'is_following': is_following
+    }
+
+def type_of_button_shows(state):
+    if state['is_follower'] and not state['is_following']:
+        btn = "follow-back"
+        return btn
+    elif state['is_following']:
+        btn = "unfollow"
+        return btn
+    else:
+        btn = "follow"
+        return btn

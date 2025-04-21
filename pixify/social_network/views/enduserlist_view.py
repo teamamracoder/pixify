@@ -5,7 +5,7 @@ from social_network.constants.default_values import Role
 from ..decorators import auth_required, role_required
 from social_network.decorators.exception_decorators import catch_error
 from django.http import JsonResponse
-from ..services import user_service,chat_service,post_service,message_reaction_service,comment_service
+from ..services import user_service,chat_service,post_service,message_reaction_service,comment_service,follow_service
 from ..models import User,Comment
 
 
@@ -20,19 +20,31 @@ class EnduserprofileListView(View):
         user_posts = post_service.get_user_posts(user_id)
         reactions = message_reaction_service.show_reactions()
 
+        current_user = request.user
+
+        # Use service to get followers and their button types
+        follow_state = follow_service.get_follow_state(user_id,current_user)
+        button = follow_service.type_of_button_shows(follow_state)
         user_details = {
-            'id':user_id,
+            'id': user_id,
             'user_name': f"{detail.first_name} {detail.last_name}",
             'profile_photo': detail.profile_photo_url if detail.profile_photo_url else '/images/avatar.jpg',
             'cover_photo': detail.cover_photo_url if detail.cover_photo_url else '/images/defaultcoverimg.png',
             'age': age,
             'status': "Active" if detail.is_active else "Deactive",
             'posts': user_posts,
-            'reactions':reactions,
-            'bio':detail.bio if detail.bio else " "
+            'reactions': reactions,
+            'bio': detail.bio if detail.bio else " "
         }
 
-        return render(request, 'enduser/profile/userprofile.html', {'user_details': user_details,'user':request.user})
+        context = {
+            'user_details': user_details,
+            'user': current_user,
+            'button': button,
+            'current_user': current_user.id
+        }
+
+        return render(request, 'enduser/profile/userprofile.html', context)
 
 
 class FetchPostReactions(View):
@@ -199,47 +211,7 @@ class TogglReactionView(View):
 
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=500)
-        
-
-class ToggleFollowView(View):
-    @catch_error
-    @auth_required
-    @role_required(Role.ADMIN.value, Role.END_USER.value)
-    def get(self, request):
-        return JsonResponse({"error": "GET method not allowed"}, status=405)
-
-    def post(self, request):
-        try:
-            data = json.loads(request.body)
-            print(data)
-            following_id = data.get("following_id")
-            created_by = data.get("created_by") 
-
-            response_data, status_code = comment_service.toggle_follow(following_id,created_by)
-            return JsonResponse(response_data, status=status_code)
-
-        except json.JSONDecodeError:
-            return JsonResponse({"error": "Invalid JSON"}, status=400)
-
-        except Exception as e:
-            return JsonResponse({"error": str(e)}, status=500)
-        
-
-class CheckFollowState(View):
-    def get(self, request):
-        following_id = request.GET.get("following_id")
-        created_by_id = request.user.id  # Assuming user is authenticated
-
-        if not following_id:
-            return JsonResponse({"error": "Missing 'following_id'"}, status=400)
-
-        is_following = comment_service.is_user_following(created_by_id, following_id)
-
-        if is_following is None:
-            return JsonResponse({"error": "User not found"}, status=404)
-
-        return JsonResponse({"is_following": is_following})
-    
+           
 
 
 import logging
