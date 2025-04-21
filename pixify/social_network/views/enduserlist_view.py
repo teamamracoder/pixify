@@ -211,7 +211,7 @@ class ToggleFollowView(View):
     def post(self, request):
         try:
             data = json.loads(request.body)
-
+            print(data)
             following_id = data.get("following_id")
             created_by = data.get("created_by") 
 

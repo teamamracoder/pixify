@@ -285,23 +285,31 @@ def toggle_follow(following_id, created_by):
     if not following_user or not created_by_user:
         return {"error": "User not found"}, 404
 
-    # Check if follow relationship exists
+    # Try to get the existing follow instance (active or inactive)
     follow_instance = Follower.objects.filter(
         created_by=created_by_user,
         user_id=created_by_user,
-        following=following_user  # Use `following` instead of `following_id`
+        following=following_user
     ).first()
 
     if follow_instance:
-        follow_instance.delete()  # No need to pass arguments
-        return {"following": False, "message": "Unfollowed successfully"}, 200
+        if follow_instance.is_active:
+            follow_instance.is_active = False
+            follow_instance.save()
+            return {"following": False, "message": "Unfollowed successfully"}, 200
+        else:
+            follow_instance.is_active = True
+            follow_instance.save()
+            return {"following": True, "message": "Followed successfully"}, 200
     else:
         Follower.objects.create(
             created_by=created_by_user,
-            user_id=created_by_user,  # Fix: Pass User instance, not ID
-            following=following_user  # Fix: Pass User instance, not ID
+            user_id=created_by_user,
+            following=following_user,
+            is_active=True
         )
         return {"following": True, "message": "Followed successfully"}, 200
+
 
 # services.py
 
@@ -316,7 +324,7 @@ def is_user_following(created_by_id, following_id):
     if not created_by_user or not following_user:
         return None  # Return None to indicate user not found
 
-    return Follower.objects.filter(created_by=created_by_user, following=following_user).exists()
+    return Follower.objects.filter(created_by=created_by_user, following=following_user , is_active=True).exists()
 
 
 
